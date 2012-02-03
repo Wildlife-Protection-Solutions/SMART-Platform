@@ -1,0 +1,132 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui;
+
+import java.util.List;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolMandate;
+
+/**
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
+ * @author Emily
+ * @since 1.0.0
+ */
+public class PatrolMandateComposite extends PatrolItemComposite{
+
+	private ComboViewer patrolMandateViewer = null;
+
+	
+	
+	/**
+	 * 
+	 */
+	public PatrolMandateComposite() {
+
+	}
+
+	public Composite createComponent(Composite parent, int style) {
+
+		Composite center = new Composite(parent, SWT.NONE);
+		center.setLayout(new GridLayout(2, false));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		Label lbl = new Label(center, SWT.NONE);
+		lbl.setText("Patrol Mandate:");
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		patrolMandateViewer = new ComboViewer(center, SWT.READ_ONLY);
+		patrolMandateViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		patrolMandateViewer.setContentProvider(ArrayContentProvider.getInstance());
+		patrolMandateViewer.setLabelProvider(new LabelProvider(){
+			public String getText(Object element) {
+				if (element instanceof PatrolMandate){
+					return ((PatrolMandate)element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		patrolMandateViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fireChangeListeners();	
+			}
+		});
+		
+		return center;
+	}
+
+	public void setValues(Patrol p, Session session) {
+		List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(p.getConservationArea(), session);
+		
+		patrolMandateViewer.setInput(mandates.toArray());
+		if (mandates.size() > 0){
+			patrolMandateViewer.setSelection(new StructuredSelection(mandates.get(0)));
+		}
+
+		if (p.getMandate() == null){
+			if (p.getTeam() != null && p.getTeam().getMandate() != null){
+	    		patrolMandateViewer.setSelection(new StructuredSelection(p.getTeam().getMandate()));
+	    	}	
+		}else{
+			patrolMandateViewer.setSelection(new StructuredSelection(p.getMandate()));
+		}
+
+	}
+
+	public void updatePatrol(Patrol p) {
+		PatrolMandate pm = (PatrolMandate) ((IStructuredSelection)patrolMandateViewer.getSelection()).getFirstElement();
+		if (pm != null){
+			p.setMandate(pm);
+		}else{
+			p.setMandate(null);
+		}
+		
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getTitle()
+	 */
+	@Override
+	public String getTitle() {
+		return "Patrol Mandate";
+	}
+}

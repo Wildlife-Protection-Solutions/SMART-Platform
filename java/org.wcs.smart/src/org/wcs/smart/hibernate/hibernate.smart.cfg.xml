@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+                                         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<!-- Database connection settings -->
+		<property name="connection.driver_class">org.apache.derby.jdbc.EmbeddedDriver</property>
+		<property name="connection.url">jdbc:derby:./database/smartdb;create=false</property>
+		 
+		<!--<property name="connection.url.create">jdbc:derby:./database/smartdb;create=true</property>-->
+		<!--<property name="connection.url.exists">jdbc:derby:./database/smartdb;create=false</property>-->
+	
+<!-- 		<property name="connection.username">login</property> -->
+<!-- 		<property name="connection.password">smrt</property> -->
+		
+		<!-- JDBC connection pool (use the built-in) -->
+		<property name="connection.pool_size">2</property>
+		<!-- SQL dialect -->
+		<property name="dialect">org.hibernate.dialect.DerbyDialect</property>
+		<!-- Disable the second-level cache -->
+		<property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+		<!-- Echo all executed SQL to stdout -->
+		<property name="show_sql">true</property>
+		
+		<property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
+		
+		<!-- Drop and re-create the database schema on startup -->
+		<!-- <property name="hibernate.hbm2ddl.auto">validate</property> -->
+		<!--  <property name="derby.authentication.provider">BUILTIN</property> -->
+		<!--  derby.connection.requireAuthentication = true -->
+
+		<!-- <property name="query.factory_class">org.hibernate.hql.classic.ClassicQueryTranslatorFactory</property> -->
+		<!-- <property name="query.factory_class">org.hibernate.hql.ast.ASTQueryTranslatorFactory</property> -->
+
+		<!-- <property name="cache.use_second_level_cache">true</property>-->
+		<!-- <property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>-->
+		<!-- <property name="cache.use_structured_entries">true</property> -->
+		<!-- <property name="cache.use_query_cache">false</property> -->
+		<!-- <property name="cache.use_minimal_puts">true</property> --> 
+
+
+		<mapping class="org.wcs.smart.ca.ConservationArea"/>
+		<mapping class="org.wcs.smart.ca.Employee"/>
+		<mapping class="org.wcs.smart.ca.Station"/>
+		<mapping class="org.wcs.smart.ca.Language"/>
+		<mapping class="org.wcs.smart.ca.Label"/>
+		<mapping class="org.wcs.smart.ca.Rank"/>
+		<mapping class="org.wcs.smart.ca.Agency"/>
+		
+		<mapping class="org.wcs.smart.ca.datamodel.Aggregation"/>
+		<mapping class="org.wcs.smart.ca.datamodel.Attribute"/>
+		<mapping class="org.wcs.smart.ca.datamodel.AttributeListItem"/>
+		<mapping class="org.wcs.smart.ca.datamodel.AttributeTreeNode"/>
+		<mapping class="org.wcs.smart.ca.datamodel.Category"/>
+		<mapping class="org.wcs.smart.ca.datamodel.CategoryAttribute"/>
+		<mapping class="org.wcs.smart.ca.datamodel.DmObject"/>
+				
+	</session-factory>
+</hibernate-configuration>

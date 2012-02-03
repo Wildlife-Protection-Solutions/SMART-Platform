@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="SMART" uid="smartapp" id="org.wcs.smart.smartapp" application="org.wcs.smart" version="0.0.1" useFeatures="true" includeLaunchers="true">
+
+   <aboutInfo>
+      <image path="/org.wcs.smart/images/nl/en/about.gif"/>
+      <text>
+         SMART
+Spatial Monitoring and Reporting Tool
+      </text>
+   </aboutInfo>
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <vmArgs>-Xmx500M -Dosgi.parentClassloader=ext</vmArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true</vmArgsMac>
+   </launcherArgs>
+
+   <windowImages i16="/org.wcs.smart/images/icons/smart16.gif" i32="/org.wcs.smart/images/icons/smart32.gif" i48="/org.wcs.smart/images/icons/smart48.gif" i64="/org.wcs.smart/images/icons/smart64.gif" i128="/org.wcs.smart/images/icons/smart128.gif"/>
+
+   <splash
+      location="org.wcs.smart"
+      handlerType="interactive" />
+   <launcher name="SMART">
+      <solaris/>
+      <win useIco="true">
+         <ico path="/org.wcs.smart/images/icons/smart.ico"/>
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+      <plugin id="org.eclipse.core.runtime"/>
+      <plugin id="org.eclipse.rcp"/>
+      <plugin id="org.eclipse.ui"/>
+      <plugin id="org.wcs.smart"/>
+   </plugins>
+
+   <features>
+      <feature id="org.eclipse.rcp" version="3.7.1.r37x_v20110729-9DB5FmNFnFLSFCtLxnRfMqt15A4A"/>
+      <feature id="org.wcs.smart_feature" version="1.0.0"/>
+   </features>
+
+
+</product>
