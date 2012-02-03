@@ -1,0 +1,203 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.ui.internal.ca;
+
+import java.util.List;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.HibernateManager;
+
+/**
+ * Dialog for creating new employees or
+ * editing existing employees.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class EmployeeDialog extends Dialog {
+
+
+	private Employee toUpdate;
+	private ConservationArea ca;
+	
+	private EmployeeComposite eComposite; 
+	private List<Agency> agencies;
+	
+	private String title = null;
+	
+	/**
+	 * Create the dialog.
+	 * @param parent
+	 * @param style
+	 */
+	public EmployeeDialog(Shell parent,  
+			Employee toUpdate, ConservationArea ca,
+			List<Agency> agencies) {
+		
+		super(parent);
+		if (toUpdate == null){
+			title = "Create Employee";
+		}else{
+			title = "Update Employee: " + toUpdate.getId();
+		}
+		
+		this.toUpdate = toUpdate;
+		this.agencies = agencies;
+		this.ca = ca;
+	}
+
+	@Override
+	protected void configureShell(Shell shell) {
+		super.configureShell(shell);
+		shell.setText(title);
+	}
+	
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+
+	@Override 
+	protected Point getInitialSize() {
+		Point p = super.getInitialSize();
+		p.x = (int)(p.x * 1.2);
+		return p;
+	}
+	
+	/**
+	 * Create contents of the dialog.
+	 */
+	@Override
+	public Control createDialogArea(Composite parent){
+		Composite composite = (Composite) super.createDialogArea(parent);
+		 
+		
+		eComposite = new EmployeeComposite(composite, SWT.NONE, true, toUpdate!=null, true, agencies);
+		eComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		if (toUpdate != null){
+			eComposite.initFields(toUpdate);
+		}		
+		return parent;
+		
+	}
+	
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", true);
+	}
+	
+	@Override
+	protected void buttonPressed(int buttonId) {
+		if (IDialogConstants.OK_ID == buttonId) {
+			if (performSave()){
+				close();
+			}
+		} else if (IDialogConstants.CANCEL_ID == buttonId) {
+			close();
+		}
+	}
+	private boolean isSmartIdUnique(){
+		if (eComposite.getSmartUserSelected()){
+			
+			String smartUser = eComposite.getSmartUser();
+			
+			if (toUpdate != null){
+				//if the user id has not changed we don't want to check it
+				if (toUpdate.getSmartUserId() != null && toUpdate.getSmartUserId().equals(eComposite.getSmartUser())){
+					return true;
+				}					
+			}
+			
+			if (!HibernateManager.validateUserIdUnique(smartUser,ca)){
+				MessageDialog.openError(this.getShell(), "Invalid User Id", "User Id already exists.  Please select a different user id");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean performSave(){
+		if (eComposite.validate()){
+			if (!isSmartIdUnique()){
+				return false;
+			}
+
+			//update employee values 
+			if (toUpdate == null){
+				toUpdate = new Employee();
+				toUpdate.setConservationArea(ca);
+				ca.getEmployees().add(toUpdate);
+			}
+			eComposite.updateEmploye(toUpdate);
+			
+			Session session = HibernateManager.openSession();
+			Transaction tx = session.beginTransaction();
+			try{
+				if (toUpdate.getId() == null){
+					//creating new 
+					HibernateManager.generateEmployeeId(toUpdate, session);
+				}else{
+					//validate that there will always be
+					//one employee with admin privileges 
+					//in the database
+					String error = HibernateManager.validateSmartUserChanges(session, toUpdate);
+					if (error != null){
+						//cannot make required changes
+						session.refresh(toUpdate);
+						tx.rollback();
+						SmartPlugIn.displayLog(getShell(), error, null);
+						return false;
+					}
+				}
+				session.saveOrUpdate(toUpdate);	
+				
+				tx.commit();
+				return true;
+			}catch (RuntimeException ex){
+				tx.rollback();
+				SmartPlugIn.displayLog(getShell(),"Error saving employees: " + ex.getMessage(), ex);
+				return false;
+			}finally{
+				session.close();
+			}
+		}
+		return false;
+	}
+
+}

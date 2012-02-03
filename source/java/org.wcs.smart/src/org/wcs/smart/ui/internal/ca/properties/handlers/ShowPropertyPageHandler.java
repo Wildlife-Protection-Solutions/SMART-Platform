@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.ui.internal.ca.properties.handlers;
+
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.AreaPropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.DataModelPropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.InitCaDataModelDialog;
+import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
+
+/**
+ * 
+ * @since 1.0.0
+ */
+public class ShowPropertyPageHandler extends AbstractHandler {
+
+	private Class<? extends Dialog> page = null;
+	
+	public ShowPropertyPageHandler(Class<? extends Dialog> page){
+		this.page = page;
+	}
+	
+	
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
+		if (page.equals(CaPropertyPage.class)){
+			CaPropertyPage dialog = new CaPropertyPage();
+			dialog.open();
+		}else if (page.equals(StationListPropertyPage.class)){
+			StationListPropertyPage dialog = new StationListPropertyPage();
+			dialog.open();
+		}else if (page.equals(AgencyRankPropertyPage.class)){
+			AgencyRankPropertyPage dialog = new AgencyRankPropertyPage();
+			dialog.open();
+		}else if (page.equals(EmployeePropertyPage.class)){
+			EmployeePropertyPage dialog = new EmployeePropertyPage();
+			dialog.open();
+		}else if (page.equals(AreaPropertyPage.class)){
+			AreaPropertyPage dialog = new AreaPropertyPage();
+			dialog.open();
+		}
+		
+		return null;
+	}
+}

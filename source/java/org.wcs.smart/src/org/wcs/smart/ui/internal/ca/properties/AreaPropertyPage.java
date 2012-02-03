@@ -1,0 +1,469 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.ui.internal.ca.properties;
+
+import java.io.File;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.IResolve;
+import net.refractions.udig.catalog.IService;
+import net.refractions.udig.catalog.internal.ui.actions.ResetService;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.geotools.data.FeatureSource;
+import org.geotools.data.FileDataStore;
+import org.geotools.data.FileDataStoreFinder;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Area;
+import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
+import org.wcs.smart.udig.catalog.smart.SmartGeoResourceInfo;
+import org.wcs.smart.udig.catalog.smart.SmartService;
+import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
+import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.WKBWriter;
+
+/**
+ * Property page for managing conservation area
+ * areas including the conservation area, administrative areas etc.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
+
+	
+	private static final String CLEAR_TEXT = "Clear...";
+	private static final String MODIFY_TEXT = "Modify...";
+	private static final String LOAD_TEXT = "Load...";
+	
+	private final static String MSG_NOT_SET = "Undefined";
+	private final static String MSG_ERROR = "Error";
+
+	
+	
+	// buttons for modifying layers; these are ordered by Area.AreaType.values()
+	private Button[] btnModify;
+	private Button[] btnClear;
+	
+	private FileDialog fileDialog;
+	/* map of areatype to status label */
+	private HashMap<Area.AreaType, Label> lblStatus = new HashMap<Area.AreaType, Label>();
+	/* map of areatype to label values */
+	private HashMap<Area.AreaType, String> initValues = new HashMap<Area.AreaType, String>();
+
+	
+	public AreaPropertyPage() {
+		super(Display.getCurrent().getActiveShell(),
+				"Define Conservation Area Boundaries");
+
+	}
+
+	@Override
+	public boolean close() {
+		boolean canClose = super.close();
+		return canClose;
+	}
+
+	@Override
+	public int open() {
+		ProgressMonitorDialog ppd = new ProgressMonitorDialog(getShell());
+		try {
+			ppd.run(true,  false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					initLayers(false, monitor);
+					
+				}
+			});
+		} catch (Exception ex) {
+			SmartPlugIn.log("Error loading feature counts.", ex);
+			setErrorMessage("Error occurred.");
+		}
+		return super.open();
+	}
+
+	/**
+	 * updates the udig service
+	 * and determines which of the layers have features (are set) and which are underfined (not set) 
+	 * 
+	 * @param updated if the udig service needs to be reset; otherwise the existing service will be used
+	 */
+	private void initLayers(boolean updated, IProgressMonitor monitor) {
+		
+		monitor.beginTask("Refreshing Feature Counts", Area.AreaType.values().length);
+		
+		// find smart service for given conservation area
+		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(SmartServiceExtension.CA_UUID_KEY, ca.getUuid());
+		URL serviceurl = SmartServiceExtension.createURL(params);
+		SmartService ss = (SmartService) CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor).get(0);
+		
+		if (updated){
+			//we need to reset the service
+			List<IService> list = new ArrayList<IService>();
+			list.add(ss);
+			ResetService.reset(list, monitor);
+			ss = (SmartService) CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor).get(0);
+		}
+		
+		//update information about each servce
+		try {
+			List<IResolve> smartresource = ss.members(monitor);
+
+			int i = 0;
+			for (Iterator iterator = smartresource.iterator(); iterator.hasNext();) {
+				monitor.worked(i++);
+				SmartGeoResource sgeo = (SmartGeoResource) iterator.next();
+				String message = null;
+				int cnt = ((SmartGeoResourceInfo)sgeo.getInfo(monitor)).getFeatureCount();
+				if (cnt == 0) {
+					message = MSG_NOT_SET;
+				} else if (cnt > 0) {
+					message = "SET ( " + cnt + " features)";
+				} else if (cnt < 0){
+					message = MSG_ERROR;
+				}
+				initValues.put(sgeo.getType(), message);
+			}
+		} catch (Exception ex) {
+			SmartPlugIn.log("Error loading feature counts for smart resources.", ex);
+			setErrorMessage("Error loading feature counts for smart resources.");
+		}
+		monitor.done();
+	}
+
+	/**
+	 * @see
+	 * org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent
+	 * (org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected Composite createContent(Composite parent) {
+		setMessage("Setup various conservation area boundaries.");
+
+		Composite comp = new Composite(parent, SWT.BORDER_DASH);
+		comp.setLayout(new GridLayout(4, false));
+
+		lblStatus = new HashMap<Area.AreaType, Label>();
+		btnModify = new Button[Area.AreaType.values().length];
+		btnClear = new Button[Area.AreaType.values().length];
+		for (int i = 0; i < Area.AreaType.values().length; i++) {
+			Label lbl = new Label(comp, SWT.NONE);
+			lbl.setText(Area.AreaType.values()[i].getGuiName() + ":");
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+			lbl = new Label(comp, SWT.NONE);
+			lbl.setText(initValues.get(Area.AreaType.values()[i]));
+			lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			lblStatus.put(Area.AreaType.values()[i], lbl);
+			
+			btnModify[i] = new Button(comp, SWT.NONE);
+			final Area.AreaType type = Area.AreaType.values()[i];
+			final int index = i;
+			btnModify[i].setText(MODIFY_TEXT);
+			btnModify[i].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					openFileDialog(getShell(), type, btnModify[index].getText().equals(MODIFY_TEXT));
+				}
+			});
+			
+			btnClear[i] = new Button(comp, SWT.NONE);
+			btnClear[i].setText(CLEAR_TEXT);
+			btnClear[i].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					deleteAll(type);
+				}
+			});
+
+		}
+		updateLabels();
+		return comp;
+	}
+	
+	/*
+	 * clears areas from database
+	 */
+	private void deleteAll(Area.AreaType areatype){
+		boolean ret = MessageDialog.openConfirm(getShell(), "Clear " + areatype.getGuiName(), "Are you sure you want to remove all features defined for " + areatype.getGuiName() + "?  This action cannot be undone.");
+		if (!ret ){
+			return;
+		}
+		getSession().beginTransaction();
+		try{
+			// remove existing areas
+			String query = "delete from Area where ca = :ca and type =:type";
+			Query q = AreaPropertyPage.this.getSession().createQuery(query);
+			q.setParameter("ca", AreaPropertyPage.this.ca);
+			q.setParameter("type", areatype);
+			q.executeUpdate();
+			getSession().getTransaction().commit();
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(),"Could not delete area.", ex);
+			getSession().close();
+		}
+		
+		// reset feature counts
+		ProgressMonitorDialog ppd = new ProgressMonitorDialog(getShell());
+		try {
+			ppd.run(true,  false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					initLayers(true, monitor);
+				}
+			});
+		} catch (Exception ex) {
+			SmartPlugIn.log("Error reseting feature counts after delete.", ex);
+			setErrorMessage("Error occurred.");
+		}
+		//update labels
+		updateLabels();
+	}
+
+
+	/*
+	 * Displays file dialog for loading new conservation area boundaries.
+	 * 
+	 * @param parent 
+	 * @param areatype - the area type to load
+	 * @verify - if user should be prompted to ensure they want to overwrite existing
+	 */
+	private boolean openFileDialog(Composite parent,
+			final Area.AreaType areatype, boolean verify) {
+		
+		//check to ensure
+		if (verify){
+			boolean ret = MessageDialog.openConfirm(getShell(), "Update " + areatype.getGuiName(), "Are you sure you want to update " + areatype.getGuiName() + ".  All existing features will be deleted and the new features added.  This action cannot be undone.");
+			if (!ret ){
+				return false;
+			}
+		}
+		
+		
+		fileDialog = new FileDialog(parent.getShell(), SWT.SINGLE | SWT.OPEN);
+		fileDialog.setText("Load " + areatype.getGuiName());
+
+//		// List<String> fileTypes = factory.getExtensionList();
+		List<String> fileTypes = new ArrayList<String>();
+//		fileTypes.add("*.shp");
+//
+//		StringBuffer all = new StringBuffer();
+//		for (Iterator<String> i = fileTypes.iterator(); i.hasNext();) {
+//			all.append(i.next());
+//			if (i.hasNext())
+//				all.append(";"); //$NON-NLS-1$ //semicolon is magic in eclipse FileDialog
+//		}
+		//only support shapefiles at this time.
+		fileTypes.add(0, "*.shp");
+		fileTypes.add("*.*"); //$NON-NLS-1$
+		fileDialog.setFilterExtensions(fileTypes.toArray(new String[fileTypes.size()]));
+		String result = fileDialog.open();
+		if (result == null) {
+			return false;
+		}
+
+		// get file name
+		String path = fileDialog.getFilterPath();
+		String filenames = fileDialog.getFileName();
+		URL url = null;
+		try {
+			url = new File(path
+					+ System.getProperty("file.separator") + filenames).toURI().toURL(); //$NON-NLS-1$
+		} catch (Throwable e) {
+			SmartPlugIn.displayLog(getShell(),"Cannot determine file selected.", e); //$NON-NLS-1$
+		}
+
+		if (url == null) {
+			setErrorMessage("Could not load file.");
+			return false;
+		}
+		final URL url2 = url;
+		loadDataSet(areatype, url2);
+		updateLabels();
+		return true;
+	}
+
+	private void loadDataSet(final Area.AreaType areatype, final URL url2) {
+		final ProgressMonitorDialog ppd = new ProgressMonitorDialog(getShell());
+		try {
+			ppd.run(true, true, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Loading features", 0);
+
+					SimpleFeatureCollection collection = null;
+					try{
+						FileDataStore store = FileDataStoreFinder.getDataStore(url2);
+						collection = store.getFeatureSource().getFeatures();
+					}catch (Exception ex){
+						SmartPlugIn.displayLog(ppd.getShell(),"Error reading data source.", ex);
+						return;
+					}
+					
+					if (collection.getSchema().getCoordinateReferenceSystem() == null){
+						//check projection
+						getShell().getDisplay().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openError(ppd.getShell(), "Error", "Projection not set for given file.  Please ensure a projection is defined for the provided dataset.");
+							}});
+						return;
+					}
+					
+					Session s = getSession();
+					s.beginTransaction();
+					// add new areas
+					try {
+						//remove existing areas
+						String query = "delete from Area where ca = :ca and type =:type";
+						Query q =s.createQuery(query);
+						q.setParameter("ca", ca);
+						q.setParameter("type", areatype);
+						q.executeUpdate();
+
+						MathTransform transform = CRS.findMathTransform(collection.getSchema().getCoordinateReferenceSystem(), Area.AREA_CRS);
+						//find feature store
+						WKBWriter writer = new WKBWriter();
+						
+						SimpleFeatureIterator it = collection.features();
+						try {
+							while (it.hasNext()) {
+								SimpleFeature sf = it.next();
+								if (monitor.isCanceled()) {
+									s.getTransaction().rollback();
+									break;
+								}
+
+								Area area = new Area();
+								area.setType(areatype);
+								area.setCa(AreaPropertyPage.this.ca);
+								//
+								Geometry geom = (Geometry) sf.getDefaultGeometry();
+								geom = JTS.transform(geom, transform);
+								area.setGeom(writer.write(geom));
+								//save
+								s.save(area);
+							}
+
+							s.getTransaction().commit();
+						} finally {
+							it.close();
+						}
+
+					} catch (Exception e) {
+						try{
+							s.getTransaction().rollback();
+						}catch (Exception ex){
+							SmartPlugIn.log("", ex);
+						}
+						s.close();
+						throw(new InvocationTargetException(e));
+					}
+
+					if (monitor.isCanceled()) {
+						return;
+					}
+					initLayers(true, monitor);
+					monitor.done();
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(getShell(),"Error occurred while updating areas.", e);
+		}
+	}
+	
+	/*
+	 * Updates the layer status labels and associated buttons
+	 */
+	private void updateLabels(){
+		for (int i =0; i < Area.AreaType.values().length; i ++){
+			final Label lbl = lblStatus.get(Area.AreaType.values()[i]);
+			final String fmessage = initValues.get(Area.AreaType.values()[i]);
+			final int index = i;
+			if (lbl != null && getShell() != null && getShell().getDisplay() != null){
+				getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						lbl.setText(fmessage);
+						if (fmessage.equals(MSG_ERROR)){
+							btnClear[index].setEnabled(false);
+							btnModify[index].setEnabled(false);
+						}else if (fmessage.equals(MSG_NOT_SET)){
+							btnClear[index].setEnabled(false);
+							btnModify[index].setEnabled(true);
+							btnModify[index].setText(LOAD_TEXT);
+						}else{
+							btnClear[index].setEnabled(true);
+							btnModify[index].setEnabled(true);
+							btnModify[index].setText(MODIFY_TEXT);
+						}
+					
+						
+					}});
+				
+			}
+		}
+
+	}
+
+	/*
+	 * @see
+	 * org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#performSave
+	 * ()
+	 */
+	@Override
+	protected boolean performSave() {
+		return true;
+	}
+}

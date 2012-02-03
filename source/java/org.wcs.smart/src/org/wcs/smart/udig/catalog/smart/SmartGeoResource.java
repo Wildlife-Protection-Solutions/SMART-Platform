@@ -1,0 +1,149 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.udig.catalog.smart;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IGeoResourceInfo;
+import net.refractions.udig.catalog.IService;
+import net.refractions.udig.core.internal.CorePlugin;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.data.CachingFeatureSource;
+import org.geotools.data.DataStore;
+import org.geotools.data.FeatureSource;
+import org.geotools.data.FeatureStore;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.Area;
+
+/**
+ * Georesource for a smart area layer.
+ * @author Emily
+ * @since 1.0.0
+ */
+public class SmartGeoResource extends IGeoResource {
+	
+	private URL url = null;
+	protected Area.AreaType areaType = null;
+	
+	public SmartGeoResource(SmartService service, Area.AreaType areaType){
+		this.service = service;
+		this.areaType = areaType;
+		URL serviceIdentifer = service.getIdentifier();
+		
+		try{
+			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + areaType.name(), CorePlugin.RELAXED_HANDLER);
+		 } catch (MalformedURLException e) {
+             throw new IllegalArgumentException("The service URL must not contain a #", e);
+         }
+		
+	}
+	
+	
+	public Area.AreaType getType(){
+		return areaType;
+	}
+	
+	/**
+	 * @see net.refractions.udig.catalog.IResolve#getStatus()
+	 */
+	@Override
+	public Status getStatus() {
+		return service.getStatus();
+	}
+
+	/**
+	 * @see net.refractions.udig.catalog.IResolve#getMessage()
+	 */
+	@Override
+	public Throwable getMessage() {
+		return service.getMessage();
+	}
+
+	/**
+	 * @see net.refractions.udig.catalog.IGeoResource#createInfo(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	@Override
+	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
+			throws IOException {
+		return new SmartGeoResourceInfo(this, monitor);
+	}
+
+	/**
+	 * @see net.refractions.udig.catalog.IGeoResource#getIdentifier()
+	 */
+	@Override
+	public URL getIdentifier() {
+		return this.url;
+	}
+	
+	@Override
+	  public <T> boolean canResolve( Class<T> adaptee ) {
+	        if (adaptee == null)
+	            return false;
+
+	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
+	                || adaptee.isAssignableFrom(IService.class)
+	                || adaptee.isAssignableFrom(FeatureSource.class)
+	                || adaptee.isAssignableFrom(FeatureStore.class)
+	                || super.canResolve(adaptee);
+	    }
+	  
+  
+
+    @Override
+    public <T> T resolve( Class<T> adaptee, IProgressMonitor monitor ) throws IOException {
+    	if (adaptee.isAssignableFrom(IGeoResourceInfo.class)){
+    		return adaptee.cast(super.getInfo(monitor));
+    	}
+        if( adaptee.isAssignableFrom(IService.class) ){
+            return adaptee.cast( this.service );
+        }
+      
+        if (adaptee.isAssignableFrom(FeatureSource.class)){
+        	 DataStore ds = ((SmartService)service).getDataStore(monitor);
+             if (ds != null) {
+                 FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(areaType.name());
+                 
+//                 CachingFeatureSource cfs = new CachingFeatureSource(fs);
+                 if (fs != null)
+                     return adaptee.cast(fs);
+             }else{
+            	 //throw some sort of error
+            	 return null;
+             }
+        }
+        if (adaptee.isAssignableFrom(FeatureStore.class)){
+        	 @SuppressWarnings("unchecked")
+			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resolve(FeatureSource.class, monitor);
+             if (fs != null && fs instanceof FeatureStore) {
+                 return adaptee.cast(fs);
+             }
+        }
+        return super.resolve(adaptee, monitor);
+    }
+
+}

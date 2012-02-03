@@ -1,0 +1,112 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.ca.datamodel;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+/**
+ * Data model value attribute aggregation options 
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+@Entity
+@Table(name = "smart.dm_aggregation")
+public class Aggregation {
+
+	/**
+	 * short name of aggregation used as key
+	 */
+	private String name = "unknown";
+	/**
+	 * name to display on gui
+	 */
+	private String guiName;
+	
+	/**
+	 * Creates new aggregation
+	 */
+	public Aggregation(){
+	}
+	
+	/**
+	 * 
+	 * @return the name for this aggregation
+	 */
+	@Id
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Sets the name for the aggregation.  Aggregations
+	 * name should never be changed.
+	 * 
+	 * @param name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	//TODO: should likely be internationalized
+	/**
+	 * 
+	 * @return the name to display on gui
+	 */
+	@Column(name = "gui_name")
+	public String getGuiName(){
+		return this.guiName;
+	}
+	/**
+	 * 
+	 * @param name the name to display on gui
+	 */
+	public void setGuiName(String name){
+		this.guiName = name;
+	}
+	
+	/**
+	 * <p> Two Aggregation objects are considered the same
+	 * object if they have the same name.
+	 * </p>
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object o){
+		if (o == null ) return false;
+		if (! (o instanceof Aggregation)) return false;
+		if (name == null && ((Aggregation)o).name != null)return false;
+		if (name != null && ((Aggregation)o).name == null)return false;
+		return ((Aggregation)o).name.equals(name);
+	}
+	
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode(){
+		return name.hashCode();
+	}
+}

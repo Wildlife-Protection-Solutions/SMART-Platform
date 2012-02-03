@@ -1,0 +1,454 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui.properties;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.apache.commons.collections.comparators.NullComparator;
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
+import org.hibernate.Session;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.LanguageViewer;
+
+/**
+ * Property page for managaing patrol types and
+ * transport types.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
+
+	private LanguageViewer languageViewer;
+	private TableViewer patrolTypeTblViewer;
+	private TableViewer transportTblViewer;
+	private Button btnDisableType;
+	private Button btnDisableTransport;
+	
+	private static NullComparator nullStringComparator = new NullComparator();
+	
+	private WritableList patrolTypes = null;
+	private WritableList patrolTransportTypes = null;
+	
+	public static Color gray = null;
+	public static Color black = null;
+	private Button btnAddTransport;
+
+	/**
+	 * @param parent
+	 * @param title
+	 */
+	public PatrolTypePropertyPage() {
+		super(Display.getCurrent().getActiveShell(), "Patrol Types & Transport Types");
+	}
+
+	@Override
+	public boolean  close(){
+		boolean canClose = super.close();
+		if (canClose){
+			gray.dispose();
+			black.dispose();
+			if (patrolTransportTypes != null){
+				patrolTransportTypes.dispose();
+			}
+			if (patrolTypes != null){
+				patrolTypes.dispose();
+			}
+		}
+		return canClose;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected Composite createContent(Composite parent) {
+		
+		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
+		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
+		
+		
+		patrolTypes = new WritableList(PatrolHibernateManager.getPatrolTypes(ca,
+				getSession()), PatrolMandate.class);
+		
+		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(3, false));
+
+		Label lblNewLabel = new Label(container, SWT.NONE);
+		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
+				false, 1, 1));
+		lblNewLabel.setText("Language:");
+
+		languageViewer = new LanguageViewer(container, SWT.NONE, ca);
+		languageViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label lblType = new Label(container, SWT.NONE);
+		lblType.setText("Patrol Types:");
+		lblType.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3,1));
+		
+		Composite composite2 = new Composite(container, SWT.NONE);
+		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		composite2.setLayout(tableLayout);
+		patrolTypeTblViewer = new TableViewer( composite2, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		createTypeColumns(patrolTypeTblViewer);
+		patrolTypeTblViewer.setContentProvider(new ObservableListContentProvider());
+		patrolTypeTblViewer.setInput(patrolTypes);
+		patrolTypeTblViewer.getTable().setHeaderVisible(true);
+		patrolTypeTblViewer.getTable().setLinesVisible(true);
+//		tableViewer.setComparator(sorter);	
+		patrolTypeTblViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
+				
+				if (pt.getIsActive()){
+					btnDisableType.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				}else{
+					btnDisableType.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				}
+				btnDisableType.setEnabled(true);
+				
+				btnAddTransport.setEnabled(pt.getIsActive());
+				btnDisableTransport.setEnabled(false);
+				transportTblViewer.getTable().setEnabled(pt.getIsActive());
+
+				if (patrolTransportTypes != null){
+					patrolTransportTypes.dispose();
+				}
+				if (pt.getTransportTypes() == null){
+					pt.setTransportTypes(new ArrayList<PatrolTransportType>());
+				}
+				patrolTransportTypes = new WritableList(pt.getTransportTypes(), PatrolTransportType.class);
+				transportTblViewer.setInput(patrolTransportTypes);
+				transportTblViewer.refresh();
+				
+			}
+		});
+		Composite composite = new Composite(container, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,
+				1, 1));
+
+		btnDisableType = new Button(composite, SWT.NONE);
+		btnDisableType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+				false, 1, 1));
+		btnDisableType.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		btnDisableType.setEnabled(false);
+		btnDisableType.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
+				if (btnDisableType.getText() == DialogConstants.DISABLE_BUTTON_TEXT){
+					pt.setIsActive(false);
+					btnDisableType.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				}else{
+					pt.setIsActive(true);
+					btnDisableType.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				}
+				patrolTypeTblViewer.refresh();
+				
+				btnAddTransport.setEnabled(pt.getIsActive());
+				btnDisableTransport.setEnabled(pt.getIsActive());
+				transportTblViewer.getTable().setEnabled(pt.getIsActive());
+
+				setChangesMade(true);
+			}
+		});
+
+		
+		/* --------- Patrol Transport Type -------------- */
+		lblType = new Label(container, SWT.NONE);
+		lblType.setText("Transporation Options:");
+		lblType.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3,1));
+		
+		composite2 = new Composite(container, SWT.NONE);
+		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		tableLayout = new TableColumnLayout();
+		composite2.setLayout(tableLayout);
+		transportTblViewer = new TableViewer( composite2, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		createTransportColumns(transportTblViewer);
+		transportTblViewer.setContentProvider(new ObservableListContentProvider());
+		
+		transportTblViewer.getTable().setHeaderVisible(true);
+		transportTblViewer.getTable().setLinesVisible(true);
+		transportTblViewer.getTable().setEnabled(false);
+		
+//		tableViewer.setComparator(sorter);	
+		transportTblViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				PatrolTransportType pt = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
+				if (pt == null){
+					btnDisableTransport.setEnabled(false);
+					return;
+				}
+				if (pt.getIsActive()){
+					btnDisableTransport.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				}else{
+					btnDisableTransport.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				}
+				btnDisableTransport.setEnabled(true);
+				
+			}
+		});
+		composite = new Composite(container, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,
+				1, 1));
+		btnAddTransport = new Button(composite, SWT.NONE);
+		btnAddTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnAddTransport.setText("Add");
+		btnAddTransport.setEnabled(false);
+		btnAddTransport.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
+				PatrolTransportType newPtt = new PatrolTransportType();
+				newPtt.setConservationArea(ca);
+				newPtt.setIsActive(true);
+				newPtt.setPatrolType(pt.getType());
+				newPtt.updateName(languageViewer.getCurrentSelection(), "New Transport Type");
+				pt.getTransportTypes().add(newPtt);
+				transportTblViewer.refresh();
+				setChangesMade(true);
+			}
+		});
+		btnDisableTransport = new Button(composite, SWT.NONE);
+		btnDisableTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+				false, 1, 1));
+		btnDisableTransport.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		btnDisableTransport.setEnabled(false);
+		btnDisableTransport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PatrolTransportType pt = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
+				if (btnDisableTransport.getText() == DialogConstants.DISABLE_BUTTON_TEXT){
+					pt.setIsActive(false);
+				}else{
+					pt.setIsActive(true);
+				}
+				transportTblViewer.refresh();
+				setChangesMade(true);
+			}
+		});
+		
+		setMessage("Manage the patrol types and patrol transport types for the conservation area.");
+		return container;
+	}
+
+	/*
+	 * Creates station table columns
+	 */
+	private void createTypeColumns(TableViewer viewer) {
+		
+		/* Active Column */
+			TableViewerColumn viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+			TableColumn column = viewerColumn.getColumn();
+			column.setText("Active");
+			column.setResizable(true);
+			column.setMoveable(true);
+
+			TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+			layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+			viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof PatrolType){
+						if (((PatrolType)element).getIsActive()){
+							return "Active";
+						}else{
+							return "Disabled";
+						}
+					}
+					return super.getText(element);
+				}
+			});
+			
+			/* Type Column */
+			viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+			column = viewerColumn.getColumn();
+			column.setText("Patrol Type");
+			column.setResizable(true);
+			column.setMoveable(true);
+
+			layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+			layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+			viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof PatrolType){
+						return (((PatrolType)element).getType().getGuiName());
+					}
+					return super.getText(element);
+				}
+			});
+
+		
+	}
+	
+	
+	/*
+	 * Creates station table columns
+	 */
+	private void createTransportColumns(final TableViewer viewer) {
+		
+		/* Active Column */
+			TableViewerColumn viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+			TableColumn column = viewerColumn.getColumn();
+			column.setText("Active");
+			column.setResizable(true);
+			column.setMoveable(true);
+
+			TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+			layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+			viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof PatrolTransportType){
+						if (((PatrolTransportType)element).getIsActive()){
+							return "Active";
+						}else{
+							return "Disabled";
+						}
+					}
+					return super.getText(element);
+				}
+			});
+			
+			/* Type Column */
+			viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+			column = viewerColumn.getColumn();
+			column.setText("Transport Type");
+			column.setResizable(true);
+			column.setMoveable(true);
+
+			layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+			layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+			viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof PatrolTransportType){
+						return (((PatrolTransportType)element).findName(languageViewer.getCurrentSelection()));
+					}
+					return super.getText(element);
+				}
+			});
+			viewerColumn.setEditingSupport(new EditingSupport(viewer){
+
+				@Override
+				protected CellEditor getCellEditor(Object element) {
+					return new TextCellEditor(viewer.getTable());
+				}
+
+				@Override
+				protected boolean canEdit(Object element) {
+					return true;
+				}
+
+				@Override
+				protected Object getValue(Object element) {
+					if (element instanceof PatrolTransportType){
+						return ((PatrolTransportType)element).findName(languageViewer.getCurrentSelection());
+					}
+					return null;
+				}
+
+				@Override
+				protected void setValue(Object element, Object value) {
+					if (element instanceof PatrolTransportType){
+						((PatrolTransportType)element).updateName(languageViewer.getCurrentSelection(), (String)value);
+						viewer.refresh();
+					}
+					// TODO Auto-generated method stub
+					
+				}});
+
+		
+	}
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#performSave()
+	 */
+	@Override
+	protected boolean performSave() {
+		Session s = getSession();
+		s.beginTransaction();
+		try{
+			for (Iterator iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
+				PatrolType type = (PatrolType) iterator.next();
+				s.saveOrUpdate(type);
+				for (PatrolTransportType ptt : type.getTransportTypes()){
+					s.saveOrUpdate(ptt);
+					for (org.wcs.smart.ca.Label name : ptt.getNames()){
+						name.setElementuuid(ptt.getUuid());
+						s.saveOrUpdate(name);
+					}
+				}
+			}
+			s.getTransaction().commit();
+			setChangesMade(false);
+			return true;
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			s.close();
+			SmartPatrolPlugIn.displayLog("Could not save patrol type changes. " + ex.getMessage(), ex);
+		}
+		return false;
+	}
+}
