@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates><template autoinsert="true" context="overridecomment_context" deleted="false" description="Comment for overriding methods" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.overridecomment" name="overridecomment">/* (non-Javadoc)
+ * ${see_to_overridden}
+ */</template><template autoinsert="true" context="delegatecomment_context" deleted="false" description="Comment for delegate methods" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.delegatecomment" name="delegatecomment">/**
+ * ${tags}
+ * ${see_to_target}
+ */</template><template autoinsert="true" context="constructorcomment_context" deleted="false" description="Comment for created constructors" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.constructorcomment" name="constructorcomment">/**
+ * ${tags}
+ */</template><template autoinsert="false" context="typecomment_context" deleted="false" description="Comment for created types" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.typecomment" name="typecomment">/**
+ * ${todo} Purpose of ${enclosing_type}
+ * &lt;p&gt;
+ * &lt;ul&gt;
+ * &lt;li&gt;&lt;/li&gt;
+ * &lt;/ul&gt;
+ * &lt;/p&gt;
+ * @author ${user}
+ * @since 1.0.0
+ * ${tags}
+ */</template><template autoinsert="true" context="fieldcomment_context" deleted="false" description="Comment for fields" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.fieldcomment" name="fieldcomment">/**
+ * 
+ */</template><template autoinsert="true" context="settercomment_context" deleted="false" description="Comment for setter method" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.settercomment" name="settercomment">/**
+ * @param ${param} the ${bare_field_name} to set
+ */</template><template autoinsert="true" context="gettercomment_context" deleted="false" description="Comment for getter method" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.gettercomment" name="gettercomment">/**
+ * @return the ${bare_field_name}
+ */</template><template autoinsert="true" context="methodcomment_context" deleted="false" description="Comment for non-overriding methods" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.methodcomment" name="methodcomment">/**
+ * ${tags}
+ */</template><template autoinsert="false" context="filecomment_context" deleted="false" description="Comment for created Java files" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.filecomment" name="filecomment">/*&#13;
+ * Copyright (C) 2012 Wildlife Conservation Society&#13;
+ *&#13;
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of&#13;
+ * this software and associated documentation files (the "Software"), to deal in&#13;
+ * the Software without restriction, including without limitation the rights to&#13;
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies&#13;
+ * of the Software, and to permit persons to whom the Software is furnished to do&#13;
+ * so, subject to the following conditions:&#13;
+ * &#13;
+ * The above copyright notice and this permission notice shall be included in all&#13;
+ * copies or substantial portions of the Software.&#13;
+ * &#13;
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR&#13;
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,&#13;
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE&#13;
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER&#13;
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,&#13;
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE&#13;
+ * SOFTWARE.&#13;
+ */</template></templates>
