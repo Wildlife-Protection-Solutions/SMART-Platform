@@ -44,6 +44,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
  * Property page for editing patrol options
+ * 
  * @author Emily
  * @since 1.0.0
  */

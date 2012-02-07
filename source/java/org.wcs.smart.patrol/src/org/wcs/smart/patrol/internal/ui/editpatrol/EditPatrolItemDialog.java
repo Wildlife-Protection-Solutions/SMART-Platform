@@ -32,12 +32,8 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Dialog box for editing patrol items.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -45,17 +41,23 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 
 	private PatrolItemComposite item;
 	private Patrol patrol;
-	private Session session;
 	
+	/**
+	 * 
+	 * @param parent parent shell
+	 * @param item the patrol item composite to display for editing 
+	 * @param patrol patrol being edited
+	 * @param session active session
+	 */
 	public EditPatrolItemDialog(Shell parent, 
 			PatrolItemComposite item, 
 			Patrol patrol, Session session){
 		super(parent, item.getTitle());
 		this.item = item;
 		this.patrol = patrol;
-		this.session = session;
 	}
-	/* (non-Javadoc)
+	
+	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
@@ -68,27 +70,38 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				
 			}
 		});
-		item.setValues(patrol, session);
+		Session s = getSession();
+		try{
+			item.setValues(patrol, s);
+		}finally{
+			if (s.isOpen()){
+				s.close();
+			}
+		}
 		setChangesMade(false);
 		return comp;
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Saves the updates to he database.
+	 * 
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#performSave()
 	 */
 	@Override
 	protected boolean performSave() {
 		item.updatePatrol(patrol);
-		
-		session.beginTransaction();
+		Session s = getSession();
+		s.beginTransaction();
 		try{
-			session.save(patrol);
-			session.getTransaction().commit();
+			
+			s.saveOrUpdate(patrol);
+			s.getTransaction().commit();
+			s.close();
 			setChangesMade(false);
 			return true;
 		}catch (Exception ex){
-			session.getTransaction().rollback();
-			session.close();
+			s.getTransaction().rollback();
+			s.close();
 			SmartPatrolPlugIn.displayLog("Could not save changed to patrol. " + ex.getMessage(), ex);
 		}
 		

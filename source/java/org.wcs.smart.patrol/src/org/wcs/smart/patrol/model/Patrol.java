@@ -43,7 +43,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
 
 /**
- * Represents a patrol objet
+ * Represents a patrol object
+ * 
  * @author Emily
  * @since 1.0.0
  */

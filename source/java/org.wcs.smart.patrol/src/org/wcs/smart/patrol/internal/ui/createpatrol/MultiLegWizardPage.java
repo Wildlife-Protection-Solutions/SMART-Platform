@@ -64,7 +64,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Is this multi-leg patrol?");
+		lbl.setText("Is this a multi-leg patrol?");
 		
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));

@@ -27,12 +27,8 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A set of utility classes.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -44,7 +40,7 @@ public class PatrolUtils {
 	 * 
 	 * @param type patrol type
 	 * 
-	 * @return
+	 * @return image associated with patrol type
 	 */
 	public static Image getImage(PatrolType.Type type){
 		if (type == PatrolType.Type.GROUND){
@@ -57,6 +53,14 @@ public class PatrolUtils {
 		return null;
 	}
 	
+	/**
+	 * Returns the image descriptor to use for a given patrol type or
+	 * null if no image found
+	 * 
+	 * @param type patrol type
+	 * 
+	 * @return image descriptor associated with patrol type
+	 */
 	public static ImageDescriptor getImageDescriptor(PatrolType.Type type){
 		if (type == PatrolType.Type.GROUND){
 			return JFaceResources.getImageRegistry().getDescriptor(SmartPatrolPlugIn.GROUND_PATROL_ICON);

@@ -36,25 +36,23 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Patrol item composite for selecting patrol objective and
+ * how well object was met.
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class ObjectiveComposite extends PatrolItemComposite{
 	private Text txtObjective;
 	private Scale objectiveMet;
-	/**
-	 * 
-	 */
+
 	public ObjectiveComposite() {
 
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
+	 */
 	public Composite createComponent(Composite parent, int style) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -105,6 +103,9 @@ public class ObjectiveComposite extends PatrolItemComposite{
 		return main;
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+	 */
 	public void setValues(Patrol p, Session session) {
     	if (p.getObjective() != null){
     		txtObjective.setText(p.getObjective());
@@ -114,13 +115,16 @@ public class ObjectiveComposite extends PatrolItemComposite{
     	}
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
+	 */
 	public void updatePatrol(Patrol p) {
 		p.setObjective(txtObjective.getText());
 		p.setObjectiveRating(objectiveMet.getSelection());
 	}
 
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getTitle()
 	 */
 	@Override

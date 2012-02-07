@@ -29,35 +29,70 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A composite that can be used both in the create patrol wizard pages
+ * and in a dialog that allows users to change the values.
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public abstract class PatrolItemComposite {
 	
 	private List<IPatrolItemChangeListener> listeners = new ArrayList<IPatrolItemChangeListener>();
+	
+	/**
+	 * Creates the component.
+	 * 
+	 * @param parent parent component
+	 * @param style style
+	 * @return composite of the created component
+	 */
 	public abstract Composite createComponent(Composite parent, int style);
 	
+	/**
+	 * Updates the component values with the values from the patrol. 
+	 * The current session is also provided to default or options
+	 * can be loaded from the database. 
+	 * 
+	 * @param p
+	 * @param session
+	 */
 	public abstract void setValues(Patrol p, Session session) ;
 
+	/**
+	 * Update the patrol with the values provided
+	 * by the user.
+	 * 
+	 * @param p
+	 */
 	public abstract void updatePatrol(Patrol p);
 	
+	/**
+	 * 
+	 * @return the composite title
+	 */
 	public abstract String getTitle();
 	
+	/**
+	 * Adds a listener to fire when component changes are made.
+	 * 
+	 * @param listener
+	 */
 	public void addChangeListener(IPatrolItemChangeListener listener){
 		this.listeners.add(listener);
 		
 	}
+	/**
+	 * Removes a listenered added using the addChangeListener
+	 * @param listener
+	 */
 	public void removeChangeListener(IPatrolItemChangeListener listener){
 		this.listeners.remove(listener);
 	}
 	
-	public void fireChangeListeners(){
+	/**
+	 * Fires all registered listeners
+	 */
+	protected void fireChangeListeners(){
 		for(IPatrolItemChangeListener listener : listeners){
 			listener.itemChanged();
 		}

@@ -22,16 +22,14 @@
 package org.wcs.smart.patrol.internal.ui;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Change listener for PatrolItemComposite.
  * @author Emily
  * @since 1.0.0
  */
 public interface IPatrolItemChangeListener{
+	/**
+	 * Fired when some part of the patrol item composite has been modified by the user
+	 */
 	void itemChanged();
 
 }

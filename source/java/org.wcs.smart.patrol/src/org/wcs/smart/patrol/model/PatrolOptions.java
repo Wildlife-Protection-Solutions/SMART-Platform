@@ -29,7 +29,7 @@ import javax.persistence.Table;
 /**
  * Class to track patrol
  * options for a given conservation
- * area 
+ * area.
  * 
  * @author Emily
  * @since 1.0.0

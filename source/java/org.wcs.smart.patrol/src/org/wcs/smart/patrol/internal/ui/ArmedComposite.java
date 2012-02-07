@@ -51,6 +51,9 @@ public class ArmedComposite  extends PatrolItemComposite{
 
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
+	 */
 	public Composite createComponent(Composite parent, int style) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -90,17 +93,23 @@ public class ArmedComposite  extends PatrolItemComposite{
 		return main;
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+	 */
 	public void setValues(Patrol p, Session session) {
 		btnYes.setSelection(p.isArmed());
 		btnNo.setSelection(!p.isArmed());
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
+	 */
 	public void updatePatrol(Patrol p) {
 		p.setArmed(btnYes.getSelection());
 	}
 
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getTitle()
 	 */
 	@Override

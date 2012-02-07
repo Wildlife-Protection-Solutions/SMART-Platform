@@ -29,7 +29,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -55,10 +54,12 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 		
 		patrol = new Patrol();
 		patrol.setConservationArea(SmartDB.getCurrentConservationArea());
-
-
 	}
 	
+	/**
+	 * Sets if the wizard can finish
+	 * @param canFinish if the wizard can finish
+	 */
 	public void setCanFinish(boolean canFinish){
 		this.canFinish = canFinish;
 	}
@@ -67,7 +68,10 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 	public boolean canFinish(){
 		return super.canFinish() && this.canFinish;
 	}
-	
+	/**
+	 * 
+	 * @return the current patrol being created
+	 */
 	public Patrol getPatrol(){
 		return this.patrol;
 	}
@@ -79,7 +83,6 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 	 * @return
 	 */
 	public Session getSession(){
-		System.out.println(Thread.currentThread().getId());
 		if (session == null || !session.isOpen()){
 			session = PatrolHibernateManager.openSession();
 			session.refresh(patrol.getConservationArea());
@@ -114,31 +117,21 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 	}
 
 	
+	/**
+	 * Creates the patrol leg days then saved the patrol to the database.
+	 */
 	@Override
 	public boolean performFinish() {
-		
 		this.getPatrol().createLegDays();
-		try{
-			String id = PatrolHibernateManager.generatePatrolId(getPatrol());
-			getPatrol().setId(id);
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Could not generate id for patrol. " + ex.getMessage(), ex);
-			return false;
-		}
-		
 		boolean ret = PatrolHibernateManager.savePatrol(getPatrol(), PatrolHibernateManager.openSession(), null);
 		
 		//fire events
 		PatrolEventManager.getInstance().patrolAdded();
 		
 		return ret;
-		
 	}
 
-
-
-
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.dialogs.IPageChangingListener#handlePageChanging(org.eclipse.jface.dialogs.PageChangingEvent)
 	 */
 	@Override
