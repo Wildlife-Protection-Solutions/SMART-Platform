@@ -73,14 +73,15 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 		} catch (InterruptedException e) {
 			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), "Could not load data model", e);
 		}
-		
-		if ( ppd.dm.getCategories().size() == 0 ){
+		DataModel dataModel = ppd.dm;
+		if ( dataModel.getCategories().size() == 0 ){
 			InitCaDataModelDialog dd = new InitCaDataModelDialog();
 			if (dd.open() == Window.CANCEL){
 				return null;
 			}
+			dataModel = dd.getDataModel();
 		}
-		dialog.setDataModel(ppd.dm);
+		dialog.setDataModel(dataModel);
 		dialog.open();
 		return null;
 	}

@@ -109,6 +109,9 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		return true;
 	}
 
+	public DataModel getDataModel(){
+		return this.dm;
+	}
 	@Override
 	public Control createDialogArea(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
@@ -132,7 +135,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			}
 		};
 		btnUseIucn = new Button(comp, SWT.RADIO);
-		btnUseIucn.setText("Use the ICUN data model");
+		btnUseIucn.setText("Use the IUCN data model");
 		btnUseIucn.addSelectionListener(validateListener);
 		btnUseIucn.setSelection(false);
 
@@ -259,62 +262,41 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 	private boolean saveDataModel() {
 
 		try {
-			if (btnUseIucn.getSelection()) {
-				// import conservation area
-				try {
-					ProgressMonitorDialog pmd = new ProgressMonitorDialog(
-							getShell());
-					pmd.run(false, false, new IRunnableWithProgress() {
+			
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(
+					getShell());
+			
+			
+			pmd.run(false, false, new IRunnableWithProgress() {
 
-						@Override
-						public void run(IProgressMonitor monitor)
-								throws InvocationTargetException,
-								InterruptedException {
-							InputStream is = SmartProperties.getIucnDataModelFile();
-							try {
-								try {
-									DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
-									dm = converter.convert(is, ca, true);
-								} finally {
-									is.close();
-								}
-							} catch (Exception ex) {
-								SmartPlugIn.displayLog(getShell(),ex.getMessage(), ex);
-								dm = null;
-							}
-						}
-					});
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException,
+						InterruptedException {
 					
-				} catch (Exception ex) {
-					SmartPlugIn.displayLog(getShell(),ex.getMessage(), ex);
-					return false;
-				}
-			} else if (btnClone.getSelection()) {
-				// clone existing conservation area
-				ProgressMonitorDialog pmd = new ProgressMonitorDialog(
-						getShell());
-				pmd.run(false, false, new IRunnableWithProgress() {
-
-					@Override
-					public void run(IProgressMonitor monitor)
-							throws InvocationTargetException,
-							InterruptedException {
-
+					if (btnUseIucn.getSelection()) {
+						monitor.setTaskName("Loading default data model...");
+						InputStream is = SmartProperties.getIucnDataModelFile();
+						try {
+							try {
+								DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
+								dm = converter.convert(is, ca, true);
+							} finally {
+								is.close();
+							}
+						} catch (Exception ex) {
+							dm = null;
+							throw new InvocationTargetException(ex);
+						}
+					}else if (btnClone.getSelection()) {
+						//clone from another data model
+						monitor.setTaskName("Cloning data model information ...");
 						ConservationArea caToCloneFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
 						DataModel dmToClone = HibernateManager.loadDataModel(caToCloneFrom, getSession());
 						
 						if (dmToClone.getCategories().size() == 0) {
-							MessageDialog
-									.openError(
-											getShell(),
-											"Data Model Not Defined",
-											"The conservation area '"
-													+ caToCloneFrom.getId()
-													+ " - "
-													+ caToCloneFrom.getName()
-													+ "' does not have a defined data model.  You cannot copy from this conservation area.");
 							dm = null;
-							return;
+							throw new InvocationTargetException(new IllegalStateException("The conservation area '" + caToCloneFrom.getId() + " - " + caToCloneFrom.getName() + "' does not have a defined data model.  You cannot copy from this conservation area."), "The conservation area '" + caToCloneFrom.getId() + " - " + caToCloneFrom.getName() + "' does not have a defined data model.  You cannot copy from this conservation area");
 						}
 						//TODO: this needs to be tested when we support mulitple languages
 						boolean hasLang = false;
@@ -334,30 +316,27 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							LanguageSelectionDialog lsd = new LanguageSelectionDialog(getShell(), ca, codes);
 							if (lsd.open() != IDialogConstants.OK_ID){
 								dm = null;
-								return;
 							}
 							code = (String)((IStructuredSelection)lsd.getSelection()).getFirstElement();
 						}
 						dm = dmToClone.clone(ca, code);
-						
 					}
-
-				});
-
-			}
-			if (dm == null) {
-				return false;
-			}
-
-		
-
-			Session s = getSession();
-			s.beginTransaction();
-			dm.save(s);
-			s.getTransaction().commit();
+					
+					if (dm == null){
+						throw new InvocationTargetException(new IllegalStateException("No data model defined."), "No data model defined.");
+					}
+					monitor.setTaskName("Saving data model to database...");
+					Session s = getSession();
+					s.beginTransaction();
+					dm.save(s);
+					s.getTransaction().commit();
+					return ;
+				}
+			});
 			return true;
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(),"Could not save data model.", ex);
+			SmartPlugIn.displayLog(getShell(),"Could not save data model. " + ex.getMessage(), ex);
+	
 		}
 		return false;
 	}

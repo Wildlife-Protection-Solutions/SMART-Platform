@@ -46,9 +46,8 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 
+	private Session session;
 	protected ConservationArea ca;
-	protected Session session;
-	
 	protected boolean changesMade;
 	
 	private String title;
@@ -59,8 +58,9 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	protected AbstractPropertyJHeaderDialog(Shell parent, String title) {
 		super(parent);
 		this.title = title;
-		session = HibernateManager.openSession();
+		
 		getConservationArea();
+		
 	}
 
 	@Override
@@ -72,15 +72,15 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	public Session getSession(){
 		if (session == null || !session.isOpen()){
 			session = HibernateManager.openSession();
+			session.refresh(ca);
 		}
 		return session;
 	}
+	
+
 	protected void getConservationArea(){
 		ca = SmartDB.getCurrentConservationArea();
-		Session s = getSession();
-		s.beginTransaction();
-		s.refresh(ca);		//attach the ca to the session
-		s.getTransaction().commit();
+		getSession();
 	}
 	
 	
@@ -172,6 +172,9 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 					return false;
 				}
 			}
+		}
+		if (session != null && session.isOpen()){
+			session.close();
 		}
 		return super.close();  
 	}
