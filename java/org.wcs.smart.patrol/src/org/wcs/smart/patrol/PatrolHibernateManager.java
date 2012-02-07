@@ -49,7 +49,8 @@ import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
- * Hibernate manager for patrol related data
+ * Extension of the smart hibernate manager for patrol related data.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -59,10 +60,11 @@ public class PatrolHibernateManager extends HibernateManager{
 	private static NumberFormat PATROL_ID_DATE_FIELD_FORMATTER = new DecimalFormat("00");
 	
 	/**
-	 * Gets all teams (active and in-active) for a given conservation ca;
-	 * @param ca 
-	 * @param s
-	 * @return
+	 * Gets all teams (active and in-active) for a given conservation area
+	 * 
+	 * @param ca conservation area 
+	 * @param s active session 
+	 * @return list of active and inactive teams
 	 */
 	public static List<Team> getTeams(ConservationArea ca, Session s){
 		return getTeams(ca, s, false);
@@ -70,14 +72,23 @@ public class PatrolHibernateManager extends HibernateManager{
 	
 	/**
 	 * Gets active teams for a given conservation area
-	 * @param ca
-	 * @param s
-	 * @return
+	 * 
+	 * @param ca conservation area
+	 * @param s active session
+	 * @return list of active teams
 	 */
 	public static List<Team> getActiveTeams(ConservationArea ca, Session s){
 		return getTeams(ca, s, true);
 	}
 	
+	/**
+	 * Loads teams from database 
+	 * 
+	 * @param ca conservation area
+	 * @param s session 
+	 * @param onlyActive <code>true</code> if only active status should be loaded; <code>false</code> returns all stations 
+	 * @return list of stations
+	 */
 	private static List<Team> getTeams(ConservationArea ca, Session s, boolean onlyActive){
 		s.beginTransaction();
 		List<Team> list = null;
@@ -102,18 +113,32 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * Gets all patrol mandates (active and in-active) for
 	 * a given conservation area.
 	 * 
-	 * @param ca
-	 * @param s
-	 * @return
+	 * @param ca conservation area 
+	 * @param s active session 
+	 * @return list of mandates
 	 */
 	public static List<PatrolMandate> getMandates(ConservationArea ca, Session s){
 		return getMandates(ca, s, false);
 	}
+	/**
+	 * Gets only active patrol mandates for a given conservation area 
+	 * 
+	 * @param ca conservation area 
+	 * @param s active session
+	 * @return list of active mandates
+	 */
 	public static List<PatrolMandate> getActiveMandates(ConservationArea ca, Session s){
 		return getMandates(ca, s, true);
 	}
 	
-	public static List<PatrolMandate> getMandates(ConservationArea ca, Session s, boolean onlyActive){
+	/**
+	 * Loads mandates from database 
+	 * @param ca conservation area 
+	 * @param s active session
+	 * @param onlyActive <code>true</code> if only active mandates should be retured, <code>false</code> for all 
+	 * @return
+	 */
+	private static List<PatrolMandate> getMandates(ConservationArea ca, Session s, boolean onlyActive){
 		s.beginTransaction();
 		List<PatrolMandate> list = null;
 		try{
@@ -131,6 +156,16 @@ public class PatrolHibernateManager extends HibernateManager{
 		
 	}
 	
+	/**
+	 * Loads the patrol options for a given conservation area.
+	 * <p>
+	 * If patrol options does not exist, it will create a new one with default values.
+	 * </p>
+	 * 
+	 * @param ca conservation area 
+	 * @param s active session
+	 * @return the patrol options
+	 */
 	public static PatrolOptions getPatrolOptions(ConservationArea ca, Session s){
 		s.beginTransaction();
 		try{
@@ -155,16 +190,32 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 		return null;
 	}
+	
+	/**
+	 * Creates new patrol options for a given conservation area and saves it to the database.
+	 * 
+	 * @param ca conservation area 
+	 * @param s active session
+	 * @return
+	 */
 	private static PatrolOptions createPatrolOption(ConservationArea ca, Session s){
 		PatrolOptions po = new PatrolOptions();
 		po.setTrackDistanceDirection(false);
 		po.setEditTime(null);
-//		po.setConservationArea(ca);
 		po.setUuid(ca.getUuid());
 		s.saveOrUpdate(po);
 		return po;
 	}
 	
+	/**
+	 * Gets all active transportation types for a given patrol type in a given
+	 * conservation area.
+	 * 
+	 * @param ca conservation area
+	 * @param s active session
+	 * @param type patrol type 
+	 * @return list of active transportation types for the given patrol type
+	 */
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
 		s.beginTransaction();
 		List<PatrolTransportType> types = null;
@@ -178,12 +229,14 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 		return null;
 	}
+	
 	/**
 	 * Gets all patrol types (active and in-active)
 	 * for a given conservation area.
-	 * @param ca
-	 * @param s
-	 * @return
+	 * 
+	 * @param ca conservation area
+	 * @param s active session
+	 * @return list of active and in-active patrol types
 	 */
 	public static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s){
 		return getPatrolTypes(ca, s, false);
@@ -193,19 +246,30 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * Gets active patrol types for a given
 	 * conservation area.
 	 * 
-	 * @param ca
-	 * @param s
-	 * @return
+	 * @param ca conservation area
+	 * @param s active session
+	 * @return list of active patrol types
 	 */
 	public static List<PatrolType> getActivePatrolTypes(ConservationArea ca, Session s){
 		return getPatrolTypes(ca, s, true);
 	}
 
+	/**
+	 * Gets patrol types for a given conservation area.
+	 * @param ca conservation area 
+	 * @param s active session 
+	 * @param onlyActive <code>true</code> if only active patrol types are to be returned, <code>false</code> otherwise
+	 * @return list of patrol types
+	 */
 	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive){
 		s.beginTransaction();
 		List<PatrolType> types = null;
 		try{
-			types = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca)).list();
+			Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca));
+			if (onlyActive){
+				query.add(Restrictions.eq("isActive", true));
+			}
+			types = query.list();
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
@@ -219,6 +283,13 @@ public class PatrolHibernateManager extends HibernateManager{
 		return types;
 	}
 	
+	/**
+	 * Creates the default patrol types and saves them to the database.
+	 * 
+	 * @param ca conservation area to create types for
+	 * @param s active sesion
+	 * @return list of default patrol types
+	 */
 	public static List<PatrolType> createPatrolTypes(ConservationArea ca, Session s){
 		List<PatrolType> types = new ArrayList<PatrolType>();
 		s.beginTransaction();
@@ -246,13 +317,21 @@ public class PatrolHibernateManager extends HibernateManager{
 	/**
 	 * Saves a patrol.
 	 * 
-	 * @param p
-	 * @param s
+	 * @param p patrol to save
+	 * @param s active session
+	 * @param objectsToDelete items removed from the patrol that need to be deleted from the database
+	 * 
+	 * @return <code>true</code> if saved successfully, <code>false</code> if failed to save
 	 */
 	public static boolean  savePatrol(Patrol p, Session s, List<Object> objectsToDelete){
 		s.beginTransaction();
 		
 		try{
+			if (p.getId() == null){
+				String id = PatrolHibernateManager.generatePatrolId(p, s);
+				p.setId(id);
+			}
+			
 			if (objectsToDelete != null){
 				for (Object toDelete :objectsToDelete){
 					s.delete(toDelete);
@@ -300,34 +379,33 @@ public class PatrolHibernateManager extends HibernateManager{
 		return false;
 	}
 	
-	public static String generatePatrolId(Patrol p){
-		Session s = openSession();
-		try {
-			s.beginTransaction();
+	/**
+	 * Computes the next patrol id;
+	 * @param p patrol to compute id for
+	 * @param s active session (should be inside the transaction that is saving patrol)
+	 * 
+	 * @return patrol id for given patrol
+	 */
+	public static String generatePatrolId(Patrol p, Session s){
+		StringBuilder sb = new StringBuilder();
+		sb.append(p.getConservationArea().getId());
+		sb.append("_");
+		Calendar cal = SmartPlugIn.convertDate(p.getStartDate());
+		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.YEAR)));
+		sb.append("_");
+		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.MONTH)+1));
+		sb.append("_");
+		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.DAY_OF_MONTH)));
 
-			StringBuilder sb = new StringBuilder();
-			sb.append(p.getConservationArea().getId());
-			sb.append("_");
-			Calendar cal = SmartPlugIn.convertDate(p.getStartDate());
-			sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.YEAR)));
-			sb.append("_");
-			sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.MONTH)+1));
-			sb.append("_");
-			sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.DAY_OF_MONTH)));
-
-			Criteria c = s.createCriteria(Patrol.class).add(Restrictions.like("id", sb.toString() + "%")).setProjection(Projections.rowCount());
+		Criteria c = s.createCriteria(Patrol.class).add(Restrictions.like("id", sb.toString() + "%")).setProjection(Projections.rowCount());
 			
-			long cnt = (Long) c.list().get(0);
-			cnt++;
-			cnt = cnt % 999;
+		long cnt = (Long) c.list().get(0);
+		cnt++;
+		cnt = cnt % 999;
 
-			sb.append("_");
-			sb.append(PATROL_ID_FORMATTER.format(cnt));
-			return sb.toString();
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
-		}
+		sb.append("_");
+		sb.append(PATROL_ID_FORMATTER.format(cnt));
+		return sb.toString();
 		
 	}
 }

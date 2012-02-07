@@ -39,7 +39,13 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
- * Track Object
+ * Patrol leg day object.
+ * <p>
+ * A patrol leg day is one day within a patrol leg.  A Patrol leg will have
+ * at least one leg day although it may span multiple days and have multiple
+ * leg days.
+ * </p>
+ * 
  * @author Emily
  * @since 1.0.0
  */

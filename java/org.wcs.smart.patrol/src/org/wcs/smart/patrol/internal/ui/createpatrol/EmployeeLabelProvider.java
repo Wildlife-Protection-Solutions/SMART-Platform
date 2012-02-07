@@ -32,36 +32,52 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 
 /**
- * TODO Purpose of
+ * Label provided for employee class.
  * <p>
- * <ul>
- * <li></li>
- * </ul>
+ * Optional leader and pilots lists can be provided. If provided the image
+ * returned identified if the employee was a leader or pilot. Otherwise the
+ * image returned identifies if the employee is a smart user or not.
  * </p>
  * 
  * @author Emily
  * @since 1.0.0
  */
 public class EmployeeLabelProvider extends LabelProvider {
-	
-	private Set<Employee> leaders ;
+
+	private Set<Employee> leaders;
 	private Set<Employee> pilots;
-	
-	public EmployeeLabelProvider(){
+
+	public EmployeeLabelProvider() {
 	}
-	
-	public void setLeaders(Set<Employee> leaders){
+
+	/**
+	 * @param leaders
+	 *            set of leaders
+	 */
+	public void setLeaders(Set<Employee> leaders) {
 		this.leaders = leaders;
 	}
-	public void setPilots(Set<Employee> pilots){
+
+	/**
+	 * 
+	 * @param pilots
+	 *            set of pilots
+	 */
+	public void setPilots(Set<Employee> pilots) {
 		this.pilots = pilots;
 	}
-	
+
 	@Override
+	/**
+	 * If leader list is provided
+	 * the image returned identified if the employee was
+	 * a leader or pilot.  Otherwise the image returned identifies
+	 * if the employee is a smart user or not.</p> 
+	 */
 	public Image getImage(Object element) {
 		if (element instanceof Employee) {
-			
-			if (leaders == null){
+
+			if (leaders == null) {
 				if (((Employee) element).getSmartUserId() == null) {
 					return JFaceResources.getImageRegistry().get(
 							SmartPlugIn.EMPLOYEE_ICON);
@@ -69,14 +85,14 @@ public class EmployeeLabelProvider extends LabelProvider {
 					return JFaceResources.getImageRegistry().get(
 							SmartPlugIn.SMART_EMPLOYEE_ICON);
 				}
-			}else{
-				if (leaders.contains(element)){
+			} else {
+				if (leaders.contains(element)) {
 					return JFaceResources.getImageRegistry().get(
 							SmartPatrolPlugIn.PATROL_LEADER_ICON);
-				}else if (pilots != null && pilots.contains(element)){
+				} else if (pilots != null && pilots.contains(element)) {
 					return JFaceResources.getImageRegistry().get(
 							SmartPatrolPlugIn.PATROL_PILOT_ICON);
-				}else{
+				} else {
 					return JFaceResources.getImageRegistry().get(
 							SmartPatrolPlugIn.PATROL_MEMBER_ICON);
 				}
@@ -90,7 +106,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 		if (element instanceof Employee) {
 			Employee e = (Employee) element;
 			return e.getLabel();
-		}else if (element instanceof PatrolLegMember){
+		} else if (element instanceof PatrolLegMember) {
 			return ((PatrolLegMember) element).getMember().getLabel();
 		}
 		return super.getText(element);

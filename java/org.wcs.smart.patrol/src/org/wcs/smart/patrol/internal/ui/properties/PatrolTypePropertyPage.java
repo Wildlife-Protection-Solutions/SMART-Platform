@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.internal.ui.properties;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -73,14 +72,12 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private TableViewer transportTblViewer;
 	private Button btnDisableType;
 	private Button btnDisableTransport;
-	
-	private static NullComparator nullStringComparator = new NullComparator();
-	
+		
 	private WritableList patrolTypes = null;
 	private WritableList patrolTransportTypes = null;
 	
-	public static Color gray = null;
-	public static Color black = null;
+	private static Color gray = null;
+	private static Color black = null;
 	private Button btnAddTransport;
 
 	/**
@@ -433,11 +430,13 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			for (Iterator iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
 				PatrolType type = (PatrolType) iterator.next();
 				s.saveOrUpdate(type);
-				for (PatrolTransportType ptt : type.getTransportTypes()){
-					s.saveOrUpdate(ptt);
-					for (org.wcs.smart.ca.Label name : ptt.getNames()){
-						name.setElementuuid(ptt.getUuid());
-						s.saveOrUpdate(name);
+				if (type.getTransportTypes() != null){
+					for (PatrolTransportType ptt : type.getTransportTypes()){
+						s.saveOrUpdate(ptt);
+						for (org.wcs.smart.ca.Label name : ptt.getNames()){
+							name.setElementuuid(ptt.getUuid());
+							s.saveOrUpdate(name);
+						}
 					}
 				}
 			}

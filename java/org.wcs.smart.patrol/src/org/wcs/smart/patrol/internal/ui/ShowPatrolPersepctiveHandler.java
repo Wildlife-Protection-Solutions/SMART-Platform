@@ -8,6 +8,12 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.ui.PatrolPerspective;
 
+/**
+ * Handler that display the patrol perspective.
+ * 
+ * @author Emily
+ *
+ */
 public class ShowPatrolPersepctiveHandler extends AbstractHandler {
 
 	public Object execute(final ExecutionEvent event) throws ExecutionException {

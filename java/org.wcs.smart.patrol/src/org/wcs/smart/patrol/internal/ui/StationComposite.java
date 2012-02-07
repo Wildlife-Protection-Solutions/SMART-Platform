@@ -42,12 +42,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Patrol Item composite for selecting patrol station.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -56,7 +52,7 @@ public class StationComposite extends PatrolItemComposite{
 	private ComboViewer stationList;
 
 	/*
-	 * Station/Team label provider
+	 * Station label provider
 	 */
 	private LabelProvider lblProvider = new LabelProvider(){
 		public String getText(Object element) {
@@ -74,6 +70,9 @@ public class StationComposite extends PatrolItemComposite{
 
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
+	 */
 	public Composite createComponent(Composite parent, int style) {
 
 		Composite center = new Composite(parent, SWT.NONE);
@@ -99,6 +98,9 @@ public class StationComposite extends PatrolItemComposite{
 		return center;
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+	 */
 	public void setValues(Patrol p, Session session) {
 		List<? extends Object> stations = HibernateManager.getActiveStations(p.getConservationArea(), session);
 
@@ -118,6 +120,9 @@ public class StationComposite extends PatrolItemComposite{
 
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
+	 */
 	public void updatePatrol(Patrol p) {
 		Object station = (Object)((IStructuredSelection)stationList.getSelection()).getFirstElement();
 		if (station != null && station instanceof Station){
@@ -128,7 +133,7 @@ public class StationComposite extends PatrolItemComposite{
 	}
 
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getTitle()
 	 */
 	@Override

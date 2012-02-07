@@ -41,12 +41,8 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ *  Patrol item composite for selecting patrol transport type. 
+ *  
  * @author Emily
  * @since 1.0.0
  */
@@ -54,8 +50,6 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 
 	private ComboViewer patrolTypeViewer = null;
 
-	
-	
 	/**
 	 * 
 	 */
@@ -63,6 +57,9 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
+	 */
 	public Composite createComponent(Composite parent, int style) {
 
 		Composite center = new Composite(parent, SWT.NONE);
@@ -94,6 +91,9 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 		return center;
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+	 */
 	public void setValues(Patrol p, Session session) {
 		List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(p.getConservationArea(), session, p.getPatrolType());
 		
@@ -108,6 +108,9 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
+	 */
 	public void updatePatrol(Patrol p) {
 		PatrolTransportType pm = (PatrolTransportType) ((IStructuredSelection)patrolTypeViewer.getSelection()).getFirstElement();
 		if (pm != null){
@@ -119,7 +122,7 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 	}
 
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getTitle()
 	 */
 	@Override

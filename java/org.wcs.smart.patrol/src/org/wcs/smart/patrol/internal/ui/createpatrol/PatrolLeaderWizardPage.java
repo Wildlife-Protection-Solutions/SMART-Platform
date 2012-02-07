@@ -36,7 +36,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 
 /**
- * Wizard page to identify patrol leader.
+ * Wizard page to identify patrol leader and pilot is applicable.
  * 
  * 
  * @author Emily
@@ -46,13 +46,10 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 
 	private ComboViewer patrolLeaderViewer = null;
-	
 	private ComboViewer patrolPilotViewer = null;
 
 	private Label lblPilot;
 	
-
-
 	/**
 	 * @param pageName
 	 */

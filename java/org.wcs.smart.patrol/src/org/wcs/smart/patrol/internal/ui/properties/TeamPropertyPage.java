@@ -225,7 +225,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
-		setMessage("Manage the list mandates associated with a patrol.");
+		setMessage("Manage the list patrol teams.");
 		return container;
 	}
 
@@ -343,7 +343,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 					colum.weight, i);
 			
 			
-			col.setLabelProvider(new MandateLabelProvider(colum));
+			col.setLabelProvider(new TeamLabelProvider(colum));
 			if (colum == Column.NAME || colum == Column.DESCRIPTION){
 				col.setEditingSupport(new TextTableEditor(viewer, colum));
 			}else if (colum == Column.MANDATE){
@@ -450,9 +450,9 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 	}
 	
-	class MandateLabelProvider extends ColumnLabelProvider implements IColorProvider{ 
+	class TeamLabelProvider extends ColumnLabelProvider implements IColorProvider{ 
 		private Column column;
-		public MandateLabelProvider(Column column){
+		public TeamLabelProvider(Column column){
 			this.column = column;
 		}
 		@Override

@@ -21,16 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.internal.ui.StationComposite;
 import org.wcs.smart.patrol.internal.ui.TeamComposite;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.Team;
 
 /**
  * Wizard page to gather station and
@@ -42,24 +39,6 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 
 	private TeamComposite teamList;
 	private StationComposite stationList;
-
-	
-	/*
-	 * Station/Team label provider
-	 */
-	private LabelProvider lblProvider = new LabelProvider(){
-		public String getText(Object element) {
-			if (element instanceof String){
-				return (String)element;
-			}
-			if (element instanceof Team){
-				return ((Team) element).getName();
-			}else if (element instanceof Station){
-				return ((Station)element).getName();
-			}
-			return super.getText(element);
-		}
-	};
 	
 	/**
 	 *

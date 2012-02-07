@@ -60,12 +60,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Property page for managing patrol mandates.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -80,8 +76,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private WritableList mandates = null;
 	
-	public static Color gray = null;
-	public static Color black = null;
+	private static Color gray = null;
+	private static Color black = null;
 	
 	/*
 	 * columns in the station table
@@ -97,8 +93,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	};
 	
 	/**
-	 * @param parent
-	 * @param title
+	 * Creates new page
 	 */
 	public PatrolMandatePropertyPage() {
 		super(Display.getCurrent().getActiveShell(), "Patrol Mandate");
@@ -227,6 +222,9 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		return false;
 	}
 	
+	/**
+	 * Adds a mandate
+	 */
 	private void addMandate(){
 		PatrolMandate mandate = new PatrolMandate();
 		mandate.setConservationArea(ca);
@@ -235,8 +233,12 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		mandates.add(mandate);
 		
 		tableViewer.refresh();
-		
 	}
+	
+	/**
+	 * Disables/enables selected mandate 
+	 * @param enable
+	 */
 	private void disableMandate(boolean enable){
 		PatrolMandate md = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 		md.setIsActive(enable);
@@ -275,7 +277,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	}
 	
 	/*
-	 * Creates station table columns
+	 * Creates mandate table columns
 	 */
 	private void createColumns(TableViewer viewer) {
 

@@ -37,6 +37,8 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.Employee;
 
 /**
+ * Patrol leg member
+ * 
  * @author Emily
  * @since 1.0.0
  */

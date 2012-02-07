@@ -32,6 +32,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.SimpleList;
 
 /**
+ * Patrol mandate
+ * 
  * @author Emily
  * @since 1.0.0
  */
