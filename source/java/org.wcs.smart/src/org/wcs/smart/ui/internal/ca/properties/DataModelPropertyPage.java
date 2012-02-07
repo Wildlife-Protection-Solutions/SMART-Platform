@@ -117,6 +117,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	
 	public void setDataModel(DataModel dm){
 		this.dataModel = dm;
+		if (viewer != null){
+			viewer.setInput(this.dataModel);
+			viewer.refresh();
+		}
 	}
 	
 	@Override
@@ -282,7 +286,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		});
 		//exportButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 2,1));
 //				
-		
+		viewer.refresh();
 		setMessage("Manage conservation area data model.");
 		return thisparent;
 	}
