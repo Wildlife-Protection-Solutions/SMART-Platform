@@ -1,0 +1,247 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui;
+
+import org.eclipse.core.databinding.observable.list.ObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegMember;
+
+/**
+ * Patrol Item Composite for patrol leader and pilot.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class LeaderPilotComposite extends PatrolLegItemComposite{
+
+	private ComboViewer patrolLeaderViewer = null;
+	private ComboViewer patrolPilotViewer = null;
+	private Label lblPilot;
+	
+	/**
+	 * 
+	 */
+	public LeaderPilotComposite() {
+
+	}
+
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
+	 */
+	public Composite createComponent(Composite parent, int style) {
+
+		Composite center = new Composite(parent, SWT.NONE);
+		center.setLayout(new GridLayout(2, false));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		Label lbl = new Label(center, SWT.NONE);
+		lbl.setText("Patrol Leader:");
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		patrolLeaderViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
+		patrolLeaderViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		patrolLeaderViewer.setContentProvider(new ObservableListContentProvider());
+		patrolLeaderViewer.setLabelProvider(new EmployeeLabelProvider());
+		patrolLeaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+				fireChangeListeners();	
+			}
+		});
+		
+		lblPilot = new Label(center, SWT.NONE);
+		lblPilot.setText("Pilot:");
+		lblPilot.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+		patrolPilotViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
+		patrolPilotViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		patrolPilotViewer.setContentProvider(new ObservableListContentProvider());
+		patrolPilotViewer.setLabelProvider(new EmployeeLabelProvider());
+		patrolPilotViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+				fireChangeListeners();	
+			}
+		});
+		
+		patrolPilotViewer.getControl().setVisible(false);
+		lblPilot.setVisible(false);
+		
+		return center;
+	}
+	private void validate(){
+		setErrorMessage(null);
+		if (patrolPilotViewer.getControl().isVisible() && (patrolPilotViewer.getSelection() == null || ((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement() == null )){
+			setErrorMessage("A pilot must be selected");
+		}
+		if (patrolLeaderViewer.getSelection() == null || ((IStructuredSelection)patrolLeaderViewer.getSelection()).getFirstElement() == null ){
+			setErrorMessage("A leader must be selected");
+		}
+	}
+
+	/**
+	 * <p>
+	 * If this composite is used on a page where employees are also
+	 * selected use update setEmployeeList(ObservableList, Patrol) to
+	 * set the input to the same list that is used for the selected
+	 * employees.  This will ensure that the values in the combo
+	 * box are updated as the selected employees change.
+	 * </p>
+	 *  
+	 *  @param session - not used and may be null
+	 *  
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+	 */
+	public void setValues(PatrolLeg patrolLeg, Session session) {
+		WritableList list = new WritableList(patrolLeg.getMembers(), PatrolLegMember.class);
+		patrolLeaderViewer.setInput(list);
+		if (patrolLeg.getLeader() != null){
+			patrolLeaderViewer.setSelection(new StructuredSelection(patrolLeg.getLeader()));
+		}else{
+			patrolLeaderViewer.setSelection(new StructuredSelection(list.get(0)));
+		}
+
+		lblPilot.setVisible(patrolLeg.getPatrol().hasPilot());
+		patrolPilotViewer.getControl().setVisible(patrolLeg.getPatrol().hasPilot());
+		if (patrolLeg.getPatrol().hasPilot()){
+			patrolPilotViewer.setInput(list);
+			if (patrolLeg.getPilot() != null){
+				patrolPilotViewer.setSelection(new StructuredSelection(patrolLeg.getPilot()));
+			}else{
+				patrolPilotViewer.setSelection(new StructuredSelection(list.get(0)));
+			}
+		}
+		validate();
+	}
+
+	/**
+	 * Alternative to setValues(Patrol, Session).
+	 * 
+	 * 
+	 * @param list list of Employees.  This is an observable list of employees associated with the patrol.
+	 * @param patrol the patrol to select default values from
+	 */
+	public void setEmployeeList(ObservableList list, Patrol patrol){
+		//leader list 
+		patrolLeaderViewer.setInput(list);		
+		if (patrol.getFirstLeg().getLeader() != null){
+			patrolLeaderViewer.setSelection(new StructuredSelection(patrol.getFirstLeg().getLeader().getMember()));
+		}else{
+			patrolLeaderViewer.setSelection(new StructuredSelection(list.get(0)));
+		}
+		//pilot list
+		lblPilot.setVisible(patrol.hasPilot());
+		patrolPilotViewer.getControl().setVisible(patrol.hasPilot());
+		if (patrol.hasPilot()){
+			patrolPilotViewer.setInput(list);
+			if ( patrol.getFirstLeg().getPilot() != null){
+				patrolPilotViewer.setSelection(new StructuredSelection(patrol.getFirstLeg().getPilot().getMember()));
+			}else{
+				patrolPilotViewer.setSelection(new StructuredSelection(list.get(0)));	
+			}
+		}
+		validate();
+	}
+	/**
+	 * 
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
+	 */
+	public void updatePatrol(PatrolLeg patrolLeg) {
+		Object x = ((IStructuredSelection)patrolLeaderViewer.getSelection()).getFirstElement();
+		if (x == null){
+			throw new PatrolSaveException("A patrol leader must be selected");
+		}
+		if (x instanceof PatrolLegMember){
+			PatrolLegMember plm = (PatrolLegMember)x;
+			if (plm != null){
+				patrolLeg.setLeader(plm);
+			}
+			if (patrolLeg.getPatrol().hasPilot()){
+				plm = (PatrolLegMember)((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement();
+				if (plm == null){
+					throw new PatrolSaveException("A patrol pilot must be selected.");
+				}
+				patrolLeg.setPilot(plm);
+				
+			}
+    	}else if (x instanceof Employee){
+    		Employee plm = (Employee)x;
+			if (plm != null){
+				for (PatrolLegMember mem : patrolLeg.getMembers()){
+					if (mem.getMember().equals(plm)){
+						patrolLeg.setLeader(mem);
+						break;
+					}
+				}
+				
+			}
+			if (patrolLeg.getPatrol().hasPilot()){
+				plm = (Employee)((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement();
+				if (plm == null){
+					throw new PatrolSaveException("A patrol pilot must be selected.");	
+				}
+				for (PatrolLegMember mem : patrolLeg.getMembers()){
+					if (mem.getMember().equals(plm)){
+						patrolLeg.setPilot(mem);
+						break;
+					}
+				}
+			}
+    	}
+    	
+	}
+
+
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getTitle()
+	 */
+	@Override
+	public String getTitle() {
+		return "Patrol Team";
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getAttribute()
+	 */
+	@Override
+	public int getAttribute() {
+		return PatrolEventManager.PATROL_DATES_LEG;
+	}
+}

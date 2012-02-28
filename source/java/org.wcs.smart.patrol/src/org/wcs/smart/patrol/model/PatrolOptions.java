@@ -77,7 +77,8 @@ public class PatrolOptions {
 		this.trackDistanceDirection = track;
 	}
 	/**
-	 * 
+	 * The number of days since the start time fo the patrol that
+	 * it can be edited by data entry users.
 	 * @return the edit time property
 	 */
 	@Column(name="edit_time")

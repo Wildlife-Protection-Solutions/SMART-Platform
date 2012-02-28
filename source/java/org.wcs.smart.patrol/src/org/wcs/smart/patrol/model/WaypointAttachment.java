@@ -21,15 +21,20 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.io.File;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Link between a way point and associated
@@ -46,6 +51,9 @@ public class WaypointAttachment {
 	private Waypoint wp;
 	private String filename;
 	
+	private File copyFromLocation;
+	private String fullFile;
+	
 	public WaypointAttachment(){
 		
 	}
@@ -61,11 +69,16 @@ public class WaypointAttachment {
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="wp_uuid", referencedColumnName="uuid")
 	public Waypoint getWaypoint(){
 		return this.wp;
 	}
 	public void setWaypoint(Waypoint wp){
 		this.wp = wp;
+		if (wp != null){
+			Patrol ptr = getWaypoint().getPatrolLegDay().getPatrolLeg().getPatrol();
+			this.fullFile = SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + ptr.getPatrolDatastorePath() + File.separator + getFilename();
+		}
 	}
 	
 	@Column(name="filename")
@@ -75,5 +88,28 @@ public class WaypointAttachment {
 	public void setFilename(String filename){
 		this.filename = filename;
 	}
+	
+	@Transient
+	/**
+	 * Location of the file to copy.  Temporarily set until
+	 * saved.  Will return null if file already in datastore.
+	 * @return 
+	 */
+	public File getCopyFromLocation(){
+		return this.copyFromLocation;
+	}
+	/**
+	 * Location to copy files from.  Temporarily set
+	 * for newly added attachments until saved. 
+	 */
+	public void setCopyFromLocation(File newFile){
+		this.copyFromLocation= newFile;
+	}
+	
+	@Transient
+	public File getFullFile(){
+		return new File(this.fullFile);
+	}
+	
 }
 

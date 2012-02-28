@@ -38,6 +38,7 @@ import org.wcs.smart.patrol.model.Patrol;
 public abstract class PatrolItemComposite {
 	
 	private List<IPatrolItemChangeListener> listeners = new ArrayList<IPatrolItemChangeListener>();
+	private String errorMessage = null;
 	
 	/**
 	 * Creates the component.
@@ -82,7 +83,7 @@ public abstract class PatrolItemComposite {
 		
 	}
 	/**
-	 * Removes a listenered added using the addChangeListener
+	 * Removes a listener added using the addChangeListener
 	 * @param listener
 	 */
 	public void removeChangeListener(IPatrolItemChangeListener listener){
@@ -98,7 +99,28 @@ public abstract class PatrolItemComposite {
 		}
 	}
 	
+	/**
+	 * <p>The error message should be set before listenered are fired.
+	 * </p>
+	 * @return the current error message associated with the composite; null if no error message
+	 */
+	public String getErrorMessage(){
+		return errorMessage;
+	}
+	/**
+	 * 
+	 * @param errorMessage error message associated with the composite; null if not error message
+	 */
+	public void setErrorMessage(String errorMessage){
+		this.errorMessage = errorMessage;
+	}
 	
+	/**
+	 * This is used when firing events.  This identifies what attribute 
+	 * is being modified. 
+	 * @return the attribute being modified.
+	 */
+	public abstract int getAttribute();
 	
 }
 

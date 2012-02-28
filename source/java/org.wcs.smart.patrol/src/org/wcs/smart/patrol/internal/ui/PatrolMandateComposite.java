@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -132,5 +133,13 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 	@Override
 	public String getTitle() {
 		return "Patrol Mandate";
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getAttribute()
+	 */
+	@Override
+	public int getAttribute() {
+		return PatrolEventManager.PATROL_MANDATE;
 	}
 }

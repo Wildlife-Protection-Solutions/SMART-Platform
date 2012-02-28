@@ -21,17 +21,12 @@
  */
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
-import java.util.Calendar;
-
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.patrol.internal.ui.DateComposite;
+import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -39,11 +34,9 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolDateWizardPage extends NewPatrolWizardPage implements SelectionListener{
+public class PatrolDateWizardPage extends NewPatrolWizardPage {
 
-	private DateTime dtStartDate;
-	private DateTime dtEndDate;
-
+	private DateComposite dateComposite = null;
 
 	/**
 	 * @param pageName
@@ -64,26 +57,20 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage implements Selecti
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		main.setLayout(new GridLayout(1, false));
 		
-		Composite center = new Composite(main, SWT.NONE);
-		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Start Date:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		
-		lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol End Date:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		
-		dtEndDate.addSelectionListener(this);
-		dtStartDate.addSelectionListener(this);
+		dateComposite = new DateComposite();
+		dateComposite.createComponent(main, SWT.NONE);
+
+		dateComposite.addChangeListener(new IPatrolItemChangeListener() {			
+			@Override
+			public void itemChanged() {
+				setErrorMessage(dateComposite.getErrorMessage());
+				if (dateComposite.getErrorMessage() == null){
+					PatrolDateWizardPage.this.setPageComplete(true);
+				}else{
+					PatrolDateWizardPage.this.setPageComplete(false);
+				}
+			}
+		});
 		
 		setMessage("Select the start and end dates for the patrol.");
 		super.setControl(main);
@@ -93,15 +80,8 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage implements Selecti
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (visible) {
-        	Patrol p = ((CreatePatrolWizard)getWizard()).getPatrol();
-        	if (p.getStartDate() != null){
-        		Calendar cal = SmartPlugIn.convertDate(p.getStartDate());
-        		dtStartDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
-        	}
-        	if (p.getEndDate() != null){
-        		Calendar cal = SmartPlugIn.convertDate(p.getEndDate());
-        		dtEndDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
-        	}
+        	CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
+        	dateComposite.setValues(wizard.getPatrol(), wizard.getSession());
         }
     }
 	
@@ -110,31 +90,7 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage implements Selecti
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	void updateModel(Patrol p) {		
-		p.setStartDate(SmartPlugIn.getDate(dtStartDate));
-		p.setEndDate(SmartPlugIn.getDate(dtEndDate));
-		
-		p.getFirstLeg().setStartDate(p.getStartDate());
-		p.getFirstLeg().setEndDate(p.getEndDate());
-	}
-
-
-	
-	@Override
-	public void widgetDefaultSelected(SelectionEvent e) {
-	}
-	
-	/**
-	 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
-	 */
-	@Override
-	public void widgetSelected(SelectionEvent e) {
-		if (SmartPlugIn.getDate(dtStartDate).after(SmartPlugIn.getDate(dtEndDate))){
-			setErrorMessage("End date must be after the start date.");
-			this.setPageComplete(false);
-		}else{
-			this.setPageComplete(true);
-			setErrorMessage(null);
-		}
+	void updateModel(Patrol p) {
+		dateComposite.updatePatrol(p);
 	}
 }

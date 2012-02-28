@@ -21,17 +21,24 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 
 /**
@@ -49,6 +56,8 @@ public class WaypointObservation {
 	
 	private List<WaypointObservationAttribute> attributes; 
 	
+	 
+	
 	public WaypointObservation(){
 		
 	}
@@ -64,6 +73,7 @@ public class WaypointObservation {
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="wp_uuid", referencedColumnName="uuid")
 	public Waypoint getWaypoint(){
 		return this.waypoint;
 	}
@@ -72,18 +82,81 @@ public class WaypointObservation {
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="category_uuid", referencedColumnName="uuid")
 	public Category getCategory(){
 		return this.category;
 	}
-	public void setCategory(Category categort){
+	public void setCategory(Category category){
 		this.category = category;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.observation", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<WaypointObservationAttribute> getAttributes(){
 		return this.attributes;
 	}
 	public void setAttributes(List<WaypointObservationAttribute> attributes){
 		this.attributes = attributes;
+	}
+	
+	/**
+	 * Finds the observation attribute for a given attribute.
+	 * 
+	 * @param attribute
+	 * @return observation attribute or null if not found
+	 */
+	@Transient
+	public WaypointObservationAttribute findAttribute(Attribute attribute){
+		if (getAttributes() ==  null){
+			return null;
+		}
+		for (WaypointObservationAttribute att: getAttributes()){
+			if (att.getAttribute().equals(attribute)){
+				return att;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof WaypointObservation){
+			WaypointObservation s = (WaypointObservation)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return super.equals(other);
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Clones the waypoint observation object.  Does not
+	 * clone the uuid or the waypoint.
+	 */
+	public WaypointObservation clone(){
+		WaypointObservation clone = new WaypointObservation();
+		
+		clone.category = getCategory();
+		if (attributes != null) {
+			clone.attributes = new ArrayList<WaypointObservationAttribute>();
+			for (Iterator<WaypointObservationAttribute> iterator = attributes.iterator(); iterator.hasNext();) {
+				WaypointObservationAttribute type = (WaypointObservationAttribute) iterator.next();
+				WaypointObservationAttribute ctype = type.clone();
+				ctype.setObservation(clone);
+				clone.attributes.add(ctype);
+			}
+		}
+		return clone;
+		
 	}
 }

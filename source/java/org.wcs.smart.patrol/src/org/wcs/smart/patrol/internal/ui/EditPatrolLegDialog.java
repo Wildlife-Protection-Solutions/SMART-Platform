@@ -1,0 +1,521 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui;
+
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+
+/**
+ * Dialog for editing a patrol leg.
+ * <p>Users can edit the leg id, start date, end date,
+ * members list, leader and transportation type.</p>
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class EditPatrolLegDialog extends TitleAreaDialog{
+	private static DateFormat DATE_TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+	
+	private PatrolLeg editLeg;
+	
+	private DateTime startDate;
+	private DateTime startTime;
+	private Button opStart;
+	private Button opCustom;
+	
+	private DateTime endDate;
+	private DateTime endTime;
+	private Button opEnd;
+	private Button opEndCustom;
+	
+	private WritableList employeeList;
+	private WritableList employeeListA;
+
+	private ComboViewer groupALeader;
+	private ComboViewer groupAPilot;
+	private ComboViewer cmbTransportTypeA;
+	private List<Employee> patrolMembers;
+	private List<PatrolTransportType> typeOps;
+	
+	private Date patrolEndDate;
+	private Date patrolStartDate;
+	
+	private Text txtLegId;
+	
+	/**
+	 * Creates a new edit leg dialog 
+	 * 
+	 * @param parentShell parent shell
+	 * @param patrolLeg leg to edit
+	 * @param patrolMembers list of possible patrol members
+	 * @param typeOps transport type options 
+	 * @param patrolStartDate patrol start date 
+	 * @param patrolEndDate patrol end date
+	 */
+	public EditPatrolLegDialog(Shell parentShell, PatrolLeg patrolLeg,  List<Employee> patrolMembers, List<PatrolTransportType> typeOps, Date patrolStartDate, Date patrolEndDate) {
+		super(parentShell);
+		this.editLeg = patrolLeg;
+		this.patrolMembers = patrolMembers;
+		this.typeOps = typeOps;
+		this.patrolEndDate = patrolEndDate;
+		this.patrolStartDate = patrolStartDate;
+	}
+
+	
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+	
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		Label lbl;
+		parent.setLayout(new GridLayout(1, false));
+		
+		employeeList = new WritableList();
+		employeeList.addAll(patrolMembers);
+		
+		employeeListA = new WritableList();
+		for (PatrolLegMember member: editLeg.getMembers()){
+			employeeListA.add(member.getMember());
+			employeeList.remove(member.getMember());
+		}
+		
+		Composite patrolIdComp = new Composite(parent, SWT.NONE);
+		patrolIdComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		patrolIdComp.setLayout(new GridLayout(2, false));
+		lbl = new Label(patrolIdComp, SWT.NONE);
+		lbl.setText("Leg Id:" );
+		txtLegId = new Text(patrolIdComp, SWT.BORDER);
+		txtLegId.setText(editLeg.getId());
+		txtLegId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		createStartTimeComposite(parent);
+		createEndTimeComposite(parent);
+		//Employee List on the Left Side of Window
+		Composite compEmployees = new Composite(parent, SWT.NONE);
+		compEmployees.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		compEmployees.setLayout(new GridLayout(2, false));
+		
+		final TableViewer emplList = new TableViewer(compEmployees, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		emplList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		emplList.setLabelProvider(new EmployeeLabelProvider());
+		emplList.setContentProvider(new ObservableListContentProvider());
+		emplList.setInput(employeeList);
+		
+		Composite right = new Composite(compEmployees, SWT.NONE);
+		right.setLayout(new GridLayout(2, false));
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		cmbTransportTypeA = createTransportTypeComboViewer(right);
+	
+		lbl = new Label(right, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		lbl.setText("Members:");
+		
+		createEmployeeButtonPanelAndTable(right, employeeListA, emplList);
+		
+		Composite leaderComp = new Composite(right, SWT.NONE);
+		leaderComp.setLayout(new GridLayout(2, false));
+		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		
+		groupALeader = createLeaderPilot(leaderComp, "Group A Leader:", employeeListA, editLeg.getLeader().getMember());
+		if (editLeg.getPatrol().hasPilot()){
+			groupAPilot = createLeaderPilot(leaderComp, "Group A Pilot:", employeeListA, editLeg.getPilot().getMember());
+		}
+		
+		setMessage("Edit the patrol leg information.");
+		return parent;
+	}
+	
+	/*
+	 * Create a combo viewer for selecting patrol leader/pilot
+	 */
+	private ComboViewer createLeaderPilot(Composite parent, String name, WritableList employeeList, Employee defaultValue){
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText(name);
+		ComboViewer cmbLeader = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbLeader.setLabelProvider(new EmployeeLabelProvider());
+		cmbLeader.setContentProvider(new ObservableListContentProvider());
+		cmbLeader.setInput(employeeList);
+		cmbLeader.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		cmbLeader.setSelection( new StructuredSelection(defaultValue));
+		
+		return cmbLeader;
+	}
+
+
+	/*
+	 * Create table viewer for patrol members list
+	 */
+	private TableViewer createEmployeeButtonPanelAndTable(Composite parent, WritableList input, final TableViewer employeeTableViewer){
+		
+		Composite btn = new Composite(parent, SWT.NONE);
+		btn.setLayout(new GridLayout(1, false));
+		btn.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		Button btnAddA = new Button(btn, SWT.PUSH);
+		btnAddA.setText("->");
+		btnAddA.setToolTipText("Move employees to patrol leg.");
+		
+		Button btnRemoveA = new Button(btn, SWT.PUSH);
+		btnRemoveA.setText("<-");
+		btnRemoveA.setToolTipText("Remove employees from patrol leg.");
+		
+		
+		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		groupList.setLabelProvider(new EmployeeLabelProvider());
+		groupList.setContentProvider(new ObservableListContentProvider());
+		groupList.setInput(input);
+		groupList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		btnAddA.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (Iterator iterator = ((IStructuredSelection)employeeTableViewer.getSelection()).iterator(); iterator.hasNext();) {
+					Employee type = (Employee) iterator.next();
+					((WritableList)employeeTableViewer.getInput()).remove(type);
+					((WritableList)groupList.getInput()).add(type);
+				}
+				
+				
+			}
+		});
+		btnRemoveA.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (Iterator iterator = ((IStructuredSelection)groupList.getSelection()).iterator(); iterator.hasNext();) {
+					Employee type = (Employee) iterator.next();
+					((WritableList)employeeTableViewer.getInput()).add(type);
+					((WritableList)groupList.getInput()).remove(type);
+				}
+				
+				
+			}
+		});
+		return groupList;
+	}
+	/*
+	 * Transport type combo viewer
+	 */
+	private ComboViewer createTransportTypeComboViewer(Composite parent){
+		Composite ttype = new Composite(parent, SWT.NONE);
+		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		ttype.setLayout(new GridLayout(2, false));
+		
+		Label lbl = new Label(ttype, SWT.NONE);
+		lbl.setText("Transportation Type:");
+		ComboViewer cmbTransportType = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmbTransportType.setLabelProvider(new LabelProvider(){
+			public String getText(Object element) {
+				return ((PatrolTransportType)element).getName();
+			}
+		});
+		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTransportType.setInput( typeOps );
+		cmbTransportType.setSelection(new StructuredSelection(editLeg.getType()));
+		cmbTransportType.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		return cmbTransportType;
+	}
+	
+
+	/*
+	 * Start time 
+	 */
+	private void createStartTimeComposite(Composite parent) {
+		
+		Composite timecomp = new Composite(parent, SWT.NONE);
+		timecomp.setLayout(new GridLayout(2, false));
+		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Leg Start Date:");
+		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
+		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		startDate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+			
+		});
+		Calendar ca = SmartPlugIn.convertDate(editLeg.getStartDate());
+		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		
+		lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Leg Start Time:");
+		
+		Composite opComp = new Composite(timecomp, SWT.NONE);
+		opComp.setLayout(new GridLayout(3, false));
+		
+		SelectionAdapter opAdapter = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				startTime.setEnabled(opCustom.getSelection());
+			}
+		};
+		opStart = new Button(opComp, SWT.RADIO);
+		opStart.setText("Start of Day");
+		opStart.addSelectionListener(opAdapter);
+		
+		opCustom = new Button(opComp, SWT.RADIO);
+		opCustom.setText("Custom:");
+		opCustom.addSelectionListener(opAdapter);
+		
+		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
+		startTime.setEnabled(false);
+		startTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		startTime.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+		});
+
+		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 0 && ca.get(Calendar.MINUTE) == 0 && ca.get(Calendar.SECOND) == 0;
+		opStart.setSelection(enabled);
+		opCustom.setSelection(!enabled);
+		startTime.setEnabled(!enabled);
+	}
+private void createEndTimeComposite(Composite parent) {
+		
+		Composite timecomp = new Composite(parent, SWT.NONE);
+		timecomp.setLayout(new GridLayout(2, false));
+		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Leg End Date:");
+		endDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
+		endDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		endDate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+			
+		});
+		Calendar ca = SmartPlugIn.convertDate(editLeg.getEndDate());
+		endDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		
+		lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Leg End Time:");
+		
+		Composite opComp = new Composite(timecomp, SWT.NONE);
+		opComp.setLayout(new GridLayout(3, false));
+		
+		SelectionAdapter opAdapter = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				endTime.setEnabled(opEndCustom.getSelection());
+			}
+		};
+		opEnd = new Button(opComp, SWT.RADIO);
+		opEnd.setText("End of Day");
+		opEnd.addSelectionListener(opAdapter);
+		
+		opEndCustom = new Button(opComp, SWT.RADIO);
+		opEndCustom.setText("Custom:");
+		opEndCustom.addSelectionListener(opAdapter);
+		
+		endTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
+		endTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		endTime.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+		});
+		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 23 && ca.get(Calendar.MINUTE) == 59 && ca.get(Calendar.SECOND) == 59;
+		opEnd.setSelection(enabled);
+		opEndCustom.setSelection(!enabled);
+		endTime.setEnabled(!enabled);
+	}
+	
+	/**
+	 * Valids the input and updates the error message
+	 */
+	private void validate(){
+		String error = getValidationErrorString();
+		setErrorMessage(error);
+		getButton(OK).setEnabled(error == null);
+	}
+	/**
+	 * Validate the dates checking:
+	 * <li>leg start between patrol start and end dates</li>
+	 * <li>leg end between patrol start and end dates</li>
+	 * <li>leg end before the leg start</li> 
+	 * 
+	 * @return
+	 */
+	private String validateDates(){
+		long patrolStart = SmartPlugIn.getDatePart(patrolStartDate, false).getTime();
+		long patrolEnd = SmartPlugIn.getDatePart(patrolEndDate, true).getTime();
+		
+		long legStart = SmartPlugIn.getDate(startDate).getTime();
+		if (opCustom.getSelection()){
+			legStart += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+		}
+		long legEnd = SmartPlugIn.getDate(endDate).getTime();
+		if (opEndCustom.getSelection()){
+			legEnd += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds();
+		}else{
+			legEnd += 24 * 60 * 60 * 1000 - 1000;
+		}
+		
+		
+		if (legStart < patrolStart){
+			return "Date must be after patrol start date: " + DATE_TIME_FORMAT.format(patrolStartDate);
+		}
+		if (legStart > patrolEnd ){
+			return "Date must be before patrol end date:" + DATE_TIME_FORMAT.format(patrolEndDate);
+		}
+		if (legEnd < patrolStart){
+			return "Date must be after patrol start date: " + DATE_TIME_FORMAT.format(patrolStartDate);
+		}
+		if (legEnd > patrolEnd ){
+			return "Date must be before patrol end date: " + DATE_TIME_FORMAT.format(patrolEndDate);
+		}
+		if (legEnd < legStart){
+			return "The start date (" + DATE_TIME_FORMAT.format(new Date(legStart)) + ") must be before the end date (" + DATE_TIME_FORMAT.format(new Date(legEnd)) + ").";
+		}
+		return null;
+	}
+	
+	/*
+	 * validates the input and return error string
+	 */
+	private String getValidationErrorString(){
+		if (txtLegId.getText().trim().isEmpty()){
+			return "Leg must have an id";
+		}
+		if (employeeListA.size() == 0){
+			return "Leg must have at least one member.";
+		}
+		
+		String dateErr = validateDates();
+		if (dateErr != null){
+			return dateErr;
+		}
+		
+		if (this.groupALeader.getSelection().isEmpty()){
+			return "A leader must be selected";
+		}
+		if (this.groupAPilot != null && this.groupAPilot.getSelection().isEmpty()){
+			return "A pilot must be selected";
+		}		
+		return null;
+	}
+	
+	/**
+	 * Performs a validation then updates the patrol leg with the new values.
+	 */
+	@Override
+	protected void okPressed() {
+		String err = getValidationErrorString();
+		if (err != null){
+			setErrorMessage(err);
+			return;
+		}
+		
+		//update id
+		editLeg.setId(txtLegId.getText().trim());
+		//update start date & time
+		long stime = SmartPlugIn.getDate(startDate).getTime();
+		if (opCustom.getSelection()){
+			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+		}
+		editLeg.setStartDate(new Date( stime ));
+		
+		//update end date & Teim
+		long etime = SmartPlugIn.getDate(endDate).getTime();
+		if (opEndCustom.getSelection()){
+			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
+		}else{
+			etime += 24 * 60 * 60 * 1000 - 1000;
+		}
+		editLeg.setEndDate(new Date( etime ));
+		
+		//update transport type
+		editLeg.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement());
+		
+		//update leader
+		Employee leaderA =   (Employee) ((IStructuredSelection)this.groupALeader.getSelection()).getFirstElement();
+		
+		//update pilot
+		Employee pilotA = null;
+		if (this.groupAPilot != null){
+			pilotA =   (Employee) ((IStructuredSelection)this.groupAPilot.getSelection()).getFirstElement();
+		}	
+		
+		//update members
+		editLeg.getMembers().clear();
+		for (Iterator iterator = this.employeeListA.iterator(); iterator.hasNext();) {
+			Employee type = (Employee) iterator.next();
+			PatrolLegMember member = new PatrolLegMember();
+			member.setPatrolLeg(editLeg);
+			member.setMember(type);
+			if (type.equals(leaderA)){
+				member.setIsLeader(true);
+			}
+			if (pilotA != null && type.equals(pilotA)){
+				member.setIsPilot(true);
+			}	
+			editLeg.getMembers().add(member);
+		}
+		
+		super.okPressed();
+		
+	}
+	
+}

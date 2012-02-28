@@ -21,14 +21,20 @@
  */
 package org.wcs.smart.patrol.internal.ui.editpatrol;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
+import org.wcs.smart.patrol.internal.ui.PatrolSaveException;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -51,7 +57,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	 */
 	public EditPatrolItemDialog(Shell parent, 
 			PatrolItemComposite item, 
-			Patrol patrol, Session session){
+			Patrol patrol){
 		super(parent, item.getTitle());
 		this.item = item;
 		this.patrol = patrol;
@@ -67,21 +73,35 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			@Override
 			public void itemChanged() {
 				setChangesMade(true);
-				
+				setErrorMessage(item.getErrorMessage());
+				if (getButton(IDialogConstants.OK_ID) != null){
+					getButton(IDialogConstants.OK_ID).setEnabled(item.getErrorMessage() == null);
+				}
 			}
 		});
+		
 		Session s = getSession();
 		try{
+		//	s.saveOrUpdate(patrol);
 			item.setValues(patrol, s);
 		}finally{
 			if (s.isOpen()){
 				s.close();
 			}
 		}
+		setMessage(item.getTitle());
 		setChangesMade(false);
 		return comp;
 	}
-
+	
+	public Session getSession(){
+		if (session == null || !session.isOpen()){
+			session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+			session.refresh(ca);
+		}
+		return session;
+	}
+	
 	/**
 	 * Saves the updates to he database.
 	 * 
@@ -89,20 +109,25 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected boolean performSave() {
-		item.updatePatrol(patrol);
+		
 		Session s = getSession();
-		s.beginTransaction();
 		try{
-			
-			s.saveOrUpdate(patrol);
-			s.getTransaction().commit();
-			s.close();
-			setChangesMade(false);
-			return true;
+			try{
+				item.updatePatrol(patrol);
+			}catch (PatrolSaveException ex){
+				MessageDialog.openError(getShell(), "Error", ex.getMessage());
+				return false;
+			}
+			if (PatrolHibernateManager.savePatrol(patrol, s, null)){
+				setChangesMade(false);
+				return true;
+			}
+			//s.saveOrUpdate(patrol);
+			return false;
 		}catch (Exception ex){
-			s.getTransaction().rollback();
-			s.close();
 			SmartPatrolPlugIn.displayLog("Could not save changed to patrol. " + ex.getMessage(), ex);
+		}finally{
+			s.close();
 		}
 		
 		return false;

@@ -23,12 +23,17 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -45,6 +50,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 	private Session session = null;
 	
 	private boolean canFinish = false;
+	private IWizardPage lastPage = null;
 	
 	/**
 	 * Creates a new wizard.
@@ -62,6 +68,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 	 */
 	public void setCanFinish(boolean canFinish){
 		this.canFinish = canFinish;
+		getContainer().updateButtons();
 	}
 	
 	@Override
@@ -104,6 +111,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 		super.addPage(new PatrolMemberWizardPage());
 		super.addPage(new PatrolLeaderWizardPage());
 		super.addPage(new MultiLegWizardPage());
+		super.addPage(new PatrolLegsWizardPage());
 		
 	}
 	
@@ -122,11 +130,23 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 	 */
 	@Override
 	public boolean performFinish() {
+		if (lastPage instanceof NewPatrolWizardPage){
+			((NewPatrolWizardPage)lastPage).updateModel(this.patrol);
+		}
+		
 		this.getPatrol().createLegDays();
 		boolean ret = PatrolHibernateManager.savePatrol(getPatrol(), PatrolHibernateManager.openSession(), null);
-		
 		//fire events
-		PatrolEventManager.getInstance().patrolAdded();
+		PatrolEventManager.getInstance().patrolAdded(getPatrol());
+		//open in editor
+		PatrolEditorInput input = new PatrolEditorInput(this.patrol.getUuid(), this.patrol.getId(), this.patrol.getPatrolType(), this.patrol.getStartDate());
+		
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PatrolEditor.ID);
+		} catch (PartInitException e) {
+			//TODO:
+			throw new RuntimeException(e);
+		}
 		
 		return ret;
 	}
@@ -146,6 +166,9 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 			setCanFinish(true);
 		}else{
 			setCanFinish(false);
+		}
+		if (event.doit){
+			lastPage = (IWizardPage) event.getTargetPage();
 		}
 	}
 

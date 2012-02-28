@@ -1,5 +1,28 @@
-package org.wcs.smart.patrol.ui;
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui.views;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,19 +48,31 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.model.PatrolType;
 
+/**
+ * A viewer where users can view all patrols by a specified filter.
+ *   
+ * 
+ * @author Emily
+ *
+ */
 public class PatrolListView extends ViewPart {
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView";
 	private TableViewer patrolListViewer;
+	private PatrolViewFilter filter = new PatrolViewFilter();
 	
+	/*
+	 * Job that updates the patrol list based on the current filter
+	 */
 	private Job updateJob = new Job("Update Patrol List") {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -45,16 +80,13 @@ public class PatrolListView extends ViewPart {
 			Session s = PatrolHibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				//String query = "p.uuid, p.id, p.patrolType from Patrol p";
-				String strquery = "select p.uuid, p.id, p.patrolType from Patrol p WHERE p.conservationArea = :ca ORDER BY p.startDate desc";
-				Query query = s.createQuery(strquery).setParameter("ca", SmartDB.getCurrentConservationArea());
-
+				Query query = filter.buildQuery(s);
 				List results = query.list();
 				final PatrolEditorInput[] input = new PatrolEditorInput[results.size()];
 				int i = 0;
 				for (Iterator iterator = results.iterator(); iterator.hasNext();) {
 					Object[] data = (Object[]) iterator.next();					
-					input[i++] = new PatrolEditorInput((byte[])data[0], (String)data[1], (PatrolType.Type)data[2]);
+					input[i++] = new PatrolEditorInput((byte[])data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3]);
 				}
 				
 				monitor.internalWorked(0.5);
@@ -73,15 +105,38 @@ public class PatrolListView extends ViewPart {
 		}
 	};
 	
+	/**
+	 * listener for patrol change events.
+	 */
 	private PatrolEventManager.IPatrolEventListener patrolListener = new IPatrolEventListener(){
 		@Override
-		public void eventFired() {
+		public void eventFired(int type, Object source) {
 			updateContent();
-			
-		}};
-	
+
+		}
+	};
+
+	/**
+	 * Creates a new vies
+	 */
 	public PatrolListView() {
 
+	}
+
+	public void dispose() {
+		
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
+		
+		super.dispose();
+	}
+
+	/**
+	 * 
+	 * @return the current filter
+	 */
+	public PatrolViewFilter getFilter() {
+		return this.filter;
 	}
 
 	@Override
@@ -108,7 +163,7 @@ public class PatrolListView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof PatrolEditorInput){
-					return ((PatrolEditorInput)element).getPatrolId();
+					return ((PatrolEditorInput)element).getPatrolId() + "  [" + DateFormat.getDateInstance(DateFormat.MEDIUM).format( ((PatrolEditorInput)element).getStartDate()) + " ]";
 				}
 				return super.getText(element);
 			}
@@ -120,8 +175,7 @@ public class PatrolListView extends ViewPart {
 		
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolListener);
-		
-		
+	
 		patrolListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override
@@ -132,7 +186,6 @@ public class PatrolListView extends ViewPart {
 						IWorkbenchPage page = getSite().getPage();
 						page.openEditor(p, PatrolEditor.ID);
 					} catch (PartInitException e) {
-						//TODO:
 						throw new RuntimeException(e);
 					}
 				}
@@ -141,6 +194,9 @@ public class PatrolListView extends ViewPart {
 		});
 	}
 
+	/**
+	 * Refreshes the list of patrols
+	 */
 	public void updateContent(){
 		updateJob.cancel();
 		updateJob.schedule();		

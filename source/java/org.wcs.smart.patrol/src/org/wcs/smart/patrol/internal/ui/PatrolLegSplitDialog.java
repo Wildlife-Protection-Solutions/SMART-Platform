@@ -1,0 +1,592 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui;
+
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+
+/**
+ * Dialog for splitting a patrol leg into two legs.
+ * 
+ * @since 1.0.0
+ */
+public class PatrolLegSplitDialog extends TitleAreaDialog{
+
+	private PatrolLeg existingLeg;
+	
+	
+	private DateTime startDate;
+	private DateTime startTime;
+	private Button opStart;
+	private Button opCustom;
+	
+	private DateTime endDate;
+	private DateTime endTime;
+	private Button opEnd;
+	private Button opEndCustom;
+	
+	private WritableList employeeList;
+	private WritableList employeeListA;
+	private WritableList employeeListB;
+
+	private ComboViewer groupALeader;
+	private ComboViewer groupAPilot;
+	private ComboViewer groupBLeader;
+	private ComboViewer groupBPilot;
+	private ComboViewer cmbTransportTypeA;
+	private ComboViewer cmbTransportTypeB;
+	private List<PatrolTransportType> typeOps;
+	private Collection<PatrolLeg> legsToUpdate;
+	
+	/**
+	 * Creates a new dialog for splitting a patrol leg into multiple legs.
+	 * 
+	 * @param parentShell the parent dialog
+	 * @param patrolLeg the patrol leg to split
+	 * @param typeOps the transportation type options
+	 * @param legsToUpdate the set of legs to update
+	 */
+	public PatrolLegSplitDialog(Shell parentShell, PatrolLeg patrolLeg, List<PatrolTransportType> typeOps, Collection<PatrolLeg> legsToUpdate ) {
+		super(parentShell);
+		this.existingLeg = patrolLeg;
+		this.typeOps = typeOps;
+		this.legsToUpdate = legsToUpdate;
+	}
+
+	
+	/**
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 */
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+	
+	/**
+	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		parent.setLayout(new GridLayout(1, false));
+		setMessage("Select information for the patrol split.");
+		
+		employeeList = new WritableList();
+		for (PatrolLegMember member: existingLeg.getMembers()){
+			employeeList.add(member.getMember());
+		}
+		employeeListA = new WritableList();
+		employeeListB = new WritableList();
+		
+		Label lbl;
+		createStartTimeComposite(parent);
+		createEndTimeComposite(parent);
+		//Employee List on the Left Side of Window
+		Composite compEmployees = new Composite(parent, SWT.NONE);
+		compEmployees.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		compEmployees.setLayout(new GridLayout(2, false));
+		
+		final TableViewer emplList = new TableViewer(compEmployees, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		emplList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		emplList.setLabelProvider(new EmployeeLabelProvider());
+		emplList.setContentProvider(new ObservableListContentProvider());
+		emplList.setInput(employeeList);
+		
+		Composite right = new Composite(compEmployees, SWT.NONE);
+		right.setLayout(new GridLayout(1, false));
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+		// -------- Group A -------------------
+		Group groupA = createGroup(right, "Group A");		
+		cmbTransportTypeA = createTransportTypeComboViewer(groupA);
+	
+		lbl = new Label(groupA, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		lbl.setText("Members:");
+		
+		createEmployeeButtonPanelAndTable(groupA, employeeListA, emplList);
+		
+		Composite leaderComp = new Composite(groupA, SWT.NONE);
+		leaderComp.setLayout(new GridLayout(2, false));
+		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		
+		groupALeader = createLeaderPilot(leaderComp, "Group A Leader:", employeeListA);
+		if (existingLeg.getPatrol().hasPilot()){
+			groupAPilot = createLeaderPilot(leaderComp, "Group A Pilot:", employeeListA);
+		}
+		
+		
+		// -------- Group B -------------------
+		Group groupB = createGroup(right, "Group B");
+		cmbTransportTypeB = createTransportTypeComboViewer(groupB);
+	
+		lbl = new Label(groupB, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		lbl.setText("Members:");
+		
+		createEmployeeButtonPanelAndTable(groupB, employeeListB, emplList);
+		
+		leaderComp = new Composite(groupB, SWT.NONE);
+		leaderComp.setLayout(new GridLayout(2, false));
+		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		groupBLeader = createLeaderPilot(leaderComp, "Group B Leader:", employeeListB);
+		if (existingLeg.getPatrol().hasPilot()){
+			groupBPilot = createLeaderPilot(leaderComp, "Group B Pilot:", employeeListB);
+		}
+		
+		return parent;
+	}
+	
+	/*
+	 * create a leader or pilot combo viewer
+	 */
+	private ComboViewer createLeaderPilot(Composite parent, String name, WritableList employeeList){
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText(name);
+		ComboViewer cmbLeader = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbLeader.setLabelProvider(new EmployeeLabelProvider());
+		cmbLeader.setContentProvider(new ObservableListContentProvider());
+		cmbLeader.setInput(employeeList);
+		cmbLeader.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbLeader.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+			}
+		});
+		return cmbLeader;
+	}
+
+	/*
+	 * create an employee table and associated buttons
+	 */
+	private TableViewer createEmployeeButtonPanelAndTable(Composite parent, WritableList input, final TableViewer employeeTableViewer){
+		Composite btn = new Composite(parent, SWT.NONE);
+		btn.setLayout(new GridLayout(1, false));
+		btn.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		Button btnAddA = new Button(btn, SWT.PUSH);
+		btnAddA.setText("->");
+		btnAddA.setToolTipText("Move employees to this group.");
+		
+		Button btnRemoveA = new Button(btn, SWT.PUSH);
+		btnRemoveA.setText("<-");
+		btnRemoveA.setToolTipText("Remove employees from this group.");
+		
+		
+		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		groupList.setLabelProvider(new EmployeeLabelProvider());
+		groupList.setContentProvider(new ObservableListContentProvider());
+		groupList.setInput(input);
+		groupList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		btnAddA.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (Iterator iterator = ((IStructuredSelection)employeeTableViewer.getSelection()).iterator(); iterator.hasNext();) {
+					Employee type = (Employee) iterator.next();
+					((WritableList)employeeTableViewer.getInput()).remove(type);
+					((WritableList)groupList.getInput()).add(type);
+				}
+				validate();
+			}
+		});
+		btnRemoveA.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (Iterator iterator = ((IStructuredSelection)groupList.getSelection()).iterator(); iterator.hasNext();) {
+					Employee type = (Employee) iterator.next();
+					((WritableList)employeeTableViewer.getInput()).add(type);
+					((WritableList)groupList.getInput()).remove(type);
+				}
+				validate();
+			}
+		});
+		return groupList;
+	}
+	/*
+	 * create transport type combo viewer
+	 */
+	private ComboViewer createTransportTypeComboViewer(Composite parent){
+		Composite ttype = new Composite(parent, SWT.NONE);
+		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		ttype.setLayout(new GridLayout(2, false));
+		
+		Label lbl = new Label(ttype, SWT.NONE);
+		lbl.setText("Transportation Type:");
+		ComboViewer cmbTransportType = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmbTransportType.setLabelProvider(new LabelProvider(){
+			public String getText(Object element) {
+				return ((PatrolTransportType)element).getName();
+			}
+		});
+		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
+		
+		cmbTransportType.setInput( typeOps );
+		
+		cmbTransportType.setSelection(new StructuredSelection(existingLeg.getType()));
+		cmbTransportType.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbTransportType.addSelectionChangedListener(new ISelectionChangedListener() {			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+			}
+		});
+		return cmbTransportType;
+	}
+	/*
+	 * create a split group
+	 */
+	private Group createGroup(Composite parent, String name){
+		Group group = new Group(parent, SWT.NONE);	
+		group.setText(name);
+		group.setLayout(new GridLayout(2, false));
+		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		return group;
+	}
+
+	/*
+	 * create start time composite
+	 */
+	private void createStartTimeComposite(Composite parent) {
+		
+		Composite timecomp = new Composite(parent, SWT.NONE);
+		timecomp.setLayout(new GridLayout(2, false));
+		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Date of Split:");
+		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
+		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		startDate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+			
+		});
+		Calendar ca = SmartPlugIn.convertDate(existingLeg.getStartDate());
+		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		
+		lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Time of Split:");
+		
+		Composite opComp = new Composite(timecomp, SWT.NONE);
+		opComp.setLayout(new GridLayout(3, false));
+		
+		SelectionAdapter opAdapter = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				startTime.setEnabled(opCustom.getSelection());
+				validate();
+			}
+		};
+		opStart = new Button(opComp, SWT.RADIO);
+		opStart.setText("Start of Day");
+		opStart.setSelection(true);
+		opStart.addSelectionListener(opAdapter);
+		
+		opCustom = new Button(opComp, SWT.RADIO);
+		opCustom.setText("Custom:");
+		opCustom.addSelectionListener(opAdapter);
+		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
+		startTime.setEnabled(false);
+		startTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+	}
+	
+	/*
+	 * create end time composite
+	 */
+	private void createEndTimeComposite(Composite parent) {
+		
+		Composite timecomp = new Composite(parent, SWT.NONE);
+		timecomp.setLayout(new GridLayout(2, false));
+		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Date Groups Joined:");
+		endDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
+		endDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		endDate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				 validate();
+			}
+			
+		});
+		Calendar ca = SmartPlugIn.convertDate(existingLeg.getEndDate());
+		endDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
+		
+		lbl = new Label(timecomp, SWT.NONE);
+		lbl.setText("Time Groups Joined:");
+		
+		Composite opComp = new Composite(timecomp, SWT.NONE);
+		opComp.setLayout(new GridLayout(3, false));
+		
+		SelectionAdapter opAdapter = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				endTime.setEnabled(opEndCustom.getSelection());
+			}
+		};
+		opEnd = new Button(opComp, SWT.RADIO);
+		opEnd.setText("End of Day");
+		opEnd.setSelection(true);
+		opEnd.addSelectionListener(opAdapter);
+		
+		opEndCustom = new Button(opComp, SWT.RADIO);
+		opEndCustom.setText("Custom:");
+		opEndCustom.addSelectionListener(opAdapter);
+		endTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
+		endTime.setEnabled(false);
+		
+		endTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+	}
+	
+	/*
+	 * validates the current import and sets error message
+	 */
+	private void validate(){
+		String error = getValidationError();
+		setErrorMessage(error);
+		getButton(OK).setEnabled(error == null);
+	}
+	
+	/*
+	 * validates the current inpur
+	 */
+	private String getValidationError(){
+//		if (employeeList.size() > 0){
+//			return "All members must belong to Group A or Group B";
+//		}
+		if (employeeListA.size() == 0){
+			return "Group A must have at least one member";
+		}
+		if (employeeListB.size() == 0){
+			return "Group B must have at least one member.";
+		}
+		if (  ((IStructuredSelection)this.groupALeader.getSelection()).isEmpty() ){
+			return "Group A must have a leader";
+		}
+		if (  ((IStructuredSelection)this.groupBLeader.getSelection()).isEmpty() ){
+			return "Group B must have a leader";
+		}
+		if (this.groupAPilot != null &&   ((IStructuredSelection)this.groupAPilot.getSelection()).isEmpty() ){
+			return "Group A must have a pilot";
+		}
+		if (this.groupBPilot != null &&   ((IStructuredSelection)this.groupBPilot.getSelection()).isEmpty() ){
+			return "Group B must have a pilot";
+		}
+		
+		if (  ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).isEmpty() ){
+			return "Group A must have a transportation type.";
+		}
+		if (  ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).isEmpty() ){
+			return "Group B must have a transportation type.";
+		}
+		
+		long stime = SmartPlugIn.getDate(startDate).getTime();
+		if (opCustom.getSelection()){
+			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+		}
+		Date newStart = new Date( stime );
+		if (newStart.before(existingLeg.getStartDate())){
+			return "Date of split must be after " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getStartDate());
+		}
+		if (newStart.after(existingLeg.getEndDate())){
+			return "Date of split must be before " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getEndDate());
+		}
+		
+		long etime = SmartPlugIn.getDate(endDate).getTime();
+		if (opEndCustom.getSelection()){
+			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
+		}else{
+			etime += 24 * 60 * 60 * 1000 - 1000;
+		}
+		Date newEnd = new Date( etime );
+		if (newEnd.before(existingLeg.getStartDate())){
+			return "Date Groups Joined must be after " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getStartDate());
+		}
+		if (newEnd.after(existingLeg.getEndDate())){
+			return "Date Groups Joined must be before " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getEndDate());
+		}
+		if (newEnd.before(newStart)){
+			return "Join date must be after split date.";
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Creates new legs and updates existing legs.
+	 */
+	@Override
+	protected void okPressed() {
+		String err = getValidationError();
+		if (err != null){
+			setErrorMessage(err);
+			return;
+		}
+		
+		PatrolLeg legA = new PatrolLeg();
+		PatrolLeg legB = new PatrolLeg();
+		
+		//dates		
+		long stime = SmartPlugIn.getDate(startDate).getTime();
+		if (opCustom.getSelection()){
+			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+		}
+		Date newStart = new Date( stime );
+		
+		long etime = SmartPlugIn.getDate(endDate).getTime();
+		if (opEndCustom.getSelection()){
+			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
+		}else{
+			etime += 24 * 60 * 60 * 1000 - 1000;
+		}
+		Date newEnd = new Date( etime );
+		
+	
+		legA.setStartDate(newStart);
+		legB.setStartDate(newStart);
+		
+		legA.setEndDate(newEnd);
+		legB.setEndDate(newEnd);
+		
+		legA.setId( existingLeg.getId() + " - Group A" );
+		legB.setId( existingLeg.getId() + " - Group B" );
+		
+		
+		legA.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement());
+		legB.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).getFirstElement());
+	
+		Employee leaderA =   (Employee) ((IStructuredSelection)this.groupALeader.getSelection()).getFirstElement();
+		Employee leaderB =   (Employee) ((IStructuredSelection)this.groupBLeader.getSelection()).getFirstElement();
+		
+		Employee pilotA = null;
+		Employee pilotB = null;
+		if (this.groupAPilot != null){
+			pilotA =   (Employee) ((IStructuredSelection)this.groupAPilot.getSelection()).getFirstElement();
+			pilotB =   (Employee) ((IStructuredSelection)this.groupBPilot.getSelection()).getFirstElement();
+		}	
+		
+		legA.setMembers(new ArrayList<PatrolLegMember>());
+		for (Iterator iterator = this.employeeListA.iterator(); iterator.hasNext();) {
+			Employee type = (Employee) iterator.next();
+			
+			PatrolLegMember member =new PatrolLegMember();
+			member.setPatrolLeg(legA);
+			member.setMember(type);
+			if (type.equals(leaderA)){
+				member.setIsLeader(true);
+			}
+			if (pilotA != null && type.equals(pilotA)){
+				member.setIsPilot(true);
+			}	
+			legA.getMembers().add(member);
+		}
+	
+		legB.setMembers(new ArrayList<PatrolLegMember>());
+		for (Iterator iterator = this.employeeListB.iterator(); iterator.hasNext();) {
+			Employee type = (Employee) iterator.next();
+			PatrolLegMember member = new PatrolLegMember();
+			member.setPatrolLeg(legB);
+			member.setMember(type);
+			if (type.equals(leaderB)){
+				member.setIsLeader(true);
+			}
+			if (pilotB != null && type.equals(pilotB)){
+				member.setIsPilot(true);
+			}	
+			legB.getMembers().add(member);
+		}
+		
+		legsToUpdate.add(legA);
+		legsToUpdate.add(legB);
+		legA.setPatrol(existingLeg.getPatrol());
+		legB.setPatrol(existingLeg.getPatrol());
+		
+		if (! newEnd.equals( existingLeg.getEndDate() )){
+			
+			//we need to create another leg
+			PatrolLeg legC = new PatrolLeg();
+			legC.setStartDate(newEnd);
+			legC.setEndDate(existingLeg.getEndDate());
+			legC.setId(  existingLeg.getId() + " - End ");
+			legC.setType(existingLeg.getType());
+			legC.setMembers(new ArrayList<PatrolLegMember>());
+			for (PatrolLegMember member : existingLeg.getMembers()){
+				PatrolLegMember mem = member.clone();
+				mem.setPatrolLeg(legC);
+				legC.getMembers().add(mem);
+			}
+			legsToUpdate.add(legC);
+			legC.setPatrol(existingLeg.getPatrol());
+		}
+		
+		
+		existingLeg.setEndDate(newStart);
+		if (existingLeg.getEndDate().getTime() - existingLeg.getStartDate().getTime() <= 1000){			
+			//1 second
+			legsToUpdate.remove(existingLeg);
+			existingLeg.setPatrol(null);
+			existingLeg = null;
+		}
+		
+		super.okPressed();
+		
+	}
+	
+}
