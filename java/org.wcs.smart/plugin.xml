@@ -119,11 +119,21 @@
             allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
-               id="toolbar:org.eclipse.ui.main.toolbar">
+               id="org.wcs.smart.perspectives">
             <command
                   commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective"
                   icon="images/icons/ctool16/map.png"
                   label="Show Map Perspective"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.resetSeparator"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.ui.internal.ResetPerspective"
+                  icon="images/icons/ctool16/arrow_refresh.png"
+                  label="Reset Windows"
                   style="push">
             </command>
          </toolbar>
@@ -208,6 +218,11 @@
       <command
             id="org.wcs.smart.ui.internal.ShowDefaultPerspective"
             name="Show Default Map Perspective">
+      </command>
+      <command
+            defaultHandler="org.eclipse.ui.internal.handlers.ResetPerspectiveHandler"
+            id="org.wcs.smart.ui.internal.ResetPerspective"
+            name="Reset Perspective">
       </command>
    </extension>
    <extension

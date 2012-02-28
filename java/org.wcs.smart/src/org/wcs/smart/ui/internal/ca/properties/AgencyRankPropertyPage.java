@@ -556,7 +556,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			rank.setAgency(current);
 			
 			current.getRanks().add(rank);
-			currentRankSet.add(rank);
+		//	currentRankSet.add(rank);
 			
 			tblRank.setSelection(new StructuredSelection(rank));
 		}

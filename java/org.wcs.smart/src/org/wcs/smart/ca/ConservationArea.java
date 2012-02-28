@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ca;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,11 +40,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.io.FileUtils;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartProperties;
 
 /**
  * 
@@ -163,7 +169,12 @@ public class ConservationArea {
 	}
 	
 	
-
+	@Transient
+	public String getFileDataStoreLocation(){
+		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
+		filestore = filestore + File.separator + SmartPlugIn.getDirectoryPath(uuid);
+		return filestore;
+	}
 	
 	/**
 	 * Two conservation areas are the same if they

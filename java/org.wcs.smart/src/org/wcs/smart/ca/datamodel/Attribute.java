@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -34,14 +35,12 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.OrderBy;
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
 import org.wcs.smart.ca.ConservationArea;
 
 /**
@@ -54,6 +53,8 @@ import org.wcs.smart.ca.ConservationArea;
 @Table(name = "smart.dm_attribute")
 public class Attribute extends DmObject{
 
+	public static final String BOOLEAN_TRUE_LABEL = "Yes";
+	public static final String BOOLEAN_FALSE_LABEL = "No";
 	/**
 	 * Conservation are associated with attribute
 	 */
@@ -260,6 +261,7 @@ public class Attribute extends DmObject{
 	joinColumns={@JoinColumn(name="attribute_uuid")},
 	inverseJoinColumns={@JoinColumn(name="node_uuid")}
 	)
+	@BatchSize(size=100)
 	//TODO: figure out how we can sort this on the node_order of the attribute_tree_node table
 	//curenttly sorted in the attributetree.content provider
 	public List<AttributeTreeNode> getTree(){
@@ -347,5 +349,27 @@ public class Attribute extends DmObject{
 		
 		return clone;
 		
+	}
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Attribute){
+			Attribute s = (Attribute)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return super.equals(other);
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
 	}
 }

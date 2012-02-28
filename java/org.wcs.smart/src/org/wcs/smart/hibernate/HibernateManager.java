@@ -153,9 +153,7 @@ public class HibernateManager extends SmartHibernateManager{
 			
 		}catch (Exception ex){
 			tx.rollback();
-			x.close();
 			throw ex;
-		
 		}finally{
 			x.close();
 		}
@@ -306,28 +304,26 @@ public class HibernateManager extends SmartHibernateManager{
 	 * can be made.
 	 */
 	public static String validateSmartUserChanges(Session session, Employee e){
-		if (e.equals(SmartDB.getCurrentEmployee())){
-			//we only care if we are modifying ourself.
-			Criteria crit = session.createCriteria(Employee.class);
-			crit.add(Restrictions.isNull("endEmploymentDate"));
-			crit.add(Restrictions.ne("uuid", e.getUuid()));
-			crit.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN));
-			crit.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
-			crit.setProjection(Projections.rowCount());
+		//we only care if we are modifying ourself.
+		Criteria crit = session.createCriteria(Employee.class);
+		crit.add(Restrictions.isNull("endEmploymentDate"));
+		crit.add(Restrictions.ne("uuid", e.getUuid()));
+		crit.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN));
+		crit.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
+		crit.setProjection(Projections.rowCount());
 			
-			int num = ((Long)crit.list().get(0)).intValue();
-			if (num > 0){
-				return null;
-			}
-			//no other users so I must be an active smart admin user
-			if (e.getEndEmploymentDate() != null){
-				return "You cannot be terminated as there would be no other admin users.  Please create another admin account before terminating this user.";
-			}
-			if (! e.getSmartUserLevel().equals(Employee.SmartUserLevel.ADMIN)){
-				return "You must be an ADMIN SMART user as there are no other ADMIN smart users in the database.";
-			}
-			
+		int num = ((Long)crit.list().get(0)).intValue();
+		if (num > 0){
+			return null;
 		}
+		//no other users so I must be an active smart admin user
+		if (e.getEndEmploymentDate() != null){
+			return "This user cannot be terminated as there would be no other admin users.  Please create another admin account before terminating this user.";
+		}
+		if (e.getSmartUserLevel() == null || ! e.getSmartUserLevel().equals(Employee.SmartUserLevel.ADMIN)){
+			return "This user must be an ADMIN SMART user as there are no other ADMIN smart users in the database.";
+		}
+			
 		return null;
 	}
 	

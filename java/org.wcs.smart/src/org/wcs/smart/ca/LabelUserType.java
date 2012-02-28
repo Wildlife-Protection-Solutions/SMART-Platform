@@ -50,6 +50,7 @@ public class LabelUserType implements UserType {
 		assert names.length == 1;
 		byte[] uuid = (byte[]) BinaryType.INSTANCE.get(rs, names[0]);
 		return Label.getDescription(uuid, Platform.getNL());
+//		return Label.getDescription(uuid, "US_en");
 	}
 
 	public void nullSafeSet(PreparedStatement st, Object value, int index)

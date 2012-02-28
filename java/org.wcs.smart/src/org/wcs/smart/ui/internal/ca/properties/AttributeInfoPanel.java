@@ -56,6 +56,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
@@ -76,6 +77,10 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public abstract class AttributeInfoPanel extends NameKeyComposite {
 
+	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+
+	
 	private Text txtMinValue;
 	private Text txtMaxValue;
 	private Text txtRegex;
@@ -656,9 +661,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		public Color getForeground(Object element) {
 			AttributeListItem it = (AttributeListItem)element;
 			if (it.getIsActive()){
-				return DataModelPropertyPage.black;
+				return BLACK;
 			}else{
-				return DataModelPropertyPage.gray;
+				return GRAY;
 			}
 		}
 

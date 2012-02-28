@@ -35,11 +35,13 @@ import javax.persistence.Transient;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.annotations.BatchSize;
 import org.wcs.smart.hibernate.HibernateManager;
 
 @Entity 
 @Table (name="smart.i18n_label")
 @IdClass(Label.LabelItemPK.class)
+@BatchSize(size=100)
 //TODO
 //@Cacheable
 //@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
@@ -50,34 +52,31 @@ public class Label  {
 	private String value;
 	
 	
+	private static GetDescriptionRunnable runnable = new GetDescriptionRunnable();
+	
+	
 	@Transient
-	public static String getDescription(byte[] elementuuid, String nl){
-		String query = "SELECT l.value from Label as l, Language as g WHERE l.languageuuid = g.uuid and "
-				+ "g.code = :nl and l.elementuuid = :elementuuid";
-		//HibernateManager.getCurrentSession().beginTransaction();
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-		Query q = s.createQuery(query);
-		q.setString("nl", nl).setBinary("elementuuid", elementuuid);
-		List ret = q.list();
-		//HibernateManager.getCurrentSession().getTransaction().commit();
+	public static synchronized String getDescription(byte[] elementuuid, String nl){
+		//TODO: review this
+		runnable.nl = nl;
+		runnable.elementuuid = elementuuid;
+		runnable.description =null;
+		Thread x = new Thread(runnable);
+		x.start();
 		
-		if (ret.size() == 0){
-			//not set
-			return null;
-		}else{
-			return (String)ret.get(0);
-		}}
-		finally{
-			s.getTransaction().rollback();
-			s.close();
+		try {
+			x.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		return runnable.description;
+
 	}
 	
 	@Transient
 	public static byte[] setCode(byte[] elementuuid, String nl){
-		System.out.println("SET CODE ....");
 		return elementuuid;
 	}
 	
@@ -171,3 +170,51 @@ public class Label  {
 	
 	
 }
+
+
+class GetDescriptionRunnable implements Runnable{
+		public String nl;
+		public byte[] elementuuid;
+		public String description;
+		
+		@Override
+		public void run() {
+			String query = "SELECT l.value from Label as l, Language as g WHERE l.languageuuid = g.uuid and "
+					+ "g.code = :nl and l.elementuuid = :elementuuid";
+			//HibernateManager.getCurrentSession().beginTransaction();
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try {
+				Query q = s.createQuery(query);
+				q.setString("nl", nl).setBinary("elementuuid", elementuuid);
+				List ret = q.list();
+				// HibernateManager.getCurrentSession().getTransaction().commit();
+
+				if (ret.size() == 0) {
+					// lets lookup default language
+					// TODO "= 'true'" is a derby hack to make booleans work
+					query = "SELECT l.value from Label as l, Language as g WHERE l.languageuuid = g.uuid and "
+							+ "g.default = 'true' and l.elementuuid = :elementuuid";
+					q = s.createQuery(query);
+					q.setBinary("elementuuid", elementuuid);
+					ret = q.list();
+					if (ret.size() == 0) {
+						description = null;
+						return;
+					} else {
+						description = (String)ret.get(0);
+						return;
+					}
+				} else {
+					description = (String)ret.get(0);
+					return;
+				}
+			} finally {
+				s.getTransaction().rollback();
+				s.close();
+			}
+			
+		}
+	}
+
+

@@ -29,6 +29,8 @@ import java.util.Map;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -98,7 +100,19 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
-		return new SmartDataSource(HibernateManager.openSession(), (byte[])params.get(CA_UUID.key));
+		
+		Session session = HibernateManager.openSession();
+		ConservationArea ca = null;
+		try{
+			ca = (ConservationArea)session.load(ConservationArea.class, ((byte[])params.get(CA_UUID.key)));	
+		
+		}finally{
+			session.close();
+		}
+		if (ca == null ){
+			throw new IOException("Unable to read hibernate data source.");
+		}
+		return new SmartDataSource(ca);
 	}
 
 	/* (non-Javadoc)
