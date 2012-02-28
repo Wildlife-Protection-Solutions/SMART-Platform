@@ -112,7 +112,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param title
 	 */
 	public TeamPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Team");
+		super(Display.getCurrent().getActiveShell(), "Patrol Team");
 		
 		/* get mandates */
 		List<PatrolMandate> ms = PatrolHibernateManager.getMandates(ca, getSession());
@@ -225,7 +225,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
-		setMessage("Manage the list patrol teams.");
+		setMessage("Manage the list of patrol teams.");
 		return container;
 	}
 

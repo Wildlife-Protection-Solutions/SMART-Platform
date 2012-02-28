@@ -32,12 +32,7 @@ import org.osgi.framework.BundleContext;
 
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * SMART patrol feature plugin
  * @author Emily
  * @since 1.0.0
  */

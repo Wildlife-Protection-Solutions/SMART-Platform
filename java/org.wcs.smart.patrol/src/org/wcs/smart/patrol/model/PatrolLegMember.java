@@ -29,6 +29,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -99,6 +100,18 @@ public class PatrolLegMember {
 		id.setPatrolLeg(leg);
 	}
 	
+	/**
+	 * Clones the patrol leg member setting the member, pilot, and leader
+	 * attributes.  DOES not set or clone the patrol leg attribute.
+	 */
+	public PatrolLegMember clone (){
+		PatrolLegMember clone = new PatrolLegMember();
+		clone.setMember(this.getMember());
+		clone.setIsLeader(getIsLeader());
+		clone.setIsPilot(getIsPilot());
+		return clone;
+	}
+	
 	@Embeddable
 	private static class PatrolLegMemberPk implements Serializable{
 		private Employee member;
@@ -112,7 +125,7 @@ public class PatrolLegMember {
 			this.leg = leg;
 		}
 		
-		@ManyToOne
+		@ManyToOne(fetch = FetchType.LAZY)
 		@JoinColumn(name="employee_uuid", referencedColumnName="uuid")
 		public Employee getMember(){
 			return this.member;
@@ -121,7 +134,7 @@ public class PatrolLegMember {
 			this.member = member;
 		}
 		
-		@ManyToOne
+		@ManyToOne(fetch = FetchType.LAZY)
 		@JoinColumn(name="patrol_leg_uuid", referencedColumnName="uuid")
 		public PatrolLeg getPatrolLeg(){
 			return this.leg;
@@ -129,8 +142,5 @@ public class PatrolLegMember {
 		public void setPatrolLeg(PatrolLeg leg){
 			this.leg  = leg;
 		}
-		
-		
-		
 	}
 }

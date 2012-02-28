@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -130,5 +131,13 @@ public class ObjectiveComposite extends PatrolItemComposite{
 	@Override
 	public String getTitle() {
 		return "Patrol Objective";
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getAttribute()
+	 */
+	@Override
+	public int getAttribute() {
+		return PatrolEventManager.PATROL_OBJECTIVE;
 	}
 }

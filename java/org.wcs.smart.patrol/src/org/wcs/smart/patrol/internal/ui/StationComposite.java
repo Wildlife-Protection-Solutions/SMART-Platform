@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -139,6 +140,15 @@ public class StationComposite extends PatrolItemComposite{
 	@Override
 	public String getTitle() {
 		return "Patrol Station";
+	}
+	
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getAttribute()
+	 */
+	@Override
+	public int getAttribute() {
+		return PatrolEventManager.PATROL_STATION;
 	}
 }
 

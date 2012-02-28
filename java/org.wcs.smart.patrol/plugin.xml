@@ -89,6 +89,45 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.resetSeparator">
+         <command
+               commandId="org.wcs.smart.patrol.PatrolPerspective"
+               icon="images/icons/ctool16/patrol.png"
+               label="Show Patrol Perspective"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.logout">
+         <command
+               commandId="org.eclipse.ui.file.save"
+               style="push">
+         </command>
+         <separator
+               name="org.wcs.smart.patrol.separator2"
+               visible="true">
+         </separator>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.patrol.patrolToolbar">
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.newPatrol"
+                  icon="images/icons/ctool16/patrol_add.png"
+                  label="Create New Patrol"
+                  style="push">
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -193,7 +232,7 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="false"
-            class="org.wcs.smart.patrol.ui.PatrolListView"
+            class="org.wcs.smart.patrol.internal.ui.views.PatrolListView"
             icon="images/icons/ctool16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
             name="Patrol List View"
@@ -203,40 +242,58 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="org.wcs.smart.patrol.ui.PatrolPerspective"
+            class="org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective"
             id="org.wcs.smart.patrol.PatrolPerspective"
             name="Patrol Perspective">
       </perspective>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.main.toolbar">
-         <toolbar
-               id="toolbar:org.eclipse.ui.main.toolbar">
-            <command
-                  commandId="org.wcs.smart.patrol.PatrolPerspective"
-                  icon="images/icons/ctool16/patrol.png"
-                  label="Show Patrol Perspective"
-                  style="push">
-            </command>
-         </toolbar>
-      </menuContribution>
-   </extension>
-   <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.patrol.ui.PatrolEditor"
+            class="org.wcs.smart.patrol.internal.ui.editor.PatrolEditor"
             icon="images/icons/ctool16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolEditor"
             name="Patrol Editor">
       </editor>
       <editor
-            class="org.wcs.smart.patrol.ui.PatrolSummaryEditor"
+            class="org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor"
             id="org.wcs.smart.patrol.ui.PatrolSummaryEditor"
             name="Patrol Summary Editor">
       </editor>
+      <editor
+            class="org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditor"
+            id="org.wcs.smart.patrol.ui.PatrolDayEditor"
+            name="Patrol Day Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.viewActions">
+      <viewContribution
+            id="org.wcs.smart.patrol.ui.PatrolListView"
+            targetID="org.wcs.smart.patrol.ui.PatrolListView">
+         <action
+               class="org.wcs.smart.patrol.internal.ui.views.FilterPatrolsAction"
+               icon="images/icons/ctool16/filter.png"
+               id="org.wcs.smart.patrol.filterpatrols"
+               label="Patrol Filter"
+               style="push"
+               toolbarPath="filtertools"
+               tooltip="Filter patrols">
+         </action>
+      </viewContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            id="org.wcs.smart.patrol.editorContribution2"
+            targetID="org.wcs.smart.patrol.editorContribution2">
+         <action
+               class="org.wcs.smart.patrol.EditorActionDelegate2"
+               id="org.eclipse.ui.file.save"
+               label="Save"
+               style="push">
+         </action>
+      </editorContribution>
    </extension>
 
 </plugin>

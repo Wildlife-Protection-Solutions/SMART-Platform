@@ -22,9 +22,14 @@
 package org.wcs.smart.patrol.model;
 
 import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,6 +40,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -62,7 +68,15 @@ public class PatrolLegDay {
 	private Time startTime;
 	private Time endTime;
 	
-	private Track track;
+	private Integer restMinutes;
+	
+	
+	/* this list should only ever contain a single track
+	 * It was implemented this way to get around hibernate bug
+	 * with one to one relationships
+	 */
+	private List<Track> tracks; 
+	
 	@Id
 	@GeneratedValue(generator="uuid")
 	@GenericGenerator(name= "uuid", strategy="uuid2")
@@ -81,7 +95,16 @@ public class PatrolLegDay {
 		this.date = date;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY)
+	@Column(name="rest_minutes")
+	public Integer getRestMinutes(){
+		return this.restMinutes;
+	}
+	public void setRestMinutes(Integer restMinutes){
+		this.restMinutes = restMinutes;
+	}
+	
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<Waypoint> getWaypoints(){
 		return this.waypoints;
 	}
@@ -89,8 +112,8 @@ public class PatrolLegDay {
 		this.waypoints = waypoints;
 	}
 
-	@ManyToOne
-	@JoinColumn(name="patrol_leg_uuid", referencedColumnName="uuid")
+	@ManyToOne()
+	@JoinColumn(name="patrol_leg_uuid")
 	public PatrolLeg getPatrolLeg(){
 		return this.patrolLeg;
 	}
@@ -114,12 +137,79 @@ public class PatrolLegDay {
 		this.endTime = endTime;
 	}
 	
-	@OneToOne
-	@JoinColumn(name="uuid", referencedColumnName = "patrol_leg_day_uuid")
+	@Transient
 	public Track getTrack(){
-		return this.track;
+		if (this.tracks != null && this.tracks.size() > 0){
+			return this.tracks.get(0);
+		}
+		return null;
 	}
-	public void setTrack(Track track){
-		this.track = track;
+	public void setTrack(Track t){
+		if (this.tracks == null){
+			this.tracks = new ArrayList<Track>();
+		}
+		if (this.tracks.size() == 1){
+			this.tracks.get(0).setPatrolLegDay(null);
+			this.tracks.remove(0);
+		}
+		this.tracks.add(t);
+	}
+	
+	@Transient
+	public double getLengthSeconds(){
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(startTime);
+		long start = cal.get(Calendar.HOUR_OF_DAY) * 60 *60 + cal.get(Calendar.MINUTE) * 60 + cal.get(Calendar.SECOND);   
+		cal.setTime(endTime);
+		long end = cal.get(Calendar.HOUR_OF_DAY) * 60 *60 + cal.get(Calendar.MINUTE) * 60 + cal.get(Calendar.SECOND);
+		
+		return end - start;
+	}
+	
+	@Transient
+	public double getHoursWorked(){
+		if (startTime == null || endTime == null){
+			return 0;
+		}
+		
+		double time = getLengthSeconds();
+		if (restMinutes != null){
+			time = time - restMinutes * 60;
+		}
+		
+		time = time / (60*60);
+		return time;
+	}
+	
+	//workaround for https://hibernate.onjira.com/browse/HHH-5267
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay", orphanRemoval = true, cascade={CascadeType.ALL})
+	public List<Track> getTracks(){
+		return this.tracks;
+	}
+	public void setTracks(List<Track> tracks){
+		this.tracks = tracks;
+	}
+	
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof PatrolLegDay){
+			PatrolLegDay s = (PatrolLegDay)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return s.hashCode() == hashCode();
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
 	}
 }

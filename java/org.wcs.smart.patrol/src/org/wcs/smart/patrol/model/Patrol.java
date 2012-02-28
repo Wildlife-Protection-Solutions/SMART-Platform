@@ -21,10 +21,17 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -37,9 +44,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.print.attribute.standard.MediaSize.Other;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OrderBy;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SimpleList;
 import org.wcs.smart.ca.Station;
 
 /**
@@ -186,14 +197,15 @@ public class Patrol {
 		this.endDate = endDate;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="patrol_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrol", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OrderBy(clause="start_date")
 	public List<PatrolLeg> getLegs(){
 		return this.legs;
 	}
 	public void setLegs(List<PatrolLeg> legs){
 		this.legs = legs;
 	}
+	
 	
 	/**
 	 * Gets the first leg associated with the patrol.  If
@@ -224,7 +236,7 @@ public class Patrol {
 		}
 		
 		PatrolLeg pl = new PatrolLeg();
-		pl.setId(this.legs.size());
+		pl.setId((this.legs.size() + 1) + "");
 		pl.setPatrol(this);
 		pl.setStartDate(getStartDate());
 		pl.setEndDate(getEndDate());
@@ -250,9 +262,40 @@ public class Patrol {
 	 * for the patrol.
 	 */
 	@Transient
-	public void createLegDays(){
+	public Collection<PatrolLegDay> createLegDays(){
 		for (PatrolLeg leg : getLegs()){
 			leg.createLegDays();
 		}
+		return null;
 	}
+	
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Patrol){
+			Patrol s = (Patrol)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return s.hashCode() == hashCode();
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
+	
+	@Transient
+	public String getPatrolDatastorePath(){
+		return "Patrol" + File.separator + id + "_" + SmartPlugIn.getDirectoryPath(uuid);
+		
+	}
+	
 }

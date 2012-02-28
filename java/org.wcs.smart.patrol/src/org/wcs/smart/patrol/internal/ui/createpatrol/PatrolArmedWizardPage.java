@@ -51,7 +51,7 @@ public class PatrolArmedWizardPage extends NewPatrolWizardPage {
 	public void createControl(Composite parent) {
 		compArmed = new ArmedComposite();
 		
-		setMessage("Identifier whether the patrol was armed or not armed.");
+		setMessage("Identify whether the patrol was armed or not armed.");
 		super.setControl(compArmed.createComponent(parent, SWT.NONE));
 		
 

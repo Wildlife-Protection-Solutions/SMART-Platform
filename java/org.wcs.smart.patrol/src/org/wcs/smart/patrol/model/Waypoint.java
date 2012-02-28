@@ -21,18 +21,25 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
@@ -50,13 +57,20 @@ public class Waypoint {
 	private int id;
 	private double x;
 	private double y;
-	private Date time;
-	private float direction;
-	private float distance;
+	private Time time;
+	private Float direction;
+	private Float distance;
 	private String comment;
 	
 	private List<WaypointAttachment> attachments;
 	private List<WaypointObservation> observations;
+	
+	/*
+	 * transient temporary field to hold
+	 * imported date if waypoint imported from
+	 * other sources
+	 */
+	private Date importedDate;
 	
 	public Waypoint(){
 		
@@ -73,6 +87,7 @@ public class Waypoint {
 	}
 	
 	@ManyToOne
+	@JoinColumn(name="leg_day_uuid")
 	public PatrolLegDay getPatrolLegDay() {
 		return patrolLegDay;
 	}
@@ -108,30 +123,30 @@ public class Waypoint {
 		this.y = y;
 	}
 
-	@Column(name="datetime")
-	public Date getTime() {
+	@Column(name="time")
+	public Time getTime() {
 		return time;
 	}
 
-	public void setTime(Date time) {
+	public void setTime(Time time) {
 		this.time = time;
 	}
 
 	@Column(name="direction")
-	public float getDirection() {
+	public Float getDirection() {
 		return direction;
 	}
 
-	public void setDirection(float direction) {
+	public void setDirection(Float direction) {
 		this.direction = direction;
 	}
 
 	@Column(name="distance")
-	public float getDistance() {
+	public Float getDistance() {
 		return distance;
 	}
 
-	public void setDistance(float distance) {
+	public void setDistance(Float distance) {
 		this.distance = distance;
 	}
 
@@ -144,7 +159,7 @@ public class Waypoint {
 		this.comment = comment;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="waypoint", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<WaypointAttachment> getAttachments() {
 		return attachments;
 	}
@@ -153,11 +168,79 @@ public class Waypoint {
 		this.attachments = attachments;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="waypoint", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<WaypointObservation> getObservations(){
 		return this.observations;
 	}
 	public void setObservations(List<WaypointObservation> observations){
 		this.observations = observations;
+	}
+	
+	@Transient
+	public Date getImportedDate(){
+		return this.importedDate;
+	}
+	public void setImportedDate(Date importedDate){
+		this.importedDate = importedDate;
+	}
+	
+	
+	public Waypoint clone(){
+		
+		Waypoint wp = new Waypoint();
+		
+		
+		if (this.attachments != null){
+			//TODO: this may be a problem
+			wp.setAttachments(new ArrayList<WaypointAttachment>());
+		}
+		
+		wp.setComment(this.comment);
+		wp.setDirection(this.direction);
+		wp.setDistance(this.distance);
+		wp.setId(this.id);
+		if (this.importedDate != null){
+			wp.setImportedDate((Date)this.importedDate.clone());
+		}
+		
+		wp.setPatrolLegDay(this.patrolLegDay);
+		wp.setTime( (Time)this.time.clone());
+		wp.setX(this.x);
+		wp.setY(this.y);
+		
+		if (this.observations != null && this.observations.size() > 0){
+			wp.setObservations(new ArrayList<WaypointObservation>());
+			for (WaypointObservation wobp : this.observations){
+				
+				WaypointObservation cloned = wobp.clone();
+				cloned.setUuid(null);
+				cloned.setWaypoint(wp);
+				wp.getObservations().add(cloned);
+			}
+		}
+		
+		return wp;
+	}
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Waypoint){
+			Waypoint s = (Waypoint)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return s.hashCode() == hashCode();
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
 	}
 }

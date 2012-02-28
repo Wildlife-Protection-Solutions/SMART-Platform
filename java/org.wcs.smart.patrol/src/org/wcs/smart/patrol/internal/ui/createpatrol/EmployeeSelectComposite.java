@@ -208,7 +208,7 @@ public class EmployeeSelectComposite extends Composite{
 	 * selected employees changes
 	 * 
 	 */
-	interface IListChanged{
+	public interface IListChanged{
 		/**
 		 * Fired when the list of selected employees is changes
 		 * @param newEmployees the new list of selected employees

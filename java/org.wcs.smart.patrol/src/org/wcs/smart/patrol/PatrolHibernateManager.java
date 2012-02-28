@@ -56,8 +56,7 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  */
 public class PatrolHibernateManager extends HibernateManager{
 	
-	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000");
-	private static NumberFormat PATROL_ID_DATE_FIELD_FORMATTER = new DecimalFormat("00");
+	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000000");
 	
 	/**
 	 * Gets all teams (active and in-active) for a given conservation area
@@ -331,44 +330,46 @@ public class PatrolHibernateManager extends HibernateManager{
 				String id = PatrolHibernateManager.generatePatrolId(p, s);
 				p.setId(id);
 			}
-			
-			if (objectsToDelete != null){
-				for (Object toDelete :objectsToDelete){
-					s.delete(toDelete);
-				}
-			}
+//			
+//			if (objectsToDelete != null){
+//				for (Object toDelete :objectsToDelete){
+//					s.delete(toDelete);
+//				}
+//			}
 			s.saveOrUpdate(p);
-			for (PatrolLeg leg: p.getLegs()){
-				s.saveOrUpdate(leg);
-				for (PatrolLegDay day : leg.getPatrolLegDays()){
-					s.saveOrUpdate(day);
-					if (day.getWaypoints() != null){
-						for (Waypoint wpt : day.getWaypoints()){
-							s.saveOrUpdate(wpt);
-						
-							if (wpt.getAttachments() != null){
-								for (WaypointAttachment attachment: wpt.getAttachments()){
-									s.saveOrUpdate(attachment);
-								}
-							}
-							if (wpt.getObservations() != null){
-								for (WaypointObservation observation : wpt.getObservations()){
-									s.saveOrUpdate(observation);
-									if (observation.getAttributes() != null){
-										for(WaypointObservationAttribute att : observation.getAttributes()){
-											s.saveOrUpdate(att);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				
-				for (PatrolLegMember member : leg.getMembers()){
-					s.saveOrUpdate(member);
-				}
-			}
+//			for (PatrolLeg leg: p.getLegs()){
+//				s.saveOrUpdate(leg);
+//				for (PatrolLegDay day : leg.getPatrolLegDays()){
+//					//s.merge(day);
+//					//s.refresh(day);
+//					s.saveOrUpdate(day);
+//					if (day.getWaypoints() != null){
+//						for (Waypoint wpt : day.getWaypoints()){
+//							s.saveOrUpdate(wpt);
+//						
+//							if (wpt.getAttachments() != null){
+//								for (WaypointAttachment attachment: wpt.getAttachments()){
+//									s.saveOrUpdate(attachment);
+//								}
+//							}
+//							if (wpt.getObservations() != null){
+//								for (WaypointObservation observation : wpt.getObservations()){
+//									s.saveOrUpdate(observation);
+//									if (observation.getAttributes() != null){
+//										for(WaypointObservationAttribute att : observation.getAttributes()){
+//											s.saveOrUpdate(att);
+//										}
+//									}
+//								}
+//							}
+//						}
+//					}
+//				}
+//				
+//				for (PatrolLegMember member : leg.getMembers()){
+//					s.saveOrUpdate(member);
+//				}
+//			}
 			s.getTransaction().commit();
 			return true;
 		}catch (Exception ex){
@@ -389,19 +390,19 @@ public class PatrolHibernateManager extends HibernateManager{
 	public static String generatePatrolId(Patrol p, Session s){
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
-		sb.append("_");
-		Calendar cal = SmartPlugIn.convertDate(p.getStartDate());
-		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.YEAR)));
-		sb.append("_");
-		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.MONTH)+1));
-		sb.append("_");
-		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.DAY_OF_MONTH)));
+//		sb.append("_");
+//		Calendar cal = SmartPlugIn.convertDate(p.getStartDate());
+//		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.YEAR)));
+//		sb.append("_");
+//		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.MONTH)+1));
+//		sb.append("_");
+//		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.DAY_OF_MONTH)));
 
 		Criteria c = s.createCriteria(Patrol.class).add(Restrictions.like("id", sb.toString() + "%")).setProjection(Projections.rowCount());
 			
 		long cnt = (Long) c.list().get(0);
 		cnt++;
-		cnt = cnt % 999;
+		cnt = cnt % 999999;
 
 		sb.append("_");
 		sb.append(PATROL_ID_FORMATTER.format(cnt));

@@ -36,8 +36,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 
 /**
@@ -46,7 +47,7 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolTransportComposite extends PatrolItemComposite{
+public class PatrolTransportComposite extends PatrolLegItemComposite{
 
 	private ComboViewer patrolTypeViewer = null;
 
@@ -94,16 +95,16 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
-	public void setValues(Patrol p, Session session) {
-		List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(p.getConservationArea(), session, p.getPatrolType());
+	public void setValues(PatrolLeg patrolLeg, Session session) {
+		List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(patrolLeg.getPatrol().getConservationArea(), session, patrolLeg.getPatrol().getPatrolType());
 		
 		patrolTypeViewer.setInput(types.toArray());
 		if (types.size() > 0){
 			patrolTypeViewer.setSelection(new StructuredSelection(types.get(0)));
 		}
 
-		if (p.getFirstLeg().getType() != null){
-			patrolTypeViewer.setSelection(new StructuredSelection(p.getFirstLeg().getType()));	
+		if (patrolLeg.getType() != null){
+			patrolTypeViewer.setSelection(new StructuredSelection(patrolLeg.getType()));	
 		}
 
 	}
@@ -111,10 +112,10 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(Patrol p) {
+	public void updatePatrol(PatrolLeg patrolLeg) {
 		PatrolTransportType pm = (PatrolTransportType) ((IStructuredSelection)patrolTypeViewer.getSelection()).getFirstElement();
 		if (pm != null){
-			p.getFirstLeg().setType(pm);
+			patrolLeg.setType(pm);
 		}else{
 			throw new IllegalStateException("Cannot have null transport type.");
 		}
@@ -129,4 +130,13 @@ public class PatrolTransportComposite extends PatrolItemComposite{
 	public String getTitle() {
 		return "Patrol Transportation Type";
 	}
+	
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getAttribute()
+	 */
+	@Override
+	public int getAttribute() {
+		return PatrolEventManager.PATROL_DATES_LEG;
+	}	
 }

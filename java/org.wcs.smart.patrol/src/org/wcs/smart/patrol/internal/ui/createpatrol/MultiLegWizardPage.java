@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -75,19 +78,30 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		btnNo.setText("No");
 		btnNo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnNo.setSelection(true);
-		
+		btnNo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				((CreatePatrolWizard)getWizard()).setCanFinish(true);
+				
+			}
+		});
 		btnYes = new Button(buttonPanel, SWT.RADIO);
-		btnYes.setText("Yes (not yet implemented)");
+		btnYes.setText("Yes");
 		btnYes.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnYes.setSelection(false);
-		btnYes.setEnabled(false);
+		btnYes.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				((CreatePatrolWizard)getWizard()).setCanFinish(false);
+			}
+		});
 		
 		lbl = new Label(center, SWT.WRAP);
 		lbl.setText("A multiple leg patrol is identified by a change in patrol leader, or by a patrol splitting into multiple groups.");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		lbl.setLayoutData(gd);
 		
-		setMessage("Identifier whether the patrol was armed or not armed.");
+		setMessage("Identify whether the patrol was a multi-leg patrol.");
 		super.setControl(main);
 	}
    
@@ -101,9 +115,14 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
         	Patrol p = ((CreatePatrolWizard)getWizard()).getPatrol();
         	if (p.getLegs() != null && p.getLegs().size() == 1){
         		btnNo.setSelection(true);
+        		btnYes.setSelection(false);
         	}else{
         		btnYes.setSelection(true);
+        		btnNo.setSelection(false);
         	}
+        	setPageComplete(true);
+        	((CreatePatrolWizard)getWizard()).setCanFinish(btnNo.getSelection());
+        	
         }
     }
 	
@@ -113,6 +132,14 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 	@Override
 	void updateModel(Patrol p) {
 		
+	}
+	
+	@Override
+	public IWizardPage getNextPage(){
+		if (btnNo.getSelection()){
+			return null;
+		}
+		return getWizard().getPage(PatrolLegsWizardPage.PAGE_NAME);
 	}
 
 }

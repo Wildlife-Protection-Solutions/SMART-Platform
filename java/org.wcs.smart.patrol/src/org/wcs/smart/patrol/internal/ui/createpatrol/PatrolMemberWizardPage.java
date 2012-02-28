@@ -44,10 +44,8 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
  * @since 1.0.0
  */
 public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
-
 	
 	private EmployeeSelectComposite members;
-
 	private List<Employee> allEmployees = null;
 
 	/**

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.wcs.smart.patrol.model.Patrol;
+
 /**
  * Event manager for managing patrol events.
  * 
@@ -29,6 +31,45 @@ public class PatrolEventManager {
 	}
 	
 	/**
+	 * Patrol station attribute
+	 */
+	public static int PATROL_STATION = 1;
+	/**
+	 * Patrol team attribute
+	 */
+	public static int PATROL_TEAM = 2;
+	/**
+	 * Patrol objective attribute
+	 */
+	public static int PATROL_OBJECTIVE = 3;
+	/**
+	 * Patrol leg changed; this includes changes to transportation type,
+	 * employees, or dates
+	 */
+	public static int PATROL_DATES_LEG = 4;
+	
+	/**
+	 * Patrol waypoints.   Fired when waypoints associated with any leg
+	 * is modified.
+	 */
+	public static int PATROL_WAYPOINTS = 5;
+	
+	/**
+	 * Patrol tracks.  Fired whe track associated with any leg
+	 * is modified.
+	 */
+	public static int PATROL_TRACKS = 6;
+	
+	/**
+	 * Patrol armed attribute
+	 */
+	public static int PATROL_ARMED = 7;
+	/**
+	 * Patrol mandate object
+	 */
+	public static int PATROL_MANDATE = 7;
+	
+	/**
 	 * 
 	 * @return the patrol event manager instance
 	 */
@@ -39,28 +80,28 @@ public class PatrolEventManager {
 	/**
 	 * Fires a patrol added event
 	 */
-	public void patrolAdded(){
-		fireListeners(EventType.PATROL_ADDED);
+	public void patrolAdded(Patrol patrol){
+		fireListeners(EventType.PATROL_ADDED, -1, patrol);
 	}
 	
 	/**
 	 * Fires a patrol deleted event
 	 */
-	public void patrolDeleted(){
-		fireListeners(EventType.PATROL_DELETED);
+	public void patrolDeleted(Patrol patrol){
+		fireListeners(EventType.PATROL_DELETED, -1, patrol);
 	}
 	
 	/**
 	 * Fires a patrol changed event
 	 */
-	public void patrolChanged(){
-		fireListeners(EventType.PATROL_MODIFIED);
+	public void patrolChanged(int attributeChanged, Object source){
+		fireListeners(EventType.PATROL_MODIFIED, attributeChanged, source);
 	}
 	
-	private void fireListeners(EventType type){
+	private void fireListeners(EventType type, int attributeChange, Object source){
 		if (listeners.get(type) != null){
 			for (IPatrolEventListener listener : listeners.get(type)){
-				listener.eventFired();
+				listener.eventFired(attributeChange, source);
 			}
 		}
 	}
@@ -79,11 +120,30 @@ public class PatrolEventManager {
 	}
 	
 	/**
+	 * Removes a patrol listener for a particular patrol event
+	 * 
+	 * @param type patrol event type
+	 * @param listener listener
+	 */
+	public void removeListener(EventType type, IPatrolEventListener listener){
+		List<IPatrolEventListener> lists = listeners.get(type);
+		if (lists != null){
+			lists.remove(listener);
+		}
+	}
+	
+	/**
 	 * Patrol event listener.  This listener
 	 * is used for all patrol events.
 	 *
 	 */
 	public interface IPatrolEventListener{
-		public void eventFired();
+		/**
+		 * attributeChanged - is the type of attribute modified
+		 * 
+		 * @param attributeChanged  -1 if patrol added or removed
+		 * @param source
+		 */
+		public void eventFired(int attributeChanged, Object source);
 	}
 }

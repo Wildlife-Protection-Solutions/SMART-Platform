@@ -21,12 +21,20 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -38,9 +46,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+
+import ucar.nc2.constants.CF;
 
 /**
  * Patrol Leg object
@@ -57,7 +69,7 @@ public class PatrolLeg {
 	private Date startDate;
 	private Date endDate;
 	private PatrolTransportType type;
-	private int id;
+	private String id;
 
 	private List<PatrolLegMember> members;
 	private List<PatrolLegDay> days;
@@ -106,14 +118,14 @@ public class PatrolLeg {
 	}
 	
 	@Column(name="id")
-	public int getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY,mappedBy="id.patrolLeg")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.patrolLeg", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<PatrolLegMember> getMembers(){
 		return this.members;
 	}
@@ -121,8 +133,8 @@ public class PatrolLeg {
 		this.members = members;
 	}
 	
-	@OneToMany(fetch= FetchType.LAZY)
-	@JoinColumn(name="patrol_leg_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch= FetchType.LAZY, mappedBy="patrolLeg", orphanRemoval=true, cascade={CascadeType.ALL})
+	@OrderBy(clause = "patrol_day")
 	public List<PatrolLegDay> getPatrolLegDays(){
 		return this.days;
 	}
@@ -199,6 +211,26 @@ public class PatrolLeg {
 		plm.setIsPilot(true);
 	}
 	
+	
+	private Time createPatrolTime(int hours, int minute, int second){
+		Calendar cForProcessing = GregorianCalendar.getInstance();
+		cForProcessing.setTimeInMillis(0);
+		
+		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
+		cForProcessing.set(Calendar.MINUTE, minute);
+		cForProcessing.set(Calendar.SECOND, second);
+		cForProcessing.set(Calendar.MILLISECOND, 0);
+		
+		return new Time(cForProcessing.getTime().getTime());
+	}
+	
+	
+	private Time convertDateToTime(Date d){
+		Calendar c = GregorianCalendar.getInstance();
+		c.setTime(d);		
+		return createPatrolTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
+		
+	}
 	/**
 	 * Creates leg days for the given leg.
 	 * <p>Will remove any existing leg days
@@ -210,30 +242,130 @@ public class PatrolLeg {
 		if (this.days == null){
 			this.days = new ArrayList<PatrolLegDay>();
 		}
-		this.days.clear();
 		
-		
-		GregorianCalendar calStart = SmartPlugIn.convertDate(getStartDate());
-		GregorianCalendar calEnd= SmartPlugIn.convertDate(getEndDate());
-		
-		PatrolLegDay pld = new PatrolLegDay();
-		pld.setPatrolLeg(this);
-		pld.setDate( calStart.getTime() );
-		
-		this.days.add(pld);
-		calStart.add(Calendar.DAY_OF_MONTH, 1);
-		
-		calStart = new GregorianCalendar(calStart.get(Calendar.YEAR), calStart.get(Calendar.MONTH), calStart.get(Calendar.DAY_OF_MONTH));
-		while (calStart.before(calEnd)){
-			pld = new PatrolLegDay();
-			pld.setDate( new GregorianCalendar(calStart.get(Calendar.YEAR), calStart.get(Calendar.MONTH), calStart.get(Calendar.DAY_OF_MONTH)).getTime() );
-			pld.setPatrolLeg(this);
-			this.days.add(pld);
-			calStart.add(Calendar.DAY_OF_MONTH, 1);
+		//lets make a hash set of existing leg days; we try to re-use these so associated data is not lost
+		HashMap<Date, PatrolLegDay> current = new HashMap<Date, PatrolLegDay>();
+		for (PatrolLegDay day : this.days){
+			current.put(SmartPlugIn.getDatePart(day.getDate(), false), day);
 		}
 		
-		//set the last patrol leg day to the end date
-		pld.setDate(calEnd.getTime());
+		//determine start & end dates
+		GregorianCalendar calStart = SmartPlugIn.convertDate( SmartPlugIn.getDatePart(getStartDate(), false) );
+		GregorianCalendar calEnd= SmartPlugIn.convertDate( SmartPlugIn.getDatePart(getEndDate(), false) );
 		
+		//---- the first patrol leg day
+		
+		PatrolLegDay previousDay;
+		PatrolLegDay existing = current.remove(SmartPlugIn.getDatePart(calStart.getTime(), false));
+		if (existing != null){
+			//update the start time
+			previousDay = existing;
+			if (existing.getStartTime() == null){
+				existing.setStartTime(createPatrolTime(0, 0, 0));
+			}
+			if (existing.getEndTime() == null){
+				existing.setEndTime(createPatrolTime(23, 59, 59));
+			}
+		}else{
+			previousDay = new PatrolLegDay();
+			previousDay.setPatrolLeg(this);
+			previousDay.setDate( calStart.getTime() );
+			previousDay.setStartTime(convertDateToTime(calStart.getTime()));
+			previousDay.setEndTime(createPatrolTime(23, 59, 59));
+			this.days.add(previousDay);
+		}
+		
+		// -- the remaining days
+		calStart.add(Calendar.DAY_OF_MONTH, 1);		
+		while (calStart.before(calEnd) || calStart.equals(calEnd) ){
+			existing = current.remove(SmartPlugIn.getDatePart(calStart.getTime(), false));
+			if (existing != null){
+				previousDay = existing;
+				if (existing.getStartTime() == null){
+					existing.setStartTime(createPatrolTime(0, 0, 0));
+				}
+				if (existing.getEndTime() == null){
+					existing.setEndTime(createPatrolTime(23, 59, 59));
+				}
+			}else{
+				previousDay = new PatrolLegDay();
+				previousDay.setDate( SmartPlugIn.getDatePart(calStart.getTime(), false) );
+				previousDay.setStartTime(createPatrolTime(0, 0, 0));
+				previousDay.setEndTime(createPatrolTime(23, 59, 59));
+				previousDay.setPatrolLeg(this);
+				this.days.add(previousDay);
+				
+			}
+			calStart.add(Calendar.DAY_OF_MONTH, 1);
+		}
+	
+		//remove old legs that weren't used
+		for (PatrolLegDay day : current.values()){
+			day.setPatrolLeg(null);
+			this.days.remove(day);
+		}
+		
+		//update the end time of the last day
+		this.days.get(0).setStartTime(convertDateToTime(getStartDate()));
+		this.days.get(this.days.size() - 1).setEndTime(convertDateToTime(getEndDate()));
+
+		//if there is only one leg day we are done.
+		//otherwise if check the first and last patrol days; if they are < 1 second in length than remove the leg day
+		if (this.days.size() > 1){
+			PatrolLegDay firstDay = this.days.get(0);
+			if (firstDay.getLengthSeconds() <= 1){
+				//remove this day
+				firstDay.setPatrolLeg(null);
+				this.days.remove(firstDay);
+				this.days.get(0).setStartTime(createPatrolTime(0, 0, 0));
+				setStartDate( SmartPlugIn.getDatePart(this.days.get(0).getDate(), false) );
+			}
+		}
+		if (this.days.size() > 1){
+			PatrolLegDay lastDay = this.days.get(this.days.size() - 1);
+			if (lastDay.getLengthSeconds() <= 1){
+				//remove this day
+				lastDay.setPatrolLeg(null);
+				this.days.remove(lastDay);
+				this.days.get(this.days.size() - 1).setEndTime(createPatrolTime(23, 59, 59));
+				setEndDate( SmartPlugIn.getDatePart(this.days.get(this.days.size() - 1).getDate(), true) );
+				
+			}
+		}
+		
+
+		//sort 
+		Collections.sort(this.days, new Comparator<PatrolLegDay>() {
+			@Override
+			public int compare(PatrolLegDay o1, PatrolLegDay o2) {
+				return o1.getDate().compareTo(o2.getDate());
+			}
+		});
 	}
+	
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof PatrolLeg){
+			PatrolLeg s = (PatrolLeg)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return s.hashCode() == hashCode();
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
+	
+	
+	
 }
