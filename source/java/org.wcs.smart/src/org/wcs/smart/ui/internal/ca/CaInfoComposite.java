@@ -135,7 +135,7 @@ public class CaInfoComposite extends Composite {
 		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
 		data.horizontalIndent = indent;
 		txtDesignation.setLayoutData(data);
-		new Label(this, SWT.NONE);
+		
 		txtDesignation.setTextLimit(ConservationArea.MAX_DESIGNATION_LENGTH);
 		txtDesignation.addKeyListener(changeListener);
 		

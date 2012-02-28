@@ -34,6 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.OrderBy;
@@ -71,6 +72,7 @@ public class AttributeTreeNode extends DmObject {
 	@Cascade({CascadeType.SAVE_UPDATE})
 	@JoinColumn(name="parent_uuid")
 	@OrderBy(clause = "node_order")
+	@BatchSize(size=100)
 	public List<AttributeTreeNode> getChildren(){
 		return this.children;
 	}

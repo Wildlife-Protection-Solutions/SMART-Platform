@@ -22,6 +22,8 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +34,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
@@ -128,6 +131,26 @@ public class Category extends DmObject{
 	public List<Category> getChildren(){
 		return this.children;
 	}
+	
+	/**
+	 * Gets children that are active or inactive  
+	 * @param active <code>true</code> for active only children, <code>false</code> for in-active only children
+	 * @return list of only active or inactive children
+	 */
+	@Transient 
+	public List<Category> getChildren(boolean active){
+		List<Category> tmp = new ArrayList<Category>();
+		if (getChildren() != null){
+			for (Iterator<Category> iterator = getChildren().iterator(); iterator.hasNext();) {
+				Category category = (Category) iterator.next();
+				if (category.getIsActive() == active){
+					tmp.add(category);
+				}
+			}
+		}
+		return tmp;
+	}
+	
 	/**
 	 * 
 	 * @param children children categories
@@ -163,6 +186,26 @@ public class Category extends DmObject{
 	public List<CategoryAttribute> getAttributes(){
 		return this.attributes;
 	}
+	
+	/**
+	 * Gets attributes that are active or inactive  
+	 * @param active <code>true</code> for active only attributes, <code>false</code> for in-active only attributes
+	 * @return list of only active or inactive attributes
+	 */
+	@Transient 
+	public List<CategoryAttribute> getAttributes(boolean active){
+		List<CategoryAttribute> tmp = new ArrayList<CategoryAttribute>();
+		if (getAttributes() != null){
+			for (Iterator<CategoryAttribute> iterator = getAttributes().iterator(); iterator.hasNext();) {
+				CategoryAttribute category = (CategoryAttribute) iterator.next();
+				if (category.getIsActive() == active){
+					tmp.add(category);
+				}
+			}
+		}
+		return tmp;
+	}
+	
 	/**
 	 * 
 	 * @param attributes list of attribute associated directory 
@@ -235,5 +278,76 @@ public class Category extends DmObject{
 		//clone language labels
 		
 		return clone;
+	}
+	
+	/**
+	 * 
+	 * @return the category name concatenated with
+	 * all parent category names.
+	 */
+	@Transient
+	public String getFullCategoryName(){
+		if (parent == null){
+			return getName();
+		}else{
+			return getName() + " - " + parent.getFullCategoryName();
+		}
+	}
+	
+	/**
+	 * finds all attributes, first looking at parent attributes
+	 * and working way down to the children
+	 * 
+	 * @param attributes list to populate
+	 */
+	@Transient
+	public void getAllAttribute(List<Attribute> attributes){
+		if (getParent() != null){
+			getParent().getAllAttribute(attributes);
+			
+		}
+		if (getAttributes() != null){
+			for (CategoryAttribute cat : getAttributes(true)){
+				attributes.add(cat.getAttribute());
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @return <code>true</code> if this category or any of it's parents have attributes; <code>false</code> otherwise
+	 */
+	@Transient
+	public boolean hasAttributes(){
+		if (getAttributes() != null && getAttributes().size() > 0){
+			return true;
+		}else if (parent == null){
+			return false;
+		}else{
+			return parent.hasAttributes();
+		}
+	}
+	
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Category){
+			Category s = (Category)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return super.equals(other);
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
 	}
 }

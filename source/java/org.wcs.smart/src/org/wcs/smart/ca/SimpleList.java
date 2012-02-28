@@ -169,7 +169,7 @@ public class SimpleList {
 		if (other != null && other instanceof SimpleList){
 			SimpleList s = (SimpleList)other;
 			if (s.getUuid() == null && this.getUuid() == null){
-				return true;
+				return s.hashCode() == hashCode();
 			}else if (s.getUuid() != null && this.getUuid() != null){
 				return Arrays.equals(s.getUuid(), this.getUuid());
 			}
@@ -177,6 +177,9 @@ public class SimpleList {
 		return false;
 	}
 	public int hashCode(){
-		return Arrays.hashCode(uuid);
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}
+		return super.hashCode();
 	}
 }

@@ -48,32 +48,28 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.dialect.ProgressDialect;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.ui.internal.ca.CategoryDialogPage;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DataModelContentProvider;
+import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import swing2swt.layout.FlowLayout;
 
 /**
  * Property page for modifying data model
@@ -98,8 +94,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 
 	private Button btnModifyElement;
 	
-	public static Color gray = null;
-	public static Color black = null;
 	
 	private DataModel dataModel = null;
 	
@@ -126,10 +120,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	@Override
 	public boolean  close(){
 		boolean canClose = super.close();
-		if (canClose){
-			gray.dispose();
-			black.dispose();
-		}
+
 		return canClose;
 	}
 	
@@ -139,9 +130,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		
-		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		
 		parent.setLayout(new GridLayout(1, false));		
 	
@@ -416,7 +404,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private void addCategory(){
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		List<Category> siblings = null;
-		if (o instanceof RootNode){
+		if (o instanceof DataModelContentProvider.RootNode){
 			siblings = ((DataModel) viewer.getInput()).getCategories();
 		}else if (o instanceof Category){
 			siblings = ((Category) o).getChildren();
@@ -436,7 +424,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			return;
 		}
 		
-		if (o instanceof RootNode){
+		if (o instanceof DataModelContentProvider.RootNode){
 			DataModel dm = (DataModel)viewer.getInput();
 			newCat.setParent(null);
 			newCat.setCategoryOrder(dm.getCategories().size());
@@ -584,7 +572,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			btnDisableElement.setEnabled(true);
 		}
-		if (o instanceof RootNode){
+		if (o instanceof DataModelContentProvider.RootNode){
 			btnAddCategory.setEnabled(true);
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 			btnAddAttribute.setEnabled(false);

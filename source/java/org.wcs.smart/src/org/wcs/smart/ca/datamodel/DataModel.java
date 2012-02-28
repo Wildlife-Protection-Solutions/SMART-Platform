@@ -24,6 +24,7 @@ package org.wcs.smart.ca.datamodel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -76,7 +77,6 @@ public class DataModel {
 	 */
 	public static List<Aggregation> getAggregations(){
 		if (aggregations == null){
-			System.out.println(Thread.currentThread().getId());
 			Session s = HibernateManager.openSession();
 			try{
 				s.beginTransaction();	
@@ -114,6 +114,23 @@ public class DataModel {
 	 */
 	public List<Category> getCategories(){
 		return this.categories;
+	}
+	
+	/**
+	 * 
+	 * @return list of only active categories
+	 */
+	public List<Category> getActiveCategories(){
+		ArrayList<Category> tmp = new ArrayList<Category>();
+		if (getCategories() != null){
+			for (Iterator<Category> iterator = getCategories().iterator(); iterator.hasNext();) {
+				Category cat = (Category) iterator.next();
+				if (cat.getIsActive()){
+					tmp.add(cat);
+				}
+			}
+		}
+		return tmp;
 	}
 	/**
 	 * Adds a category to the list of root categores.

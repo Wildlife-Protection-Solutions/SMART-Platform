@@ -19,14 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui.properties;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
@@ -34,6 +36,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ui.internal.ca.properties.DataModelPropertyPage;
 
 /**
  * Label provided for data model tree
@@ -72,6 +75,8 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	 */
 	private static final String DATA_MODEL_ICON= "org.wsc.smart.datamodel.DATAMODEL_ICON"; //$NON-NLS-1$
 	
+	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
 	
 	/**
@@ -125,6 +130,14 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	private Language currentLang = null;
 	
 	/**
+	 * Creates new data model provided.  In this case
+	 * the current system language is used.
+	 * 
+	 */
+	public DataModelLabelProvider(){
+	}
+	
+	/**
 	 * Creates new data model provided
 	 * @param lang the working language
 	 */
@@ -141,7 +154,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	
 	@Override
 	public String getText(Object element) {
-		if (element instanceof RootNode){
+		if (element instanceof DataModelContentProvider.RootNode){
 			return "Data Model";
 		}
 		if (element instanceof CategoryAttribute){
@@ -150,7 +163,11 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 		
 		if (element instanceof DmObject){
 			DmObject obj = (DmObject)element;
-			return obj.findName(currentLang);
+			if (currentLang != null){
+				return obj.findName(currentLang);
+			}else{
+				return obj.getName();
+			}
 		}
 		return "";
 	}
@@ -172,7 +189,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 			}else if (ca.getAttribute().getType()== Attribute.AttributeType.TREE){
 				return JFaceResources.getImageRegistry().get(ATTRIBUTE_TREE_ICON);
 			}
-		}else if (element instanceof RootNode){
+		}else if (element instanceof DataModelContentProvider.RootNode){
 			return JFaceResources.getImageRegistry().get(DATA_MODEL_ICON);
 		}
 		return null;
@@ -187,9 +204,9 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 			active = ((CategoryAttribute)element).getIsActive();
 		}
 		if (active){
-			return DataModelPropertyPage.black;
+			return BLACK;
 		}else{
-			return DataModelPropertyPage.gray;
+			return GRAY;
 		}
 	}
 	

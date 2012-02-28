@@ -64,6 +64,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
  * Dialog for managing conservation area

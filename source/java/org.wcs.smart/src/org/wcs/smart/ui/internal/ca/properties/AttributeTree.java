@@ -22,18 +22,14 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.util.LocalSelectionTransfer;
-import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
@@ -46,18 +42,22 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
+import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
+import org.wcs.smart.ui.properties.DataModelContentProvider;
+import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -71,6 +71,7 @@ public class AttributeTree {
 	
 	
 	private TreeViewer viewer = null;
+
 	
 	/**
 	 * Sets the attribute input to the attribute tree
@@ -103,8 +104,32 @@ public class AttributeTree {
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		comp.setLayout(new GridLayout(2, false));
 		
-		viewer = new TreeViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-		viewer.setContentProvider(new AttributeTreeContentProvider( new AttributeTree.RootNode()));
+		
+		
+		PatternFilter patternFilter = new PatternFilter(){			
+			protected boolean isChildMatch(Viewer viewer, Object element) {
+				Object parent = ((AttributeTreeContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
+				if (parent != null) {
+					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
+				}
+				return false;
+			}
+
+			@Override
+			protected boolean isLeafMatch(Viewer viewer, Object element) {
+				String labelText = ((AttributeTreeLabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
+				if (labelText == null) {
+					return false;
+				}
+				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
+			}
+			
+		};
+		FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true);
+		
+		//viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		viewer = fTree.getViewer();
+		viewer.setContentProvider(new AttributeTreeContentProvider( ));
 		viewer.setLabelProvider(new AttributeTreeLabelProvider(currentLanguage));
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		((GridData)viewer.getTree().getLayoutData()).heightHint = 80;
@@ -153,6 +178,45 @@ public class AttributeTree {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				disableItem(viewer, !btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT));
+				
+				if (btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
+					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				}else{
+					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				}
+			}
+		});
+		
+		Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		final Button btnDisableAll = new Button(buttonPanel, SWT.NONE);
+		btnDisableAll.setText(DialogConstants.DISABLE_BUTTON_TEXT + " All");
+		btnDisableAll.setToolTipText("Disable all categories.");
+		btnDisableAll.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Attribute att = (Attribute) viewer.getInput();
+				for (AttributeTreeNode node : att.getTree()){
+					disableNode(node, false);
+				}
+				viewer.refresh();
+			}
+		});
+		
+		
+		final Button btnEnableeAll = new Button(buttonPanel, SWT.NONE);
+		btnEnableeAll.setText(DialogConstants.ENABLE_BUTTON_TEXT + " All");
+		btnEnableeAll.setToolTipText("Enable all categories.");
+		btnEnableeAll.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Attribute att = (Attribute) viewer.getInput();
+				if (att.getTree() == null) return;
+				for (AttributeTreeNode node : att.getTree()){
+					enableAll(node);
+				}
+				viewer.refresh();
 			}
 		});
 		
@@ -160,7 +224,7 @@ public class AttributeTree {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-				if (x instanceof AttributeTree.RootNode){
+				if (x instanceof AttributeTreeContentProvider.RootNode){
 					btnEdit.setEnabled(false);
 					btnDisable.setEnabled(false);
 				}else if (x instanceof AttributeTreeNode){
@@ -180,18 +244,39 @@ public class AttributeTree {
 	}
 	
 	/*
+	 * Enables the attribute tree node and all its children
+	 */
+	private void enableAll(AttributeTreeNode node){
+		node.setIsActive(true);
+		if (node.getChildren() == null) return;
+		for (AttributeTreeNode child: node.getChildren()){
+			enableAll(child);
+		}
+		
+	}
+	/*
 	 * disable items in the tree
 	 */
 	private void disableItem(TreeViewer viewer, boolean enabled){
-		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-		if (x instanceof AttributeTreeNode){
-			disableNode((AttributeTreeNode)x, enabled);	
+		for (Iterator iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof AttributeTreeNode){
+				disableNode((AttributeTreeNode)x, enabled);	
+			}
+			
 		}
+		
+//		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+//		if (x instanceof AttributeTreeNode){
+//			disableNode((AttributeTreeNode)x, enabled);	
+//		}
 		refreshTree(viewer);
 	}
 	
 	/*
-	 * disables a tree node
+	 * disables or enables a tree node
+	 * 
+	 * @param enabled true if the node is to be activated; false to de-activate
 	 */
 	public void disableNode(AttributeTreeNode node, boolean enabled){
 		if (!enabled){
@@ -242,10 +327,10 @@ public class AttributeTree {
 	private void addItem(TreeViewer viewer, Language currentLanguage){
 		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		Attribute a = (Attribute)viewer.getInput();
-		if (x instanceof AttributeTree.RootNode || x instanceof AttributeTreeNode){
+		if (x instanceof AttributeTreeContentProvider.RootNode || x instanceof AttributeTreeNode){
 			List<? extends DmObject> siblings = null;
 			AttributeTreeNode parent = null;
-			if (x instanceof AttributeTree.RootNode){
+			if (x instanceof AttributeTreeContentProvider.RootNode){
 				siblings = a.getTree();
 			}else{
 				siblings = ((AttributeTreeNode)x).getChildren();
@@ -288,177 +373,14 @@ public class AttributeTree {
 	 * refresh the tree
 	 */
 	private void refreshTree(TreeViewer viewer) {
-//		Object[] elements = viewer.getExpandedElements();
-//		TreePath[] paths = viewer.getExpandedTreePaths();
-
 		viewer.refresh();
-//		viewer.setExpandedElements(elements);
-//		viewer.setExpandedTreePaths(paths);
 	}
 	
-	/**
-	 * Empty class to represent root node of data tree.
-	 * 
-	 */
-	class RootNode{}
+	
 }
-
-
 
 
 /**
- * Content provided for an attribute tree 
- * 
- * @author Emily
- * @since 1.0.0
- */
- class AttributeTreeContentProvider implements ITreeContentProvider {
-
-	private static AttributeTree.RootNode root;
-	private Attribute attribute;
-
-	public AttributeTreeContentProvider(AttributeTree.RootNode root){
-		this.root = root;
-	}
-	/**
-	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-	 */
-	@Override
-	public void dispose() {
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.attribute = (Attribute)newInput;
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
-	 */
-	@Override
-	public Object[] getElements(Object inputElement) {
-		return new AttributeTree.RootNode[]{root};
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
-	 */
-	@Override
-	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof AttributeTree.RootNode){
-			if (attribute.getTree() != null && attribute.getTree().size() > 0){
-				Collections.sort(attribute.getTree(), new AttributeTreeNode.NodeComparator());
-				return attribute.getTree().toArray();
-			}
-			return null;
-		}
-		if (parentElement instanceof AttributeTreeNode){
-			if (((AttributeTreeNode)parentElement).getChildren() != null && ((AttributeTreeNode)parentElement).getChildren().size() > 0){
-				return ((AttributeTreeNode)parentElement).getChildren().toArray();
-			}
-		}
-		return null;
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
-	 */
-	@Override
-	public Object getParent(Object element) {
-		if (element instanceof AttributeTreeNode){
-			if (((AttributeTreeNode)element).getParent() == null){
-				return root;
-			}
-			return ((AttributeTreeNode)element).getParent();
-		}
-		return null;
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
-	 */
-	@Override
-	public boolean hasChildren(Object element) {
-		if (element instanceof AttributeTreeNode){
-			return ((AttributeTreeNode)element).getChildren() != null && ((AttributeTreeNode)element).getChildren().size() > 0; 
-		}else if (element instanceof AttributeTree.RootNode){
-			return attribute.getTree() != null && attribute.getTree().size() > 0;
-		}
-		return false;
-	}
-	
-}
-
- /**
-  * Label provided for attribute tree
-  * @author Emily
-  *
-  */
- class AttributeTreeLabelProvider extends LabelProvider implements IColorProvider {
-		
-		private Language currentLang = null;
-		
-		/**
-		 * Creates new data model provided
-		 * @param lang the working language
-		 */
-		public AttributeTreeLabelProvider(Language lang){
-			this.currentLang = lang;
-		}
-		/**
-		 * Update the language
-		 * @param lang new language
-		 */
-		public void setLanguage(Language lang){
-			this.currentLang = lang;
-		}
-		
-		@Override
-		public String getText(Object element) {
-			if (element instanceof AttributeTree.RootNode){
-				return "Root";
-			}
-			if (element instanceof AttributeTreeNode){
-				element = ((AttributeTreeNode)element);
-			}
-			
-			if (element instanceof DmObject){
-				DmObject obj = (DmObject)element;
-				return obj.findName(currentLang) + "  [" + obj.getKeyId() + "]";
-			}
-			return "";
-		}
-
-		@Override
-		public Image getImage(Object element) {
-			return null;
-		}
-		
-		@Override
-		public Color getForeground(Object element) {
-			boolean active = true;
-			if (element instanceof AttributeTreeNode){
-				active = ((AttributeTreeNode)element).getIsActive();
-			}
-			
-			if (active){
-				return DataModelPropertyPage.black;
-			}else{
-				return DataModelPropertyPage.gray;
-			}
-		}
-		
-		@Override
-		public Color getBackground(Object element) {
-			return null;
-		}
-
-	}
- 
- /**
   * Drag listener for attribute tree
   * @author Emily
   *

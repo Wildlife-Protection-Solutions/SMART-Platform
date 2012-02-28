@@ -285,7 +285,7 @@ public class EmployeeComposite extends Composite {
 				cmbViewerRank.getCombo().setEnabled(false);
 			} else {
 				cmbViewerRank.getCombo().setEnabled(true);
-				Set<Rank> ranks = agency.getRanks();
+				List<Rank> ranks = agency.getRanks();
 
 				List<Rank> temp = new ArrayList<Rank>();
 				temp.addAll(ranks);

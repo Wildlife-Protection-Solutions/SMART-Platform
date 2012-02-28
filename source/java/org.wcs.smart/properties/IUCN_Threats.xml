@@ -3545,180 +3545,180 @@ xsi:schemaLocation="http://wsc.smart.org/datamodel
 </smrt:attribute>
 </smrt:attributes>
   <smrt:categories>
-    <smrt:category key="threat" ismultiple="false" isactive="true">
+    <smrt:category key="threat" ismultiple="true" isactive="true">
       <smrt:names language_code="en_CA" value="Threats"/>
       
-      <smrt:category key="residentialcommercialdevelopment" ismultiple="false" isactive="true">
+      <smrt:category key="residentialcommercialdevelopment" ismultiple="true" isactive="true">
         	<smrt:names language_code="en_CA" value="Residential &amp; Commercial Development"/>
     
-    		<smrt:category key="housingurbanareas" ismultiple="false" isactive="true">
+    		<smrt:category key="housingurbanareas" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Housing &amp; Urban Areas"/>
       		</smrt:category>
-    		<smrt:category key="commericalindustrialareas" ismultiple="false" isactive="true">
+    		<smrt:category key="commericalindustrialareas" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Commercial &amp; Industrial Areas"/>
       		</smrt:category>
-      		<smrt:category key="tourismrecreationareas" ismultiple="false" isactive="true">
+      		<smrt:category key="tourismrecreationareas" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Tourism &amp; Recreation Areas"/>
       		</smrt:category>
       </smrt:category>
      
-      <smrt:category key="agricultureaquaculture" ismultiple="false" isactive="true">
+      <smrt:category key="agricultureaquaculture" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Agriculture &amp; Aquaculture"/>
     
-    		<smrt:category key="annualperennialnontimbercrops" ismultiple="false" isactive="true">
+    		<smrt:category key="annualperennialnontimbercrops" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Annual &amp; Perennial Non-Timber Crops"/>
       		</smrt:category>
-    		<smrt:category key="woodpulpplantations" ismultiple="false" isactive="true">
+    		<smrt:category key="woodpulpplantations" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Wood &amp; Pulp Plantations"/>
       		</smrt:category>
-    		<smrt:category key="livestockfarmingranching" ismultiple="false" isactive="true">
+    		<smrt:category key="livestockfarmingranching" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Livestock Farming &amp; Ranching"/>
       		</smrt:category>
-      		<smrt:category key="marinefreshwateraquaculture" ismultiple="false" isactive="true">
+      		<smrt:category key="marinefreshwateraquaculture" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Marine &amp; Freshwater Aquaculture"/>
       		</smrt:category>
       </smrt:category> 
      
-      <smrt:category key="energyproductionmining" ismultiple="false" isactive="true">
+      <smrt:category key="energyproductionmining" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Energy Production &amp; Mining"/>
     
-    		<smrt:category key="oilgasdrlling" ismultiple="false" isactive="true">
+    		<smrt:category key="oilgasdrlling" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Oil &amp; Gas Drilling"/>
       		</smrt:category>
-    		<smrt:category key="miningquarrying" ismultiple="false" isactive="true">
+    		<smrt:category key="miningquarrying" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Mining &amp; Quarrying"/>
       		</smrt:category>
-      		<smrt:category key="renewableenergy" ismultiple="false" isactive="true">
+      		<smrt:category key="renewableenergy" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Renewable Energy"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="transportationservicecorridors" ismultiple="false" isactive="true">
+      <smrt:category key="transportationservicecorridors" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Transportation &amp; Service Corridors"/>
     
-    		<smrt:category key="roadsrailroads" ismultiple="false" isactive="true">
+    		<smrt:category key="roadsrailroads" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Roads &amp; Railroads"/>
       		</smrt:category>
-    		<smrt:category key="utilityservicelines" ismultiple="false" isactive="true">
+    		<smrt:category key="utilityservicelines" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Utility &amp; Service Lines"/>
       		</smrt:category>
-      		<smrt:category key="shippinglanes" ismultiple="false" isactive="true">
+      		<smrt:category key="shippinglanes" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Shipping Lanes"/>
       		</smrt:category>
-      		<smrt:category key="flightpaths" ismultiple="false" isactive="true">
+      		<smrt:category key="flightpaths" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Flight Paths"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="biologicalresourceuse" ismultiple="false" isactive="true">
+      <smrt:category key="biologicalresourceuse" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Biological Resource Use"/>
     
-    		<smrt:category key="huntingcollectingterrestrialanimals" ismultiple="false" isactive="true">
+    		<smrt:category key="huntingcollectingterrestrialanimals" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Hunting &amp; Collecting Terrestrial Animals"/>
       		</smrt:category>
-    		<smrt:category key="gatheringterrestrialplants" ismultiple="false" isactive="true">
+    		<smrt:category key="gatheringterrestrialplants" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Gathering Terrestrial Plants"/>
       		</smrt:category>
-      		<smrt:category key="loggingwoodharvesting" ismultiple="false" isactive="true">
+      		<smrt:category key="loggingwoodharvesting" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Logging &amp; Wood Harvesting"/>
       		</smrt:category>
-      		<smrt:category key="fishingharvestingaquaticresources" ismultiple="false" isactive="true">
+      		<smrt:category key="fishingharvestingaquaticresources" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Fishing &amp; Harvesting Aquatic Resources"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="humanintrusionsdisturbance" ismultiple="false" isactive="true">
+      <smrt:category key="humanintrusionsdisturbance" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Human Intrusions &amp; Disturbance"/>
     
-    		<smrt:category key="recreationalactivities" ismultiple="false" isactive="true">
+    		<smrt:category key="recreationalactivities" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Recreational Activities"/>
       		</smrt:category>
-    		<smrt:category key="warcivilunrestmilitaryexercises" ismultiple="false" isactive="true">
+    		<smrt:category key="warcivilunrestmilitaryexercises" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="War, Civil Unrest &amp; Military Exercises"/>
       		</smrt:category>
-      		<smrt:category key="workotheractivities" ismultiple="false" isactive="true">
+      		<smrt:category key="workotheractivities" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Work &amp; Other Activities"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="naturalsystemmodifications" ismultiple="false" isactive="true">
+      <smrt:category key="naturalsystemmodifications" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Natural System Modifications"/>
     
-    		<smrt:category key="firefiresuppression" ismultiple="false" isactive="true">
+    		<smrt:category key="firefiresuppression" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Fire &amp; Fire Suppression"/>
       		</smrt:category>
-    		<smrt:category key="damswatermanagementuse" ismultiple="false" isactive="true">
+    		<smrt:category key="damswatermanagementuse" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Dams &amp; Water Management/Use"/>
       		</smrt:category>
-      		<smrt:category key="otherecosystemmodifications" ismultiple="false" isactive="true">
+      		<smrt:category key="otherecosystemmodifications" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Other Ecosystem Modifications"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="invasiveotherproblematicspeciesgenes" ismultiple="false" isactive="true">
+      <smrt:category key="invasiveotherproblematicspeciesgenes" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Invasive &amp; Other Problematic Species &amp; Genes"/>
     
-    		<smrt:category key="invasivenonnativealienspecies" ismultiple="false" isactive="true">
+    		<smrt:category key="invasivenonnativealienspecies" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Invasive Non-Native/Alien Species"/>
       		</smrt:category>
-    		<smrt:category key="problematicnativespecies" ismultiple="false" isactive="true">
+    		<smrt:category key="problematicnativespecies" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Problematic Native Species"/>
       		</smrt:category>
-      		<smrt:category key="introducedgeneticmaterial" ismultiple="false" isactive="true">
+      		<smrt:category key="introducedgeneticmaterial" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Introduced Genetic Material"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="pollution" ismultiple="false" isactive="true">
+      <smrt:category key="pollution" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Pollution"/>
     
-    		<smrt:category key="householdsewageurbanwastewater" ismultiple="false" isactive="true">
+    		<smrt:category key="householdsewageurbanwastewater" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Household Sewage &amp; Urban Waste Water"/>
       		</smrt:category>
-    		<smrt:category key="industrialmilitaryeffluents" ismultiple="false" isactive="true">
+    		<smrt:category key="industrialmilitaryeffluents" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Industrial &amp; Military Effluents"/>
       		</smrt:category>
-    		<smrt:category key="agriculturalforestryeffluents" ismultiple="false" isactive="true">
+    		<smrt:category key="agriculturalforestryeffluents" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Agricultural &amp; Forestry Effluents"/>
       		</smrt:category>
-    		<smrt:category key="garbagesolidwaste" ismultiple="false" isactive="true">
+    		<smrt:category key="garbagesolidwaste" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Garbage &amp; Solid Waste"/>
       		</smrt:category>
-    		<smrt:category key="airbornepollutants" ismultiple="false" isactive="true">
+    		<smrt:category key="airbornepollutants" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Air-Borne Pollutants"/>
       		</smrt:category>
-      		<smrt:category key="excessenergy" ismultiple="false" isactive="true">
+      		<smrt:category key="excessenergy" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Excess Energy"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="geologicalevents" ismultiple="false" isactive="true">
+      <smrt:category key="geologicalevents" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Geological Events"/>
     
-    		<smrt:category key="volcanoes" ismultiple="false" isactive="true">
+    		<smrt:category key="volcanoes" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Volcanoes"/>
       		</smrt:category>
-    		<smrt:category key="earthquakestsunamis" ismultiple="false" isactive="true">
+    		<smrt:category key="earthquakestsunamis" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Earthquakes/Tsunamis"/>
       		</smrt:category>
-      		<smrt:category key="avalancheslandslides" ismultiple="false" isactive="true">
+      		<smrt:category key="avalancheslandslides" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Avalanches/Landslides"/>
       		</smrt:category>
       </smrt:category> 
 
-      <smrt:category key="climatechangesevereweather" ismultiple="false" isactive="true">
+      <smrt:category key="climatechangesevereweather" ismultiple="true" isactive="true">
        		<smrt:names language_code="en_CA" value="Climate Change &amp; Severe Weather"/>
     
-    		<smrt:category key="habitatshiftingalteration" ismultiple="false" isactive="true">
+    		<smrt:category key="habitatshiftingalteration" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Habitat Shifting &amp; Alteration"/>
       		</smrt:category>
-    		<smrt:category key="droughts" ismultiple="false" isactive="true">
+    		<smrt:category key="droughts" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Droughts"/>
       		</smrt:category>
-      		<smrt:category key="temperatureextremes" ismultiple="false" isactive="true">
+      		<smrt:category key="temperatureextremes" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Temperature Extremes"/>
       		</smrt:category>
-      		<smrt:category key="stormsflooding" ismultiple="false" isactive="true">
+      		<smrt:category key="stormsflooding" ismultiple="true" isactive="true">
         		<smrt:names language_code="en_CA" value="Storms &amp; Flooding"/>
       		</smrt:category>
       </smrt:category> 

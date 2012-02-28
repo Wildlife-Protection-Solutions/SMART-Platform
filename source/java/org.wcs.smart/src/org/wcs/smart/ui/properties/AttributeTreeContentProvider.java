@@ -19,27 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties;
+package org.wcs.smart.ui.properties;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
 /**
- * Content provided for data model tree.
+ * Content provided for an attribute tree 
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class DataModelContentProvider implements ITreeContentProvider {
+public class AttributeTreeContentProvider implements ITreeContentProvider {
 
-	private static RootNode root = new RootNode();
-	private DataModel model;
+	private static RootNode root ;
+	private Attribute attribute;
 
+	public AttributeTreeContentProvider(){
+		this.root = new RootNode();
+	}
 	/**
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
@@ -52,7 +54,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.model = (DataModel)newInput;
+		this.attribute = (Attribute)newInput;
 	}
 
 	/*
@@ -69,25 +71,16 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof RootNode){
-			if ((model.getCategories() != null && model.getCategories().size() > 0)){
-				return model.getCategories().toArray();
-				
+			if (attribute.getTree() != null && attribute.getTree().size() > 0){
+				Collections.sort(attribute.getTree(), new AttributeTreeNode.NodeComparator());
+				return attribute.getTree().toArray();
 			}
 			return null;
 		}
-		if (parentElement instanceof Category){
-			ArrayList<Object> children = new ArrayList<Object>();
-			Category category = ((Category)parentElement);
-			if ((category.getChildren() != null && category.getChildren().size() > 0)){
-				children.addAll(category.getChildren());
-				
+		if (parentElement instanceof AttributeTreeNode){
+			if (((AttributeTreeNode)parentElement).getChildren() != null && ((AttributeTreeNode)parentElement).getChildren().size() > 0){
+				return ((AttributeTreeNode)parentElement).getChildren().toArray();
 			}
-			if (category.getAttributes() != null && category.getAttributes().size() > 0){
-				children.addAll(category.getAttributes());
-			}
-			return children.toArray();
-		}else if (parentElement instanceof Attribute){
-			
 		}
 		return null;
 	}
@@ -97,8 +90,11 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof Category){
-			return ((Category)element).getParent();
+		if (element instanceof AttributeTreeNode){
+			if (((AttributeTreeNode)element).getParent() == null){
+				return root;
+			}
+			return ((AttributeTreeNode)element).getParent();
 		}
 		return null;
 	}
@@ -108,26 +104,17 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public boolean hasChildren(Object element) {
-		
-		if (element instanceof Category){
-			if (((Category)element).getChildren() != null && ((Category)element).getChildren().size() > 0){
-				return true;
-			}
-			if (((Category)element).getAttributes() != null && ((Category)element).getAttributes().size() > 0){
-				return true;
-			}
+		if (element instanceof AttributeTreeNode){
+			return ((AttributeTreeNode)element).getChildren() != null && ((AttributeTreeNode)element).getChildren().size() > 0; 
 		}else if (element instanceof RootNode){
-			if (model.getCategories() != null && model.getCategories().size() > 0){
-				return true;
-			}
+			return attribute.getTree() != null && attribute.getTree().size() > 0;
 		}
 		return false;
 	}
 	
+	/**
+	 * Empty class to represent root node of data tree.
+	 * 
+	 */
+	public class RootNode{}
 }
-
-/**
- * Empty class to represent root node of data tree.
- * 
- */
-class RootNode{}

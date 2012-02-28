@@ -46,7 +46,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 
-	private Session session;
+	protected Session session;
 	protected ConservationArea ca;
 	protected boolean changesMade;
 	
@@ -128,13 +128,17 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		getButton(IDialogConstants.CLOSE_ID).setFocus();
+		
+		super.setReturnCode(IDialogConstants.CLOSE_ID);
 	}
 	
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			performSave();
+			super.setReturnCode(IDialogConstants.OK_ID);
 		} else if (IDialogConstants.CLOSE_ID == buttonId) {
+			//super.setReturnCode(IDialogConstants.CLOSE_ID);
 			close();
 		}
 	}
@@ -160,16 +164,22 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	@Override
 	public boolean close(){
 		if (changesMade){
-			MessageDialog md = new MessageDialog(getShell(), "Save Changes?", null, "There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
-			int ret = md.open();
-			if (ret == 2){
-				//cancel
-				return false;
-			}
-			if (ret == 0){
-				//yes
-				if (!performSave()){
+			if (getErrorMessage() != null){
+				if (!MessageDialog.openQuestion(getShell(), "Close", "Changes have been made that cannot be saved.  Are you sure you want to close?")){
 					return false;
+				}
+			}else{
+				MessageDialog md = new MessageDialog(getShell(), "Save Changes?", null, "There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+				int ret = md.open();
+				if (ret == 2){
+					//cancel
+					return false;
+				}
+				if (ret == 0){
+					//yes
+					if (!performSave()){
+						return false;
+					}
 				}
 			}
 		}

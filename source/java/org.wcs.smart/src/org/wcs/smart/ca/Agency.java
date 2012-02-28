@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.ca;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -44,7 +46,7 @@ public class Agency extends SimpleList{
 	public static final String NAME = "Agency";
 	
 	private ConservationArea ca;
-	private Set<Rank> ranks;
+	private List<Rank> ranks;
 	
 	/**
 	 * Creates a new agency
@@ -76,9 +78,9 @@ public class Agency extends SimpleList{
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="agency_uuid", referencedColumnName="uuid", updatable = false, insertable=false)
-	public Set<Rank> getRanks(){
+	public List<Rank> getRanks(){
 		if (this.ranks == null){
-			this.ranks = new HashSet<Rank>();
+			this.ranks = new ArrayList<Rank>();
 		}
 		return this.ranks;
 	}
@@ -86,7 +88,7 @@ public class Agency extends SimpleList{
 	 * 
 	 * @param ranks
 	 */
-	public void setRanks(Set<Rank> ranks){
+	public void setRanks(List<Rank> ranks){
 		this.ranks = ranks;
 	}
 }

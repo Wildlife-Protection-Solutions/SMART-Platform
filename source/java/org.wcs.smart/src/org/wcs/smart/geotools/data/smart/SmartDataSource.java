@@ -27,7 +27,6 @@ import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
-import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.SmartPlugIn;
@@ -42,20 +41,13 @@ import org.wcs.smart.ca.ConservationArea;
 public class SmartDataSource extends AbstractDataStore{
 
 	private ConservationArea ca = null;
-	private Session session;
 
-	public SmartDataSource(Session session, byte[] cauuid){
-		this.session = session;
-		this.ca = (ConservationArea)session.load(ConservationArea.class, cauuid);
+	public SmartDataSource(ConservationArea ca){
+		this.ca = ca;
 	}
 
 	@Override
 	public void dispose(){
-		try{
-			this.session.close();
-		}catch (Throwable t){
-			SmartPlugIn.log("Error disposing of smart data source", t);
-		}
 		super.dispose();
 	}
 
