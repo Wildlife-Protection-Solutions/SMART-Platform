@@ -207,7 +207,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		/* --------- Patrol Transport Type -------------- */
 		lblType = new Label(container, SWT.NONE);
-		lblType.setText("Transporation Options:");
+		lblType.setText("Transportation Options:");
 		lblType.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3,1));
 		
 		composite2 = new Composite(container, SWT.NONE);
@@ -410,11 +410,13 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				@Override
 				protected void setValue(Object element, Object value) {
 					if (element instanceof PatrolTransportType){
-						((PatrolTransportType)element).updateName(languageViewer.getCurrentSelection(), (String)value);
+						PatrolTransportType ttype = (PatrolTransportType)element;
+						if (!ttype.findName(languageViewer.getCurrentSelection()).equals((String)value)){
+							ttype.updateName(languageViewer.getCurrentSelection(), (String)value);
+							setChangesMade(true);	
+						}
 						viewer.refresh();
-					}
-					// TODO Auto-generated method stub
-					
+					}					
 				}});
 
 		

@@ -179,7 +179,7 @@ public class PatrolViewFilter {
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate ");
+		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate, p.endDate ");
 		str.append("FROM Patrol p ");
 		str.append("WHERE p.conservationArea = :ca " );
 	
@@ -215,16 +215,16 @@ public class PatrolViewFilter {
 			}
 			or = true;
 			if (dateFilter != DateFilter.CUSTOM){
-				str.append(" p.startDate >= :date1 ");
+				str.append(" p.endDate >= :date1 ");
 			}else{
-				str.append(" ( p.startDate >= :date1 and p.startDate <= :date2 ) ");
+				str.append(" ( p.endDate > :date1 and p.startDate < :date2 ) ");
 			}
 		}
 		if (!and){
 			str.append(")");
 		}
 		
-		str.append("ORDER BY p.startDate desc");
+		str.append("ORDER BY p.id desc");
 		
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea());
 		if (types != null && types.length > 0){

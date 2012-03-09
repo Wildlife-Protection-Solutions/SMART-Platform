@@ -52,7 +52,7 @@ public class WaypointAttachment {
 	private String filename;
 	
 	private File copyFromLocation;
-	private String fullFile;
+   private String fullFile;
 	
 	public WaypointAttachment(){
 		
@@ -75,10 +75,7 @@ public class WaypointAttachment {
 	}
 	public void setWaypoint(Waypoint wp){
 		this.wp = wp;
-		if (wp != null){
-			Patrol ptr = getWaypoint().getPatrolLegDay().getPatrolLeg().getPatrol();
-			this.fullFile = SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + ptr.getPatrolDatastorePath() + File.separator + getFilename();
-		}
+		setFullFile();
 	}
 	
 	@Column(name="filename")
@@ -87,6 +84,7 @@ public class WaypointAttachment {
 	}
 	public void setFilename(String filename){
 		this.filename = filename;
+		setFullFile();
 	}
 	
 	@Transient
@@ -105,9 +103,18 @@ public class WaypointAttachment {
 	public void setCopyFromLocation(File newFile){
 		this.copyFromLocation= newFile;
 	}
-	
+	private void setFullFile(){
+		if (wp != null && getWaypoint().getPatrolLegDay() != null ){
+			Patrol ptr = getWaypoint().getPatrolLegDay().getPatrolLeg().getPatrol();
+			this.fullFile = SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + ptr.getPatrolDatastorePath() + File.separator + getFilename();
+		}
+	}
 	@Transient
 	public File getFullFile(){
+		if (this.fullFile == null){
+			//try to set it
+			setFullFile();
+		}
 		return new File(this.fullFile);
 	}
 	

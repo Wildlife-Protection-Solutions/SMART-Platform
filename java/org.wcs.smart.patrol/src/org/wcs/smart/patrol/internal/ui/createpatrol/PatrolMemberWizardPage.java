@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -97,27 +98,20 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	}
 	
 	/**
-	 * 
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (visible) {
-        	Patrol p = ((CreatePatrolWizard)getWizard()).getPatrol();
-   			PatrolLeg pl = p.getFirstLeg();
-    		
-        	ArrayList<Employee> current = new ArrayList<Employee>();
-        	if (pl.getMembers() != null){
-        		for (Iterator iterator = pl.getMembers().iterator(); iterator.hasNext();) {
-        			PatrolLegMember employee = (PatrolLegMember) iterator.next();
-        			current.add(employee.getMember());
-        		}
-        	}
-        	
-        	members.setEmployeeData(allEmployees, current);
-        }
-    }
-	
+	void initModel(Patrol p, Session session) {
+		PatrolLeg pl = p.getFirstLeg();
+    	ArrayList<Employee> current = new ArrayList<Employee>();
+    	if (pl.getMembers() != null){
+    		for (Iterator iterator = pl.getMembers().iterator(); iterator.hasNext();) {
+    			PatrolLegMember employee = (PatrolLegMember) iterator.next();
+    			current.add(employee.getMember());
+    		}
+    	}
+    	members.setEmployeeData(allEmployees, current);
+	}
 	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()

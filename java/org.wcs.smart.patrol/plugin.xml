@@ -11,6 +11,7 @@
                label="&amp;Patrol">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
+                  icon="images/icons/ctool16/patrol_add.png"
                   label="&amp;Create New Patrol"
                   style="push">
                <visibleWhen
@@ -30,6 +31,35 @@
                      </test>
                   </or>
                </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.importPatrol"
+                  icon="images/icons/ctool16/patrol_import.png"
+                  label="&amp;Import Patrol"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.exportPatrol"
+                  icon="images/icons/ctool16/patrol_export.png"
+                  label="E&amp;xport Patrol"
+                  style="push">
             </command>
             <separator
                   name="org.wcs.smart.patrol.separator1"
@@ -102,10 +132,6 @@
       <menuContribution
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.logout">
-         <command
-               commandId="org.eclipse.ui.file.save"
-               style="push">
-         </command>
          <separator
                name="org.wcs.smart.patrol.separator2"
                visible="true">
@@ -117,14 +143,34 @@
          <toolbar
                id="org.wcs.smart.patrol.patrolToolbar">
             <command
-                  commandId="org.eclipse.ui.file.save"
-                  style="push">
-            </command>
-            <command
                   commandId="org.wcs.smart.patrol.newPatrol"
                   icon="images/icons/ctool16/patrol_add.png"
                   label="Create New Patrol"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.exportPatrol"
+                  icon="images/icons/ctool16/patrol_export.png"
+                  label="Export Patrol"
+                  style="push"
+                  tooltip="Export the current patrol to xml file">
             </command>
          </toolbar>
       </menuContribution>
@@ -155,32 +201,112 @@
             id="org.wcs.smart.patrol.PatrolPerspective"
             name="Show Patrol Perspective">
       </command>
+      <command
+            id="org.wcs.smart.patrol.exportPatrol"
+            name="Export Patrol">
+      </command>
+      <command
+            id="org.wcs.smart.patrol.importPatrol"
+            name="Import Patrol">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTypeHandler"
             commandId="org.wcs.smart.patrol.patrolTypes">
+         <activeWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="admin">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolMandateHandler"
             commandId="org.wcs.smart.patrol.patrolMandate">
+         <activeWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="admin">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolOptionsHandler"
             commandId="org.wcs.smart.patrol.patrolOptions">
+         <activeWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="admin">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTeamsHandler"
             commandId="org.wcs.smart.patrol.teamList">
+         <activeWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="admin">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.NewPatrolHandler"
             commandId="org.wcs.smart.patrol.newPatrol">
+         <activeWhen>
+            <or>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="dataentry">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="manager">
+               </test>
+            </or>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.ShowPatrolPersepctiveHandler"
             commandId="org.wcs.smart.patrol.PatrolPerspective">
+      </handler>
+      <handler
+            class="org.wcs.smart.patrol.xml.export.ExportPatrolHandler"
+            commandId="org.wcs.smart.patrol.exportPatrol">
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.patrol.ui.PatrolEditor">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.patrol.xml.in.ImportPatrolHandler"
+            commandId="org.wcs.smart.patrol.importPatrol">
+         <activeWhen>
+            <or>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="dataentry">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="manager">
+               </test>
+            </or>
+         </activeWhen>
       </handler>
    </extension>
    <extension
@@ -265,6 +391,12 @@
             id="org.wcs.smart.patrol.ui.PatrolDayEditor"
             name="Patrol Day Editor">
       </editor>
+      <editor
+            class="org.wcs.smart.patrol.internal.ui.editor.PatrolMapPageEditor"
+            default="false"
+            id="org.wcs.smart.patrol.ui.PatrolMapEditor"
+            name="Patrol Map Editor">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.viewActions">
@@ -284,16 +416,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.editorActions">
-      <editorContribution
-            id="org.wcs.smart.patrol.editorContribution2"
-            targetID="org.wcs.smart.patrol.editorContribution2">
-         <action
-               class="org.wcs.smart.patrol.EditorActionDelegate2"
-               id="org.eclipse.ui.file.save"
-               label="Save"
-               style="push">
-         </action>
-      </editorContribution>
    </extension>
 
 </plugin>

@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -94,8 +95,18 @@ public class AttributeTreeDialog extends TitleAreaDialog {
 		FilteredTree fTree = new FilteredTree(main, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true);
 		tblTree = fTree.getViewer();
 		tblTree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tblTree.setContentProvider(new AttributeTreeContentProvider());
+		tblTree.setContentProvider(new AttributeTreeContentProvider(true));
 		tblTree.setLabelProvider(new AttributeTreeLabelProvider());
+//		tblTree.addFilter(new ViewerFilter() {
+//			
+//			@Override
+//			public boolean select(Viewer viewer, Object parentElement, Object element) {
+//				if (element instanceof AttributeTreeNode){
+//					return ((AttributeTreeNode)element).getIsActive();
+//				}
+//				return true;
+//			}
+//		});
 		tblTree.setAutoExpandLevel(1);
 		tblTree.setInput(attribute);
 		tblTree.addSelectionChangedListener(new ISelectionChangedListener() {

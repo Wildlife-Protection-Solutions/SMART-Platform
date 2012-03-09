@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -105,25 +106,27 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		super.setControl(main);
 	}
    
+	@Override
+	public void setVisible(boolean isVisible){
+		super.setVisible(isVisible);
+		if (isVisible){
+			((CreatePatrolWizard)getWizard()).getContainer().updateButtons();
+		}
+	}
 	/**
-	 * Called when the wizard page is made visible
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	@Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (visible) {
-        	Patrol p = ((CreatePatrolWizard)getWizard()).getPatrol();
-        	if (p.getLegs() != null && p.getLegs().size() == 1){
-        		btnNo.setSelection(true);
-        		btnYes.setSelection(false);
-        	}else{
-        		btnYes.setSelection(true);
-        		btnNo.setSelection(false);
-        	}
-        	setPageComplete(true);
-        	((CreatePatrolWizard)getWizard()).setCanFinish(btnNo.getSelection());
-        	
-        }
+    public void initModel(Patrol p, Session session) {
+       	if (p.getLegs() != null && p.getLegs().size() == 1){
+       		btnNo.setSelection(true);
+       		btnYes.setSelection(false);
+       	}else{
+       		btnYes.setSelection(true);
+       		btnNo.setSelection(false);
+       	}
+       	setPageComplete(true);
+       	((CreatePatrolWizard)getWizard()).setCanFinish(btnNo.getSelection());
     }
 	
 	/**

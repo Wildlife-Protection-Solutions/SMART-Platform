@@ -112,18 +112,13 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param title
 	 */
 	public TeamPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Patrol Team");
+		super(Display.getCurrent().getActiveShell(), "Patrol Teams");
 		
 		/* get mandates */
-		List<PatrolMandate> ms = PatrolHibernateManager.getMandates(ca, getSession());
+		List<PatrolMandate> ms = PatrolHibernateManager.getActiveMandates(ca, getSession());
+		ms.add(0, null);
 		mandates = ms.toArray(new PatrolMandate[ms.size()]);
-		PatrolMandate[] mm = new PatrolMandate[mandates.length + 1];
-		mm[0] = null;
-		for (int i= 0; i < mandates.length; i ++){
-			mm[i+1] = mandates[i];
-		}
-		this.mandates = mm;
-		
+
 		uuidGenerator = UUIDGenerator
 				.buildSessionFactoryUniqueIdentifierGenerator();
 		Properties prop = new Properties();

@@ -505,8 +505,17 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		legA.setEndDate(newEnd);
 		legB.setEndDate(newEnd);
 		
-		legA.setId( existingLeg.getId() + " - Group A" );
-		legB.setId( existingLeg.getId() + " - Group B" );
+		String legAId = existingLeg.getId() + " - Group A";
+		if (legAId.length() > PatrolLeg.ID_MAX_SIZE){
+			legAId = legAId.substring(0, PatrolLeg.ID_MAX_SIZE);
+		}
+		String legBId = existingLeg.getId() + " - Group B";
+		if (legBId.length() > PatrolLeg.ID_MAX_SIZE){
+			legBId = legBId.substring(0, PatrolLeg.ID_MAX_SIZE);
+		}
+		
+		legA.setId( legAId );
+		legB.setId( legBId );
 		
 		
 		legA.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement());
@@ -564,7 +573,13 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			PatrolLeg legC = new PatrolLeg();
 			legC.setStartDate(newEnd);
 			legC.setEndDate(existingLeg.getEndDate());
-			legC.setId(  existingLeg.getId() + " - End ");
+			
+			String legCId = existingLeg.getId() + " - End ";
+			if (legCId.length() > PatrolLeg.ID_MAX_SIZE){
+				legCId = legCId.substring(0, PatrolLeg.ID_MAX_SIZE);
+			}
+			
+			legC.setId( legCId );
 			legC.setType(existingLeg.getType());
 			legC.setMembers(new ArrayList<PatrolLegMember>());
 			for (PatrolLegMember member : existingLeg.getMembers()){

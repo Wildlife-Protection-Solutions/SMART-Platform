@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolLegsComposite;
 import org.wcs.smart.patrol.model.Patrol;
@@ -87,16 +88,6 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 		}
 	}
 
-	
-	@Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (visible) {
-        	CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
-        	legComposite.setValues(wizard.getPatrol(), wizard.getSession());
-        }
-    }
-	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
 	 */
@@ -104,4 +95,14 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 	void updateModel(Patrol p) {
 		legComposite.updatePatrol(p);
 	}	
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 */
+	@Override
+	void initModel(Patrol p, Session session) {
+		legComposite.setValues(p, session);
+		validate();
+		((CreatePatrolWizard)getWizard()).setCanFinish(true);
+	}
 }

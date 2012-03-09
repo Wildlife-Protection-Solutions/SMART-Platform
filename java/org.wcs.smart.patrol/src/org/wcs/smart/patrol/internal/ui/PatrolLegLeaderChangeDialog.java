@@ -88,7 +88,12 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		newLeg.setMembers(members);
 		newLeg.setPatrol(existingLeg.getPatrol());
 		newLeg.setType(existingLeg.getType());
-		newLeg.setId( existingLeg.getId() + " - Leader Change "  );
+		
+		String legId = existingLeg.getId() + " - Leader Change ";
+		if (legId.length() > PatrolLeg.ID_MAX_SIZE){
+			legId = legId.substring(0, PatrolLeg.ID_MAX_SIZE);
+		}
+		newLeg.setId( legId  );
 	}
 
 	

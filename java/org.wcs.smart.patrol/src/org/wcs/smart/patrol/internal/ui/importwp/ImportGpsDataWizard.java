@@ -67,7 +67,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	 * Creates a new wizard.
 	 */
 	public ImportGpsDataWizard(Date currentDay, GPSDataImport.ImportType type) {
-		setWindowTitle("Import " + type + " Data");
+		setWindowTitle("Import " + type.guiName + " Data");
 		this.currentDay = currentDay;
 		this.type = type;
 		super.setForcePreviousAndNextButtons(true);
@@ -140,7 +140,6 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			return false;
 		}
 		if (lastPage instanceof ImportGpxWizardPage){
-			//finished; import data from file for current date
 			allData = ((ImportGpxWizardPage)lastPage).getImportAll();
 			final String filename = ((ImportGpxWizardPage)lastPage).getFileName();
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -154,7 +153,6 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							importedData = (GPSDataImport.convertGpx(new File(filename), null, Collections.singleton(type), monitor)).get(type);
 						}else{
 							importedData = (GPSDataImport.convertGpx(new File(filename), currentDay, Collections.singleton(type), monitor)).get(type);
-								
 						}
 					}
 				});
@@ -202,7 +200,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 		};
 		
 		if (importedData  == null || (importedData instanceof Collection &&  ((Collection)importedData).size() == 0 )){
-			MessageDialog.openWarning(getShell(), "Import", "No " + this.type + " were found to import. This could be due to date formats or other GPS issues.  Try importing all " + this.type + " and selecting desired waypoints.");
+			MessageDialog.openWarning(getShell(), "Import", "No " + this.type.guiName + " were found to import. This could be due to date formats or other GPS issues.  Try importing all " + this.type + " and selecting desired waypoints.");
 			return false;
 		}
 		return true;
@@ -262,21 +260,30 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
+						File f = null;
 						try{
 							monitor.setTaskName("Importing Data from GPS Device");
-							File f = GPSBabel.getData(deviceType, Collections.singleton(type));
+							f = GPSBabel.getData(deviceType, Collections.singleton(type));
 							if (type == ImportType.WAYPOINT){
 								allWaypoints = GPSDataImport.getWaypointsGpx(f, monitor);
 							}else if (type == ImportType.TRACK){
 								allWaypoints = GPSDataImport.getTrackPoints(f, monitor);
 							}
 						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog("Could not import data from GPX file", ex);
+							SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
+						}finally{
+							try{
+								if (f != null){
+									f.delete();
+								}
+							}catch (Exception ex){
+								SmartPatrolPlugIn.log("Error deleting patrol data file.", ex);
+							}
 						}
 					}
 				});
 				}catch (Exception ex){
-					SmartPatrolPlugIn.displayLog("Could not import data from GPX file", ex);
+					SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
 					event.doit = false;
 				}
 				

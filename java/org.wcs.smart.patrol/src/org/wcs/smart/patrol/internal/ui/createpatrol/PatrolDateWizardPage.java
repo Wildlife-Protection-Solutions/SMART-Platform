@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
@@ -76,15 +77,6 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 		super.setControl(main);
 		
 	}
-	@Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (visible) {
-        	CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
-        	dateComposite.setValues(wizard.getPatrol(), wizard.getSession());
-        }
-    }
-	
 	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
@@ -92,5 +84,13 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 	@Override
 	void updateModel(Patrol p) {
 		dateComposite.updatePatrol(p);
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 */
+	@Override
+	void initModel(Patrol p, Session session) {
+		dateComposite.setValues(p, session);		
 	}
 }

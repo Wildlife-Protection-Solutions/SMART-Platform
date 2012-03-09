@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.StationComposite;
 import org.wcs.smart.patrol.internal.ui.TeamComposite;
 import org.wcs.smart.patrol.model.Patrol;
@@ -68,10 +69,6 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 		stationList = new StationComposite();
 		stationList.createComponent(center,  SWT.NONE);
    		
-		CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
-		teamList.setValues(wizard.getPatrol(), wizard.getSession());
-		stationList.setValues(wizard.getPatrol(), wizard.getSession());
-  
 		setMessage("Select the station and team associated with the patrol.  Select (none) if station/team not applicable.");
 		super.setControl(main);
 		super.setPageComplete(true);
@@ -86,4 +83,12 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 		teamList.updatePatrol(p);
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 */
+	@Override
+	void initModel(Patrol p, Session session) {
+		teamList.setValues(p, session);
+		stationList.setValues(p, session);
+	}
 }

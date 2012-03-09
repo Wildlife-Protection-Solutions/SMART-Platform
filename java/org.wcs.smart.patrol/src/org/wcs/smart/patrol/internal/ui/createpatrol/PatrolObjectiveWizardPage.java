@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -53,15 +54,9 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		objectiveComp = new ObjectiveComposite();
-		
 		setMessage("Enter the patrol objective and select how well this objective was met.");
 		super.setControl(objectiveComp.createComponent(parent, SWT.NONE));
-		
-		CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
-		objectiveComp.setValues(wizard.getPatrol(), wizard.getSession());
 	}
-
-	
 	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
@@ -70,5 +65,12 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	void updateModel(Patrol p) {
 		objectiveComp.updatePatrol(p);
 	}
-
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 */
+	@Override
+	void initModel(Patrol p, Session session) {
+		objectiveComp.setValues(p, session);
+	}
 }
