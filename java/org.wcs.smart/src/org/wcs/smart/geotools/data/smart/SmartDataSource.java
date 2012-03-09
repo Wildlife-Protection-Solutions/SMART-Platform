@@ -79,7 +79,6 @@ public class SmartDataSource extends AbstractDataStore{
 		String spec = "id:String,geom:MultiPolygon:srid=4326,uuid:String";
 		try {
 			SimpleFeatureType type =  DataUtilities.createType("smart." + typeName, spec);
-			type.getCoordinateReferenceSystem();
 			return type;
 		} catch (SchemaException e) {
 			SmartPlugIn.log(e.getMessage(), e);

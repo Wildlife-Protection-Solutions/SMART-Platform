@@ -303,7 +303,8 @@
                id="org.wcs.smart.ui.map.zoomextent"
                label="Zoom to map extents"
                style="push"
-               toolbarPath="maptools">
+               toolbarPath="maptools"
+               tooltip="Zoom to full extents of all layers">
          </action>
          <action
                class="org.wcs.smart.ui.map.AddLayerAction"
@@ -311,7 +312,8 @@
                id="org.wcs.smart.ui.map.addlayer"
                label="Add Layer "
                style="push"
-               toolbarPath="layertools">
+               toolbarPath="layertools"
+               tooltip="Add a layer to the map">
          </action>
       </viewContribution>
    </extension>
@@ -384,6 +386,29 @@
       <class
             class="org.wcs.smart.ca.datamodel.DmObject">
       </class>
+   </extension>
+   <extension
+         point="net.refractions.udig.project.ui.tool">
+      <actionTool
+            categoryId="org.wcs.smart.udig.addlayer"
+            class="org.wcs.smart.udig.AddLayerTool"
+            icon="images/icons/clcl16/layer_add.png"
+            id="org.wcs.smart.udig.AddLayer"
+            name="Add Layer"
+            tooltip="Add Layer To Map">
+      </actionTool>
+      <category
+            id="org.wcs.smart.udig.addlayer">
+      </category>
+      <actionTool
+            categoryId="org.wcs.smart.udig.addlayer"
+            class="org.wcs.smart.udig.ZoomLayersTool"
+            icon="images/icons/clcl16/zoom_layers.png"
+            id="org.wcs.smart.udig.ZoomExtents"
+            name="Zoom to map extents"
+            onToolbar="false"
+            tooltip="Zoom to map extents">
+      </actionTool>
    </extension>
 
 </plugin>

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ca;
 
+import java.util.Arrays;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -80,5 +82,25 @@ public class Language {
 	}
 	public void setDefault(boolean isDefault) {
 		this.isDefault = isDefault;
+	}
+	
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Language){
+			Language s = (Language)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return s.hashCode() == hashCode();
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}
+		return super.hashCode();
 	}
 }

@@ -33,6 +33,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cascade;
@@ -66,6 +67,20 @@ public class AttributeTreeNode extends DmObject {
 	
 	public void setNodeOrder(int nodeOrder){
 		this.nodeOrder = nodeOrder;
+	}
+	
+	/**
+	 * computes the full key for the category.  This is of
+	 * the form <parent key>.<parent key>.<parent key>...<category key>
+	 * @return
+	 */
+	@Transient
+	public String getFullKey(){
+		if (parent != null){
+			return parent.getFullKey() + "." + getKeyId();
+		}else{
+			return getKeyId();
+		}
 	}
 	
 	@OneToMany(fetch=FetchType.LAZY)

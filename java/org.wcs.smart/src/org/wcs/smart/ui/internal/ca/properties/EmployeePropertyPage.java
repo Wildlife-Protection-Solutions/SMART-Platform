@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -263,7 +264,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 * user for employee information
 	 */
 	private void createNewEmployee(){
-		EmployeeDialog dia = new EmployeeDialog(getShell(), null, ca, getAgencies());
+		EmployeeDialog dia = new EmployeeDialog(getShell(), null, ca, getAgencies(), getSession());
 		dia.open();
 		
 		employees.clear();
@@ -281,9 +282,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			return;
 		}
 		Employee e = (Employee)sec.getFirstElement();
-		EmployeeDialog dia = new EmployeeDialog(getShell(), e, ca, getAgencies());
-		dia.open();
-		
+		EmployeeDialog dia = new EmployeeDialog(getShell(), e, ca, getAgencies(), getSession());
+		dia.open();		
 		tblEmployee.refresh();
 	}
 

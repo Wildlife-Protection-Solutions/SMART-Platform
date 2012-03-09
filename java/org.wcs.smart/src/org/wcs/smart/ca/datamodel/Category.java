@@ -73,6 +73,19 @@ public class Category extends DmObject{
 	}
 	
 	/**
+	 * computes the full key for the category.  This is of
+	 * the form <parent key>.<parent key>.<parent key>...<category key>
+	 * @return
+	 */
+	@Transient
+	public String getFullKey(){
+		if (parent != null){
+			return parent.getFullKey() + "." + getKeyId();
+		}else{
+			return getKeyId();
+		}
+	}
+	/**
 	 * 
 	 * @return if multiple observations can be recorded for this category
 	 */

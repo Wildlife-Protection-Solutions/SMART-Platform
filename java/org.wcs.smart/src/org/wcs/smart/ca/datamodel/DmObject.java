@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -38,6 +39,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.ConservationArea;
@@ -112,7 +115,8 @@ public class DmObject {
 	 * language the platform is running in.
 	 */
 	@Type(type="org.wcs.smart.ca.LabelUserType")
-	@Column(name="uuid", insertable=false, updatable=false)
+	@Column(name="uuid", insertable=false, updatable=false)	
+	@Basic(fetch = FetchType.LAZY)
 	public String getName() {
 		return name;
 	}
@@ -147,7 +151,7 @@ public class DmObject {
 	public String findName(Language lang){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
-			if ( Arrays.equals(type.getLanguageuuid(), lang.getUuid())){
+			if ( type.getLanguage().equals(lang) ){
 				return type.getValue();
 			}
 		}
@@ -164,7 +168,7 @@ public class DmObject {
 	public void updateName(Language lang, String newName){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
-			if ( Arrays.equals(type.getLanguageuuid(), lang.getUuid())){
+			if ( type.getLanguage().equals(lang) ){
 				type.setValue(newName);
 				return;
 			}
@@ -172,7 +176,7 @@ public class DmObject {
 		//create a new label
 		Label lbl = new Label( );
 		lbl.setElementuuid(getUuid());
-		lbl.setLanguageuuid(lang.getUuid());
+		lbl.setLanguage(lang);
 		lbl.setValue(newName);
 		getNames().add(lbl);
 		
@@ -228,7 +232,7 @@ public class DmObject {
 				String value = oldObject.findName(ll);
 				Label lblClone = new Label();
 				lblClone.setValue(value);
-				lblClone.setLanguageuuid(newLang.getUuid());
+				lblClone.setLanguage(newLang);
 				this.getNames().add(lblClone);
 			}
 					
@@ -237,7 +241,7 @@ public class DmObject {
 				String value = oldObject.findName(ll);
 				Label lblClone = new Label();
 				lblClone.setValue(value);
-				lblClone.setLanguageuuid(newCa.getDefaultLanguage().getUuid());
+				lblClone.setLanguage(newCa.getDefaultLanguage());
 				this.getNames().add(lblClone);
 					
 			}

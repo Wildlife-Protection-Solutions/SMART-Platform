@@ -134,7 +134,7 @@ public class SimpleList {
 	public String findName(Language lang){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
-			if ( Arrays.equals(type.getLanguageuuid(), lang.getUuid())){
+			if (type.getLanguage().equals(lang)){
 				return type.getValue();
 			}
 		}
@@ -150,7 +150,7 @@ public class SimpleList {
 	public void updateName(Language lang, String newName){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
-			if ( Arrays.equals(type.getLanguageuuid(), lang.getUuid())){
+			if (type.getLanguage().equals(lang)){
 				type.setValue(newName);
 				return;
 			}
@@ -158,7 +158,7 @@ public class SimpleList {
 		//create a new label
 		Label lbl = new Label( );
 		lbl.setElementuuid(getUuid());
-		lbl.setLanguageuuid(lang.getUuid());
+		lbl.setLanguage(lang);
 		lbl.setValue(newName);
 		getNames().add(lbl);
 		

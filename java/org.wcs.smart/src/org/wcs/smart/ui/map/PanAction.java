@@ -1,17 +1,18 @@
 package org.wcs.smart.ui.map;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.tools.internal.PanTool;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IEditorActionDelegate;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 
 public class PanAction implements IViewActionDelegate {
 
 	private MapView view = null;
+	
 	private String PanToolId = "net.refractions.udig.tools.Pan";
 	private PanTool tool = new PanTool();
 	
@@ -33,5 +34,7 @@ public class PanAction implements IViewActionDelegate {
 	public void init(IViewPart view) {
 		this.view = (MapView)view;
 	}
+
+
 
 }

@@ -57,15 +57,19 @@ public class EmployeeDialog extends Dialog {
 	private List<Agency> agencies;
 	
 	private String title = null;
+	private Session session = null;
 	
 	/**
 	 * Create the dialog.
+	 * 
+	 * 
+	 * 
 	 * @param parent
 	 * @param style
 	 */
 	public EmployeeDialog(Shell parent,  
 			Employee toUpdate, ConservationArea ca,
-			List<Agency> agencies) {
+			List<Agency> agencies, Session session) {
 		
 		super(parent);
 		if (toUpdate == null){
@@ -77,6 +81,7 @@ public class EmployeeDialog extends Dialog {
 		this.toUpdate = toUpdate;
 		this.agencies = agencies;
 		this.ca = ca;
+		this.session = session;
 	}
 
 	@Override
@@ -126,9 +131,11 @@ public class EmployeeDialog extends Dialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			if (performSave()){
+				setReturnCode(OK);
 				close();
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
+			setReturnCode(CANCEL);
 			close();
 		}
 	}
@@ -144,7 +151,7 @@ public class EmployeeDialog extends Dialog {
 				}					
 			}
 			
-			if (!HibernateManager.validateUserIdUnique(smartUser,ca)){
+			if (!HibernateManager.validateUserIdUnique(smartUser,ca, session)){
 				MessageDialog.openError(this.getShell(), "Invalid User Id", "User Id already exists.  Please select a different user id");
 				return false;
 			}
@@ -166,7 +173,6 @@ public class EmployeeDialog extends Dialog {
 			}
 			eComposite.updateEmploye(toUpdate);
 			
-			Session session = HibernateManager.openSession();
 			Transaction tx = session.beginTransaction();
 			try{
 				if (toUpdate.getId() == null){
@@ -178,23 +184,21 @@ public class EmployeeDialog extends Dialog {
 					//in the database
 					String error = HibernateManager.validateSmartUserChanges(session, toUpdate);
 					if (error != null){
-						//cannot make required changes
-						session.refresh(toUpdate);
 						tx.rollback();
+						session.refresh(toUpdate);
 						SmartPlugIn.displayLog(getShell(), error, null);
 						return false;
 					}
 				}
+				//save results to database
 				session.saveOrUpdate(toUpdate);	
-				
 				tx.commit();
 				return true;
 			}catch (RuntimeException ex){
 				tx.rollback();
+				session.close();
 				SmartPlugIn.displayLog(getShell(),"Error saving employees: " + ex.getMessage(), ex);
 				return false;
-			}finally{
-				session.close();
 			}
 		}
 		return false;

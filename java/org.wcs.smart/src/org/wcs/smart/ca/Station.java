@@ -22,7 +22,6 @@
 package org.wcs.smart.ca;
 
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -115,7 +114,7 @@ public class Station extends SimpleList {// implements Serializable{
 			Session sess = HibernateManager.openSession();
 			sess.beginTransaction();
 			Criteria r = sess.createCriteria(Label.class);
-			r.add(Restrictions.eq("elementuuid", this.descuuid));
+			r.add(Restrictions.eq("id.elementuuid", this.descuuid));
 			this.descriptions.addAll( r.list() );
 			sess.getTransaction().commit();
 			sess.close();
@@ -158,7 +157,7 @@ public class Station extends SimpleList {// implements Serializable{
 		if (lbl == null){
 			lbl = new Label();
 			lbl.setElementuuid(getUuid());
-			lbl.setLanguageuuid(lang.getUuid());
+			lbl.setLanguage(lang);
 			getDescriptions().add(lbl);
 		}
 		lbl.setValue(description);
@@ -167,7 +166,7 @@ public class Station extends SimpleList {// implements Serializable{
 	
 	private Label findValue(Set<Label> list, Language lang){
 		for(Label lbl : list){
-			if (Arrays.equals(lbl.getLanguageuuid(), lang.getUuid())){
+			if (lbl.getLanguage().equals(lang)){
 				return lbl;
 			}
 		}
