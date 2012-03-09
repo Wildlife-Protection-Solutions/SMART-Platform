@@ -243,7 +243,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-			Composite dateFilterExpComp = createGroupComposite("Start Date", composite);
+			Composite dateFilterExpComp = createGroupComposite("Patrol Dates", composite);
 			createDateFilter(dateFilterExpComp);
 
 			Composite patrolType = createGroupComposite("Patrol Type", composite);
@@ -351,7 +351,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 			}
 		});
 		lblStartDateBetween = new Label(comp, SWT.NONE);
-		lblStartDateBetween.setText(" Start Date Between");
+		lblStartDateBetween.setText("Contains Date Between");
 		
 		
 		dtStart = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);

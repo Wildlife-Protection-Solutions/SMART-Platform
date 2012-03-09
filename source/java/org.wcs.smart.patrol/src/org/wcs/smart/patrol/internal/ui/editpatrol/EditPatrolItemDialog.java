@@ -118,7 +118,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				MessageDialog.openError(getShell(), "Error", ex.getMessage());
 				return false;
 			}
-			if (PatrolHibernateManager.savePatrol(patrol, s, null)){
+			if (PatrolHibernateManager.savePatrol(patrol, s)){
 				setChangesMade(false);
 				return true;
 			}

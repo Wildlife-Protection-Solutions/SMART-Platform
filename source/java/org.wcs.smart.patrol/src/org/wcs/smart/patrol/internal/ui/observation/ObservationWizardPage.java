@@ -126,32 +126,34 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	public IWizardPage getPreviousPage() {
 		isNext = false;
 		if (((ObservationWizard)getWizard()).getAllObservations().size() > 0){
-			if (nextPage == null){
-				nextPage = new ObservationSummaryWizardPage((Wizard) getWizard());
-			}
-			return nextPage;
+//			if (nextPage == null){
+//				nextPage = new ObservationSummaryWizardPage((Wizard) getWizard());
+//			}
+//			return nextPage;
+			return new ObservationSummaryWizardPage((Wizard) getWizard());
 		}
 		return null;
 		
 	}
 	
-	private ObservationSummaryWizardPage nextPage;
-	private AttributeWizardPage nextPageAtt;
+//	private ObservationSummaryWizardPage nextPage;
+//	private AttributeWizardPage nextPageAtt;
 	
 	@Override
     public IWizardPage getNextPage() {
 		isNext = true;
 		Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
 		if (o instanceof Category && ((Category)o).hasAttributes()  ){
-			if (nextPageAtt == null){
-				nextPageAtt = new AttributeWizardPage((Wizard)getWizard());
-			}
-			return nextPageAtt;
+//			if (nextPageAtt == null){
+//				nextPageAtt = 
+//			}
+			return new AttributeWizardPage((Wizard)getWizard());
 		}else{
-			if (nextPage == null){
-				nextPage = new ObservationSummaryWizardPage((Wizard) getWizard());
-			}
-			return nextPage;
+//			if (nextPage == null){
+//				nextPage = new ObservationSummaryWizardPage((Wizard) getWizard());
+//			}
+//			return nextPage;
+			return new ObservationSummaryWizardPage((Wizard) getWizard());
 			
 		}
     }
@@ -181,6 +183,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 			}
 			return true;
 		}
+		
 		return false;
 	}
 

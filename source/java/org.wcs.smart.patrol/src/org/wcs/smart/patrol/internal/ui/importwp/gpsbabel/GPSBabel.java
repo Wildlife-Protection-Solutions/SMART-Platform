@@ -144,7 +144,7 @@ public class GPSBabel {
 	/**
 	 * Trys to read data from the gps device and write it to a temporary file.
 	 * Will first try the usb then com1 then fail.
-	 * 
+	 * <p>The caller of this function is responsible for deleting the temporary file.</p>
 	 * @param deviceType the type of device.
 	 * @param types waypoint or tracks
 	 * @return A gpx file of the data imported from the device.  May return null if file not created.

@@ -84,15 +84,18 @@ public class AttributeTableEditingSupport extends EditingSupport {
 					table.getTable(), SWT.READ_ONLY | SWT.DROP_DOWN);
 			e.setContentProvider(ArrayContentProvider.getInstance());
 
-			if (attribute.getIsRequired()) {
-				e.setInput(attribute.getAttributeList().toArray());
-			} else {
-				// add blank field
-				List<AttributeListItem> its = new ArrayList<AttributeListItem>();
-				its.add(new AttributeListItem());
-				its.addAll(attribute.getAttributeList());
-				e.setInput(its.toArray());
+			//display only active items
+			ArrayList<AttributeListItem> enabledItems = new ArrayList<AttributeListItem>();
+			for (AttributeListItem it : attribute.getAttributeList()){
+				if (it.getIsActive()){
+					enabledItems.add(it);
+				}
 			}
+			if (!attribute.getIsRequired()){
+				//add blank item (for optional)
+				enabledItems.add(0, new AttributeListItem());
+			}
+			e.setInput(enabledItems.toArray());
 			e.setLabelProvider(new LabelProvider() {
 				@Override
 				public String getText(Object element) {

@@ -27,7 +27,8 @@ public class PatrolEventManager {
 	public static enum EventType{
 		PATROL_ADDED,
 		PATROL_DELETED,
-		PATROL_MODIFIED
+		PATROL_MODIFIED, 
+		PATROL_SAVED
 	}
 	
 	/**
@@ -82,6 +83,13 @@ public class PatrolEventManager {
 	 */
 	public void patrolAdded(Patrol patrol){
 		fireListeners(EventType.PATROL_ADDED, -1, patrol);
+	}
+	
+	/**
+	 * Fires a patrol added event
+	 */
+	public void patrolSaved(Patrol patrol){
+		fireListeners(EventType.PATROL_SAVED, -1, patrol);
 	}
 	
 	/**
@@ -142,7 +150,7 @@ public class PatrolEventManager {
 		 * attributeChanged - is the type of attribute modified
 		 * 
 		 * @param attributeChanged  -1 if patrol added or removed
-		 * @param source
+		 * @param source the source object of the event.  Either a Patrol object or PatrolLegDay object
 		 */
 		public void eventFired(int attributeChanged, Object source);
 	}

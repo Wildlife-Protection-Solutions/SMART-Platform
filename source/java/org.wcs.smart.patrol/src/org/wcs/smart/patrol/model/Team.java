@@ -171,8 +171,9 @@ public class Team extends SimpleList{
 			this.descriptions = new HashSet<Label>();
 			Session sess = PatrolHibernateManager.openSession();
 			sess.beginTransaction();
+			
 			Criteria r = sess.createCriteria(Label.class);
-			r.add(Restrictions.eq("elementuuid", this.descuuid));
+			r.add(Restrictions.eq("id.elementuuid", this.descuuid));
 			this.descriptions.addAll( r.list() );
 			sess.getTransaction().commit();
 			sess.close();
@@ -219,7 +220,7 @@ public class Team extends SimpleList{
 		if (lbl == null){
 			lbl = new Label();
 			lbl.setElementuuid(getUuid());
-			lbl.setLanguageuuid(lang.getUuid());
+			lbl.setLanguage(lang);
 			getDescriptions().add(lbl);
 		}
 		lbl.setValue(description);
@@ -227,7 +228,7 @@ public class Team extends SimpleList{
 	}
 	private Label findValue(Set<Label> list, Language lang){
 		for(Label lbl : list){
-			if (Arrays.equals(lbl.getLanguageuuid(), lang.getUuid())){
+			if (lbl.getLanguage().equals(lang)){
 				return lbl;
 			}
 		}

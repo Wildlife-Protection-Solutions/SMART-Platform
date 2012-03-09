@@ -131,8 +131,8 @@ public class Track {
 		GeodeticCalculator cal = new GeodeticCalculator();
 		double distance = 0;
 		for (int i = 1; i < ls.getCoordinates().length; i ++){
-			cal.setStartingGeographicPoint(ls.getCoordinateN(i-1).y, ls.getCoordinateN(i-1).x);
-			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).y, ls.getCoordinateN(i).x);
+			cal.setStartingGeographicPoint(ls.getCoordinateN(i-1).x, ls.getCoordinateN(i-1).y);
+			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y);
 			distance +=cal.getOrthodromicDistance();
 		}
 		this.distance = (float)(distance / 1000.0);

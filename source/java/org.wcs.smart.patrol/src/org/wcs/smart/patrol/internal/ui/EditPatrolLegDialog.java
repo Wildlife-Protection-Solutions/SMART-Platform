@@ -137,6 +137,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		lbl = new Label(patrolIdComp, SWT.NONE);
 		lbl.setText("Leg Id:" );
 		txtLegId = new Text(patrolIdComp, SWT.BORDER);
+		txtLegId.setTextLimit(PatrolLeg.ID_MAX_SIZE);
 		txtLegId.setText(editLeg.getId());
 		txtLegId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		

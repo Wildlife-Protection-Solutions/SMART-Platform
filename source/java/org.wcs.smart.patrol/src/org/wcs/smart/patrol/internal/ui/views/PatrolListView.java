@@ -37,12 +37,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
@@ -53,6 +55,7 @@ import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -86,7 +89,7 @@ public class PatrolListView extends ViewPart {
 				int i = 0;
 				for (Iterator iterator = results.iterator(); iterator.hasNext();) {
 					Object[] data = (Object[]) iterator.next();					
-					input[i++] = new PatrolEditorInput((byte[])data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3]);
+					input[i++] = new PatrolEditorInput((byte[])data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3], (Date)data[4]);
 				}
 				
 				monitor.internalWorked(0.5);
@@ -163,7 +166,7 @@ public class PatrolListView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof PatrolEditorInput){
-					return ((PatrolEditorInput)element).getPatrolId() + "  [" + DateFormat.getDateInstance(DateFormat.MEDIUM).format( ((PatrolEditorInput)element).getStartDate()) + " ]";
+					return ((PatrolEditorInput)element).getPatrolId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getStartDate()) + "  - " + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getEndDate()) + " ]";
 				}
 				return super.getText(element);
 			}
@@ -182,11 +185,13 @@ public class PatrolListView extends ViewPart {
 			public void doubleClick(DoubleClickEvent event) {
 				PatrolEditorInput p = (PatrolEditorInput)((IStructuredSelection)patrolListViewer.getSelection()).getFirstElement();
 				if (p != null){
+					IEditorPart openedPage  = null;
+					IWorkbenchPage page = null;
 					try {
-						IWorkbenchPage page = getSite().getPage();
-						page.openEditor(p, PatrolEditor.ID);
-					} catch (PartInitException e) {
-						throw new RuntimeException(e);
+						page = getSite().getPage();
+						openedPage = page.openEditor(p, PatrolEditor.ID);						
+					} catch (Throwable t) {
+						SmartPatrolPlugIn.displayLog(t.getMessage(), t);
 					}
 				}
 				

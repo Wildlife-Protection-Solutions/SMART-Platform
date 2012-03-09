@@ -64,6 +64,7 @@ import ucar.nc2.constants.CF;
 @Table(name="smart.patrol_leg")
 public class PatrolLeg {
 	
+	public static final int ID_MAX_SIZE = 50;
 	private byte[] uuid;
 	private Patrol patrol;
 	private Date startDate;

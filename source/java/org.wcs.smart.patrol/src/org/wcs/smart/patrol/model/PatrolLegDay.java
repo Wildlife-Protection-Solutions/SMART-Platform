@@ -139,8 +139,8 @@ public class PatrolLegDay {
 	
 	@Transient
 	public Track getTrack(){
-		if (this.tracks != null && this.tracks.size() > 0){
-			return this.tracks.get(0);
+		if (getTracks() != null && getTracks().size() > 0){
+			return getTracks().get(0);
 		}
 		return null;
 	}

@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 import org.eclipse.jface.wizard.WizardPage;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -46,5 +47,13 @@ public abstract class NewPatrolWizardPage extends WizardPage {
 	 * @param p patrol to update
 	 */
 	abstract void updateModel(Patrol p);
-	
+
+	/**
+	 * Updates the current page gui components with the values
+	 * from the patrol
+	 * 
+	 * @param p patrol to use when updating gui components
+	 * @param session the current hibernate session
+	 */
+	abstract void initModel(Patrol p, Session session);
 }

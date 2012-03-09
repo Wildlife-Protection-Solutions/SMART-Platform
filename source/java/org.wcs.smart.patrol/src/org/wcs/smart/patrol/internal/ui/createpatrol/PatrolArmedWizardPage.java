@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -50,14 +51,8 @@ public class PatrolArmedWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		compArmed = new ArmedComposite();
-		
 		setMessage("Identify whether the patrol was armed or not armed.");
 		super.setControl(compArmed.createComponent(parent, SWT.NONE));
-		
-
-		CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
-		compArmed.setValues(wizard.getPatrol(), wizard.getSession());
-		
 	}
    
 	/**
@@ -79,6 +74,14 @@ public class PatrolArmedWizardPage extends NewPatrolWizardPage {
 	@Override
 	void updateModel(Patrol p) {
 		compArmed.updatePatrol(p);
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 */
+	@Override
+	void initModel(Patrol p, Session session) {
+		compArmed.setValues(p, session);		
 	}
 
 }

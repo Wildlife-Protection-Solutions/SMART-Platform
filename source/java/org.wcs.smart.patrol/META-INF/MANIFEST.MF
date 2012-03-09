@@ -9,7 +9,12 @@ Require-Bundle: org.wcs.smart;bundle-version="0.0.1",
  org.eclipse.core.runtime;bundle-version="3.7.0",
  org.eclipse.jface.databinding;bundle-version="1.5.0",
  org.eclipse.core.databinding.observable;bundle-version="1.4.0",
- org.eclipse.ui.forms;bundle-version="3.5.100"
+ org.eclipse.ui.forms;bundle-version="3.5.100",
+ net.refractions.udig.catalog;bundle-version="1.3.0",
+ net.refractions.udig.ui;bundle-version="1.3.0",
+ net.refractions.udig.project.ui;bundle-version="1.3.1",
+ org.eclipse.gef;bundle-version="3.7.1",
+ net.refractions.udig.tool.info;bundle-version="1.2.3"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.patrol.SmartPatrolPlugIn
 Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs

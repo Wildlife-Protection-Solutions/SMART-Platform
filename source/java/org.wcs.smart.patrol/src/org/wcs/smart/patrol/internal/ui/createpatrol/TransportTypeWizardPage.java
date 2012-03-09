@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.PatrolTransportComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -74,15 +75,11 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 	}
 
 	/**
-	 * 
-	 */
+     * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+     */
     @Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (visible) {
-        	CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
-        	transportType.setValues(wizard.getPatrol(), wizard.getSession());
-        }
+    public void initModel(Patrol p, Session session) {
+       	transportType.setValues(p, session);
     }
     
 	/**
@@ -94,4 +91,5 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 		setPageComplete(true);
 	}
 
+	
 }

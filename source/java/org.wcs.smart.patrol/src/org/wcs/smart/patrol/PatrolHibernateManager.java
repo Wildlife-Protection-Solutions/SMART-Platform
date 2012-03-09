@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.patrol;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -34,10 +34,10 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -45,8 +45,6 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachment;
-import org.wcs.smart.patrol.model.WaypointObservation;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
  * Extension of the smart hibernate manager for patrol related data.
@@ -230,6 +228,29 @@ public class PatrolHibernateManager extends HibernateManager{
 	}
 	
 	/**
+	 * Gets all  transportation types for a given patrol type in a given
+	 * conservation area.
+	 * 
+	 * @param ca conservation area
+	 * @param s active session
+	 * @param type patrol type 
+	 * @return list of transportation types for the given patrol type
+	 */
+	public static List<PatrolTransportType> getPatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
+		s.beginTransaction();
+		List<PatrolTransportType> types = null;
+		try{
+			types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).list();
+			s.getTransaction().commit();
+			return types;
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
+			s.close();
+		}
+		return null;
+	}
+	
+	/**
 	 * Gets all patrol types (active and in-active)
 	 * for a given conservation area.
 	 * 
@@ -313,72 +334,6 @@ public class PatrolHibernateManager extends HibernateManager{
 		
 	}
 	
-	/**
-	 * Saves a patrol.
-	 * 
-	 * @param p patrol to save
-	 * @param s active session
-	 * @param objectsToDelete items removed from the patrol that need to be deleted from the database
-	 * 
-	 * @return <code>true</code> if saved successfully, <code>false</code> if failed to save
-	 */
-	public static boolean  savePatrol(Patrol p, Session s, List<Object> objectsToDelete){
-		s.beginTransaction();
-		
-		try{
-			if (p.getId() == null){
-				String id = PatrolHibernateManager.generatePatrolId(p, s);
-				p.setId(id);
-			}
-//			
-//			if (objectsToDelete != null){
-//				for (Object toDelete :objectsToDelete){
-//					s.delete(toDelete);
-//				}
-//			}
-			s.saveOrUpdate(p);
-//			for (PatrolLeg leg: p.getLegs()){
-//				s.saveOrUpdate(leg);
-//				for (PatrolLegDay day : leg.getPatrolLegDays()){
-//					//s.merge(day);
-//					//s.refresh(day);
-//					s.saveOrUpdate(day);
-//					if (day.getWaypoints() != null){
-//						for (Waypoint wpt : day.getWaypoints()){
-//							s.saveOrUpdate(wpt);
-//						
-//							if (wpt.getAttachments() != null){
-//								for (WaypointAttachment attachment: wpt.getAttachments()){
-//									s.saveOrUpdate(attachment);
-//								}
-//							}
-//							if (wpt.getObservations() != null){
-//								for (WaypointObservation observation : wpt.getObservations()){
-//									s.saveOrUpdate(observation);
-//									if (observation.getAttributes() != null){
-//										for(WaypointObservationAttribute att : observation.getAttributes()){
-//											s.saveOrUpdate(att);
-//										}
-//									}
-//								}
-//							}
-//						}
-//					}
-//				}
-//				
-//				for (PatrolLegMember member : leg.getMembers()){
-//					s.saveOrUpdate(member);
-//				}
-//			}
-			s.getTransaction().commit();
-			return true;
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Could not save patrol. " + ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			s.close();
-		}
-		return false;
-	}
 	
 	/**
 	 * Computes the next patrol id;
@@ -408,5 +363,65 @@ public class PatrolHibernateManager extends HibernateManager{
 		sb.append(PATROL_ID_FORMATTER.format(cnt));
 		return sb.toString();
 		
+	}
+	
+	/**
+	 * Saves a given patrol to the database.
+	 * 
+	 * @param patrol the patrol to save
+	 * @param session the database session to use
+	 * @return <code>true</code> if saved successfully, <code>false</code> if error
+	 */
+	public static boolean savePatrol(Patrol patrol, Session session){
+		session.beginTransaction();
+		try{
+			if (patrol.getId() == null){
+				String id = PatrolHibernateManager.generatePatrolId(patrol, session);
+				patrol.setId(id);
+			}
+			
+			//save
+			session.saveOrUpdate(patrol);
+			
+			File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath() );
+			if (!f.exists()){
+				SmartPlugIn.createDirectory(f);
+			}
+			
+			//sync attachments 
+			//save new ones
+			for (PatrolLeg leg: patrol.getLegs()){
+				for (PatrolLegDay day : leg.getPatrolLegDays()){
+					if (day.getWaypoints() ==null) continue;
+					for (Waypoint wp : day.getWaypoints()){
+						if (wp.getAttachments() ==null) continue;
+						for (WaypointAttachment attachment : wp.getAttachments()){
+							if (attachment.getCopyFromLocation() != null){
+								int counter = 1;
+								
+								File to = new File(f.getAbsoluteFile() + File.separator + attachment.getFilename());
+								while(to.exists()){
+									String name = (counter++) + "_" + attachment.getFilename();
+									to = new File(f.getAbsoluteFile() + File.separator + name);
+								}
+								if (!SmartPlugIn.copyFile(attachment.getCopyFromLocation(), to)){
+									throw new RuntimeException("Patrol modifications could not be saved because attachment could not be copied.  Ensure write permissions to directory or remove attachment.");
+								}else{
+									attachment.setFilename(to.getName());
+									attachment.setCopyFromLocation(null);
+								}
+							}
+						}
+					}
+				}
+			}
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			session.getTransaction().rollback();
+			session.close();
+			SmartPatrolPlugIn.displayLog("Could not save patrol. " + ex.getMessage(), ex);
+			return false;
+		}
+		return true;
 	}
 }

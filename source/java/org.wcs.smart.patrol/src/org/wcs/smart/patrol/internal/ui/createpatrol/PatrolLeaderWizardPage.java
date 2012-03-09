@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.LeaderPilotComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -61,24 +62,7 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 		leaderComposite.createComponent(main, SWT.NONE);
 		super.setControl(main);
 	}
-	
-	/**
-	 * 
-	 */
-	@Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        if (visible) {
-        	CreatePatrolWizard wizard = ((CreatePatrolWizard)getWizard());
-        	leaderComposite.setValues(wizard.getPatrol(), wizard.getSession());
-        	if (wizard.getPatrol().hasPilot()){
-        		setMessage("Select the patrol leader and patrol pilot.");
-        	}else{
-        		setMessage("Select the patrol leader.");
-        	}
-        }
-    }
-	
+
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
 	 */
@@ -86,5 +70,18 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 	void updateModel(Patrol p) {
 		leaderComposite.updatePatrol(p);
 		setPageComplete(true);
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 */
+	@Override
+	void initModel(Patrol p, Session session) {
+		leaderComposite.setValues(p, session);
+    	if (p.hasPilot()){
+    		setMessage("Select the patrol leader and patrol pilot.");
+    	}else{
+    		setMessage("Select the patrol leader.");
+    	}	
 	}
 }

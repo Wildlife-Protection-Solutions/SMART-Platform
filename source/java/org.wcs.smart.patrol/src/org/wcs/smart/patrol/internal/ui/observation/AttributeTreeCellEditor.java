@@ -51,7 +51,6 @@ public class AttributeTreeCellEditor extends DialogCellEditor{
 		final AttributeTreeDialog dialog = new AttributeTreeDialog(super.getControl().getShell(), wp.getAttribute());
 
 		if (dialog.open() == Window.CANCEL) {
-			setValue(null);
 			return null;
 		}
 		wp.setAttributeTreeNode(dialog.getSelection());

@@ -21,10 +21,14 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -39,8 +43,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
  * Waypoint object
@@ -128,8 +134,25 @@ public class Waypoint {
 		return time;
 	}
 
+	/**
+	 * When the time is set; any date information is removed.
+	 * 
+	 * @param time
+	 */
 	public void setTime(Time time) {
-		this.time = time;
+		//remove the date part from the time
+		
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(time);
+		int hour = cal.get(Calendar.HOUR_OF_DAY);
+		int min = cal.get(Calendar.MINUTE);
+		int sec = cal.get(Calendar.SECOND);
+		
+		cal.setTimeInMillis(0);
+		cal.set(Calendar.HOUR_OF_DAY, hour);
+		cal.set(Calendar.MINUTE, min);
+		cal.set(Calendar.SECOND, sec);
+		this.time = new Time( cal.getTime().getTime() );
 	}
 
 	@Column(name="direction")
@@ -185,15 +208,9 @@ public class Waypoint {
 	}
 	
 	
-	public Waypoint clone(){
+	public Waypoint clone() {
 		
 		Waypoint wp = new Waypoint();
-		
-		
-		if (this.attachments != null){
-			//TODO: this may be a problem
-			wp.setAttachments(new ArrayList<WaypointAttachment>());
-		}
 		
 		wp.setComment(this.comment);
 		wp.setDirection(this.direction);
@@ -216,6 +233,29 @@ public class Waypoint {
 				cloned.setUuid(null);
 				cloned.setWaypoint(wp);
 				wp.getObservations().add(cloned);
+			}
+		}
+		
+		if (this.attachments != null) {
+			wp.setAttachments(new ArrayList<WaypointAttachment>());
+			for (WaypointAttachment sp : this.attachments) {
+				WaypointAttachment att = new WaypointAttachment();
+				try {
+					// copy file to emp location so it won't be deleted out from
+					// under us
+					File tmpLocation = File.createTempFile(
+							"smart_" + System.nanoTime(), "");
+					tmpLocation.deleteOnExit();
+					FileUtils.copyFile(sp.getFullFile(), tmpLocation);
+
+					att.setCopyFromLocation(tmpLocation);
+					att.setFilename(sp.getFilename());
+					att.setWaypoint(wp);
+					wp.getAttachments().add(att);
+				} catch (IOException ex) {
+					SmartPatrolPlugIn.displayLog("Could not move attachment " + sp.getFilename(), ex);
+				}
+
 			}
 		}
 		

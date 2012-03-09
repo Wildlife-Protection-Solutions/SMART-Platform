@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class GPSDataImport {
 	 */
 	public enum ImportType{
 		WAYPOINT ("Waypoint", "Select the waypoints to import.  The name and date/time of the waypoint is listed below.  If the date/time is not listed it could not be determined."), 
-		TRACK("Track", "Select the track points to create track from.  The track points listed below contain the track name and the datetime of the track point.  If the datetime is not listed then it could not be read.");
+		TRACK("Track", "Select the track points to import.  Track points listed below contain the track name and the datetime (if available) of the track point.");
 		
 		public String guiName;
 		public String importDesc;
@@ -107,10 +108,18 @@ public class GPSDataImport {
 
 		monitor.setTaskName("Importing Data from GPS Device");
 		File f = GPSBabel.getData(deviceType, dataType);
-		monitor.setTaskName("Reading data");
-		Map<ImportType, Object> vals = convertGpx(f, day, dataType, monitor);
-		for (ImportType type : dataType) {
-			data.put(type, vals.get(type));
+		try {
+			monitor.setTaskName("Reading data");
+			Map<ImportType, Object> vals = convertGpx(f, day, dataType, monitor);
+			for (ImportType type : dataType) {
+				data.put(type, vals.get(type));
+			}
+		} finally {
+			try {
+				f.delete();
+			} catch (Exception ex) {
+				SmartPatrolPlugIn.log("Error deleting patrol data file.", ex);
+			}
 		}
 
 		return data;
@@ -174,19 +183,22 @@ public class GPSDataImport {
 					//find the leg day
 					boolean found = false;
 					for (PatrolLegDay legday : leg.getPatrolLegDays()){
-						List<Coordinate> trackpnts = tracks.get(legday);
-						if (trackpnts == null){
-							trackpnts = new ArrayList<Coordinate>();
-							tracks.put(legday, trackpnts);
-						}
-						
 						Date start = SmartPlugIn.combineDateTime(legday.getDate(), legday.getStartTime());
 						Date end = SmartPlugIn.combineDateTime(legday.getDate(), legday.getEndTime());
 						if (betweenDates(wpdt, start, end)){
-							trackpnts.add(point);
 							found = true;
+							
+							List<Coordinate> trackpnts = tracks.get(legday);
+							if (trackpnts == null){
+								trackpnts = new ArrayList<Coordinate>();
+								tracks.put(legday, trackpnts);
+							}
+							trackpnts.add(point);
 						}
+					
+					
 					}
+					
 					if (!found) {
 						// start time could not be found; assign based on date only
 						for (PatrolLegDay legday : leg.getPatrolLegDays()) {
@@ -226,8 +238,8 @@ public class GPSDataImport {
 	 * 
 	 * @return list of patrol leg days modified
 	 */
-	public static List<PatrolLegDay> assignWaypoints(List<Waypoint> waypoints, List<PatrolLeg> patrolLegs){
-		List<PatrolLegDay> modified = new ArrayList<PatrolLegDay>();
+	public static Set<PatrolLegDay> assignWaypoints(List<Waypoint> waypoints, List<PatrolLeg> patrolLegs){
+		Set<PatrolLegDay> modified = new HashSet<PatrolLegDay>();
 		
 		for (Waypoint point : waypoints){
 			
@@ -237,7 +249,7 @@ public class GPSDataImport {
 				continue;
 			}
 			for(PatrolLeg leg : patrolLegs){
-				if (betweenDates(wpdt, leg.getStartDate(), leg.getEndDate())){
+				if (betweenDates(SmartPlugIn.getDatePart(wpdt,false), leg.getStartDate(), leg.getEndDate())){
 					//find the leg day
 					boolean found = false;
 					for (PatrolLegDay legday : leg.getPatrolLegDays()){
@@ -397,16 +409,24 @@ public class GPSDataImport {
 			}
 			if (wpdt == null) {
 				try {
-					// 24short
-					wpdt = DateFormat.getDateInstance(DateFormat.SHORT).parse(
+					// short
+					wpdt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(
 							wptType.getCmt());
 				} catch (ParseException e) {
 				}
 			}
 			if (wpdt == null) {
 				try {
-					// 24short
-					wpdt = DateFormat.getDateInstance(DateFormat.MEDIUM).parse(
+					// medium
+					wpdt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).parse(
+							wptType.getCmt());
+				} catch (ParseException e) {
+				}
+			}
+			if (wpdt == null) {
+				try {
+					// medium
+					wpdt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).parse(
 							wptType.getCmt());
 				} catch (ParseException e) {
 				}
@@ -414,8 +434,8 @@ public class GPSDataImport {
 
 			if (wpdt == null) {
 				try {
-					// 24short
-					wpdt = DateFormat.getDateInstance(DateFormat.LONG).parse(
+					// long
+					wpdt = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).parse(
 							wptType.getCmt());
 				} catch (ParseException e) {
 				}
@@ -469,76 +489,60 @@ public class GPSDataImport {
 	 * 
 	 */
 	public static Map<ImportType, Object> convertGpx(File gpxFile, Date day, Set<ImportType> dataType, IProgressMonitor monitor){
-		HashMap<ImportType, Object> data = new HashMap<ImportType, Object>();
+		
+		HashMap<ImportType, Object> data = new HashMap<ImportType, Object>();		
+		Date plddt = null;
+		if (day != null){
+			plddt = SmartPlugIn.getDatePart(day, false);
+		}
 		
 		if (dataType.contains(ImportType.WAYPOINT)){
 			List<WptType> waypoints = getWaypointsGpx(gpxFile, monitor);
 			monitor.subTask("Parsing waypoints.");
-
 			ArrayList<Waypoint> newwaypoints = new ArrayList<Waypoint>();
-
-			Calendar plddt = null;
-			if (day != null){
-				 plddt = GregorianCalendar.getInstance();
-				plddt.setTime(day);
-			}
-
 			for (Iterator<WptType> iterator = waypoints.iterator(); iterator.hasNext();) {
 				WptType wptType = (WptType) iterator.next();
-
 				Waypoint newwp = convertWpt(wptType);
 				if (plddt == null){
+					//import all waypoints regardless of date
 					newwaypoints.add(newwp);
-				}else if (newwp.getImportedDate() == null) {
-					
-				} else {
-					Calendar dt = GregorianCalendar.getInstance();
-					dt.setTime(newwp.getImportedDate());
-					if (dt.get(Calendar.YEAR) == plddt.get(Calendar.YEAR)
-							&& dt.get(Calendar.MONTH) == plddt
-									.get(Calendar.MONTH)
-							&& dt.get(Calendar.DAY_OF_MONTH) == plddt
-									.get(Calendar.DAY_OF_MONTH)) {
+				} else if (newwp.getImportedDate() != null){
+					//only import waypoints whose imported date match the given date
+					if (SmartPlugIn.getDatePart(newwp.getImportedDate(), false).equals(plddt)){
 						newwaypoints.add(newwp);
 					}
-
 				}
 			}
 			data.put(ImportType.WAYPOINT, newwaypoints);
 		}
 		if (dataType.contains(ImportType.TRACK)){
 			monitor.subTask("Parsing tracks.");
-			Calendar plddt = null;
-			if (day != null){
-				plddt = GregorianCalendar.getInstance();
-				plddt.setTime(day);
-			}
 			List<Coordinate> trackCoords = new ArrayList<Coordinate>();
+		
 			List<TrkType> tracks = getTracksGpx(gpxFile, monitor);
 			for (TrkType trk : tracks){
 				List<TrksegType> segments = trk.getTrkseg();
 				for (TrksegType seg: segments){
 					List<WptType> trkPnt = seg.getTrkpt();
 					for (WptType pnt : trkPnt){
-						double y = pnt.getLon().doubleValue();
-						double x = pnt.getLat().doubleValue();
-						if (pnt.getTime() == null && plddt == null){
-							Coordinate c = new Coordinate(x, y, Double.NaN);
+						double y = pnt.getLat().doubleValue();
+						double x = pnt.getLon().doubleValue();
+						Date datetime = findWaypointDate(pnt);
+						
+						if (plddt == null){
+							//include all
+							double time = Double.NaN;
+							if (datetime != null){
+								time = datetime.getTime();
+							}
+							Coordinate c = new Coordinate(x, y, time);
 							trackCoords.add(c);
-						}else if (pnt.getTime() != null && plddt == null){
-							Coordinate c = new Coordinate(x, y, pnt.getTime().toGregorianCalendar().getTime().getTime());
-							trackCoords.add(c);
-						}else if (plddt != null){
-						Calendar dt = pnt.getTime().toGregorianCalendar();
-						if (dt.get(Calendar.YEAR) == plddt.get(Calendar.YEAR)
-								&& dt.get(Calendar.MONTH) == plddt
-										.get(Calendar.MONTH)
-								&& dt.get(Calendar.DAY_OF_MONTH) == plddt
-										.get(Calendar.DAY_OF_MONTH)) {
-							
-							Coordinate c = new Coordinate(x, y, dt.getTime().getTime());
-							trackCoords.add(c);
-						}
+						}else if (plddt != null && datetime != null){
+							//include only waytpoints which match current date
+							if (SmartPlugIn.getDatePart(datetime, false).equals(plddt)){
+								Coordinate c = new Coordinate(x, y, datetime.getTime());
+								trackCoords.add(c);
+							}
 						}
 						
 					}
@@ -572,23 +576,23 @@ public class GPSDataImport {
 	
 	
 	/**
-	 * Converts a set of track points to a track.  Points
-	 * are sorted by date/time.
+	 * Converts a set of track points to coordinates.
 	 * 
 	 * @param trackpoints
 	 * @return
 	 */
-	public static Track convertPointsToTrack(List<WptType> trackpoints){
+	public static List<Coordinate> convertPointsToTrack(List<WptType> trackpoints){
 		ArrayList<Coordinate> trackCoords = new ArrayList<Coordinate>();
 		for (WptType pnt : trackpoints){
-			double y = pnt.getLon().doubleValue();
-			double x = pnt.getLat().doubleValue();
-			Date d = pnt.getTime().toGregorianCalendar().getTime();
-					
-			Coordinate c = new Coordinate(x, y, d.getTime());
+			double y = pnt.getLat().doubleValue();
+			double x = pnt.getLon().doubleValue();
+			long time = 0;
+			if (pnt.getTime() != null){
+				time = pnt.getTime().toGregorianCalendar().getTime().getTime();
+			}
+			Coordinate c = new Coordinate(x, y, time);
 			trackCoords.add(c);
-
 		}
-		return convertToTrack(trackCoords);
+		return trackCoords;
 	}
 }
