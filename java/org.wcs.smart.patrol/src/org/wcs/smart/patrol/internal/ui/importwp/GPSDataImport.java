@@ -28,11 +28,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +44,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.GpxType;
 import org.wcs.smart.patrol.gpx.TrkType;
@@ -183,8 +181,8 @@ public class GPSDataImport {
 					//find the leg day
 					boolean found = false;
 					for (PatrolLegDay legday : leg.getPatrolLegDays()){
-						Date start = SmartPlugIn.combineDateTime(legday.getDate(), legday.getStartTime());
-						Date end = SmartPlugIn.combineDateTime(legday.getDate(), legday.getEndTime());
+						Date start = SmartUtils.combineDateTime(legday.getDate(), legday.getStartTime());
+						Date end = SmartUtils.combineDateTime(legday.getDate(), legday.getEndTime());
 						if (betweenDates(wpdt, start, end)){
 							found = true;
 							
@@ -207,8 +205,8 @@ public class GPSDataImport {
 								trackpnts = new ArrayList<Coordinate>();
 								tracks.put(legday, trackpnts);
 							}
-							if (SmartPlugIn.getDatePart(wpdt, false).equals(
-									SmartPlugIn.getDatePart(legday.getDate(),
+							if (SmartUtils.getDatePart(wpdt, false).equals(
+									SmartUtils.getDatePart(legday.getDate(),
 											false))) {
 								trackpnts.add(point);
 							}
@@ -249,17 +247,17 @@ public class GPSDataImport {
 				continue;
 			}
 			for(PatrolLeg leg : patrolLegs){
-				if (betweenDates(SmartPlugIn.getDatePart(wpdt,false), leg.getStartDate(), leg.getEndDate())){
+				if (betweenDates(SmartUtils.getDatePart(wpdt,false), leg.getStartDate(), leg.getEndDate())){
 					//find the leg day
 					boolean found = false;
 					for (PatrolLegDay legday : leg.getPatrolLegDays()){
-						Date start = SmartPlugIn.combineDateTime(legday.getDate(), legday.getStartTime());
-						Date end = SmartPlugIn.combineDateTime(legday.getDate(), legday.getEndTime());
+						Date start = SmartUtils.combineDateTime(legday.getDate(), legday.getStartTime());
+						Date end = SmartUtils.combineDateTime(legday.getDate(), legday.getEndTime());
 						if (betweenDates(wpdt, start, end)){
 							legday.getWaypoints().add(point);
 							point.setPatrolLegDay(legday);
 							if (point.getTime() == null){
-								point.setTime(new Time(SmartPlugIn.getMidnight().getTime()));
+								point.setTime(new Time(SmartUtils.getMidnight().getTime()));
 							}
 							modified.add(legday);
 							found = true;
@@ -270,12 +268,12 @@ public class GPSDataImport {
 						// start time could not be found; assign based on date
 						// only
 						for (PatrolLegDay legday : leg.getPatrolLegDays()) {
-							if (SmartPlugIn.getDatePart(wpdt, false).equals(SmartPlugIn.getDatePart(legday.getDate(),false))) {
+							if (SmartUtils.getDatePart(wpdt, false).equals(SmartUtils.getDatePart(legday.getDate(),false))) {
 								legday.getWaypoints().add(point);
 								modified.add(legday);
 								point.setPatrolLegDay(legday);
 								if (point.getTime() == null) {
-									point.setTime(new Time(SmartPlugIn
+									point.setTime(new Time(SmartUtils
 											.getMidnight().getTime()));
 								}
 								break;
@@ -493,7 +491,7 @@ public class GPSDataImport {
 		HashMap<ImportType, Object> data = new HashMap<ImportType, Object>();		
 		Date plddt = null;
 		if (day != null){
-			plddt = SmartPlugIn.getDatePart(day, false);
+			plddt = SmartUtils.getDatePart(day, false);
 		}
 		
 		if (dataType.contains(ImportType.WAYPOINT)){
@@ -508,7 +506,7 @@ public class GPSDataImport {
 					newwaypoints.add(newwp);
 				} else if (newwp.getImportedDate() != null){
 					//only import waypoints whose imported date match the given date
-					if (SmartPlugIn.getDatePart(newwp.getImportedDate(), false).equals(plddt)){
+					if (SmartUtils.getDatePart(newwp.getImportedDate(), false).equals(plddt)){
 						newwaypoints.add(newwp);
 					}
 				}
@@ -539,7 +537,7 @@ public class GPSDataImport {
 							trackCoords.add(c);
 						}else if (plddt != null && datetime != null){
 							//include only waytpoints which match current date
-							if (SmartPlugIn.getDatePart(datetime, false).equals(plddt)){
+							if (SmartUtils.getDatePart(datetime, false).equals(plddt)){
 								Coordinate c = new Coordinate(x, y, datetime.getTime());
 								trackCoords.add(c);
 							}

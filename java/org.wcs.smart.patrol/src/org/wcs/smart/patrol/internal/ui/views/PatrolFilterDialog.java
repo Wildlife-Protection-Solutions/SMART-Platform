@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -145,7 +145,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		if (btnFilterDate.getSelection()){
 			PatrolViewFilter.DateFilter df = (PatrolViewFilter.DateFilter) ((IStructuredSelection)dateViewer.getSelection()).getFirstElement();
 			if (df == PatrolViewFilter.DateFilter.CUSTOM){
-				this.currentFilter.setDateFilter(df,SmartPlugIn.getDate(dtStart), SmartPlugIn.getDate(dtEnd));
+				this.currentFilter.setDateFilter(df,SmartUtils.getDate(dtStart), SmartUtils.getDate(dtEnd));
 			}else{
 				this.currentFilter.setDateFilter(df, null, null);
 			}
@@ -199,9 +199,9 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		if (enabled){
 			dateViewer.setSelection(new StructuredSelection(currentFilter.getDateFilter()));
 			if (currentFilter.getDateFilter() == PatrolViewFilter.DateFilter.CUSTOM){
-				GregorianCalendar cal = SmartPlugIn.convertDate(currentFilter.getStartDate());
+				GregorianCalendar cal = SmartUtils.convertDate(currentFilter.getStartDate());
 				dtStart.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
-				cal = SmartPlugIn.convertDate(currentFilter.getEndDate());
+				cal = SmartUtils.convertDate(currentFilter.getEndDate());
 				dtEnd.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
 		
 				dtStart.setEnabled(true);

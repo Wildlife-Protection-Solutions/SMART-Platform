@@ -48,7 +48,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -290,7 +290,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartPlugIn.convertDate(editLeg.getStartDate());
+		Calendar ca = SmartUtils.convertDate(editLeg.getStartDate());
 		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
 		
 		lbl = new Label(timecomp, SWT.NONE);
@@ -345,7 +345,7 @@ private void createEndTimeComposite(Composite parent) {
 			}
 			
 		});
-		Calendar ca = SmartPlugIn.convertDate(editLeg.getEndDate());
+		Calendar ca = SmartUtils.convertDate(editLeg.getEndDate());
 		endDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
 		
 		lbl = new Label(timecomp, SWT.NONE);
@@ -400,14 +400,14 @@ private void createEndTimeComposite(Composite parent) {
 	 * @return
 	 */
 	private String validateDates(){
-		long patrolStart = SmartPlugIn.getDatePart(patrolStartDate, false).getTime();
-		long patrolEnd = SmartPlugIn.getDatePart(patrolEndDate, true).getTime();
+		long patrolStart = SmartUtils.getDatePart(patrolStartDate, false).getTime();
+		long patrolEnd = SmartUtils.getDatePart(patrolEndDate, true).getTime();
 		
-		long legStart = SmartPlugIn.getDate(startDate).getTime();
+		long legStart = SmartUtils.getDate(startDate).getTime();
 		if (opCustom.getSelection()){
 			legStart += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
 		}
-		long legEnd = SmartPlugIn.getDate(endDate).getTime();
+		long legEnd = SmartUtils.getDate(endDate).getTime();
 		if (opEndCustom.getSelection()){
 			legEnd += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds();
 		}else{
@@ -472,14 +472,14 @@ private void createEndTimeComposite(Composite parent) {
 		//update id
 		editLeg.setId(txtLegId.getText().trim());
 		//update start date & time
-		long stime = SmartPlugIn.getDate(startDate).getTime();
+		long stime = SmartUtils.getDate(startDate).getTime();
 		if (opCustom.getSelection()){
 			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
 		}
 		editLeg.setStartDate(new Date( stime ));
 		
 		//update end date & Teim
-		long etime = SmartPlugIn.getDate(endDate).getTime();
+		long etime = SmartUtils.getDate(endDate).getTime();
 		if (opEndCustom.getSelection()){
 			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
 		}else{

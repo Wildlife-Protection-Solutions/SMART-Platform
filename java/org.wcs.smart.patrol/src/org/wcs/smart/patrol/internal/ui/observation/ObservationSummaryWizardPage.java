@@ -150,6 +150,9 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 		scrolled.setContent(main);
 		setControl(scrolled);
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		//TODO:  This is a hack to prevent hibernate errors
+		((ObservationWizard)getWizard()).getDataModel();
 	}
 	
 	

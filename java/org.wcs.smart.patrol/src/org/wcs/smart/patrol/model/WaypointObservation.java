@@ -50,11 +50,11 @@ import org.wcs.smart.ca.datamodel.Category;
 @Table(name="smart.wp_observation")
 public class WaypointObservation {
 	
-	private byte[] uuid;
-	private Waypoint waypoint;
-	private Category category;
+	private byte[] uuid = null;
+	private Waypoint waypoint = null;
+	private Category category = null;
 	
-	private List<WaypointObservationAttribute> attributes; 
+	private List<WaypointObservationAttribute> attributes = null; 
 	
 	 
 	
@@ -96,6 +96,14 @@ public class WaypointObservation {
 	}
 	public void setAttributes(List<WaypointObservationAttribute> attributes){
 		this.attributes = attributes;
+//		if (this.attributes == null){
+//			this.attributes = attributes;
+//		}else{
+//			this.attributes.clear();
+//			if (attributes != null){
+//				this.attributes.addAll(attributes);
+//			}
+//		}
 	}
 	
 	/**

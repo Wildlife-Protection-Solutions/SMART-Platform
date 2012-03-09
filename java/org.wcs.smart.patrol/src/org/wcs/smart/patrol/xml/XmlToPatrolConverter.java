@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleList;
@@ -206,7 +207,7 @@ public class XmlToPatrolConverter {
 			TrackType txml = xml.getTrack();
 			Track track = new Track();
 			track.setDistance((float)txml.getDistance().doubleValue());
-			track.setGeom( decodeHex(txml.getGeom()) );
+			track.setGeom( SmartUtils.decodeHex(txml.getGeom()) );
 			track.setPatrolLegDay(legday);
 			legday.setTrack(track);
 		}
@@ -484,55 +485,6 @@ public class XmlToPatrolConverter {
 		
 	}
 	
-	
-   /**
-    * Adapted from apache-commons-codec HEX class.
-    * 
-    * @param data
-    * @return
-    * @throws Exception
-    */
-   public static byte[] decodeHex(String str) throws Exception {
-	   char[] data = str.toCharArray();
-       int len = data.length;
-
-       if ((len & 0x01) != 0) {
-           throw new IllegalStateException("Odd number of characters.");
-       }
-
-       byte[] out = new byte[len >> 1];
-
-       // two characters form the hex value.
-       for (int i = 0, j = 0; j < len; i++) {
-           int f = toDigit(data[j], j) << 4;
-           j++;
-           f = f | toDigit(data[j], j);
-           j++;
-           out[i] = (byte) (f & 0xFF);
-       }
-
-       return out;
-   }
-   /**
-    * 
-    * Adapted from apache-commons-codec HEX class.
-    * Converts a hexadecimal character to an integer.
-    * 
-    * @param ch
-    *            A character to convert to an integer digit
-    * @param index
-    *            The index of the character in the source
-    * @return An integer
-    * @throws DecoderException
-    *             Thrown if ch is an illegal hex character
-    */
-   protected static int toDigit(char ch, int index) throws Exception {
-       int digit = Character.digit(ch, 16);
-       if (digit == -1) {
-           throw new IllegalStateException("Illegal hexadecimal character " + ch + " at index " + index);
-       }
-       return digit;
-   }
 
 }
 

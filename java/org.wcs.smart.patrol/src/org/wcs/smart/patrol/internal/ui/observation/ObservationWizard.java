@@ -37,6 +37,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
@@ -67,12 +68,12 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
 		
-		
 		if (wp.getObservations() != null){
 			for (WaypointObservation ob : wp.getObservations()){
 				if(ob.getUuid() == null){
 					//this is not yet part of hibernate but if
 					//attributes/categories exist they need to be loaded into the session
+					WaypointObservation orig = ob;
 					ob = ob.clone();
 					getSession().refresh(ob.getCategory());
 					if (ob.getAttributes() != null){
@@ -90,6 +91,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					//we need to merge this with hibernate so
 					//we can lazy load things
 					ob = (WaypointObservation) getSession().merge(ob);
+					//getSession().refresh(ob);
 				}
 				
 				
@@ -221,6 +223,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		}
 		wp.getObservations().clear();
 		wp.getObservations().addAll(wobservations);
+		
 		
 		return true;
 	}

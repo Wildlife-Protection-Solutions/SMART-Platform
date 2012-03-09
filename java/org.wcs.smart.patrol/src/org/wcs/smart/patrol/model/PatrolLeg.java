@@ -25,14 +25,12 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -46,13 +44,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Employee;
-
-import ucar.nc2.constants.CF;
 
 /**
  * Patrol Leg object
@@ -247,17 +242,17 @@ public class PatrolLeg {
 		//lets make a hash set of existing leg days; we try to re-use these so associated data is not lost
 		HashMap<Date, PatrolLegDay> current = new HashMap<Date, PatrolLegDay>();
 		for (PatrolLegDay day : this.days){
-			current.put(SmartPlugIn.getDatePart(day.getDate(), false), day);
+			current.put(SmartUtils.getDatePart(day.getDate(), false), day);
 		}
 		
 		//determine start & end dates
-		GregorianCalendar calStart = SmartPlugIn.convertDate( SmartPlugIn.getDatePart(getStartDate(), false) );
-		GregorianCalendar calEnd= SmartPlugIn.convertDate( SmartPlugIn.getDatePart(getEndDate(), false) );
+		GregorianCalendar calStart = SmartUtils.convertDate( SmartUtils.getDatePart(getStartDate(), false) );
+		GregorianCalendar calEnd= SmartUtils.convertDate( SmartUtils.getDatePart(getEndDate(), false) );
 		
 		//---- the first patrol leg day
 		
 		PatrolLegDay previousDay;
-		PatrolLegDay existing = current.remove(SmartPlugIn.getDatePart(calStart.getTime(), false));
+		PatrolLegDay existing = current.remove(SmartUtils.getDatePart(calStart.getTime(), false));
 		if (existing != null){
 			//update the start time
 			previousDay = existing;
@@ -279,7 +274,7 @@ public class PatrolLeg {
 		// -- the remaining days
 		calStart.add(Calendar.DAY_OF_MONTH, 1);		
 		while (calStart.before(calEnd) || calStart.equals(calEnd) ){
-			existing = current.remove(SmartPlugIn.getDatePart(calStart.getTime(), false));
+			existing = current.remove(SmartUtils.getDatePart(calStart.getTime(), false));
 			if (existing != null){
 				previousDay = existing;
 				if (existing.getStartTime() == null){
@@ -290,7 +285,7 @@ public class PatrolLeg {
 				}
 			}else{
 				previousDay = new PatrolLegDay();
-				previousDay.setDate( SmartPlugIn.getDatePart(calStart.getTime(), false) );
+				previousDay.setDate( SmartUtils.getDatePart(calStart.getTime(), false) );
 				previousDay.setStartTime(createPatrolTime(0, 0, 0));
 				previousDay.setEndTime(createPatrolTime(23, 59, 59));
 				previousDay.setPatrolLeg(this);
@@ -319,7 +314,7 @@ public class PatrolLeg {
 				firstDay.setPatrolLeg(null);
 				this.days.remove(firstDay);
 				this.days.get(0).setStartTime(createPatrolTime(0, 0, 0));
-				setStartDate( SmartPlugIn.getDatePart(this.days.get(0).getDate(), false) );
+				setStartDate( SmartUtils.getDatePart(this.days.get(0).getDate(), false) );
 			}
 		}
 		if (this.days.size() > 1){
@@ -329,7 +324,7 @@ public class PatrolLeg {
 				lastDay.setPatrolLeg(null);
 				this.days.remove(lastDay);
 				this.days.get(this.days.size() - 1).setEndTime(createPatrolTime(23, 59, 59));
-				setEndDate( SmartPlugIn.getDatePart(this.days.get(this.days.size() - 1).getDate(), true) );
+				setEndDate( SmartUtils.getDatePart(this.days.get(this.days.size() - 1).getDate(), true) );
 				
 			}
 		}

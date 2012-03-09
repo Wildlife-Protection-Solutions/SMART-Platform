@@ -36,6 +36,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 
@@ -152,7 +153,12 @@ public class PatrolLegTable {
 	public TableViewer createTable(Composite parent){
 		
 		patrolLegViewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER );
-		patrolLegViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		try{
+			gd.widthHint = (int) (Display.getCurrent().getActiveShell().getBounds().width * 0.8);
+		}catch (Exception ex){}
+		
+		patrolLegViewer.getTable().setLayoutData(gd);
 		patrolLegViewer.setContentProvider(new ObservableListContentProvider());
 		patrolLegViewer.getTable().setHeaderVisible(true);
 		patrolLegViewer.getTable().setLinesVisible(true);

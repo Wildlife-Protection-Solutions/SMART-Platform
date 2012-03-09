@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 
@@ -122,7 +122,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		startDate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Date d = SmartPlugIn.getDate(startDate);
+				Date d = SmartUtils.getDate(startDate);
 				if (d.before(existingLeg.getStartDate()) || d.after(existingLeg.getEndDate())){
 					setErrorMessage("Invalid date.  Must be before " + DateFormat.getDateInstance().format(existingLeg.getEndDate()) + " and after " + DateFormat.getDateInstance().format(existingLeg.getStartDate()));
 					getButton(OK).setEnabled(false);
@@ -133,7 +133,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartPlugIn.convertDate(existingLeg.getStartDate());
+		Calendar ca = SmartUtils.convertDate(existingLeg.getStartDate());
 		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
 		
 		//time of change
@@ -165,6 +165,9 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		leaderPilotcomp = new LeaderPilotComposite();
 		leaderPilotcomp.createComponent(parent, SWT.NONE);
 		leaderPilotcomp.setValues(this.newLeg, null);
+		
+		super.getShell().setText("Change Leader");
+		setMessage("Select the date/time of the leader change and the new leader.");
 		return parent;
 	}
 	
@@ -176,7 +179,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 	@Override
 	protected void okPressed() {
 		//date validation
-		long time = SmartPlugIn.getDate(startDate).getTime();
+		long time = SmartUtils.getDate(startDate).getTime();
 		if (opCustom.getSelection()){
 			time += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
 		}
