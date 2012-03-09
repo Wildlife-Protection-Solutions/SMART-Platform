@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -93,9 +93,9 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * @param endDate the end date
 	 */
 	public void setValues(Date startDate, Date endDate){
-		Calendar cal = SmartPlugIn.convertDate(startDate);
+		Calendar cal = SmartUtils.convertDate(startDate);
         dtStartDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
-        cal = SmartPlugIn.convertDate(endDate);
+        cal = SmartUtils.convertDate(endDate);
         dtEndDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
 	}
 	
@@ -106,14 +106,14 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * @return the end date selected by the user.
 	 */
 	public Date getEndDate(){
-		return new Date(SmartPlugIn.getDate(dtEndDate).getTime() + 24*60*60*1000 - 1);
+		return new Date(SmartUtils.getDate(dtEndDate).getTime() + 24*60*60*1000 - 1);
 	}
 	/**
 	 * Gets the start date selected by the user with the time set to 0.
 	 * @return the start date selected by the user.
 	 */
 	public Date getStartDate(){
-		return SmartPlugIn.getDate(dtStartDate);
+		return SmartUtils.getDate(dtStartDate);
 	}
 	/**
 	 * 
@@ -121,11 +121,11 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	public void setValues(Patrol p, Session session) {
 	    if (p.getStartDate() != null){
-	    	Calendar cal = SmartPlugIn.convertDate(p.getStartDate());
+	    	Calendar cal = SmartUtils.convertDate(p.getStartDate());
 	        dtStartDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
 	    }
 	    if (p.getEndDate() != null){
-	    	Calendar cal = SmartPlugIn.convertDate(p.getEndDate());
+	    	Calendar cal = SmartUtils.convertDate(p.getEndDate());
 	    	dtEndDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
 	    }
 	}
@@ -160,7 +160,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	@Override
 	public void widgetSelected(SelectionEvent e) {
-		if (SmartPlugIn.getDate(dtStartDate).after(SmartPlugIn.getDate(dtEndDate))){
+		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
 			setErrorMessage("End date must be after the start date.");
 		}else{
 			setErrorMessage(null);

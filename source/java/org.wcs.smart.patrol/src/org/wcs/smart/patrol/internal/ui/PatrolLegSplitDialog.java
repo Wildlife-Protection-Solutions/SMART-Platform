@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -123,6 +124,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	protected Control createDialogArea(Composite parent) {
 		parent.setLayout(new GridLayout(1, false));
 		setMessage("Select information for the patrol split.");
+		super.getShell().setText("Patrol Split");
 		
 		employeeList = new WritableList();
 		for (PatrolLegMember member: existingLeg.getMembers()){
@@ -317,7 +319,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartPlugIn.convertDate(existingLeg.getStartDate());
+		Calendar ca = SmartUtils.convertDate(existingLeg.getStartDate());
 		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
 		
 		lbl = new Label(timecomp, SWT.NONE);
@@ -366,7 +368,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			}
 			
 		});
-		Calendar ca = SmartPlugIn.convertDate(existingLeg.getEndDate());
+		Calendar ca = SmartUtils.convertDate(existingLeg.getEndDate());
 		endDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
 		
 		lbl = new Label(timecomp, SWT.NONE);
@@ -437,7 +439,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			return "Group B must have a transportation type.";
 		}
 		
-		long stime = SmartPlugIn.getDate(startDate).getTime();
+		long stime = SmartUtils.getDate(startDate).getTime();
 		if (opCustom.getSelection()){
 			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
 		}
@@ -449,7 +451,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			return "Date of split must be before " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getEndDate());
 		}
 		
-		long etime = SmartPlugIn.getDate(endDate).getTime();
+		long etime = SmartUtils.getDate(endDate).getTime();
 		if (opEndCustom.getSelection()){
 			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
 		}else{
@@ -484,13 +486,13 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		PatrolLeg legB = new PatrolLeg();
 		
 		//dates		
-		long stime = SmartPlugIn.getDate(startDate).getTime();
+		long stime = SmartUtils.getDate(startDate).getTime();
 		if (opCustom.getSelection()){
 			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
 		}
 		Date newStart = new Date( stime );
 		
-		long etime = SmartPlugIn.getDate(endDate).getTime();
+		long etime = SmartUtils.getDate(endDate).getTime();
 		if (opEndCustom.getSelection()){
 			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
 		}else{

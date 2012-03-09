@@ -7,6 +7,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.SimpleList;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.Patrol;
@@ -126,7 +127,7 @@ public class PatrolToXmlConverter {
 			TrackType track = new TrackType();
 			track.setDistance((double)legDay.getTrack().getDistance());
 			
-			track.setGeom(encodeHex(legDay.getTrack().getGeom()) );
+			track.setGeom(SmartUtils.encodeHex(legDay.getTrack().getGeom()) );
 			xml.setTrack(track);
 		}
 		
@@ -187,17 +188,5 @@ public class PatrolToXmlConverter {
 		return DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
 	}
 	
-	public static String encodeHex(byte[] data) {
-		char[] toDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-				'a', 'b', 'c', 'd', 'e', 'f' };
-		int l = data.length;
-		char[] out = new char[l << 1];
-		// two characters form the hex value.
-		for (int i = 0, j = 0; i < l; i++) {
-			out[j++] = toDigits[(0xF0 & data[i]) >>> 4];
-			out[j++] = toDigits[0x0F & data[i]];
-		}
-		return new String(out);
 
-	}
 }

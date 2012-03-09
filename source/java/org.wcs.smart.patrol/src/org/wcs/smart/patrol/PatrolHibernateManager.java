@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -381,11 +382,14 @@ public class PatrolHibernateManager extends HibernateManager{
 			}
 			
 			//save
-			session.saveOrUpdate(patrol);
+			session.update(patrol);
+			
+			session.save(patrol);
+//			session.saveOrUpdate(patrol);
 			
 			File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath() );
 			if (!f.exists()){
-				SmartPlugIn.createDirectory(f);
+				SmartUtils.createDirectory(f);
 			}
 			
 			//sync attachments 
@@ -404,7 +408,7 @@ public class PatrolHibernateManager extends HibernateManager{
 									String name = (counter++) + "_" + attachment.getFilename();
 									to = new File(f.getAbsoluteFile() + File.separator + name);
 								}
-								if (!SmartPlugIn.copyFile(attachment.getCopyFromLocation(), to)){
+								if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
 									throw new RuntimeException("Patrol modifications could not be saved because attachment could not be copied.  Ensure write permissions to directory or remove attachment.");
 								}else{
 									attachment.setFilename(to.getName());

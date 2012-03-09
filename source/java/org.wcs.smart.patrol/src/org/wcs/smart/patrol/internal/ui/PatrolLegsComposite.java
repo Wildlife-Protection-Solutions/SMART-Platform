@@ -25,7 +25,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -50,7 +49,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -256,18 +255,18 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			//start time
 			Date date = null;
 			if (leg.getPatrolLegDays().size() > 0){
-				date = SmartPlugIn.combineDateTime(leg.getStartDate(), leg.getPatrolLegDays().get(0).getStartTime());	
+				date = SmartUtils.combineDateTime(leg.getStartDate(), leg.getPatrolLegDays().get(0).getStartTime());	
 			}else{
-				date = SmartPlugIn.getDatePart(leg.getStartDate(), false);
+				date = SmartUtils.getDatePart(leg.getStartDate(), false);
 			}
 			tmpLeg.setStartDate(date);
 			
 			//end time
 			date = null;
 			if (leg.getPatrolLegDays().size() > 0){
-				date = SmartPlugIn.combineDateTime(leg.getEndDate(), leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).getEndTime());	
+				date = SmartUtils.combineDateTime(leg.getEndDate(), leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).getEndTime());	
 			}else{
-				date = SmartPlugIn.getDatePart(leg.getEndDate(), true);
+				date = SmartUtils.getDatePart(leg.getEndDate(), true);
 			}
 			tmpLeg.setEndDate(date);
 			//type
@@ -377,14 +376,14 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	public String getErrorMessage(){
 		
 		/* ensure each patrol leg between the patrol start and end */
-		Date pstart = SmartPlugIn.getDatePart(patrolStartDate, false);
-		Date pend = SmartPlugIn.getDatePart(patrolEndDate, true);
+		Date pstart = SmartUtils.getDatePart(patrolStartDate, false);
+		Date pend = SmartUtils.getDatePart(patrolEndDate, true);
 		
 		for (Iterator iterator = legs.iterator(); iterator.hasNext();) {
 			PatrolLeg legA = (PatrolLeg) iterator.next();
 			
-			Date legstart = SmartPlugIn.getDatePart(legA.getStartDate(), false);
-			Date legend = SmartPlugIn.getDatePart(legA.getEndDate(), true);
+			Date legstart = SmartUtils.getDatePart(legA.getStartDate(), false);
+			Date legend = SmartUtils.getDatePart(legA.getEndDate(), true);
 			
 			if (legstart.after(pend)){
 				return legA.getId() + " cannot start after the patrol ends.";
@@ -427,16 +426,16 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		}
 		
 		/* ensure there is at least one leg for each day in the patrol */
-		GregorianCalendar calStart = SmartPlugIn.convertDate(patrolStartDate);
+		GregorianCalendar calStart = SmartUtils.convertDate(patrolStartDate);
 		calStart = new GregorianCalendar(calStart.get(Calendar.YEAR), calStart.get(Calendar.MONTH), calStart.get(Calendar.DAY_OF_MONTH), 0,0,0);		
-		GregorianCalendar calEnd = SmartPlugIn.convertDate(patrolEndDate);
+		GregorianCalendar calEnd = SmartUtils.convertDate(patrolEndDate);
 		
 		while (calStart.before(calEnd) || calStart.equals(calEnd)){
 			boolean found = false;
 			for (Iterator iterator = legs.iterator(); iterator.hasNext();) {
 				PatrolLeg leg = (PatrolLeg) iterator.next();
-				Date legStart = SmartPlugIn.getDatePart(leg.getStartDate(), false);
-				Date legEnd = SmartPlugIn.getDatePart(leg.getEndDate(), true);
+				Date legStart = SmartUtils.getDatePart(leg.getStartDate(), false);
+				Date legEnd = SmartUtils.getDatePart(leg.getEndDate(), true);
 				
 				if ( (calStart.getTime().before(legEnd) || calStart.getTime().equals(legEnd)) && 
 						(calStart.getTime().after(legStart) ||calStart.getTime().equals(legStart)) ){

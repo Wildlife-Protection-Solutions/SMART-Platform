@@ -25,11 +25,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -44,13 +41,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.print.attribute.standard.MediaSize.Other;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleList;
 import org.wcs.smart.ca.Station;
 
 /**
@@ -294,7 +289,7 @@ public class Patrol {
 	
 	@Transient
 	public String getPatrolDatastorePath(){
-		return "Patrol" + File.separator + id + "_" + SmartPlugIn.getDirectoryPath(uuid);
+		return "Patrol" + File.separator + id + "_" + SmartUtils.getDirectoryPath(uuid);
 		
 	}
 	
