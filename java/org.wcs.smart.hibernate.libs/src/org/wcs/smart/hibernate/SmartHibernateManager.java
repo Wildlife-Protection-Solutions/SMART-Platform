@@ -22,6 +22,7 @@
 package org.wcs.smart.hibernate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -128,8 +129,10 @@ public class SmartHibernateManager {
 	}
 	
 	private static final String MAPPING_ID = "org.wcs.smart.hibernate.mapping";
+	
 	private static final List<Class>  getMappings(){
 		List<Class> items = new ArrayList<Class>();
+		if (Platform.getExtensionRegistry() == null) return Collections.EMPTY_LIST;
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
 		try {
 			for (IConfigurationElement e : config) {
