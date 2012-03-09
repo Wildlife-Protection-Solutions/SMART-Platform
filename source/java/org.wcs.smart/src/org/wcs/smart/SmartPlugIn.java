@@ -191,8 +191,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		
 		return calendar.getTime();
 	}
-	
-	
+
 	/**
 	 * Gets only the date part of a given date.  Sets the time to 0 is not endOfDay; sets
 	 * the time to 23:59:59 if end of day.
@@ -269,6 +268,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	
 	public static String getDirectoryPath(byte[] uuid){
 		return Arrays.toString(uuid).replaceAll(", ", "").replace("[", "").replace("]", "");
+	}
+	
+	
+	public static String getUuidAsString(byte[] uuid){
+		return Arrays.toString(uuid).replaceAll(", ", "").replace("[", "").replace("]", "").replace("-", "_");
 	}
 	
 	public static boolean createDirectory(File dir){

@@ -27,6 +27,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
@@ -39,6 +40,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -53,6 +55,31 @@ import org.wcs.smart.ca.datamodel.DataModel;
  */
 public class HibernateManager extends SmartHibernateManager{
 
+	/**
+	 * 
+	 * @return the language for the given code
+	 */
+	public static Language findLanguage(String code, ConservationArea ca){
+		Session x = openSession();
+		Transaction tx = x.beginTransaction();
+		try {
+			List results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", code)).list();
+			if (results.size() > 0){
+				return (Language)results.get(0);
+			}else{
+				results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("isDefault", true)).list();
+				if (results.size() > 0){
+					return (Language) results.get(0);
+				}
+			}
+			return null;
+		}finally{
+			tx.rollback();
+			x.close();
+		}
+	}
+	
+	
 	/**
 	 * Opens a session, loads all conservation areas and
 	 * closes the session.
@@ -101,12 +128,11 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param ca conservation area
 	 * @return true if no other usernames; true if username already exists 
 	 */
-	public static boolean validateUserIdUnique(String userName, ConservationArea ca){
-		Session x = openSession();
-		Transaction tx = x.beginTransaction();
+	public static boolean validateUserIdUnique(String userName, ConservationArea ca, Session session){
+		Transaction tx = session.beginTransaction();
 		try{
 			String query = "select count(*) from Employee where conservationArea = :ca and smartUserId = :userId";
-			List cnt = x.createQuery(query).setEntity("ca", ca).setString("userId", userName).list();
+			List cnt = session.createQuery(query).setEntity("ca", ca).setString("userId", userName).list();
 			boolean ok = false;
 			if ( (Long) cnt.get(0) > 0){
 				ok = false;
@@ -117,7 +143,7 @@ public class HibernateManager extends SmartHibernateManager{
 			return ok;
 		}catch (Exception ex){
 			tx.rollback();
-			x.close();
+			session.close();
 			SmartPlugIn.displayLog(null, "Error validating user id.", ex);
 		}
 		return false;

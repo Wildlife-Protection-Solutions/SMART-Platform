@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
@@ -33,6 +34,7 @@ import net.refractions.udig.project.ui.tool.ModalTool;
 import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
@@ -44,6 +46,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.ca.Area;
 
@@ -56,7 +59,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @since 1.1.0
  * @version 1.3.0
  */
-public class MapView extends ViewPart implements MapPart {
+public class MapView extends ViewPart implements MapPart, IAdaptable {
 
 	public static String ID = "org.wcs.smart.ui.map.MapView";
     // private GISWidget widget;
@@ -68,33 +71,6 @@ public class MapView extends ViewPart implements MapPart {
     private ToolContext toolcontext;
     
     
-    private IPartListener partListener = new IPartListener() {
-		@Override
-		public void partOpened(IWorkbenchPart part) {	
-		}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPart part) {
-		}
-		
-		@Override
-		public void partClosed(IWorkbenchPart part) {
-		}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPart part) {
-		}
-		
-		@Override
-		public void partActivated(IWorkbenchPart part) {
-			if (part.getClass().equals(MapView.class)){
-				LayersView view = (LayersView) getViewSite().getWorkbenchWindow().getActivePage().findView(LayersView.ID);
-				if (view != null){
-					view.setCurrentMap(map);
-				}
-			}
-		}
-	};
 	private Label lblCoordinates;
     public MapView() {
         super();
@@ -123,6 +99,7 @@ public class MapView extends ViewPart implements MapPart {
         mapviewer.setMap(map);
 		
         //set default crs
+        map.getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		map.getViewportModelInternal().setCRS(Area.AREA_CRS);
 		
         Composite infoArea = new Composite(parent, SWT.BORDER);
@@ -146,14 +123,16 @@ public class MapView extends ViewPart implements MapPart {
 			@Override
 			public void changed(ViewportModelEvent event) {
 				if(event.getType() == ViewportModelEvent.EventType.CRS){
-					Display.getCurrent().asyncExec(new Runnable(){
-
+					Display display = PlatformUI.getWorkbench().getDisplay();
+			        if (display == null){
+			        	display = Display.getDefault();
+			        }
+			        display.asyncExec(new Runnable(){
 						@Override
 						public void run() {
 							lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
-							
+							lblSRID.getParent().layout();
 						}});
-								
 				}
 				
 			}
@@ -190,8 +169,6 @@ public class MapView extends ViewPart implements MapPart {
 			public void mouseDragged(MapMouseEvent event) {
 			}
 		});        
-        //setup layers view to reference this map
-        getSite().getWorkbenchWindow().getPartService().addPartListener(partListener);
     }
 
     public void setModalTool( String toolId ) {
@@ -242,10 +219,13 @@ public class MapView extends ViewPart implements MapPart {
 
     @Override
     public void dispose() {
+    	super.dispose();
         if (mapviewer != null && mapviewer.getViewport() != null && getMap() != null) {
             mapviewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
-        getSite().getWorkbenchWindow().getPartService().removePartListener(partListener);
+       if (mapviewer != null){
+    	   mapviewer.dispose();
+       }
         
     }
 
@@ -264,5 +244,12 @@ public class MapView extends ViewPart implements MapPart {
 	@Override
 	public IStatusLineManager getStatusLineManager() {
 		return getViewSite().getActionBars().getStatusLineManager();
+	}
+	
+	public Object getAdapter(Class adaptee) {
+		if (adaptee.isAssignableFrom(Map.class)) {
+			return getMap();
+		}
+		return super.getAdapter(adaptee);
 	}
 }

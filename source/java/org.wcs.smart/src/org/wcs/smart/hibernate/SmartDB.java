@@ -23,9 +23,11 @@ package org.wcs.smart.hibernate;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Language;
 
 /**
  * Manages the smart database.
@@ -67,6 +69,7 @@ public class SmartDB {
 	private static DbUser current = DbUser.LOGIN;
 	private static Employee currentEmployee = null;
 	private static ConservationArea currentCa = null;
+	private static Language currentLanguage = null;;
 	
 	/**
 	 * 
@@ -91,7 +94,8 @@ public class SmartDB {
 		}else{
 			current = null;
 		}
-		HibernateManager.setUserName(current.username, current.password);				
+		HibernateManager.setUserName(current.username, current.password);	
+		getCurrentLanguage();
 	}
 	
 	/**
@@ -140,6 +144,19 @@ public class SmartDB {
 			return DbUser.ANALYST;
 		}
 		return DbUser.LOGIN;
+	}
+	
+	
+	/**
+	 * Must be called after current conservation area set
+	 * @return the current language of the logged in user
+	 */
+	public static Language getCurrentLanguage(){
+		if (currentLanguage == null){
+			currentLanguage = HibernateManager.findLanguage(Platform.getNL(), getCurrentConservationArea());
+		}
+		return currentLanguage;
+		
 	}
 	
 

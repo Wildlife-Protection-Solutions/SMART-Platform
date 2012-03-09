@@ -25,54 +25,75 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.AssociationOverride;
+import javax.persistence.AssociationOverrides;
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 @Entity 
 @Table (name="smart.i18n_label")
-@IdClass(Label.LabelItemPK.class)
-@BatchSize(size=100)
+
+@AssociationOverrides({
+	@AssociationOverride(name = "id.language", 
+		joinColumns = @JoinColumn(name = "language_uuid")),
+	@AssociationOverride(name = "id.elementuuid", 
+		joinColumns = @JoinColumn(name = "element_uuid")) })
+
 //TODO
-//@Cacheable
-//@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Label  {
 
-	private byte[] elementuuid;
-	private byte[] languageuuid;
+	private LabelItemPK id;
 	private String value;
 	
 	
-	private static GetDescriptionRunnable runnable = new GetDescriptionRunnable();
+//	private static GetDescriptionRunnable runnable = new GetDescriptionRunnable();
 	
 	
 	@Transient
-	public static synchronized String getDescription(byte[] elementuuid, String nl){
-		//TODO: review this
-		runnable.nl = nl;
-		runnable.elementuuid = elementuuid;
-		runnable.description =null;
-		Thread x = new Thread(runnable);
-		x.start();
-		
-		try {
-			x.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return runnable.description;
+	public static synchronized String getDescription(byte[] elementuuid) {
+		Session s = HibernateManager.openSession();
 
+		Label.LabelItemPK id = new Label.LabelItemPK();
+		id.setElementuuid(elementuuid);
+		id.setLanguage(SmartDB.getCurrentLanguage());
+		String description = "";
+
+		Label lbl = (Label) s.get(Label.class, id);
+		if (lbl == null) {
+			// try for the default language
+			id.setLanguage(SmartDB.getCurrentConservationArea()
+					.getDefaultLanguage());
+			lbl = (Label) s.get(Label.class, id);
+		}
+		if (lbl != null) {
+			description = lbl.getValue();
+		}
+		return description;
+
+	}
+	
+	public Label(){
+		id = new LabelItemPK();
 	}
 	
 	@Transient
@@ -88,48 +109,51 @@ public class Label  {
 		this.value = label;
 	}
 	
-	@Id
-	@Column(name="language_uuid")
-	public byte[] getLanguageuuid() {
-		return languageuuid;
+	@EmbeddedId
+	public LabelItemPK getId(){
+		return this.id;
 	}
-
-	public void setLanguageuuid(byte[] languageuuid) {
-		this.languageuuid = languageuuid;
+	public void setId(LabelItemPK id){
+		this.id = id;
 	}
 	
-	@Id
-	@Column(name="element_uuid")
-	public byte[] getElementuuid() {
-		return elementuuid;
+	@Transient
+	public Language getLanguage() {
+		return id.getLanguage();
 	}
 
+	public void setLanguage(Language language) {
+		id.setLanguage(language);
+	}
+	
+	@Transient
+	public byte[] getElementuuid() {
+		return id.elementuuid;
+	}
+
+	
 	public void setElementuuid(byte[] elementuuid) {
-		this.elementuuid = elementuuid;
+		id.setElementuuid(elementuuid);
 	}
 
 	
 	@Embeddable
-	private static class LabelItemPK implements Serializable {
-		private byte[] languageuuid;
+	protected static class LabelItemPK implements Serializable {
+		private Language language;
 		private byte[] elementuuid;
 
-		public LabelItemPK(){
-			
-		}
-		public LabelItemPK(byte[] language, byte[] element){
-			this.languageuuid = language;
-			this.elementuuid = element;
-		}
 		
-		public byte[] getLanguageuuid() {
-			return languageuuid;
+		@ManyToOne(fetch = FetchType.LAZY)
+		@JoinColumn(name="language_uuid", referencedColumnName="uuid")
+		public Language getLanguage() {
+			return language;
 		}
 
-		public void setLanguageuuid(byte[] languageuuid) {
-			this.languageuuid = languageuuid;
+		public void setLanguage(Language language) {
+			this.language = language;
 		}
 		
+		@Column(name="element_uuid")
 		public byte[] getElementuuid() {
 			return elementuuid;
 		}
@@ -145,74 +169,97 @@ public class Label  {
 			}
 			LabelItemPK p = (LabelItemPK)key;
 			
-			if (p.languageuuid == null || this.languageuuid == null ||
+			if (p.language == null || this.language == null ||
 				p.elementuuid == null || this.elementuuid == null ){
 				
-				if (p.languageuuid == null && this.languageuuid == null && 
+				if (p.language == null && this.language == null && 
 					p.elementuuid == null && this.elementuuid == null){
 						return true;
 				}
 				return false;
 			}
 			
-			return Arrays.equals(p.languageuuid, this.languageuuid)
+			return p.language.equals(this.language)
 					&& Arrays.equals(p.elementuuid, this.elementuuid);
 		}
+		@Override
+		public int hashCode() {
+		    int code = 0;
+		    if (language!=null) {code += Arrays.hashCode(getLanguage().getUuid());}
+		    if (elementuuid!=null) {code += Arrays.hashCode(elementuuid); }
+		    return code;
+		  }
 	}
 	
-	@Override
-	public int hashCode() {
-	    int code = 0;
-	    if (languageuuid!=null) {code += Arrays.hashCode(languageuuid);}
-	    if (elementuuid!=null) {code += Arrays.hashCode(elementuuid); }
-	    return code;
-	  }
+	
 	
 	
 }
 
 
 class GetDescriptionRunnable implements Runnable{
-		public String nl;
+
 		public byte[] elementuuid;
 		public String description;
 		
 		@Override
 		public void run() {
-			String query = "SELECT l.value from Label as l, Language as g WHERE l.languageuuid = g.uuid and "
-					+ "g.code = :nl and l.elementuuid = :elementuuid";
-			//HibernateManager.getCurrentSession().beginTransaction();
+			
 			Session s = HibernateManager.openSession();
-			s.beginTransaction();
+//			s.beginTransaction();
 			try {
-				Query q = s.createQuery(query);
-				q.setString("nl", nl).setBinary("elementuuid", elementuuid);
-				List ret = q.list();
-				// HibernateManager.getCurrentSession().getTransaction().commit();
-
-				if (ret.size() == 0) {
-					// lets lookup default language
-					// TODO "= 'true'" is a derby hack to make booleans work
-					query = "SELECT l.value from Label as l, Language as g WHERE l.languageuuid = g.uuid and "
-							+ "g.default = 'true' and l.elementuuid = :elementuuid";
-					q = s.createQuery(query);
-					q.setBinary("elementuuid", elementuuid);
-					ret = q.list();
-					if (ret.size() == 0) {
-						description = null;
-						return;
-					} else {
-						description = (String)ret.get(0);
-						return;
-					}
-				} else {
-					description = (String)ret.get(0);
-					return;
-				}
+				Label.LabelItemPK id = new Label.LabelItemPK();
+				id.setElementuuid(elementuuid);
+				id.setLanguage(SmartDB.getCurrentLanguage());
+				
+				Label lbl = (Label) s.load(Label.class, id);
+				description = lbl.getValue();
+				Label lbl2 = (Label) s.load(Label.class, id);
+				description = lbl2.getValue();
+				
+				
+				return;
+			}catch (Exception ex){
+				ex.printStackTrace();
 			} finally {
-				s.getTransaction().rollback();
-				s.close();
+//				s.getTransaction().rollback();
+				//s.close();
 			}
+			
+//			String query = "SELECT l.value from Label as l, Language as g WHERE l.languageuuid = g.uuid and "
+//					+ "g.code = :nl and l.elementuuid = :elementuuid";
+//			//HibernateManager.getCurrentSession().beginTransaction();
+//			Session s = HibernateManager.openSession();
+//			s.beginTransaction();
+//			try {
+//				Query q = s.createQuery(query);
+//				q.setString("nl", nl).setBinary("elementuuid", elementuuid);
+//				List ret = q.list();
+//				// HibernateManager.getCurrentSession().getTransaction().commit();
+//
+//				if (ret.size() == 0) {
+//					// lets lookup default language
+//					// TODO "= 'true'" is a derby hack to make booleans work
+//					query = "SELECT l.value from Label as l, Language as g WHERE l.languageuuid = g.uuid and "
+//							+ "g.default = 'true' and l.elementuuid = :elementuuid";
+//					q = s.createQuery(query);
+//					q.setBinary("elementuuid", elementuuid);
+//					ret = q.list();
+//					if (ret.size() == 0) {
+//						description = null;
+//						return;
+//					} else {
+//						description = (String)ret.get(0);
+//						return;
+//					}
+//				} else {
+//					description = (String)ret.get(0);
+//					return;
+//				}
+//			} finally {
+//				s.getTransaction().rollback();
+//				s.close();
+//			}
 			
 		}
 	}

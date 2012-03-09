@@ -460,12 +460,13 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	@Override
 	public boolean close(){
 		boolean ret = super.close();
-		
-		if (currentRankSet != null){
-			currentRankSet.dispose();
-		}
-		if (agencies != null ){
-			agencies.dispose();
+		if (ret){
+			if (currentRankSet != null){
+				currentRankSet.dispose();
+			}
+			if (agencies != null ){
+				agencies.dispose();
+			}
 		}
 		return ret;
 	}
@@ -520,7 +521,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		Agency agency = new Agency();
 		org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
-		lbl.setLanguageuuid(cmbLanguage.getCurrentSelection().getUuid());
+		lbl.setLanguage(cmbLanguage.getCurrentSelection());
 		lbl.setValue("New Agency");
 		agency.getNames().add(lbl);
 		agency.setConservationArea(ca);
@@ -550,7 +551,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			
 			Rank rank = new Rank();
 			org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
-			lbl.setLanguageuuid(cmbLanguage.getCurrentSelection().getUuid());
+			lbl.setLanguage(cmbLanguage.getCurrentSelection());
 			lbl.setValue("New Rank");
 			rank.getNames().add(lbl);
 			rank.setAgency(current);

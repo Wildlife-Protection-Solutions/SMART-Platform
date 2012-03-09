@@ -255,13 +255,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		org.wcs.smart.ca.Label nameLabel = new org.wcs.smart.ca.Label();
 		nameLabel.setElementuuid(x.getUuid());
-		nameLabel.setLanguageuuid(ca.getDefaultLanguage().getUuid());
+		nameLabel.setLanguage(ca.getDefaultLanguage());
 		nameLabel.setValue("New Station");
 		x.getNames().add(nameLabel);
 
 		org.wcs.smart.ca.Label descLabel = new org.wcs.smart.ca.Label();
 		descLabel.setElementuuid(x.getUuid());
-		descLabel.setLanguageuuid(ca.getDefaultLanguage().getUuid());
+		descLabel.setLanguage(ca.getDefaultLanguage());
 		descLabel.setValue("Description ");
 		x.getDescriptions().add(descLabel);
 
@@ -416,67 +416,20 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		return false;
 	}
 
+	
 	@Override
 	public boolean close() {
 		boolean ret = super.close();
-		if (stations != null) {
-			stations.dispose();
-			gray.dispose();
-			black.dispose();
+		if (ret){
+			if (stations != null) {
+				stations.dispose();
+				gray.dispose();
+				black.dispose();
+			}	
 		}
-		
-		return ret;
+		return ret;		
 	}
 
-//	
-//	@Override
-//	public void performDefaults() {
-//		session.beginTransaction();
-//		try {
-//			for (Iterator<Station> iterator = stations.iterator(); iterator.hasNext();) {
-//				Station stn = (Station) iterator.next();
-//				if (stn.getUuid() != null) {
-//					stn.evitNames(session);
-//					for (Iterator<org.wcs.smart.ca.Label> iterator2 = stn.getDescriptions().iterator(); iterator2
-//							.hasNext();) {
-//						org.wcs.smart.ca.Label lbl = (org.wcs.smart.ca.Label) iterator2
-//								.next();
-//						session.evict(lbl);
-//					}
-//					session.evict(stn);
-//				}
-//			}
-//			session.getTransaction().commit();
-//
-//			stations.clear();
-//			toDelete.clear();
-//			stations.addAll(HibernateManager.getStations(ca,
-//					session));
-//
-//		} catch (RuntimeException ex) {
-//			SmartPlugIn.displayLog(
-//					"Error loading defaults for stations. "
-//							+ ex.getLocalizedMessage(), ex);
-//			session.getTransaction().rollback();
-//			session.close();
-//		}
-//
-//		tableViewer.refresh();
-//		super.performDefaults();
-//	}
-//
-//	private void deleteStation(final TableViewer tableViewer) {
-//		IStructuredSelection sel = ((IStructuredSelection) tableViewer
-//				.getSelection());
-//		for (Iterator iterator = sel.iterator(); iterator.hasNext();) {
-//			Station type = (Station) iterator.next();
-//			stations.remove(type);
-//			if (type.getUuid() != null) {
-//				toDelete.add(type);
-//			}
-//		}
-//		setChangesMade(true);
-//	}
 
 	private class TextTableEditor extends EditingSupport {
 		private Column column;

@@ -49,7 +49,7 @@ public class LabelUserType implements UserType {
 			throws HibernateException, SQLException {
 		assert names.length == 1;
 		byte[] uuid = (byte[]) BinaryType.INSTANCE.get(rs, names[0]);
-		return Label.getDescription(uuid, Platform.getNL());
+		return Label.getDescription(uuid);
 //		return Label.getDescription(uuid, "US_en");
 	}
 

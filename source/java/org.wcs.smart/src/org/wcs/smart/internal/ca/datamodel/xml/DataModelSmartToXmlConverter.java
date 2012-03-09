@@ -151,7 +151,7 @@ public class DataModelSmartToXmlConverter {
 		for (Label lbl: names){
 			NameType nt = new NameType();
 			nt.setValue(lbl.getValue());
-			nt.setLanguageCode(llookup.get(new String(lbl.getLanguageuuid())).getCode());
+			nt.setLanguageCode(llookup.get(new String(lbl.getLanguage().getUuid())).getCode());
 			list.add(nt);
 		}
 		

@@ -15,7 +15,7 @@ Spatial Monitoring and Reporting Tool
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xmx500M -Dosgi.parentClassloader=ext</vmArgs>
+      <vmArgs>-Xmx500M -Dosgi.parentClassloader=ext -XX:MaxPermSize=250M</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true</vmArgsMac>
    </launcherArgs>
 
