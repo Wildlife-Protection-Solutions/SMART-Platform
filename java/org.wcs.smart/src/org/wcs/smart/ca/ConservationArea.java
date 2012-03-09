@@ -22,12 +22,10 @@
 package org.wcs.smart.ca;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -40,15 +38,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.io.FileUtils;
-import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.SmartUtils;
 
 /**
  * 
@@ -85,11 +79,11 @@ public class ConservationArea {
 	private String description;
 	
 	private String srs;
-	private Set<Employee> employees;
+	private List<Employee> employees;
 	private Set<Language> languages;
 	
 	public ConservationArea(){
-		employees = new HashSet<Employee>();
+		employees = new ArrayList<Employee>();
 		languages = new HashSet<Language>();
 	}
 	
@@ -139,10 +133,10 @@ public class ConservationArea {
 	
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public Set<Employee> getEmployees() {
+	public List<Employee> getEmployees() {
 		return this.employees;
 	}
-	public void setEmployees(Set<Employee> employees){
+	public void setEmployees(List<Employee> employees){
 		this.employees = employees;
 	}
 
@@ -172,7 +166,7 @@ public class ConservationArea {
 	@Transient
 	public String getFileDataStoreLocation(){
 		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
-		filestore = filestore + File.separator + SmartPlugIn.getDirectoryPath(uuid);
+		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(uuid);
 		return filestore;
 	}
 	

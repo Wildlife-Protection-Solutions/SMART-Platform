@@ -174,8 +174,9 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		});
 		
 		tblEmployee = createEmployeeTableViewer(container);
-		tblEmployee.setInput(employees);
 		tblEmployee.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		((GridData)tblEmployee.getTable().getLayoutData()).heightHint = tblEmployee.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		tblEmployee.setInput(employees);
 		
 		nameFilter = new EmployeeNameFilter();
 		activeFilter = new EmployeeActiveFilter();
@@ -266,9 +267,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private void createNewEmployee(){
 		EmployeeDialog dia = new EmployeeDialog(getShell(), null, ca, getAgencies(), getSession());
 		dia.open();
-		
-		employees.clear();
-		employees.addAll(ca.getEmployees());
 		tblEmployee.refresh();
 	}
 	

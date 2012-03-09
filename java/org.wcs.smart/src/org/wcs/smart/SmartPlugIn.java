@@ -21,13 +21,6 @@
  */
 package org.wcs.smart;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.Time;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,13 +28,9 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IService;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -174,125 +163,6 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		
 	}
 	
-	/**
-	 * Converts a datetime widget to a date object only setting year, month and day.
-	 * The hour, minute, second and millisecond are all set to 0;
-	 * 
-	 */
-	public static Date getDate(DateTime dt){
-		Calendar calendar = new GregorianCalendar();
-		calendar.set(Calendar.YEAR, dt.getYear());
-		calendar.set(Calendar.MONTH, dt.getMonth());
-		calendar.set(Calendar.DAY_OF_MONTH, dt.getDay());
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		
-		return calendar.getTime();
-	}
+	
 
-	/**
-	 * Gets only the date part of a given date.  Sets the time to 0 is not endOfDay; sets
-	 * the time to 23:59:59 if end of day.
-	 * @param dt
-	 * @return date only date
-	 */
-	public static Date getDatePart(Date date, boolean endOfDay){
-		Calendar calendar = new GregorianCalendar();
-		calendar.setTime(date);
-		if (!endOfDay){
-			calendar.set(Calendar.HOUR_OF_DAY, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MILLISECOND, 0);
-		}else{
-			calendar.set(Calendar.HOUR_OF_DAY, 23);
-			calendar.set(Calendar.MINUTE, 59);
-			calendar.set(Calendar.SECOND, 59);
-			calendar.set(Calendar.MILLISECOND, 0);
-		}
-		
-		return calendar.getTime();
-	}
-	
-	/**
-	 * Gets only the date part of a given date.  Sets the time to 0.
-	 * @param dt
-	 * @return date only date
-	 */
-	public static Date combineDateTime(Date date, Time time){
-		Calendar calendar = new GregorianCalendar();
-		calendar.setTime(date);
-		Calendar calendar2 = new GregorianCalendar();
-		calendar2.setTime(time);
-		
-		calendar.set(Calendar.HOUR_OF_DAY, calendar2.get(Calendar.HOUR_OF_DAY));
-		calendar.set(Calendar.MINUTE, calendar2.get(Calendar.MINUTE));
-		calendar.set(Calendar.SECOND, calendar2.get(Calendar.SECOND));
-		calendar.set(Calendar.MILLISECOND, calendar2.get(Calendar.MILLISECOND));
-		
-		return calendar.getTime();
-	}
-	
-	/**
-	 * Converts a datetime widget to a date object only setting hour, minute, seconde
-	 */
-	public static Date getTime (DateTime dt){
-		Calendar calendar  = new GregorianCalendar();
-		calendar.setTimeInMillis(0);
-		calendar.set(Calendar.HOUR_OF_DAY, dt.getHours());
-		calendar.set(Calendar.MINUTE, dt.getMinutes());
-		calendar.set(Calendar.SECOND, dt.getSeconds());
-		return calendar.getTime();
-	}
-	
-	public static Date getMidnight ( ){
-		Calendar cal = GregorianCalendar.getInstance();
-		cal.setTimeInMillis(0);
-		cal.set(Calendar.MILLISECOND,0);
-		cal.set(Calendar.SECOND,0);
-		cal.set(Calendar.HOUR_OF_DAY,0);
-		cal.set(Calendar.MINUTE,0);
-		return cal.getTime();
-	}
-	/**
-	 * converts a Date to a Calendar object
-	 */
-	public static GregorianCalendar convertDate(Date d){
-		GregorianCalendar calendar = new GregorianCalendar();
-		calendar.setTime(d);
-		return calendar;
-		
-	}
-	
-	public static String getDirectoryPath(byte[] uuid){
-		return Arrays.toString(uuid).replaceAll(", ", "").replace("[", "").replace("]", "");
-	}
-	
-	
-	public static String getUuidAsString(byte[] uuid){
-		return Arrays.toString(uuid).replaceAll(", ", "").replace("[", "").replace("]", "").replace("-", "_");
-	}
-	
-	public static boolean createDirectory(File dir){
-		try{
-			FileUtils.forceMkdir(dir);
-			return true;
-		}catch (IOException ex){
-			SmartPlugIn.displayLog(null, "Could not create directory.  Attachments will not be imported.", ex);
-		}
-		return false;
-	}
-	
-	public static boolean copyFile(File from, File to){
-		//if (true) return false;
-		try {
-			FileUtils.copyFile(from, to);
-			return true;
-		} catch (IOException e) {
-			SmartPlugIn.displayLog(null, "Could not copy file " + from.getAbsolutePath() + " to " + to.getAbsolutePath() + ". ", e);
-		}
-		return false;
-	}
 }

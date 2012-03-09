@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
@@ -97,7 +98,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
 		Area a = (Area)itemCursor.get(0);
-		String fid = new String(a.getUuid());
+		String fid = SmartUtils.encodeHex(a.getUuid());
 		Object values[] = new Object[3];
 		values[0] = fid;
 		values[1] = a.getGeometry();
