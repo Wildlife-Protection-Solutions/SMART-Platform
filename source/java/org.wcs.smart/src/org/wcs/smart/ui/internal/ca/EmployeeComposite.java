@@ -23,10 +23,7 @@ package org.wcs.smart.ui.internal.ca;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -53,7 +50,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
@@ -397,17 +394,17 @@ public class EmployeeComposite extends Composite {
 		opFemale.setSelection(e.getGender() == Employee.DB_FEMALE);
 		opMale.setSelection(e.getGender() ==  Employee.DB_MALE);
 		
-		Calendar birthDate = SmartPlugIn.convertDate(e.getBirthDate());
+		Calendar birthDate = SmartUtils.convertDate(e.getBirthDate());
 		dtBirthDate.setDate(birthDate.get(Calendar.YEAR), birthDate.get(Calendar.MONTH), birthDate.get(Calendar.DATE));
 		
-		Calendar employmentStartDate = SmartPlugIn.convertDate(e.getStartEmploymentDate());
+		Calendar employmentStartDate = SmartUtils.convertDate(e.getStartEmploymentDate());
 		dtEmploymentStart.setDate(employmentStartDate.get(Calendar.YEAR), employmentStartDate.get(Calendar.MONTH), employmentStartDate.get(Calendar.DATE));
 		
 		if (e.getEndEmploymentDate() != null){
 			chNotActive.setSelection(true);
 			dtEmploymentEnd.setEnabled(true);
 			
-			Calendar endDate = SmartPlugIn.convertDate(e.getEndEmploymentDate());
+			Calendar endDate = SmartUtils.convertDate(e.getEndEmploymentDate());
 			dtEmploymentEnd.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
 		}else{
 			chNotActive.setSelection(false);
@@ -499,8 +496,8 @@ public class EmployeeComposite extends Composite {
 	 */
 	public void updateEmploye(Employee e){
 
-		e.setBirthDate(SmartPlugIn.getDate(dtBirthDate));
-		e.setStartEmploymentDate(SmartPlugIn.getDate(dtEmploymentStart));
+		e.setBirthDate(SmartUtils.getDate(dtBirthDate));
+		e.setStartEmploymentDate(SmartUtils.getDate(dtEmploymentStart));
 		
 		e.setFamilyName(txtFamilyName.getText());
 		e.setGender(opFemale.getSelection() ? Employee.DB_FEMALE : Employee.DB_MALE);
@@ -510,7 +507,7 @@ public class EmployeeComposite extends Composite {
 			if (!chNotActive.getSelection()){
 				e.setEndEmploymentDate(null);
 			}else{
-				e.setEndEmploymentDate(SmartPlugIn.getDate(dtEmploymentEnd));
+				e.setEndEmploymentDate(SmartUtils.getDate(dtEmploymentEnd));
 			}
 		}
 		

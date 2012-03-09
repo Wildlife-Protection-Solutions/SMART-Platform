@@ -191,7 +191,8 @@ public class EmployeeDialog extends Dialog {
 					}
 				}
 				//save results to database
-				session.saveOrUpdate(toUpdate);	
+				session.saveOrUpdate(toUpdate);
+				session.saveOrUpdate(ca);	
 				tx.commit();
 				return true;
 			}catch (RuntimeException ex){

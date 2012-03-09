@@ -67,7 +67,7 @@ public class HibernateManager extends SmartHibernateManager{
 			if (results.size() > 0){
 				return (Language)results.get(0);
 			}else{
-				results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("isDefault", true)).list();
+				results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("default", true)).list();
 				if (results.size() > 0){
 					return (Language) results.get(0);
 				}
