@@ -1,0 +1,1041 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui.editor;
+
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Time;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnViewerEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TableViewerEditor;
+import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Session;
+import org.wcs.smart.SmartUtils;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolEventManager.EventType;
+import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
+import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
+import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.model.Waypoint;
+
+import com.vividsolutions.jts.geom.Coordinate;
+
+/**
+ * Composite for editing patrol leg days data.  This includes modifying
+ * the date/time; rest minutes; tracks and waypoints.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class PatrolLegDayInputComposite {
+
+	private DateTime dtStartTime;
+	private DateTime dtEndTime;
+	private Text restMinutes;
+	private Label lblTotalHours;
+
+	private TableViewer observationTable;
+	//private WritableList inputList;
+	
+	private WizardDialog dialog = null;
+	private PatrolDayEditor editor;
+	private PatrolLegDay patrolLegDate;
+	
+	private Button btnAddWaypoint;
+	private Button btnDeleteWaypoint;
+	private Button btnMoveWaypoint;
+	
+	private  DoubleCellEditor doubleCellEditor;
+	private IntegerCellEditor integerCellEditor;
+	private TimeCellEditor timeEditor;
+	private AttachmentCellEditor attachmentEditor;
+	private TextCellEditor commentEditor;
+	private ObservationCellEditor observationEditor;
+	
+	private WaypointSorter waypointSorter;
+	
+	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;
+	private Hyperlink viewTrackPoints;
+	private Hyperlink importTrack;
+	private Text txtDistance;
+	
+	private IPatrolEventListener trackListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			if (attributeChanged == PatrolEventManager.PATROL_TRACKS && source.equals(patrolLegDate)){
+				updateDistance();
+			}
+			
+		}
+	};
+	private IPatrolEventListener waypointListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			if (attributeChanged == PatrolEventManager.PATROL_WAYPOINTS && source.equals(patrolLegDate)){
+				refreshObservationTable();
+			}
+			
+		}
+	};
+	private Composite mainComposite;
+	private Hyperlink lblImportWaypoints;
+	
+	
+	protected enum OtColumn {
+		ID("Waypoint Id", 1), EAST("Easting", 2), NORTH("Northing", 2), TIME(
+				"Time", 2), DIRECTION("Direction", 1), DISTANCE("Distance", 1), OBSERVATION(
+				"Observation", 4), COMMENT("Comment", 3), ATTACHMENTS(
+				"Attachments", 3);
+
+		protected String guiName;
+		protected int weight;
+
+		private OtColumn(String name, int weight) {
+			this.guiName = name;
+			this.weight = weight;
+		}
+	}
+
+	
+	public PatrolLegDayInputComposite(PatrolDayEditor editor){
+		this.editor = editor;
+	}
+
+	public void refreshObservationTable(){
+		observationTable.refresh();
+	}
+	
+	
+	public void setData(PatrolLegDay data) {
+		this.patrolLegDate = data;
+		
+		Calendar cal = new GregorianCalendar();
+		if (data.getStartTime() != null) {
+			cal.setTime(data.getStartTime());
+			dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
+					cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+		}else{
+			dtStartTime.setTime(0,0,0);
+		}
+		if (data.getEndTime() != null) {
+			cal.setTime(data.getEndTime());
+			dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
+					cal.get(Calendar.SECOND));
+		}else{
+			dtEndTime.setTime(23,59,59);
+		}
+		if (data.getRestMinutes() == null) {
+			restMinutes.setText("0");
+		} else {
+			restMinutes.setText(String.valueOf(data.getRestMinutes()));
+		}
+
+		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
+
+		if (data.getWaypoints() == null){
+			data.setWaypoints(new ArrayList<Waypoint>());
+		}
+		WritableList inputList = new WritableList(data.getWaypoints(), Waypoint.class);
+		observationTable.setInput(inputList);
+		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (editor.getPatrolEditor().canEdit()){
+					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
+					btnDeleteWaypoint.setEnabled(enabled);
+					
+					if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
+						btnMoveWaypoint.setEnabled(enabled);	
+					}else{
+						btnMoveWaypoint.setEnabled(false);
+					}
+				}
+			}
+		});
+		
+		this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
+				
+		updateTotalHours();
+		updateDistance();
+		
+		btnMoveWaypoint.setEnabled(false);
+		btnDeleteWaypoint.setEnabled(false);
+		
+		if (!editor.getPatrolEditor().canEdit()){
+			dtEndTime.setEnabled(false);
+			dtStartTime.setEnabled(false);
+			restMinutes.setEditable(false);
+			restMinutes.setEnabled(false);
+			
+			btnAddWaypoint.setVisible(false);
+			btnDeleteWaypoint.setVisible(false);
+			btnMoveWaypoint.setVisible(false);
+			
+			importTrack.setVisible(false);
+			lblImportWaypoints.setVisible(false);
+			
+		}
+	
+	}
+
+	public Composite createComposite(Composite parent, FormToolkit toolkit) {
+		
+		mainComposite = toolkit.createComposite(parent);
+		mainComposite.setLayout(new GridLayout(1, false));
+		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite timeInfo = toolkit.createComposite(mainComposite);
+		timeInfo.setLayout(new GridLayout(4, false));
+		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 20;
+		// ((GridLayout)timeInfo.getLayout()).marginRight = 10;
+		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		Composite c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toolkit.createLabel(c, "Start Time:");
+		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
+		toolkit.adapt(dtStartTime);
+		dtStartTime.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateTotalHours();
+			}
+			
+		});
+		dtStartTime.addFocusListener(new FocusAdapter() {			
+			@Override
+			public void focusLost(FocusEvent e) {
+				editor.getPatrolEditor().doSave(null);
+//				editor.setDirty(true);
+				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
+
+				
+			}
+		});
+
+		c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		toolkit.createLabel(c, "End Time:");
+		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
+		toolkit.adapt(dtEndTime);
+		dtEndTime.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateTotalHours();
+			}
+			
+		});
+		dtEndTime.addFocusListener(new FocusAdapter() {			
+			@Override
+			public void focusLost(FocusEvent e) {
+//				editor.setDirty(true);
+				editor.getPatrolEditor().doSave(null);
+				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
+			}
+		});
+		
+		// TODO rest hours can only contain numbers
+		c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		toolkit.createLabel(c, "Rest Minutes:");
+		restMinutes = toolkit.createText(c, "0");
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		gd.widthHint = 30;
+		restMinutes.setLayoutData(gd);
+		restMinutes.addFocusListener(new FocusListener() {
+			private int oldValue; 
+			@Override
+			public void focusLost(FocusEvent e) {
+				int d = oldValue;
+				try{
+					d = Integer.parseInt(restMinutes.getText());
+				}catch (Exception ex){
+					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Error", "Rest Minutes must be a valid number.");
+					restMinutes.setText(oldValue + "");
+				}
+				updateTotalHours();
+//				editor.setDirty(true);
+				editor.getPatrolEditor().doSave(null);
+				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				oldValue = Integer.parseInt(restMinutes.getText());
+			}
+		});
+		
+		
+		c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		toolkit.createLabel(c, "Total Hours Patrolled:");
+		lblTotalHours = toolkit.createLabel(c, "N/A");
+		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gd.widthHint = 30;
+		lblTotalHours.setLayoutData(gd);
+
+		Composite trackComp = toolkit.createComposite(mainComposite);
+		trackComp.setLayout(new GridLayout(4, false));
+		
+		
+		toolkit.createLabel(trackComp, "Distance Travelled (km): ");
+		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE);
+		txtDistance.setEditable(false);
+		gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		gd.widthHint = 50;
+		txtDistance.setLayoutData(gd);
+		
+		importTrack = toolkit.createHyperlink(trackComp, "Import Track ...", SWT.NONE);
+		importTrack.addHyperlinkListener(new HyperlinkAdapter(){
+			public void linkActivated(HyperlinkEvent e) {
+				if (patrolLegDate.getTrack() != null){
+					if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Track", "The current track will be replaced.  Are you sure you want to continue?")){
+						return;
+					}
+				}
+				showImportTrackWizard();
+				viewTrackPoints.setEnabled(patrolLegDate.getTrack() != null);
+			}
+		});
+		
+		viewTrackPoints = toolkit.createHyperlink(trackComp, "View TrackPoints...", SWT.NONE);
+		viewTrackPoints.setEnabled(false);
+		viewTrackPoints.addHyperlinkListener(new HyperlinkAdapter(){
+			public void linkActivated(HyperlinkEvent e) {
+				//showImportWizard();
+				TrackPointDialog tpd = new TrackPointDialog(Display.getCurrent().getActiveShell(), patrolLegDate.getTrack());
+				tpd.open();
+			}
+		});
+		
+		
+		
+		Composite observationHcomp = toolkit.createComposite(mainComposite);
+		observationHcomp.setLayout(new GridLayout(2, false));
+		toolkit.createLabel(observationHcomp, "Observations / Waypoints:");
+		lblImportWaypoints = toolkit.createHyperlink(observationHcomp, "Import Waypoints ...", SWT.NONE);
+		lblImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
+			public void linkActivated(HyperlinkEvent e) {
+				showImportWaypointWizard();
+			}
+		});
+
+		observationHcomp.addPaintListener(new PaintListener() {
+			boolean called = false;
+			@Override
+			public void paintControl(PaintEvent e) {
+				if (called) return;
+				called = true;
+				resize();
+				
+			}
+		});
+		
+//		Composite compTable = toolkit.createComposite(main);
+//		compTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		TableColumnLayout tableLayout = new TableColumnLayout();
+//		compTable.setLayout(tableLayout);
+
+		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		toolkit.adapt(observationTable.getTable());
+		setupObservationTable();
+
+		Composite buttonComp = toolkit.createComposite(mainComposite);
+		buttonComp.setLayout(new GridLayout(3, false));
+		btnAddWaypoint = toolkit.createButton(buttonComp, "Add Waypoint", SWT.PUSH);
+		btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addWaypoint();
+			}
+		});
+		
+		
+		btnDeleteWaypoint = toolkit.createButton(buttonComp, "Delete Waypoint(s)", SWT.PUSH);
+		btnDeleteWaypoint.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				deleteSelectedWaypoints();
+			}
+		});
+		
+		btnMoveWaypoint = toolkit.createButton(buttonComp, "Move Waypoint(s)", SWT.PUSH);
+		btnMoveWaypoint.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				moveSelectedWaypoints();
+			}
+		});
+		
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, trackListener);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, waypointListener);
+		updateTotalHours();
+		return mainComposite;
+	}
+	
+	public void dispose(){
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, trackListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, waypointListener);
+		
+		mainComposite.dispose();
+	}
+	
+	private void moveSelectedWaypoints(){
+		MoveWaypointDialog dialog = new MoveWaypointDialog(Display.getCurrent().getActiveShell(), patrolLegDate.getPatrolLeg().getPatrol());
+		if (dialog.open() != Window.OK ){
+			return ;
+		}
+		PatrolLegDay moveTo = dialog.getMoveToPosition();
+		Session session = HibernateManager.openSession();
+		try {
+			IStructuredSelection selection = ((IStructuredSelection) observationTable.getSelection());
+			for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+				Waypoint w = (Waypoint) iterator.next();
+				Waypoint toClone = w;
+				if (toClone.getUuid() != null) {
+					toClone = (Waypoint) session.merge(toClone);
+				}
+				Waypoint cloned = toClone.clone();
+				if (patrolLegDate.getWaypoints().remove(w)) {
+					w.setPatrolLegDay(null);
+					cloned.setPatrolLegDay(moveTo);
+					moveTo.getWaypoints().add(cloned);
+				}
+				
+				//ensure minimum is loaded for the patrol mapping service which assumes
+				//to a minimum that this information is already loaded 
+				if (cloned.getObservations() != null && cloned.getObservations().size() > 0){
+					cloned.getObservations().get(0).getCategory().getName();
+				}
+				
+			}
+		} finally {
+			session.close();
+		}
+//		this.editor.setDirty(true);
+		editor.getPatrolEditor().doSave(null);
+		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, moveTo);
+		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+		
+	}
+	
+	
+	private void deleteSelectedWaypoints() {
+		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Delete Waypoints", "Are you sure you want to delete the selected waypoints.  This action cannot be undone.");
+		if (!doDel){
+			return;
+		}
+		IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
+		for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+			Waypoint w = (Waypoint) iterator.next();
+			if (patrolLegDate.getWaypoints().remove(w)){
+				w.setPatrolLegDay(null);
+			}
+		}
+//		editor.setDirty(true);
+		editor.getPatrolEditor().doSave(null);
+		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+	}
+	
+	private void resize(){
+		if (observationTableColumns == null){
+			return ;
+		}
+		
+		GC gc = new GC(observationTable.getTable().getDisplay());
+		gc.setFont(observationTable.getTable().getFont());
+		
+		for (Iterator<Entry<OtColumn, TableViewerColumn>> iterator = observationTableColumns.entrySet().iterator(); iterator.hasNext();) {
+			Entry<OtColumn, TableViewerColumn> type = iterator.next();
+			type.getValue().getColumn().setWidth(getMaximumWidth(gc, type.getKey()));
+		}
+		gc.dispose();
+	}
+	
+	/**
+	 * This convenience method is used to determine an appropriate width for
+	 * the column based on the collection of event objects. The returned
+	 * value is the maximum width (in pixels) of the text the receiver
+	 * associates with each of the events. The events are provided as
+	 * Object[] because converting them to {@link UsageDataEventWrapper}[]
+	 * would be an unnecessary expense.
+	 * 
+	 * @param gc
+	 *            a {@link GC} loaded with the font used to display the
+	 *            events.
+	 * @param events
+	 *            an array of {@link UsageDataEventWrapper} instances.
+	 * @return the width of the widest event
+	 */
+	private int getMaximumWidth(GC gc, OtColumn column){ //, Object[] events) {
+		int width = 0;
+		Point extent = gc.textExtent(column.guiName);
+		width = extent.x;
+		for (Iterator iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
+			Waypoint e = (Waypoint) iterator.next();
+			String str = getWaypointValueAsString(e, column);
+			
+			if (str != null){
+				int tmp = gc.textExtent(str).x;
+				if ( tmp > width){
+					width = tmp;
+				}
+			}
+		}
+		width = Math.min(200, width);
+		return width + 20;
+	}
+	
+	private void updateTotalHours(){
+		double d = Double.parseDouble(this.restMinutes.getText());
+		double time = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime() - d * 60 * 1000;
+		lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time / (1000 * 60 * 60)));
+	}
+	
+	public void updateDistance(){
+		if (this.patrolLegDate.getTrack() == null || this.patrolLegDate.getTrack().getDistance() == null){
+			this.viewTrackPoints.setEnabled(false);
+			this.txtDistance.setText("0");
+		}else{
+			this.txtDistance.setText(PatrolEditor.DISTANCE_FORMATTER.format(this.patrolLegDate.getTrack().getDistance()));
+			this.viewTrackPoints.setEnabled(true);
+		}
+	}
+	private void setupObservationTable() {
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = observationTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		observationTable.getTable().setLayoutData(gd);
+		observationTable.getTable().setLinesVisible(true);
+		observationTable.getTable().setHeaderVisible(true);
+		observationTable.setContentProvider(new ObservableListContentProvider());
+		
+
+//		TreeViewerFocusCellManager focusCellManager = new TreeViewerFocusCellManager(observationTable, new FocusCellOwnerDrawHighlighter(observationTable));
+		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(observationTable) {
+			protected boolean isEditorActivationEvent(
+					ColumnViewerEditorActivationEvent event) {
+				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
+						|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
+						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
+						|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+			}
+		};
+		
+		TableViewerEditor.create(observationTable, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR );
+
+		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
+		integerCellEditor = new IntegerCellEditor(observationTable.getTable());
+		timeEditor = new TimeCellEditor(observationTable.getTable());
+		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
+		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
+		observationEditor = new ObservationCellEditor(observationTable.getTable());
+		
+		observationTableColumns = new HashMap<OtColumn, TableViewerColumn>();
+		
+		waypointSorter = new WaypointSorter(observationTable);
+		observationTable.setComparator(waypointSorter);
+		for (int i = 0; i < OtColumn.values().length; i++) {
+			final OtColumn columntype = OtColumn.values()[i];
+			
+
+			if (!editor.getPatrolEditor().getOptions().getTrackDistanceDirection() && 
+					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE)){
+				continue;
+			}
+			
+			final TableViewerColumn column = new TableViewerColumn(observationTable,SWT.NONE);
+			column.setLabelProvider(new ObsrvationTableLabelProvider(columntype));
+			column.getColumn().setText(columntype.guiName);
+			column.getColumn().setResizable(true);
+			column.getColumn().setMoveable(false);
+
+			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH){
+				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
+			}
+			
+			observationTableColumns.put(columntype, column);
+			
+			if (columntype == OtColumn.ID || columntype == OtColumn.TIME){
+				column.getColumn().addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						waypointSorter.setSortColumn(columntype, column.getColumn());
+					}	
+				});
+				if (columntype == OtColumn.TIME){
+					waypointSorter.setSortColumn(columntype, column.getColumn());
+				}
+			}
+		
+		}
+
+	}
+	
+	
+	private void showImportTrackWizard(){
+		//Show Create Patrol Wizard
+		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate.getDate(), GPSDataImport.ImportType.TRACK);		
+		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
+		try {
+			pmd.run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					monitor.setTaskName("Loading Wizard");
+					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
+
+					
+					if (dialog != null) {
+						try{
+							monitor.setTaskName("Displaying Input Wizard");
+							dialog.open();
+							Object data = wizard.getImportedData();
+							boolean importAll = wizard.getImportAll();
+							monitor.setTaskName("Importing Data");
+							
+							if (data != null){
+								if (importAll){
+									HashMap<PatrolLegDay, Track> tracks = GPSDataImport.convertTracks((List<Coordinate>)data, editor.getPatrolEditor().getPatrol().getLegs());
+									int count = 0;
+									for (Iterator<Entry<PatrolLegDay, Track>> iterator = tracks.entrySet().iterator(); iterator
+											.hasNext();) {
+										Entry<PatrolLegDay, Track> type = (Entry<PatrolLegDay, Track>) iterator.next();
+										type.getKey().setTrack(type.getValue());
+										type.getValue().setPatrolLegDay(type.getKey());
+										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, type.getKey());
+										count++;
+									}
+									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Tracks were imported for " + count + " patrol days.");
+								}else{
+									Track track = GPSDataImport.convertToTrack((List<Coordinate>)data);
+									track.setPatrolLegDay(patrolLegDate);
+									patrolLegDate.setTrack(track);
+									PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
+									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Track succesfully imported.");
+								}
+//								editor.setDirty(true);
+								editor.getPatrolEditor().doSave(null);
+								//updateDistance();
+								
+							}
+						}catch (Exception ex){
+							SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+						}
+					}
+				}
+			});
+		} catch (Exception ex) {
+			dialog = null;
+			SmartPatrolPlugIn.displayLog("Error loading new patrol wizard. "
+					+ ex.getMessage(), ex);
+				}
+		
+	}
+	
+
+	private void showImportWaypointWizard(){
+		//Show Create Patrol Wizard
+		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate.getDate(), GPSDataImport.ImportType.WAYPOINT);		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
+		try {
+			pmd.run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					monitor.setTaskName("Loading Wizard");
+					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
+					
+					if (dialog != null) {
+						monitor.setTaskName("Displaying Input Wizard");
+						try{
+							dialog.open();
+							monitor.setTaskName("Importing Data ...");
+							Object data = wizard.getImportedData();
+							boolean importAll = wizard.getImportAll();
+							if (data != null){
+								List<Waypoint> wp = (List<Waypoint>) data;
+								
+								if (importAll){
+										Set<PatrolLegDay> modified = GPSDataImport.assignWaypoints(wp, editor.getPatrolEditor().getPatrol().getLegs());
+										for (PatrolLegDay day : modified){
+											PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, day);
+										}
+										MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Waypoints successfully imported for " + modified.size() + " days.");
+								}else{
+									int count = 0;
+									for (Waypoint w : wp){
+										w.setPatrolLegDay(patrolLegDate);
+										if (w.getTime() == null){
+											w.setTime(new Time(SmartUtils.getMidnight().getTime()));
+										}
+										count++;
+									}
+									patrolLegDate.getWaypoints().addAll(wp);
+									PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", count + " waypoints succesfully imported.");
+								}
+								
+//								editor.setDirty(true);
+								editor.getPatrolEditor().doSave(null);
+								
+							}
+							
+						}catch (Exception ex){
+							SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+						}
+					}
+				}
+			});
+		} catch (Exception ex) {
+			dialog = null;
+			SmartPatrolPlugIn.displayLog("Error loading new patrol wizard. "
+					+ ex.getMessage(), ex);
+				}
+		
+	}
+	private void setTime(DateTime d, Time time){
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(time);
+		d.setTime(cal.get(Calendar.HOUR), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+	}
+
+	
+	private void setWaypointValue(Waypoint element, OtColumn column, Object value){
+		boolean needSave = false;
+		if (column == OtColumn.ID) {
+			element.setId((Integer)value);
+			needSave = true;
+//			editor.setDirty(true);
+		} else if (column == OtColumn.EAST) {
+			element.setX((Double)value);
+			needSave = true;
+//			editor.setDirty(true);
+		} else if (column == OtColumn.NORTH) {
+			element.setY((Double)value);
+			needSave = true;
+//			editor.setDirty(true);
+		} else if (column == OtColumn.TIME) {
+			if (value instanceof Date){ 
+				element.setTime(new Time( ((Date)value).getTime()) );
+//				editor.setDirty(true);
+				needSave = true;
+			}
+		} else if (column == OtColumn.DIRECTION) {
+			needSave = true;
+			element.setDirection(( (Double)value).floatValue());
+//			editor.setDirty(true);
+		} else if (column == OtColumn.DISTANCE) {
+			element.setDistance( ( (Double)value).floatValue());
+			needSave = true;
+//			editor.setDirty(true);
+		} else if (column == OtColumn.OBSERVATION) {
+			//updated in cell editor
+			if (value != null){
+//				editor.setDirty(true);
+				needSave = true;
+			}
+		} else if (column == OtColumn.COMMENT) {
+			element.setComment((String)value);
+//			editor.setDirty(true);
+			needSave = true;
+		} else if (column == OtColumn.ATTACHMENTS) {
+			if (value != null){
+				needSave = true;
+//				editor.setDirty(true);
+			}
+			//updated in cell editor
+		}
+		if (needSave){
+			editor.getPatrolEditor().doSave(null);
+		}
+		observationTable.refresh(element);
+		
+	}
+	
+	private Object getWaypointValue(Waypoint element, OtColumn column) {
+
+		Waypoint wp = (Waypoint) element;
+		if (column == OtColumn.ID) {
+			return wp.getId();
+		} else if (column == OtColumn.EAST) {
+			return wp.getX();
+		} else if (column == OtColumn.NORTH) {
+			return wp.getY();
+		} else if (column == OtColumn.TIME) {
+			return wp.getTime();
+		} else if (column == OtColumn.DIRECTION) {
+			return wp.getDirection();
+		} else if (column == OtColumn.DISTANCE) {
+			return wp.getDistance();
+		} else if (column == OtColumn.OBSERVATION) {
+			return wp;
+		} else if (column == OtColumn.COMMENT) {
+			if (wp.getComment() == null){
+				return "";
+			}
+			return wp.getComment();
+		} else if (column == OtColumn.ATTACHMENTS) {
+			//return wp.getAttachments();
+			return wp;
+		}
+	
+	return "";
+}
+	
+	private String getWaypointValueAsString(Waypoint element, OtColumn column) {
+
+			Waypoint wp = (Waypoint) element;
+			if (column == OtColumn.ID) {
+				return String.valueOf(wp.getId());
+			} else if (column == OtColumn.EAST) {
+				return String.valueOf(wp.getX());
+			} else if (column == OtColumn.NORTH) {
+				return String.valueOf(wp.getY());
+			} else if (column == OtColumn.TIME) {
+				if (wp.getTime() != null) {
+					Calendar ca = Calendar.getInstance();
+					ca.setTime(wp.getTime());
+					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(ca.getTime());
+				}
+				return "";
+			} else if (column == OtColumn.DIRECTION) {
+				if (wp.getDirection() != null) {
+					return String.valueOf(wp.getDirection());
+				}
+				return "";
+			} else if (column == OtColumn.DISTANCE) {
+				if (wp.getDistance() != null) {
+					return String.valueOf(wp.getDistance());
+				}
+				return "";
+			} else if (column == OtColumn.OBSERVATION) {
+				if (wp.getObservations() == null
+						|| wp.getObservations().size() == 0) {
+					return "(None)";
+				} else {
+					if (wp.getObservations().size() == 1){
+						return wp.getObservations().get(0).getCategory().getName();
+					}
+					return wp.getObservations().size() + " Observations";
+				}
+			} else if (column == OtColumn.COMMENT) {
+				if (wp.getComment() == null) {
+					return "";
+				}
+				return wp.getComment();
+			} else if (column == OtColumn.ATTACHMENTS) {
+				if (wp.getAttachments() == null
+						|| wp.getAttachments().size() == 0) {
+					return "(None)";
+				} else {
+					return wp.getAttachments().size() + " Files";
+				}
+			}
+		
+		return "";
+	}
+	
+	/**
+	 * update patrol leg day values 
+	 * @param session
+	 */
+	public void updateLegDay() {
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(0);
+		cal.set(Calendar.HOUR_OF_DAY, dtEndTime.getHours());
+		cal.set(Calendar.MINUTE, dtEndTime.getMinutes());
+		cal.set(Calendar.SECOND, dtEndTime.getSeconds());
+		Time t = new Time(cal.getTimeInMillis());
+		patrolLegDate.setEndTime(t);
+		
+		cal.setTimeInMillis(0);
+		cal.set(Calendar.HOUR_OF_DAY, dtStartTime.getHours());
+		cal.set(Calendar.MINUTE, dtStartTime.getMinutes());
+		cal.set(Calendar.SECOND, dtStartTime.getSeconds());
+		t = new Time(cal.getTimeInMillis());
+		patrolLegDate.setStartTime(t);
+		
+		patrolLegDate.setRestMinutes(Integer.parseInt(restMinutes.getText()));
+	}
+	
+	private void addWaypoint() {
+		AddWaypointDialog add = new AddWaypointDialog(Display.getCurrent().getActiveShell());
+		if (add.open() == Window.OK){
+			Waypoint wp = add.getWaypoint();
+			wp.setPatrolLegDay(patrolLegDate);
+			
+			Calendar cal = Calendar.getInstance();
+			cal.set(Calendar.MILLISECOND,0);
+			cal.set(Calendar.SECOND,0);
+			cal.set(Calendar.HOUR_OF_DAY,0);
+			cal.set(Calendar.MINUTE,0);
+			wp.setTime(new Time(cal.getTime().getTime()));
+			patrolLegDate.getWaypoints().add(wp);
+			
+			editor.getPatrolEditor().doSave(null);
+			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
+		}
+		//saveLegDay();
+		//editor.setDirty(true);
+		
+		
+	}
+
+	class ObsrvationTableLabelProvider extends ColumnLabelProvider {
+
+		private OtColumn column = null;
+
+		public ObsrvationTableLabelProvider(OtColumn column) {
+			this.column = column;
+		}
+
+		public String getText(Object element) {
+			if (element instanceof Waypoint) {
+				Waypoint wp = (Waypoint) element;
+				return getWaypointValueAsString(wp, column);
+			}
+			return super.getText(element);
+		}
+		
+
+	}
+	
+	
+	class ObservationTableCellModifier extends EditingSupport{
+		
+		private OtColumn column;
+		
+		public ObservationTableCellModifier(ColumnViewer viewer, OtColumn column){
+			super(viewer);
+			this.column = column;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.EditingSupport#getCellEditor(java.lang.Object)
+		 */
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			if (column == OtColumn.NORTH || column == OtColumn.EAST || 
+					column == OtColumn.DIRECTION || column == OtColumn.DISTANCE ){
+				return doubleCellEditor;
+			}else if (column == OtColumn.ID){
+				return integerCellEditor;
+			}else if (column == OtColumn.TIME){
+				return timeEditor;
+			}else if (column == OtColumn.ATTACHMENTS){
+				return attachmentEditor;
+			}else if (column == OtColumn.COMMENT){
+				return commentEditor;
+			}else if (column == OtColumn.OBSERVATION){
+				return observationEditor;
+			}
+			return null;
+			
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.EditingSupport#canEdit(java.lang.Object)
+		 */
+		@Override
+		protected boolean canEdit(Object element) {
+			if (!PatrolLegDayInputComposite.this.editor.getPatrolEditor().canEdit()){
+				return false;
+			}
+			return true;	
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.EditingSupport#getValue(java.lang.Object)
+		 */
+		@Override
+		protected Object getValue(Object element) {
+			return getWaypointValue((Waypoint)element, column);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.EditingSupport#setValue(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		protected void setValue(Object element, Object value) {
+			setWaypointValue((Waypoint)element, column, value);
+		}
+
+	
+		
+	}
+}
