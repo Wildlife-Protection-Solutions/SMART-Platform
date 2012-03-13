@@ -72,7 +72,7 @@ public class Label  {
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
 		Session s = HibernateManager.openSession();
-
+//		s.beginTransaction();
 		Label.LabelItemPK id = new Label.LabelItemPK();
 		id.setElementuuid(elementuuid);
 		id.setLanguage(SmartDB.getCurrentLanguage());
@@ -81,13 +81,15 @@ public class Label  {
 		Label lbl = (Label) s.get(Label.class, id);
 		if (lbl == null) {
 			// try for the default language
-			id.setLanguage(SmartDB.getCurrentConservationArea()
-					.getDefaultLanguage());
+			id.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			lbl = (Label) s.get(Label.class, id);
 		}
 		if (lbl != null) {
 			description = lbl.getValue();
 		}
+//		s.getTransaction().rollback();
+//		s.close();
+//		
 		return description;
 
 	}

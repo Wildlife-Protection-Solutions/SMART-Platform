@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -439,32 +440,35 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			return "Group B must have a transportation type.";
 		}
 		
-		long stime = SmartUtils.getDate(startDate).getTime();
+		Date stime  = SmartUtils.getDate(startDate);
 		if (opCustom.getSelection()){
-			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+			stime = SmartUtils.combineDateTime(stime, new Time (SmartUtils.getTime(startTime).getTime()));
+//			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
 		}
-		Date newStart = new Date( stime );
-		if (newStart.before(existingLeg.getStartDate())){
+
+		if (stime.before(existingLeg.getStartDate())){
 			return "Date of split must be after " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getStartDate());
 		}
-		if (newStart.after(existingLeg.getEndDate())){
+		if (stime.after(existingLeg.getEndDate())){
 			return "Date of split must be before " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getEndDate());
 		}
 		
-		long etime = SmartUtils.getDate(endDate).getTime();
+		Date etime = SmartUtils.getDate(endDate);
 		if (opEndCustom.getSelection()){
-			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
+			etime = SmartUtils.combineDateTime(etime,  new Time (SmartUtils.getTime(endTime).getTime()));
+//			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
 		}else{
-			etime += 24 * 60 * 60 * 1000 - 1000;
+			etime = SmartUtils.getDatePart(etime, true);
+//			etime += 24 * 60 * 60 * 1000 - 1000;
 		}
-		Date newEnd = new Date( etime );
-		if (newEnd.before(existingLeg.getStartDate())){
+
+		if (etime.before(existingLeg.getStartDate())){
 			return "Date Groups Joined must be after " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getStartDate());
 		}
-		if (newEnd.after(existingLeg.getEndDate())){
+		if (etime.after(existingLeg.getEndDate())){
 			return "Date Groups Joined must be before " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getEndDate());
 		}
-		if (newEnd.before(newStart)){
+		if (etime.before(stime)){
 			return "Join date must be after split date.";
 		}
 		
@@ -486,26 +490,41 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		PatrolLeg legB = new PatrolLeg();
 		
 		//dates		
-		long stime = SmartUtils.getDate(startDate).getTime();
+		Date stime  = SmartUtils.getDate(startDate);
 		if (opCustom.getSelection()){
-			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+			stime = SmartUtils.combineDateTime(stime, new Time (SmartUtils.getTime(startTime).getTime()));
+//			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
 		}
-		Date newStart = new Date( stime );
-		
-		long etime = SmartUtils.getDate(endDate).getTime();
+
+		Date etime = SmartUtils.getDate(endDate);
 		if (opEndCustom.getSelection()){
-			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
+			etime = SmartUtils.combineDateTime(etime,  new Time (SmartUtils.getTime(endTime).getTime()));
+//			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
 		}else{
-			etime += 24 * 60 * 60 * 1000 - 1000;
+			etime = SmartUtils.getDatePart(etime, true);
+//			etime += 24 * 60 * 60 * 1000 - 1000;
 		}
-		Date newEnd = new Date( etime );
+		
+//		long stime = SmartUtils.getDate(startDate).getTime();
+//		if (opCustom.getSelection()){
+//			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+//		}
+//		Date newStart = new Date( stime );
+//		
+//		long etime = SmartUtils.getDate(endDate).getTime();
+//		if (opEndCustom.getSelection()){
+//			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
+//		}else{
+//			etime += 24 * 60 * 60 * 1000 - 1000;
+//		}
+//		Date newEnd = new Date( etime );
 		
 	
-		legA.setStartDate(newStart);
-		legB.setStartDate(newStart);
+		legA.setStartDate(stime);
+		legB.setStartDate(stime);
 		
-		legA.setEndDate(newEnd);
-		legB.setEndDate(newEnd);
+		legA.setEndDate(etime);
+		legB.setEndDate(etime);
 		
 		String legAId = existingLeg.getId() + " - Group A";
 		if (legAId.length() > PatrolLeg.ID_MAX_SIZE){
@@ -569,11 +588,11 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		legA.setPatrol(existingLeg.getPatrol());
 		legB.setPatrol(existingLeg.getPatrol());
 		
-		if (! newEnd.equals( existingLeg.getEndDate() )){
+		if (! etime.equals( existingLeg.getEndDate() )){
 			
 			//we need to create another leg
 			PatrolLeg legC = new PatrolLeg();
-			legC.setStartDate(newEnd);
+			legC.setStartDate(etime);
 			legC.setEndDate(existingLeg.getEndDate());
 			
 			String legCId = existingLeg.getId() + " - End ";
@@ -594,7 +613,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		}
 		
 		
-		existingLeg.setEndDate(newStart);
+		existingLeg.setEndDate(stime);
 		if (existingLeg.getEndDate().getTime() - existingLeg.getStartDate().getTime() <= 1000){			
 			//1 second
 			legsToUpdate.remove(existingLeg);

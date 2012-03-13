@@ -382,10 +382,9 @@ public class PatrolHibernateManager extends HibernateManager{
 			}
 			
 			//save
-			session.update(patrol);
-			
-			session.save(patrol);
-//			session.saveOrUpdate(patrol);
+			//session.update(patrol);
+			//session.save(patrol);
+			session.saveOrUpdate(patrol);
 			
 			File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath() );
 			if (!f.exists()){
