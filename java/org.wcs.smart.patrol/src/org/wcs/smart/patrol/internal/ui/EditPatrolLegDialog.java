@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -400,35 +401,50 @@ private void createEndTimeComposite(Composite parent) {
 	 * @return
 	 */
 	private String validateDates(){
-		long patrolStart = SmartUtils.getDatePart(patrolStartDate, false).getTime();
-		long patrolEnd = SmartUtils.getDatePart(patrolEndDate, true).getTime();
+		Date patrolStart = SmartUtils.getDatePart(patrolStartDate, false);
+		Date patrolEnd = SmartUtils.getDatePart(patrolEndDate, true);
 		
-		long legStart = SmartUtils.getDate(startDate).getTime();
+		
+		Date legStart = SmartUtils.getDate(startDate);
 		if (opCustom.getSelection()){
-			legStart += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+			legStart = SmartUtils.combineDateTime(legStart, new Time(SmartUtils.getTime(startTime).getTime()));
 		}
-		long legEnd = SmartUtils.getDate(endDate).getTime();
+//		long legStart = SmartUtils.getDate(startDate).getTime();
+//		if (opCustom.getSelection()){
+//			legStart += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+//		}
+		
+		
+		//update end date & Time
+		//long etime = SmartUtils.getDate(endDate).getTime();
+		Date legEnd = SmartUtils.getDate(endDate);
 		if (opEndCustom.getSelection()){
-			legEnd += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds();
+			legEnd = SmartUtils.combineDateTime(legEnd, new Time(SmartUtils.getTime(endTime).getTime()));
 		}else{
-			legEnd += 24 * 60 * 60 * 1000 - 1000;
+			legEnd = SmartUtils.getDatePart(legEnd, true);
 		}
+//		long legEnd = SmartUtils.getDate(endDate).getTime();
+//		if (opEndCustom.getSelection()){
+//			legEnd += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds();
+//		}else{
+//			legEnd += 24 * 60 * 60 * 1000 - 1000;
+//		}
 		
 		
-		if (legStart < patrolStart){
+		if (legStart.before(patrolStart)){
 			return "Date must be after patrol start date: " + DATE_TIME_FORMAT.format(patrolStartDate);
 		}
-		if (legStart > patrolEnd ){
+		if (legStart.after(patrolEnd) ){
 			return "Date must be before patrol end date:" + DATE_TIME_FORMAT.format(patrolEndDate);
 		}
-		if (legEnd < patrolStart){
+		if (legEnd.before(patrolStart)){
 			return "Date must be after patrol start date: " + DATE_TIME_FORMAT.format(patrolStartDate);
 		}
-		if (legEnd > patrolEnd ){
+		if (legEnd.after(patrolEnd)){
 			return "Date must be before patrol end date: " + DATE_TIME_FORMAT.format(patrolEndDate);
 		}
-		if (legEnd < legStart){
-			return "The start date (" + DATE_TIME_FORMAT.format(new Date(legStart)) + ") must be before the end date (" + DATE_TIME_FORMAT.format(new Date(legEnd)) + ").";
+		if (legEnd.before(legStart)){
+			return "The start date (" + DATE_TIME_FORMAT.format(legStart) + ") must be before the end date (" + DATE_TIME_FORMAT.format(legEnd) + ").";
 		}
 		return null;
 	}
@@ -472,20 +488,29 @@ private void createEndTimeComposite(Composite parent) {
 		//update id
 		editLeg.setId(txtLegId.getText().trim());
 		//update start date & time
-		long stime = SmartUtils.getDate(startDate).getTime();
-		if (opCustom.getSelection()){
-			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
-		}
-		editLeg.setStartDate(new Date( stime ));
 		
-		//update end date & Teim
-		long etime = SmartUtils.getDate(endDate).getTime();
-		if (opEndCustom.getSelection()){
-			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
-		}else{
-			etime += 24 * 60 * 60 * 1000 - 1000;
+		Date stime = SmartUtils.getDate(startDate);
+		if (opCustom.getSelection()){
+			//SmartUtils.getTime(startTime).getTime();
+			//stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+			stime = SmartUtils.combineDateTime(stime, new Time(SmartUtils.getTime(startTime).getTime()));
 		}
-		editLeg.setEndDate(new Date( etime ));
+		//editLeg.setStartDate(new Date( stime ));
+		editLeg.setStartDate(stime);
+		
+		
+		//update end date & Time
+		//long etime = SmartUtils.getDate(endDate).getTime();
+		Date etime = SmartUtils.getDate(endDate);
+		if (opEndCustom.getSelection()){
+			etime = SmartUtils.combineDateTime(etime, new Time(SmartUtils.getTime(endTime).getTime()));
+			//etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
+		}else{
+			etime = SmartUtils.getDatePart(etime, true);
+//			etime += 24 * 60 * 60 * 1000 - 1000;
+		}
+//		editLeg.setEndDate(new Date( etime ));
+		editLeg.setEndDate(etime);
 		
 		//update transport type
 		editLeg.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement());

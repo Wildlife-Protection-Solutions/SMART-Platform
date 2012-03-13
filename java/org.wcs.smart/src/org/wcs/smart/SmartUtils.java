@@ -46,7 +46,8 @@ public class SmartUtils {
 	 * 
 	 */
 	public static Date getDate(DateTime dt) {
-		Calendar calendar = new GregorianCalendar();
+		//Calendar calendar = new GregorianCalendar();
+		Calendar calendar = GregorianCalendar.getInstance();
 		calendar.set(Calendar.YEAR, dt.getYear());
 		calendar.set(Calendar.MONTH, dt.getMonth());
 		calendar.set(Calendar.DAY_OF_MONTH, dt.getDay());
@@ -57,6 +58,7 @@ public class SmartUtils {
 
 		return calendar.getTime();
 	}
+	
 
 	/**
 	 * Gets only the date part of a given date. Sets the time to 0 is not
@@ -66,7 +68,8 @@ public class SmartUtils {
 	 * @return date only date
 	 */
 	public static Date getDatePart(Date date, boolean endOfDay) {
-		Calendar calendar = new GregorianCalendar();
+		//Calendar calendar = new GregorianCalendar();
+		Calendar calendar = GregorianCalendar.getInstance();
 		calendar.setTime(date);
 		if (!endOfDay) {
 			calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -108,7 +111,7 @@ public class SmartUtils {
 	 * seconde
 	 */
 	public static Date getTime(DateTime dt) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = GregorianCalendar.getInstance();
 		calendar.setTimeInMillis(0);
 		calendar.set(Calendar.HOUR_OF_DAY, dt.getHours());
 		calendar.set(Calendar.MINUTE, dt.getMinutes());
@@ -134,9 +137,9 @@ public class SmartUtils {
 	 * converts a Date to a Calendar object
 	 */
 	public static GregorianCalendar convertDate(Date d) {
-		GregorianCalendar calendar = new GregorianCalendar();
+		Calendar calendar = GregorianCalendar.getInstance();
 		calendar.setTime(d);
-		return calendar;
+		return (GregorianCalendar)calendar;
 
 	}
 
