@@ -1,0 +1,326 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.ui.editor;
+
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Session;
+import org.wcs.smart.SmartUtils;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolEventManager.EventType;
+import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
+
+/**
+ * The patrol editor.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
+
+	public static final String ID = "org.wcs.smart.patrol.ui.PatrolEditor"; //$NON-NLS-1$
+
+	public static final DecimalFormat REST_TIME_FORMATTER = new DecimalFormat("00.00");
+	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##");
+	
+	private Patrol patrol = null;
+	private PatrolOptions ops = null;
+	
+	private IPatrolEventListener saveListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			Patrol p = null;
+			if (source instanceof PatrolLegDay){
+				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
+			}else if (source instanceof Patrol){
+				p = (Patrol)source;
+			}
+			if (p.equals(patrol)){
+				updateSummaryPage();
+			}
+		}
+	};
+	
+	public PatrolEditor() {
+		super();
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, saveListener);
+	}
+
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
+
+	}
+
+	public PatrolOptions getOptions(){
+		return this.ops;
+	}
+	
+	/**
+	 * 
+	 * @return true if the patrol can be edited false otherwise
+	 */
+	public boolean canEdit(){
+		
+		//analyst users can never edit
+		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
+			return false;
+		}
+		
+		if (ops.getEditTime() == null || ops.getEditTime() < 0){
+			return true;
+		}else if (patrol.getStartDate() == null){
+			return true;
+		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
+			Date d = new Date();
+			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
+			if (patrol.getStartDate().after(d)){
+				return true;
+			}else{
+				return false;
+			}
+		}else{
+			return true;
+		}
+	}
+	
+	public Patrol getPatrol(){
+		if (this.patrol == null){
+			
+			byte[] puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
+			Session session = HibernateManager.openSession();		
+			this.patrol = (Patrol) session.load(Patrol.class, puuid);
+			this.patrol.getLegs().size();
+			
+			ops = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+			session.close();
+		}
+		return this.patrol;
+	}
+
+	
+	
+	@Override
+	protected void createPages() {
+		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
+		super.setPartName("Patrol " + input.getPatrolId());
+		showBusy(true);
+		try {
+			summaryEditor = new PatrolSummaryEditor(this);
+			int i = addPage(summaryEditor, getEditorInput());
+			setPageText(i, "Summary");
+			createDayPages();
+			mapPage = new PatrolMapPageEditor(PatrolEditor.this);
+			int mapIndex = addPage(mapPage, getEditorInput());
+			setPageText(mapIndex, "Map");
+			showBusy(false);
+		} catch (final Throwable t) {
+			PatrolEditor.this.getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					try{
+					PatrolEditor.this.dispose();
+					PatrolEditor.this.getSite().getPage().closeEditor(PatrolEditor.this, false);
+					if (t instanceof SWTError && t.getMessage().contains ("No more handles")){
+						SmartPatrolPlugIn.displayLog("Patrol editor could not be created.  Please try closing existing open editors and try again.\n" + t.getMessage(), t);
+					}else{
+						SmartPatrolPlugIn.displayLog("Error occurred while loading editor. " + t.getMessage(), t);
+					}
+					}catch (Exception ex){
+						//TODO: FAIL
+					}
+					
+				}
+				
+			});
+			//and error occurred while loading; close this editor
+			
+		}
+	}
+	
+	public void updateSummaryPage(){
+		summaryEditor.refreshPatrolSummaryTable();
+	}
+	
+//	private HashMap<PatrolDayEditorInput, PatrolDayEditor> dayPages = new HashMap<PatrolDayEditorInput,PatrolDayEditor>();
+	
+//	public void refreshDayPages(){
+//		for (int i = 0; i < super.getPageCount(); i ++){
+//			if (super.getEditor(i) instanceof PatrolDayEditor){
+//				((PatrolDayEditor)super.getEditor(i)).refresh();
+//			}
+//		}
+//	}
+	
+	public void createDayPages( ) {
+		try {
+			int i = 0;
+			while( i < getPageCount()){
+				if (getEditor(i) instanceof PatrolDayEditor){
+					removePage(i);
+				}else{
+					i++;
+				}
+			}
+			int insertindex = 1;
+			GregorianCalendar calStart = SmartUtils.convertDate(getPatrol().getStartDate());
+			calStart = new GregorianCalendar(calStart.get(Calendar.YEAR),calStart.get(Calendar.MONTH),calStart.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+			GregorianCalendar calEnd = SmartUtils.convertDate(getPatrol().getEndDate());
+			
+			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+				PatrolDayEditorInput input = new PatrolDayEditorInput(calStart.getTime());
+				PatrolDayEditor editor = new PatrolDayEditor(this);
+				super.addPage(insertindex, editor, input);
+				super.setPageText(
+						insertindex,
+						DateFormat.getDateInstance(DateFormat.MEDIUM).format(
+								input.getPatrolDay()));
+				insertindex++;
+				calStart.add(Calendar.DAY_OF_MONTH, 1);
+			}
+
+		} catch (Exception ex) {
+			SmartPatrolPlugIn.displayLog("Error loading editor", ex);
+		}
+	}
+	
+
+	@Override
+	public boolean isSaveAsAllowed() {
+	return false;
+	}
+
+	private Session saveSession = null;
+
+	private PatrolSummaryEditor summaryEditor;
+
+	private PatrolMapPageEditor mapPage;
+	public Session getCurrentSession(){
+		return saveSession;
+	}
+	
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+
+		//update all the patrol values
+		for (int i = 0; i < getPageCount(); i ++){
+			getEditor(i).doSave(monitor);
+		}
+		
+		saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+	//	saveSession.update(patrol);
+		if (PatrolHibernateManager.savePatrol(patrol, saveSession)){
+			//saved okay
+			saveSession.close();
+			PatrolEventManager.getInstance().patrolSaved(patrol);
+		}
+		saveSession = null;
+		
+		
+		firePropertyChange(IEditorPart.PROP_DIRTY);
+				
+	}
+
+	@Override
+	public void doSaveAs() {
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 */
+	@Override
+	public Map getMap() {
+		if (mapPage == null){
+			return null;
+		}
+		return 	mapPage.getMap();
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 */
+	@Override
+	public void openContextMenu() {
+		mapPage.openContextMenu();
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 */
+	@Override
+	public void setFont(Control textArea) {
+		mapPage.setFont(textArea);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 */
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		mapPage.setSelectionProvider(selectionProvider);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 */
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return mapPage.getStatusLineManager();
+	}
+
+	public Object getAdapter(Class adaptee) {
+		if (adaptee.isAssignableFrom(Map.class)) {
+			return getMap();
+		}
+		return super.getAdapter(adaptee);
+	}
+}
