@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.io.File;
 import java.io.Serializable;
 
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
+import org.wcs.smart.SmartUtils;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * An interceptor for waypoint attachment that copies the file into the filestore
@@ -52,6 +55,45 @@ public class WaypointAttachmentInterceptor extends EmptyInterceptor{
     		wa.getFullFile().delete();
     		wa.setWaypoint(null);
     	}
+    	
+    }
+    
+    
+    /**
+	 * When a waypoint is deleted it also deletes the file on disk.
+	 */
+    public boolean onSave(Object entity,
+            Serializable id,
+            Object[] state,
+            String[] propertyNames,
+            Type[] types) {
+//    	
+    	if (entity instanceof WaypointAttachment){
+    		WaypointAttachment attachment = (WaypointAttachment)entity;
+    		
+    		if (attachment.getCopyFromLocation() != null){
+    		
+    			File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + attachment.getWaypoint().getPatrolLegDay().getPatrolLeg().getPatrol().getPatrolDatastorePath() );
+    			if (!f.exists()){
+    				SmartUtils.createDirectory(f);
+    			}
+    			File to = new File(f.getAbsoluteFile() + File.separator + attachment.getFilename());
+    			int counter = 1;
+    			while(to.exists()){
+    				String name = (counter++) + "_" + attachment.getFilename();
+    				to = new File(f.getAbsoluteFile() + File.separator + name);
+    			}
+    			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
+    				throw new RuntimeException("Patrol modifications could not be saved because attachment could not be copied.  Ensure write permissions to directory or remove attachment.");
+    			}else{
+    				attachment.setFilename(to.getName());
+    				attachment.setCopyFromLocation(null);
+    			}
+    		}
+    		
+    	}
+    	
+    	return true;
     	
     }
 

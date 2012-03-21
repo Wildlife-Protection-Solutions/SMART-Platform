@@ -31,7 +31,6 @@ import java.util.Set;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -72,6 +71,10 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		wizard.addPage(this);
 	}
 
+	/**
+	 * Listener that listens for changes to the attribute table;
+	 * updates the table viewer and validates the changes.
+	 */
 	private IAttributeTableChangeListener tableChange = new IAttributeTableChangeListener() {
 		@Override
 		public void updated() {
@@ -154,6 +157,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		WaypointObservation observation = new WaypointObservation();
 		observation.setCategory(cat);
 		this.observations.add(observation);
+		//this is required so hibernate merge options doesn't throw  A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
+		observation.setAttributes(new ArrayList<WaypointObservationAttribute>());
 	}
 	
 
@@ -209,6 +214,10 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	
 
 	
+	/**
+	 * Next page is always the summary wizard page.
+	 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
+	 */
 	@Override
     public IWizardPage getNextPage() {
 		if (nextPage == null){

@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeSelectComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -124,11 +125,12 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p) {
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
 		if (empListComposite.getSelectedEmployees().size() <= 0){
-			throw new PatrolSaveException("At least one member must be selected.");
+			SmartPatrolPlugIn.displayLog("At least one member must be selected.", null);
+			return false;
 		}
     	for (Iterator iterator = empListComposite.getSelectedEmployees().iterator(); iterator.hasNext();) {
 			Employee e = (Employee) iterator.next();
@@ -136,6 +138,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		}
     	
 		leaderPilotComp.updatePatrol(p);
+		return true;
 	}
 
 

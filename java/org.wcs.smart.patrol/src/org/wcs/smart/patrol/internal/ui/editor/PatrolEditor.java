@@ -24,8 +24,11 @@ package org.wcs.smart.patrol.internal.ui.editor;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -33,6 +36,7 @@ import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
@@ -51,6 +55,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 
 /**
@@ -69,6 +74,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private Patrol patrol = null;
 	private PatrolOptions ops = null;
 	
+	private Session saveSession = null;
+	private PatrolSummaryEditor summaryEditor;
+	private PatrolMapPageEditor mapPage;
+	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
@@ -78,8 +87,19 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}else if (source instanceof Patrol){
 				p = (Patrol)source;
 			}
-			if (p.equals(patrol)){
+			if (p != null && p.equals(patrol)){
 				updateSummaryPage();
+			}
+		}
+	};
+	
+	
+	private IPatrolEventListener patrolDeleteListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			if ( ((Patrol)source ).equals(PatrolEditor.this.patrol)  ){
+				//close this editor
+				PatrolEditor.this.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(PatrolEditor.this, false);
 			}
 		}
 	};
@@ -87,6 +107,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public PatrolEditor() {
 		super();
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, saveListener);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolDeleteListener);
 	}
 
 	
@@ -94,6 +115,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void dispose() {
 		super.dispose();
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolDeleteListener);
 
 	}
 
@@ -133,10 +155,11 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		if (this.patrol == null){
 			
 			byte[] puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
-			Session session = HibernateManager.openSession();		
+			Session session = HibernateManager.openSession();
+			//load patrol items so don't have lazy loading issues later.
 			this.patrol = (Patrol) session.load(Patrol.class, puuid);
 			this.patrol.getLegs().size();
-			
+			this.patrol.getPatrolDatastorePath();
 			ops = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 			session.close();
 		}
@@ -162,24 +185,23 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		} catch (final Throwable t) {
 			PatrolEditor.this.getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
-				public void run() {
-					try{
-					PatrolEditor.this.dispose();
-					PatrolEditor.this.getSite().getPage().closeEditor(PatrolEditor.this, false);
-					if (t instanceof SWTError && t.getMessage().contains ("No more handles")){
-						SmartPatrolPlugIn.displayLog("Patrol editor could not be created.  Please try closing existing open editors and try again.\n" + t.getMessage(), t);
-					}else{
-						SmartPatrolPlugIn.displayLog("Error occurred while loading editor. " + t.getMessage(), t);
-					}
-					}catch (Exception ex){
-						//TODO: FAIL
-					}
-					
-				}
-				
+						public void run() {
+							try {
+								PatrolEditor.this.dispose();
+								PatrolEditor.this.getSite().getPage().closeEditor(PatrolEditor.this, false);
+								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) {
+									SmartPatrolPlugIn.displayLog("Patrol editor could not be created.  Please try closing existing open editors and try again.\n" + t.getMessage(), t);
+								} else {
+									SmartPatrolPlugIn.displayLog("Error occurred while loading editor. "+ t.getMessage(), t);
+								}
+							} catch (Exception ex) {
+								//TODO: Should we fail the program here??
+								SmartPatrolPlugIn.log("Failure",ex);
+							}
+
+						}
 			});
-			//and error occurred while loading; close this editor
-			
+
 		}
 	}
 	
@@ -187,15 +209,6 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		summaryEditor.refreshPatrolSummaryTable();
 	}
 	
-//	private HashMap<PatrolDayEditorInput, PatrolDayEditor> dayPages = new HashMap<PatrolDayEditorInput,PatrolDayEditor>();
-	
-//	public void refreshDayPages(){
-//		for (int i = 0; i < super.getPageCount(); i ++){
-//			if (super.getEditor(i) instanceof PatrolDayEditor){
-//				((PatrolDayEditor)super.getEditor(i)).refresh();
-//			}
-//		}
-//	}
 	
 	public void createDayPages( ) {
 		try {
@@ -232,17 +245,65 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 	@Override
 	public boolean isSaveAsAllowed() {
-	return false;
+		return false;
 	}
 
-	private Session saveSession = null;
-
-	private PatrolSummaryEditor summaryEditor;
-
-	private PatrolMapPageEditor mapPage;
+	
 	public Session getCurrentSession(){
 		return saveSession;
 	}
+	
+	public void save(Patrol patrol){
+		savePatrolPart(patrol);
+	}
+	
+	public void save(PatrolLegDay patrolLegDay){
+		patrolLegDay.getTrack();
+		savePatrolPart(patrolLegDay);
+	}
+	
+	public void save(Collection<Waypoint> waypoints) {
+		saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		saveSession.beginTransaction();
+		for (Waypoint wp : waypoints){
+			saveSession.saveOrUpdate(wp);
+		}
+		saveSession.getTransaction().commit();
+		saveSession.close();
+	}
+	
+	public void delete(Collection<Waypoint> waypoints) {
+		saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		saveSession.beginTransaction();
+		for (Waypoint wp : waypoints){
+			saveSession.delete(wp);
+		}
+		saveSession.getTransaction().commit();
+		saveSession.close();
+	}
+	
+	private void savePatrolPart(Object object){
+		//update all the patrol values
+		for (int i = 0; i < getPageCount(); i ++){
+			getEditor(i).doSave(new NullProgressMonitor());
+		}
+		
+		saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		if (object instanceof Patrol){
+			if (((Patrol)object).getId() == null){
+				String id = PatrolHibernateManager.generatePatrolId(((Patrol)object), saveSession);
+				((Patrol)object).setId(id);
+			}
+		}
+		saveSession.beginTransaction();
+		saveSession.saveOrUpdate(object);
+		saveSession.getTransaction().commit();
+		saveSession.close();
+		PatrolEventManager.getInstance().patrolSaved(patrol);
+		
+		firePropertyChange(IEditorPart.PROP_DIRTY);
+	}
+	
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -253,14 +314,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 		
 		saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+			
 	//	saveSession.update(patrol);
 		if (PatrolHibernateManager.savePatrol(patrol, saveSession)){
 			//saved okay
 			saveSession.close();
 			PatrolEventManager.getInstance().patrolSaved(patrol);
 		}
-		saveSession = null;
-		
 		
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 				

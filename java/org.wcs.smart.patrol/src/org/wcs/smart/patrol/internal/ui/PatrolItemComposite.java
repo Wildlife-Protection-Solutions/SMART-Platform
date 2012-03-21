@@ -63,9 +63,10 @@ public abstract class PatrolItemComposite {
 	 * Update the patrol with the values provided
 	 * by the user.
 	 * 
+	 * @return <code>true</code> if successfully updated <code>false</code> if could not update patrol
 	 * @param p
 	 */
-	public abstract void updatePatrol(Patrol p);
+	public abstract boolean updatePatrol(Patrol p);
 	
 	/**
 	 * 

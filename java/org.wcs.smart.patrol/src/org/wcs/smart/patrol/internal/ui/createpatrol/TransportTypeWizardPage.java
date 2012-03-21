@@ -86,9 +86,13 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void updateModel(Patrol p) {
-		transportType.updatePatrol(p);
-		setPageComplete(true);
+	public boolean updateModel(Patrol p) {
+		if (transportType.updatePatrol(p)){
+			setPageComplete(true);
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	

@@ -26,6 +26,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.hibernate.Session;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
@@ -35,7 +36,6 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  */
 public class AttributeTreeCellEditor extends DialogCellEditor{
 
-	
 	public AttributeTreeCellEditor(Composite parent){
 		super(parent);
 	}

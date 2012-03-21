@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -151,7 +152,7 @@ public class PatrolType {
 	 * 
 	 * @return list of transport types associated with patrol types
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, cascade={CascadeType.ALL}, orphanRemoval=true)
 	@JoinColumns({
 		@JoinColumn(name="patrol_type", referencedColumnName="patrol_type"),
 		@JoinColumn(name="ca_uuid", referencedColumnName="ca_uuid")

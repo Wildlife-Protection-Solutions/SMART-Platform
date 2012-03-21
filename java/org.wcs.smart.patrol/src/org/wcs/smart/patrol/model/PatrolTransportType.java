@@ -31,7 +31,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleList;
+import org.wcs.smart.ca.SimpleListItem;
 
 /**
  * Class to represent a sub-transportation 
@@ -42,7 +42,7 @@ import org.wcs.smart.ca.SimpleList;
  */
 @Entity
 @Table(name = "smart.patrol_transport")
-public class PatrolTransportType extends SimpleList{
+public class PatrolTransportType extends SimpleListItem{
 
 	public static final String NAME = "Transport Type";
 	

@@ -47,16 +47,20 @@ public class DoubleCellEditor extends TextCellEditor {
 	 * @param canNull if the value can be null 
 	 */
 	public DoubleCellEditor(Composite parent, boolean canNull){
-		super(parent);
+		this(parent);
 		this.canNull = canNull;
 	}
 	
-	
+	/**
+	 * Creates a new cell editor that cannot be null;
+	 * 
+	 * @param composite
+	 */
 	public DoubleCellEditor(Composite composite) {
 		super(composite);
 		setValidator(new ICellEditorValidator() {
 			public String isValid(Object object) {
-				if (object == null || object instanceof Double) {
+				if (object == null || object instanceof Double || object instanceof Float) {
 					return null;
 				} else {
 					String string = (String) object;

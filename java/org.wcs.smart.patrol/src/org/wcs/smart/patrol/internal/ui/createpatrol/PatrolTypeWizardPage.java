@@ -99,13 +99,14 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	void updateModel(Patrol p) {
+	public boolean updateModel(Patrol p) {
 		for (Button btn: btnTypes){
 			if (btn.getSelection()){
 				p.setPatrolType(  ((PatrolType)btn.getData()).getType() );
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 
 

@@ -35,12 +35,7 @@ import org.wcs.smart.patrol.xml.model.ObjectFactory;
 import org.wcs.smart.patrol.xml.model.PatrolType;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Manager for reading and writing patrol xml files.
  * @author Emily
  * @since 1.0.0
  */

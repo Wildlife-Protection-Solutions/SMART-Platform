@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -183,10 +184,11 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	 * 
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(PatrolLeg patrolLeg) {
+	public boolean updatePatrol(PatrolLeg patrolLeg) {
 		Object x = ((IStructuredSelection)patrolLeaderViewer.getSelection()).getFirstElement();
 		if (x == null){
-			throw new PatrolSaveException("A patrol leader must be selected");
+			SmartPatrolPlugIn.displayLog("A patrol must have a leader.", null);
+			return false;
 		}
 		if (x instanceof PatrolLegMember){
 			PatrolLegMember plm = (PatrolLegMember)x;
@@ -196,7 +198,8 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			if (patrolLeg.getPatrol().hasPilot()){
 				plm = (PatrolLegMember)((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement();
 				if (plm == null){
-					throw new PatrolSaveException("A patrol pilot must be selected.");
+					SmartPatrolPlugIn.displayLog("This patrol must have a pilot.", null);
+					return false;
 				}
 				patrolLeg.setPilot(plm);
 				
@@ -225,6 +228,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 				}
 			}
     	}
+		return true;
     	
 	}
 

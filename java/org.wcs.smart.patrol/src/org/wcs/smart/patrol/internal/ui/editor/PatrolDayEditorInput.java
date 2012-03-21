@@ -86,7 +86,6 @@ public class PatrolDayEditorInput  implements IEditorInput {
 	 */
 	@Override
 	public IPersistableElement getPersistable() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -95,7 +94,6 @@ public class PatrolDayEditorInput  implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		//TODO
 		return "Edit patrol day data for patrol day " + DateFormat.getDateInstance(DateFormat.MEDIUM).format( patrolDay.getTime() );
 	}
 

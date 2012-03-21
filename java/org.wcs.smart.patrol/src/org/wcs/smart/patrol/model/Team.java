@@ -40,7 +40,8 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.SimpleList;
+import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.SimpleListItemWithDescription;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 
 /**
@@ -51,7 +52,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
  */
 @Entity
 @Table(name="smart.team")
-public class Team extends SimpleList{
+public class Team extends SimpleListItemWithDescription{
 
 	public static final String NAME = "Team";
 	public static final String DESCRIPTION = "Description";
@@ -59,13 +60,9 @@ public class Team extends SimpleList{
 	
 	private PatrolMandate mandate;
 	private boolean isActive;
-	private Set<Label> descriptions;
 	
 	private ConservationArea ca;
-	
-	private String description;
-	private byte[] descuuid;
-	
+		
 	public Team(){}
 	
 	/**
@@ -121,117 +118,5 @@ public class Team extends SimpleList{
 		this.ca = ca;
 	}
 
-	/**
-	 * Description of the team in the current 
-	 * language.
-	 * 
-	 * @return team description
-	 */
-	@Type(type="org.wcs.smart.ca.LabelUserType")
-	@Column(name="desc_uuid", insertable=false, updatable=false)
-	public String getDescription() {
-		return description;
-	}
-	/**
-	 * Sets the local description. 
-	 * <p>
-	 * Should uss updateDescription to save
-	 * changes to database.
-	 * </p>
-	 * @param description
-	 */
-	public void setDescription(String description){
-		this.description = description;
-	}
-	/**
-	 * 
-	 * @return uuid for the description field
-	 */
-	@Column(name="desc_uuid")
-	public byte[] getDescUuid() {
-		return descuuid;
-	}
-
-	/**
-	 * 
-	 * @param uuid uuid for description field
-	 */
-	public void setDescUuid(byte[] uuid) {
-		this.descuuid = uuid;
-	}
 	
-	/**
-	 * 
-	 * @return loads all descriptions in all languages
-	 * for the given team
-	 */
-	@Transient
-	public Set<Label> getDescriptions(){
-		if (this.descriptions == null){
-			this.descriptions = new HashSet<Label>();
-			Session sess = PatrolHibernateManager.openSession();
-			sess.beginTransaction();
-			
-			Criteria r = sess.createCriteria(Label.class);
-			r.add(Restrictions.eq("id.elementuuid", this.descuuid));
-			this.descriptions.addAll( r.list() );
-			sess.getTransaction().commit();
-			sess.close();
-		}
-		return this.descriptions;
-	}
-	
-	/**
-	 * Sets the descriptions for the current team.
-	 * @param descriptions
-	 */
-	public void setDescriptions(Set<Label> descriptions){
-		if (descriptions == null){
-			this.descriptions = new HashSet<Label>();
-		}else{
-			this.descriptions = descriptions;
-		}
-	}
-	
-	
-	/**
-	 * Finds the description with the associated language
-	 * @param lang
-	 * @return the description associated with the language; empty
-	 * string if description not found
-	 */
-	public String findDescription(Language lang){
-		Label x = findValue(getDescriptions(), lang);
-		if (x == null){
-			return "";
-		}else{
-			return x.getValue();
-		}
-	}
-	/**
-	 * Updates the description for the current language.
-	 * Will create a new label if label is not found.
-	 * 
-	 * @param lang lanaguage 
-	 * @param description new description
-	 */
-	public void updateDescription(Language lang, String description){
-		Label lbl = findValue(getDescriptions(), lang);
-		if (lbl == null){
-			lbl = new Label();
-			lbl.setElementuuid(getUuid());
-			lbl.setLanguage(lang);
-			getDescriptions().add(lbl);
-		}
-		lbl.setValue(description);
-		
-	}
-	private Label findValue(Set<Label> list, Language lang){
-		for(Label lbl : list){
-			if (lbl.getLanguage().equals(lang)){
-				return lbl;
-			}
-		}
-		return null;
-	}
 }

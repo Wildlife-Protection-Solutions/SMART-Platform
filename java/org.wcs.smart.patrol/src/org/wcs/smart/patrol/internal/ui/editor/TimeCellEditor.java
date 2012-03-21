@@ -31,7 +31,6 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartUtils;
 
 /**
@@ -57,13 +56,9 @@ public class TimeCellEditor extends CellEditor{
 	@Override
 	protected Control createControl(Composite parent) {
 		dt = new DateTime(parent, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
-		
 		dt.addKeyListener(new KeyListener() {
-			
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
@@ -71,7 +66,6 @@ public class TimeCellEditor extends CellEditor{
 				if (e.character == Character.LINE_SEPARATOR){
 					handleDefaultSelection();
 				}
-				
 			}
 		});
 		return dt;

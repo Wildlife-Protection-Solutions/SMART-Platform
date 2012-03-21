@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.internal.ui.observation;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -34,6 +33,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -71,19 +71,20 @@ public class AttributeTableEditingSupport extends EditingSupport {
 		if (type == AttributeType.BOOLEAN) {
 			ComboBoxViewerCellEditor e = new ComboBoxViewerCellEditor(
 					table.getTable(), SWT.READ_ONLY | SWT.DROP_DOWN);
+			e.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_TRAVERSE_ACTIVATION |  ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
 			e.setContentProvider(ArrayContentProvider.getInstance());
 			e.setLabelProvider(new LabelProvider());
 			if (attribute.getIsRequired()) {
-				e.setInput(new String[] { "Yes", "No" });
+				e.setInput(new String[] { Attribute.BOOLEAN_TRUE_LABEL, Attribute.BOOLEAN_FALSE_LABEL });
 			} else {
-				e.setInput(new String[] { "", "Yes", "No" });
+				e.setInput(new String[] { "", Attribute.BOOLEAN_TRUE_LABEL, Attribute.BOOLEAN_FALSE_LABEL });
 			}
 			editor = e;
 		} else if (type == AttributeType.LIST) {
 			ComboBoxViewerCellEditor e = new ComboBoxViewerCellEditor(
 					table.getTable(), SWT.READ_ONLY | SWT.DROP_DOWN);
 			e.setContentProvider(ArrayContentProvider.getInstance());
-
+			e.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_TRAVERSE_ACTIVATION |  ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
 			//display only active items
 			ArrayList<AttributeListItem> enabledItems = new ArrayList<AttributeListItem>();
 			for (AttributeListItem it : attribute.getAttributeList()){
@@ -111,9 +112,8 @@ public class AttributeTableEditingSupport extends EditingSupport {
 		} else if (type == AttributeType.TREE) {
 			editor = new AttributeTreeCellEditor(table.getTable());
 		} else if (type == AttributeType.NUMERIC) {
-			editor = new DoubleCellEditor(table.getTable());
+			editor = new DoubleCellEditor(table.getTable(), true);
 		}
-
 	}
 
 	/**
@@ -147,8 +147,7 @@ public class AttributeTableEditingSupport extends EditingSupport {
 			att.setAttribute(attribute);
 			att.setObservation(observation);
 			if (observation.getAttributes() == null) {
-				observation
-						.setAttributes(new ArrayList<WaypointObservationAttribute>());
+				observation.setAttributes(new ArrayList<WaypointObservationAttribute>());
 			}
 			observation.getAttributes().add(att);
 		}

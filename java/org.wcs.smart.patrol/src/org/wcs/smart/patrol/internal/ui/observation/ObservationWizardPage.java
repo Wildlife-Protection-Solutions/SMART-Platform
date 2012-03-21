@@ -41,12 +41,10 @@ import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A wizard page to display the observation data model
+ * and allow the users to select a category from the data
+ * model.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -55,6 +53,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	public static final String PAGE_NAME = "Observation Wizard Page";
 
 	private boolean isNext = true;
+	private TreeViewer dmTreeViewer = null;
 	
 	/**
 	 * @param pageName
@@ -63,9 +62,6 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		super(PAGE_NAME);
 		wizard.addPage(this);
 	}
-	
-	
-	private TreeViewer dmTreeViewer = null;
 	
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -95,7 +91,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 			}
 			
 		};
-		FilteredTree fTree = new FilteredTree(main, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true);
+		FilteredTree fTree = new FilteredTree(main, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
 		dmTreeViewer = fTree.getViewer();
 		dmTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dmTreeViewer.setContentProvider(new DataModelContentProvider(true, true));
@@ -104,7 +100,6 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		dmTreeViewer.setInput(  ((ObservationWizard)getWizard()).getDataModel() ); 
 		
 		dmTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
@@ -122,43 +117,38 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		setControl(main);
 	}
 	
+	/**
+	 * If there are additional observations then the previous page
+	 * is the summary page.  Otherwise there is no previous page.
+	 */
 	@Override
 	public IWizardPage getPreviousPage() {
 		isNext = false;
 		if (((ObservationWizard)getWizard()).getAllObservations().size() > 0){
-//			if (nextPage == null){
-//				nextPage = new ObservationSummaryWizardPage((Wizard) getWizard());
-//			}
-//			return nextPage;
 			return new ObservationSummaryWizardPage((Wizard) getWizard());
 		}
 		return null;
-		
 	}
 	
-//	private ObservationSummaryWizardPage nextPage;
-//	private AttributeWizardPage nextPageAtt;
-	
+	/**
+	 * The next page is either the attribute page
+	 * or the summary page if the current selected attribute
+	 * has no attributes.
+	 */
 	@Override
     public IWizardPage getNextPage() {
 		isNext = true;
 		Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
 		if (o instanceof Category && ((Category)o).hasAttributes()  ){
-//			if (nextPageAtt == null){
-//				nextPageAtt = 
-//			}
 			return new AttributeWizardPage((Wizard)getWizard());
 		}else{
-//			if (nextPage == null){
-//				nextPage = new ObservationSummaryWizardPage((Wizard) getWizard());
-//			}
-//			return nextPage;
 			return new ObservationSummaryWizardPage((Wizard) getWizard());
-			
 		}
     }
 	
-	/* (non-Javadoc)
+	/**
+	 * Update the wizard current observation before moving to the next page.
+	 * 
 	 * @see org.wcs.smart.patrol.internal.ui.observation.IObservationWizardPage#beforeMoveNext()
 	 */
 	@Override
@@ -171,6 +161,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
 		if (o instanceof Category){
 			if (((Category) o).getChildren() != null && ((Category)o).getChildren().size() > 0 ){
+				//validate if they want to look further in the tree
 				if (MessageDialog.openQuestion(getWizard().getContainer().getShell(), "Observation", "The observation category " + ((Category)o).getName() + " you have selected contains " + ((Category)o).getChildren().size() + " sub-categories.  If possible you should select one of these sub-categories.  Do you want to select a sub-category?")){
 					dmTreeViewer.setExpandedState(o, true);
 					return false;
@@ -186,7 +177,5 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		
 		return false;
 	}
-
-	
 	
 }

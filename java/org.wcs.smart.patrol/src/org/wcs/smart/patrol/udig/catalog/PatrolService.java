@@ -38,6 +38,7 @@ import net.refractions.udig.ui.UDIGDisplaySafeLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.patrol.geotools.PatrolDataSourceFactory;
 import org.wcs.smart.patrol.model.Patrol;
@@ -167,7 +168,9 @@ public class PatrolService extends IService {
 	public void dispose( IProgressMonitor monitor ) {
         if (members == null)
             return;
-
+        if (monitor == null){
+        	monitor = new NullProgressMonitor();
+        }
         int steps = (int) ((double) 99 / (double) members.size());
         for( PatrolGeoResource resolve : members ) {
             try {
@@ -175,7 +178,7 @@ public class PatrolService extends IService {
                 resolve.dispose(subProgressMonitor);
                 subProgressMonitor.done();
             } catch (Throwable e) {
-                //TODO: ERROR MESSAGE
+            	SmartPatrolPlugIn.log("Could not dispose Patrol Service", e);
             }
         }
         if (this.ds != null){
@@ -185,9 +188,6 @@ public class PatrolService extends IService {
 	
 	
 	PatrolDataSource getDataStore( IProgressMonitor monitor ) throws IOException {
-        if (monitor == null)
-            monitor = new NullProgressMonitor();
-
         if (this.ds == null) {
             dsInstantiationLock.lock();
             try {

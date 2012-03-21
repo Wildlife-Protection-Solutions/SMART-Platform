@@ -47,6 +47,7 @@ import org.wcs.smart.SmartUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.Waypoint;
 
 /**
  * Patrol Day editor.  This consists of 
@@ -111,6 +112,14 @@ public class PatrolDayEditor extends EditorPart {
 				for (PatrolLegDay day : leg.getPatrolLegDays()){
 					if (SmartUtils.getDatePart(day.getDate(), false).equals(  SmartUtils.getDatePart( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay(), false))){
 						plds.add(day);
+					}
+					
+					//load waypoints and attach to session; for performance reasons
+					//waypoints are not cascaded (otherwise saves are cascaded too)
+					if (day.getWaypoints() != null){
+						for (Waypoint wp : day.getWaypoints()) {
+							session.update(wp);
+						}
 					}
 				}
 			}

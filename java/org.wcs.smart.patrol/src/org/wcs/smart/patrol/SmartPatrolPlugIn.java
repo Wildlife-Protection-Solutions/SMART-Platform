@@ -29,6 +29,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
 
 
 /**
@@ -129,6 +130,9 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		//adds the delete handler
+		ConservationAreaManager.getInstance().addDeleteHandler(new PatrolCaDeleteHandler(),PatrolCaDeleteHandler.EXECUTE_ORDER);
 	}
 
 	/*

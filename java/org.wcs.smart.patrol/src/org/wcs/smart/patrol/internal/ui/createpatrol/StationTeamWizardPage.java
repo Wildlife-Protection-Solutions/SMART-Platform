@@ -78,9 +78,10 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void updateModel(Patrol p) {
-		stationList.updatePatrol(p);
-		teamList.updatePatrol(p);
+	public boolean updateModel(Patrol p) {
+		boolean ret = stationList.updatePatrol(p);
+		ret = ret & teamList.updatePatrol(p);
+		return ret;
 	}
 
 	/**

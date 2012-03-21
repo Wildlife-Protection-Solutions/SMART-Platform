@@ -206,10 +206,6 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			for (Iterator iterator = mandates.iterator(); iterator.hasNext();) {
 				PatrolMandate pm = (PatrolMandate) iterator.next();
 				s.saveOrUpdate(pm);
-				for (org.wcs.smart.ca.Label lbl : pm.getNames()){
-					lbl.setElementuuid(pm.getUuid());
-					s.saveOrUpdate(lbl);
-				}
 			}
 			s.getTransaction().commit();
 			setChangesMade(false);

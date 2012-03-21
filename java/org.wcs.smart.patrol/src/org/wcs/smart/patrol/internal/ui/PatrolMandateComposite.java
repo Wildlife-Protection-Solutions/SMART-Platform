@@ -116,13 +116,14 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p) {
 		PatrolMandate pm = (PatrolMandate) ((IStructuredSelection)patrolMandateViewer.getSelection()).getFirstElement();
 		if (pm != null){
 			p.setMandate(pm);
 		}else{
 			p.setMandate(null);
 		}
+		return true;
 		
 	}
 

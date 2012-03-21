@@ -133,8 +133,8 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	void updateModel(Patrol p) {
-		
+	public boolean updateModel(Patrol p) {
+		return true;
 	}
 	
 	@Override

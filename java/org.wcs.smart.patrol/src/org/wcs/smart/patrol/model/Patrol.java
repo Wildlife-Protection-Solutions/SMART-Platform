@@ -42,6 +42,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.SmartUtils;
@@ -194,6 +195,7 @@ public class Patrol {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrol", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause="start_date")
+	@BatchSize(size=50)
 	public List<PatrolLeg> getLegs(){
 		return this.legs;
 	}
@@ -287,6 +289,16 @@ public class Patrol {
 		return false;
 	}
 	
+	/**
+	 * 
+	 * <p>
+	 * To get full file names you must prepend this with the conservation area file store location.
+	 * </p>
+	 * <code>
+	 * ConservationArea.getFileDataStoreLocation() + File.separator + Patrol.getPatrolDatastorePath();
+	 * </code>
+	 * @return the file store location for the patrol relative to the conservation area file store
+	 */
 	@Transient
 	public String getPatrolDatastorePath(){
 		return "Patrol" + File.separator + id + "_" + SmartUtils.getDirectoryPath(uuid);
