@@ -47,20 +47,31 @@
                id="org.wcs.smart.menu.file"
                label="&amp;File">
             <command
-                  commandId="org.wcs.smart.logout"
-                  id="org.wcs.menu.file.logout"
-                  label="&amp;Logout"
-                  style="push">
+                  commandId="org.wcs.smart.changeUserPassword"
+                  id="org.wcs.menu.file.changeuserpassword"
+                  label="Change Password ..."
+                  mnemonic="P"
+                  style="push"
+                  tooltip="Change your username or password">
             </command>
             <separator
-                  name="org.wcs.smart.menu.file.sep1"
-                  visible="true">
+                  name="org.wcs.smart.file.separator1">
             </separator>
+            <command
+                  commandId="org.wcs.smart.logout"
+                  id="org.wcs.menu.file.logout"
+                  label="Logout"
+                  mnemonic="L"
+                  style="push"
+                  tooltip="logout of the application">
+            </command>
             <command
                   commandId="org.wcs.smart.exit"
                   id="org.wcs.menu.file.exit"
-                  label="E&amp;xit"
-                  style="push">
+                  label="Exit"
+                  mnemonic="x"
+                  style="push"
+                  tooltip="exit the application">
             </command>
          </menu>
          <menu
@@ -68,33 +79,56 @@
                label="&amp;Conservation Area">
             <command
                   commandId="org.wcs.smart.ca.showProperties"
-                  label="&amp;Conservation Area Properties ..."
+                  label="Conservation Area Properties ..."
+                  mnemonic="C"
                   style="push">
             </command>
+            <separator
+                  name="org.wcs.smart.separator2"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.ca.showAgencyPropertyPage"
-                  label="&amp;Agency and Rank List ..."
+                  label="Agency and Rank List ..."
+                  mnemonic="A"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showEmployees"
-                  label="&amp;Employee List ..."
+                  icon="images/icons/etool16/user.png"
+                  label="Employee List ..."
+                  mnemonic="E"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showStations"
-                  label="&amp;Station List ..."
+                  label="Station List ..."
+                  mnemonic="S"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showArea"
                   label="Define Area Boundaries ..."
+                  mnemonic="B"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showDataModel"
-                  label="&amp;Data Model ..."
+                  label="Data Model ..."
+                  mnemonic="D"
                   style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.ca.delete"
+                  icon="images/icons/etool16/delete.png"
+                  label="Delete Conservation Area"
+                  mnemonic="t"
+                  style="push"
+                  tooltip="delete the conservation area from the database">
             </command>
             <visibleWhen
                   checkEnabled="true">
@@ -110,7 +144,8 @@
                label="&amp;Help">
             <command
                   commandId="org.eclipse.ui.help.aboutAction"
-                  label="&amp;About Smart"
+                  label="About Smart"
+                  mnemonic="A"
                   style="push">
             </command>
          </menu>
@@ -122,7 +157,7 @@
                id="org.wcs.smart.perspectives">
             <command
                   commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective"
-                  icon="images/icons/ctool16/map.png"
+                  icon="images/icons/etool16/map.png"
                   label="Show Map Perspective"
                   style="push">
             </command>
@@ -132,7 +167,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.ui.internal.ResetPerspective"
-                  icon="images/icons/ctool16/arrow_refresh.png"
+                  icon="images/icons/etool16/arrow_refresh.png"
                   label="Reset Windows"
                   style="push">
             </command>
@@ -224,6 +259,14 @@
             id="org.wcs.smart.ui.internal.ResetPerspective"
             name="Reset Perspective">
       </command>
+      <command
+            id="org.wcs.smart.ca.delete"
+            name="Delete Conservation Area">
+      </command>
+      <command
+            id="org.wcs.smart.changeUserPassword"
+            name="Change UserName Password">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -263,6 +306,14 @@
             class="org.wcs.smart.ui.internal.ShowDefaultMapPerspective"
             commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective">
       </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.DeleteConservationArea"
+            commandId="org.wcs.smart.ca.delete">
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ChangeUserNameHandler"
+            commandId="org.wcs.smart.changeUserPassword">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
@@ -281,7 +332,7 @@
             targetID="org.wcs.smart.ui.map.MapView">
          <action
                class="org.wcs.smart.ui.map.PanAction"
-               icon="images/icons/clcl16/pan_tool.png"
+               icon="images/icons/elcl16/pan_tool.png"
                id="org.wcs.smart.ui.map.pan"
                label="Pan"
                style="radio"
@@ -290,7 +341,7 @@
          </action>
          <action
                class="org.wcs.smart.ui.map.ZoomAction"
-               icon="images/icons/clcl16/zoom_tool.png"
+               icon="images/icons/elcl16/zoom_tool.png"
                id="org.wcs.smart.action4"
                label="Zoom "
                style="radio"
@@ -299,7 +350,7 @@
          </action>
          <action
                class="org.wcs.smart.ui.map.ZoomExtentAction"
-               icon="images/icons/clcl16/zoom_layers.png"
+               icon="images/icons/elcl16/zoom_layers.png"
                id="org.wcs.smart.ui.map.zoomextent"
                label="Zoom to map extents"
                style="push"
@@ -308,7 +359,7 @@
          </action>
          <action
                class="org.wcs.smart.ui.map.AddLayerAction"
-               icon="images/icons/clcl16/layer_add.png"
+               icon="images/icons/elcl16/layer_add.png"
                id="org.wcs.smart.ui.map.addlayer"
                label="Add Layer "
                style="push"
@@ -386,13 +437,22 @@
       <class
             class="org.wcs.smart.ca.datamodel.DmObject">
       </class>
+      <class
+            class="org.wcs.smart.ca.HasLabel">
+      </class>
+      <class
+            class="org.wcs.smart.ca.SimpleListItemWithDescription">
+      </class>
+      <class
+            class="org.wcs.smart.ca.DescriptionLabel">
+      </class>
    </extension>
    <extension
          point="net.refractions.udig.project.ui.tool">
       <actionTool
             categoryId="org.wcs.smart.udig.addlayer"
             class="org.wcs.smart.udig.AddLayerTool"
-            icon="images/icons/clcl16/layer_add.png"
+            icon="images/icons/elcl16/layer_add.png"
             id="org.wcs.smart.udig.AddLayer"
             name="Add Layer"
             tooltip="Add Layer To Map">
@@ -403,7 +463,7 @@
       <actionTool
             categoryId="org.wcs.smart.udig.addlayer"
             class="org.wcs.smart.udig.ZoomLayersTool"
-            icon="images/icons/clcl16/zoom_layers.png"
+            icon="images/icons/elcl16/zoom_layers.png"
             id="org.wcs.smart.udig.ZoomExtents"
             name="Zoom to map extents"
             onToolbar="false"
