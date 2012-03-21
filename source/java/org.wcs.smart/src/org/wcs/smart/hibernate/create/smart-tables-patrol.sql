@@ -241,6 +241,12 @@ ALTER TABLE smart.patrol_leg
 	ON DELETE CASCADE
 ;
 
+ALTER TABLE smart.patrol_leg
+	ADD CONSTRAINT patrol_leg_transport_uuid_fk FOREIGN KEY (TRANSPORT_UUID)
+	REFERENCES smart.patrol_transport (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
 
 ALTER TABLE smart.patrol_leg_day
    ADD CONSTRAINT patrol_leg_day_leg_uuid_fk FOREIGN KEY (PATROL_LEG_UUID)

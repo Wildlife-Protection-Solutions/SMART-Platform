@@ -71,6 +71,7 @@ public class Label  {
 	
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
+		if (elementuuid == null ) return "";
 		Session s = HibernateManager.openSession();
 		Label.LabelItemPK id = new Label.LabelItemPK();
 		HasLabel h = new HasLabel();
