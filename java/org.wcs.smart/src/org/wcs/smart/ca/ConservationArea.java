@@ -138,7 +138,7 @@ public class ConservationArea {
 		this.employees = employees;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, cascade={javax.persistence.CascadeType.ALL}, mappedBy="ca", orphanRemoval=true)
+	@OneToMany(fetch = FetchType.EAGER, cascade={javax.persistence.CascadeType.ALL}, mappedBy="ca", orphanRemoval=true)
 	public Set<Language> getLanguages(){
 		return this.languages;
 	}
