@@ -95,7 +95,7 @@ public class DataModelXmlToSmartConverter {
 	 * default language labels (for the conservation area).
 	 * </p>
 	 * <p>
-	 * 2. TODO: If a language in the data model does not exist in the conservation area the user
+	 * 2. If a language in the data model does not exist in the conservation area the user
 	 * is prompted to add the language to the target conservation area.
 	 * </p> 
 	 * @param is input stream of xml data model
@@ -120,8 +120,6 @@ public class DataModelXmlToSmartConverter {
 		getLanguages();  //this probably requires a db session
 		
 		if (syncLanguages){
-			//TODO: add check to add language to ca if languge exists in import and not ca
-			
 			//here we check to ensure default ca lang
 			boolean hasDefault = false;
 			for (LanguageType lt : xmlDataModel.getLanguages().getLanguages()){
@@ -214,7 +212,6 @@ public class DataModelXmlToSmartConverter {
 		updateNames(newCategory, xmlCat.getNames());
 		
 		/* Attributes */
-		//TODO: add active lookup to attribute list
 		List<CategoryAttributeLink> attributes = xmlCat.getAttributes();
 		if (attributes != null && attributes.size() > 0){
 			newCategory.setAttributes(new ArrayList<CategoryAttribute>());
@@ -302,7 +299,7 @@ public class DataModelXmlToSmartConverter {
 			if (rootNodes != null && rootNodes.size() > 0){
 				newAttribute.setTree(new ArrayList<AttributeTreeNode>());
 				for (int i = 0; i < rootNodes.size(); i ++){
-					AttributeTreeNode newNode = processAttributeTreeNode(null, rootNodes.get(i));
+					AttributeTreeNode newNode = processAttributeTreeNode(null, newAttribute, rootNodes.get(i));
 					newNode.setNodeOrder(i);
 					newAttribute.getTree().add(newNode);
 				}
@@ -325,9 +322,9 @@ public class DataModelXmlToSmartConverter {
 		return attributeLookUp;
 	}
 	
-	private AttributeTreeNode processAttributeTreeNode(AttributeTreeNode parent, TreeNodeType xmlNode) {		
+	private AttributeTreeNode processAttributeTreeNode(AttributeTreeNode parent, Attribute parentAttribute, TreeNodeType xmlNode) {		
 		AttributeTreeNode newAttributeTreeNode = new AttributeTreeNode();
-
+		newAttributeTreeNode.setAttribute(parentAttribute);
 		newAttributeTreeNode.setKeyId(xmlNode.getKey());
 		updateNames(newAttributeTreeNode, xmlNode.getNames());
 		newAttributeTreeNode.setParent(parent);
@@ -336,7 +333,7 @@ public class DataModelXmlToSmartConverter {
 		if (xmlNode.getChildrens() != null && xmlNode.getChildrens().size() > 0) {
 			newAttributeTreeNode.setChildren(new ArrayList<AttributeTreeNode>());
 			for (int i = 0; i < xmlNode.getChildrens().size(); i ++){			
-				AttributeTreeNode newChild = processAttributeTreeNode(newAttributeTreeNode, xmlNode.getChildrens().get(i));
+				AttributeTreeNode newChild = processAttributeTreeNode(newAttributeTreeNode, parentAttribute, xmlNode.getChildrens().get(i));
 				newChild.setNodeOrder(i);
 				newAttributeTreeNode.getChildren().add(newChild);
 			}

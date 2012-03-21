@@ -24,12 +24,7 @@ package org.wcs.smart.ui.internal.ca.properties.handlers;
 import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Handler for showing agency/rank property page.
  * @author Emily
  * @since 1.0.0
  */

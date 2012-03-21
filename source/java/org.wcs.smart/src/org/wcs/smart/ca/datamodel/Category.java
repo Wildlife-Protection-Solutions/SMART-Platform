@@ -22,11 +22,12 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,6 +37,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 
@@ -55,6 +58,8 @@ import org.wcs.smart.ca.ConservationArea;
  */
 @Entity
 @Table(name = "smart.dm_category")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Category extends DmObject{
 	
 	private boolean isMultiple;			//if multiple observations can be recorded
@@ -138,9 +143,9 @@ public class Category extends DmObject{
 	 * 
 	 * @return all children categories; <code>null</code> if leaf node
 	 */
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name="parent_category_uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "cat_order")
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<Category> getChildren(){
 		return this.children;
 	}
@@ -176,8 +181,8 @@ public class Category extends DmObject{
 	 * 
 	 * @return parent category;  <code>null</code> if root node
 	 */
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="parent_category_uuid", insertable=false, updatable=false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="parent_category_uuid", referencedColumnName="uuid")
 	public Category getParent(){
 		return this.parent;
 	}
@@ -194,8 +199,9 @@ public class Category extends DmObject{
 	 * @return list of attributes associated directly 
 	 * with category
 	 */
-	@OneToMany(fetch = FetchType.LAZY,mappedBy="id.category")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.category", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "att_order")
+//	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<CategoryAttribute> getAttributes(){
 		return this.attributes;
 	}
@@ -342,25 +348,25 @@ public class Category extends DmObject{
 	}
 	
 	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Category){
-			Category s = (Category)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(other);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
+//	@Override
+//	public int hashCode(){
+//		if (uuid != null){
+//			return Arrays.hashCode(uuid);
+//		}else{
+//			return super.hashCode();
+//		}
+//	}
+//	
+//	@Override
+//	public boolean equals(Object other){
+//		if (other != null && other instanceof Category){
+//			Category s = (Category)other;
+//			if (s.getUuid() == null && this.getUuid() == null){
+//				return super.equals(other);
+//			}else if (s.getUuid() != null && this.getUuid() != null){
+//				return Arrays.equals(s.getUuid(), this.getUuid());
+//			}
+//		}
+//		return false;
+//	}
 }

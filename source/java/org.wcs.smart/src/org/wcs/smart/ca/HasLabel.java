@@ -21,72 +21,70 @@
  */
 package org.wcs.smart.ca;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+
+import org.hibernate.annotations.GenericGenerator;
 
 /**
- * A class representing an employee agency
+ * Entities which have associated name labels should
+ * extend this class.  This entity has a simple uuid.
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
 @Entity
-@Table(name ="smart.agency")
-public class Agency extends SimpleListItem{
+@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+public class HasLabel {
+	
+	private byte[] uuid;
+	
+	public  HasLabel(){}
+	
+	public  HasLabel(byte[] uuid){
+		this.uuid = uuid;
+		
+	}
+	
+	/**
+	 * 
+	 * @return the uuid for the list element
+	 */
+	@Id
+	@GeneratedValue(generator="uuid")
+	@GenericGenerator(name= "uuid", strategy="uuid2")
+	public byte[] getUuid() {
+		return uuid;
+	}
 
-	public static final String NAME = "Agency";
-	
-	private ConservationArea ca;
-	private List<Rank> ranks;
-	
-	/**
-	 * Creates a new agency
-	 */
-	public Agency(){
-		super();
+	public void setUuid(byte[] uuid) {
+		this.uuid = uuid;
 	}
 	
-	/**
-	 * 
-	 * @return the conservation area associated with agency
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getConservationArea(){
-		return this.ca;
-	}
-	/**
-	 * 
-	 * sets the conservation area
-	 */
-	public void setConservationArea(ConservationArea ca){
-		this.ca = ca;
-	}
 	
-	/**
-	 * 
-	 * @return the ranks associated with the given agency
-	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="agency", cascade={CascadeType.ALL}, orphanRemoval=true)
-	public List<Rank> getRanks(){
-		if (this.ranks == null){
-			this.ranks = new ArrayList<Rank>();
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof HasLabel){
+			HasLabel s = (HasLabel)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return s.hashCode() == hashCode();
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
 		}
-		return this.ranks;
+		return false;
 	}
-	/**
-	 * 
-	 * @param ranks
-	 */
-	public void setRanks(List<Rank> ranks){
-		this.ranks = ranks;
+	
+	
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}
+		return super.hashCode();
 	}
 }

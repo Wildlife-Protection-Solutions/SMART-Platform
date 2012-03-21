@@ -21,10 +21,14 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Data model value attribute aggregation options 
@@ -34,6 +38,9 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "smart.dm_aggregation")
+
+//@Cacheable
+//@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Aggregation {
 
 	/**

@@ -19,22 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca.properties.handlers;
+package org.wcs.smart.ca;
 
-import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
 
 /**
- * Handler for displaying conservation area property dialog.
+ * A handler to implement and add to the ConservationAreaManager
+ * delete handlers. These handlers are used when a
+ * conservation area is deleted.  It should remove
+ * all information associated with the conservation area
+ * that the plug-in has added to the database.
+ * 
  * @author Emily
  * @since 1.0.0
  */
-public class ShowCaPropertyHandler extends ShowPropertyPageHandler {
+public interface ICaDeleteHandler {
 
 	/**
-	 * @param page
+	 * Throw an exception if you cannot delete and the delete
+	 * should be cancelled.
+	 * 
+	 * @param ca the conservation being deleted
+	 * @param session the delete session
+	 * @param monitor the progress monitor
+	 * @throws Exception if error occurs and the ca information could not be removed
 	 */
-	public ShowCaPropertyHandler() {
-		super(CaPropertyPage.class);
-	}
-
+	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception;
 }

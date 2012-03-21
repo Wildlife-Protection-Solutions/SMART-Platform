@@ -249,21 +249,21 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private void addStation() {
 		sorter.setSortColumn(null, null);	//we want to make sure this is added at the end 
 		
-		Station x = new Station();
+		final Station x = new Station();
 		x.setConservationArea(ca);
 		x.setIsActive(true);
 		
 		org.wcs.smart.ca.Label nameLabel = new org.wcs.smart.ca.Label();
-		nameLabel.setElementuuid(x.getUuid());
+		nameLabel.setElement(x);
 		nameLabel.setLanguage(ca.getDefaultLanguage());
 		nameLabel.setValue("New Station");
 		x.getNames().add(nameLabel);
 
-		org.wcs.smart.ca.Label descLabel = new org.wcs.smart.ca.Label();
-		descLabel.setElementuuid(x.getUuid());
-		descLabel.setLanguage(ca.getDefaultLanguage());
-		descLabel.setValue("Description ");
-		x.getDescriptions().add(descLabel);
+//		org.wcs.smart.ca.Label descLabel = new org.wcs.smart.ca.Label();
+//		descLabel.setElement(x);
+//		descLabel.setLanguage(ca.getDefaultLanguage());
+//		descLabel.setValue("Description ");
+//		x.getDescriptions().add(descLabel);
 
 		stations.add(x);
 		setChangesMade(true);
@@ -360,36 +360,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		Session s = getSession();
 		Transaction tx = s.beginTransaction();
 		try {
-//			for (Station stn : toDelete) {
-//				s.update(stn);
-//				// remove all labels
-//				Set<org.wcs.smart.ca.Label> toDelete = new HashSet<org.wcs.smart.ca.Label>();
-//				toDelete.addAll(stn.getNames());
-//				toDelete.addAll(stn.getDescriptions());
-//				for (Iterator<org.wcs.smart.ca.Label> iterator = toDelete
-//						.iterator(); iterator.hasNext();) {
-//					org.wcs.smart.ca.Label lbl = (org.wcs.smart.ca.Label) iterator
-//							.next();
-//					s.update(lbl);
-//					s.delete(lbl);
-//				}
-//				// remove station
-//				s.delete(stn);
-//			}
-//			toDelete.clear();
 
 			// add/update stations
 			for (int i = 0; i < stations.size(); i++) {
 				Station stn = (Station) stations.get(i);
 				s.saveOrUpdate(stn);
-				for (org.wcs.smart.ca.Label lbl : stn.getNames()) {
-					if (lbl.getElementuuid() == null) {
-						lbl.setElementuuid(stn.getUuid());
-					}
-					s.saveOrUpdate(lbl);
-				}
 
-				for (org.wcs.smart.ca.Label lbl : stn.getDescriptions()) {
+				for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions()) {
 					if (lbl.getElementuuid() == null) {
 						if (stn.getDescUuid() == null) {
 							byte[] uuid = (byte[]) uuidGenerator.generate(
@@ -397,7 +374,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 							stn.setDescUuid(uuid);
 							s.saveOrUpdate(stn);
 						}
-						lbl.setElementuuid(stn.getDescUuid());
+						lbl.setElement(stn.getDescUuid());
 					}
 					s.saveOrUpdate(lbl);
 				}

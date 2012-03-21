@@ -21,27 +21,23 @@
  */
 package org.wcs.smart.ca;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 
 import org.hibernate.Session;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 /**
- * Super class for simple lists.  A simple list
+ * Super class for items with names.  A simple list items
  * contains a uuid and a link to a list of 
  * names that represent the list name in various
  * languages.
@@ -51,38 +47,23 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class SimpleList {
+public class SimpleListItem extends HasLabel {
 
-	private byte[] uuid;
+	
 	private Set<Label> names;
 	private String name;
 
 	/**
 	 * Creates a new simple list
 	 */
-	public SimpleList(){}
+	public SimpleListItem(){}
 
-	/**
-	 * 
-	 * @return the uuid for the list element
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
 	
 	/**
 	 * 
 	 * @return the names associated with the list element
 	 */
-	@OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY)
-	@JoinColumn(updatable = false, insertable = false, name="element_uuid", referencedColumnName="uuid")
+	@OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY, mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
 	public Set<Label> getNames() {
 		if (names == null){
 			names = new HashSet<Label>();
@@ -156,30 +137,12 @@ public class SimpleList {
 			}
 		}
 		//create a new label
-		Label lbl = new Label( );
-		lbl.setElementuuid(getUuid());
+		Label lbl = new Label();
+		lbl.setElement(this);
 		lbl.setLanguage(lang);
 		lbl.setValue(newName);
 		getNames().add(lbl);
 		
 	}
 	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof SimpleList){
-			SimpleList s = (SimpleList)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return s.hashCode() == hashCode();
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}
-		return super.hashCode();
-	}
 }

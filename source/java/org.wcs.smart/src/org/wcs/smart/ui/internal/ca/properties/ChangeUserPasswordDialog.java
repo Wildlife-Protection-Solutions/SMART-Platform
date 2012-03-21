@@ -1,0 +1,298 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.ui.internal.ca.properties;
+
+import java.util.List;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+
+/**
+ * Create a change user password dialog where users can
+ * change their username or password.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
+
+	private Employee toUpdate = null;
+	private Text txtPassword1;
+	private Text txtPassword2;
+	private Text txtCurrentPassword;
+	
+	private ControlDecoration cdPassword1;
+	private ControlDecoration cdPassword2;
+	private ControlDecoration cdCurrentPassword;
+
+	/**
+	 * Create a new user password dialog.
+	 * 
+	 * @param parent the parent shell
+	 * 
+	 */
+	public ChangeUserPasswordDialog(Shell parent) {
+		super(parent, "Change username password.");
+		
+		toUpdate = SmartDB.getCurrentEmployee();
+	}
+
+	/**
+	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected Composite createContent(Composite parent) {
+		
+		ModifyListener validateListener = new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				setChangesMade(true);
+				validate();
+			}
+		};
+		Composite data = new Composite(parent, SWT.NONE);
+		data.setLayout(new GridLayout(3, false));
+		
+		Label lbl = new Label(data, SWT.NONE);
+		lbl.setText("Username:");
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		final Text txtUserName = new Text(data, SWT.BORDER);
+		txtUserName.setText(toUpdate.getSmartUserId());
+		txtUserName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtUserName.setEditable(false);
+		Button modifyUser = new Button(data, SWT.PUSH);
+		modifyUser.setText("Change...");
+		modifyUser.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				InputDialog dialog = new InputDialog(ChangeUserPasswordDialog.this.getParentShell(), "Change User Name", "Enter your new user name.", toUpdate.getSmartUserId(), 
+						new IInputValidator() {
+							@Override
+							public String isValid(String newText) {
+								if (newText.length() < 4){
+									return "User name must be longer than 4 characters.";
+								}
+								return null;
+							}
+						});
+				if (dialog.open() == Window.CANCEL){
+					return;
+				}
+				
+				//check to ensure that user name does not already exist
+				String newUserName = dialog.getValue();
+				if (newUserName.equals(toUpdate.getSmartUserId())){
+					return;
+				}
+				
+				List otherUsers = getSession().createCriteria(Employee.class).add(Restrictions.eq("smartUserId", newUserName)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				if (otherUsers.size() > 0){
+					MessageDialog.openError(ChangeUserPasswordDialog.this.getShell(), "Error", "Cannot change user name.  The username '" + newUserName + "' exists.");
+					return;
+				}
+				else{
+					String old = toUpdate.getSmartUserId();
+					try {
+						getSession().beginTransaction();
+						getSession().update(toUpdate);
+						toUpdate.setSmartUserId(newUserName);
+						getSession().getTransaction().commit();
+					} catch (Exception ex) {
+						toUpdate.setSmartUserId(old);
+						SmartPlugIn.displayLog(
+								ChangeUserPasswordDialog.this.getShell(),
+								"Could not change user name. " + ex.getMessage(), ex);
+						getSession().close();
+					}
+					
+					txtUserName.setText(toUpdate.getSmartUserId());
+				}
+				
+			}
+			
+		});
+		
+		lbl = new Label(data, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		
+		lbl = new Label(data, SWT.NONE);
+		lbl.setText("Current Password:");		
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		txtCurrentPassword = new Text(data, SWT.BORDER | SWT.PASSWORD);
+		txtCurrentPassword.setText("");
+		txtCurrentPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)txtCurrentPassword.getLayoutData()).horizontalIndent = 5;
+		txtCurrentPassword.addModifyListener(validateListener);
+		cdCurrentPassword = createDecoration(txtCurrentPassword);
+		
+		lbl = new Label(data, SWT.NONE);
+		lbl.setText("New Password:");		
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		txtPassword1 = new Text(data, SWT.BORDER | SWT.PASSWORD);
+		txtPassword1.setText("");
+		txtPassword1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)txtPassword1.getLayoutData()).horizontalIndent = 5;
+		txtPassword1.addModifyListener(validateListener);
+		cdPassword1 = createDecoration(txtPassword1);
+		
+		lbl = new Label(data, SWT.NONE);
+		lbl.setText("Re-type New Password:");		
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		txtPassword2 = new Text(data, SWT.BORDER | SWT.PASSWORD);
+		txtPassword2.setText("");
+		txtPassword2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)txtPassword2.getLayoutData()).horizontalIndent = 5;
+		txtPassword2.addModifyListener(validateListener);
+		cdPassword2 = createDecoration(txtPassword2);
+		
+		setMessage("To change your password enter your current password and your new password.");
+		validate();
+		return data;
+	}
+
+	
+	/**
+	 * Overrides button press.
+	 * 
+	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#buttonPressed(int)
+	 */
+	@Override
+	protected void buttonPressed(int buttonId) {
+		if (IDialogConstants.OK_ID == buttonId) {
+			if (performSave()){
+				super.setReturnCode(IDialogConstants.OK_ID);
+				close();
+			}
+		} else if (IDialogConstants.CLOSE_ID == buttonId) {
+			//super.setReturnCode(IDialogConstants.CLOSE_ID);
+			close();
+		}
+	}
+	
+	protected ControlDecoration createDecoration(Control control){
+		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
+	}
+	
+	/**
+	 * Validates the current input
+	 */
+	private void validate(){
+		cdCurrentPassword.hide();
+		cdPassword1.hide();
+		cdPassword2.hide();
+		
+		boolean error = false;
+		
+		if (txtCurrentPassword.getText().length() == 0){
+			cdCurrentPassword.setDescriptionText("Must enter your current password.");
+			cdCurrentPassword.show();
+			error = true;
+		}
+		
+		if (txtPassword1.getText().length() == 0){
+			cdPassword1.setDescriptionText("Must enter a new password.");
+			cdPassword1.show();
+			error = true;
+		}
+		if (txtPassword2.getText().length() == 0){
+			cdPassword2.setDescriptionText("Must re-enter your new password.");
+			cdPassword2.show();
+			error = true;
+		}
+
+		if (!txtPassword1.getText().equals(txtPassword2.getText())){
+			cdPassword2.setDescriptionText("Passwords do not match");
+			cdPassword2.show();
+			error = true;
+		}
+		
+		Button btn = getButton(IDialogConstants.OK_ID);
+		if (btn != null){
+			btn.setEnabled(!error);
+		}
+		
+		
+	}
+	
+	/**
+	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#performSave()
+	 */
+	@Override
+	protected boolean performSave() {
+		setErrorMessage(null);
+		if (txtPassword1.getText().equals(txtPassword2.getText())){
+			//check to ensure old password is correct
+			if (txtCurrentPassword.getText().equals(toUpdate.getSmartPassword())){
+				String old = toUpdate.getSmartPassword();
+				try {
+					getSession().beginTransaction();
+					getSession().update(toUpdate);
+					toUpdate.setSmartPassword(txtPassword1.getText());
+					getSession().getTransaction().commit();
+					
+					MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), "Password Update", "Password successfully updated.");
+					setChangesMade(false);
+					return true;
+				} catch (Exception ex) {
+					toUpdate.setSmartPassword(old);	//reset password
+					SmartPlugIn.displayLog(
+							ChangeUserPasswordDialog.this.getShell(),
+							"Could not change password. " + ex.getMessage(), ex);
+					getSession().close();
+				}	
+			}else{
+				setErrorMessage("The current password entered does not match your current password.");
+			}	
+		}
+		return false;
+	}
+
+}

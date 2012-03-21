@@ -21,17 +21,10 @@
  */
 package org.wcs.smart;
 
-import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.ui.application.IWorkbenchConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchAdvisor;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
-import org.eclipse.ui.model.ContributionComparator;
-import org.eclipse.ui.model.IComparableContribution;
-import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
-import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
-import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
-import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
 
 /**
  * This workbench advisor creates the window advisor, and specifies the

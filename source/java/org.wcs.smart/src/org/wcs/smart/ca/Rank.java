@@ -35,7 +35,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name ="smart.rank")
-public class Rank extends SimpleList{
+public class Rank extends SimpleListItem{
 
 	public static final String NAME = "Rank";
 	

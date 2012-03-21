@@ -41,12 +41,7 @@ import org.wcs.smart.ui.internal.ca.properties.DataModelPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.InitCaDataModelDialog;
 
 /**
- * TODO Purpose of
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Handler for displaying data model property dialog.
  * 
  * @author Emily
  * @since 1.0.0

@@ -98,6 +98,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	private ControlDecoration cdMinValue;
 	private ControlDecoration cdMaxValue;
 	private ControlDecoration cdAttList;
+	private ControlDecoration cdAttTree;
 
 	private TableViewer lstAttributeList; 
 	private Button[] btnAggs;	//list of aggregation options
@@ -401,9 +402,17 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		treeComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		treeComposite.setBounds(0, 0, 64, 64);
 		
+		
 		if (canEdit){
 			attTree = new AttributeTree();
-			attTree.createTree(treeComposite, lang);
+			Composite tree = attTree.createTree(treeComposite, lang);
+			cdAttTree = createDecoration(tree);
+			attTree.setListener(new AttributeTreeChangeListener() {
+				@Override
+				public void treeModified() {
+					validate();	
+				}
+			});
 		}
 
 		/*   Boolean Attribute Options */
@@ -423,6 +432,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		cdMaxValue.hide();
 		cdMinValue.hide();
 		cdAttList.hide();
+		if (cdAttTree != null){
+			cdAttTree.hide();
+		}
 		
 		Attribute.AttributeType type = (Attribute.AttributeType)(((IStructuredSelection)cmbType.getSelection()).getFirstElement());
 		if (type.equals(AttributeType.BOOLEAN)){
@@ -463,9 +475,14 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				
 			}
 		}else if (type.equals(AttributeType.TREE)){
-			//TODO: validate tree expression
+			if (this.attTree != null){
+				if (this.attTree.getAttribute().getTree() == null || this.attTree.getAttribute().getTree().size() == 0){
+					cdAttTree.setDescriptionText("At least one tree node must be defined.");
+					cdAttTree.show();
+					error = false;
+				}
+			}
 		}
-		
 		
 		for (IValidationListener listener: listeners){
 			listener.validated(error);

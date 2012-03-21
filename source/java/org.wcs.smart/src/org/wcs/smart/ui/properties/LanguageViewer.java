@@ -30,12 +30,9 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Comobo viewer that allows users
+ * to select a language.
+ * 
  * @author Emily
  * @since 1.0.0
  */

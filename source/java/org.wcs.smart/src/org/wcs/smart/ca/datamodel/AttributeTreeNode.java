@@ -25,19 +25,19 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 
@@ -49,8 +49,11 @@ import org.wcs.smart.ca.ConservationArea;
  */
 @Entity
 @Table(name = "smart.dm_attribute_tree")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AttributeTreeNode extends DmObject {
 
+	private Attribute attribute = null;
 	private int nodeOrder;
 	private List<AttributeTreeNode> children = new ArrayList<AttributeTreeNode>();
 	private AttributeTreeNode parent = null;
@@ -58,6 +61,22 @@ public class AttributeTreeNode extends DmObject {
 	
 	public AttributeTreeNode(){
 		super();
+	}
+	
+	/*
+	 * This attribute is here to to able
+	 * to delete references quickly.  A database
+	 * FK cascade delete link is used to cascade 
+	 * delete when the attribute is removed.
+	 */
+	@ManyToOne
+	@JoinColumn(name="attribute_uuid")
+	public Attribute getAttribute(){
+		return this.attribute;
+	}
+	
+	public void setAttribute(Attribute attribute){
+		this.attribute = attribute;
 	}
 	
 	@Column(name="node_order")
@@ -83,11 +102,12 @@ public class AttributeTreeNode extends DmObject {
 		}
 	}
 	
-	@OneToMany(fetch=FetchType.LAZY)
-	@Cascade({CascadeType.SAVE_UPDATE})
-	@JoinColumn(name="parent_uuid")
+	@OneToMany(fetch=FetchType.EAGER, mappedBy="parent", cascade = {javax.persistence.CascadeType.ALL}, orphanRemoval = true)
+//	@Cascade({CascadeType.SAVE_UPDATE})
+//	@JoinColumn(name="parent_uuid")
 	@OrderBy(clause = "node_order")
-	@BatchSize(size=100)
+	@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getChildren(){
 		return this.children;
 	}
@@ -97,8 +117,8 @@ public class AttributeTreeNode extends DmObject {
 	}
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@Cascade({CascadeType.SAVE_UPDATE})
-	@JoinColumn(name="parent_uuid", insertable=false, updatable=false)
+	@JoinColumn(name="parent_uuid")
+//	@Cascade({CascadeType.SAVE_UPDATE})	
 	public AttributeTreeNode getParent(){
 		return this.parent;
 	}
@@ -128,6 +148,7 @@ public class AttributeTreeNode extends DmObject {
 		
 		clone.setNodeOrder(this.getNodeOrder());
 		clone.setParent(parent);
+		clone.setAttribute(this.getAttribute());
 		
 		if (this.getChildren() != null){
 			clone.setChildren(new ArrayList<AttributeTreeNode>());

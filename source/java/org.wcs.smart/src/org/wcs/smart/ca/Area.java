@@ -68,6 +68,12 @@ public class Area {
 		}
 	}
 	
+	/**
+	 * Type of the area.
+	 * 
+	 * @author Emily
+	 * @since 1.0.0
+	 */
 	public enum AreaType{
 		CA("Conservation Area Boundary"),
 		BA("Buffered Management Area"),
@@ -94,6 +100,8 @@ public class Area {
 	private byte[] geom;
 	private ConservationArea ca;
 	private AreaType type;
+	private Geometry value = null;
+	
 	public Area(){
 		
 	}
@@ -134,11 +142,11 @@ public class Area {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getCa() {
+	public ConservationArea getConservationArea() {
 		return ca;
 	}
 
-	public void setCa(ConservationArea ca) {
+	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
 	}
 
@@ -153,11 +161,7 @@ public class Area {
 	}
 
 	@Transient
-	private Geometry value = null;
-	@Transient
-	//TODO: Cache me
-	public Geometry getGeometry() {
-		
+	public Geometry getGeometry() {		
 		if (value == null){
 			try {
 				WKBReader reader = new WKBReader();
@@ -166,8 +170,7 @@ public class Area {
 					value = new MultiPolygon(new Polygon[]{(Polygon)value}, value.getFactory());
 				}
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				SmartPlugIn.log("Could not read geometry from database.", e);
 			}
 		}
 		return value;

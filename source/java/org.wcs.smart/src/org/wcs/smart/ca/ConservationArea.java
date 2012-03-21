@@ -38,8 +38,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.SmartUtils;
@@ -140,9 +138,7 @@ public class ConservationArea {
 		this.employees = employees;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@Cascade( {CascadeType.SAVE_UPDATE} )
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, cascade={javax.persistence.CascadeType.ALL}, mappedBy="ca", orphanRemoval=true)
 	public Set<Language> getLanguages(){
 		return this.languages;
 	}
@@ -163,6 +159,7 @@ public class ConservationArea {
 	}
 	
 	
+
 	@Transient
 	public String getFileDataStoreLocation(){
 		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);

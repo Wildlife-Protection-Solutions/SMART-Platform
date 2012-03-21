@@ -28,9 +28,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.DateTime;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Language;
 
 /**
  * General utility functions.
@@ -263,5 +267,29 @@ public class SmartUtils {
 					+ ch + " at index " + index);
 		}
 		return digit;
+	}
+	
+	/**
+	 * Creates a new conservation area with default language
+	 * setup.  Has no name, id or any other values;
+	 * 
+	 * @return conservation area 
+	 */
+	public static ConservationArea createConservationArea(){
+		//create new CA with single default language
+		ConservationArea newCa = new ConservationArea();
+		
+		Language lang = new Language();
+		lang.setCa(newCa);
+		String code = Platform.getNL();
+		lang.setCode(code);
+		lang.setName(SmartPlugIn.lookupLocaleName(code));
+		lang.setDefault(true);
+		
+		HashSet<Language> langs = new HashSet<Language>();
+		langs.add(lang);
+		
+		newCa.setLanguages(langs);
+		return newCa;
 	}
 }

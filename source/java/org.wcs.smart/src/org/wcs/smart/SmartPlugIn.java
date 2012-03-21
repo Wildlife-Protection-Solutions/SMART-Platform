@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -56,17 +57,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor key for non-smart user employee
 	 */
 	public static final String EMPLOYEE_ICON = "org.wsc.smart.EMPLOYEE"; //$NON-NLS-1$
-
-	static {
-
-	}
-
 	
 	/**
 	 * The constructor
 	 */
 	public SmartPlugIn() {
-		
 
 	}
 
@@ -77,6 +72,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		// add delete handler
+		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(),DeleteConservationAreaHandler.EXECUTE_ORDER);
 	}
 
 	/*

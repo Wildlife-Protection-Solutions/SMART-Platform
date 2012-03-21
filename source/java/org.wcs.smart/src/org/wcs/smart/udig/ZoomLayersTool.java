@@ -8,10 +8,15 @@ import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxC
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.tool.AbstractActionTool;
 
+/**
+ * Zoom tool for map.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
 public class ZoomLayersTool extends AbstractActionTool {
 
 	public ZoomLayersTool() {
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -23,7 +28,6 @@ public class ZoomLayersTool extends AbstractActionTool {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
 
 	}
 

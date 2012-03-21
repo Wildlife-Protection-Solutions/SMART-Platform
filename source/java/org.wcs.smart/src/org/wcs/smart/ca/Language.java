@@ -25,7 +25,6 @@ import java.util.Arrays;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -34,6 +33,12 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+/**
+ * Supported lanaguage.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
 @Entity
 @Table(name="smart.language")
 public class Language {
@@ -67,7 +72,7 @@ public class Language {
 		this.name = name;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getCa() {
 		return ca;

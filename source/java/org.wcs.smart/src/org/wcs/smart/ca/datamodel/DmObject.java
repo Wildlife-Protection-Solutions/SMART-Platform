@@ -21,29 +21,23 @@
  */
 package org.wcs.smart.ca.datamodel;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 
 import org.hibernate.Session;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.HasLabel;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 
@@ -57,14 +51,13 @@ import org.wcs.smart.ca.Language;
 
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class DmObject {
+public class DmObject extends HasLabel{
 	
 	/**
 	 * Maximum length of the key identifier
 	 */
 	public static final int MAX_KEY_LENGTH = 128;
-	
-	protected byte[] uuid;		//unique id
+
 	private Set<Label> names;	//names
 	private String name;		//default name		
 	private String keyid;		//key
@@ -75,29 +68,9 @@ public class DmObject {
 	
 	/**
 	 * 
-	 * @return the uuid for the list element
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-
-	/**
-	 * 
-	 * @param uuid the unique identifier
-	 */
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-	
-	/**
-	 * 
 	 * @return the names associated with the list element
 	 */
-	@OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY)
-	@JoinColumn(updatable = false, insertable = false, name="element_uuid", referencedColumnName="uuid")
+	@OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY, mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
 	public Set<Label> getNames() {
 		if (names == null){
 			names = new HashSet<Label>();
@@ -173,13 +146,17 @@ public class DmObject {
 				return;
 			}
 		}
+		getNames().add(createLabel(lang, newName));
+		
+	}
+	
+	private Label createLabel(Language lang, String newName){
 		//create a new label
-		Label lbl = new Label( );
-		lbl.setElementuuid(getUuid());
+		Label lbl = new Label();
+		lbl.setElement(this);
 		lbl.setLanguage(lang);
 		lbl.setValue(newName);
-		getNames().add(lbl);
-		
+		return lbl;
 	}
 	
 	/**
@@ -234,6 +211,7 @@ public class DmObject {
 				lblClone.setValue(value);
 				lblClone.setLanguage(newLang);
 				this.getNames().add(lblClone);
+				lblClone.setElement(this);
 			}
 					
 			if (defaultLang != null && defaultLang.equals(ll.getCode())){
@@ -242,11 +220,9 @@ public class DmObject {
 				Label lblClone = new Label();
 				lblClone.setValue(value);
 				lblClone.setLanguage(newCa.getDefaultLanguage());
+				lblClone.setElement(  this );
 				this.getNames().add(lblClone);
-					
 			}
-			
-			
 		}
 	}
 }

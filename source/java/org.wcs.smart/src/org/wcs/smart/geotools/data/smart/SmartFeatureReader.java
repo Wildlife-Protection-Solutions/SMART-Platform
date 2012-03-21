@@ -58,7 +58,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		this.session = HibernateManager.openSession();
 		this.session.beginTransaction();
 		itemCursor = session.createCriteria(Area.class)
-				.add(Restrictions.eq("ca", ca))
+				.add(Restrictions.eq("conservationArea", ca))
 				.add(Restrictions.eq("type", type)).setReadOnly(true).setCacheable(false).scroll(ScrollMode.FORWARD_ONLY);
 		
 		

@@ -27,12 +27,7 @@ import net.refractions.udig.project.ui.tool.AbstractActionTool;
 import org.eclipse.swt.widgets.Display;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Add layer tool for map.
  * @author Emily
  * @since 1.0.0
  */

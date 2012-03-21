@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -77,17 +78,7 @@ public class CreateCaWizard extends Wizard {
 	public boolean performFinish() {
 		completedOK = false;
 		
-		//create new CA with single default language
-		ConservationArea newCa = new ConservationArea();
-		Language lang = new Language();
-		lang.setCa(newCa);
-		String code = Platform.getNL();
-		lang.setCode(code);			
-		lang.setName(SmartPlugIn.lookupLocaleName(code));
-		lang.setDefault(true);
-		HashSet<Language> langs = new HashSet<Language>();
-		langs.add(lang);
-		newCa.setLanguages(langs);
+		ConservationArea newCa = SmartUtils.createConservationArea();
 
 		for (int i= 0; i < super.getPageCount(); i ++){
 			if (super.getPages()[i] instanceof CaWizardPage){

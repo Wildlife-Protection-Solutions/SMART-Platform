@@ -72,7 +72,7 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	public Session getSession(){
 		if (session == null || !session.isOpen()){
 			session = HibernateManager.openSession();
-			session.refresh(ca);
+			session.update(ca);
 		}
 		return session;
 	}
