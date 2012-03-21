@@ -72,7 +72,6 @@ public class StartUpDialog extends Dialog {
 	public Object open() {
 		createContents();
 
-		// TODO: check this
 		Rectangle bds = shell.getDisplay().getMonitors()[0].getBounds();
 		Point p = shell.getSize();
 

@@ -366,7 +366,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					// add new areas
 					try {
 						//remove existing areas
-						String query = "delete from Area where ca = :ca and type =:type";
+						String query = "delete from Area where conservationArea = :ca and type =:type";
 						Query q =s.createQuery(query);
 						q.setParameter("ca", ca);
 						q.setParameter("type", areatype);
@@ -387,7 +387,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 
 								Area area = new Area();
 								area.setType(areatype);
-								area.setCa(AreaPropertyPage.this.ca);
+								area.setConservationArea(AreaPropertyPage.this.ca);
 								//
 								Geometry geom = (Geometry) sf.getDefaultGeometry();
 								geom = JTS.transform(geom, transform);

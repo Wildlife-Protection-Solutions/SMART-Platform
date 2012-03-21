@@ -23,16 +23,10 @@ package org.wcs.smart;
 
 import net.refractions.udig.ui.WorkbenchConfiguration;
 
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Smart workbench configurator
  * @author Emily
  * @since 1.0.0
  */

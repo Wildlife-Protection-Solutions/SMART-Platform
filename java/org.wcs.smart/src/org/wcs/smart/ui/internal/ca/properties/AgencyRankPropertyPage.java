@@ -82,7 +82,6 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private WritableList currentRankSet;
 	private WritableList agencies ;
 	private HashSet<Agency> toDelete;
-	private HashSet<Rank> toDeleteRank;
 	
 	private AgencySorter agencySorter;
 	private RankSorter rankSorter;
@@ -122,7 +121,6 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	public AgencyRankPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), "Agency and Rank List");
 		toDelete = new HashSet<Agency>();
-		toDeleteRank = new HashSet<Rank>();
 	}
 
 	@Override
@@ -393,57 +391,18 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			for (Iterator<Agency> iterator = toDelete.iterator(); iterator.hasNext();) {
 				Agency agt = (Agency) iterator.next();
 				if(agt.getUuid() != null){
-					//must also delete labels
-					for (org.wcs.smart.ca.Label lbl : agt.getNames()){
-						s.delete(lbl);
-					}
-					//and ranks
-					for (Rank r : agt.getRanks()){
-						for (org.wcs.smart.ca.Label lbl : r.getNames()){
-							s.delete(lbl);
-						}
-						s.delete(r);
-					}
 					s.delete(agt);
 				}
 			}
-			
-			//delete ranks
-			for (Iterator<Rank> iterator = toDeleteRank.iterator(); iterator.hasNext();) {
-				Rank r = (Rank) iterator.next();
-				if (r.getUuid() != null){
-					for (org.wcs.smart.ca.Label lbl : r.getNames()){
-						s.delete(lbl);
-					}
-					s.delete(r);
-				}
-			}
+
 				
 			for(Iterator<Agency> iterator = agencies.iterator(); iterator.hasNext();){
 				Agency agt = (Agency) iterator.next();
 				s.saveOrUpdate(agt);
-				
-				//must also update labels
-				for (org.wcs.smart.ca.Label lbl : agt.getNames()){
-					if (lbl.getElementuuid() == null){
-						lbl.setElementuuid(agt.getUuid());
-					}
-					s.saveOrUpdate(lbl);
-				}
-				for (Rank r : agt.getRanks()){
-					s.saveOrUpdate(r);
-					for (org.wcs.smart.ca.Label lbl : r.getNames()){
-						if (lbl.getElementuuid() == null){
-							lbl.setElementuuid(r.getUuid());
-						}
-						s.saveOrUpdate(lbl);
-					}	
-				}
 			}
 			
 			tx.commit();
 			toDelete.clear();
-			toDeleteRank.clear();
 			setChangesMade(false);
 			return true;
 		}catch (Exception ex){
@@ -471,58 +430,15 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		return ret;
 	}
 	
-
-
-//	@Override
-//	public void performDefaults() {
-//		
-//		super.performDefaults();
-//		//refresh agency list
-//		session.beginTransaction();
-//		agencies.addAll(toDelete);
-//		//evict everything as we want to reload
-//		for (Iterator iterator = agencies.iterator(); iterator.hasNext();) {
-//			Agency type = (Agency) iterator.next();
-//			if (type.getUuid() == null) continue;		
-//			type.evitNames(session);
-//			
-//			for (Iterator iterator2 = type.getRanks().iterator(); iterator2.hasNext();) {
-//				Rank r = (Rank) iterator2.next();
-//				if (r.getUuid() == null) continue;
-//				r.evitNames(session);
-//				session.evict(r);
-//				
-//			}
-//			session.evict(type);
-//			
-//		}
-//		//TODO:  type.getRanks() above causes labels to be updated 
-//		//we don't want that to happen so we rollback those changes here.
-//		//There must be a better way.
-//		session.getTransaction().rollback();
-//		
-//		agencies.clear();
-//		agencies.addAll(HibernateManager.getAgencies(ca, session));
-//		
-//		
-//		toDelete.clear();
-//		toDeleteRank.clear();
-//		
-//		tblAgencies.refresh();
-//		
-//		current = null;
-//		currentRankSet = null;
-//		enableRank(false);
-//		
-//	}
 	
 	private void addAgency() {
 		agencySorter.setSortColumn(null, null);	//we want to make sure this is added at the end 
 		
-		Agency agency = new Agency();
+		final Agency agency = new Agency();
 		org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
 		lbl.setLanguage(cmbLanguage.getCurrentSelection());
 		lbl.setValue("New Agency");
+		lbl.setElement(agency);
 		agency.getNames().add(lbl);
 		agency.setConservationArea(ca);
 		agencies.add(agency);
@@ -549,10 +465,11 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		if (current != null){
 			rankSorter.setSortColumn(null, null);	//we want to make sure this is added at the end
 			
-			Rank rank = new Rank();
+			final Rank rank = new Rank();
 			org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
 			lbl.setLanguage(cmbLanguage.getCurrentSelection());
 			lbl.setValue("New Rank");
+			lbl.setElement(rank);
 			rank.getNames().add(lbl);
 			rank.setAgency(current);
 			
@@ -571,9 +488,6 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		if (current != null){
 			currentRankSet.remove(r);
 			current.getRanks().remove(r);
-			if (r.getUuid() != null){
-				toDeleteRank.add(r);
-			}
 		}
 		tblRank.refresh();
 		setChangesMade(true);

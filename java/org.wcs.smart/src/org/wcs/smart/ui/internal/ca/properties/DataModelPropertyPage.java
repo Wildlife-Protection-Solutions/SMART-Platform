@@ -47,7 +47,6 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -62,6 +61,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
@@ -326,6 +326,15 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			SmartPlugIn.displayLog(getShell(),"Error exporting xml data model.", ex);
 		}
 	}
+	
+	public Session getSession(){
+		if (session == null || !session.isOpen()){
+			session = HibernateManager.openSession();
+			session.refresh(ca);
+		}
+		return session;
+	}
+	
 //	private void importXml(){
 //		FileDialog fd = new FileDialog(this.getShell(), SWT.OPEN);
 //		String file = fd.open();
@@ -369,7 +378,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						s.getTransaction().commit();
 						setChangesMade(false);
 					}catch (Exception ex){
-						throw new IllegalStateException();
+						SmartPlugIn.log(null, ex);
+						throw new IllegalStateException(ex);
 					}
 				}
 			});

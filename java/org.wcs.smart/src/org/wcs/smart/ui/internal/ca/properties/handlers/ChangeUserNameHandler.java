@@ -19,28 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.ui.internal.ca.properties.handlers;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.ui.internal.ca.properties.ChangeUserPasswordDialog;
 
-public class TempView extends ViewPart {
+/**
+ * Handler for changing the smart username or password.  Shows
+ * the appropriate dialog box.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class ChangeUserNameHandler extends AbstractHandler {
 
-	public static final String ID = "org.wcs.smart.TempView";
-	public TempView() {
-		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setFocus() {
-		// TODO Auto-generated method stub
-
+		@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		ChangeUserPasswordDialog dialog = new ChangeUserPasswordDialog(Display.getCurrent().getActiveShell());
+		dialog.open();
+		return null;
 	}
 
 }

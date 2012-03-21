@@ -24,9 +24,7 @@ package org.wcs.smart.ca;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -36,66 +34,34 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.Session;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-
 /**
- * 
- * Represents a internationalized label.
- * 
+ * A object class which represnts the i18n_label table.
+ * <p>
+ * This is similar to the Label object but does not
+ * user a has_label object as the primary key.  Instead
+ * it references the element_uuid automatically.
+ *  </p>
+ *  <p>
+ *  This is used for description fields and can be used
+ *  for other strings that need to be internationalized using
+ *  a field other than the entity uuid.
+ *  
+ *  </p>
  * @author Emily
  * @since 1.0.0
  */
+
 @Entity 
 @Table (name="smart.i18n_label")
 
-@AssociationOverrides({
-	@AssociationOverride(name = "id.language", 
-		joinColumns = @JoinColumn(name = "language_uuid")),
-	@AssociationOverride(name = "id.element", 
-		joinColumns = @JoinColumn(name = "element_uuid")) })
-@Cacheable
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Label  {
+public class DescriptionLabel {
 
-	private LabelItemPK id;
+	private DescLabelItemPK id;
 	private String value;
 
 	
-	public Label(){
-		id = new LabelItemPK();
-	}
-	
-	@Transient
-	public static synchronized String getDescription(byte[] elementuuid) {
-		Session s = HibernateManager.openSession();
-		Label.LabelItemPK id = new Label.LabelItemPK();
-		HasLabel h = new HasLabel();
-		h.setUuid(elementuuid);
-		id.setElement(h);
-		id.setLanguage(SmartDB.getCurrentLanguage());
-		String description = "";
-
-		Label lbl = (Label) s.get(Label.class, id);
-		if (lbl == null) {
-			// try for the default language
-			id.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-			lbl = (Label) s.get(Label.class, id);
-		}
-		if (lbl != null) {
-			description = lbl.getValue();
-		}
-		return description;
-	}
-	
-
-	
-	@Transient
-	public static byte[] setCode(byte[] elementuuid, String nl){
-		return elementuuid;
+	public DescriptionLabel(){
+		id = new DescLabelItemPK();
 	}
 	
 	
@@ -107,10 +73,10 @@ public class Label  {
 	}
 	
 	@EmbeddedId
-	public LabelItemPK getId(){
+	public DescLabelItemPK getId(){
 		return this.id;
 	}
-	public void setId(LabelItemPK id){
+	public void setId(DescLabelItemPK id){
 		this.id = id;
 	}
 	
@@ -124,23 +90,23 @@ public class Label  {
 	}
 	
 	@Transient
-	public HasLabel getElementuuid() {
+	public byte[] getElementuuid() {
 		return id.element;
 	}
 
 	
-	public void setElement(HasLabel elementuuid) {
+	public void setElement(byte[] elementuuid) {
 		id.setElement(elementuuid);
 	}
 
 	
 	@Embeddable
-	protected static class LabelItemPK implements Serializable {
+	protected static class DescLabelItemPK implements Serializable {
 		private Language language;
-		private HasLabel element;
+		private byte[] element;
 
 		
-		@ManyToOne(fetch = FetchType.LAZY)
+		@ManyToOne(fetch = FetchType.EAGER)
 		@JoinColumn(name="language_uuid", referencedColumnName="uuid")
 		public Language getLanguage() {
 			return language;
@@ -150,22 +116,21 @@ public class Label  {
 			this.language = language;
 		}
 		
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name="element_uuid", referencedColumnName="uuid")
-		public HasLabel getElement() {
+		@Column(name="element_uuid")
+		public byte[] getElement() {
 			return element;
 		}
 
-		public void setElement(HasLabel element) {
+		public void setElement(byte[] element) {
 			this.element = element;
 		}
 		
 		@Override
 		public boolean equals(Object key) {
-			if (! (key instanceof LabelItemPK)){
+			if (! (key instanceof DescLabelItemPK)){
 				return false;
 			}
-			LabelItemPK p = (LabelItemPK)key;
+			DescLabelItemPK p = (DescLabelItemPK)key;
 			
 			if (p.language == null || this.language == null ||
 				p.element == null || this.element == null ){
@@ -178,20 +143,14 @@ public class Label  {
 			}
 			
 			return p.language.equals(this.language)
-					&& Arrays.equals(p.element.getUuid(), this.element.getUuid());
+					&& Arrays.equals(p.element, this.element);
 		}
 		@Override
 		public int hashCode() {
 		    int code = 0;
 		    if (language!= null) {code += Arrays.hashCode(getLanguage().getUuid());}
-		    if (element != null && element.getUuid() != null) {code += Arrays.hashCode(element.getUuid()); }
+		    if (element != null && element != null) {code += Arrays.hashCode(element); }
 		    return code;
 		  }
 	}
-	
-	
-	
-	
 }
-
-

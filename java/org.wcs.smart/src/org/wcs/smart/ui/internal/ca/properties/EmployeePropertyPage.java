@@ -163,6 +163,10 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		container = new Composite(parent, SWT.NULL);
 		container.setLayout(new GridLayout(2, false));
 		
+
+		nameFilter = new EmployeeNameFilter();
+		activeFilter = new EmployeeActiveFilter();
+		
 		txtFilter = new FilterComposite(container, SWT.BORDER);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		txtFilter.addChangeListener(new ChangeListener() {	
@@ -178,8 +182,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		((GridData)tblEmployee.getTable().getLayoutData()).heightHint = tblEmployee.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		tblEmployee.setInput(employees);
 		
-		nameFilter = new EmployeeNameFilter();
-		activeFilter = new EmployeeActiveFilter();
 		tblEmployee.setFilters(new ViewerFilter[]{nameFilter, activeFilter});
 		
 		final Button chActive = new Button(container, SWT.CHECK);

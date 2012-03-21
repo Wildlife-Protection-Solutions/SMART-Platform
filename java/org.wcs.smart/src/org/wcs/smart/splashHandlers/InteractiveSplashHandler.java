@@ -32,6 +32,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -172,15 +174,15 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			}
 		});
 		
-		KeyListener validator = new KeyAdapter() {	
+		ModifyListener validator = new ModifyListener() {	
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void modifyText(ModifyEvent e) {
 				validateUi();
 			}
 
 		};
-		txtUserName.addKeyListener(validator);
-		txtPassword.addKeyListener(validator);
+		txtUserName.addModifyListener(validator);
+		txtPassword.addModifyListener(validator);
 	}
 
 	/*

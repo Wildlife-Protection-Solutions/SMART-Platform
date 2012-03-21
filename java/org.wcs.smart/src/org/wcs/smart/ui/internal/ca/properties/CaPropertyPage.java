@@ -91,11 +91,12 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected boolean performSave(){		
-		caComposite.updateConservationArea(ca);
+		
 		Session session = getSession();
 		Transaction tx = session.beginTransaction();
 		try{
-			session.saveOrUpdate(ca);
+//			session.saveOrUpdate(ca);
+			caComposite.updateConservationArea(ca);
 			tx.commit();
 			setChangesMade(false);
 			return true;

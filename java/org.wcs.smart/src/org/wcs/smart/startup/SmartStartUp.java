@@ -100,7 +100,6 @@ public class SmartStartUp {
 	 * @param parent wizard parent shell
 	 */
 	public static boolean openCreateNewCaWizard(Shell parent){
-		//TODO: surround with try/catch
 		CreateCaWizard wizard = new CreateCaWizard();
 		WizardDialog wd = new WizardDialog(parent, wizard);
 		wd.create();

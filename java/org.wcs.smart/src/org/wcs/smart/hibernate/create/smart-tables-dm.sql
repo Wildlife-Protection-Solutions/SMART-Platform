@@ -44,6 +44,7 @@ CREATE TABLE smart.dm_attribute_tree
 	keyid VARCHAR(128) NOT NULL,
 	node_order SMALLINT NOT NULL,
 	parent_uuid CHAR(16) FOR BIT DATA,
+	attribute_uuid CHAR(16) FOR BIT DATA,
 	is_active BOOLEAN NOT NULL,
 	PRIMARY KEY (UUID)
 );
@@ -96,7 +97,7 @@ ALTER TABLE smart.dm_attribute
 	ADD CONSTRAINT dm_attribute_ca_uuid_fk FOREIGN KEY (CA_UUID)
 	REFERENCES smart.conservation_area (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -104,7 +105,7 @@ ALTER TABLE smart.dm_category
 	ADD CONSTRAINT dm_category_ca_uuid_fk FOREIGN KEY (CA_UUID)
 	REFERENCES smart.conservation_area (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -121,7 +122,7 @@ ALTER TABLE smart.dm_attribute_list
 	ADD CONSTRAINT dm_attribute_list_attribute_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
 	REFERENCES smart.dm_attribute (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -129,7 +130,7 @@ ALTER TABLE smart.dm_att_agg_map
 	ADD CONSTRAINT dm_att_agg_map_attribute_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
 	REFERENCES smart.dm_attribute (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -137,7 +138,7 @@ ALTER TABLE smart.dm_att_tree_nodes
 	ADD CONSTRAINT dm_att_tree_nodes_attribute_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
 	REFERENCES smart.dm_attribute (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -145,7 +146,7 @@ ALTER TABLE smart.dm_cat_att_map
 	ADD CONSTRAINT dm_cat_att_map_attribute_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
 	REFERENCES smart.dm_attribute (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -153,7 +154,7 @@ ALTER TABLE smart.dm_att_tree_nodes
 	ADD CONSTRAINT dm_att_tree_nodes_node_uuid_fk FOREIGN KEY (NODE_UUID)
 	REFERENCES smart.dm_attribute_tree (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -161,15 +162,27 @@ ALTER TABLE smart.dm_cat_att_map
 	ADD CONSTRAINT dm_cat_att_map_category_uuid_fk FOREIGN KEY (CATEGORY_UUID)
 	REFERENCES smart.dm_category (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 ALTER TABLE smart.dm_category 
-	ADD CONSTRAINT dm_category_parent_category_uuid_pk FOREIGN KEY (PARENT_CATEGORY_UUID)
+	ADD CONSTRAINT dm_category_parent_category_uuid_fk FOREIGN KEY (PARENT_CATEGORY_UUID)
 	REFERENCES smart.dm_category (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
+ALTER TABLE smart.dm_attribute_tree 
+	ADD CONSTRAINT dm_attribut_tree_parent_uuid_fk FOREIGN KEY (PARENT_UUID)
+	REFERENCES smart.dm_attribute_tree (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
 
+ALTER TABLE smart.dm_attribute_tree 
+	ADD CONSTRAINT dm_attribut_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
+	REFERENCES smart.dm_attribute (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
 

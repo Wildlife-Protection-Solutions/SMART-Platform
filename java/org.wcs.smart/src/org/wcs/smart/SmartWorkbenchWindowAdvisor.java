@@ -33,12 +33,15 @@ import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.LayersView;
 import net.refractions.udig.project.ui.internal.MapPart;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
@@ -47,12 +50,16 @@ import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.geotools.gml3.smil.SMIL20;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.ui.map.MapView;
 
+/**
+ * Smart Workbench Window Advisor.
+ * @author Emily
+ * @since 1.0.0
+ */
 public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 	private IPartListener2 partListener = null;
@@ -83,6 +90,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
         //assign title to window
         getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getId() + " - " + SmartDB.getCurrentConservationArea().getName());
         
+        /* -- setup part listener for layer view legend */
     	partListener = new IPartListener2() {
     		@Override
 			public void partActivated(IWorkbenchPartReference partRef) {
@@ -106,16 +114,16 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 			@Override
 			public void partHidden(IWorkbenchPartReference partRef) {
-				if (partRef.getPart(false) instanceof MapPart){
-					MapPart mp = (MapPart)partRef.getPart(false); 
-					if (PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() == null){
-						return;
-					}
-					LayersView view = (LayersView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(LayersView.ID);
-					if (view.getCurrentMap() == mp.getMap()){
-						view.setCurrentMap(null);
-					}
-				}
+//				if (partRef.getPart(false) instanceof MapPart){
+//					MapPart mp = (MapPart)partRef.getPart(false); 
+//					if (PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() == null){
+//						return;
+//					}
+//					LayersView view = (LayersView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(LayersView.ID);
+//					if (view.getCurrentMap() == mp.getMap()){
+//						view.setCurrentMap(null);
+//					}
+//				}
 			}
 
 			@Override
@@ -124,44 +132,46 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 					MapPart mp = (MapPart)partRef.getPart(false); 
 					LayersView view = (LayersView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(LayersView.ID);
 					//if (view.getCurrentMap() == null){
+					if (view != null){
 						view.setCurrentMap(mp.getMap());
+					}
 					//}
 				}
 				
 			}
 
 			@Override
-			public void partInputChanged(IWorkbenchPartReference partRef) {
-				// TODO Auto-generated method stub
-				
+			public void partInputChanged(IWorkbenchPartReference partRef) {				
 			}
 		};
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
     	
-        //find view
-    	Display.getCurrent().asyncExec(new Runnable(){
-
+        /* --- Add initial layers to map --- */
+    	final MapView view = (MapView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(MapView.ID);
+    	Job j = new Job("Load initial maps") {
+			
 			@Override
-			public void run() {
-				MapView view = (MapView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(MapView.ID);
+			protected IStatus run(IProgressMonitor monitor) {
+				HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+	    		params.put(SmartServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
+	    		SmartService ss = new SmartService(params);
+	    		CatalogPlugin.getDefault().getLocalCatalog().add(ss);
 		    	if (view != null){
-		    		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-		    		params.put(SmartServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
-		    		SmartService ss = new SmartService(params);
-		    		CatalogPlugin.getDefault().getLocalCatalog().add(ss);
 		    		try {
 		    			List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);
 						ApplicationGIS.addLayersToMap(view.getMap(),layers,0);
 						view.getMap().sendCommandASync(new ZoomExtentCommand());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						SmartPlugIn.log("Could not add layers to map.", e);
 					}
 		    	}
-				
-			}});
-    	
-    	//TODO put this in SmartPlugIn class
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
+
+
+    	/* --- Image Descriptors for PlugIn --- */
 		ImageDescriptor descriptor = AbstractUIPlugin
 				.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,
 						"images/icons/obj16/user_orange.png"); //$NON-NLS-1$

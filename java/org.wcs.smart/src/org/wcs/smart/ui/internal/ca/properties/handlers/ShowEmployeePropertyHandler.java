@@ -24,12 +24,8 @@ package org.wcs.smart.ui.internal.ca.properties.handlers;
 import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Handler for displaying employee property page.
+ * 
  * @author Emily
  * @since 1.0.0
  */

@@ -49,7 +49,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	 * both enabled and disabled categories and attributes
 	 */
 	public DataModelContentProvider(){
-		this(false, true);
+		this(false, false);
 	}
 	
 	/**
@@ -61,6 +61,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	 */
 	public DataModelContentProvider(boolean onlyCategories, boolean onlyEnabled){
 		this.onlyCategories = onlyCategories;
+		this.onlyEnabled = onlyEnabled;
 	}
 	
 	/**
@@ -115,7 +116,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			if (!onlyCategories){
 				//add attributes
 				if (onlyEnabled){
-					children.addAll(category.getChildren(true));
+					children.addAll(category.getAttributes(true));
 				}else{
 					if (category.getAttributes() != null ){
 						children.addAll(category.getAttributes());

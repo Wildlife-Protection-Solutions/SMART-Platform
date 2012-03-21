@@ -56,23 +56,34 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
-import org.wcs.smart.ui.properties.DataModelContentProvider;
-import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Class that creates an attribute tree for
+ * Class that creates an attribute tree viewer for
+ * a given attribute.
  * 
  * @author Emily
  * @since 1.0.0
  */
 public class AttributeTree {
 
-	
-	
 	private TreeViewer viewer = null;
-
+	private AttributeTreeChangeListener listener = null;
 	
+	
+	/**
+	 * Sets the listener fired when modifications occur.  
+	 * @param listener
+	 */
+	public void setListener(AttributeTreeChangeListener listener){
+		this.listener = listener;
+	}
+	
+	private void fireChangeListener(){
+		if (listener != null){
+			listener.treeModified();
+		}
+	}
 	/**
 	 * Sets the attribute input to the attribute tree
 	 * 
@@ -103,8 +114,6 @@ public class AttributeTree {
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		comp.setLayout(new GridLayout(2, false));
-		
-		
 		
 		PatternFilter patternFilter = new PatternFilter(){			
 			protected boolean isChildMatch(Viewer viewer, Object element) {
@@ -201,6 +210,7 @@ public class AttributeTree {
 					disableNode(node, false);
 				}
 				viewer.refresh();
+				fireChangeListener();
 			}
 		});
 		
@@ -217,6 +227,7 @@ public class AttributeTree {
 					enableAll(node);
 				}
 				viewer.refresh();
+				fireChangeListener();
 			}
 		});
 		
@@ -251,8 +262,7 @@ public class AttributeTree {
 		if (node.getChildren() == null) return;
 		for (AttributeTreeNode child: node.getChildren()){
 			enableAll(child);
-		}
-		
+		}		
 	}
 	/*
 	 * disable items in the tree
@@ -262,15 +272,10 @@ public class AttributeTree {
 			Object x = (Object) iterator.next();
 			if (x instanceof AttributeTreeNode){
 				disableNode((AttributeTreeNode)x, enabled);	
-			}
-			
+			}	
 		}
-		
-//		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-//		if (x instanceof AttributeTreeNode){
-//			disableNode((AttributeTreeNode)x, enabled);	
-//		}
-		refreshTree(viewer);
+		viewer.refresh();
+		fireChangeListener();
 	}
 	
 	/*
@@ -319,6 +324,7 @@ public class AttributeTree {
 			}
 		}
 		refreshTree(viewer);
+		fireChangeListener();
 	}
 	
 	/*
@@ -344,6 +350,7 @@ public class AttributeTree {
 				return;
 			}
 			it.setParent(parent);
+			it.setAttribute(a);
 			if (parent != null){
 				if (parent.getChildren() == null){
 					parent.setChildren(new ArrayList<AttributeTreeNode>());
@@ -365,7 +372,7 @@ public class AttributeTree {
 			}
 		
 			refreshTree(viewer);
-			
+			fireChangeListener();
 		}
 	}
 	
@@ -379,118 +386,130 @@ public class AttributeTree {
 	
 }
 
+interface AttributeTreeChangeListener{
+	public void treeModified();
+}
 
 /**
-  * Drag listener for attribute tree
-  * @author Emily
-  *
-  */
- class AttributeTreeDragListener implements DragSourceListener {
+ * Drag listener for attribute tree
+ * 
+ * @author Emily
+ * 
+ */
+class AttributeTreeDragListener implements DragSourceListener {
 
-		private TreeViewer viewer;
-		
-		public AttributeTreeDragListener(TreeViewer viewer){
-			this.viewer = viewer;
-		}
-		
-		
-		/**
-		 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart(org.eclipse.swt.dnd.DragSourceEvent)
-		 */
-		@Override
-		public void dragStart(DragSourceEvent event) {
-			LocalSelectionTransfer.getTransfer().setSelection(viewer.getSelection());
-			event.doit = true;
+	private TreeViewer viewer;
 
-		}
+	public AttributeTreeDragListener(TreeViewer viewer) {
+		this.viewer = viewer;
+	}
 
-		/**
-		 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
-		 */
-		@Override
-		public void dragSetData(DragSourceEvent event) {
-			if (LocalSelectionTransfer.getTransfer()
-					.isSupportedType(event.dataType)) {
-				event.data = viewer.getSelection();
-			}
+	/**
+	 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart(org.eclipse.swt.dnd.DragSourceEvent)
+	 */
+	@Override
+	public void dragStart(DragSourceEvent event) {
+		LocalSelectionTransfer.getTransfer()
+				.setSelection(viewer.getSelection());
+		event.doit = true;
 
-		}
+	}
 
-		/**
-		 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished(org.eclipse.swt.dnd.DragSourceEvent)
-		 */
-		@Override
-		public void dragFinished(DragSourceEvent event) {
-			LocalSelectionTransfer.getTransfer().setSelection(null);
-			viewer.refresh();
+	/**
+	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
+	 */
+	@Override
+	public void dragSetData(DragSourceEvent event) {
+		if (LocalSelectionTransfer.getTransfer()
+				.isSupportedType(event.dataType)) {
+			event.data = viewer.getSelection();
 		}
 
 	}
 
- /**
-  * Drop listener for attribute tree
-  * @author Emily
-  *
-  */
- class AttributeTreeDropListener  extends ViewerDropAdapter {
+	/**
+	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished(org.eclipse.swt.dnd.DragSourceEvent)
+	 */
+	@Override
+	public void dragFinished(DragSourceEvent event) {
+		LocalSelectionTransfer.getTransfer().setSelection(null);
+		viewer.refresh();
+	}
 
-		private TreeViewer viewer;
-		
-		/**
-		 * @param viewer
-		 */
-		protected AttributeTreeDropListener(TreeViewer viewer) {
-			super(viewer);
-			this.viewer = viewer;
-			
-		}
+}
 
-		/**
-		 * @see org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
-		 */
-		@Override
-		public boolean performDrop(Object data) {
-			
-			StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
-			if (selection == null){
-				return false;
-			}
-			Object obj = selection.getFirstElement();
-			int loc = getCurrentLocation();
-			if (obj instanceof AttributeTreeNode && getCurrentTarget() instanceof AttributeTreeNode){
-				((Attribute)viewer.getInput()).moveAttributeTreeNode((AttributeTreeNode)obj, (AttributeTreeNode)getCurrentTarget(), loc == LOCATION_BEFORE);
-				return true;
-			}
+/**
+ * Drop listener for attribute tree
+ * 
+ * @author Emily
+ * 
+ */
+class AttributeTreeDropListener extends ViewerDropAdapter {
+
+	private TreeViewer viewer;
+
+	/**
+	 * @param viewer
+	 */
+	protected AttributeTreeDropListener(TreeViewer viewer) {
+		super(viewer);
+		this.viewer = viewer;
+
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
+	 */
+	@Override
+	public boolean performDrop(Object data) {
+
+		StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer
+				.getTransfer().getSelection();
+		if (selection == null) {
 			return false;
 		}
+		Object obj = selection.getFirstElement();
+		int loc = getCurrentLocation();
+		if (obj instanceof AttributeTreeNode
+				&& getCurrentTarget() instanceof AttributeTreeNode) {
+			((Attribute) viewer.getInput()).moveAttributeTreeNode(
+					(AttributeTreeNode) obj,
+					(AttributeTreeNode) getCurrentTarget(),
+					loc == LOCATION_BEFORE);
+			return true;
+		}
+		return false;
+	}
 
-		/**
-		 * @see org.eclipse.jface.viewers.ViewerDropAdapter#validateDrop(java.lang.Object, int, org.eclipse.swt.dnd.TransferData)
-		 */
-		@Override
-		public boolean validateDrop(Object target, int operation,
-				TransferData transferType) {
+	/**
+	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#validateDrop(java.lang.Object,
+	 *      int, org.eclipse.swt.dnd.TransferData)
+	 */
+	@Override
+	public boolean validateDrop(Object target, int operation,
+			TransferData transferType) {
 
-			StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
-			if (selection == null){
-				return false;
-			}
-			Object obj = selection.getFirstElement();
-			
-			if (obj instanceof AttributeTreeNode){
-				AttributeTreeNode toMove = (AttributeTreeNode)obj;
-				
-				if (target instanceof AttributeTreeNode){
-					AttributeTreeNode toMoveTo = (AttributeTreeNode)target;
-					if ((toMoveTo.getParent() == null && toMove.getParent() == null) ||
-							( toMoveTo.getParent() != null && toMove.getParent() != null && toMoveTo.getParent().equals(toMove.getParent()) ) ){
-						return true;
-					}
+		StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer
+				.getTransfer().getSelection();
+		if (selection == null) {
+			return false;
+		}
+		Object obj = selection.getFirstElement();
+
+		if (obj instanceof AttributeTreeNode) {
+			AttributeTreeNode toMove = (AttributeTreeNode) obj;
+
+			if (target instanceof AttributeTreeNode) {
+				AttributeTreeNode toMoveTo = (AttributeTreeNode) target;
+				if ((toMoveTo.getParent() == null && toMove.getParent() == null)
+						|| (toMoveTo.getParent() != null
+								&& toMove.getParent() != null && toMoveTo
+								.getParent().equals(toMove.getParent()))) {
+					return true;
 				}
 			}
-			return false;
 		}
-
+		return false;
 	}
 
-	 
+}

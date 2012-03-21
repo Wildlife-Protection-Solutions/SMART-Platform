@@ -22,9 +22,10 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -38,8 +39,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 
@@ -51,6 +52,9 @@ import org.wcs.smart.ca.ConservationArea;
  */
 @Entity
 @Table(name = "smart.dm_attribute")
+
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Attribute extends DmObject{
 
 	public static final String BOOLEAN_TRUE_LABEL = "Yes";
@@ -212,8 +216,7 @@ public class Attribute extends DmObject{
 	 * 
 	 * @return the set of aggregations that are valid for the attribute
 	 */
-	@ManyToMany(fetch = FetchType.LAZY)
-	@Cascade( {CascadeType.SAVE_UPDATE} )
+	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinTable(name="smart.dm_att_agg_map", 
 	 joinColumns = {@JoinColumn(name="attribute_uuid")},
 	 inverseJoinColumns = {@JoinColumn(name="agg_name")}
@@ -235,9 +238,9 @@ public class Attribute extends DmObject{
 	 * 
 	 * @return set of valid list elements
 	 */
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name="attribute_uuid")
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
 	@OrderBy(clause = "list_order")
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeListItem> getAttributeList(){
 		return this.attributeList;
 	}
@@ -255,13 +258,13 @@ public class Attribute extends DmObject{
 	 * Only valid for tree attributes.
 	 * @return  set of root tree nodes
 	 */
-	@OneToMany(fetch=FetchType.LAZY)
-	@Cascade({CascadeType.SAVE_UPDATE})
+	@OneToMany(fetch=FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@JoinTable(name="smart.dm_att_tree_nodes",
 	joinColumns={@JoinColumn(name="attribute_uuid")},
 	inverseJoinColumns={@JoinColumn(name="node_uuid")}
 	)
-	@BatchSize(size=100)
+	@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	//TODO: figure out how we can sort this on the node_order of the attribute_tree_node table
 	//curenttly sorted in the attributetree.content provider
 	public List<AttributeTreeNode> getTree(){
@@ -351,25 +354,25 @@ public class Attribute extends DmObject{
 		
 	}
 	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Attribute){
-			Attribute s = (Attribute)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(other);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
+//	@Override
+//	public int hashCode(){
+//		if (uuid != null){
+//			return Arrays.hashCode(uuid);
+//		}else{
+//			return super.hashCode();
+//		}
+//	}
+//	
+//	@Override
+//	public boolean equals(Object other){
+//		if (other != null && other instanceof Attribute){
+//			Attribute s = (Attribute)other;
+//			if (s.getUuid() == null && this.getUuid() == null){
+//				return super.equals(other);
+//			}else if (s.getUuid() != null && this.getUuid() != null){
+//				return Arrays.equals(s.getUuid(), this.getUuid());
+//			}
+//		}
+//		return false;
+//	}
 }

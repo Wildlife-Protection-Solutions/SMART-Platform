@@ -38,6 +38,7 @@ import net.refractions.udig.ui.UDIGDisplaySafeLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.geotools.data.smart.SmartDataSource;
 import org.wcs.smart.geotools.data.smart.SmartDataSourceFactory;
@@ -57,21 +58,16 @@ public class SmartService extends IService {
 	public static final String SERVICE_ID = "org.wcs.smart.udig.catalog.smartService";
 	private Map<String, Serializable> params;
 	private URL url;
-//	private Session session = null;
 	
 	private List<SmartGeoResource> members;
-
+	private SmartDataSource ds = null;
+	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
+	
+	
 	public SmartService(Map<String, Serializable> params) {
 		this.params = params;
 		this.url = SmartServiceExtension.createURL(this.params);
 	}
-
-//	public Session getSession(){
-//		if (session == null || !session.isOpen()){
-//			session = HibernateManager.openSession();
-//		}
-//		return session;
-//	}
 	
 	
 	
@@ -89,8 +85,7 @@ public class SmartService extends IService {
 	 * @see net.refractions.udig.catalog.IResolve#getMessage()
 	 */
 	@Override
-	public Throwable getMessage() {
-		// TODO Auto-generated method stub
+	public Throwable getMessage() {	
 		return null;
 	}
 
@@ -154,16 +149,13 @@ public class SmartService extends IService {
                 resolve.dispose(subProgressMonitor);
                 subProgressMonitor.done();
             } catch (Throwable e) {
-                //TODO: ERROR MESSAGE
+            	SmartPlugIn.log("Could not dispose of smart service.", e);
             }
         }
         this.ds.dispose();
-        
-//        getSession().close();
     }
 	
-	private SmartDataSource ds = null;
-	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
+
 	
 	SmartDataSource getDataStore( IProgressMonitor monitor ) throws IOException {
         if (monitor == null)
@@ -173,22 +165,15 @@ public class SmartService extends IService {
             dsInstantiationLock.lock();
             try {
                 if (ds == null) {
-                    // We are using DB2NGDataStoreFactory as we do not need to look up in
-                    // a JNDI context for a shared connection pool - we will end up using a
-                    // an internal connection pool supplied by GeoTools DBCPDataSource.
-                    //
                 	SmartDataSourceFactory dsf = new SmartDataSourceFactory();
                     
                     try {
                         Map<String, Serializable> paramsLocal = new HashMap<String, Serializable>();
                         paramsLocal.put(SmartDataSourceFactory.CA_UUID.key, params.get(SmartServiceExtension.CA_UUID_KEY));
-                   
-                        
                         if (dsf.canProcess(paramsLocal)) {
                             this.ds = (SmartDataSource) dsf.createDataStore(paramsLocal);
                         }
                     } catch (IOException e) {
-//                        msg = e;
                         throw e;
                     }
                 }

@@ -21,30 +21,18 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.AreaPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
-import org.wcs.smart.ui.internal.ca.properties.DataModelPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
-import org.wcs.smart.ui.internal.ca.properties.InitCaDataModelDialog;
 import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
 
 /**
+ * Handler for displaying property page.
  * 
  * @since 1.0.0
  */

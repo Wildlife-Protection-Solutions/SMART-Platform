@@ -26,11 +26,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.eclipse.core.runtime.Platform;
 import org.hibernate.HibernateException;
 import org.hibernate.type.BinaryType;
 import org.hibernate.usertype.UserType;
 
+/**
+ * Custom Hibernate user type for internationalized labels.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
 public class LabelUserType implements UserType {
 
 	public int[] sqlTypes() {
@@ -50,13 +55,11 @@ public class LabelUserType implements UserType {
 		assert names.length == 1;
 		byte[] uuid = (byte[]) BinaryType.INSTANCE.get(rs, names[0]);
 		return Label.getDescription(uuid);
-//		return Label.getDescription(uuid, "US_en");
 	}
 
 	public void nullSafeSet(PreparedStatement st, Object value, int index)
 			throws HibernateException, SQLException {
-//		byte[] uuid = Label.setCode((String)value, Platform.getNL());
-//		BinaryType.INSTANCE.nullSafeSet(st, uuid, index);
+		//does nothing
 	}
 
 	public Object deepCopy(Object value) throws HibernateException {

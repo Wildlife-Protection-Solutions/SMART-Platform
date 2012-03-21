@@ -28,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
@@ -79,7 +78,7 @@ public class DataModel {
 		if (aggregations == null){
 			Session s = HibernateManager.openSession();
 			try{
-				s.beginTransaction();	
+				s.beginTransaction();
 				aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).list();
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(null, "Cannot load aggregations from database.", ex);
@@ -418,68 +417,13 @@ public class DataModel {
 	 */
 	public void save(Session session){
 		for (Attribute att: attributes){
-			saveAttribute(att, session);
+			session.saveOrUpdate(att);
 		}
 		for (Category c: categories){
-			saveCategory(c, session);
+			session.saveOrUpdate(c);
 		}
 	}
 	
-	private void saveAttribute(Attribute attribute, Session s){
-		s.saveOrUpdate(attribute);
-		saveLabels(attribute, attribute.getNames(), s);
-		if (attribute.getAttributeList() != null){
-			for (AttributeListItem it : attribute.getAttributeList()){
-				s.saveOrUpdate(it);
-				saveLabels(it, it.getNames(), s);
-			}
-		}
-		if (attribute.getTree() != null){
-			for(AttributeTreeNode child: attribute.getTree()){
-				saveAttributeTreeNode(child, s);
-			}
-		}
-	}
-	/*
-	 * saves a category and associated attributes.
-	 */
-	private void saveCategory(Category c, Session s){
-		s.saveOrUpdate(c);
-		saveLabels(c, c.getNames(), s);
-		if (c.getChildren()!=null){
-			for(Category child: c.getChildren()){
-				saveCategory(child, s);
-			}
-		}
-		if (c.getAttributes() != null){
-			for (CategoryAttribute att: c.getAttributes()){
-
-				s.saveOrUpdate(att);
-			}
-		}
-		
-	}
-	private void saveAttributeTreeNode(AttributeTreeNode node, Session s){
-		s.saveOrUpdate(node);
-		saveLabels(node, node.getNames(), s);
-		if (node.getChildren() != null){
-			for(AttributeTreeNode child : node.getChildren()){
-				saveAttributeTreeNode(child, s);
-			}
-		}
-	}
-	
-	/*
-	 * Saves all labels
-	 */
-	private void saveLabels(DmObject parent, Set<Label> labels, Session s){
-		for (Label l : labels){
-			if (l.getElementuuid() == null){
-				l.setElementuuid(parent.getUuid());
-			}
-			s.saveOrUpdate(l);
-		}
-	}
 	
 	/**
 	 * Creates a copy of the current data model for the

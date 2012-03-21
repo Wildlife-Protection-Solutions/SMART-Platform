@@ -161,7 +161,7 @@ ALTER TABLE smart.patrol_options
 	ADD CONSTRAINT patrol_options_ca_uuid_fk FOREIGN KEY (CA_UUID)
 	REFERENCES smart.conservation_area (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 ALTER TABLE smart.patrol_mandate
@@ -234,14 +234,11 @@ ALTER TABLE smart.team
 ;
 
 
-
-
-
 ALTER TABLE smart.patrol_leg
 	ADD CONSTRAINT patrol_leg_patrol_uuid_fk FOREIGN KEY (PATROL_UUID)
 	REFERENCES smart.patrol (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -249,7 +246,7 @@ ALTER TABLE smart.patrol_leg_day
    ADD CONSTRAINT patrol_leg_day_leg_uuid_fk FOREIGN KEY (PATROL_LEG_UUID)
 	REFERENCES smart.PATROL_LEG (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -257,20 +254,20 @@ ALTER TABLE smart.patrol_leg_members
     ADD CONSTRAINT leg_members_patrol_leg_uuid_fk FOREIGN KEY (PATROL_LEG_UUID)
 	REFERENCES smart.PATROL_LEG (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 ALTER TABLE smart.patrol_leg_members 
     ADD CONSTRAINT leg_members_employee_uuid_fk FOREIGN KEY (EMPLOYEE_UUID)
 	REFERENCES smart.EMPLOYEE (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 ALTER TABLE smart.track
 	ADD CONSTRAINT track_leg_day_uuid_fk FOREIGN KEY (PATROL_LEG_DAY_UUID)
 	REFERENCES smart.PATROL_LEG_DAY (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -278,7 +275,7 @@ ALTER TABLE smart.waypoint
 	ADD CONSTRAINT waypoint_leg_day_uuid_fk FOREIGN KEY (LEG_DAY_UUID)
 	REFERENCES smart.PATROL_LEG_DAY (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -286,7 +283,7 @@ ALTER TABLE smart.wp_attachments
 	ADD CONSTRAINT wp_attachments_wp_uuid_fk FOREIGN KEY (WP_UUID)
 	REFERENCES smart.waypoint (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 
@@ -294,41 +291,41 @@ ALTER TABLE smart.wp_observation
 	ADD CONSTRAINT observation_wp_uuid_fk FOREIGN KEY (WP_UUID)
 	REFERENCES smart.waypoint (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 ALTER TABLE smart.wp_observation 
 	ADD CONSTRAINT observation_category_uuid_fk FOREIGN KEY (CATEGORY_UUID)
 	REFERENCES smart.dm_category (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 ALTER TABLE smart.wp_observation_attributes 
 	ADD CONSTRAINT obs_attribute_obs_uuid_fk FOREIGN KEY (OBSERVATION_UUID)
 	REFERENCES smart.WP_OBSERVATION (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 ALTER TABLE smart.wp_observation_attributes 
 	ADD CONSTRAINT observation_attribute_att_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
 	REFERENCES smart.dm_attribute (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 ALTER TABLE smart.wp_observation_attributes 
 	ADD CONSTRAINT observation_attribute_att_list_uuid_fk FOREIGN KEY (LIST_ELEMENT_UUID)
 	REFERENCES smart.dm_attribute_list (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 ALTER TABLE smart.wp_observation_attributes 
 	ADD CONSTRAINT observation_attribute_att_tree_uuid_fk FOREIGN KEY (TREE_NODE_UUID)
 	REFERENCES smart.dm_attribute_tree (UUID)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE CASCADE
 ;
 
 

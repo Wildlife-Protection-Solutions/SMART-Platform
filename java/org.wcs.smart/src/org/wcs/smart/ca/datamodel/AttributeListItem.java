@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.wcs.smart.ca.ConservationArea;
 
 /**
@@ -37,6 +40,8 @@ import org.wcs.smart.ca.ConservationArea;
  */
 @Entity
 @Table(name = "smart.dm_attribute_list")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AttributeListItem extends DmObject{
 
 	private int listOrder;			//order of item in list

@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -34,9 +35,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 
 /**
- * Assocation between a Category and its attributes.
+ * Association between a Category and its attributes.
  * 
  * @author Emily
  * @since 1.0.0
@@ -48,6 +52,8 @@ import javax.persistence.Transient;
 		joinColumns = @JoinColumn(name = "attribute_uuid")),
 	@AssociationOverride(name = "id.category", 
 		joinColumns = @JoinColumn(name = "category_uuid")) })
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class CategoryAttribute {
 
 	private CategoryAttributePk id = new CategoryAttributePk();	
@@ -165,6 +171,7 @@ public class CategoryAttribute {
 		}
 		
 		@ManyToOne
+		@JoinColumn(name="category_uuid")
 		public Category getCategory() {
 			return category;
 		}
@@ -174,6 +181,7 @@ public class CategoryAttribute {
 		}
 		
 		@ManyToOne
+		@JoinColumn(name="attribute_uuid")
 		public Attribute getAttribute() {
 			return attribute;
 		}
