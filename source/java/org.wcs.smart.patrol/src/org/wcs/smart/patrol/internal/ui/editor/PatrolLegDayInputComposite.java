@@ -26,6 +26,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -119,6 +120,7 @@ public class PatrolLegDayInputComposite {
 	private Button btnMoveWaypoint;
 	
 	private  DoubleCellEditor doubleCellEditor;
+	private  DoubleCellEditor nullableDoubleCellEditor;
 	private IntegerCellEditor integerCellEditor;
 	private TimeCellEditor timeEditor;
 	private AttachmentCellEditor attachmentEditor;
@@ -280,8 +282,8 @@ public class PatrolLegDayInputComposite {
 		dtStartTime.addFocusListener(new FocusAdapter() {			
 			@Override
 			public void focusLost(FocusEvent e) {
-				editor.getPatrolEditor().doSave(null);
-//				editor.setDirty(true);
+				editor.getPatrolEditor().save(patrolLegDate);
+//				editor.getPatrolEditor().doSave(null);
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 
 				
@@ -304,12 +306,12 @@ public class PatrolLegDayInputComposite {
 			@Override
 			public void focusLost(FocusEvent e) {
 //				editor.setDirty(true);
-				editor.getPatrolEditor().doSave(null);
+//				editor.getPatrolEditor().doSave(null);
+				editor.getPatrolEditor().save(patrolLegDate);
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
 		});
 		
-		// TODO rest hours can only contain numbers
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
 		toolkit.createLabel(c, "Rest Minutes:");
@@ -319,18 +321,25 @@ public class PatrolLegDayInputComposite {
 		restMinutes.setLayoutData(gd);
 		restMinutes.addFocusListener(new FocusListener() {
 			private int oldValue; 
+			
 			@Override
 			public void focusLost(FocusEvent e) {
-				int d = oldValue;
 				try{
-					d = Integer.parseInt(restMinutes.getText());
+					Integer.parseInt(restMinutes.getText());
 				}catch (Exception ex){
-					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Error", "Rest Minutes must be a valid number.");
 					restMinutes.setText(oldValue + "");
+					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Error", "Rest Minutes must be a valid number.");
+					Display.getCurrent().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							restMinutes.setFocus();
+						}
+					});
+					
 				}
 				updateTotalHours();
-//				editor.setDirty(true);
-				editor.getPatrolEditor().doSave(null);
+//				editor.getPatrolEditor().doSave(null);
+				editor.getPatrolEditor().save(patrolLegDate);
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
 			
@@ -459,6 +468,9 @@ public class PatrolLegDayInputComposite {
 		if (dialog.open() != Window.OK ){
 			return ;
 		}
+		ArrayList<Waypoint> deleted = new ArrayList<Waypoint>();
+		ArrayList<Waypoint> added = new ArrayList<Waypoint>();
+		
 		PatrolLegDay moveTo = dialog.getMoveToPosition();
 		Session session = HibernateManager.openSession();
 		try {
@@ -474,6 +486,8 @@ public class PatrolLegDayInputComposite {
 					w.setPatrolLegDay(null);
 					cloned.setPatrolLegDay(moveTo);
 					moveTo.getWaypoints().add(cloned);
+					deleted.add(w);
+					added.add(cloned);
 				}
 				
 				//ensure minimum is loaded for the patrol mapping service which assumes
@@ -487,7 +501,10 @@ public class PatrolLegDayInputComposite {
 			session.close();
 		}
 //		this.editor.setDirty(true);
-		editor.getPatrolEditor().doSave(null);
+//		editor.getPatrolEditor().doSave(null);
+		editor.getPatrolEditor().save(added);
+		editor.getPatrolEditor().delete(deleted);
+		
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, moveTo);
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 		
@@ -500,14 +517,20 @@ public class PatrolLegDayInputComposite {
 			return;
 		}
 		IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
+		ArrayList<Waypoint> deleted = new ArrayList<Waypoint>();
+		
 		for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
 			Waypoint w = (Waypoint) iterator.next();
 			if (patrolLegDate.getWaypoints().remove(w)){
 				w.setPatrolLegDay(null);
+				deleted.add(w);
 			}
+			
 		}
 //		editor.setDirty(true);
-		editor.getPatrolEditor().doSave(null);
+//		editor.getPatrolEditor().doSave(null);
+		//delete waypoints
+		editor.getPatrolEditor().delete(deleted);
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 	}
 	
@@ -598,6 +621,7 @@ public class PatrolLegDayInputComposite {
 		TableViewerEditor.create(observationTable, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR );
 
 		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
+		nullableDoubleCellEditor = new DoubleCellEditor(observationTable.getTable(), true);
 		integerCellEditor = new IntegerCellEditor(observationTable.getTable());
 		timeEditor = new TimeCellEditor(observationTable.getTable());
 		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
@@ -688,7 +712,8 @@ public class PatrolLegDayInputComposite {
 									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Track succesfully imported.");
 								}
 //								editor.setDirty(true);
-								editor.getPatrolEditor().doSave(null);
+//								editor.getPatrolEditor().doSave(null);
+								editor.getPatrolEditor().save(patrolLegDate);
 								//updateDistance();
 								
 							}
@@ -748,9 +773,9 @@ public class PatrolLegDayInputComposite {
 									PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", count + " waypoints succesfully imported.");
 								}
-								
+								editor.getPatrolEditor().save(patrolLegDate.getWaypoints());
 //								editor.setDirty(true);
-								editor.getPatrolEditor().doSave(null);
+//								editor.getPatrolEditor().doSave(null);
 								
 							}
 							
@@ -820,7 +845,8 @@ public class PatrolLegDayInputComposite {
 			//updated in cell editor
 		}
 		if (needSave){
-			editor.getPatrolEditor().doSave(null);
+//			editor.getPatrolEditor().doSave(null);
+			editor.getPatrolEditor().save(Collections.singleton(element));
 		}
 		observationTable.refresh(element);
 		
@@ -930,7 +956,13 @@ public class PatrolLegDayInputComposite {
 		t = new Time(cal.getTimeInMillis());
 		patrolLegDate.setStartTime(t);
 		
-		patrolLegDate.setRestMinutes(Integer.parseInt(restMinutes.getText()));
+		int rest = 0;
+		try{
+			rest = Integer.parseInt(restMinutes.getText());
+		}catch (Exception ex){
+			SmartPatrolPlugIn.log("Could not parse rest minutes", ex);
+		}
+		patrolLegDate.setRestMinutes(rest);
 	}
 	
 	private void addWaypoint() {
@@ -947,7 +979,8 @@ public class PatrolLegDayInputComposite {
 			wp.setTime(new Time(cal.getTime().getTime()));
 			patrolLegDate.getWaypoints().add(wp);
 			
-			editor.getPatrolEditor().doSave(null);
+//			editor.getPatrolEditor().doSave(null);
+			editor.getPatrolEditor().save(Collections.singleton(wp));
 			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 		}
 		//saveLegDay();
@@ -990,9 +1023,10 @@ public class PatrolLegDayInputComposite {
 		 */
 		@Override
 		protected CellEditor getCellEditor(Object element) {
-			if (column == OtColumn.NORTH || column == OtColumn.EAST || 
-					column == OtColumn.DIRECTION || column == OtColumn.DISTANCE ){
+			if (column == OtColumn.NORTH || column == OtColumn.EAST ){
 				return doubleCellEditor;
+			}else if (column == OtColumn.DIRECTION || column == OtColumn.DISTANCE ){
+				return nullableDoubleCellEditor;
 			}else if (column == OtColumn.ID){
 				return integerCellEditor;
 			}else if (column == OtColumn.TIME){

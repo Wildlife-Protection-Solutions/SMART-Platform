@@ -97,7 +97,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	public Session getSession(){
 		if (session == null || !session.isOpen()){
 			session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-			session.refresh(ca);
+			session.update(ca);
 		}
 		return session;
 	}

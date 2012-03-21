@@ -235,18 +235,15 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			for (Iterator iterator = teams.iterator(); iterator.hasNext();) {
 				Team team = (Team) iterator.next();
 				s.saveOrUpdate(team);
-				for (org.wcs.smart.ca.Label lbl : team.getNames()){
-					lbl.setElementuuid(team.getUuid());
-					s.saveOrUpdate(lbl);
-				}
-				for (org.wcs.smart.ca.Label lbl : team.getDescriptions()) {
+				
+				for (org.wcs.smart.ca.DescriptionLabel lbl : team.getDescriptions()) {
 					if (lbl.getElementuuid() == null) {
 						if (team.getDescUuid() == null) {
 							byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) s, lbl);
 							team.setDescUuid(uuid);
 							s.saveOrUpdate(team);
 						}
-						lbl.setElementuuid(team.getDescUuid());
+						lbl.setElement(team.getDescUuid());
 					}
 					s.saveOrUpdate(lbl);
 				}

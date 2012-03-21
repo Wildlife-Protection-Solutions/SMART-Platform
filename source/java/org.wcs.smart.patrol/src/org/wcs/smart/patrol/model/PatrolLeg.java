@@ -44,6 +44,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.SmartUtils;
@@ -122,6 +123,7 @@ public class PatrolLeg {
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.patrolLeg", orphanRemoval=true, cascade={CascadeType.ALL})
+	@BatchSize(size=50)
 	public List<PatrolLegMember> getMembers(){
 		return this.members;
 	}
@@ -131,6 +133,7 @@ public class PatrolLeg {
 	
 	@OneToMany(fetch= FetchType.LAZY, mappedBy="patrolLeg", orphanRemoval=true, cascade={CascadeType.ALL})
 	@OrderBy(clause = "patrol_day")
+	@BatchSize(size=50)
 	public List<PatrolLegDay> getPatrolLegDays(){
 		return this.days;
 	}

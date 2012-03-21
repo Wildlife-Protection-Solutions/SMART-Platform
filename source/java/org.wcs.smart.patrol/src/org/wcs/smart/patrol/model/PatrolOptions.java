@@ -41,6 +41,7 @@ public class PatrolOptions {
 	private boolean trackDistanceDirection;
 	private Integer editTime;
 	private byte[] ca_uuid;
+	
 	public PatrolOptions(){}
 	
 	/**

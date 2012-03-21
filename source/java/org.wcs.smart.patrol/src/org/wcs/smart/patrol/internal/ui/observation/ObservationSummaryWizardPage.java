@@ -58,20 +58,22 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 	public static final String PAGE_NAME = "Observation Summary Page";
 
 	public Font boldFont = null;
+	private ObservationWizardPage nextPage = null;
 	
 	protected ObservationSummaryWizardPage(Wizard wizard) {
 		super(PAGE_NAME);
 		wizard.addPage(this);
 	}
 
-
+	/**
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
 	@Override
 	public void dispose(){
 		super.dispose();
 		if (boldFont != null){
 			boldFont.dispose();
 		}
-		
 	}
 	
 	@Override
@@ -132,7 +134,9 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 				lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 
-			if (ob.getValue() != null && ob.getValue().size() > 0){
+			List<WaypointObservation> wob = ob.getValue();
+			
+			if (wob.size() > 1 || (wob.size() == 1 && (wob.get(0).getAttributes() != null && wob.get(0).getAttributes().size() > 0))){
 				TableViewer viewer = AttributeTable.createAttributeTable(false, entryComp, ob.getKey(), null);
 				viewer.setContentProvider(ArrayContentProvider.getInstance());
 				viewer.setInput(ob.getValue().toArray());
@@ -150,12 +154,14 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 		scrolled.setContent(main);
 		setControl(scrolled);
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		//TODO:  This is a hack to prevent hibernate errors
-		((ObservationWizard)getWizard()).getDataModel();
 	}
 	
 	
+	/**
+	 * Deletes the given cateory and all associated observations
+	 * @param category
+	 * @param comp
+	 */
 	private void deleteCategory(Category category, Composite comp){
 		((ObservationWizard)getWizard()).getAllObservations().remove(category);
 		Composite parent = comp.getParent();
@@ -163,17 +169,30 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 		parent.layout();
 	}
 	
+	/**
+	 * Opens the edit wizard page.
+	 * 
+	 * @param category
+	 */
 	private void editCategory(Category category){
 		((ObservationWizard)getWizard()).setCurrentObservation(category);
 		((ObservationWizard)getWizard()).getWizardDialog().showPage( new AttributeWizardPage((Wizard)getWizard()) );
 	}
 	
+	/**
+	 * Users cannot go back from this page.
+	 * 
+	 * @return null
+	 * @see org.eclipse.jface.wizard.WizardPage#getPreviousPage()
+	 */
 	@Override
 	public IWizardPage getPreviousPage(){
 		return null;
 	}
-	
-	private ObservationWizardPage nextPage = null;
+
+	/**
+	 * The observation wizard page
+	 */
 	@Override
     public IWizardPage getNextPage() {
 		if (nextPage == null){
@@ -182,12 +201,12 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 		return nextPage;
     }
 	
-	/* (non-Javadoc)
+	/**
+	 * @return true
 	 * @see org.wcs.smart.patrol.internal.ui.observation.IObservationWizardPage#beforeMoveNext()
 	 */
 	@Override
 	public boolean beforeMoveNext(IWizardPage target) {
-		//((ObservationWizard)getWizard()).setCurrentObservation(null);
 		return true;
 	}
 

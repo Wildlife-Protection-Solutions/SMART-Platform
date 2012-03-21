@@ -32,16 +32,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.GeodeticCalculator;
 import org.hibernate.annotations.GenericGenerator;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.ParseException;
@@ -91,6 +87,7 @@ public class Track {
 	public void setGeom(byte[] geom) {
 		this.geom = geom;
 	}
+	
 	@Column(name="distance")
 	public Float getDistance() {
 		return distance;
@@ -116,18 +113,18 @@ public class Track {
 			try {
 				this.ls = (LineString)reader.read(geom);
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				SmartPatrolPlugIn.log("Could not convert wkb to linestring object.", e);
 			}
 		}
 		return this.ls;
 	}
+	/**
+	 * Sets the linestring.  Also updates the distance field.  Linestring
+	 * must be in EPSG:4326
+	 * 
+	 * @param ls new linestring
+	 */
 	public void setLineString(LineString ls){
-		//TODO: DOES NOT write 3d
-		//computer read distance from coordinates
-		
-		
-		
 		GeodeticCalculator cal = new GeodeticCalculator();
 		double distance = 0;
 		for (int i = 1; i < ls.getCoordinates().length; i ++){
@@ -136,7 +133,6 @@ public class Track {
 			distance +=cal.getOrthodromicDistance();
 		}
 		this.distance = (float)(distance / 1000.0);
-		 
 		
 		WKBWriter writer = new WKBWriter(3);
 		this.geom = writer.write(ls);

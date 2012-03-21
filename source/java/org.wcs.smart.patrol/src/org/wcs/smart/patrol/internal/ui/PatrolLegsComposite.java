@@ -299,7 +299,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	public void updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p) {
 		if (this.canEditDates){
 			p.setStartDate(patrolStartDate);
 			p.setEndDate(patrolEndDate);
@@ -358,6 +358,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		//create leg days
 		p.createLegDays();
+		return true;
 			
 	}
 

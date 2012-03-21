@@ -522,7 +522,7 @@ public class PatrolMapPageEditor extends EditorPart implements MapPart {
             if (part == PatrolMapPageEditor.this.parentEditor || getSite().getPage().getActivePart() != part
                     || selection instanceof IBlockingSelection)
                 return;
-
+            
             ISafeRunnable sendAnimation = new ISafeRunnable(){
                 public void run() {
                     if (selection instanceof IStructuredSelection) {

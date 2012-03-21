@@ -123,13 +123,14 @@ public class TeamComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p) {
 		Object team = (Object)((IStructuredSelection)teamList.getSelection()).getFirstElement();
 		if (team != null && team instanceof Team){
 			p.setTeam((Team)team);
 		}else{
 			p.setTeam(null);
 		}
+		return true;
 	}
 
 

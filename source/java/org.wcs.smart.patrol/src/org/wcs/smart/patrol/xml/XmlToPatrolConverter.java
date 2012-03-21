@@ -33,7 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.SimpleList;
+import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -466,7 +466,7 @@ public class XmlToPatrolConverter {
 		}
 	}
 	
-	private SimpleList findValue(String langCode, String value, String objectType){
+	private SimpleListItem findValue(String langCode, String value, String objectType){
 		
 		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.elementuuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca ";
 		
@@ -479,7 +479,7 @@ public class XmlToPatrolConverter {
 		if (results.size() == 0){
 			return null;
 		}else{
-			return (SimpleList)results.get(0);
+			return (SimpleListItem)results.get(0);
 		}
 		
 		

@@ -19,6 +19,7 @@ public class PatrolEventManager {
 	//registered listeners
 	private HashMap<EventType, List<IPatrolEventListener>> listeners = new HashMap<EventType, List<IPatrolEventListener>>();
 	
+	
 	/**
 	 * Types of patrol events that can be listened to
 	 * 
@@ -108,7 +109,10 @@ public class PatrolEventManager {
 	
 	private void fireListeners(EventType type, int attributeChange, Object source){
 		if (listeners.get(type) != null){
-			for (IPatrolEventListener listener : listeners.get(type)){
+			//prevents concurrentmodificationexceptions
+			ArrayList<IPatrolEventListener> localListeners = new ArrayList<IPatrolEventListener>();
+			localListeners.addAll(listeners.get(type));
+			for (IPatrolEventListener listener : localListeners){
 				listener.eventFired(attributeChange, source);
 			}
 		}

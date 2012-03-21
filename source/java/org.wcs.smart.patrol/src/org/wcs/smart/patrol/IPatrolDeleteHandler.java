@@ -19,42 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.createpatrol;
+package org.wcs.smart.patrol;
 
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * An abstract class for new patrol wizard pages.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public abstract class NewPatrolWizardPage extends WizardPage {
+public interface IPatrolDeleteHandler {
 
+	
 	/**
-	 * @param pageName the name of the patrol wizard page
-	 */
-	protected NewPatrolWizardPage(String pageName) {
-		super(pageName);
-	}
-
-	/**
-	 * Updates the current patrol with the new values inputed
-	 * in the patrol page.
+	 * Throw an exception if you cannot delete and the delete
+	 * should be cancelled.
 	 * 
-	 * @param p patrol to update
-	 * @return <code>true</code> of model updated; <code>false</code> if error 
+	 * @param patrol the patrol to delete
+	 * @param session the delete session
+	 * @param monitor the progress monitor
+	 * @throws Exception if error occurs and the patrol information could not be removed
 	 */
-	abstract boolean updateModel(Patrol p);
-
-	/**
-	 * Updates the current page gui components with the values
-	 * from the patrol
-	 * 
-	 * @param p patrol to use when updating gui components
-	 * @param session the current hibernate session
-	 */
-	abstract void initModel(Patrol p, Session session);
+	public void beforeDelete(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception;
 }

@@ -56,8 +56,6 @@ public class WaypointObservation {
 	
 	private List<WaypointObservationAttribute> attributes = null; 
 	
-	 
-	
 	public WaypointObservation(){
 		
 	}
@@ -96,14 +94,6 @@ public class WaypointObservation {
 	}
 	public void setAttributes(List<WaypointObservationAttribute> attributes){
 		this.attributes = attributes;
-//		if (this.attributes == null){
-//			this.attributes = attributes;
-//		}else{
-//			this.attributes.clear();
-//			if (attributes != null){
-//				this.attributes.addAll(attributes);
-//			}
-//		}
 	}
 	
 	/**
@@ -154,14 +144,14 @@ public class WaypointObservation {
 	public WaypointObservation clone(){
 		WaypointObservation clone = new WaypointObservation();
 		
-		clone.category = getCategory();
+		clone.setCategory(getCategory());
+		clone.setAttributes(new ArrayList<WaypointObservationAttribute>());
 		if (attributes != null) {
-			clone.attributes = new ArrayList<WaypointObservationAttribute>();
 			for (Iterator<WaypointObservationAttribute> iterator = attributes.iterator(); iterator.hasNext();) {
 				WaypointObservationAttribute type = (WaypointObservationAttribute) iterator.next();
 				WaypointObservationAttribute ctype = type.clone();
 				ctype.setObservation(clone);
-				clone.attributes.add(ctype);
+				clone.getAttributes().add(ctype);
 			}
 		}
 		return clone;

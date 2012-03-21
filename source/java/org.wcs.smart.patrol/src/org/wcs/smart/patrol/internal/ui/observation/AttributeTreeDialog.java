@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -42,7 +41,10 @@ import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
 /**
- * Dialog for display attribute tree.
+ * Dialog for displaying data model attributes
+ * that are trees.  This dialog displays a searchable
+ * tree viewer.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -59,8 +61,6 @@ public class AttributeTreeDialog extends TitleAreaDialog {
 	public AttributeTreeDialog(Shell parentShell, Attribute attribute) {
 		super(parentShell);
 		this.attribute = attribute;
-		
-		
 	}
 	
 	@Override
@@ -88,40 +88,34 @@ public class AttributeTreeDialog extends TitleAreaDialog {
 				}
 				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
 			}
-			
 		};
 		
 		
-		FilteredTree fTree = new FilteredTree(main, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true);
+		FilteredTree fTree = new FilteredTree(main, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
 		tblTree = fTree.getViewer();
-		tblTree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		tblTree.setContentProvider(new AttributeTreeContentProvider(true));
 		tblTree.setLabelProvider(new AttributeTreeLabelProvider());
-//		tblTree.addFilter(new ViewerFilter() {
-//			
-//			@Override
-//			public boolean select(Viewer viewer, Object parentElement, Object element) {
-//				if (element instanceof AttributeTreeNode){
-//					return ((AttributeTreeNode)element).getIsActive();
-//				}
-//				return true;
-//			}
-//		});
-		tblTree.setAutoExpandLevel(1);
+		tblTree.setAutoExpandLevel(2);
 		tblTree.setInput(attribute);
 		tblTree.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				currentSelection = ((IStructuredSelection)tblTree.getSelection()).getFirstElement();
-				
 			}
 		});
+		tblTree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)tblTree.getTree().getLayoutData()).heightHint = 200;
 		
-		setMessage("Select attribute value from tree.");
+		
+		getShell().setText(attribute.getName());
+		setMessage("Select the attribute value from tree. Or search using the provided search box.");
 		return composite; 
 	}
 
+	/**
+	 * @return the selected tree node
+	 */
 	public AttributeTreeNode getSelection(){
 		if (currentSelection instanceof AttributeTreeNode){
 			return (AttributeTreeNode)currentSelection;
@@ -129,6 +123,11 @@ public class AttributeTreeDialog extends TitleAreaDialog {
 		return null;
 	}
 
+	/**
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * 
+	 * @return <code>true</code>
+	 */
 	protected boolean isResizable() {
 		return true;
 	}

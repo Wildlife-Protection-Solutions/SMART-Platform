@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.DialogCellEditor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -79,7 +80,9 @@ public class ObservationCellEditor extends DialogCellEditor{
 					+ ex.getMessage(), ex);
 		}
 		if (dialog != null) {
-			dialog.open();
+			if (dialog.open() == Window.CANCEL){
+				return null;
+			}
 		}
 		
 		return wp;

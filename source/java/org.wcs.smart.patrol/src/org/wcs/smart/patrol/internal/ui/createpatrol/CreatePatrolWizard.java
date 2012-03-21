@@ -42,65 +42,78 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author Emily
  * @since 1.0.0
  */
-public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
+public class CreatePatrolWizard extends Wizard implements IPageChangingListener {
 
 	private boolean completedOK = false;
 
 	private Patrol patrol = null;
 	private Session session = null;
-	
+
 	private boolean canFinish = false;
 	private IWizardPage lastPage = null;
-	
+
 	/**
 	 * Creates a new wizard.
 	 */
 	public CreatePatrolWizard() {
 		setWindowTitle("Create New Patrol");
-		
+
 		patrol = new Patrol();
 		patrol.setConservationArea(SmartDB.getCurrentConservationArea());
 	}
-	
+
 	/**
 	 * Sets if the wizard can finish
-	 * @param canFinish if the wizard can finish
+	 * 
+	 * @param canFinish
+	 *            if the wizard can finish
 	 */
-	public void setCanFinish(boolean canFinish){
+	public void setCanFinish(boolean canFinish) {
 		this.canFinish = canFinish;
 		getContainer().updateButtons();
 	}
-	
+
+	/**
+	 * Closes the active session
+	 */
 	@Override
-	public boolean canFinish(){
+	public void dispose() {
+		super.dispose();
+		if (session != null && session.isOpen()) {
+			session.close();
+		}
+	}
+
+	@Override
+	public boolean canFinish() {
 		return super.canFinish() && this.canFinish;
 	}
+
 	/**
 	 * 
 	 * @return the current patrol being created
 	 */
-	public Patrol getPatrol(){
+	public Patrol getPatrol() {
 		return this.patrol;
 	}
 
 	/**
-	 * Creates a new session and attaches
-	 * the current conservation area.
+	 * Creates a new session and attaches the current conservation area.
 	 * 
 	 * @return
 	 */
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
+	public Session getSession() {
+		if (session == null || !session.isOpen()) {
 			session = PatrolHibernateManager.openSession();
-			session.refresh(patrol.getConservationArea());
+			session.update(patrol.getConservationArea());
 		}
 		return session;
 	}
-	
+
 	@Override
 	public void addPages() {
-		((WizardDialog)getContainer()).addPageChangingListener(this);
-		
+		((WizardDialog) getContainer()).addPageChangingListener(this);
+
 		super.addPage(new PatrolTypeWizardPage());
 		super.addPage(new TransportTypeWizardPage());
 		super.addPage(new PatrolArmedWizardPage());
@@ -112,42 +125,48 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 		super.addPage(new PatrolLeaderWizardPage());
 		super.addPage(new MultiLegWizardPage());
 		super.addPage(new PatrolLegsWizardPage());
-		
+
 	}
-	
+
 	/**
 	 * 
-	 * @return true if the wizard completed okay with no errors; false if error occured
-	 * while finishing wizard
+	 * @return true if the wizard completed okay with no errors; false if error
+	 *         occured while finishing wizard
 	 */
-	public boolean isCompletedOk(){
+	public boolean isCompletedOk() {
 		return completedOK;
 	}
 
-	
 	/**
 	 * Creates the patrol leg days then saved the patrol to the database.
 	 */
 	@Override
 	public boolean performFinish() {
-		if (lastPage instanceof NewPatrolWizardPage){
-			((NewPatrolWizardPage)lastPage).updateModel(this.patrol);
+		if (lastPage instanceof NewPatrolWizardPage) {
+			((NewPatrolWizardPage) lastPage).updateModel(this.patrol);
 		}
-		
+
 		this.getPatrol().createLegDays();
-		boolean ret = PatrolHibernateManager.savePatrol(getPatrol(), PatrolHibernateManager.openSession());
-		//fire events
+		boolean ret = PatrolHibernateManager.savePatrol(getPatrol(),
+				PatrolHibernateManager.openSession());
+
+		if (!ret)
+			return false;
+
+		// fire events
 		PatrolEventManager.getInstance().patrolAdded(getPatrol());
-		//open in editor
-		PatrolEditorInput input = new PatrolEditorInput(this.patrol.getUuid(), this.patrol.getId(), this.patrol.getPatrolType(), this.patrol.getStartDate(), this.patrol.getEndDate());
-		
+		// open in editor
+		PatrolEditorInput input = new PatrolEditorInput(this.patrol.getUuid(),
+				this.patrol.getId(), this.patrol.getPatrolType(),
+				this.patrol.getStartDate(), this.patrol.getEndDate());
+
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PatrolEditor.ID);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+					.getActivePage().openEditor(input, PatrolEditor.ID);
 		} catch (PartInitException e) {
-			//TODO:
 			throw new RuntimeException(e);
 		}
-		
+
 		return ret;
 	}
 
@@ -156,23 +175,29 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener{
 	 */
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (event.getCurrentPage() instanceof NewPatrolWizardPage){
-			((NewPatrolWizardPage)event.getCurrentPage()).updateModel(patrol);
+		if (event.getCurrentPage() instanceof NewPatrolWizardPage) {
+			if (!((NewPatrolWizardPage) event.getCurrentPage())
+					.updateModel(patrol)) {
+				event.doit = false;
+				return;
+			}
 		}
-		if (event.getTargetPage() instanceof NewPatrolWizardPage){
-			((NewPatrolWizardPage)event.getTargetPage()).initModel(patrol, getSession());
+		if (event.getTargetPage() instanceof NewPatrolWizardPage) {
+			((NewPatrolWizardPage) event.getTargetPage()).initModel(patrol,
+					getSession());
 		}
-		
-		if ( !(event.getTargetPage() instanceof MultiLegWizardPage) && !(event.getTargetPage() instanceof PatrolLegsWizardPage) ){
+
+		if (!(event.getTargetPage() instanceof MultiLegWizardPage)
+				&& !(event.getTargetPage() instanceof PatrolLegsWizardPage)) {
 			setCanFinish(false);
 		}
-		//last page of wizard
-//		if (!event.getTargetPage().equals(getPages()[getPageCount()-1])){
-////			setCanFinish(true);
-////		}else{
-//			setCanFinish(false);
-//		}
-		if (event.doit){
+		// last page of wizard
+		// if (!event.getTargetPage().equals(getPages()[getPageCount()-1])){
+		// // setCanFinish(true);
+		// // }else{
+		// setCanFinish(false);
+		// }
+		if (event.doit) {
 			lastPage = (IWizardPage) event.getTargetPage();
 		}
 	}

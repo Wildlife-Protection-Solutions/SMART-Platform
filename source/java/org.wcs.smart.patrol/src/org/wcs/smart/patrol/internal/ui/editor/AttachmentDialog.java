@@ -118,22 +118,24 @@ public class AttachmentDialog extends TitleAreaDialog {
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				FileDialog fd = new FileDialog(AttachmentDialog.this.getShell());
+				FileDialog fd = new FileDialog(AttachmentDialog.this.getShell(), SWT.MULTI);
+				
 				String file = fd.open();
 				if (file == null){
 					return;
 				}
-				File f = new File(file);
-				if (!f.exists()){
-						SmartPatrolPlugIn.displayLog("The selected file does not exist: '" + file + "'", null);
-					return;
+				for (int i = 0; i < fd.getFileNames().length; i ++){
+					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
+					if (!f.exists()){
+						SmartPatrolPlugIn.displayLog("The selected file does not exist: '" + f.getAbsolutePath() + "'", null);
+						return;
+					}
+					WaypointAttachment wpa = new WaypointAttachment();
+					wpa.setCopyFromLocation(f);
+					wpa.setFilename(f.getName());
+					attachments.add(wpa);
 				}
-				WaypointAttachment wpa = new WaypointAttachment();
-				wpa.setCopyFromLocation(f);
-				wpa.setFilename(f.getName());
-				attachments.add(wpa);
 				tblAttachments.refresh();
-//				}
 			}
 		});
 		

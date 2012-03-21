@@ -136,7 +136,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * 
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p) {
 		p.setStartDate(getStartDate());
 		p.setEndDate(getEndDate());		
 		if (p.getLegs().size() == 1){
@@ -144,6 +144,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 			p.getFirstLeg().setEndDate(p.getEndDate());
 			p.createLegDays();
 		}
+		return true;
 	}
 
 

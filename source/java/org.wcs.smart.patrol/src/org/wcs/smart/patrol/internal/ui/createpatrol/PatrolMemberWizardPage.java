@@ -117,7 +117,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	void updateModel(Patrol p) {		
+	public boolean  updateModel(Patrol p) {		
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
 		
@@ -125,6 +125,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 			Employee e = (Employee) iterator.next();
 			firstLeg.addPatrolLegMember(e);
 		}
+    	return true;
 	}
 }
 

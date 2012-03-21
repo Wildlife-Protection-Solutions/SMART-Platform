@@ -82,8 +82,8 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
-	void updateModel(Patrol p) {
-		dateComposite.updatePatrol(p);
+	public boolean updateModel(Patrol p) {
+		return dateComposite.updatePatrol(p);
 	}
 	
 	/**

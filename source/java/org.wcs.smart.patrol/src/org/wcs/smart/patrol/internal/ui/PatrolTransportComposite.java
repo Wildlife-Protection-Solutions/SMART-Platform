@@ -36,8 +36,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 
@@ -112,12 +114,14 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(PatrolLeg patrolLeg) {
+	public boolean updatePatrol(PatrolLeg patrolLeg) {
 		PatrolTransportType pm = (PatrolTransportType) ((IStructuredSelection)patrolTypeViewer.getSelection()).getFirstElement();
 		if (pm != null){
 			patrolLeg.setType(pm);
+			return true;
 		}else{
-			throw new IllegalStateException("Cannot have null transport type.");
+			SmartPatrolPlugIn.displayLog("Patrol must have a transportation type.  If there are no options, the administrator must first setup transportation types.", null);
+			return false;
 		}
 		
 	}

@@ -119,9 +119,10 @@ public class ObjectiveComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public void updatePatrol(Patrol p) {
+	public boolean updatePatrol(Patrol p) {
 		p.setObjective(txtObjective.getText());
 		p.setObjectiveRating(objectiveMet.getSelection());
+		return true;
 	}
 
 

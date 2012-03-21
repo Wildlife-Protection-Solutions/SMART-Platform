@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 
@@ -57,7 +58,10 @@ public class AttributeTable {
 	 * @param listener listener fired when item in the table is changed, can be null if canEdit is false
 	 * @return created attribute table
 	 */
-	public static TableViewer createAttributeTable(boolean canEdit, Composite parent, Category currentCategory, IAttributeTableChangeListener listener){
+	public static TableViewer createAttributeTable(boolean canEdit, 
+			Composite parent, 
+			Category currentCategory, 
+			IAttributeTableChangeListener listener){
 		
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		currentCategory.getAllAttribute(attributes);
@@ -116,6 +120,8 @@ public class AttributeTable {
 	 * Creates editor for given column
 	 */
 	private static AttributeTableEditingSupport createEditor(ColumnViewer column, TableViewer table, Attribute att, IAttributeTableChangeListener listener){
+		
+
 		AttributeTableEditingSupport support = new AttributeTableEditingSupport(column, table, att);
 		if (listener != null){
 			support.addChangeListener(listener);

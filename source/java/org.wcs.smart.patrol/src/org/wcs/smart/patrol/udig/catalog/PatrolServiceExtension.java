@@ -45,7 +45,7 @@ public class PatrolServiceExtension implements ServiceExtension {
 
 	@Override
 	public Map<String, Serializable> createParams(URL url) {	
-		return createParams(url);
+		return createParamsFromUrl(url);
 
 	}
 	

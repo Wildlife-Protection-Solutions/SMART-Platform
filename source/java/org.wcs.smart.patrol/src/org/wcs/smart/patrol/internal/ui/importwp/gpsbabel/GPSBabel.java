@@ -97,8 +97,7 @@ public class GPSBabel {
 				try {
 					inputReader.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					SmartPatrolPlugIn.log("Error reading GPS Babel device options", e);
 				}
 			}
 

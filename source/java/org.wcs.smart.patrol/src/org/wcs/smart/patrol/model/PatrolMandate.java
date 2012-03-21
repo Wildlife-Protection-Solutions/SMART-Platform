@@ -29,7 +29,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.SimpleList;
+import org.wcs.smart.ca.SimpleListItem;
 
 /**
  * Patrol mandate
@@ -39,7 +39,7 @@ import org.wcs.smart.ca.SimpleList;
  */
 @Entity
 @Table(name = "smart.patrol_mandate")
-public class PatrolMandate extends SimpleList{
+public class PatrolMandate extends SimpleListItem{
 
 	public static final String NAME = "Mandate";
 	

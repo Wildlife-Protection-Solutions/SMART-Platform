@@ -42,6 +42,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
@@ -104,7 +106,9 @@ public class PatrolLegDay {
 	}
 	
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay", orphanRemoval = true, cascade={CascadeType.ALL})
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay", orphanRemoval = true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="patrolLegDay")
+	@BatchSize(size=200)
 	public List<Waypoint> getWaypoints(){
 		return this.waypoints;
 	}

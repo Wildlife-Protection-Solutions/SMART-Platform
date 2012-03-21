@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -37,16 +38,15 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTError;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -126,11 +126,9 @@ public class PatrolListView extends ViewPart {
 
 	}
 
-	public void dispose() {
-		
+	public void dispose() {		
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
-		
 		super.dispose();
 	}
 
@@ -144,6 +142,9 @@ public class PatrolListView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
+		
+		
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		main.setLayout(new GridLayout(1, false));
@@ -197,6 +198,13 @@ public class PatrolListView extends ViewPart {
 				
 			}
 		});
+		
+		/* add right click context menu */
+		MenuManager menuManager = new MenuManager();
+		Menu menu = menuManager.createContextMenu(patrolListViewer.getControl());
+		patrolListViewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuManager,  patrolListViewer);
+		getSite().setSelectionProvider(patrolListViewer);
 	}
 
 	/**
