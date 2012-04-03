@@ -1,0 +1,1 @@
+java -cp "hatbox-emily.jar;util-0.0.1-SNAPSHOT.jar;jts-1.12-SNAPSHOT.jar;derby-10.8.2.2.jar" org.wcs.smart.db.CmdLine %*
