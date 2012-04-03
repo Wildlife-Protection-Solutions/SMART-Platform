@@ -60,7 +60,7 @@ import org.wcs.smart.ca.ConservationArea;
 @Table(name = "smart.dm_category")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Category extends DmObject{
+public class Category extends DmObject implements HkeyObject{
 	
 	private boolean isMultiple;			//if multiple observations can be recorded
 	private ConservationArea ca; 		//conservation area of category
@@ -69,6 +69,7 @@ public class Category extends DmObject{
 	private int categoryOrder;			//order of the category in relation to its siblings
 	private List<CategoryAttribute> attributes;	//list of attributes
 	private boolean isActive;			//if active.
+	private String categoryHkey;	//the full key of the category "parent.parent.parent.me"
 	
 	/**
 	 * Creates a new category
@@ -76,20 +77,7 @@ public class Category extends DmObject{
 	public Category(){
 		super();
 	}
-	
-	/**
-	 * computes the full key for the category.  This is of
-	 * the form <parent key>.<parent key>.<parent key>...<category key>
-	 * @return
-	 */
-	@Transient
-	public String getFullKey(){
-		if (parent != null){
-			return parent.getFullKey() + "." + getKeyId();
-		}else{
-			return getKeyId();
-		}
-	}
+
 	/**
 	 * 
 	 * @return if multiple observations can be recorded for this category
@@ -176,6 +164,42 @@ public class Category extends DmObject{
 	public void setChildren(List<Category> children){
 		this.children = children;
 	}
+	
+	/**
+	 * The full key of the category.  This key includes
+	 * the key of all the parents.
+	 * <parent>.<parent>. ... .<mykey>
+	 * 
+	 * 
+	 * @return the category heriarchical key
+	 */
+	@Column(name="hkey")
+	public String getHkey(){
+		return this.categoryHkey;
+	}
+	public void setHkey(String hkey){
+		this.categoryHkey = hkey;
+	}
+	
+	/**
+	 * Updates the hkey of this object
+	 */
+	public void updateHkey(){
+		setHkey(computeHkey());
+	}
+	/**
+	 * Computes the hkey for the given category.
+	 * 
+	 * @return the hkey for this category.
+	 */
+	public String computeHkey(){
+		if (parent == null){
+			return this.getKeyId() + ".";
+		}
+		return parent.computeHkey() + this.getKeyId() + ".";
+	}
+	
+	
 	
 	/**
 	 * 

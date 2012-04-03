@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.datamodel.HkeyObject;
 
 /**
  * Composite that has a method to add name and key fields.
@@ -82,6 +83,9 @@ public abstract class NameKeyComposite extends Composite {
 	protected void updateFields(DmObject dmObject, Language defaultLang){
 		dmObject.updateName(defaultLang, txtName.getText());
 		dmObject.setKeyId(txtKey.getText());
+		if (dmObject instanceof HkeyObject){
+			((HkeyObject)dmObject).updateHkey();
+		}
 	}
 	
 	/**

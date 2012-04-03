@@ -133,9 +133,13 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		
 		//auto-login for testing
+		txtUserName.setText("username1000002");
+		txtPassword.setText("pass1000002");
+		
 //		txtUserName.setText("egouge");
 //		txtPassword.setText("smart");
-//		handleButtonOKWidgetSelected();
+
+		handleButtonOKWidgetSelected();
 
 		doEventLoop();
 		

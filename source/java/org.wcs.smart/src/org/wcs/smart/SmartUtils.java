@@ -292,4 +292,24 @@ public class SmartUtils {
 		newCa.setLanguages(langs);
 		return newCa;
 	}
+	
+	/**
+	 * <p>
+	 * Strips double quotes off the beginning and end of the string
+	 * only if they exist in both places.  Examples:</p>
+	 * <p>"abc" -> abc</p>
+	 * <p>abc" -> abc"</p>
+	 * <p>"abc -> "abc</p>
+	 * <p>""abc"" -> "abc"</p>
+	 *  
+	 * @param str 
+	 * @return string with quotes removed
+	 */
+	public static String stripQuotes(String str){
+		if (str.charAt(0)=='"' && str.charAt(str.length()-1) == '"'){
+			return str.substring(1, str.length() - 1);
+		}
+		return str;
+		
+	}
 }

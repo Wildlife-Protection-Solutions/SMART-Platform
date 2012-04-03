@@ -43,6 +43,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.ActionBarAdvisor;
@@ -63,15 +64,24 @@ import org.wcs.smart.ui.map.MapView;
 public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 	private IPartListener2 partListener = null;
+
+	private PerspectiveEditorTracker perspectiveTracker = null;
+	private PerspectiveEditorListener perspectiveListener = null;
 	
     public SmartWorkbenchWindowAdvisor(IWorkbenchWindowConfigurer configurer) {
         super(configurer);
+        
+        perspectiveTracker = new PerspectiveEditorTracker();
+        perspectiveListener = new PerspectiveEditorListener(perspectiveTracker);
     }
 
     public void dispose(){
     	super.dispose();
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
+    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(perspectiveTracker);    	
+    	super.getWindowConfigurer().getWindow().removePerspectiveListener(perspectiveListener);
     }
+    
     public ActionBarAdvisor createActionBarAdvisor(IActionBarConfigurer configurer) {
     	return new ActionBarAdvisor(configurer);
     }
@@ -82,6 +92,11 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
         configurer.setShowCoolBar(true);
         configurer.setShowStatusLine(false);
         configurer.setShowProgressIndicator(true);
+        
+        /* setup perspective tracker */
+        IPartService service = (IPartService) configurer.getWindow().getService(IPartService.class);
+        service.addPartListener(perspectiveTracker);
+        configurer.getWindow().addPerspectiveListener(perspectiveListener);
     }
     
     @Override
