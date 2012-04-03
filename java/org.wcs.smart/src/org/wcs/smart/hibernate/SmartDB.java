@@ -91,12 +91,14 @@ public class SmartDB {
 		currentCa = ca;
 		if (currentEmployee != null){
 			current = findDbUser(user);
+			HibernateManager.setUserName(current.username, current.password);
 		}else{
 			current = null;
 		}
-		HibernateManager.setUserName(current.username, current.password);	
+			
 		getCurrentLanguage();
 	}
+	
 	
 	/**
 	 * Determines if the smart database file exists.  This does not

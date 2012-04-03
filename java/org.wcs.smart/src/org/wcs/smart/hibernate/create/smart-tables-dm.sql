@@ -75,6 +75,7 @@ CREATE TABLE smart.dm_category
 	is_multiple BOOLEAN,
 	cat_order SMALLINT,
 	is_active BOOLEAN NOT NULL,
+	hkey VARCHAR(32672) NOT NULL,
 	PRIMARY KEY (UUID)
 );
 
