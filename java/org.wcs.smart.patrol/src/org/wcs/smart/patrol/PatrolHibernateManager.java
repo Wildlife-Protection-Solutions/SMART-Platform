@@ -383,9 +383,10 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * 
 	 * @param patrol the patrol to save
 	 * @param session the database session to use
+	 * @param saveWaypoints if waypoints should also be saved; waypoints saving is not cascade automatically for performance reasons
 	 * @return <code>true</code> if saved successfully, <code>false</code> if error
 	 */
-	public static boolean savePatrol(Patrol patrol, Session session){
+	public static boolean savePatrol(Patrol patrol, Session session, boolean saveWaypoints){
 		session.beginTransaction();
 		try{
 			if (patrol.getId() == null){
@@ -402,7 +403,17 @@ public class PatrolHibernateManager extends HibernateManager{
 			//session.update(patrol);
 			//session.save(patrol);
 			session.saveOrUpdate(patrol);
-			
+
+			if (saveWaypoints){
+				//save all the waypoints as well
+				for (PatrolLeg pl : patrol.getLegs()){
+					for (PatrolLegDay pld : pl.getPatrolLegDays()){
+						for (Waypoint wp: pld.getWaypoints()){
+							session.saveOrUpdate(wp);
+						}
+					}
+				}
+			}
 
 			
 //			//sync attachments 

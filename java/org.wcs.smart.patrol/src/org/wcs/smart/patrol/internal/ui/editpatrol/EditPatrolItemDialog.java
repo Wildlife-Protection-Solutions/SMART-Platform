@@ -48,6 +48,18 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	private PatrolItemComposite item;
 	private Patrol patrol;
 	
+	
+	IPatrolItemChangeListener listener = new IPatrolItemChangeListener() {			
+		@Override
+		public void itemChanged() {
+			setChangesMade(true);
+			EditPatrolItemDialog.this.setErrorMessage(item.getErrorMessage());
+			if (getButton(IDialogConstants.OK_ID) != null){
+				getButton(IDialogConstants.OK_ID).setEnabled(item.getErrorMessage() == null);
+			}
+		}
+	};
+	
 	/**
 	 * 
 	 * @param parent parent shell
@@ -63,22 +75,21 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		this.patrol = patrol;
 	}
 	
+	@Override
+	public boolean close(){
+		if (super.close()){
+			item.removeChangeListener(listener);
+			return true;
+		}
+		return false;
+	}
 	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
 		Composite comp = item.createComponent(parent, SWT.NONE);
-		item.addChangeListener(new IPatrolItemChangeListener() {			
-			@Override
-			public void itemChanged() {
-				setChangesMade(true);
-				setErrorMessage(item.getErrorMessage());
-				if (getButton(IDialogConstants.OK_ID) != null){
-					getButton(IDialogConstants.OK_ID).setEnabled(item.getErrorMessage() == null);
-				}
-			}
-		});
+		item.addChangeListener(listener);
 		
 		Session s = getSession();
 		try{
@@ -118,7 +129,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				MessageDialog.openError(getShell(), "Error", ex.getMessage());
 				return false;
 			}
-			if (PatrolHibernateManager.savePatrol(patrol, s)){
+			if (PatrolHibernateManager.savePatrol(patrol, s, false)){
 				setChangesMade(false);
 				return true;
 			}

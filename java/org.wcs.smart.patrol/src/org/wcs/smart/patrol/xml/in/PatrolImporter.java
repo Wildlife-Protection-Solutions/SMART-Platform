@@ -49,6 +49,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
 import org.wcs.smart.patrol.xml.XmlToPatrolConverter;
 import org.wcs.smart.patrol.xml.model.PatrolType;
@@ -227,7 +229,7 @@ public class PatrolImporter {
 			Patrol imported = converter.getImportedPatrol();
 			
 			monitor.subTask("Saving");
-			if (!PatrolHibernateManager.savePatrol(imported, session)){
+			if (!PatrolHibernateManager.savePatrol(imported, session, true)){
 				imported = null;
 			}
 			monitor.worked(1);

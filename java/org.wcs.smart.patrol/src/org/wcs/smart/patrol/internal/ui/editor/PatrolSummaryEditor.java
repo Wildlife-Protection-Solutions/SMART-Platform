@@ -435,7 +435,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	}
 
 	/**
-	 * Updates the widges with th value from the patrol.
+	 * Updates the widges with the value from the patrol.
 	 */
 	private void initValues(){
 		Session session = HibernateManager.openSession();
@@ -443,8 +443,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			Patrol patrol = editor.getPatrol();
 			session.update(patrol);
 			txtPatrolId.setText(patrol.getId(), false, false);
-			txtPatrolType.setText(patrol.getPatrolType().getGuiName(), false,
-					false);
+			txtPatrolType.setText(patrol.getPatrolType().getGuiName(), false, false);
 			if (patrol.getStation() == null) {
 				txtStation.setText("(none)");
 			} else {

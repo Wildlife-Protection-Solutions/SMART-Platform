@@ -53,6 +53,14 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	private EmployeeSelectComposite empListComposite = null;
 	private LeaderPilotComposite leaderPilotComp;
 	
+	
+	private  IPatrolItemChangeListener listener = new IPatrolItemChangeListener() {
+		@Override
+		public void itemChanged() {
+			fireChangeListeners();
+		}
+	};
+	
 	/**
 	 * 
 	 */
@@ -82,12 +90,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		});
 		leaderPilotComp = new LeaderPilotComposite();
 		leaderPilotComp.createComponent(main, SWT.NONE);
-		leaderPilotComp.addChangeListener( new IPatrolItemChangeListener() {
-			@Override
-			public void itemChanged() {
-				fireChangeListeners();
-			}
-		});
+		leaderPilotComp.addChangeListener(listener);
 
 		return main;
 	}
@@ -157,4 +160,5 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	public int getAttribute() {
 		return PatrolEventManager.PATROL_DATES_LEG;
 	}
+
 }

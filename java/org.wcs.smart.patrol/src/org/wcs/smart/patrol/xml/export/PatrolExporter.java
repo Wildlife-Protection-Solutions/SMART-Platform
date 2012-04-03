@@ -79,7 +79,7 @@ public class PatrolExporter {
 		monitor.beginTask("Exporting Patrol", includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
-			session.update(patrol);
+			session.refresh(patrol);
 			
 			monitor.subTask("Converting patrol");
 			PatrolType xml = PatrolToXmlConverter.toXml(patrol);
