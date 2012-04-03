@@ -1,0 +1,273 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.parser.test;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.wcs.smart.query.model.WaypointQuery;
+import org.wcs.smart.query.parser.internal.Filter;
+import org.wcs.smart.query.parser.internal.parser.ParseException;
+import org.wcs.smart.query.parser.internal.parser.Parser;
+
+/**
+ * Sets of test for testing query parser.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class ParserTest {
+
+	
+	@Test
+	public void testCategory() throws Exception{
+		
+		String query = "category:pigs";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:threats.biologicalresourceuse.species.pigs";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	
+	@Test
+	public void testNumericAttribute() throws Exception{
+		String query = "attribute:n:size > 1.2";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:n:age >= 3.4";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:n:age <= 4.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:n:age < 5.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:n:age = 234.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:n:age != -12.3";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:n:age <> 0.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), "attribute:n:age != 0.0");
+	}
+	
+	
+	@Test
+	public void testBooleanAttribute() throws Exception{
+		String query = "attribute:b:camp";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	
+	@Test
+	public void testListAttribute() throws Exception{
+		String query = "attribute:l:weapontype = gun";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	@Test
+	public void testTreeAttribute() throws Exception{
+		String query = "attribute:t:weapontype = gun.hand.jamesbond";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	
+	@Test
+	public void testStringAttribute() throws Exception{
+		String query = "attribute:s:color equals \"red\"";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:s:color contains \"white\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:s:color notcontains \"purple\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		boolean ex = false;
+		try{
+			query = "attribute:s:color notcontains purple";
+			test = parseQuery(query);
+		}catch (ParseException e){
+			ex = true;
+		}
+		Assert.assertTrue(ex);
+	}
+	
+	@Test
+	public void testPatrolValueAttribute() throws Exception{
+		String query = "patrol:id equals \"abc\"";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:station equals \"abc\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:team equals \"abc\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:mandate equals \"abc\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:patroltype equals \"abc\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:transport equals \"abc\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:leader equals \"abc\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:member equals \"abc\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:member = \"abc\"";
+		boolean ok = false;
+		try{
+			test = parseQuery(query);
+		}catch (ParseException ex){
+			ok = true;
+		}
+		Assert.assertTrue(ok);
+		
+		query = "patrol:member > \"abc\"";
+		ok = false;
+		try{
+			test = parseQuery(query);
+		}catch (ParseException ex){
+			ok = true;
+		}
+		Assert.assertTrue(ok);
+		
+	}
+	@Test
+	public void testPatrolBooleanAttribute() throws Exception{
+		String query = "patrol:armed";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "patrol:armed equals \"abc\"";
+		boolean ok = false;
+		try{
+			test = parseQuery(query);
+			System.out.println(test.asString() + ":" + query);
+		}catch (ParseException ex){
+			ok = true;
+		}
+		Assert.assertTrue(ok);
+	}
+	
+	@Test
+	public void testBrackets() throws Exception{
+		String query = "( patrol:armed ) =";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), "(patrol:armed)");
+
+		query = "( category:threats.fish.color.blue or attribute:n:age>=30) AND (patrol:id equals \"00001\" OR patrol:id equals \"90002\")";
+		test = parseQuery(query);
+		System.out.println(test.asString());
+		Assert.assertEquals(test.asString(), "(category:threats.fish.color.blue OR attribute:n:age >= 30.0) AND (patrol:id equals \"00001\" OR patrol:id equals \"90002\")");
+	}
+	
+	@Test
+	public void testNot() throws Exception{
+		String query = "NOT category:threats.pigs";
+		Filter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "NOT (category:threats.pigs or category:threats.items)";
+		String queryOK = "NOT (category:threats.pigs OR category:threats.items)";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), queryOK);
+		
+		query = "NOT (category:threats.pigs)";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "NOT (attribute:b:camp)";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "NOT attribute:b:camp";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "NOT attribute:n:age = 0.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "NOT attribute:n:age ";
+		boolean error = false;
+		try{
+			test = parseQuery(query);
+		}catch (ParseException ex){
+			error = true;
+		}
+		Assert.assertTrue(error);
+		
+		query = "NOT (category:threats.pigs) OR NOT category:threats.mules";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "NOT ((category:threats.pigs) OR NOT category:threats.mules)";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "NOT ((category:threats.pigs) NOT category:threats.mules)";
+		try{
+			test = parseQuery(query);
+		}catch (ParseException ex){
+			error = true;
+		}
+		Assert.assertTrue(error);
+	}
+	
+	private Filter parseQuery(String query) throws Exception{
+		InputStream is = new ByteArrayInputStream(query.getBytes());
+		Parser parser = new Parser(is);		
+		Filter myQuery = parser.Expression();
+		is.close();
+		return myQuery;
+	}
+}
