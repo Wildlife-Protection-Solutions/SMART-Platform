@@ -122,7 +122,6 @@ public abstract class PatrolItemComposite {
 	 * @return the attribute being modified.
 	 */
 	public abstract int getAttribute();
-	
 }
 
 

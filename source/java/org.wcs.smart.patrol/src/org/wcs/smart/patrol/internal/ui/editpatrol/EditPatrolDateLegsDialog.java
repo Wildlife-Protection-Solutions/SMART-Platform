@@ -45,6 +45,18 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 	private DateComposite item;
 	private Date startDate;
 	private Date endDate;
+	
+	private IPatrolItemChangeListener listener = new IPatrolItemChangeListener() {			
+		@Override
+		public void itemChanged() {
+			setChangesMade(true);
+			setErrorMessage(item.getErrorMessage());
+			if (getButton(IDialogConstants.OK_ID) != null){
+				getButton(IDialogConstants.OK_ID).setEnabled(item.getErrorMessage() == null);
+			}
+		}
+	};
+	
 	/**
 	 * 
 	 */
@@ -57,22 +69,26 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 		this.endDate = endDate;
 	}
 	
+	
+	/**
+	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#close()
+	 */
+	@Override
+	public boolean close(){
+		if (super.close()){
+			item.removeChangeListener(listener);
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
 		Composite comp = item.createComponent(parent, SWT.NONE);
-		item.addChangeListener(new IPatrolItemChangeListener() {			
-			@Override
-			public void itemChanged() {
-				setChangesMade(true);
-				setErrorMessage(item.getErrorMessage());
-				if (getButton(IDialogConstants.OK_ID) != null){
-					getButton(IDialogConstants.OK_ID).setEnabled(item.getErrorMessage() == null);
-				}
-			}
-		});
+		item.addChangeListener(listener);
 		
 		item.setValues(startDate,  endDate);
 		setMessage(item.getTitle());

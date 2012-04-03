@@ -121,7 +121,11 @@ public class PatrolToXmlConverter {
 		xml.setDate(toXmlDate(legDay.getDate()));
 		xml.setEndTime(toXmlDate(legDay.getEndTime()));
 		xml.setStartTime(toXmlDate(legDay.getStartTime()));
-		xml.setRestMinutes((double)legDay.getRestMinutes());
+		if (legDay.getRestMinutes() ==  null){
+			xml.setRestMinutes(0.0);
+		}else{
+			xml.setRestMinutes((double)legDay.getRestMinutes());
+		}
 		
 		if (legDay.getTrack() != null){
 			TrackType track = new TrackType();
@@ -160,7 +164,7 @@ public class PatrolToXmlConverter {
 	
 	private static WaypointObservationType convertObservation (WaypointObservation observation){
 		WaypointObservationType xml = new WaypointObservationType();
-		xml.setCategoryKey(observation.getCategory().getFullKey());
+		xml.setCategoryKey(observation.getCategory().getHkey());
 		
 		for (WaypointObservationAttribute att : observation.getAttributes()){
 			WaypointObservationAttributeType xml2 = new WaypointObservationAttributeType();

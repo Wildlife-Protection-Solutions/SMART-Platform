@@ -45,6 +45,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
@@ -182,7 +183,7 @@ public class Waypoint {
 		this.comment = comment;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="waypoint", orphanRemoval=true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.EAGER, mappedBy="waypoint", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<WaypointAttachment> getAttachments() {
 		return attachments;
 	}
@@ -192,6 +193,7 @@ public class Waypoint {
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="waypoint", orphanRemoval=true, cascade={CascadeType.ALL})
+	@BatchSize(size=500)
 	public List<WaypointObservation> getObservations(){
 		return this.observations;
 	}

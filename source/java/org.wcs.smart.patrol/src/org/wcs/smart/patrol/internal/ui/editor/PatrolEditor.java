@@ -316,7 +316,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 			
 	//	saveSession.update(patrol);
-		if (PatrolHibernateManager.savePatrol(patrol, saveSession)){
+		if (PatrolHibernateManager.savePatrol(patrol, saveSession, false)){
 			//saved okay
 			saveSession.close();
 			PatrolEventManager.getInstance().patrolSaved(patrol);

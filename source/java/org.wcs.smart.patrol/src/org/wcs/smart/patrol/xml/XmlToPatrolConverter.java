@@ -290,7 +290,7 @@ public class XmlToPatrolConverter {
 		
 		Attribute dmAttribute = findAttribute(type.getAttributeKey(), parent.getCategory());
 		if (dmAttribute == null){
-			warnings.add("Attribute: " + type.getAttributeKey() + " could not be found for category " + parent.getCategory().getFullKey() + ".  Attribute information will not be imported.");
+			warnings.add("Attribute: " + type.getAttributeKey() + " could not be found for category " + parent.getCategory().getHkey() + ".  Attribute information will not be imported.");
 			return null;
 		}else{
 			attribute.setAttribute(dmAttribute);
@@ -411,7 +411,7 @@ public class XmlToPatrolConverter {
 		Category found = null;
 		for (Iterator iterator = results.iterator(); iterator.hasNext();) {
 			Category options = (Category) iterator.next();
-			if (options.getFullKey().equals(key)){
+			if (options.getHkey().equals(key)){
 				found = options;
 				break;
 			}
@@ -468,7 +468,7 @@ public class XmlToPatrolConverter {
 	
 	private SimpleListItem findValue(String langCode, String value, String objectType){
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.elementuuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca ";
+		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca ";
 		
 		Query query = session.createQuery(sql);
 		query.setParameter("cd", langCode);
@@ -478,6 +478,9 @@ public class XmlToPatrolConverter {
 		List results = query.list();
 		if (results.size() == 0){
 			return null;
+		}else if (results.size() > 1){
+			warnings.add("Multiple options found for " + objectType + ". Using the first value found.");
+			return (SimpleListItem)results.get(0);
 		}else{
 			return (SimpleListItem)results.get(0);
 		}
