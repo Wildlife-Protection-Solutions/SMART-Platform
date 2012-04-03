@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.query.ui.QueryDefView"
+            id="org.wcs.smart.query.ui.QueryDefView"
+            name="Smart Query Definition View"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.query.ui.QueryResultsEditor"
+            default="false"
+            id="org.wcs.smart.query.ui.QueryResults"
+            name="Query Results">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.wcs.smart.query.internal.ui.QueryPerspective"
+            icon="icons/etool16/querypatrol.gif"
+            id="org.wcs.smart.query.SmartQueryPerspective"
+            name="Smart Query Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.resetSeparator">
+         <command
+               commandId="org.wcs.smart.query.QueryPerspective"
+               icon="icons/etool16/querypatrol.gif"
+               label="Show Query Perspective"
+               mnemonic="Q"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.query.queryToolbar">
+            <command
+                  commandId="org.wcs.smart.query.createQuery"
+                  icon="icons/etool16/addquery.png"
+                  label="Create Query"
+                  mnemonic="Q"
+                  style="push"
+                  tooltip="Create a new database query.">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.query.QueryPerspective"
+            name="Show Query Perspective">
+      </command>
+      <command
+            id="org.wcs.smart.query.createQuery"
+            name="Create Query">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.query.internal.ui.ShowQueryPersepctiveHandler"
+            commandId="org.wcs.smart.query.QueryPerspective">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateQueryHandler"
+            commandId="org.wcs.smart.query.createQuery">
+      </handler>
+   </extension>
+
+</plugin>
