@@ -133,7 +133,7 @@
                commandId="org.wcs.smart.patrol.PatrolPerspective"
                icon="images/icons/etool16/patrol.png"
                label="Show Patrol Perspective"
-               mnemonic="S"
+               mnemonic="p"
                style="push">
          </command>
       </menuContribution>
