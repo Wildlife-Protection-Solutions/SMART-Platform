@@ -400,8 +400,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (ret){
 			if (stations != null) {
 				stations.dispose();
-				gray.dispose();
-				black.dispose();
 			}	
 		}
 		return ret;		

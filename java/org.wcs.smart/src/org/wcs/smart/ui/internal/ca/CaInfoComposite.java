@@ -156,6 +156,7 @@ public class CaInfoComposite extends Composite {
 		txtDescription.setText(ca.getDescription());
 		txtDesignation.setText(ca.getDesignation());
 	}
+	
 	/**
 	 * Validate the input fields
 	 */
@@ -165,6 +166,11 @@ public class CaInfoComposite extends Composite {
 		cdIdentifier.hide();
 		if (txtIdentifier.getText().trim().isEmpty() || txtIdentifier.getText().length() > ConservationArea.MAX_ID_LENGTH) {
 			cdIdentifier.setDescriptionText("A conservation area id must be provided." );
+			cdIdentifier.show();
+			isValid = false;
+		}
+		if (txtIdentifier.getText().matches(".*[^a-zA-Z0-9-:].*")){
+			cdIdentifier.setDescriptionText("A conservation area id can only contain the characters a-Z, the digist 0-9 or - or :" );
 			cdIdentifier.show();
 			isValid = false;
 		}
