@@ -4,7 +4,7 @@ GeoAnalytic Grid Engine Language Syntax & Semantic actions
 
 
 =============================================*/options{  LOOKAHEAD= 1;  CHOICE_AMBIGUITY_CHECK = 2;  OTHER_AMBIGUITY_CHECK = 1;  STATIC = false;  DEBUG_PARSER = false;  DEBUG_LOOKAHEAD = false;  DEBUG_TOKEN_MANAGER = false;  ERROR_REPORTING = true;  JAVA_UNICODE_ESCAPE = false;  UNICODE_INPUT = false;  IGNORE_CASE = false;  USER_TOKEN_MANAGER = false;  USER_CHAR_STREAM = false;  BUILD_PARSER = true;  BUILD_TOKEN_MANAGER = true;  SANITY_CHECK = true;  FORCE_LA_CHECK = false;}PARSER_BEGIN(Parser)package org.wcs.smart.query.parser.internal.parser;import java.util.*;import org.wcs.smart.query.parser.internal.*;
-import org.wcs.smart.query.Query;public class Parser{  public static void main(String args []) throws ParseException  {    Parser parser = new Parser(System.in);    parser.Expression();  }}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_CASE : "case" >| < K_ELSE : "else" >| < K_END : "end" >| < K_EXISTS : "exists" >| < K_IN : "in" >| < K_NOT : "not" >| < K_OR : "or" >| < K_THEN : "then" >| < K_WHEN : "when" >}
+public class Parser{  public static void main(String args []) throws ParseException  {    Parser parser = new Parser(System.in);    parser.Expression();  }}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_CASE : "case" >| < K_ELSE : "else" >| < K_END : "end" >| < K_EXISTS : "exists" >| < K_IN : "in" >| < K_NOT : "not" >| < K_OR : "or" >| < K_THEN : "then" >| < K_WHEN : "when" >}
 
 
 TOKEN :
@@ -56,6 +56,7 @@ TOKEN :
 	Filter expr;}
 {
 	expr = ExpressionPart()
+	< EOF >
   	{    	return expr;
   	}}
 
@@ -118,7 +119,7 @@ Filter BooleanPart() :
 			   	filter = AttributeFilter.createTreeItemFilter(key,op,value);
 		 	} 		 	
 		
-	| < OPENPAREN > filter = ExpressionPart() < CLOSEPAREN >
+	| (< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
 		{	  filter = BracketFilter.createFilter(filter);
 	}
 	)	  {

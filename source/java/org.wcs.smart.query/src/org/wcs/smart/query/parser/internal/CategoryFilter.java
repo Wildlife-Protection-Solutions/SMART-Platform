@@ -22,66 +22,53 @@
 package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.wcs.smart.ca.datamodel.Category;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A data model category filter. Of the form<br>
+ * category:<category_hkey>
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class CategoryFilter implements Filter {
 
-	private String key;
-	
-	public CategoryFilter(String key){
-		this.key = key;
+	/**
+	 * Creates new category filter
+	 * @param categoryIdentifier the category key part of the form "category:<categoryhkey>"
+	 * @return
+	 */
+	public static CategoryFilter createFilter(String categoryIdentifier){
+		return new CategoryFilter(categoryIdentifier);
 	}
 	
-	public static CategoryFilter createFilter(String key){
-		return new CategoryFilter(key);
+	private String categoryIdentifier;  //category:category_hkey
+	
+	/**
+	 * Creates new category filter
+	 * @param categoryIdentifier the category key part of the form "category:<categoryhkey>"
+	 */
+	public CategoryFilter(String categoryIdentifier){
+		this.categoryIdentifier = categoryIdentifier;
 	}
 	
-	
-	public String asString(){
-		return key;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
 	 */
 	@Override
-	public String asHql(HashMap<Class<?>, String> tableMapping, HashMap<String, Object> parameters) {
-		String keyPart = key.split(":")[1];
-		
-		String prefix = tableMapping.get(Category.class);
-		if (prefix == null){
-			throw new IllegalStateException("Category prefix could not be determined.");
-		}
-		String param1 = keyPart;
-		String param2 = keyPart + "%";
-		String key1 = "p" + String.valueOf(parameters.size());
-		String key2 = "p" + String.valueOf(parameters.size() + 1);
-		
-		parameters.put(key1, param1);
-		parameters.put(key2, param2);
-		
-		return "( " + prefix + ".hkey = :" + key1 + " or " + prefix + ".hkey like :" + key2 + ") ";
+	public String asString(){
+		return categoryIdentifier;
 	}
 	
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		String keyPart = key.split(":")[1];
+		String keyPart = categoryIdentifier.split(":")[1];
 		
 		String prefix = tableMapping.get(Category.class);
 		if (prefix == null){
@@ -91,21 +78,8 @@ public class CategoryFilter implements Filter {
 		return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') ";
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeTreeItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeTreeItemFilter() {
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeListItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeListItemFilter() {
-		return false;
-	}
-	/* (non-Javadoc)
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
 	 */
 	@Override
@@ -113,7 +87,7 @@ public class CategoryFilter implements Filter {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
 	 */
 	@Override
@@ -121,11 +95,18 @@ public class CategoryFilter implements Filter {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
 		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 */
+	@Override
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
 	}
 }

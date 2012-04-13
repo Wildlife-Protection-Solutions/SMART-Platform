@@ -1,0 +1,202 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.ui.formulaDnd;
+
+import java.util.ArrayList;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.hibernate.HibernateManager;
+
+/**
+ * Attribute list type drop item.
+ * 
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class AttributeListDropItem extends DropItem{
+	
+	private String text;
+	private String key;
+	private Label lblAttribute;
+	private ComboViewer listViewer;
+
+	private Font smallerFont;
+	private Attribute attribute = null;
+	
+	/*
+	 * Job to load the attribute list options
+	 */
+	private Job loadItemsJobs = new Job("Loading List Items"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			Session s = HibernateManager.openSession();
+			try{
+				final ArrayList<ListItem> items = new ArrayList<ListItem>();
+				s.saveOrUpdate(attribute);
+				for (AttributeListItem item : attribute.getAttributeList()){
+					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+				}
+				
+				Display.getDefault().asyncExec(new Runnable(){
+
+					@Override
+					public void run() {
+						listViewer.setInput(items.toArray(new ListItem[items.size()]));
+						
+					}});
+				
+			}finally{
+				s.close();
+			}
+			return Status.OK_STATUS;
+		}};
+		
+	/**
+	 * Creates a new attribute list drop item
+	 * 
+	 * @param parent parent composite
+	 * @param panel drop target
+	 * @param att the category attribute to make up the drop item
+	 */
+	public AttributeListDropItem(Composite parent, DropTargetPanel panel, CategoryAttribute att) {
+		super(parent, panel);
+		this.key = "category:" + att.getCategory().getHkey() + " and attribute:l:" + att.getAttribute().getKeyId();
+		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
+		this.attribute = att.getAttribute();
+		lblAttribute.setText(this.text + " = ");
+		loadItemsJobs.schedule();		
+	}
+	
+	/**
+	 * Creates a new attribute list drop item
+	 * @param parent parent composite
+	 * @param panel drop target
+	 * @param att the attribute to make up the drop item
+	 */
+	public AttributeListDropItem(Composite parent, DropTargetPanel panel, Attribute att) {
+		super(parent, panel);
+		this.key = "attribute:l:" + att.getKeyId();
+		this.text = att.getName() ;
+		this.attribute = att;
+		lblAttribute.setText(this.text + " = ");
+		loadItemsJobs.schedule();
+		
+	}
+	
+	/**
+	 * @see org.eclipse.swt.widgets.Widget#dispose()
+	 */
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (smallerFont != null){
+			smallerFont.dispose();
+		}
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
+	 */
+	@Override
+	public String getText() {
+		return this.text + " = " + listViewer.getCombo().getText();
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
+	 */
+	@Override
+	public String asQueryPart() {
+		StringBuilder query = new StringBuilder(this.key);
+		query.append(" = ");
+		
+		IStructuredSelection sel = (IStructuredSelection) listViewer.getSelection();
+		if (sel != null && !sel.isEmpty()){
+			ListItem it = (ListItem) sel.getFirstElement();
+			if (it.getUuid() != null){
+				query.append(it.getKey());
+			}
+		}
+		return query.toString();
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	public void createComposite(Composite parent) {
+		Composite main = new Composite(parent, SWT.NONE);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginTop = 0;
+		gl.marginBottom = 0;
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		
+		main.setLayout(gl);
+		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		
+		lblAttribute = new Label(main, SWT.NONE);
+
+		listViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+		
+		FontData fd = (listViewer.getCombo().getFont().getFontData()[0]);
+		fd.setHeight(fd.getHeight() - 1);
+		smallerFont = new Font(Display.getCurrent(), fd);
+		listViewer.getCombo().setFont(smallerFont);
+		listViewer.setContentProvider(ArrayContentProvider.getInstance());
+		listViewer.setLabelProvider(ListItem.createLabelProvider());
+		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fireListeners();
+			}
+		});
+		listViewer.setInput(new ListItem[]{new ListItem("Loading")});
+		
+		initDrag(main);
+		initDrag(lblAttribute);
+	}
+
+}

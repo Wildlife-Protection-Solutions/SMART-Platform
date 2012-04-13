@@ -22,76 +22,84 @@
 package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A bracketed expression.  Of the form:
+ * ( Filter )
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class BracketFilter implements Filter{
 
-	private Filter filter;
-	public BracketFilter(Filter filter){
-		this.filter = filter;
-	}
-	public String asString(){
-		return "(" + filter.asString() + ")";
-	}
-	
+	/**
+	 * Creates new bracket filter expression
+	 * 
+	 * @param f bracketed expression 
+	 * @return
+	 */
 	public static BracketFilter createFilter(Filter f){
 		return new BracketFilter(f);
 	}
 	
-	public String asHql(HashMap<Class<?>, String> tableMapping, HashMap<String, Object> parameters){
-		return "(" + filter.asHql(tableMapping, parameters) + ")";
+	private Filter filter;
+	
+	/**
+	 * Creates new bracket filter expression
+	 * 
+	 * @param f bracketed expression
+	 */
+	private BracketFilter(Filter filter){
+		this.filter = filter;
 	}
 	
-	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 */
+	@Override
+	public String asString(){
+		return "(" + filter.asString() + ")";
+	}
+
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 */
+	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
 		return "(" + filter.asSql(tableMapping) + ")";
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeTreeItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeTreeItemFilter() {
-		return filter.hasAttributeTreeItemFilter();
-	}
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeListItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeListItemFilter() {
-		return filter.hasAttributeListItemFilter();
-	}
-	/* (non-Javadoc)
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
 		return filter.hasEmployeeFilter();
 	}
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
-		// TODO Auto-generated method stub
 		return filter.hasCategoryFilter();
 	}
-	/* (non-Javadoc)
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
-		// TODO Auto-generated method stub
 		return filter.hasAttributeFilter();
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 */
+	@Override
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+		filter.getAttributeFilters(attributes);
 	}
 	
 }

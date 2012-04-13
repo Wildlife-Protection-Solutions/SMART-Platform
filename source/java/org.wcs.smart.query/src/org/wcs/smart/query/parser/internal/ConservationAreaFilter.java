@@ -21,101 +21,79 @@
  */
 package org.wcs.smart.query.parser.internal;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A Conservation Area filter.
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class ConservationAreaFilter implements Filter {
-	private ConservationArea[] conservationAreaFilter = {};
+	
+	private ArrayList<ConservationArea> filters = new ArrayList<ConservationArea>();
 
 	
+	/**
+	 * Creates an empty conservation area filter
+	 */
 	public ConservationAreaFilter(){
 		
 	}
+	
+	/**
+	 * Adds a conservation area to the filter
+	 * @param newCa conservation area
+	 */
 	public void addConservationArea(ConservationArea newCa){
-		conservationAreaFilter = Arrays.copyOf(conservationAreaFilter, conservationAreaFilter.length + 1);
-		conservationAreaFilter[conservationAreaFilter.length - 1] = newCa;
+		filters.add(newCa);
 	}
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
 	 */
 	@Override
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
-		for (int i = 0; i < conservationAreaFilter.length; i ++){
+		for (int i = 0; i < filters.size(); i ++){
 			if (i != 0){
-				sb.append(" OR ");
+				sb.append(" , ");
 			}
-		
-			sb.append(" CA = '" + conservationAreaFilter[i].getId());
+			sb.append( filters.get(i).getId() );
 		}			
 		sb.append(")");
 		return sb.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#asHql(java.util.HashMap, java.util.HashMap)
-	 */
-	@Override
-	public String asHql(HashMap<Class<?>, String> tableMapping,
-			HashMap<String, Object> parameters) {
-		// TODO Auto-generated method stub
-		throw new IllegalStateException("Not implemented.");
-//		return null;
-	}
-
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		if (conservationAreaFilter.length == 0){
+		if (filters.size() == 0){
 			return "";
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(tableMapping.get(Patrol.class));
 		sb.append(".ca_uuid IN (");
-		for (int i = 0; i < conservationAreaFilter.length; i++) {
-			String uuid = SmartUtils.encodeHex(conservationAreaFilter[i].getUuid());
-//			String uuid = Arrays.toString(conservationAreaFilter[i].getUuid()).replaceAll(" ", "").replaceAll(",", "").replaceAll("\\\\[", "").replaceAll("\\\\]", "");
+		for (int i = 0; i < filters.size(); i++) {
+			String uuid = SmartUtils.encodeHex(filters.get(i).getUuid());
 			sb.append("x'" + uuid + "'");
 		}
 		sb.append(")");
 		return sb.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeTreeItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeTreeItemFilter() {
-		return false;
-	}
+	
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeListItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeListItemFilter() {
-		return false;
-	}
-
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
 	 */
 	@Override
@@ -123,7 +101,7 @@ public class ConservationAreaFilter implements Filter {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
 	 */
 	@Override
@@ -131,11 +109,18 @@ public class ConservationAreaFilter implements Filter {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
 		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 */
+	@Override
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
 	}
 }

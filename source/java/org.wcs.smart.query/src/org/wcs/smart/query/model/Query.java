@@ -46,6 +46,9 @@ public class Query {
 	public byte[] getUuid() {
 		return uuid;
 	}
+	/**
+	 * @param uuid the query uuid
+	 */
 	public void setUuid(byte[] uuid) {
 		this.uuid = uuid;
 	}
@@ -56,6 +59,9 @@ public class Query {
 	public String getName() {
 		return name;
 	}
+	/**
+	 * @param name the query name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -66,6 +72,9 @@ public class Query {
 	public Employee getOwner() {
 		return owner;
 	}
+	/**
+	 * @param owner the query owner
+	 */
 	public void setOwner(Employee owner) {
 		this.owner = owner;
 	}
@@ -76,6 +85,9 @@ public class Query {
 	public Date getDateCreated() {
 		return dateCreated;
 	}
+	/**
+	 * @param dateCreated the date the query created
+	 */
 	public void setDateCreated(Date dateCreated) {
 		this.dateCreated = dateCreated;
 	}

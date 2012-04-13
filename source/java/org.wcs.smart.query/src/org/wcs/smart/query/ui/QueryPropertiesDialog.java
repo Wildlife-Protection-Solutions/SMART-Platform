@@ -37,20 +37,22 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.ui.querytable.column.QueryTableColumn;
-import org.wcs.smart.query.ui.querytable.column.QueryTableViewerColumn;
+import org.wcs.smart.query.ui.querytable.QueryTableColumn;
 
 /**
- * Dialog box for modifying waypoint query information include the
- * name and output columns.
+ * Dialog box for modifying query information.  This includes the query
+ * name and the columns in the query.
  * 
  * @author Emily
  * @since 1.0.0
@@ -61,12 +63,16 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	private CheckboxTableViewer columnViewer;
 	private Text txtName;
 	
-	private QueryTableViewerColumn[] allColumns;
+	private QueryTableColumn[] allColumns;
+	
+
 	/**
-	 * @param parent
-	 * @param title
+	 * @param parent the parent shell
+	 * @param query the query to update
+	 * @param allCollumns all columns available to the query
 	 */
-	protected QueryPropertiesDialog(Shell parent, WaypointQuery query, QueryTableViewerColumn[] allCollumns) {
+	protected QueryPropertiesDialog(Shell parent, WaypointQuery query,
+			QueryTableColumn[] allCollumns) {
 		super(parent);
 		this.query = query;
 		this.allColumns = allCollumns;
@@ -95,11 +101,15 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		btnOk.setEnabled(false);
 	}
 
-	public void setChangesMade(boolean changesMade){
+	/**
+	 * enables or disables the save button based changesMade
+	 * @param changesMade 
+	 */
+	private void setChangesMade(boolean changesMade){
 		getButton(IDialogConstants.OK_ID).setEnabled(changesMade);
 	}
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
@@ -134,35 +144,64 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		gd.heightHint = 200;
 		columnViewer.getTable().setLayoutData(gd);
 		
+		Composite hyperlinkComposite = new Composite(main, SWT.NONE);
+		hyperlinkComposite.setLayout(new GridLayout(3, false));
+		
+		Link selectAll = new Link(hyperlinkComposite, SWT.NONE);
+		selectAll.setText("<a>Select All</a>");
+		selectAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				columnViewer.setAllChecked(true);
+				setChangesMade(true);
+			}
+		});
+		Label lbl = new Label(hyperlinkComposite, SWT.VERTICAL | SWT.SEPARATOR);
+		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
+		gd.heightHint = selectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		lbl.setLayoutData(gd);
+		Link deselectAll = new Link(hyperlinkComposite, SWT.NONE);
+		deselectAll.setText("<a>De-Select All</a>");
+		deselectAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				columnViewer.setAllChecked(false);
+				setChangesMade(true);
+			}
+		});
+		
 		
 		return main;
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Updates the query.
+	 * 
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#performSave()
 	 */
-	
 	protected boolean performSave() {
 		
 		query.setName(txtName.getText());
-		ArrayList<QueryTableColumn> columns = new ArrayList<QueryTableColumn> ();
+		ArrayList<String> columns = new ArrayList<String> ();
 		for (int i = 0; i < columnViewer.getCheckedElements().length; i ++){
-			columns.add( ((QueryTableViewerColumn)columnViewer.getCheckedElements()[i]).getColumn()  );
+			columns.add( ((QueryTableColumn)columnViewer.getCheckedElements()[i]  ).getKey()  );
 		}
-		query.setTableColumns(columns);
+		query.setVisibleColumns(columns);
 		setChangesMade(false);
 		return true;
 	}
 
-	
+	/*
+	 * Creates checkbox table viewer for selecting columns
+	 */
 	private void createColumnTable(Composite parent){
 		columnViewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		
 		columnViewer.setContentProvider(ArrayContentProvider.getInstance());
 		columnViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
-				if (element instanceof QueryTableViewerColumn){
-					return ((QueryTableViewerColumn)element).getColumn().getName();
+				if (element instanceof QueryTableColumn){
+					return ((QueryTableColumn)element).getName();
 				}
 				return super.getText(element);
 			}
@@ -176,29 +215,27 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		});
 		
 		
-		if (query.getTableColumns().size() == 0){
+		if (query.getVisibleColumns() == null){
 			columnViewer.setAllChecked(true);
 		}else{
 			for (int i = 0; i < allColumns.length; i ++){
-				if (query.getTableColumns().contains(allColumns[i].getColumn())){
+				if (query.getVisibleColumns().contains(allColumns[i])){
 					columnViewer.setChecked(allColumns[i], true);
 				}
 			}
 		}
 		
 		columnViewer.getTable().addKeyListener(new KeyListener(){
-
+			@SuppressWarnings("rawtypes")
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.character == ' '){
+				if (e.character == SWT.SPACE){
 					boolean value = columnViewer.getChecked(   ((IStructuredSelection)columnViewer.getSelection()).getFirstElement() );
 					for (Iterator iterator = ((IStructuredSelection)columnViewer.getSelection()).iterator(); iterator.hasNext();) {
 						Object tp = (Object) iterator.next();
 						columnViewer.setChecked(tp, !value);
-						
 					}
 					e.doit = false;
-					
 				}
 			}
 
@@ -209,6 +246,10 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		
 	}
 	
+	/**
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @return <code>true</code>
+	 */
 	@Override
 	public boolean isResizable(){
 		return true;

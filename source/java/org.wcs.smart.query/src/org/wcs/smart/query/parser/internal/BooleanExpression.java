@@ -22,14 +22,17 @@
 package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
- * TODO Purpose of 
+ * Boolean filter expression.
  * <p>
- * <ul>
- * <li></li>
- * </ul>
+ * Filter takes the form:
+ * <p>
+ * BooleanExpression = Filter BooleanOperator Filter
  * </p>
+ * <p>Where BooleanOperator: {AND | OP }</p>
+ *  
  * @author Emily
  * @since 1.0.0
  */
@@ -39,52 +42,57 @@ public class BooleanExpression implements Filter{
 	private Filter e2;
 	private BooleanOperator op;
 
-	public BooleanExpression(Filter e1, Filter e2, BooleanOperator op){
+	/**
+	 * Creates a new boolean expression 
+	 * 
+	 * @param e1 left expression
+	 * @param e2 right expression 
+	 * @param op boolean operator
+	 * @return
+	 */
+	public static BooleanExpression create(Filter e1, Filter e2, BooleanOperator op){
+		return new BooleanExpression(e1, e2, op);
+	}
+	
+	/**
+	 * Creates a new boolean expression 
+	 * 
+	 * @param e1 left expression
+	 * @param e2 right expression 
+	 * @param op boolean operator
+	 */
+	private BooleanExpression(Filter e1, Filter e2, BooleanOperator op){
 		this.e1 = e1;
 		this.op = op;
 		this.e2 = e2;
 	}
 	
-	public static BooleanExpression create(Filter e1, Filter e2, BooleanOperator op){
-		return new BooleanExpression(e1, e2, op);
-	}
-	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 */
+	@Override
 	public String asString(){
-		return e1.asString() + " " + op.asString() + " " +e2.asString() ;
+		return e1.asString() + " " + op.asSql() + " " +e2.asString() ;
 	}
+
 	
-	public String asHql(HashMap<Class<?>, String> tableMapping, HashMap<String, Object> parameters){
-		return e1.asHql(tableMapping, parameters) + " " + op.asString() + " " + e2.asHql(tableMapping, parameters);
-	}
-	
-	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 */
+	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
-		return e1.asSql(tableMapping) + " " + op.asString() + " " + e2.asSql(tableMapping);
+		return e1.asSql(tableMapping) + " " + op.asSql() + " " + e2.asSql(tableMapping);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeTreeItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeTreeItemFilter() {
-		return e1.hasAttributeTreeItemFilter() | e2.hasAttributeTreeItemFilter();
-	}
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeListItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeListItemFilter() {
-		return e1.hasAttributeTreeItemFilter() | e2.hasAttributeTreeItemFilter();
-	}
-	/* (non-Javadoc)
+	/**	
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
-		return e1.hasEmployeeFilter() | e2.hasEmployeeFilter();
+		return e1.hasEmployeeFilter() || e2.hasEmployeeFilter();
 	}
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
 	 */
 	@Override
@@ -92,12 +100,21 @@ public class BooleanExpression implements Filter{
 		return e1.hasCategoryFilter() || e2.hasCategoryFilter();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
 		return e1.hasAttributeFilter() || e2.hasAttributeFilter();
+	}
+
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 */
+	@Override
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+		e1.getAttributeFilters(attributes);
+		e2.getAttributeFilters(attributes);
 	}
 }
 

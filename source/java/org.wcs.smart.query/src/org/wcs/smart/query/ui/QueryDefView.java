@@ -1,56 +1,74 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui;
 
-
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
-import org.eclipse.jface.util.LocalSelectionTransfer;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
-import org.eclipse.swt.dnd.DragSourceEvent;
-import org.eclipse.swt.dnd.DragSourceListener;
-import org.eclipse.swt.dnd.DropTarget;
-import org.eclipse.swt.dnd.DropTargetAdapter;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISourceProviderListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.model.WaypointQuery;
+import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.ui.formulaDnd.DropTargetPanel;
+import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
 
+/**
+ * A view for building query definition.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
 public class QueryDefView extends ViewPart {
 
+	/**
+	 * View identifier
+	 */
 	public static final String ID = "org.wcs.smart.query.ui.QueryDefView";
 	
-	
-	private WaypointQuery current = null;
-	private Text txtQueryDefinition;
-	
+	private WaypointQuery current = null;	
+	private DropItemFactory dropItemFactory = null;
+	private DropTargetPanel dropTarget;
+
+	/* listener to update query definition when window changes */
 	private IPartListener2 editorListener = new IPartListener2() {
 		
 		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
-			
 		}
 		
 		@Override
@@ -84,18 +102,21 @@ public class QueryDefView extends ViewPart {
 				IWorkbenchPart part = partRef.getPart(false);
 				if (part instanceof QueryResultsEditor){
 					setQuery(((QueryResultsEditor)part).getQuery());
-				}
-				
-				
+				}	
 			}
-			
 		}
 	};;
 	
+	/**
+	 * Creates new query definition view.
+	 */
 	public QueryDefView() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
 	}
 	
+	/**
+	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
+	 */
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -106,68 +127,128 @@ public class QueryDefView extends ViewPart {
 			dropTarget.dispose();
 		}
 	}
+	
+	/**
+	 * Clears the current query
+	 */
+	public void clearQuery(){
+		dropTarget.clear();
+	}
 
+	/**
+	 * @return the drop item factory for dropping items into the query
+	 */
+	public DropItemFactory getDropItemFactory(){
+		return this.dropItemFactory;
+	}
+	
+	/**
+	 * Runs the current query
+	 */
+	public void runQuery(){
+		current.setQueryFilter( dropTarget.getQueryString() );
+		QueryEventManager.getInstance().fireQueryChangedListeners(current);
+	}
+	
+	/**
+	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	 */
 	@Override
 	public void createPartControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(1, false));
 		
-		txtQueryDefinition = new Text(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-		txtQueryDefinition.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout(1, false);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
 		
-		Button btnRefresh = new Button(main, SWT.PUSH);
-		btnRefresh.setText("Run Query");
-		btnRefresh.addSelectionListener(new SelectionAdapter() {
+		main.setLayout(layout);
+		main.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+
+		// create drop area
+		createDragAndDropArea(main);
+
+		// add a listener for when items are added to the query
+		ISourceProviderService service = (ISourceProviderService)getSite().getService(ISourceProviderService.class);
+		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.SELECTED_FILTERS);
+		provider.addSourceProviderListener(new ISourceProviderListener() {
+			
+			@SuppressWarnings("rawtypes")
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				current.setQueryFilter(txtQueryDefinition.getText());
-				QueryEventManager.getInstance().fireQueryChangedListeners(current);
+			public void sourceChanged(int sourcePriority, String sourceName,
+					Object sourceValue) {
+				if (sourceName == SourceProvider.SELECTED_FILTERS){
+					IStructuredSelection selection = (IStructuredSelection)sourceValue;
+					for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+						Object type = (Object) iterator.next();
+						if (type instanceof Category){
+							DropItem it = getDropItemFactory().createCategoryDropItem((Category) type);
+							dropTarget.addElement(it);
+						}else if (type instanceof CategoryAttribute){
+							DropItem it = getDropItemFactory().createAttributeDropItem((CategoryAttribute) type);
+							if (it != null){
+								dropTarget.addElement(it);
+							}
+						}else if (type instanceof PatrolFilterOption){
+							DropItem it = getDropItemFactory().createPatrolDropItem((PatrolFilterOption)type);
+							if (it != null){
+								dropTarget.addElement(it);
+							}
+						}else if (type instanceof Attribute){
+							DropItem it = getDropItemFactory().createAttributeDropItem((Attribute)type);
+							if (it != null){
+								dropTarget.addElement(it);
+							}
+						}else if (type instanceof QueryFilterContentProvider.OtherItems){
+							DropItem[] its = getDropItemFactory().createOtherDropItem((QueryFilterContentProvider.OtherItems)type);
+							if (its != null){
+								for (int i = 0; i < its.length; i ++){
+									dropTarget.addElement(its[i]);
+								}
+							}
+						}
+						
+					}
+				}
+				
+			}
+			
+			@SuppressWarnings("rawtypes")
+			@Override
+			public void sourceChanged(int sourcePriority, Map sourceValuesByName) {
+				
 			}
 		});
-		
-		createDragAndDropArea(main);
 	}
 	
 	
 	public void setQuery(WaypointQuery query){
 		current = query;
-		txtQueryDefinition.setText(query.getQueryFilter());
+		//TODO: update ui
+//		txtQueryDefinition.setText(query.getQueryFilter());
 	}
 	
 	
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
 	}
-
-	
-//	private Composite dropTarget = null;
-//	private DropTarget dtarget  = null;
-//	private ArrayList<Composite> order = new ArrayList<Composite>();
-	
-	private DropTargetPanel dropTarget;
 	
 	
-	private Composite createDragAndDropArea(Composite parent){
-		dropTarget = new DropTargetPanel();
+	/**
+	 * Creates the drag and drop are panel
+	 * @param parent
+	 * 
+	 * @return
+	 */
+	private void createDragAndDropArea(Composite parent){
+		SourceProvider provider = (SourceProvider) ((ISourceProviderService)getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
+		
+		dropTarget = new DropTargetPanel(provider);
 		dropTarget.createComposite(parent);
 		
-		DropItem di1 = new DropItem(dropTarget.getComposite(), "Part 1");
-		DropItem di2 = new DropItem(dropTarget.getComposite(), "Part 2");
-		DropItem di3 = new DropItem(dropTarget.getComposite(), "Part 3");
-		DropItem di4 = new DropItem(dropTarget.getComposite(), "A really long part");
-		DropItem di5 = new DropItem(dropTarget.getComposite(), "Another really long part");
-		DropItem di6 = new DropItem(dropTarget.getComposite(), "Yet another really really really really really long part");
-		
-		dropTarget.addElement(di1);
-		dropTarget.addElement(di2);
-		dropTarget.addElement(di3);
-		dropTarget.addElement(di4);
-		dropTarget.addElement(di5);
-		dropTarget.addElement(di6);
-		
-		return dropTarget.getComposite();
+		dropItemFactory = new DropItemFactory(dropTarget);
+		dropTarget.setDropItemFactory(dropItemFactory);
 		
 	}
 	

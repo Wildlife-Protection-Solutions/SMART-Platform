@@ -29,12 +29,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.query.model.QueryResultItem;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Lazy content provider for the query results
  * @author Emily
  * @since 1.0.0
  */
@@ -45,25 +40,27 @@ public class QueryResultLazyContentProvider implements ILazyContentProvider {
 	private Viewer viewer = null;
 	
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
+		data = null;
+		viewer = null;
 
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.data = (List<QueryResultItem>)newInput;
 		this.viewer = viewer;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.ILazyContentProvider#updateElement(int)
 	 */
 	@Override

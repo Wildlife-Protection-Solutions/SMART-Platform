@@ -10,13 +10,21 @@
             name="Smart Query Definition View"
             restorable="true">
       </view>
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.query.ui.queyfilter.QueryFilterView"
+            icon="images/icons/etool16/cog.png"
+            id="org.wcs.smart.query.ui.QueryFilter"
+            name="Query Filter View"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
       <editor
             class="org.wcs.smart.query.ui.QueryResultsEditor"
             default="false"
-            id="org.wcs.smart.query.ui.QueryResults"
+            id="org.wcs.smart.query.ui.QueryResultsEditor"
             name="Query Results">
       </editor>
    </extension>
@@ -24,7 +32,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.query.internal.ui.QueryPerspective"
-            icon="icons/etool16/querypatrol.gif"
+            icon="images/icons/etool16/querypatrol.gif"
             id="org.wcs.smart.query.SmartQueryPerspective"
             name="Smart Query Perspective">
       </perspective>
@@ -36,7 +44,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.resetSeparator">
          <command
                commandId="org.wcs.smart.query.QueryPerspective"
-               icon="icons/etool16/querypatrol.gif"
+               icon="images/icons/etool16/querypatrol.gif"
                label="Show Query Perspective"
                mnemonic="Q"
                style="push">
@@ -49,7 +57,7 @@
                id="org.wcs.smart.query.queryToolbar">
             <command
                   commandId="org.wcs.smart.query.createQuery"
-                  icon="icons/etool16/addquery.png"
+                  icon="images/icons/etool16/addquery.png"
                   label="Create Query"
                   mnemonic="Q"
                   style="push"
@@ -68,6 +76,15 @@
             id="org.wcs.smart.query.createQuery"
             name="Create Query">
       </command>
+      <command
+            description="Clear Query Definition"
+            id="org.wcs.smart.query.clearQueryDefinition"
+            name="Clear">
+      </command>
+      <command
+            id="org.wcs.smart.query.runQuery"
+            name="Run Query">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -79,6 +96,55 @@
             class="org.wcs.smart.query.internal.ui.CreateQueryHandler"
             commandId="org.wcs.smart.query.createQuery">
       </handler>
+      <handler
+            class="org.wcs.smart.query.ui.ClearQueryHandler"
+            commandId="org.wcs.smart.query.clearQueryDefinition">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.RunQueryHandler"
+            commandId="org.wcs.smart.query.runQuery">
+         <enabledWhen>
+            <with
+                  variable="org.wcs.smart.query.ui.queryvalid">
+               <equals
+                     value="true">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <sourceProvider
+            provider="org.wcs.smart.query.ui.SourceProvider">
+         <variable
+               name="org.wcs.smart.query.ui.filteradd"
+               priorityLevel="activePartId">
+         </variable>
+         <variable
+               name="org.wcs.smart.query.ui.queryvalid"
+               priorityLevel="activePartId">
+         </variable>
+      </sourceProvider>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.query.ui.QueryDefView">
+         <command
+               commandId="org.wcs.smart.query.clearQueryDefinition"
+               icon="images/icons/etool16/clear.png"
+               style="push"
+               tooltip="Clear the query">
+         </command>
+         <command
+               commandId="org.wcs.smart.query.runQuery"
+               icon="images/icons/etool16/run_query.png"
+               label="Run Current Query"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
 
 </plugin>
