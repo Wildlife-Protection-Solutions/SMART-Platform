@@ -89,6 +89,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	 */
 	@Override
 	public void close() throws IOException {
+		
 	}
 
 	/* (non-Javadoc)

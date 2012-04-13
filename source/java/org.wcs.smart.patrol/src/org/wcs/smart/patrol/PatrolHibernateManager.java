@@ -231,6 +231,31 @@ public class PatrolHibernateManager extends HibernateManager{
 	}
 	
 	/**
+	 * Gets all active transportation types for a all active patrol type in a given
+	 * conservation area.
+	 * 
+	 * @param ca conservation area
+	 * @param s active session
+	 * 
+	 * @return list of active transportation types for the given patrol type
+	 */
+	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s){
+		s.beginTransaction();
+		List<PatrolTransportType> types = null;
+		try{
+			String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true'"; //'true' = derby fix 
+			types = s.createQuery(query).list();
+//			types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
+			s.getTransaction().commit();
+			return types;
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
+			s.close();
+		}
+		return null;
+	}
+	
+	/**
 	 * Gets all  transportation types for a given patrol type in a given
 	 * conservation area.
 	 * 

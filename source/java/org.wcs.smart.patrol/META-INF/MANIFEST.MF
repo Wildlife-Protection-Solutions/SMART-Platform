@@ -13,13 +13,13 @@ Require-Bundle: org.wcs.smart;bundle-version="0.0.1",
  net.refractions.udig.catalog;bundle-version="1.3.0",
  net.refractions.udig.ui;bundle-version="1.3.0",
  net.refractions.udig.project.ui;bundle-version="1.3.1",
- org.eclipse.gef;bundle-version="3.7.1",
- net.refractions.udig.tool.info;bundle-version="1.2.3"
+ org.eclipse.gef;bundle-version="3.7.1"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.patrol.SmartPatrolPlugIn
 Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs
 Eclipse-BuddyPolicy: global
-Export-Package: org.wcs.smart.patrol.internal.ui.importwp.gpsbabel;x-friends:="org.wcs.smart.patrol.test",
+Export-Package: org.wcs.smart.patrol,
+ org.wcs.smart.patrol.internal.ui.importwp.gpsbabel;x-friends:="org.wcs.smart.patrol.test",
  org.wcs.smart.patrol.model
 Bundle-ClassPath: lib/commons-exec-1.1.jar,
  .
