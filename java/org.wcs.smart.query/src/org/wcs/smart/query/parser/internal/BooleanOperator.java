@@ -22,35 +22,57 @@
 package org.wcs.smart.query.parser.internal;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Boolean operator
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class BooleanOperator {
 	
-	private String guiValue;
-	private String sqlOperator;
-	
-	public BooleanOperator(String guiValue, String sqlOperator){
-		this.guiValue = guiValue;
-		this.sqlOperator = sqlOperator;
-	}
-
-	public String asString(){
-		return guiValue;
-	}
 	public static BooleanOperator AND = new BooleanOperator("AND", "AND");
 	public static BooleanOperator OR = new BooleanOperator("OR", "OR");
 	public static BooleanOperator NOT = new BooleanOperator("NOT", "NOT");
+
 	
-	public static BooleanOperator parseOperator(String value){
-		if (value.toLowerCase().equalsIgnoreCase("and")) return AND;
-		if (value.toLowerCase().equalsIgnoreCase("or")) return OR;
+	/**
+	 * Parses the boolean operator from the value 
+	 * @param value the string value 
+	 * @return
+	 */
+	public static BooleanOperator parseOperator(String value) {
+		if (value.toLowerCase().equalsIgnoreCase("and"))
+			return AND;
+		if (value.toLowerCase().equalsIgnoreCase("or"))
+			return OR;
 		return null;
 	}
+
+	private String sqlOperator;
+	private String guiValue ;
+	
+	/**
+	 * Creates a new boolean operator.
+	 * 
+	 * @param guiValue the value to display to the user 
+	 * @param sqlOperator the sql operator value 
+	 */
+	private BooleanOperator(String guiValue, String sqlOperator){
+		this.sqlOperator = sqlOperator;
+		this.guiValue = guiValue;
+	}
+	
+	/**
+	 * @return the operator gui value
+	 */
+	public String getGuiValue(){
+		return this.guiValue;
+	}
+	
+	/**
+	 * @return the sql operator
+	 */
+	public String asSql(){
+		return this.sqlOperator;
+	}
+
 }

@@ -21,16 +21,24 @@
  */
 package org.wcs.smart.query.engine;
 
+import java.sql.SQLException;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.WaypointQuery;
+
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A query engine for executing
+ * queries.
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public interface QueryEngine {
 
+	public List<QueryResultItem> executeQuery(final WaypointQuery query,
+			final Session session, final IProgressMonitor monitor)
+			throws SQLException ;
 }

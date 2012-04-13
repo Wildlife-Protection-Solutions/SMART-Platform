@@ -1,20 +1,44 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.Waypoint;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
+/**
+ * A class to hold the results of a waypoint 
+ * query.  Each class contains the results for
+ * a single observation.  The observation contains
+ * a single category and all attributes.
+ * 
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
 public class QueryResultItem {
 
 	private String patrolId;
@@ -41,27 +65,51 @@ public class QueryResultItem {
 	private String waypointComment;
 	
 	private String[] observationCategory;
-	private String[] attributeKeys = new String[]{};
-	private Object[] attributeValues = new Object[]{};
+	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
 	private byte[] observationUuid;
 	
 	
+	/**
+	 * @return the patrol id
+	 */
 	public String getPatrolId() {
 		return patrolId;
 	}
 	
+	/**
+	 * @param observationUuid the observation uuid
+	 */
 	public void setObservationUuid(byte[] observationUuid){
 		this.observationUuid = observationUuid;
 	}
+	
+	/**
+	 * @return the observation uuid
+	 */
 	public byte[] getObservationUuid(){
 		return this.observationUuid;
 	}
+	
+	/**
+	 * Each item is associated with a single category.  This
+	 * returns an array of the names of the category and
+	 * all the parent categories:
+	 *   - {parent1, parent2, category}
+	 * 
+	 * @return an array of the category names of the category & parent categories
+	 */
 	public String[] getCategories(){
 		return this.observationCategory;
 	}
 	
+	/**
+	 * @param cat sets the category
+	 */
 	public void setCategory(Category cat){
+		if (cat == null){
+			return;
+		}
 		ArrayList<String> values = new ArrayList<String>();
 		values.add(cat.getName());
 		Category parent = cat.getParent();
@@ -74,217 +122,284 @@ public class QueryResultItem {
 		observationCategory = values.toArray(new String[values.size()]);
 	}
 	
-	public String getAttributeValue(String attributeKey){
-		for (int i = 0; i < attributeKeys.length; i ++){
-			if (attributeKeys[i].equals(attributeKey)){
-				return attributeValues[i].toString();
-			}
-		}
-		return "";
+	/**
+	 * Finds the attribute value of the associated attribute
+	 * key.
+	 * 
+	 * @param attributeKey the attribute key
+	 * @return the value associated with the attribute given key
+	 */
+	public Object getAttributeValue(String attributeKey){
+		return attributes.get(attributeKey);
 	}
 	
+	/**
+	 * Adds an attribute to the observation results 
+	 * @param key the attribute key
+	 * @param value the attribute value
+	 */
 	public void addAttribute(String key, Object value){
-		attributeKeys = Arrays.copyOf(attributeKeys, attributeKeys.length + 1);
-		attributeValues = Arrays.copyOf(attributeValues, attributeValues.length + 1);
-	
-		attributeKeys[attributeKeys.length - 1] = key;
-		attributeValues[attributeValues.length - 1] = value;
+		attributes.put(key, value);
+	}
 		
-		/*
-		attributeKeys[attributeKeys.length - 1] = attribute.getAttribute().getKeyId();
-		switch(attribute.getAttribute().getType()){
-		case NUMERIC:
-			attributeValues[attributeValues.length -1] = attribute.getNumberValue();
-			break;
-		case BOOLEAN:
-			attributeValues[attributeValues.length -1] = attribute.getNumberValue() > 0.5;
-			break;
-		case TEXT:
-			attributeValues[attributeValues.length -1] = attribute.getStringValue();
-			break;
-		case TREE:
-			attributeValues[attributeValues.length -1] = attribute.getAttributeTreeNode().getName();
-			break;
-		case LIST:
-			attributeValues[attributeValues.length -1] = attribute.getAttributeListItem().getName();
-			break;
-		}
-		*/
-		
-	}
-	
-	public void setPatrolValues(Patrol p){
-		this.patrolId = p.getId();
-		this.patrolEndDate = p.getEndDate();
-		this.patrolStartDate = p.getStartDate();
-		this.patrolType = p.getPatrolType();
-		this.armed = p.isArmed();
-		
-		if (p.getStation() != null){
-			this.station = p.getStation().getName();
-		}else{
-			this.station = "";
-		}
-		if (p.getTeam() != null){
-			this.team = p.getTeam().getName();
-		}else{
-			this.team = "";
-		}
-		if (p.getMandate() != null){
-			this.mandate = p.getMandate().getName();
-		}else{
-			this.mandate = "";
-		}
-		this.objective = p.getObjective();
-		this.objectiveRating = p.getObjectiveRating();
-	}
-	
-	
-	public void setPatrolLegValues(PatrolLeg pl){
-		this.patrolLegId = pl.getId();
-		this.transportType =pl.getType().getName();
-	}
-	public void setPatrolLegDayValues(PatrolLegDay pld){
-		this.wpDateTime = pld.getDate();
-	}
-	public void setWaypointValues(Waypoint wp){
-		this.waypointDirection = wp.getDirection();
-		this.waypointDistance = wp.getDistance();
-		this.waypointId = wp.getId();
-		this.waypointX = wp.getX();
-		this.waypointY = wp.getY();
-		this.waypointComment = wp.getComment();
-		this.waypointTime = wp.getTime();
-		
-	}
-	
+	/**
+	 * @param patrolId patrol id
+	 */
 	public void setPatrolId(String patrolId) {
 		this.patrolId = patrolId;
 	}
+	/**
+	 * @return patrol start date
+	 */
 	public Date getPatrolStartDate() {
 		return patrolStartDate;
 	}
+	/**
+	 * @param patrolStartDate  patrol start date 
+	 */
 	public void setPatrolStartDate(Date patrolStartDate) {
 		this.patrolStartDate = patrolStartDate;
 	}
+	/**
+	 * @return patrol end date
+	 */
 	public Date getPatrolEndDate() {
 		return patrolEndDate;
 	}
+	/**
+	 * @param patrolEndDate patrol end date
+	 */
 	public void setPatrolEndDate(Date patrolEndDate) {
 		this.patrolEndDate = patrolEndDate;
 	}
+	
+	
+	/**
+	 * @return patrol station name
+	 */
 	public String getStation() {
 		return station;
 	}
+	
+	/**
+	 * @param station patrol station name
+	 */
 	public void setStation(String station) {
 		this.station = station;
 	}
+	
+	/**
+	 * @return patrol team name 
+	 */
 	public String getTeam() {
 		return team;
 	}
+	/**
+	 * @param team patrol team name
+	 */
 	public void setTeam(String team) {
 		this.team = team;
 	}
+	
+	/**
+	 * @return patrol objective 
+	 */
 	public String getObjective() {
 		return objective;
 	}
+	/**
+	 * @param objective patrol objective
+	 */
 	public void setObjective(String objective) {
 		this.objective = objective;
 	}
+	
+	/**
+	 * @return patrol objective rating
+	 */
 	public int getObjectiveRating() {
 		return objectiveRating;
 	}
+	/**
+	 * @param objectiveRating patrol objective rating
+	 */
 	public void setObjectiveRating(int objectiveRating) {
 		this.objectiveRating = objectiveRating;
 	}
+	
+	/**
+	 * @return patrol mandate
+	 */
 	public String getMandate() {
 		return mandate;
 	}
+	/**
+	 * @param mandate the patrol mandate
+	 */
 	public void setMandate(String mandate) {
 		this.mandate = mandate;
 	}
+	
+	/**
+	 * @return the patrol type 
+	 */
 	public PatrolType.Type getPatrolType() {
 		return patrolType;
 	}
+	/**
+	 * @param patrolType the patrol type
+	 */
 	public void setPatrolType(PatrolType.Type patrolType) {
 		this.patrolType = patrolType;
 	}
+	
+	/**
+	 * @return the patrol uuid
+	 */
 	public byte[] getPatrolUuid() {
 		return patrolUuid;
 	}
+	/**
+	 * @param patrolUuid the patrol uuid
+	 */
 	public void setPatrolUuid(byte[] patrolUuid) {
 		this.patrolUuid = patrolUuid;
 	}
+	/**
+	 * @return if the patrol is armed or not
+	 */
 	public boolean isArmed() {
 		return armed;
 	}
+	/**
+	 * @param armed if the patrol is armed or not
+	 */
 	public void setArmed(boolean armed) {
 		this.armed = armed;
 	}
+	/**
+	 * @return patrol leg id
+	 */
 	public String getPatrolLegId() {
 		return patrolLegId;
 	}
+	/**
+	 * @param patrolLegId patrol leg id
+	 */
 	public void setPatrolLegId(String patrolLegId) {
 		this.patrolLegId = patrolLegId;
 	}
+	/**
+	 * @return patrol transport type
+	 */
 	public String getTransportType() {
 		return transportType;
 	}
+	/**
+	 * @param transportType patrol transport type
+	 */
 	public void setTransportType(String transportType) {
 		this.transportType = transportType;
 	}
+	/**
+	 * @return waypoint date 
+	 */
 	public Date getWpDateTime() {
 		return wpDateTime;
 	}
+	/**
+	 * @param wpDateTime waypoint date 
+	 */
 	public void setWpDateTime(Date wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
+	/**
+	 * @return waypoint time
+	 */
 	public Date getWaypointTime() {
 		return waypointTime;
 	}
+	/**
+	 * @param wpTime waypoint time
+	 */
 	public void setWaypointTime(Date wpTime) {
 		this.waypointTime = wpTime;
 	}
+	/**
+	 * @return waypoint id
+	 */
 	public int getWaypointId() {
 		return waypointId;
 	}
+	/**
+	 * @param waypointId waypoint id
+	 */
 	public void setWaypointId(int waypointId) {
 		this.waypointId = waypointId;
 	}
+	/**
+	 * @return waypoint x (longitude) position
+	 */
 	public double getWaypointX() {
 		return waypointX;
 	}
+	/**
+	 * @param waypointX waypoint y (longitude)
+	 */
 	public void setWaypointX(double waypointX) {
 		this.waypointX = waypointX;
 	}
+	
+	
+	/**
+	 * @return the waypoint y (latitude)
+	 */
 	public double getWaypointY() {
 		return waypointY;
 	}
+	/**
+	 * @param waypointY the waypoint y (latitude)
+	 */
 	public void setWaypointY(double waypointY) {
 		this.waypointY = waypointY;
 	}
+	
+	/**
+	 * @return waypoint distance observation
+	 */
 	public Float getWaypointDistance() {
 		return waypointDistance;
 	}
+	/**
+	 * @param waypointDistance
+	 */
 	public void setWaypointDistance(float waypointDistance) {
 		this.waypointDistance = waypointDistance;
 	}
+	
+	/**
+	 * @return the waypoint direction of observation
+	 */
 	public Float getWaypointDirection() {
 		return waypointDirection;
 	}
+	/**
+	 * @param waypointDirection direction of observation
+	 */
 	public void setWaypointDirection(float waypointDirection) {
 		this.waypointDirection = waypointDirection;
 	}
+	
+	/**
+	 * @return waypoint comment
+	 */
 	public String getWaypointComment() {
 		return waypointComment;
 	}
+	/**
+	 * @param wpComment wyapoint comment
+	 */
 	public void setWaypointComment(String wpComment) {
 		this.waypointComment = wpComment;
 	}
-	public QueryResultItem(){
-		
-	}
-	
-	
-	
 }

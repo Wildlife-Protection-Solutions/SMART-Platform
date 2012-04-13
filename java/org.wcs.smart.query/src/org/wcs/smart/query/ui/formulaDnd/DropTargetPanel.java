@@ -1,5 +1,28 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui.formulaDnd;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -11,77 +34,194 @@ import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.ui.SourceProvider;
 
+/**
+ * A drop target area for creating query formulas
+ * @author Emily
+ * @since 1.0.0
+ */
 public class DropTargetPanel {
 
+	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+	
 	private ScrolledComposite dropTarget = null;
-	private ProxyItem proxy = null;
+	private Composite dropTargetContent; 
+	private DropItemFactory factory;
+	private SourceProvider provider;
+	
+	private ProxyItem proxy = null;	//drag proxy item
 
-	private ArrayList<Control> items = new ArrayList<Control>();
+	private ArrayList<Control> items = new ArrayList<Control>();	//list of controls in formula
 
-	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer
-			.getTransfer() };
-	private Composite dropTargetContent;
-
+	
+	/**
+	 * Creates a new drop target panel.  After creating a drop
+	 * target panel you must set the dropItemFactory.
+	 * 
+	 * @param provider the source provider that provides the query valid 
+	 */
+	public DropTargetPanel(SourceProvider provider){
+		this.provider = provider;
+	}
+	
+	/**
+	 * Sets the drop item factory.
+	 * @param factory
+	 */
+	public void setDropItemFactory(DropItemFactory factory){
+		this.factory = factory;
+	}
+	
+	/**
+	 * @return 
+	 */
 	public static Transfer[] getTransferTypes() {
 		return types;
 	}
 
-	public void dispose() {
 
+	public void dispose(){		
 	}
 
+	/**
+	 * Clears all items from the query and hides the 
+	 * proxy,
+	 */
+	public void clear(){
+		for (Control item: items){
+			if (item == proxy){
+				continue;
+			}
+			if (item != null){
+				item.dispose();
+			}
+		}
+		proxy.setVisible(false);
+		items.clear();
+		dropTarget.redraw();
+		validate();
+	}
+	
+	/**
+	 * Converts the items that make up the query to 
+	 * a query string.
+	 * 
+	 * @return the query string represented by the items in the query panel
+	 */
+	public String getQueryString(){
+		StringBuilder query = new StringBuilder();
+		
+		for (Control item : items){
+			if (item instanceof DropItem){
+				DropItem it = (DropItem)item;
+				query.append(it.asQueryPart());
+				query.append(" ");
+			}
+		}
+		return query.toString();
+	}
+	
+	
+	/**
+	 * Validates the current query.
+	 */
+	public void validate(){
+		String query = getQueryString().trim();
+		boolean isvalid = true;
+		if (query.length() == 0) {
+			isvalid = true;
+		} else {
+			try {
+				InputStream is = new ByteArrayInputStream(query.getBytes());
+				Parser parser = new Parser(is);
+				parser.Expression();
+				is.close();
+			} catch (Exception ex) {
+				// failed to parse query
+				isvalid = false;
+			}
+		}
+		provider.setQueryValue(isvalid);
+		
+	}
+	
+	/**
+	 * Adds a drop item to the query formula
+	 * @param item drop item to add
+	 */
 	public void addElement(DropItem item) {
+		if (items.size() > 0){
+			if (!(item instanceof NotDropItem || item instanceof BracketDropItem)){
+				items.add(this.factory.createBooleanOpDropItem());	
+			}
+		}
 		items.add(item);
 		orderElements();
+		validate();
 	}
 
+	/**
+	 * Remove an element from the drop item
+	 * 
+	 * @param item item to remove
+	 */
+	public void removeElement(DropItem item){
+		if (items.remove(item)){
+			item.dispose();
+		}
+		orderElements();
+		validate();
+	}
+	
+	/**
+	 * Redraws the items in the query formula in the correct order
+	 */
 	private void orderElements() {
 		int currx = 0;
 		int curry = 0;
 		int maxWidth = dropTarget.getBounds().width;
-		int lastHeight = 10;
+		int height = 10;
 		for (int i = 0; i < items.size(); i++) {
 			Point pnt = items.get(i).computeSize(SWT.DEFAULT, SWT.DEFAULT);
-			// Rectangle r = items.get(i).getBounds();
-
+			height = pnt.y;
 			if (currx + pnt.x > maxWidth) {
 				// move to next line
-
-				curry += curry | pnt.y;
+				curry += height;
 				currx = 0;
 			}
-			items.get(i).setBounds(currx, curry, pnt.x, pnt.y);
+			items.get(i).setBounds(currx, curry, pnt.x, height);
 			currx += pnt.x;
-			lastHeight = pnt.y;
 			if (items.get(i) instanceof Composite) {
 				((Composite) items.get(i)).layout();
 			}
-
 		}
-
-		dropTargetContent.setSize(maxWidth, curry + lastHeight);
+		dropTargetContent.setSize(maxWidth, curry + height);
 		dropTarget.redraw();
 
 	}
 
+	/**
+	 * @return the drop target composite
+	 */
 	public Composite getComposite() {
 		return dropTargetContent;
 	}
 
+	/**
+	 * Creates the drop target composite
+	 * @param parent
+	 * @return
+	 */
 	public Composite createComposite(Composite parent) {
 
 		dropTarget = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.BORDER);
@@ -95,23 +235,10 @@ public class DropTargetPanel {
 			}
 		});
 
-		dropTargetContent = new Composite(dropTarget, SWT.BORDER);
+		dropTargetContent = new Composite(dropTarget, SWT.NONE);
+		dropTargetContent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		dropTarget.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		dropTarget.setContent(dropTargetContent);
-
-		// dropTarget = new ScrolledComposite(parent, SWT.V_SCROLL |
-		// SWT.BORDER);
-		// dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-		// true));
-		// dropTarget.setExpandVertical(true);
-		// dropTarget.setLayout(new GridLayout(1, false));
-		//
-		// dropTargetContent = new Composite(dropTarget, SWT.BORDER);
-		// dropTargetContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
-		// true, true));
-		// Label lblhelp = new Label(dropTargetContent, SWT.NONE);
-		// lblhelp.setText("HEKO!!!!");
-		// lblhelp.setBounds(0,0,200,100);
-		// dropTarget.setContent(dropTargetContent);
 
 		proxy = new ProxyItem(dropTargetContent);
 		proxy.setVisible(false);
@@ -121,53 +248,53 @@ public class DropTargetPanel {
 		dtarget.addDropListener(new DropTargetAdapter() {
 
 			private DropItem dp;
-
+			
+			@Override
 			public void dragEnter(DropTargetEvent event) {
-				if (dp != null) {
-					// continuing drag
-					return;
-				}
 
-				StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer
-						.getTransfer().getSelection();
+				StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
 				if (selection == null) {
 					return;
 				}
-				Object obj = selection.getFirstElement();
-				dp = (DropItem) obj;
+				//hide drop item and setup proxy
+				dp = (DropItem)selection.getFirstElement();
 				dp.setVisible(false);
-
 				int i = items.indexOf(dp);
-				items.add(i, proxy);
-				items.remove(dp);
-
-				dp.setBounds(0, 0, 0, 0);
+				if ( i < 0){
+					items.add(proxy);
+				}else{
+					items.add(i, proxy);
+					items.remove(dp);
+				}
 				proxy.setLabelText(dp.getText());
 				proxy.setVisible(true);
-
 				orderElements();
 			}
 
 			public void dragLeave(DropTargetEvent event) {
-
+				proxy.setVisible(false);
+				items.remove(proxy);
+				orderElements();
 			}
-
+			
+			@Override
 			public void dragOperationChanged(DropTargetEvent event) {
-
 			}
 
+			@Override
 			public void dragOver(DropTargetEvent event) {
 				moveElements(event.x, event.y);
 				orderElements();
 			}
 
+			@Override
 			public void dropAccept(DropTargetEvent event) {
 			}
 
 			@Override
 			public void drop(DropTargetEvent event) {
 				moveElements(event.x, event.y);
-
+				//remove proxy and put back the drop item
 				int i = items.indexOf(proxy);
 				items.add(i, dp);
 				dp.setVisible(true);
@@ -175,6 +302,7 @@ public class DropTargetPanel {
 				proxy.setVisible(false);
 				orderElements();
 				dp = null;
+				validate();
 			}
 
 			private void moveElements(int x, int y) {
@@ -208,7 +336,6 @@ public class DropTargetPanel {
 					}
 					items.add(toIndex, proxy);
 				}
-
 			}
 		});
 

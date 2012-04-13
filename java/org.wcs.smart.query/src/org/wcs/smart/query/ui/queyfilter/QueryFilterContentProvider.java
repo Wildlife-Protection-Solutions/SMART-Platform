@@ -1,0 +1,272 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.ui.queyfilter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.query.parser.internal.PatrolFilter;
+import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
+import org.wcs.smart.ui.properties.DataModelContentProvider;
+import org.wcs.smart.ui.properties.DataModelLabelProvider;
+
+/**
+ * A content provider that provides the query
+ * filter options.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class QueryFilterContentProvider implements ITreeContentProvider {
+
+	//data model 
+	private DataModel dataModel = null;
+	private DataModelContentProvider provider;
+	
+	//root nodes
+	private Object[] roots = new Object[]{new RootNode(RootNodeType.PATROL_FILTERS), 
+			new RootNode(RootNodeType.DATA_MODEL_FILTERS), 
+			new RootNode(RootNodeType.OTHER_ITEMS)};
+	
+	private PatrolFilter.PatrolFilterOption[] patrolOptions = null;
+	
+	/**
+	 * Data model children items
+	 */
+	enum DataModelItem{
+		CATEGORIES("Categories"),
+		ATTRIBUTES("Attributes");
+		
+		String guiName;
+		DataModelItem(String guiName){
+			this.guiName = guiName;
+		}
+	}
+	
+	/**
+	 * Other item children
+	 */
+	public enum OtherItems{
+		BRACKETS(" (   ) "),
+		NOT (" NOT ");
+		
+		String guiName;
+		OtherItems(String guiName){
+			this.guiName = guiName;
+		}
+	}
+	
+	/**
+	 * Root node children
+	 */
+	enum RootNodeType  {
+		PATROL_FILTERS("Patrol Filters"),
+		DATA_MODEL_FILTERS("Data Model Filters"),
+		AREA_FILTERS("Area Filters"),
+		OTHER_ITEMS("Operators");
+		
+		private String name;
+		private RootNodeType( String name){
+			this.name = name;
+		}
+	}
+	
+	/**
+	 * Creates a new content provider 
+	 */
+	public QueryFilterContentProvider(){
+		provider = new DataModelContentProvider(false, true);
+		
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+	 */
+	@Override
+	public void dispose() {
+		provider.dispose();
+	}
+
+	/**
+	 * 
+	 * @param newInput must be a map that contains the keys
+	 * RootNodeType.DATA_MODEL_FILTERS whose value is the current data model
+	 * and 
+	 * RootNodeType.PATROL_FILTERS whose value is the patrol filter options
+	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		if (newInput != null && !(newInput instanceof Map)){
+			throw new IllegalArgumentException("new input must be map");
+		}
+		if (newInput == null){
+			patrolOptions = null;
+			provider.inputChanged(viewer, oldInput, null);
+		}else{
+			Map<?, ?> in = (Map<?, ?>)newInput;
+			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
+			patrolOptions = (PatrolFilterOption[]) in.get(RootNodeType.PATROL_FILTERS);		
+			provider.inputChanged(viewer, oldInput, this.dataModel);	
+		}
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
+	 */
+	@Override
+	public Object[] getElements(Object inputElement) {
+		return roots;
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
+	 */
+	@Override
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof RootNode){
+			return ((RootNode)parentElement).getChildren();
+		}else if (parentElement instanceof PatrolFilter.PatrolFilterOption){
+			return null;
+		//}else if (parentElement instanceof AREA FITLER){
+		}else if (parentElement instanceof DataModelItem){
+			if (parentElement == DataModelItem.CATEGORIES){
+					return provider.getChildren(provider.getElements(null)[0]);	
+			}else if (parentElement == DataModelItem.ATTRIBUTES){
+//				DataModel dm = provider.
+				List<Attribute> atts = new ArrayList<Attribute>();
+				for (Attribute a : this.dataModel.getAttributes()){
+					//TODO: check categories and only include attributes with at least one active 
+					//category
+					atts.add(a);
+				}
+				return atts.toArray(new Attribute[atts.size()]);
+				
+			}
+			return null;
+		}else{
+			//assume data model
+			return provider.getChildren(parentElement);
+			
+		}
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
+	 */
+	@Override
+	public Object getParent(Object element) {
+		if (element instanceof RootNode){
+			return null;
+		}else if (element instanceof PatrolFilter.PatrolFilterOption){
+			return roots[0];
+		//}else if (parentElement instanceof AREA FITLER){
+		}else if (element instanceof OtherItems){
+			return roots[2];
+		}else if (element instanceof DataModelItem){
+			return roots[1];
+		}else{
+			//assume data model
+			return provider.getParent(element);	
+		}
+	}
+
+	/**
+	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
+	 */
+	@Override
+	public boolean hasChildren(Object element) {
+		if (element instanceof RootNode){
+			return true;
+		}else if (element instanceof PatrolFilter.PatrolFilterOption){
+			return false;
+		}else if (element instanceof DataModelItem){
+			return true;
+		}else if (element instanceof OtherItems){
+			return false;
+		//}else if (parentElement instanceof AREA FITLER){
+		}else{
+			//assume data model
+			return provider.hasChildren(element);
+			
+		}
+	}
+
+	
+	/*
+	 * A root node of the content provider
+	 */
+	class RootNode{
+		private RootNodeType type;
+		
+		/**
+		 * Creates a new root node of a give type
+		 * @param type
+		 */
+		public RootNode(RootNodeType type){
+			this.type = type;
+		}
+		
+		/**
+		 * @return the children of the given root node
+		 */
+		public Object[] getChildren(){
+			if (type == RootNodeType.PATROL_FILTERS){
+				return QueryFilterContentProvider.this.patrolOptions;
+			}else if (type == RootNodeType.AREA_FILTERS){
+				return null;
+			}else if (type == RootNodeType.DATA_MODEL_FILTERS){				
+				return DataModelItem.values();
+			}else if (type == RootNodeType.OTHER_ITEMS){
+				return OtherItems.values();
+			}
+			return null;
+		}
+		
+		/**
+		 * @return root node name
+		 */
+		public String getName(){
+			return type.name;
+		}
+		
+		/**
+		 * @return root node image
+		 */
+		public Image getImage(){
+			if (type == RootNodeType.PATROL_FILTERS){
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+			}else if (type == RootNodeType.DATA_MODEL_FILTERS){
+				 return JFaceResources.getImageRegistry().get(DataModelLabelProvider.DATA_MODEL_ICON);
+			}
+			return null;
+		}
+	}
+}

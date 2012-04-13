@@ -22,29 +22,40 @@
 package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
- * TODO Purpose of 
+ * A not filter expression of the form:
  * <p>
- * <ul>
- * <li></li>
- * </ul>
+ * NOT <Filter>
  * </p>
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class NotExpression implements Filter {
 
-	private Filter filter;
-	public NotExpression(Filter filter){
-		this.filter = filter;
-	}
 	
+	/**
+	 * Creates a new not expression 
+	 * @param filter the not filter
+	 * @return
+	 */
 	public static NotExpression createNotExpression(Filter filter){
 		return new NotExpression(filter);
 	}
 	
-	/* (non-Javadoc)
+	private Filter filter;
+	
+	/**
+	 * @param filter the not expression
+	 */
+	public NotExpression(Filter filter){
+		this.filter = filter;
+	}
+
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
 	 */
 	@Override
@@ -52,28 +63,15 @@ public class NotExpression implements Filter {
 		return "NOT " + filter.asString();
 	}
 	
-	public String asHql(HashMap<Class<?>, String> tableMapping, HashMap<String, Object> parameters){
-		return "NOT ( " + filter.asHql(tableMapping, parameters) + ")";
-	}
-	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 */
+	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
 		return "NOT ( " + filter.asSql(tableMapping) + ")";
 	}
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeTreeItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeTreeItemFilter() {
-		return filter.hasAttributeTreeItemFilter();
-	}
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeListItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeListItemFilter() {
-		return filter.hasAttributeListItemFilter();
-	}
-	/* (non-Javadoc)
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
 	 */
 	@Override
@@ -81,7 +79,7 @@ public class NotExpression implements Filter {
 		return filter.hasEmployeeFilter();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
 	 */
 	@Override
@@ -89,12 +87,20 @@ public class NotExpression implements Filter {
 		return filter.hasCategoryFilter();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
 		return filter.hasAttributeFilter();
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 */
+	@Override
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+		filter.getAttributeFilters(attributes);
 	}
 
 }

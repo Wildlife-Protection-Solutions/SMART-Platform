@@ -22,169 +22,143 @@
 package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Query filter for data model attributes.
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class AttributeFilter implements Filter {
-
+	/**
+	 * Creates a new boolean attribute filter
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:b:<key>"
+	 * @return
+	 */
+	public static AttributeFilter createBooleanFilter(String attributeIdentifier){
+		return new AttributeFilter(attributeIdentifier);
+	}
 	
+	/**
+	 * Creates a new value attribute filter
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:n:<key>"
+	 * @param op the operator
+	 * @param Double value the filter value
+	 * @return
+	 */
+	public static AttributeFilter createValueFilter(String attributeIdentifier, Operator op, Double value){
+		return new AttributeFilter(attributeIdentifier, op, value);
+	}
+	/**
+	 * Creates a new text attribute filter
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:s:<key>"
+	 * @param op the string operator
+	 * @param value the filter value
+	 * @return
+	 */
+	public static AttributeFilter createStringFilter(String attributeIdentifier, Operator op, String value){
+		value = SmartUtils.stripQuotes(value);
+		return new AttributeFilter(attributeIdentifier,  op, value);
+	}
+
+	/**
+	 * Creates a new list item attribute filter 
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:l:<key>"
+	 * @param op the list operator
+	 * @param attributeItemKey the list item key
+	 * @return
+	 */
+	public static AttributeFilter createListItemFilter(String attributeIdentifier, Operator op, String attributeItemKey){
+		return new AttributeFilter(attributeIdentifier,  op, attributeItemKey);
+	}
+	
+	/**
+	 * Creates a new list item attribute filter 
+	 * @param attributeIdentifier the attribute identifier in the form "attribute:t:<hkey>"
+	 * @param op the list operator
+	 * @param attributeItemKey the tree item hkey
+	 * @return
+	 */
+	public static AttributeFilter createTreeItemFilter(String attributeIdentifier, Operator op, String attributeItemKey){
+		return new AttributeFilter(attributeIdentifier,  op, attributeItemKey);
+	}
+	
+	
+	private String fullIdentifier;
 	private String attributeKey;
 	private AttributeType attributeType;
 	private Operator op;
 	private Object value1;
 	private Object value2;
 	
-	public AttributeFilter(String attributeKey, AttributeType type){
-		this.attributeKey = attributeKey;
-		this.attributeType = type;
+	
+	/**
+	 * Creates a new attribute filter with a given key and type.
+	 * 
+	 * @param attributeIdentifier
+	 * @param type
+	 */
+	private AttributeFilter(String attributeIdentifier){
+		this.fullIdentifier = attributeIdentifier;
+		
+		String[] bits = this.fullIdentifier.split(":");
+		if (bits[1].equals("b")){
+			this.attributeType = AttributeType.BOOLEAN;
+		}else if (bits[1].equals("n")){ 
+			this.attributeType = AttributeType.NUMERIC;
+		}else if (bits[1].equals("t")){
+			this.attributeType = AttributeType.TREE;
+		}else if (bits[1].equals("s")){
+			this.attributeType = AttributeType.TEXT;
+		}else if (bits[1].equals("l")){
+			this.attributeType = AttributeType.LIST;
+		}
+		attributeKey = bits[2];
 	}
 	
-	public AttributeFilter(String attributeKey, AttributeType type, Operator op, Object value){
-		this(attributeKey, type);
+	/**
+	 * Creates a new attribute filter 
+	 * @param attributeIdentifier the attribute key of the form attribute:type:attributeKey
+	 * @param op the filter operator
+	 * @param value the filter value
+	 */
+	private AttributeFilter(String attributeIdentifier, Operator op, Object value){
+		this(attributeIdentifier);
 		this.op = op;
 		this.value1 = value;
 	}
 	
 	/* for between operators */
-	public AttributeFilter(String attributeKey, AttributeType type, Operator op, Object value, Object value2){
-		this(attributeKey, type);
-		this.op = op;
-		this.value1 = value;
+	private AttributeFilter(String attributeIdentifier, Operator op, Object value, Object value2){
+		this(attributeIdentifier, op,  value);
 		this.value2 = value2;
 	}
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
 	 */
 	@Override
 	public String asString() {
 		if (attributeType == AttributeType.BOOLEAN){
-			return attributeKey;
+			return fullIdentifier;
 		}else if (attributeType == AttributeType.NUMERIC){
-			return attributeKey + " " + op.asString() + " " + ((Double)value1).toString();
+			return fullIdentifier + " " + op.asString() + " " + ((Double)value1).toString();
 		}else if (attributeType == AttributeType.TEXT){
-			return attributeKey + " " + op.asString() + " \"" + ((String)value1) + "\"";
+			return fullIdentifier + " " + op.asString() + " \"" + ((String)value1) + "\"";
 		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
-			return attributeKey + " " + op.asString() + " " + ((String)value1);
+			return fullIdentifier + " " + op.asString() + " " + ((String)value1);
 		}
 		return "";
 	}
-	
-	public static AttributeFilter createBooleanFilter(String attributeKey){
-		return new AttributeFilter(attributeKey, AttributeType.BOOLEAN);
-	}
-	
-	public static AttributeFilter createValueFilter(String key, Operator op, Double value){
-		return new AttributeFilter(key, AttributeType.NUMERIC, op, value);
-	}
-	
-	public static AttributeFilter createStringFilter(String attributeKey, Operator op, String value){
-		value = SmartUtils.stripQuotes(value);
-		return new AttributeFilter(attributeKey, AttributeType.TEXT, op, value);
-	}
-
-	public static AttributeFilter createListItemFilter(String attributeKey, Operator op, String attributeItemKey){
-		return new AttributeFilter(attributeKey, AttributeType.LIST, op, attributeItemKey);
-	}
-	public static AttributeFilter createTreeItemFilter(String attributeKey, Operator op, String attributeItemKey){
-		return new AttributeFilter(attributeKey, AttributeType.TREE, op, attributeItemKey);
-	}
-	
-	
-	@Override
-	public String asHql(HashMap<Class<?>, String> tableMapping, HashMap<String, Object> parameters) {
-		String keyPart = attributeKey.split(":")[2];
-		
-		String attprefix = tableMapping.get(Attribute.class);
-		if (attprefix == null){
-			throw new IllegalStateException("Attribute prefix could not be determined.");
-		}
-		String attObprefix = tableMapping.get(WaypointObservationAttribute.class);
-		if (attObprefix == null){
-			throw new IllegalStateException("Waypoint Observation Attribute prefix could not be determined.");
-		}
-
-		if (attributeType == AttributeType.BOOLEAN){
-			String param1 = keyPart;
-			String key1 = "p" + String.valueOf(parameters.size());
-			parameters.put(key1, param1);
-			return "( " + attprefix + ".keyId = :" + key1 + " and " + attObprefix + ".numberValue > 0.5 )";			
-		}else if (attributeType == AttributeType.NUMERIC){
-			String param1 = keyPart;
-			Double param2 = (Double)value1;
-			String key1 = "p" + String.valueOf(parameters.size());
-			String key2 = "p" + String.valueOf(parameters.size()+1);
-			parameters.put(key1, param1);
-			parameters.put(key2, param2);
-			
-			return "( " + attprefix + ".keyId = :" + key1 + " and " + attObprefix + ".numberValue " + op.asHql() + " :" + key2 + " )";
-		}else if (attributeType == AttributeType.TEXT){
-			String param1 = keyPart;
-			String param2 = (String)value1;
-			String key1 = "p" + String.valueOf(parameters.size());
-			String key2 = "p" + String.valueOf(parameters.size()+1);
-			String queryStr = "";
-			if (op == Operator.STR_CONTAINS || op == Operator.STR_NOTCONTAINS){
-				param2 = "%" + param2 + "%";	
-				queryStr = "( " + attprefix + ".keyId = :" + key1 + " and " + attObprefix + ".stringValue " + op.asHql() + " :" + key2 + " )";	
-			}else if (op == Operator.STR_EQUALS){
-				queryStr = "( " + attprefix + ".keyId = :" + key1 + " and " + attObprefix + ".stringValue " + op.asHql() + " :" + key2 + " )";
-			}
-			parameters.put(key1, param1);
-			parameters.put(key2, param2);
-			return queryStr;
-		}else if (attributeType == AttributeType.LIST ){
-			String param1 = keyPart;
-			String param2 = (String)value1;
-			String key1 = "p" + String.valueOf(parameters.size());
-			String key2 = "p" + String.valueOf(parameters.size()+1);
-			parameters.put(key1, param1);
-			parameters.put(key2, param2);
-			
-			String listPrefix = tableMapping.get(AttributeListItem.class);
-			return "( " + attprefix + ".keyId = :" + key1 + " and " 
-					+ listPrefix + ".keyId " + op.asHql() + " :" + key2 + " )";			
-		}else if (attributeType == AttributeType.TREE){
-			//TODO: - need to add hkey to dm_attribute_tree_table
-			String param1 = keyPart;
-			String param2 = (String)value1;
-			String param3 = (String)value1 + ".%";
-			String key1 = "p" + String.valueOf(parameters.size());
-			String key2 = "p" + String.valueOf(parameters.size()+1);
-			String key3 = "p" + String.valueOf(parameters.size()+2);
-			parameters.put(key1, param1);
-			parameters.put(key2, param2);
-			parameters.put(key3, param3);
-			
-			String treePrefix = tableMapping.get(AttributeTreeNode.class);
-			return "( " + attprefix + ".keyId = :" + key1 + " and " 
-					+ "(" + treePrefix + ".keyid like  :" + key2 + " OR " + treePrefix + ".keyid like :" + key3 + ") )";
-			//change to keyid to hkey; and add like or equals
-		}
-		return "";
-	}
-	
-	
 	
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		String keyPart = attributeKey.split(":")[2];
 		
 		String attprefix = tableMapping.get(Attribute.class);
 		if (attprefix == null){
@@ -196,49 +170,31 @@ public class AttributeFilter implements Filter {
 		}
 
 		if (attributeType == AttributeType.BOOLEAN){
-			return "( " + attprefix + ".keyId = '" + keyPart + "' and " + attObprefix + ".number_value > 0.5 )";			
+			return " (qa." + attributeKey + " > 0.5 ) ";			
 		}else if (attributeType == AttributeType.NUMERIC){
-			return "( " + attprefix + ".keyId = '" + keyPart + "' and " + attObprefix + ".number_value " + op.asSql() + " " + String.valueOf((Double)value1) + " )";
+			return " (qa." + attributeKey + " " + op.asSql() + " " + String.valueOf((Double)value1) + ") ";
 		}else if (attributeType == AttributeType.TEXT){
 			String queryStr = "";
+			//TODO: look into escape % & _ as these are wild card characters
+			// SELECT a FROM tabA WHERE a LIKE '%=_' ESCAPE '='  (must specify escape character)
+			String val = (String)value1;
+			val = val.replaceAll("'", "''");
+			
 			if (op == Operator.STR_CONTAINS || op == Operator.STR_NOTCONTAINS){
-				queryStr = "( " + attprefix + ".keyId = '" + keyPart + "' and " + attObprefix + ".string_value " + op.asSql() + " '" + (String)value1 + "' )";	
+				queryStr = "( qa." + attributeKey + " " + op.asSql() + " '%" + val + "%' )";	
 			}else if (op == Operator.STR_EQUALS){
-				queryStr = "( " + attprefix + ".keyId = '" + keyPart + "' and " + attObprefix + ".string_value " + op.asSql() + " '" + (String)value1 + "' )";
+				queryStr = "( qa." + attributeKey + " " + op.asSql() + " '" + val + "' )";
 			}
 			return queryStr;
 		}else if (attributeType == AttributeType.LIST ){
-			String listPrefix = tableMapping.get(AttributeListItem.class);
-			return "( " + attprefix + ".keyId = '" + keyPart + "' and " 
-					+ listPrefix + ".keyId " + op.asSql() + " '" + (String)value1 + "' )";			
+			return "( qa."+ attributeKey  + " " + op.asSql() + " '" + (String)value1 + "' )";
 		}else if (attributeType == AttributeType.TREE){
-			String treePrefix = tableMapping.get(AttributeTreeNode.class);
-			return "( " + attprefix + ".keyId = '" + keyPart + "' and " 
-					+  treePrefix + ".keyid like  '" + (String)value1 + "') ";
-			//change to keyid to hkey; and add like or equals
+			return "( qa." + attributeKey + " " + op.asSql() + " '" + (String)value1 + "' )";
 		}
 		return "";
-		
-		 
-		
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeTreeItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeTreeItemFilter() {
-		return (attributeType == AttributeType.TREE);
-	}
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeListItemFilter()
-	 */
-	@Override
-	public boolean hasAttributeListItemFilter() {
-		return (attributeType == AttributeType.LIST);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
 	 */
 	@Override
@@ -246,7 +202,7 @@ public class AttributeFilter implements Filter {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
 	 */
 	@Override
@@ -254,7 +210,7 @@ public class AttributeFilter implements Filter {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
 	 */
 	@Override
@@ -262,6 +218,12 @@ public class AttributeFilter implements Filter {
 		return true;
 	}
 	
-	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 */
+	@Override
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+		attributes.add(new AttributeInfo(attributeKey, attributeType));
+	}
 }
 

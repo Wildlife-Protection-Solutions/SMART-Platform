@@ -1,6 +1,28 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui.formulaDnd;
 
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -9,91 +31,141 @@ import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.query.QueryPlugIn;
 
-public class DropItem extends Composite {
+/**
+ * A super class for a query drag and drop item.
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public abstract class DropItem extends Composite {
 
-	private Label lbl;
-	private String text;
-
-	public DropItem(Composite parent, String test) {
+	private final static Transfer[] types = DropTargetPanel.types;
+	private DropTargetPanel targetPanel = null;
+	
+	/**
+	 * Creates a new drop item
+	 * @param parent parent composite
+	 * @param panel drop panel target
+	 */
+	public DropItem(Composite parent, DropTargetPanel panel) {
 		super(parent, SWT.NONE);
-		this.text = test;
-		createComposite(parent);
+		createCompositeInternal(parent);
+		targetPanel = panel;
+	}
+	
+	/**
+	 * @return a text representation of the drop item.  Used to approx. the size
+	 * of the drop item when dragging
+	 */
+	public abstract String getText();
+	
+	/**
+	 * @return the drop item as a query filter
+	 */
+	public abstract String asQueryPart();
+	
+	/**
+	 * fire any listeners registered with the drop panel
+	 */
+	protected void fireListeners(){
+		targetPanel.validate();
+	}
+	
+	/**
+	 * @param parent parent composite
+	 */
+	private void createCompositeInternal(Composite parent){
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginBottom = 2;
+		layout.marginLeft = 4;
+		layout.marginRight = 4;
+		layout.marginTop = 2;
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		super.setLayout(layout);
+		this.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		
-	}
-	
-	
-	
-	
-	public String getText(){
-		return this.lbl.getText();
-	}
-	
-	public String asQueryPart(){
-		return "";
-	};
-	public String asValidationQueryPart(){
-		return "";
-	}
-	
-	public void createComposite(Composite parent){
-		super.setLayout(new GridLayout(1, false));
-		GridData gd = new GridData();
-		gd.horizontalIndent = 5;
-		gd.verticalIndent = 0;
-		
-		super.setData(gd);
 		
 		Composite inner = new Composite(this, SWT.BORDER);
-		inner.setLayout(new GridLayout(1, false));
-		lbl = new Label(inner, SWT.NONE);
-		lbl.setText(this.text);
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)inner.getLayoutData()).heightHint = 23;
+
+		layout = new GridLayout(2, false);
+		layout.marginBottom = 1;
+		layout.marginLeft = 4;
+		layout.marginRight = 0;
+		layout.marginTop = 1;
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.horizontalSpacing = 4;
+		layout.verticalSpacing = 0;
+		inner.setLayout(layout);
 		
-		initDrag(this, DropTargetPanel.types);
-		initDrag(lbl, DropTargetPanel.types);
-		initDrag(inner, DropTargetPanel.types);
+		createComposite(inner);
+		Label lblX = new Label(inner, SWT.NONE);
+		lblX.setToolTipText("delete item");
+		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
+		lblX.setImage(JFaceResources.getImage(QueryPlugIn.DELETE_MINI_ICON));
+		lblX.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				targetPanel.removeElement(DropItem.this);
+			}
+			
+		});
+		
+		initDrag(this);
+		initDrag(inner);
 	}
-	
+
+	/**
+	 * Creates the internals of the drop item
+	 * @param parent
+	 */
+	public abstract void createComposite(Composite parent);
 	
 
-	private void initDrag(Control comp, Transfer[] types){
+	/**
+	 * Registers a control for dragging.  Any sub-elements
+	 * that you want to be able to drag need to be registered.
+	 * 
+	 * @param comp control to register
+	 */
+	protected void initDrag(Control comp){
 		DragSource dsource = new DragSource(comp, DND.DROP_MOVE);
 		dsource.setTransfer(types);
 		dsource.addDragListener(new DragSourceListener() {
-			
 			@Override
 			public void dragStart(DragSourceEvent event) {
-				// TODO Auto-generated method stub
 				LocalSelectionTransfer.getTransfer().setSelection(new StructuredSelection(DropItem.this));
 				event.doit = true;
-
 			}
 			
 			@Override
 			public void dragSetData(DragSourceEvent event) {
-				// TODO Auto-generated method stub
-				if (LocalSelectionTransfer.getTransfer()
-						.isSupportedType(event.dataType)) {
-					//event.data = viewer.getSelection();
-					event.data = DropItem.this;
-				}
 			}
 			
 			@Override
 			public void dragFinished(DragSourceEvent event) {
 				LocalSelectionTransfer.getTransfer().setSelection(null);
-//				viewer.refresh();
-				DropItem.this.redraw();
+				if (!DropItem.this.isVisible()){
+					//the widget is no longer used in the query so we need
+					//to ensure it is dispoed of properly
+					DropItem.this.dispose();
+				}
 			}
 		});		
 	}
-	
-	
-	
-	
 }

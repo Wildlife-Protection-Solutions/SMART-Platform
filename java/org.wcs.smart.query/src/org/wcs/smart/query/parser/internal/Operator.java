@@ -22,60 +22,110 @@
 package org.wcs.smart.query.parser.internal;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Filter expression operator
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class Operator {
 
-	private String guiValue;
-	private String sqlOperator;
-	
-	public Operator(String guiValue, String sqlOperator){
-		this.guiValue = guiValue;
-		this.sqlOperator = sqlOperator;
-	}
-
-	public String asString(){
-		return guiValue;
-	}
-
-	public String asHql(){
-		return sqlOperator;
-	}
-	public String asSql(){
-		return sqlOperator;
-	}
-	
+	/**
+	 * Equals (=) operator 
+	 */
 	public static Operator EQUALS = new Operator("=", "=");
+	/**
+	 * Less Than (<) operator 
+	 */
 	public static Operator LESSTHAN = new Operator("<", "<");
+	/**
+	 * Less Than Equals (<=) operator 
+	 */
 	public static Operator LESSTHANEQUALS = new Operator("<=", "<=");
+	/**
+	 * Great Than (>) operator 
+	 */
 	public static Operator GREATERTHAN = new Operator(">", ">");
+	/**
+	 * Great Than Equals (>=) operator 
+	 */
 	public static Operator GREATERTHANEQUALS = new Operator(">=", ">=");
-	public static Operator NOT_EQUALS = new Operator("!=", "<>");
-	
-	public static Operator STR_EQUALS = new Operator("equals", "like");
+	/**
+	 * Not Equals (!=) operator 
+	 */
+	public static Operator NOTEQUALS = new Operator("!=", "<>");
+	/**
+	 * String like operator 
+	 */
+	public static Operator STR_EQUALS = new Operator("equals", "=");
+	/**
+	 * String contains operator 
+	 */
 	public static Operator STR_CONTAINS = new Operator("contains", "like");
-	public static Operator STR_NOTCONTAINS = new Operator("notcontains", "not like");
+	/**
+	 * String not contains operator
+	 */
+	public static Operator STR_NOTCONTAINS = new Operator("not contains", "not like");
 	
+	/**
+	 * Valid numeric operators
+	 */
+	public static Operator[] NUMERIC_OPS = {EQUALS, LESSTHAN, LESSTHANEQUALS, GREATERTHAN, GREATERTHANEQUALS, NOTEQUALS};
+	/**
+	 * Valid string operators
+	 */
+	public static Operator[] STRING_OPS = {STR_EQUALS, STR_CONTAINS, STR_NOTCONTAINS};
+	
+	/**
+	 * Parses an operator from the string value 
+	 * @param value the string value
+	 * @return the operator
+	 */
 	public static Operator parseOperator(String value){
 		if (value.equals("=")) return EQUALS;
 		if (value.equals("<")) return LESSTHAN;
 		if (value.equals("<=")) return LESSTHANEQUALS;
 		if (value.equals(">")) return GREATERTHAN;
 		if (value.equals(">=")) return GREATERTHANEQUALS;
-		if (value.equals("!=")) return NOT_EQUALS;
-		if (value.equals("<>")) return NOT_EQUALS;
+		if (value.equals("!=")) return NOTEQUALS;
+		if (value.equals("<>")) return NOTEQUALS;
 		
 		if (value.equals("equals")) return STR_EQUALS;
 		if (value.equals("contains")) return STR_CONTAINS;
 		if (value.equals("notcontains")) return STR_NOTCONTAINS;
 		
 		return null;
+	}
+	
+	private String guiValue;
+	private String sqlOperator;
+	
+	/**
+	 * @param guiValue the operator gui value
+	 * @param sqlOperator the sql operator
+	 */
+	public Operator(String guiValue, String sqlOperator){
+		this.guiValue = guiValue;
+		this.sqlOperator = sqlOperator;
+	}
+
+	/**
+	 * @return gui representation of operator
+	 */
+	public String getGuiValue(){
+		return this.guiValue;
+	}
+	
+	/**
+	 * @return the sql operator
+	 */
+	public String asSql(){
+		return sqlOperator;
+	}
+	
+	/**
+	 * @return string representation of operator
+	 */
+	public String asString(){
+		return sqlOperator;
 	}
 }

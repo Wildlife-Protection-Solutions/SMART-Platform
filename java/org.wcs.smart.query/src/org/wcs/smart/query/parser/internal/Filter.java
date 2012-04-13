@@ -22,32 +22,90 @@
 package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A query filter.
  * @author Emily
  * @since 1.0.0
  */
 public interface Filter {
 
+	/**
+	 * A class to represent and empty filter.
+	 */
+	public Filter EMPTY_FILTER = new Filter(){
+
+		@Override
+		public String asString() {
+			return "";
+		}
+
+		@Override
+		public String asSql(HashMap<Class<?>, String> tableMapping) {
+			return "";
+		}
+
+
+		@Override
+		public boolean hasCategoryFilter() {
+			return false;
+		}
+
+		@Override
+		public boolean hasAttributeFilter() {
+			return false;
+		}
+
+		@Override
+		public boolean hasEmployeeFilter() {
+			return false;
+		}
+
+		@Override
+		public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+		}
+	};
 	
+	/**
+	 * @return the string representation of the filter
+	 */
 	public String asString();
 	
-	public String asHql(HashMap<Class<?>, String> tableMapping, HashMap<String, Object> parameters);
-	
+
+	/**
+	 * Converts the filter to an sql where clause expression
+	 * 
+	 * @param tableMapping a mapping of tables to table prefixes
+	 * @return sql where clause expression
+	 */
 	public String asSql(HashMap<Class<?>, String> tableMapping);
+
 	
-	public boolean hasAttributeTreeItemFilter();
-	
-	public boolean hasAttributeListItemFilter();
-	
+	/**
+	 * @return <code>true</code> if the filter includes a data 
+	 * model category filter, <code>false</code> otherwise
+	 */
 	public boolean hasCategoryFilter();
+
+	/**
+	 * @return <code>true</code> if the filter includes a data 
+	 * model attribute filter, <code>false</code> otherwise
+	 */
 	public boolean hasAttributeFilter();
 	
+	/**
+	 * @return <code>true</code> if the filter includes a 
+	 * patrol member filter, <code>false</code> otherwise
+	 */
 	public boolean hasEmployeeFilter();
+	
+	/**
+	 * Add the attributes used in the filter to to set of 
+	 * attributes. 
+	 * 
+	 * @param attributes set of attribute info used in the attribute
+	 * filter
+	 */
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes);
 }
