@@ -102,10 +102,6 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	@Override
 	public boolean  close(){
 		boolean canClose = super.close();
-		if (canClose){
-			gray.dispose();
-			black.dispose();
-		}
 		return canClose;
 	}
 	

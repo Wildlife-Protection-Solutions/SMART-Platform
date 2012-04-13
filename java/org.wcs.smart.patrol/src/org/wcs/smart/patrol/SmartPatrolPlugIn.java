@@ -78,6 +78,24 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	public static final String PATROL_PILOT_ICON = "org.wsc.smart.patrol.PATROL_PILOT"; //$NON-NLS-1$
 	
 	/**
+	 * Image descriptor key for patrol icon
+	 */
+	public static final String PATROL_ICON = "org.wsc.smart.patrol.PATROL"; //$NON-NLS-1$
+	
+	
+	/**
+	 * Image descriptor key for patrol armed icon
+	 */
+	public static final String PATROL_ARMED_ICON = "org.wsc.smart.patrol.PATROL_ARMED"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor key for patrol armed icon
+	 */
+	public static final String PATROL_TEAM_ICON = "org.wsc.smart.patrol.PATROL_TEAM"; //$NON-NLS-1$
+	
+	
+	
+	/**
 	 * Get image descriptors for the clear button.
 	 */
 	static {
@@ -87,6 +105,18 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(AIR_PATROL_ICON, descriptor);
 		}
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
+				PLUGIN_ID, "images/icons/obj16/patrol_armed.png"); //$NON-NLS-1$
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(PATROL_ARMED_ICON, descriptor);
+		}
+		
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
+				PLUGIN_ID, "images/icons/obj16/patrol_team.png"); //$NON-NLS-1$
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(PATROL_TEAM_ICON, descriptor);
+		}
+		
 		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
 				PLUGIN_ID, "images/icons/obj16/boat.png"); //$NON-NLS-1$
 		if (descriptor != null) {
@@ -114,6 +144,12 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 				PLUGIN_ID, "images/icons/obj16/patrol_pilot.png"); //$NON-NLS-1$
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(PATROL_PILOT_ICON, descriptor);
+		}
+		
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
+				PLUGIN_ID, "images/icons/obj16/patrol.png"); //$NON-NLS-1$
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(PATROL_ICON, descriptor);
 		}
 	}
 	
