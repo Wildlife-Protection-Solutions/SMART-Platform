@@ -292,6 +292,7 @@ public class Category extends DmObject implements HkeyObject{
 		clone.setIsActive(this.getIsActive());
 		clone.setIsMultiple(this.getIsMultiple());
 		clone.setParent(parent);
+		clone.updateHkey();
 		
 		if (this.getAttributes() != null){
 			clone.setAttributes(new ArrayList<CategoryAttribute>());

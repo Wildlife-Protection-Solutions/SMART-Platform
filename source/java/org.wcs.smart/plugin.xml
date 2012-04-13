@@ -48,6 +48,7 @@
                label="&amp;File">
             <command
                   commandId="org.wcs.smart.changeUserPassword"
+                  icon="images/icons/etool16/changepass.png"
                   id="org.wcs.menu.file.changeuserpassword"
                   label="Change Password ..."
                   mnemonic="P"

@@ -48,7 +48,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	/**
 	 * Image descriptor for category icon
 	 */
-	private static final String CATEGORY_ICON = "org.wsc.smart.datamodel.CATEGORY_ICON"; //$NON-NLS-1$
+	public static final String CATEGORY_ICON = "org.wsc.smart.datamodel.CATEGORY_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for attribute text icon
 	 */
@@ -61,7 +61,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	/**
 	 * Image descriptor for attribute number icon
 	 */
-	private static final String ATTRIBUTE_NUMBER_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_NUMBER_ICON"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_NUMBER_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_NUMBER_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for attribute list icon
 	 */
@@ -73,7 +73,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	/**
 	 * Image descriptor for data model icon
 	 */
-	private static final String DATA_MODEL_ICON= "org.wsc.smart.datamodel.DATAMODEL_ICON"; //$NON-NLS-1$
+	public static final String DATA_MODEL_ICON= "org.wsc.smart.datamodel.DATAMODEL_ICON"; //$NON-NLS-1$
 	
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
@@ -178,19 +178,27 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 			return JFaceResources.getImageRegistry().get(CATEGORY_ICON);
 		}else if (element instanceof CategoryAttribute){
 			CategoryAttribute ca = (CategoryAttribute)element;
-			if (ca.getAttribute().getType()== Attribute.AttributeType.BOOLEAN){
-				return JFaceResources.getImageRegistry().get(ATTRIBUTE_BOOLEAN_ICON);
-			}else if (ca.getAttribute().getType()== Attribute.AttributeType.TEXT){
-				return JFaceResources.getImageRegistry().get(ATTRIBUTE_TEXT_ICON);
-			}else if (ca.getAttribute().getType()== Attribute.AttributeType.LIST){
-				return JFaceResources.getImageRegistry().get(ATTRIBUTE_LIST_ICON);
-			}else if (ca.getAttribute().getType()== Attribute.AttributeType.NUMERIC){
-				return JFaceResources.getImageRegistry().get(ATTRIBUTE_NUMBER_ICON);
-			}else if (ca.getAttribute().getType()== Attribute.AttributeType.TREE){
-				return JFaceResources.getImageRegistry().get(ATTRIBUTE_TREE_ICON);
-			}
+			return getAttributeImage(ca.getAttribute());
+		}else if (element instanceof Attribute){
+			return getAttributeImage((Attribute)element);
+			
 		}else if (element instanceof DataModelContentProvider.RootNode){
 			return JFaceResources.getImageRegistry().get(DATA_MODEL_ICON);
+		}
+		return null;
+	}
+	
+	private Image getAttributeImage(Attribute att){
+		if (att.getType()== Attribute.AttributeType.BOOLEAN){
+			return JFaceResources.getImageRegistry().get(ATTRIBUTE_BOOLEAN_ICON);
+		}else if (att.getType() == Attribute.AttributeType.TEXT){
+			return JFaceResources.getImageRegistry().get(ATTRIBUTE_TEXT_ICON);
+		}else if (att.getType()== Attribute.AttributeType.LIST){
+			return JFaceResources.getImageRegistry().get(ATTRIBUTE_LIST_ICON);
+		}else if (att.getType()== Attribute.AttributeType.NUMERIC){
+			return JFaceResources.getImageRegistry().get(ATTRIBUTE_NUMBER_ICON);
+		}else if (att.getType()== Attribute.AttributeType.TREE){
+			return JFaceResources.getImageRegistry().get(ATTRIBUTE_TREE_ICON);
 		}
 		return null;
 	}
