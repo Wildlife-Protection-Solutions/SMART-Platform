@@ -186,4 +186,4 @@ ALTER TABLE smart.dm_attribute_tree
 	ON UPDATE RESTRICT
 	ON DELETE CASCADE
 ;
-
+create index dm_category_hkey_idx on smart.dm_category(hkey);

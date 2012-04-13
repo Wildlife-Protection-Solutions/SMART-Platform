@@ -334,4 +334,8 @@ ALTER TABLE smart.wp_observation_attributes
 	ON DELETE CASCADE
 ;
 
+create index patrol_leg_day_patrol_day_idx on smart.patrol_leg_day (patrol_day);
 
+create index patrol_start_date_idx on smart.patrol (start_date);
+create index patrol_end_date_idx on smart.patrol (end_date);
+ 
