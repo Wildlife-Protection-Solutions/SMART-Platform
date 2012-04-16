@@ -63,6 +63,12 @@
                   style="push"
                   tooltip="Create a new database query.">
             </command>
+            <command
+                  commandId="org.wcs.smart.query.exportQuery"
+                  icon="images/icons/etool16/exportquery.png"
+                  label="Export Query"
+                  style="push">
+            </command>
          </toolbar>
       </menuContribution>
    </extension>
@@ -84,6 +90,10 @@
       <command
             id="org.wcs.smart.query.runQuery"
             name="Run Query">
+      </command>
+      <command
+            id="org.wcs.smart.query.exportQuery"
+            name="Export Query">
       </command>
    </extension>
    <extension
@@ -111,6 +121,10 @@
                </equals>
             </with>
          </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.tools.ExportQueryHandler"
+            commandId="org.wcs.smart.query.exportQuery">
       </handler>
    </extension>
    <extension

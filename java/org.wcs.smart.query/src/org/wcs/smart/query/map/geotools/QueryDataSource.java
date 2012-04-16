@@ -115,12 +115,12 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef());
+		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(this.columns));
 		return type;
 	}
 	
 	
-	private String getFeatureSchemaDef(){
+	public static String getFeatureSchemaDef(QueryTableColumn[] columns){
 		
 		StringBuilder sb = new StringBuilder();
 		
