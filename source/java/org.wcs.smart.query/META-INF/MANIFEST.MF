@@ -17,3 +17,5 @@ Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.model,
  org.wcs.smart.query.parser.internal;x-friends:="org.wcs.smart.query.test",
  org.wcs.smart.query.parser.internal.parser;x-friends:="org.wcs.smart.query.test"
+Bundle-ClassPath: lib/opencsv-2.3.jar,
+ .
