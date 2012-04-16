@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wcs.smart</groupId>
 	<artifactId>patrol</artifactId>
-	<version>1.2.3</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>SMART - Spatial Monitoring and Reporting Tool</name>
 	<packaging>pom</packaging>
 	
