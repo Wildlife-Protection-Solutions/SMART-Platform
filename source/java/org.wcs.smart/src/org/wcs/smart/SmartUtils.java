@@ -44,6 +44,9 @@ import org.wcs.smart.ca.Language;
  */
 public class SmartUtils {
 
+	
+	
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	/**
 	 * Converts a datetime widget to a date object only setting year, month and
 	 * day. The hour, minute, second and millisecond are all set to 0;
