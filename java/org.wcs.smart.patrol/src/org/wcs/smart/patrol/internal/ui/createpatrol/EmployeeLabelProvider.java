@@ -104,10 +104,21 @@ public class EmployeeLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof Employee) {
-			Employee e = (Employee) element;
-			return e.getLabel();
+			String text = "";
+			if (leaders != null && leaders.contains(element)) {
+				text = "[Leader] ";
+			} else if (pilots != null && pilots.contains(element)) {
+				text += "[Pilot] ";
+			}
+			return text + ((Employee) element).getLabel();
 		} else if (element instanceof PatrolLegMember) {
-			return ((PatrolLegMember) element).getMember().getLabel();
+			String text = "";
+			if (((PatrolLegMember) element).getIsLeader()) {
+				text = "[Leader]";
+			} else if (((PatrolLegMember) element).getIsPilot()) {
+				text += "[Pilot]";
+			}
+			return text + ((PatrolLegMember) element).getMember().getLabel();
 		}
 		return super.getText(element);
 	}

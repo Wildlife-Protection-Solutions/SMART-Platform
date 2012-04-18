@@ -45,9 +45,9 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Represents a patrol object

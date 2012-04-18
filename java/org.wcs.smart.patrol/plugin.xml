@@ -70,6 +70,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.patrol.patrolOptions"
+                  icon="images/icons/etool16/patrol_option.png"
                   label="Patrol Options ..."
                   mnemonic="O"
                   style="push">
@@ -84,6 +85,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.patrolMandate"
+                  icon="images/icons/etool16/patrol_mandate.png"
                   label="Patrol Mandates ..."
                   mnemonic="M"
                   style="push">
@@ -98,6 +100,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.patrolTypes"
+                  icon="images/icons/etool16/patrol.png"
                   label="Patrol Types ..."
                   mnemonic="T"
                   style="push">
@@ -112,6 +115,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.teamList"
+                  icon="images/icons/etool16/patrol_team.png"
                   label="Patrol Teams ..."
                   mnemonic="e"
                   style="push">
@@ -214,7 +218,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.ShowPatrolFilter"
-               icon="images/icons/etool16/filter.png"
+               icon="images/icons/etool16/patrol_filter.png"
                style="push"
                tooltip="Filter the patrols displayed in this list">
          </command>
@@ -462,7 +466,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.patrol.internal.ui.views.PatrolListView"
-            icon="images/icons/etool16/patrol.png"
+            icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
             name="Patrol List View"
             restorable="false">
@@ -472,6 +476,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective"
+            icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.PatrolPerspective"
             name="Patrol Perspective">
       </perspective>
@@ -480,7 +485,7 @@
          point="org.eclipse.ui.editors">
       <editor
             class="org.wcs.smart.patrol.internal.ui.editor.PatrolEditor"
-            icon="images/icons/etool16/patrol.png"
+            icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolEditor"
             name="Patrol Editor">
       </editor>

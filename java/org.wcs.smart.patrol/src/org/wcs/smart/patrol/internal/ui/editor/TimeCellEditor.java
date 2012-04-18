@@ -31,7 +31,7 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
-import org.wcs.smart.SmartUtils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Cell editor for editing time fields in a table.
