@@ -43,11 +43,11 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol Day editor.  This consists of 

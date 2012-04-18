@@ -26,8 +26,8 @@ import java.io.Serializable;
 
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * An interceptor for waypoint attachment that copies the file into the filestore

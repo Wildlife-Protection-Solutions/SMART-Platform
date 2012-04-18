@@ -7,7 +7,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.Patrol;
@@ -28,6 +27,7 @@ import org.wcs.smart.patrol.xml.model.TrackType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationType;
 import org.wcs.smart.patrol.xml.model.WaypointType;
+import org.wcs.smart.util.SmartUtils;
 
 public class PatrolToXmlConverter {
 

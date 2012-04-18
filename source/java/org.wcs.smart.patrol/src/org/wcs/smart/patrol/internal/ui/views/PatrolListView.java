@@ -123,7 +123,6 @@ public class PatrolListView extends ViewPart {
 	 * Creates a new vies
 	 */
 	public PatrolListView() {
-
 	}
 
 	public void dispose() {		
@@ -142,14 +141,17 @@ public class PatrolListView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		
-		
-		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		main.setLayout(new GridLayout(1, false));
 		
-		patrolListViewer = new TableViewer(main, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		GridLayout layout = new GridLayout(1, false);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		main.setLayout(layout);
+		
+		patrolListViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		Table list = patrolListViewer.getTable();
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		list.setBounds(0, 0, 88, 68);

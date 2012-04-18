@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
@@ -62,6 +61,7 @@ import org.wcs.smart.patrol.xml.model.TrackType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationType;
 import org.wcs.smart.patrol.xml.model.WaypointType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts an xml patrol file to a

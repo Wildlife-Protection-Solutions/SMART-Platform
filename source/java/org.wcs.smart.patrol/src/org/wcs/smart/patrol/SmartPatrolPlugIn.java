@@ -93,6 +93,10 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String PATROL_TEAM_ICON = "org.wsc.smart.patrol.PATROL_TEAM"; //$NON-NLS-1$
 	
+	/**
+	 * Image descriptor key for patrol mandate icon
+	 */
+	public static final String PATROL_MANDATE_ICON = "org.wsc.smart.patrol.PATROL_MANDATE"; //$NON-NLS-1$
 	
 	
 	/**
@@ -150,6 +154,12 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 				PLUGIN_ID, "images/icons/obj16/patrol.png"); //$NON-NLS-1$
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(PATROL_ICON, descriptor);
+		}
+		
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
+				PLUGIN_ID, "images/icons/obj16/patrol_mandate.png"); //$NON-NLS-1$
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(PATROL_MANDATE_ICON, descriptor);
 		}
 	}
 	

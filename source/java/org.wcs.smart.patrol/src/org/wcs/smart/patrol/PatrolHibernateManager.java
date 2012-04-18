@@ -34,7 +34,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -48,6 +47,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachment;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Extension of the smart hibernate manager for patrol related data.
@@ -159,7 +159,11 @@ public class PatrolHibernateManager extends HibernateManager{
 	/**
 	 * Loads the patrol options for a given conservation area.
 	 * <p>
-	 * If patrol options does not exist, it will create a new one with default values.
+	 * This is executed inside a transaction so you cannot
+	 * run this inside a session with an open transaction.</p>
+	 * <p>
+	 * If patrol options does not exist, 
+	 * it will create a new one with default values.
 	 * </p>
 	 * 
 	 * @param ca conservation area 
