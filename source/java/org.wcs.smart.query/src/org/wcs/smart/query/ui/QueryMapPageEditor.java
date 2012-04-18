@@ -68,6 +68,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	    	try {
 	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+	    		if (getMap() == null) return Status.CANCEL_STATUS;
 	    		getMap().sendCommandASync(command);
 	    		initListener = new IViewportModelListener() {
 					@Override

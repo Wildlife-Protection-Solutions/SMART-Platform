@@ -124,8 +124,9 @@ public class QueryResultsTablePage  extends EditorPart  {
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		parent.setLayout(layout);
-		content = new QueryEditorTableContent(parent, parentEditor);	
+		content = new QueryEditorTableContent(parent, parentEditor);
 		
+		content.initValues(parentEditor.getQuery());
 	}
 	
 	/**
@@ -148,8 +149,8 @@ public class QueryResultsTablePage  extends EditorPart  {
 	/**
 	 * @return a progress monitor that updates the progress area
 	 */
-	public IProgressMonitor getProgressMonitor(){
-		return content.getProgressMonitor();
+	public IProgressMonitor createProgressMonitor(){
+		return content.createProgressMonitor();
 	}
 	
 	@Override

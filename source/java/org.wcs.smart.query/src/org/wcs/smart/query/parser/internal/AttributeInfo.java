@@ -41,7 +41,7 @@ public class AttributeInfo {
 	 * @param type the type of the attribute
 	 */
 	public AttributeInfo(String key, AttributeType type){
-		this.key = key.split(":")[2];
+		this.key = key;
 		this.type = type;
 	}
 	

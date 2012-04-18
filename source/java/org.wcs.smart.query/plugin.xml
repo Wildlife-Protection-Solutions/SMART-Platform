@@ -6,6 +6,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.query.ui.QueryDefView"
+            icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.ui.QueryDefView"
             name="Smart Query Definition View"
             restorable="true">
@@ -13,10 +14,10 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.query.ui.queyfilter.QueryFilterView"
-            icon="images/icons/etool16/cog.png"
+            icon="images/icons/view16/query_filter_op.png"
             id="org.wcs.smart.query.ui.QueryFilter"
             name="Query Filter View"
-            restorable="true">
+            restorable="false">
       </view>
    </extension>
    <extension
@@ -24,6 +25,7 @@
       <editor
             class="org.wcs.smart.query.ui.QueryResultsEditor"
             default="false"
+            icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
             name="Query Results">
       </editor>
@@ -32,7 +34,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.query.internal.ui.QueryPerspective"
-            icon="images/icons/etool16/querypatrol.gif"
+            icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.SmartQueryPerspective"
             name="Smart Query Perspective">
       </perspective>
@@ -44,7 +46,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.resetSeparator">
          <command
                commandId="org.wcs.smart.query.QueryPerspective"
-               icon="images/icons/etool16/querypatrol.gif"
+               icon="images/icons/view16/querypatrol.gif"
                label="Show Query Perspective"
                mnemonic="Q"
                style="push">

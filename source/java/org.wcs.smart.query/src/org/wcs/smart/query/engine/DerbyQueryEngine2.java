@@ -124,6 +124,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		queryTempTable = queryTempTable + System.nanoTime();
 		observationTempTable = observationTempTable + System.nanoTime();
 
+		myResults = null;
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -135,27 +136,35 @@ public class DerbyQueryEngine2 implements QueryEngine {
 						createObservationTable(c, query);
 					}
 					monitor.worked(1);
+					if (monitor.isCanceled()){
+						return;
+					}
 
 					monitor.subTask("Creating temporary table");
 					createTemporaryTable(c);
 					monitor.worked(1);
-
+					if (monitor.isCanceled()){
+						return;
+					}
+					
 					monitor.subTask("Populating results table");
 					populateTemporaryTable(query, c);
 					monitor.worked(1);
-
+					if (monitor.isCanceled()){
+						return;
+					}
+					
 					monitor.subTask("Loading results into editor");
 					myResults = getResults(c, session);
+					
+					monitor.worked(1);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
+					monitor.done();
 				}
-				monitor.worked(1);
-				monitor.done();
-
 			}
 		});
-
 		return myResults;
 
 	}

@@ -163,7 +163,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		page1.showProgressArea();
 		
 		//run query
-		final IProgressMonitor mymonitor = page1.getProgressMonitor();
+		final IProgressMonitor mymonitor = page1.createProgressMonitor();
 		Job runQueryJob = new Job("Running query: " + this.query.getName()) {
 
 			@Override

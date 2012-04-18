@@ -24,9 +24,11 @@ package org.wcs.smart.query.internal.ui;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.ui.QueryResultsEditor;
 
 /**
  * Handler for displaying query perspective
@@ -46,6 +48,20 @@ public class ShowQueryPersepctiveHandler extends AbstractHandler {
 					.getWorkbench()
 					.showPerspective(QueryPerspective.ID,
 							HandlerUtil.getActiveWorkbenchWindow(event));
+			
+			IEditorReference[] ref = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getEditorReferences();
+			boolean found = false;
+			for (int i = 0; i < ref.length; i ++){
+				if (ref[i].getId().equals(QueryResultsEditor.ID)){
+					found = true;
+					break;
+				}
+			}
+			if (!found){
+				//open a new editor 
+				CreateQueryHandler h = new CreateQueryHandler();
+				h.execute(event);
+			}
 		} catch (WorkbenchException e) {
 			QueryPlugIn.displayLog("Error loading Query perspective.", e);
 		}

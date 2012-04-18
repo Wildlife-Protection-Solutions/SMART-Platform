@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.queyfilter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.parser.internal.PatrolFilter;
 import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
@@ -35,7 +36,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryFilterLabelProvider extends LabelProvider  {
+public class QueryFilterLabelProvider extends LabelProvider {
 
 	
 	private DataModelLabelProvider dmLabelProvider = new DataModelLabelProvider();
@@ -44,7 +45,6 @@ public class QueryFilterLabelProvider extends LabelProvider  {
 	 * Creates a new label provider
 	 */
 	public QueryFilterLabelProvider(){
-		
 	}
 	
 	/**
@@ -57,8 +57,25 @@ public class QueryFilterLabelProvider extends LabelProvider  {
 				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON);
 			}else if (element == PatrolFilterOption.TEAM){
 				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
+			}else if (element == PatrolFilterOption.STATION){
+				return JFaceResources.getImageRegistry().get(SmartPlugIn.STATION_ICON);
+			}else if (element == PatrolFilterOption.MANDATE){
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
+			}else if (element == PatrolFilterOption.LEADER){
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON);
+			}else if (element == PatrolFilterOption.PILOT){
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON);
+			}else if (element == PatrolFilterOption.EMPLOYEE){
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON);
+			}else if (element == PatrolFilterOption.PATROLTYPE){
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+			}else if (element == PatrolFilterOption.TRANSPORT){
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+			}else {
+				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 			}
-			return null;
+
+			//return null;
 		}else if (element instanceof QueryFilterContentProvider.RootNode){
 			return ((QueryFilterContentProvider.RootNode)element).getImage();
 		//}else if (element instanceof AREAFILTER)
@@ -84,6 +101,7 @@ public class QueryFilterLabelProvider extends LabelProvider  {
 			return ((PatrolFilter.PatrolFilterOption)element).getGuiName();
 		}else if (element instanceof QueryFilterContentProvider.RootNode){
 			return ((QueryFilterContentProvider.RootNode)element).getName();
+//			return getStyledText(element).getString();
 		//}else if (area FILTER);
 		}else if (element instanceof QueryFilterContentProvider.OtherItems){
 			return ((QueryFilterContentProvider.OtherItems) element).guiName;
@@ -93,4 +111,6 @@ public class QueryFilterLabelProvider extends LabelProvider  {
 			return dmLabelProvider.getText(element);
 		}
 	}
+
+
 }

@@ -39,10 +39,10 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.query.parser.internal.DateFilter;
 import org.wcs.smart.query.parser.internal.DateFilter.DATE_FIELD_OP;
 import org.wcs.smart.query.parser.internal.DateFilter.DATE_FILTER_OP;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A composite for query date filters.

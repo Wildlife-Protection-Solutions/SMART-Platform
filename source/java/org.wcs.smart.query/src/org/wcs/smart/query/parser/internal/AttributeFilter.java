@@ -24,10 +24,10 @@ package org.wcs.smart.query.parser.internal;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query filter for data model attributes.
