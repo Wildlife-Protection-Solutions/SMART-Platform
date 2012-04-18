@@ -117,7 +117,7 @@ public class DataModel {
 	
 	/**
 	 * 
-	 * @return list of only active categories
+	 * @return list of only active root categories
 	 */
 	public List<Category> getActiveCategories(){
 		ArrayList<Category> tmp = new ArrayList<Category>();

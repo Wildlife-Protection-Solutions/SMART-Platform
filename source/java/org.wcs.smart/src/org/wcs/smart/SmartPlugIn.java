@@ -51,12 +51,18 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	/**
 	 * Image descriptor key for smart employee
 	 */
-	public static final String SMART_EMPLOYEE_ICON = "org.wsc.smart.SMART_EMPLOYEE"; //$NON-NLS-1$
+	public static final String SMART_EMPLOYEE_ICON = "org.wsc.smart.SMART_EMPLOYEE_ICON"; //$NON-NLS-1$
 
 	/**
 	 * Image descriptor key for non-smart user employee
 	 */
-	public static final String EMPLOYEE_ICON = "org.wsc.smart.EMPLOYEE"; //$NON-NLS-1$
+	public static final String EMPLOYEE_ICON = "org.wsc.smart.EMPLOYEE_ICON"; //$NON-NLS-1$
+	
+
+	/**
+	 * Image descriptor key for station
+	 */
+	public static final String STATION_ICON = "org.wsc.smart.STATION_ICON"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor

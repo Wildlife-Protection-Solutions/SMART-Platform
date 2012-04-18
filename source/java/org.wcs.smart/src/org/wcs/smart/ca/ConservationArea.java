@@ -40,7 +40,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.SmartProperties;
-import org.wcs.smart.SmartUtils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * 

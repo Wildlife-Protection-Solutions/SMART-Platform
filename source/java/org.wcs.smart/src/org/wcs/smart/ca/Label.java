@@ -63,23 +63,25 @@ public class Label  {
 
 	private LabelItemPK id;
 	private String value;
-
 	
 	public Label(){
 		id = new LabelItemPK();
 	}
-	
+
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
-		if (elementuuid == null ) return "";
-		Session s = HibernateManager.openSession();
+		if (elementuuid == null){
+			return "";
+		}
+		
 		Label.LabelItemPK id = new Label.LabelItemPK();
 		HasLabel h = new HasLabel();
 		h.setUuid(elementuuid);
 		id.setElement(h);
 		id.setLanguage(SmartDB.getCurrentLanguage());
-		String description = "";
 
+		String description = "";
+		Session s = HibernateManager.openSession();
 		Label lbl = (Label) s.get(Label.class, id);
 		if (lbl == null) {
 			// try for the default language
@@ -91,8 +93,6 @@ public class Label  {
 		}
 		return description;
 	}
-	
-
 	
 	@Transient
 	public static byte[] setCode(byte[] elementuuid, String nl){
@@ -189,10 +189,6 @@ public class Label  {
 		    return code;
 		  }
 	}
-	
-	
-	
-	
 }
 
 

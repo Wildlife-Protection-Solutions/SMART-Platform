@@ -103,6 +103,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.ca.showStations"
+                  icon="images/icons/etool16/station.png"
                   label="Station List ..."
                   mnemonic="S"
                   style="push">
@@ -115,6 +116,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.ca.showDataModel"
+                  icon="images/icons/etool16/data_model.png"
                   label="Data Model ..."
                   mnemonic="D"
                   style="push">

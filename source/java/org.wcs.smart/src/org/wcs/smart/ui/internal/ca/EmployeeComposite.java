@@ -50,10 +50,10 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.util.SmartUtils;
 
 public class EmployeeComposite extends Composite {
 

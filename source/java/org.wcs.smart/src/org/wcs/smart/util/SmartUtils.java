@@ -19,20 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.util;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 
+import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.DateTime;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 
@@ -44,9 +47,39 @@ import org.wcs.smart.ca.Language;
  */
 public class SmartUtils {
 
+	public static NullComparator nullStringComparator = new NullComparator();
 	
+	public static NullComparator nullIntegerComparator = new NullComparator(new Comparator<Integer>() {
+		@Override
+		public int compare(Integer o1, Integer o2) {
+			return o1.compareTo(o2);
+		}
+	});
+	
+	public static NullComparator nullDoubleComparator = new NullComparator(new Comparator<Double>() {
+		@Override
+		public int compare(Double o1, Double o2) {
+			return o1.compareTo(o2);
+		}
+	});
+	
+	public static NullComparator nullBooleanComparator = new NullComparator(new Comparator<Boolean>() {
+		@Override
+		public int compare(Boolean o1, Boolean o2) {
+			return o1.compareTo(o2);
+		}
+	});
+	
+	public static NullComparator nullDateComparator = new NullComparator(new Comparator<Date>() {
+		@Override
+		public int compare(Date o1, Date o2) {
+			return o1.compareTo(o2);
+		}
+	});
 	
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	
+	
 	/**
 	 * Converts a datetime widget to a date object only setting year, month and
 	 * day. The hour, minute, second and millisecond are all set to 0;

@@ -356,17 +356,21 @@ public class HibernateManager extends SmartHibernateManager{
 	
 	/**
 	 * Loads a data model for a given conservation area from the database.
+	 * <p>
+	 * Does not use a transaction; you must open a transaction
+	 * before calling this method if you require a transaction.
+	 * 
+	 * </p>
+	 * 
 	 * @param ca Conservation area
 	 * @param s database connection
 	 * @return data model loaded or <code>null</code> if error occurred
 	 */
 	public static DataModel loadDataModel(ConservationArea ca, Session s){
 		try{
-			s.beginTransaction();
 			List<Category> rootCategories = s.createCriteria(Category.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("parent")).list();
 			List<Attribute> attribute = s.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", ca)).list();
 			DataModel dm = new DataModel(ca, rootCategories, attribute);
-			s.getTransaction().rollback();
 			return dm;
 		}catch (final Exception ex){
 			s.close();

@@ -33,11 +33,11 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Smart area feature reader
@@ -55,6 +55,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	
 	public SmartFeatureReader(ConservationArea ca,
 			AreaType type,SimpleFeatureType ftype) {
+
 		this.session = HibernateManager.openSession();
 		this.session.beginTransaction();
 		itemCursor = session.createCriteria(Area.class)

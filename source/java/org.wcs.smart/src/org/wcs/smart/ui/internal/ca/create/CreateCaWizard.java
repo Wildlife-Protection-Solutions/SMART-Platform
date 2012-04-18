@@ -27,10 +27,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * 

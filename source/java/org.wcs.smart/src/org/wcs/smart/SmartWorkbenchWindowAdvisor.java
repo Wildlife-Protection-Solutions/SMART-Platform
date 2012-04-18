@@ -198,6 +198,11 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(SmartPlugIn.EMPLOYEE_ICON, descriptor);
 		}
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
+				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/station.png"); //$NON-NLS-1$
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(SmartPlugIn.STATION_ICON, descriptor);
+		}
     }
     
     public void postWindowCreate() {
