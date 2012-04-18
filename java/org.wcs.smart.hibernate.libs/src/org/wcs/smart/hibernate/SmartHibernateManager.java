@@ -50,6 +50,8 @@ public class SmartHibernateManager {
 	private static  String userName = "login";
 	private static  String passWord = "smrt";
 	
+	public static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
+	 
 	public static void setUserName(String username, String password){
 		userName = username;
 		passWord = password;
@@ -84,7 +86,7 @@ public class SmartHibernateManager {
 			config.setProperty("hibernate.connection.password", passWord);
 			
 			//add mapping classes
-			for (Class c: getMappings()){
+			for (Class<?> c: getMappings()){
 				config.addAnnotatedClass(c);
 			}
 			sessionFactory = config.buildSessionFactory();
@@ -100,22 +102,38 @@ public class SmartHibernateManager {
 	 * Users are required to close the session when they are done with it.
 	 * @return
 	 */
-	public static final Session openSession(){
+	public synchronized static final Session openSession(){
+		
 		if (sessionFactory == null){
 			createSessionFactory();
 		}
-		return sessionFactory.openSession();
+		Session session = (Session) sessionMapsThreadLocal.get();
+		if (session == null || !session.isOpen() ){
+			session = sessionFactory.openSession();
+			sessionMapsThreadLocal.set(session);
+//			System.out.println("Creating new session : " +Thread.currentThread().getId());
+//		}else{
+//			System.out.println("Re-using session : " +Thread.currentThread().getId());
+		}
+		
+		return session;
 	}
 	
 	/**
 	 * Users are required to close the session when they are done with it.
+	 * @param interceptor a session interceptor
 	 * @return
 	 */
-	public static final Session openSession(Interceptor interceptor){
+	public synchronized static final Session openSession(Interceptor interceptor){
 		if (sessionFactory == null){
 			createSessionFactory();
 		}
-		return sessionFactory.openSession(interceptor);
+		Session session = (Session) sessionMapsThreadLocal.get();
+		if (session == null || !session.isOpen() ){
+			session = sessionFactory.openSession(interceptor);
+			sessionMapsThreadLocal.set(session);
+		}
+		return session;
 	}
 	
 	/**
