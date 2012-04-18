@@ -46,6 +46,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -79,29 +80,32 @@ public class QueryFilterView extends ViewPart {
 	 */
 	private void initialize(){
 		Job j = new Job("initialize query filter tree"){
-
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				final HashMap<QueryFilterContentProvider.RootNodeType, Object> input = new HashMap<QueryFilterContentProvider.RootNodeType, Object>();
+				DataModel dm = null;
 				Session session = HibernateManager.openSession();
+				session.beginTransaction();
 				try{
-					final HashMap<QueryFilterContentProvider.RootNodeType, Object> input = new HashMap<QueryFilterContentProvider.RootNodeType, Object>();
-					DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-					for (Category cat: dm.getActiveCategories()){
+					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+					for (Category cat: dm.getCategories()){
 						visitCategory(cat);
 					}
-					
-					input.put(QueryFilterContentProvider.RootNodeType.DATA_MODEL_FILTERS, dm);
-					input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, PatrolFilterOption.values());
-//					input.put(QueryFilterContentProvider.RootNodeType.AREA_FILTERS,"");
-					Display.getDefault().asyncExec(new Runnable(){
-						@Override
-						public void run() {
-							tv.setInput(input);
-						}});
-					
 				}finally{
+					session.getTransaction().rollback();
 					session.close();
 				}
+				
+				input.put(QueryFilterContentProvider.RootNodeType.DATA_MODEL_FILTERS, dm);
+				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, PatrolFilterOption.values());
+//				input.put(QueryFilterContentProvider.RootNodeType.AREA_FILTERS,"");
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						tv.setInput(input);
+					}});
+					
+
 				return Status.OK_STATUS;
 			}};
 		j.schedule();
@@ -118,8 +122,12 @@ public class QueryFilterView extends ViewPart {
 	private void visitCategory(Category cat){
 		for (Category child : cat.getChildren()){
 			visitCategory(child);
+			child.getName();
 		}
-		cat.getAttributes().size();
+		for (CategoryAttribute ca: cat.getAttributes()){
+			ca.getAttribute().getName();
+		}
+	
 	}
 	
 	

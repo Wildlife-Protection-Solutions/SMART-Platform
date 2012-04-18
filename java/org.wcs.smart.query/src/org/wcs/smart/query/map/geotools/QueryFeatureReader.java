@@ -57,8 +57,10 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		
 		this.ftype = ftype;
 		this.columns = columns;
-		
-		fIterator = query.getLastResults().iterator();
+		this.fIterator = null;
+		if (query.getLastResults() != null){
+			fIterator = query.getLastResults().iterator();
+		}
 	}
 	
 

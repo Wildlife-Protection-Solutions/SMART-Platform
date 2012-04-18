@@ -24,9 +24,15 @@ package org.wcs.smart.query.ui.querytable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -36,7 +42,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.ui.QueryResultLazyContentProvider;
 
 /**
  * Creates a query results table for a given query.
@@ -51,6 +56,8 @@ public class QueryResultsTable {
 	private QueryTableColumn[] columns;
 	private QueryTableViewerColumn[] tableViewerColumns;
 
+	private QueryResultItemComparator sorter;
+	
 	public QueryTableColumn[] getColumns(){
 		return this.columns;
 	}
@@ -66,24 +73,66 @@ public class QueryResultsTable {
 		table.getTable().setHeaderVisible(true);
 		table.getTable().setLinesVisible(true);
 		table.setItemCount(0);
-	
-		Session session = HibernateManager.openSession();
-		try{
-			DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-			PatrolOptions patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-			this.columns = findTableColumns(dm, patrolOps);
-			this.tableViewerColumns = createColumns(table, this.columns);
-		}finally{
-			session.close();
-		}
-		table.setContentProvider(new QueryResultLazyContentProvider());
+		sorter = new QueryResultItemComparator(table);
+		table.setComparator(sorter);
+		
+		//lets start a job to get the table column
+		Job job = new Job("Initialize query results table."){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session session = HibernateManager.openSession();
+				
+				try {
+					PatrolOptions patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					session.beginTransaction();
+					DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+					columns = findTableColumns(dm, patrolOps);
+
+				} finally {
+					session.getTransaction().rollback();
+					session.close();
+				}
+				//in display thread update table
+				Display.getDefault().asyncExec(new Runnable(){
+
+					@Override
+					public void run() {
+						tableViewerColumns = createColumns(table, columns, sorter);
+						//table.setContentProvider(new QueryResultLazyContentProvider());
+						table.setContentProvider(ArrayContentProvider.getInstance());
+						updateVisible(visibleColumnKeys);
+						visibleColumnKeys = null;
+					}});
+
+				return Status.OK_STATUS;
+			}
+			
+		};
+		job.schedule();
+		
 		
 		return table;
 	}
 	
+	/**
+	 * Updates the items in the table with the new list
+	 * <p>If the new list is null; then the table is 
+	 * emptied.</p>
+	 * 
+	 * @param items items to display in table
+	 * 
+	 */
 	public void setInput(List<QueryResultItem> items){
-		table.setItemCount(items.size());
-		table.setInput(items);
+		if (!table.getTable().isDisposed()){
+			if (items == null){
+				table.setItemCount(0);
+				table.setInput(new QueryResultItem[]{});
+			}else{
+				table.setItemCount(items.size());
+				table.setInput(items.toArray());
+			}
+		}
 	}
 	
 	
@@ -95,7 +144,7 @@ public class QueryResultsTable {
 	 * 
 	 * @return an array of query table columns
 	 */
-	private static QueryTableColumn[] findTableColumns(DataModel dm, PatrolOptions ops) {
+	private QueryTableColumn[] findTableColumns(DataModel dm, PatrolOptions ops) {
 		ArrayList<QueryTableColumn> cols = new ArrayList<QueryTableColumn>();
 		for (int i = 0; i < FixedTableColumn.FIXED_COLUMN.values().length; i++) {
 			
@@ -110,6 +159,7 @@ public class QueryResultsTable {
 			}
 		}
 
+
 		// add data model category columns
 		int numCategory = 0;
 		for (Category cat : dm.getActiveCategories()) {
@@ -121,7 +171,8 @@ public class QueryResultsTable {
 		}
 
 		for (Attribute att : dm.getAttributes()) {
-			cols.add(new AttributeTableColumn(att.getName(), att.getKeyId(), att.getType()));
+			String name = att.getName();
+			cols.add(new AttributeTableColumn(name, att.getKeyId(), att.getType()));
 		}
 
 		return cols.toArray(new QueryTableColumn[cols.size()]);
@@ -134,10 +185,10 @@ public class QueryResultsTable {
 	 * @param columns table column definition
 	 * @return list of table viewer columns
 	 */
-	private static QueryTableViewerColumn[] createColumns(TableViewer viewer, QueryTableColumn[] columns) {
+	private static QueryTableViewerColumn[] createColumns(TableViewer viewer, QueryTableColumn[] columns, QueryResultItemComparator sorter) {
 		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.length];
 		for (int i = 0; i < columns.length; i++) {
-			viewers[i] = new QueryTableViewerColumn(viewer,columns[i]);
+			viewers[i] = new QueryTableViewerColumn(viewer,columns[i], sorter);
 		}
 		return viewers;
 	}
@@ -148,7 +199,7 @@ public class QueryResultsTable {
 	 * @param cat category
 	 * @return maximum depth
 	 */
-	private static int getDepth(Category cat) {
+	private int getDepth(Category cat) {
 		int maxDepth = 0;
 		for (Category child : cat.getChildren()) {
 			if (child.getIsActive()) {
@@ -158,12 +209,20 @@ public class QueryResultsTable {
 		return maxDepth + 1;
 
 	}
+	
+	private List<String> visibleColumnKeys = null;
 	/**
 	 * 
 	 * Updates the visible columns in the table.
 	 * @param visibleColumns
 	 */
 	public void updateVisible(List<String> visibleColumnKeys) {
+		if (this.tableViewerColumns == null){
+			//not yet initialized; save to be used when 
+			//initialized
+			this.visibleColumnKeys = visibleColumnKeys;
+			return;
+		}
 		if (visibleColumnKeys == null){
 			//show all
 			for (int i = 0; i < tableViewerColumns.length; i ++){

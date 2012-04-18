@@ -23,8 +23,8 @@ package org.wcs.smart.query.export;
 
 import java.io.FileWriter;
 
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 

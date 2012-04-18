@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
@@ -55,6 +54,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.query.parser.internal.PatrolFilter;
 import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol drop item for a patrol option 

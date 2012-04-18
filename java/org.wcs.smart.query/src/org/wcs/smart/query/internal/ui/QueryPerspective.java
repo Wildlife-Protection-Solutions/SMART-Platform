@@ -53,12 +53,13 @@ public class QueryPerspective implements IPerspectiveFactory {
 		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.query.queryFolder1", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA);
 		folder1.addView(QueryFilterView.ID);
 		folder1.addView("net.refractions.udig.project.ui.layerManager");
-
+		
 		//bottom query and info view
 		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.8f, IPageLayout.ID_EDITOR_AREA);
 		folder2.addView(QueryDefView.ID);
 		folder2.addPlaceholder(InfoView2.VIEW_ID);
 
 		layout.getViewLayout(QueryDefView.ID).setCloseable(false);
+		layout.getViewLayout(QueryFilterView.ID).setCloseable(false);
 	}
 }

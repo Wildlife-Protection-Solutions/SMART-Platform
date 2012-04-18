@@ -28,8 +28,11 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -64,6 +67,9 @@ public class QueryEditorTableContent {
 	private Composite stackComposite;
 	private Form frmQueryArea;
 	private QueryResultsEditor editor;
+	private Button btnCancel;
+	
+	private IProgressMonitor internalMonitor = null;
 	
 	/**
 	 * Creates a new editor area
@@ -79,7 +85,7 @@ public class QueryEditorTableContent {
 	 * Initializes the form values with the query information
 	 * @param query the waypoint query to initialize data with
 	 */
-	private void initValues(WaypointQuery query) {
+	public void initValues(WaypointQuery query) {
 		frmQueryArea.setText("Query: " + query.getName());
 		resultsTable.updateVisible(query.getVisibleColumns());
 	}
@@ -102,15 +108,35 @@ public class QueryEditorTableContent {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				resultsTable.setInput(items);
-				showTable();
+				if (tableComp.isDisposed()){
+					//window closed nothing to update
+					return;
+				}
+				if (getProgressMonitor().isCanceled()){
+					showCancelled();
+				}else{
+					resultsTable.setInput(items);
+					showTable();
+				}
 			}
 		});
 	}
 
 	/**
+	 * Sets the state of the progress area to cancelled
+	 * which disables the progress bar, cancel button and
+	 * updates the text to "cancelled"
+	 */
+	private void showCancelled(){
+		showProgressArea();
+		lblStatus.setText("Query Cancelled");
+		progresBar.setEnabled(false);
+		btnCancel.setEnabled(false);
+	}
+	
+	/**
 	 * Shows the progress bar and message area and hides
-	 * the table area.
+	 * the table area.  Enables all progress elements.
 	 * <p>
 	 * Must be called from display thread.
 	 * </p>
@@ -118,6 +144,9 @@ public class QueryEditorTableContent {
 	public void showProgressArea() {
 		((StackLayout) stackComposite.getLayout()).topControl = progressComp;
 		stackComposite.layout();
+		
+		progresBar.setEnabled(true);
+		btnCancel.setEnabled(true);
 	}
 
 	/**
@@ -132,86 +161,107 @@ public class QueryEditorTableContent {
 	}
 
 	/**
+	 * @return creates a new progress monitor
+	 * for displaying the progress in the progress
+	 * area.
+	 */
+	public IProgressMonitor createProgressMonitor(){
+		internalMonitor =  new IProgressMonitor() {
+				private String taskName = null;
+				private boolean isCancelled = false;
+				@Override
+				public void worked(final int work) {
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (progresBar.isDisposed()){
+								return;
+							}
+							int newValue = progresBar.getSelection() + work;
+							if (newValue > progresBar.getMaximum()) {
+								newValue = progresBar.getMaximum();
+							}
+							if (newValue < progresBar.getMinimum()) {
+								newValue = progresBar.getMinimum();
+							}
+							progresBar.setSelection(newValue);
+						}
+					});
+				}
+
+				@Override
+				public void subTask(final String name) {
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (lblStatus.isDisposed()){
+								return;
+							}
+							lblStatus.setText(taskName + " - " + name);
+						}
+					});
+				}
+
+				@Override
+				public void setTaskName(String name) {
+					this.taskName = name;
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (lblStatus.isDisposed()){
+								return;
+							}
+							lblStatus.setText(taskName);
+						}
+					});
+				}
+
+				@Override
+				public void setCanceled(boolean value) {
+					this.isCancelled = value;
+				}
+
+				@Override
+				public boolean isCanceled() {
+					return isCancelled;
+				}
+
+				@Override
+				public void internalWorked(double work) {
+				}
+
+				@Override
+				public void done() {
+				}
+
+				@Override
+				public void beginTask(final String name, final int totalWork) {
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (progresBar.isDisposed()){
+								return;
+							}
+							progresBar.setMinimum(0);
+							progresBar.setMaximum(totalWork);
+							progresBar.setSelection(0);
+							setTaskName(name);
+
+						}
+					});
+
+				}
+			};
+			return internalMonitor;
+	}
+	
+	/**
 	 * @return a progress monitor that displays the progress
 	 * in the progress bar and progress message area.
 	 */
-	public IProgressMonitor getProgressMonitor() {
-
-		return new IProgressMonitor() {
-			private String taskName = null;
-			private boolean isCancelled = false;
-			@Override
-			public void worked(final int work) {
-				Display.getDefault().asyncExec(new Runnable() {
-
-					@Override
-					public void run() {
-						int newValue = progresBar.getSelection() + work;
-						if (newValue > progresBar.getMaximum()) {
-							newValue = progresBar.getMaximum();
-						}
-						if (newValue < progresBar.getMinimum()) {
-							newValue = progresBar.getMinimum();
-						}
-						progresBar.setSelection(newValue);
-					}
-				});
-			}
-
-			@Override
-			public void subTask(final String name) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						lblStatus.setText(taskName + " - " + name);
-					}
-				});
-			}
-
-			@Override
-			public void setTaskName(String name) {
-				this.taskName = name;
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						lblStatus.setText(taskName);
-					}
-				});
-			}
-
-			@Override
-			public void setCanceled(boolean value) {
-				this.isCancelled = value;
-			}
-
-			@Override
-			public boolean isCanceled() {
-				return isCancelled;
-			}
-
-			@Override
-			public void internalWorked(double work) {
-			}
-
-			@Override
-			public void done() {
-			}
-
-			@Override
-			public void beginTask(final String name, final int totalWork) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						progresBar.setMinimum(0);
-						progresBar.setMaximum(totalWork);
-						progresBar.setSelection(0);
-						setTaskName(name);
-
-					}
-				});
-
-			}
-		};
+	private IProgressMonitor getProgressMonitor() {
+		return internalMonitor;
+		
 	}
 
 	
@@ -308,17 +358,37 @@ public class QueryEditorTableContent {
 	 */
 	private Composite createProcessingComposite(Composite parent) {
 		Composite main = toolkit.createComposite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(1, false));
+		GridLayout gl = new GridLayout(1, false);
+		gl.marginLeft = 100;
+		gl.marginRight = 100;
+		gl.marginBottom = 150;
+		main.setLayout(gl);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		Composite outer = toolkit.createComposite(main, SWT.NONE);
+		gl = new GridLayout(2, false);
+		gl.verticalSpacing = 15;
+		outer.setLayout(gl);
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		
+		lblStatus = toolkit.createLabel(outer, "");
+		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
 		// main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		progresBar = new ProgressBar(main, SWT.SMOOTH | SWT.HORIZONTAL);
+		progresBar = new ProgressBar(outer, SWT.SMOOTH | SWT.HORIZONTAL);
 		toolkit.adapt(progresBar, false, false);
 		progresBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lblStatus = toolkit.createLabel(main, "");
-		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
+		btnCancel = new Button(outer, SWT.NONE);
+		btnCancel.setText("Cancel");
+		btnCancel.setEnabled(true);
+		btnCancel.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				lblStatus.setText("Cancelling Query.  This may take some time.");
+				getProgressMonitor().setCanceled(true);
+			}
+		});
 		return main;
 	}
 

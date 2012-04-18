@@ -24,6 +24,8 @@ package org.wcs.smart.query.ui.querytable;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 /**
  * A table viewer column for the query results table viewer.
@@ -42,13 +44,23 @@ public class QueryTableViewerColumn {
 	 * @param viewer the table viewer
 	 * @param column the column
 	 */
-	public QueryTableViewerColumn(TableViewer viewer, QueryTableColumn column){
+	public QueryTableViewerColumn(TableViewer viewer, 
+			QueryTableColumn column,
+			final QueryResultItemComparator sorter){
 		this.column = column;
 		
 		tcolumn = new TableViewerColumn(viewer, SWT.NONE);
 		tcolumn.getColumn().setText(column.getName());
 		tcolumn.getColumn().setWidth(100);
 		tcolumn.setLabelProvider(column.getLabelProvider());
+		
+		tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				sorter.setSortColumn(QueryTableViewerColumn.this);
+			}
+			
+		});
 	}
 	
 	/**
@@ -76,5 +88,12 @@ public class QueryTableViewerColumn {
 	 */
 	public QueryTableColumn getColumn(){
 		return this.column;
+	}
+	
+	/**
+	 * @return the table column 
+	 */
+	public TableViewerColumn getTableColumn(){
+		return this.tcolumn;
 	}
 }

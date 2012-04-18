@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.wcs.smart.SmartUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A Conservation Area filter.
