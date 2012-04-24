@@ -233,6 +233,23 @@
                mnemonic="d"
                style="push"
                tooltip="delete this patrol">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -505,12 +522,6 @@
             id="org.wcs.smart.patrol.ui.PatrolMapEditor"
             name="Patrol Map Editor">
       </editor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.viewActions">
-   </extension>
-   <extension
-         point="org.eclipse.ui.editorActions">
    </extension>
 
 </plugin>

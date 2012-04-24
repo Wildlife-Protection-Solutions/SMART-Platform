@@ -266,7 +266,7 @@ public class XmlToPatrolConverter {
 		ob.setWaypoint(parent);
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
-			warnings.add("Observation category " + xml.getCategoryKey() + " for waypoint " + parent.getId() + " on " + DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime() + " could not be found. These observations will not be imported."));
+			warnings.add("Observation category " + xml.getCategoryKey() + " for waypoint " + parent.getId() + " on " + DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime()) + " could not be found. These observations will not be imported.");
 			return null;
 		}else{
 			ob.setCategory(cat);

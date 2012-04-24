@@ -98,7 +98,7 @@ public class PatrolHibernateManager extends HibernateManager{
 				query.add(Restrictions.eq("isActive", true));
 			}
 			list = query.list();
-			s.getTransaction().commit();
+			s.getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog("Error loading patrol mandates.", ex);
 			s.close();
@@ -147,7 +147,7 @@ public class PatrolHibernateManager extends HibernateManager{
 				query.add(Restrictions.eq("isActive", true));
 			}
 			list = query.list();
-			s.getTransaction().commit();
+			s.getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog("Error loading patrol mandates.", ex);
 			s.close();
@@ -225,7 +225,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		List<PatrolTransportType> types = null;
 		try{
 			types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
-			s.getTransaction().commit();
+			s.getTransaction().rollback();
 			return types;
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
@@ -247,8 +247,11 @@ public class PatrolHibernateManager extends HibernateManager{
 		s.beginTransaction();
 		List<PatrolTransportType> types = null;
 		try{
-			String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true'"; //'true' = derby fix 
-			types = s.createQuery(query).list();
+			String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix
+			Query q = s.createQuery(query);
+			q.setParameter("ca", ca);
+			q.setParameter("ca2", ca);
+			types = q.list();
 //			types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
 			s.getTransaction().commit();
 			return types;
@@ -322,7 +325,7 @@ public class PatrolHibernateManager extends HibernateManager{
 				query.add(Restrictions.eq("isActive", true));
 			}
 			types = query.list();
-			s.getTransaction().commit();
+			s.getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
 			s.close();
@@ -403,6 +406,7 @@ public class PatrolHibernateManager extends HibernateManager{
 
 		sb.append("_");
 		sb.append(PATROL_ID_FORMATTER.format(cnt));
+		s.evict(p.getConservationArea());
 		return sb.toString();
 		
 	}
