@@ -169,7 +169,7 @@ public class CaInfoComposite extends Composite {
 			cdIdentifier.show();
 			isValid = false;
 		}
-		if (txtIdentifier.getText().matches(".*[^a-zA-Z0-9_-:].*")){
+		if (txtIdentifier.getText().matches(".*[^a-zA-Z0-9_:\\-].*")){
 			cdIdentifier.setDescriptionText("A conservation area id can only contain the characters a-Z, the digist 0-9 or - or :" );
 			cdIdentifier.show();
 			isValid = false;

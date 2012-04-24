@@ -217,9 +217,6 @@
       </splashHandlerProductBinding>
    </extension>
    <extension
-         point="org.eclipse.ui.propertyPages">
-   </extension>
-   <extension
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.ca.showProperties"

@@ -93,6 +93,7 @@ public class AttributeTree {
 		viewer.setInput(attribute);
 		refreshTree(viewer);
 	}
+
 	
 	/**
 	 * 
@@ -344,13 +345,16 @@ public class AttributeTree {
 			}
 			
 			AttributeTreeNode it = new AttributeTreeNode();
+			it.setParent(parent);
+			it.setAttribute(a);
+			
 			AttributeItemDialog dd = new AttributeItemDialog(Display.getCurrent().getActiveShell(), it, siblings, currentLanguage);
 			int ret = dd.open();
 			if (ret == Window.CANCEL){
 				return;
 			}
-			it.setParent(parent);
-			it.setAttribute(a);
+			
+			
 			if (parent != null){
 				if (parent.getChildren() == null){
 					parent.setChildren(new ArrayList<AttributeTreeNode>());

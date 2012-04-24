@@ -136,6 +136,8 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	public Object getParent(Object element) {
 		if (element instanceof Category){
 			return ((Category)element).getParent();
+		}else if (element instanceof CategoryAttribute){
+			return ((CategoryAttribute) element).getCategory();
 		}
 		return null;
 	}

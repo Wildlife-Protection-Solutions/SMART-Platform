@@ -416,9 +416,11 @@ public class DataModel {
 	 * @param session database connection
 	 */
 	public void save(Session session){
+	
 		for (Attribute att: attributes){
 			session.saveOrUpdate(att);
 		}
+		
 		for (Category c: categories){
 			session.saveOrUpdate(c);
 		}

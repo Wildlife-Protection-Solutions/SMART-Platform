@@ -339,6 +339,7 @@ public class DataModelXmlToSmartConverter {
 				newAttributeTreeNode.getChildren().add(newChild);
 			}
 		}
+		newAttributeTreeNode.updateHkey();
 		return newAttributeTreeNode;
 	}
 	

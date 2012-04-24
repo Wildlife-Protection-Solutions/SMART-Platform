@@ -260,13 +260,13 @@ public class Attribute extends DmObject{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@JoinTable(name="smart.dm_att_tree_nodes",
-	joinColumns={@JoinColumn(name="attribute_uuid")},
-	inverseJoinColumns={@JoinColumn(name="node_uuid")}
+		joinColumns={@JoinColumn(name="attribute_uuid")},
+		inverseJoinColumns={@JoinColumn(name="node_uuid")}
 	)
 	@BatchSize(size=200)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	//TODO: figure out how we can sort this on the node_order of the attribute_tree_node table
-	//curenttly sorted in the attributetree.content provider
+	//currently sorted in the attributetree.content provider
 	public List<AttributeTreeNode> getTree(){
 		return this.rootTreeNodes;
 	}
@@ -327,7 +327,6 @@ public class Attribute extends DmObject{
 			clone.setMinValue(this.minValue.doubleValue());
 		}
 		clone.setRegex(this.getRegex());
-		
 		clone.setType(this.getType());
 		
 		
@@ -348,6 +347,7 @@ public class Attribute extends DmObject{
 			for (AttributeTreeNode node: this.rootTreeNodes){
 				clone.rootTreeNodes.add(node.clone(newCa, this.ca, null,defaultLang));
 			}
+			
 		}
 		
 		return clone;

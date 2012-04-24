@@ -187,12 +187,14 @@ public class Category extends DmObject implements HkeyObject{
 	public void updateHkey(){
 		setHkey(computeHkey());
 	}
+	
+	
 	/**
 	 * Computes the hkey for the given category.
 	 * 
 	 * @return the hkey for this category.
 	 */
-	public String computeHkey(){
+	private String computeHkey(){
 		if (parent == null){
 			return this.getKeyId() + ".";
 		}

@@ -41,6 +41,7 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	private Attribute attribute;
 
 	private boolean active;
+	private boolean showRoot;
 
 	/**
 	 * 
@@ -48,17 +49,20 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	 *
 	 */
 	public AttributeTreeContentProvider(){
-		this(false);
+		this(false, true);
 	}
 	
 	/**
 	 * 
 	 * @param active <code>true</code> if only active elements to be included; otherwise <code>false</code> includes all
+	 * @param showRoot <code>true</code> if tree should start with a "Root" element, false if it should just
+	 * start with children
 	 *
 	 */
-	public AttributeTreeContentProvider(boolean active){
-		this.root = new RootNode();
+	public AttributeTreeContentProvider(boolean active, boolean showRoot){
+		root = new RootNode();
 		this.active = active;
+		this.showRoot = showRoot;
 	}
 	/**
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
@@ -80,7 +84,11 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return new RootNode[]{root};
+		if (showRoot){
+			return new RootNode[]{root};
+		}else{
+			return getChildren(root);
+		}
 	}
 
 	/*

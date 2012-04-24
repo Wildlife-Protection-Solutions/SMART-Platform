@@ -65,6 +65,7 @@ import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -641,9 +642,24 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			}
 		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
 			if(attTree != null){
-				att.setTree(attTree.getAttribute().getTree());
+				List<AttributeTreeNode> root = attTree.getAttribute().getTree();
+				for (AttributeTreeNode n : root){
+					setAttribute(att, n);
+				}
+				att.setTree(root);
 			}
 		}
+	}
+	
+
+	private void setAttribute(Attribute newAttribute, AttributeTreeNode node){
+		node.setAttribute(newAttribute);
+		if (node.getChildren() != null){
+			for (AttributeTreeNode child : node.getChildren()){
+				setAttribute(newAttribute, child);
+			}
+		}
+		
 	}
 		
 	/**
