@@ -109,7 +109,7 @@ public class HibernateManager extends SmartHibernateManager{
 		s.beginTransaction();
 		try {
 			List<Employee> results = s.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("endEmploymentDate")).list();
-			s.getTransaction().commit();
+			s.getTransaction().rollback();
 			return results;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -225,7 +225,7 @@ public class HibernateManager extends SmartHibernateManager{
 				st.add(Restrictions.eq("isActive", true));
 			}
 			List<Station> people = st.list();
-			tx.commit();
+			tx.rollback();
 
 			return people;
 	}

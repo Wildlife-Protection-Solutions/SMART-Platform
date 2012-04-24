@@ -43,6 +43,7 @@ public class SmartUserTester extends PropertyTester {
 	@Override
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
+		if (SmartDB.getCurrentEmployee() == null) return false;
 		if (expectedValue.equals("admin")){
 			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
 				SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.ADMIN);

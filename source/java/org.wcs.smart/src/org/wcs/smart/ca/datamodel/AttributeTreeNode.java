@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,7 +34,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -51,13 +51,15 @@ import org.wcs.smart.ca.ConservationArea;
 @Table(name = "smart.dm_attribute_tree")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class AttributeTreeNode extends DmObject {
+public class AttributeTreeNode extends DmObject implements HkeyObject{
 
 	private Attribute attribute = null;
 	private int nodeOrder;
 	private List<AttributeTreeNode> children = new ArrayList<AttributeTreeNode>();
 	private AttributeTreeNode parent = null;
 	private boolean isActive;
+	
+	private String hkey;
 	
 	public AttributeTreeNode(){
 		super();
@@ -89,20 +91,35 @@ public class AttributeTreeNode extends DmObject {
 	}
 	
 	/**
-	 * computes the full key for the category.  This is of
-	 * the form <parent key>.<parent key>.<parent key>...<category key>
-	 * @return
+	 * Updates the hkey of this object
 	 */
-	@Transient
-	public String getFullKey(){
-		if (parent != null){
-			return parent.getFullKey() + "." + getKeyId();
-		}else{
-			return getKeyId();
-		}
+	public void updateHkey(){
+		setHkey(computeHkey());
 	}
 	
-	@OneToMany(fetch=FetchType.EAGER, mappedBy="parent", cascade = {javax.persistence.CascadeType.ALL}, orphanRemoval = true)
+	
+	/**
+	 * Computes the hkey for the given category.
+	 * 
+	 * @return the hkey for this category.
+	 */
+	private String computeHkey(){
+		if (parent == null){
+			return this.getKeyId() + ".";
+		}
+		return parent.computeHkey() + this.getKeyId() + ".";
+	}
+	
+	@Column(name="hkey")
+	public String getHkey(){
+		return this.hkey;
+	}
+	
+	public void setHkey(String hkey){
+		this.hkey = hkey;
+	}
+	
+	@OneToMany(fetch=FetchType.EAGER, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
 //	@Cascade({CascadeType.SAVE_UPDATE})
 //	@JoinColumn(name="parent_uuid")
 	@OrderBy(clause = "node_order")
@@ -156,6 +173,7 @@ public class AttributeTreeNode extends DmObject {
 				clone.getChildren().add(node.clone(newCa, oldCa, clone, defaultLang));
 			}
 		}
+		clone.updateHkey();
 	
 		return clone;
 	}

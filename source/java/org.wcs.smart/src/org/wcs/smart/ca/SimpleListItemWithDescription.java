@@ -95,12 +95,9 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 	public Set<DescriptionLabel> getDescriptions() {
 		if (this.descriptions == null) {
 			this.descriptions = new HashSet<DescriptionLabel>();
-			Session sess = HibernateManager.openSession();
-			sess.beginTransaction();
-			Criteria c = sess.createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", this.descuuid));
+			Session session = HibernateManager.openSession();
+			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", this.descuuid));
 			this.descriptions.addAll(c.list());
-			sess.getTransaction().commit();
-			sess.close();
 		}
 		return this.descriptions;
 	}
