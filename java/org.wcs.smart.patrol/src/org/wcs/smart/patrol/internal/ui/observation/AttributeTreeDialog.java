@@ -94,7 +94,7 @@ public class AttributeTreeDialog extends TitleAreaDialog {
 		FilteredTree fTree = new FilteredTree(main, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
 		tblTree = fTree.getViewer();
 		
-		tblTree.setContentProvider(new AttributeTreeContentProvider(true));
+		tblTree.setContentProvider(new AttributeTreeContentProvider(true, true));
 		tblTree.setLabelProvider(new AttributeTreeLabelProvider());
 		tblTree.setAutoExpandLevel(2);
 		tblTree.setInput(attribute);

@@ -178,7 +178,7 @@ public class PatrolToXmlConverter {
 			}else if (att.getAttribute().getType().equals(AttributeType.TEXT)){
 				xml2.setSValue(att.getStringValue());
 			}else if (att.getAttribute().getType().equals(AttributeType.TREE)){
-				xml2.setItemKey(att.getAttributeTreeNode().getFullKey());
+				xml2.setItemKey(att.getAttributeTreeNode().getHkey());
 			}
 			xml.getAttributes().add(xml2);
 		}

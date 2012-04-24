@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
@@ -23,16 +24,19 @@ import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 public class DeletePatrolHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		PatrolListView view = (PatrolListView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(PatrolListView.ID);
-		ISelection thisSelection = null;
-		if (view != null){
-			thisSelection = view.getViewSite().getSelectionProvider().getSelection();
-		}
-		if (thisSelection == null){
-			return null;
-		}
 		
-		final ISelection lastSelection = thisSelection;
+//		PatrolListView view = (PatrolListView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(PatrolListView.ID);
+//		ISelection thisSelection = null;
+//		if (view != null){
+//			thisSelection = view.getViewSite().getSelectionProvider().getSelection();
+//		}
+//		if (thisSelection == null){
+//			return null;
+//		}
+//		
+		final ISelection lastSelection = HandlerUtil.getCurrentSelection(event);
+		
+//		final ISelection lastSelection = thisSelection;
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
