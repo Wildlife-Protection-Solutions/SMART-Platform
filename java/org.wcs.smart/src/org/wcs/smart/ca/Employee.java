@@ -72,14 +72,24 @@ public class Employee {
 	 * Maximum length of family and given names
 	 */
 	public static final int MAX_NAME_LENGTH = 64;
+	
 	/**
 	 * Maximum smart id length
 	 */
 	public static final int MAX_SMART_ID_LENGTH = 16;
+	
+	/**
+	 * Minimum smart id length
+	 */
+	public static final int MIN_SMART_ID_LENGTH = 4;
 	/**
 	 * Maximum smart password length
 	 */
 	public static final int MAX_SMART_PASSWORD_LENGTH = 16;
+	/**
+	 * Minimum smart password length
+	 */
+	public static final int MIN_SMART_PASSWORD_LENGTH = 4;
 	
 	/**
 	 * Smart user level.

@@ -29,6 +29,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -39,6 +40,7 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.internal.ca.create.CaWizard_UserDef;
 
 /**
  * Dialog for creating new employees or
@@ -110,11 +112,22 @@ public class EmployeeDialog extends Dialog {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		 
 		
-		eComposite = new EmployeeComposite(composite, SWT.NONE, true, toUpdate!=null, true, agencies);
+		eComposite = new EmployeeComposite(composite, SWT.NONE, true, toUpdate!=null, true, agencies){
+			@Override
+			public boolean validate(){
+				boolean valid = super.validate();
+				Button x = getButton(OK);
+				if (x != null){
+					x.setEnabled(valid);
+				}
+				return valid;
+			}
+		};
 		eComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (toUpdate != null){
 			eComposite.initFields(toUpdate);
 		}		
+		
 		return parent;
 		
 	}

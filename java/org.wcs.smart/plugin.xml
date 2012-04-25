@@ -45,7 +45,8 @@
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
                id="org.wcs.smart.menu.file"
-               label="&amp;File">
+               label="File"
+               mnemonic="F">
             <command
                   commandId="org.wcs.smart.changeUserPassword"
                   icon="images/icons/etool16/changepass.png"
@@ -77,7 +78,8 @@
          </menu>
          <menu
                id="org.wcs.smart.menu.ca"
-               label="&amp;Conservation Area">
+               label="Conservation Area"
+               mnemonic="C">
             <command
                   commandId="org.wcs.smart.ca.showProperties"
                   label="Conservation Area Properties ..."
@@ -144,7 +146,8 @@
          </menu>
          <menu
                id="Help"
-               label="&amp;Help">
+               label="Help"
+               mnemonic="H">
             <command
                   commandId="org.eclipse.ui.help.aboutAction"
                   label="About Smart"
