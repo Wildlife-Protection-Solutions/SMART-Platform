@@ -21,8 +21,14 @@
  */
 package org.wcs.smart.query.parser.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
 /**
  * Boolean filter expression.
@@ -36,11 +42,11 @@ import java.util.HashSet;
  * @author Emily
  * @since 1.0.0
  */
-public class BooleanExpression implements Filter{
+public class BooleanExpression implements IFilter{
 
-	private Filter e1;
-	private Filter e2;
-	private BooleanOperator op;
+	private IFilter e1;
+	private IFilter e2;
+	private Operator op;
 
 	/**
 	 * Creates a new boolean expression 
@@ -50,7 +56,7 @@ public class BooleanExpression implements Filter{
 	 * @param op boolean operator
 	 * @return
 	 */
-	public static BooleanExpression create(Filter e1, Filter e2, BooleanOperator op){
+	public static BooleanExpression create(IFilter e1, IFilter e2, Operator op){
 		return new BooleanExpression(e1, e2, op);
 	}
 	
@@ -61,14 +67,15 @@ public class BooleanExpression implements Filter{
 	 * @param e2 right expression 
 	 * @param op boolean operator
 	 */
-	private BooleanExpression(Filter e1, Filter e2, BooleanOperator op){
+	private BooleanExpression(IFilter e1, IFilter e2, Operator op){
+		assert op == Operator.AND || op == Operator.OR;
 		this.e1 = e1;
 		this.op = op;
 		this.e2 = e2;
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asString()
 	 */
 	@Override
 	public String asString(){
@@ -77,7 +84,7 @@ public class BooleanExpression implements Filter{
 
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
@@ -85,7 +92,7 @@ public class BooleanExpression implements Filter{
 	}
 	
 	/**	
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -93,7 +100,7 @@ public class BooleanExpression implements Filter{
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -101,7 +108,7 @@ public class BooleanExpression implements Filter{
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -109,12 +116,41 @@ public class BooleanExpression implements Filter{
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
 		e1.getAttributeFilters(attributes);
 		e2.getAttributeFilters(attributes);
+	}
+	
+	public DropItem[] getDropItems(Session session) throws Exception{
+		
+		DropItem[] its1 = e1.getDropItems(session);
+		DropItem opDropItem = DropItemFactory.INSTANCE.createBooleanOpDropItem();
+		opDropItem.initializeData(op.getGuiValue());
+		DropItem[] its2 = e2.getDropItems(session);
+		
+		DropItem[] results = new DropItem[its1.length + its2.length + 1];
+		for (int i = 0; i < its1.length; i ++){
+			results[i] = its1[i];
+		}
+		results[its1.length] = opDropItem;
+		for (int i = 0; i < its2.length; i++){
+			results[its1.length + i + 1] = its2[i];
+		}
+		return results;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getChildren()
+	 */
+	@Override
+	public List<IFilter> getChildren() {
+		List<IFilter> kids = new ArrayList<IFilter>();
+		kids.add(e1);
+		kids.add(e2);
+		return kids;
 	}
 }
 

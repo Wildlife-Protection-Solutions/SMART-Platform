@@ -44,13 +44,13 @@ public class BooleanPatrolDropItem extends DropItem {
 	 * @param target drop target
 	 * @param filter patrol filter
 	 */
-	public BooleanPatrolDropItem(Composite parent, DropTargetPanel target, PatrolFilter.PatrolFilterOption filter) {
-		super(parent, target);
+	public BooleanPatrolDropItem(PatrolFilter.PatrolFilterOption filter) {
+		//super(parent, target);
 		
 		this.text = filter.getGuiName();
 		this.key = "patrol:" + filter.getKeyPart();
 		
-		this.lbl.setText(this.text);
+	
 	}
 
 	/**
@@ -73,10 +73,17 @@ public class BooleanPatrolDropItem extends DropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));		
 		initDrag(lbl);
+		
+		this.lbl.setText(this.text);
+	}
+
+	@Override
+	public void initializeData(Object data) {
+		
 	}
 
 }

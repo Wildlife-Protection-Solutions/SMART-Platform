@@ -12,18 +12,18 @@ public class Parser implements ParserConstants {
   }
 
 /* ------------ Expressions ----------------------*/
-  final public Filter Expression() throws ParseException {
-        Filter expr;
+  final public IFilter Expression() throws ParseException {
+        IFilter expr;
     expr = ExpressionPart();
     jj_consume_token(0);
         {if (true) return expr;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Filter ExpressionPart() throws ParseException {
-  Filter expr = null;
-  BooleanOperator op = null;
-  Filter expr2 = null;
+  final public IFilter ExpressionPart() throws ParseException {
+  IFilter expr = null;
+  Operator op = null;
+  IFilter expr2 = null;
     expr = BooleanPart();
     label_1:
     while (true) {
@@ -44,13 +44,13 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public Filter BooleanPart() throws ParseException {
-  Filter filter = null;
+  final public IFilter BooleanPart() throws ParseException {
+  IFilter filter = null;
   boolean hasNot = false;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case K_NOT:
       jj_consume_token(K_NOT);
-                hasNot = true;
+                    hasNot = true;
       break;
     default:
       jj_la1[1] = jj_gen;
@@ -59,69 +59,54 @@ public class Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case CATEGORY_KEY:
       /* Category Key */
-                filter = CategoryKey();
+                      filter = CategoryKey();
       break;
     case ATT_STR_KEY:
-    case PATROL_STR_KEY:
-      /* String comparison */
-                filter = StringExpression();
-      break;
     case ATT_VALUE_KEY:
-      /* Numeric comparison */
-                      filter = NumberExpression();
-      break;
     case ATT_BOOL_KEY:
-    case PATROL_BOOL_KEY:
-      /* boolean */
-                      filter = BooleanItemExpression();
-      break;
     case ATT_LIST_KEY:
-      jj_consume_token(ATT_LIST_KEY);
-                                     String key = token.image;
-      jj_consume_token(EQUAL);
-                               Operator op = Operator.parseOperator(token.image);
-      jj_consume_token(ATT_ITEM_VALUE_KEY);
-                                            String value = token.image;
-                                filter = AttributeFilter.createListItemFilter(key,op,value);
-      break;
     case ATT_TREE_KEY:
-      jj_consume_token(ATT_TREE_KEY);
-                                     key = token.image;
-      jj_consume_token(EQUAL);
-                               op = Operator.parseOperator(token.image);
-      jj_consume_token(ATT_ITEM_VALUE_KEY);
-                                            value = token.image;
-                                filter = AttributeFilter.createTreeItemFilter(key,op,value);
+    case CAT_ATT_STR_KEY:
+    case CAT_ATT_VALUE_KEY:
+    case CAT_ATT_BOOL_KEY:
+    case CAT_ATT_LIST_KEY:
+    case CAT_ATT_TREE_KEY:
+    case PATROL_STR_KEY:
+    case PATROL_BOOL_KEY:
+      filter = AttributeExpression();
       break;
     case OPENPAREN:
       jj_consume_token(OPENPAREN);
       filter = ExpressionPart();
       jj_consume_token(CLOSEPAREN);
-          filter = BracketFilter.createFilter(filter);
+                        filter = BracketFilter.createFilter(filter);
       break;
     default:
       jj_la1[2] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-            if (hasNot)
-            {
+                if (hasNot){
               filter = NotExpression.createNotExpression(filter);
             }
-  {if (true) return filter;}
+                {if (true) return filter;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Filter BooleanItemExpression() throws ParseException {
-  Filter filter = null;
+  final public IFilter BooleanItemExpression() throws ParseException {
+  IFilter filter = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ATT_BOOL_KEY:
       jj_consume_token(ATT_BOOL_KEY);
-    filter = AttributeFilter.createBooleanFilter(token.image);
+                filter = AttributeFilter.createBooleanFilter(token.image);
+      break;
+    case CAT_ATT_BOOL_KEY:
+      jj_consume_token(CAT_ATT_BOOL_KEY);
+                filter = CategoryAttributeFilter.createBooleanFilter(token.image);
       break;
     case PATROL_BOOL_KEY:
       jj_consume_token(PATROL_BOOL_KEY);
-      filter = PatrolFilter.createBooleanFilter(token.image);
+                filter = PatrolFilter.createBooleanFilter(token.image);
       break;
     default:
       jj_la1[3] = jj_gen;
@@ -132,49 +117,141 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public Filter NumberExpression() throws ParseException {
-  Filter filter = null;
+  final public IFilter NumberExpression() throws ParseException {
+  IFilter filter = null;
   Operator op = null;
   String key = null;
   Double value = null;
-    jj_consume_token(ATT_VALUE_KEY);
-                               key = token.image;
-    op = NumberOp();
-    jj_consume_token(NUMBER);
-                         value = Double.parseDouble(token.image);
-                filter = AttributeFilter.createValueFilter(key, op, value);
-  {if (true) return filter;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Filter StringExpression() throws ParseException {
-  Filter filter = null;
-  Operator op = null;
-  String key = null;
-  String value = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case ATT_STR_KEY:
-      jj_consume_token(ATT_STR_KEY);
-                                key = token.image;
-      op = StringOp();
-      jj_consume_token(QUOTED_STRING);
-                                value = token.image;
-                filter = AttributeFilter.createStringFilter(key, op, value);
+    case ATT_VALUE_KEY:
+      jj_consume_token(ATT_VALUE_KEY);
+                                          key = token.image;
+      op = NumberOp();
+      jj_consume_token(NUMBER);
+                            value = Double.parseDouble(token.image);
+                        filter = AttributeFilter.createValueFilter(key, op, value);
       break;
-    case PATROL_STR_KEY:
-      jj_consume_token(PATROL_STR_KEY);
-                                       key = token.image;
-      op = StringOp();
-      jj_consume_token(QUOTED_STRING);
-                               value = token.image;
-                filter = PatrolFilter.createStringFilter(key, op, value);
+    case CAT_ATT_VALUE_KEY:
+      jj_consume_token(CAT_ATT_VALUE_KEY);
+                                              key = token.image;
+      op = NumberOp();
+      jj_consume_token(NUMBER);
+                            value = Double.parseDouble(token.image);
+                        filter = CategoryAttributeFilter.createValueFilter(key, op, value);
       break;
     default:
       jj_la1[4] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-  {if (true) return filter;}
+                {if (true) return filter;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public IFilter AttributeExpression() throws ParseException {
+        IFilter filter = null;
+        String key;
+        Operator op;
+        String value;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case ATT_STR_KEY:
+    case CAT_ATT_STR_KEY:
+    case PATROL_STR_KEY:
+      /* String comparison */
+              filter = StringExpression();
+      break;
+    case ATT_VALUE_KEY:
+    case CAT_ATT_VALUE_KEY:
+      /* Numeric comparison */
+              filter = NumberExpression();
+      break;
+    case ATT_BOOL_KEY:
+    case CAT_ATT_BOOL_KEY:
+    case PATROL_BOOL_KEY:
+      /* boolean */
+              filter = BooleanItemExpression();
+      break;
+    case ATT_LIST_KEY:
+      jj_consume_token(ATT_LIST_KEY);
+                                  key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(ATT_ITEM_VALUE_KEY);
+                                         value = token.image;
+                filter = AttributeFilter.createListItemFilter(key,op,value);
+      break;
+    case CAT_ATT_LIST_KEY:
+      jj_consume_token(CAT_ATT_LIST_KEY);
+                                      key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(ATT_ITEM_VALUE_KEY);
+                                         value = token.image;
+                filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
+      break;
+    case ATT_TREE_KEY:
+      jj_consume_token(ATT_TREE_KEY);
+                                  key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(ATT_ITEM_VALUE_KEY);
+                                         value = token.image;
+                filter = AttributeFilter.createTreeItemFilter(key,op,value);
+      break;
+    case CAT_ATT_TREE_KEY:
+      jj_consume_token(CAT_ATT_TREE_KEY);
+                                      key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(ATT_ITEM_VALUE_KEY);
+                                         value = token.image;
+                filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
+      break;
+    default:
+      jj_la1[5] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+                {if (true) return filter;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public IFilter StringExpression() throws ParseException {
+  IFilter filter = null;
+  Operator op = null;
+  String key = null;
+  String value = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case ATT_STR_KEY:
+      jj_consume_token(ATT_STR_KEY);
+                                         key = token.image;
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                                           value = token.image;
+                        filter = AttributeFilter.createStringFilter(key, op, value);
+      break;
+    case CAT_ATT_STR_KEY:
+      jj_consume_token(CAT_ATT_STR_KEY);
+                                             key = token.image;
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                                           value = token.image;
+                        filter = CategoryAttributeFilter.createStringFilter(key, op, value);
+      break;
+    case PATROL_STR_KEY:
+      jj_consume_token(PATROL_STR_KEY);
+                                            key = token.image;
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                                          value = token.image;
+                        filter = PatrolFilter.createStringFilter(key, op, value);
+      break;
+    default:
+      jj_la1[6] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+                {if (true) return filter;}
     throw new Error("Missing return statement in function");
   }
 
@@ -208,7 +285,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(LESSEQUAL);
       break;
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[7] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -228,7 +305,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(NOT_CONTAINS);
       break;
     default:
-      jj_la1[6] = jj_gen;
+      jj_la1[8] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -236,7 +313,7 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public BooleanOperator BooleanOp() throws ParseException {
+  final public Operator BooleanOp() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case K_AND:
       jj_consume_token(K_AND);
@@ -245,11 +322,11 @@ public class Parser implements ParserConstants {
       jj_consume_token(K_OR);
       break;
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[9] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-    {if (true) return BooleanOperator.parseOperator(token.image);}
+    {if (true) return Operator.parseOperator(token.image);}
     throw new Error("Missing return statement in function");
   }
 
@@ -262,7 +339,7 @@ public class Parser implements ParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[8];
+  final private int[] jj_la1 = new int[10];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -270,10 +347,10 @@ public class Parser implements ParserConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x4080,0x2000,0x2000000,0x0,0x0,0x1fc0000,0x0,0x4080,};
+      jj_la1_0 = new int[] {0x4080,0x2000,0x2000000,0x0,0x0,0x0,0x0,0x1fc0000,0x0,0x4080,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0xdf800,0x84000,0x41000,0x0,0x1c,0x0,};
+      jj_la1_1 = new int[] {0x0,0x0,0x1bff800,0x1084000,0x42000,0x1bff000,0x821000,0x0,0x1c,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -287,7 +364,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -301,7 +378,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -311,7 +388,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -321,7 +398,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -330,7 +407,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -339,7 +416,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -390,12 +467,12 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[58];
+    boolean[] la1tokens = new boolean[63];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 10; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -407,7 +484,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 58; i++) {
+    for (int i = 0; i < 63; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

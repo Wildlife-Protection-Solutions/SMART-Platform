@@ -27,8 +27,8 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.QueryResultsEditor;
-import org.wcs.smart.query.ui.QueryResultsInput;
 
 /**
  * Handler for creating a new query.
@@ -42,7 +42,7 @@ public class CreateQueryHandler extends AbstractHandler {
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		QueryResultsInput input = new QueryResultsInput();
+		QueryInput input = new QueryInput();
 		
 		try {
 			IWorkbenchPage page = null;

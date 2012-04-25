@@ -51,10 +51,10 @@ public class BracketDropItem extends DropItem {
 	 * @param target drop target
 	 * @param order bracket type
 	 */
-	public BracketDropItem(Composite parent, DropTargetPanel target, BracketType order) {
-		super(parent, target);
+	public BracketDropItem(BracketType order) {
+		//super(parent, target);
 		this.order = order;
-		lbl.setText(getText());
+		
 	}
 
 	
@@ -83,10 +83,18 @@ public class BracketDropItem extends DropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 		initDrag(lbl);
+		
+		lbl.setText(getText());
+	}
+
+
+	@Override
+	public void initializeData(Object data) {
+		
 	}
 
 }

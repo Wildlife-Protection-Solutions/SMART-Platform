@@ -54,6 +54,8 @@ public class FixedTableColumn implements QueryTableColumn {
 		PATROL_MANDATE("Mandate", ColumnType.STRING,"patrol:mandate"),
 		PATROL_ARMED("Armed", ColumnType.BOOLEAN,"patrol:armed"),
 		PATROL_LEG_ID("Patrol Leg Id", ColumnType.STRING, "patrol:legid"),
+		PATROL_LEG_LEADER("Leader", ColumnType.STRING, "patrol:leader"),
+		PATROL_LEG_PILOT("Pilot", ColumnType.STRING, "patrol:pilot"),
 		TRANSPORT_TYPE("Patrol Transport Type", ColumnType.STRING,"patrol:transporttype"),
 		WAYPOINT_ID("Waypoint Id", ColumnType.INTEGER,"waypoint:id"),
 		WAYPOINT_DATE("Waypoint Date", ColumnType.DATE,"waypoint:date"),
@@ -149,6 +151,10 @@ public class FixedTableColumn implements QueryTableColumn {
 			return item.getPatrolStartDate();
 		case PATROL_STATION:
 			return item.getStation();
+		case PATROL_LEG_LEADER:
+			return item.getLeader();
+		case PATROL_LEG_PILOT:
+			return item.getPilot();
 		case PATROL_TEAM:
 			return item.getTeam();
 		case PATROL_TYPE:

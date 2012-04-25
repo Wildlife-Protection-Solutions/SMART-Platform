@@ -19,60 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.parser.internal;
+package org.wcs.smart.query;
+
+import org.wcs.smart.query.model.QueryFolder;
 
 /**
- * Boolean operator
- * 
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
  * @author Emily
  * @since 1.0.0
  */
-public class BooleanOperator {
+public interface IQueryFolderListener {
+	public static final int FOLDER_ADDED = 1;
+	public static final int FOLDER_RENAMED = 2;
+	public static final int FOLDER_DELETED = 3;
 	
-	public static BooleanOperator AND = new BooleanOperator("AND", "AND");
-	public static BooleanOperator OR = new BooleanOperator("OR", "OR");
-	public static BooleanOperator NOT = new BooleanOperator("NOT", "NOT");
-
+	public static final int QUERY_ADDED = 4;
+	public static final int QUERY_SAVED = 5;
+	public static final int QUERY_DELETED = 6;
 	
-	/**
-	 * Parses the boolean operator from the value 
-	 * @param value the string value 
-	 * @return
-	 */
-	public static BooleanOperator parseOperator(String value) {
-		if (value.toLowerCase().equalsIgnoreCase("and"))
-			return AND;
-		if (value.toLowerCase().equalsIgnoreCase("or"))
-			return OR;
-		return null;
-	}
-
-	private String sqlOperator;
-	private String guiValue ;
+	void folderChanged(int eventType, Object object);
 	
-	/**
-	 * Creates a new boolean operator.
-	 * 
-	 * @param guiValue the value to display to the user 
-	 * @param sqlOperator the sql operator value 
-	 */
-	private BooleanOperator(String guiValue, String sqlOperator){
-		this.sqlOperator = sqlOperator;
-		this.guiValue = guiValue;
-	}
-	
-	/**
-	 * @return the operator gui value
-	 */
-	public String getGuiValue(){
-		return this.guiValue;
-	}
-	
-	/**
-	 * @return the sql operator
-	 */
-	public String asSql(){
-		return this.sqlOperator;
-	}
-
 }

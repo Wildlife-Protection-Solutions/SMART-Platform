@@ -38,15 +38,13 @@ import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
  */
 public class DropItemFactory {
 
-	private DropTargetPanel target;
-	
+	public static final DropItemFactory INSTANCE = new DropItemFactory();
 	/**
 	 * Creates a new factory
 	 * 
 	 * @param target drop target 
 	 */
-	public DropItemFactory(DropTargetPanel target){
-		this.target = target;
+	private DropItemFactory(){
 	}
 	
 	/**
@@ -56,7 +54,7 @@ public class DropItemFactory {
 	 * @return
 	 */
 	public DropItem createCategoryDropItem(Category category){
-		CategoryDropItem item = new CategoryDropItem(target.getComposite(), target, category);
+		CategoryDropItem item = new CategoryDropItem(category);
 		return item;
 	}
 	
@@ -68,9 +66,11 @@ public class DropItemFactory {
 	public DropItem createAttributeDropItem(CategoryAttribute attribute){
 		DropItem item = null;
 		if (attribute.getAttribute().getType() == AttributeType.NUMERIC || attribute.getAttribute().getType() == AttributeType.TEXT){
-			item =  new AttributeDropItem(target.getComposite(), target, attribute);
+			item =  new AttributeDropItem(attribute);
 		}else if (attribute.getAttribute().getType() == AttributeType.LIST){
-			item =  new AttributeListDropItem(target.getComposite(), target, attribute);
+			item =  new AttributeListDropItem(attribute);
+		}else if (attribute.getAttribute().getType() == AttributeType.TREE){
+			item = new AttributeTreeDropItem(attribute);
 		}
 		return item;
 	}
@@ -84,20 +84,21 @@ public class DropItemFactory {
 	public DropItem createAttributeDropItem(Attribute attribute){
 		DropItem item = null;
 		if (attribute.getType() == AttributeType.NUMERIC || attribute.getType() == AttributeType.TEXT){
-			item =  new AttributeDropItem(target.getComposite(), target, attribute);
+			item =  new AttributeDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.LIST){
-			item =  new AttributeListDropItem(target.getComposite(), target, attribute);
+			item =  new AttributeListDropItem(attribute);
+		}else if (attribute.getType() == AttributeType.TREE){
+			item = new AttributeTreeDropItem(attribute);
 		}
 		return item;
 	}
-	
 
 	/**
 	 * Creates a drop item for a boolean operator
 	 * @return
 	 */
 	public DropItem createBooleanOpDropItem(){
-		DropItem item = new BooleanOpDropItem(target.getComposite(), target);
+		DropItem item = new BooleanOpDropItem();
 		return item;
 	}
 	
@@ -109,9 +110,9 @@ public class DropItemFactory {
 	public DropItem createPatrolDropItem(PatrolFilter.PatrolFilterOption option){
 		DropItem item = null;
 		if (option == PatrolFilterOption.ARMED){
-			item = new BooleanPatrolDropItem(target.getComposite(),target, option);
+			item = new BooleanPatrolDropItem( option);
 		}else if (option == PatrolFilterOption.ID){
-			item = new PatrolIdDropItem(target.getComposite(), target, option);
+			item = new PatrolIdDropItem(option);
 		}else if (option == PatrolFilterOption.MANDATE || 
 				option == PatrolFilterOption.PATROLTYPE ||
 				option == PatrolFilterOption.TRANSPORT ||
@@ -120,7 +121,7 @@ public class DropItemFactory {
 				option == PatrolFilterOption.LEADER ||
 				option == PatrolFilterOption.TEAM||
 				option == PatrolFilterOption.PILOT){
-			item = new PatrolListDropItem(target.getComposite(), target, option);
+			item = new PatrolListDropItem( option);
 		}
 		return item;
 			
@@ -134,12 +135,24 @@ public class DropItemFactory {
 	 */
 	public DropItem[] createOtherDropItem(QueryFilterContentProvider.OtherItems other){
 		if (other == QueryFilterContentProvider.OtherItems.BRACKETS){
-			return new DropItem[]{new BracketDropItem(target.getComposite(), target, BracketType.OPEN),
-			 new BracketDropItem(target.getComposite(), target, BracketType.CLOSE)};
+			return new DropItem[]{new BracketDropItem(BracketType.OPEN),
+			 new BracketDropItem(BracketType.CLOSE)};
 		}else if (other == QueryFilterContentProvider.OtherItems.NOT){
-			return new DropItem[]{new NotDropItem(target.getComposite(), target)};
+			return new DropItem[]{new NotDropItem()};
 		}
 		return null;
 	}
+	
+	/**
+	 * Creates one of the other query drop items
+	 * @param other
+	 * @return an array of drop items of the associated type
+	 */
+	public DropItem createOtherSingleBracketDropItem(BracketType type){
+			return  new BracketDropItem(type);
+	}
+	
+	
+
 	
 }

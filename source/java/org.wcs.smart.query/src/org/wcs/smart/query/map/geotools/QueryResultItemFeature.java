@@ -54,7 +54,7 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createFeature(QueryResultItem it, QueryTableColumn[] columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.length + 2];
-		data[0] = it.getPatrolId() + "_" + it.getWaypointId() + "_" + System.nanoTime(); //TODO: make unique
+		data[0] = it.getPatrolId() + "_" + it.getWaypointId() + "_" + System.nanoTime();
 		for (int i = 0; i < columns.length; i ++){
 			Object x =  columns[i].getValue(it);
 			if (x instanceof Boolean){

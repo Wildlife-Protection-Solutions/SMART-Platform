@@ -7,8 +7,12 @@ elementFormDefault="qualified">
     <complexType name="QueryType">
     	<sequence>
     		<element name="definition" type="string"></element>
+    		<element name="uuiditem" type="tns:UuidItemType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
     	</sequence>
     	<attribute name="name" type="string"></attribute>
+    	<attribute name="language" type="string"></attribute>
     </complexType>
 
     <element name="SmartQuery" type="tns:Query" />
@@ -19,5 +23,13 @@ elementFormDefault="qualified">
     	<sequence>
     		<element name="query" type="tns:QueryType" maxOccurs="1" minOccurs="1"></element>
     	</sequence>
+    </complexType>
+
+    <complexType name="UuidItemType">
+    	<sequence>
+    		<element name="id" type="string"></element>
+    		<element name="value" type="string" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="uuid" type="string"></attribute>
     </complexType>
 </schema>

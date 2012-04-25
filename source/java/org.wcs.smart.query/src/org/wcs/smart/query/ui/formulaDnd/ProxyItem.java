@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Label;
  * @author Emily
  * @since 1.0.0
  */
-public class ProxyItem extends Composite {
+public class ProxyItem extends DropItem {
 
 	private Label lbl = null;
 	
@@ -44,8 +44,41 @@ public class ProxyItem extends Composite {
 	 * 
 	 * @param parent
 	 */
-	public ProxyItem(Composite parent) {
-		super(parent, SWT.NONE);
+	public ProxyItem() {
+		
+	}
+	
+	/**
+	 * Sets the proxy item label text
+	 * @param text
+	 */
+	public void setLabelText(String text){
+		this.lbl.setText(text);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
+	 */
+	@Override
+	public String getText() {
+		return this.lbl.getText();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
+	 */
+	@Override
+	public String asQueryPart() {
+		return "";
+	}
+
+		
+	/**
+	 * @param parent parent composite
+	 */
+	@Override
+	protected Composite createCompositeInternal(Composite parent){
+		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginBottom = 2;
 		layout.marginLeft = 4;
@@ -56,16 +89,17 @@ public class ProxyItem extends Composite {
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		
-		super.setLayout(layout);
-		this.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		main.setLayout(layout);
+		main.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		
+		createComposite(parent);
 		GridData gd = new GridData();
 		gd.horizontalIndent = 5;
 		gd.verticalIndent = 0;
 		
-		super.setData(gd);
+		main.setData(gd);
 		
-		Composite inner = new Composite(this, SWT.BORDER);
+		Composite inner = new Composite(main, SWT.BORDER);
 		inner.setLayout(new GridLayout(1, false));
 		inner.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		
@@ -77,13 +111,25 @@ public class ProxyItem extends Composite {
 		lbl = new Label(inner, SWT.NONE);
 		lbl.setText("");
 		lbl.setVisible(false);
+		
+		return main;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected void createComposite(Composite parent) {
+		// not used for proxy item
+		
+	}
+
+	/**
+	 *  Nothing to initialize
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
+	 */
+	@Override
+	public void initializeData(Object data) {
 	}
 	
-	/**
-	 * Sets the proxy item label text
-	 * @param text
-	 */
-	public void setLabelText(String text){
-		this.lbl.setText(text);
-	}
 }

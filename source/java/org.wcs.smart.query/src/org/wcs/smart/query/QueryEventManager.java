@@ -23,6 +23,9 @@ package org.wcs.smart.query;
 
 import java.util.ArrayList;
 
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.WaypointQuery;
 
 /**
@@ -35,7 +38,9 @@ public class QueryEventManager {
 
 	private static QueryEventManager instance = null;
 	
-	private ArrayList<QueryChangedListener> listeners = new ArrayList<QueryChangedListener>();
+	private ArrayList<IQueryListener> listeners = new ArrayList<IQueryListener>();
+	private ArrayList<IQueryFolderListener> folderListeners = new ArrayList<IQueryFolderListener>();
+	
 	
 	/**
 	 * @return the query event manager
@@ -54,22 +59,48 @@ public class QueryEventManager {
 	}
 	
 	/**
-	 * Fires all query changed listeners.
+	 * Fires the query changed method of all
+	 * query listeners
 	 * 
 	 * @param query the query that was modified
 	 */
 	public void fireQueryChangedListeners(WaypointQuery query){
-		for (QueryChangedListener listener: listeners){
+		for (IQueryListener listener: listeners){
 			listener.queryChanged(query);
 			
 		}
 	}
 	
 	/**
+	 * Fires all query run event on all query listeners.
+	 * 
+	 * @param query the query that is to be run 
+	 */
+	public void fireQueryRunListeners(WaypointQuery query){
+		for (IQueryListener listener: listeners){
+			listener.queryRun(query);
+			
+		}
+	}
+	
+	/**
+	 * Fires all query changed listeners.
+	 * 
+	 * @param query the query that was modified
+	 */
+	public void fireFolderChangedListeners(int eventType, Object folder){
+		for (IQueryFolderListener listener: folderListeners){
+			listener.folderChanged(eventType, folder);
+			
+		}
+	}
+	
+	
+	/**
 	 * Adds a query change listener 
 	 * @param listener the listener
 	 */
-	public void addQueryChangedEvent(QueryChangedListener listener){
+	public void addQueryChangedEvent(IQueryListener listener){
 		listeners.add(listener);
 	}
 	
@@ -77,7 +108,23 @@ public class QueryEventManager {
 	 * Removes a query change listener
 	 * @param listener the listener to remove
 	 */
-	public void removeQueryChangedEvent(QueryChangedListener listener){
+	public void removeQueryChangedEvent(IQueryListener listener){
 		listeners.remove(listener);
+	}
+	
+	/**
+	 * Adds a query folder listener 
+	 * @param listener the listener
+	 */
+	public void addQueryFolderListener(IQueryFolderListener listener){
+		folderListeners.add(listener);
+	}
+	
+	/**
+	 * Removes a query folder listener
+	 * @param listener the listener to remove
+	 */
+	public void removeQueryFolderListener(IQueryFolderListener listener){
+		folderListeners.remove(listener);
 	}
 }

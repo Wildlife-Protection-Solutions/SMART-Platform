@@ -21,10 +21,16 @@
  */
 package org.wcs.smart.query.parser.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.query.model.QueryHibernateManager;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
 /**
  * A data model category filter. Of the form<br>
@@ -33,8 +39,10 @@ import org.wcs.smart.ca.datamodel.Category;
  * @author Emily
  * @since 1.0.0
  */
-public class CategoryFilter implements Filter {
+public class CategoryFilter implements IFilter {
 
+	private String categoryIdentifier;  //category:category_hkey
+	
 	/**
 	 * Creates new category filter
 	 * @param categoryIdentifier the category key part of the form "category:<categoryhkey>"
@@ -43,8 +51,6 @@ public class CategoryFilter implements Filter {
 	public static CategoryFilter createFilter(String categoryIdentifier){
 		return new CategoryFilter(categoryIdentifier);
 	}
-	
-	private String categoryIdentifier;  //category:category_hkey
 	
 	/**
 	 * Creates new category filter
@@ -55,7 +61,7 @@ public class CategoryFilter implements Filter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asString()
 	 */
 	@Override
 	public String asString(){
@@ -64,7 +70,7 @@ public class CategoryFilter implements Filter {
 	
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
@@ -80,7 +86,7 @@ public class CategoryFilter implements Filter {
 	
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -88,7 +94,7 @@ public class CategoryFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -96,7 +102,7 @@ public class CategoryFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -104,9 +110,42 @@ public class CategoryFilter implements Filter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public DropItem[] getDropItems(Session session) throws Exception{
+		Category cat = getCategory(session);
+		DropItem it = DropItemFactory.INSTANCE.createCategoryDropItem(cat);
+		return new DropItem[]{it};
+	}
+	
+	/**
+	 * Loads the full category item from the database.
+	 * 
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
+	public Category getCategory(Session session) throws Exception{
+		String keyPart = categoryIdentifier.split(":")[1];
+		Category cat = QueryHibernateManager.getCategory(session, keyPart);
+		if (cat == null){
+			throw new Exception("Query formula could not be parsed from the database.  Category " + keyPart + " could not be found.");
+		}
+		return cat;
+	}
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getChildren()
+	 */
+	@Override
+	public List<IFilter> getChildren() {
+		return null;
 	}
 }

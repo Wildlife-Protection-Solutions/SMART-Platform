@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.formulaDnd;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -38,11 +39,11 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.ui.QueryDefView;
 import org.wcs.smart.query.ui.SourceProvider;
 
 /**
@@ -56,13 +57,14 @@ public class DropTargetPanel {
 	
 	private ScrolledComposite dropTarget = null;
 	private Composite dropTargetContent; 
-	private DropItemFactory factory;
 	private SourceProvider provider;
 	
 	private ProxyItem proxy = null;	//drag proxy item
 
-	private ArrayList<Control> items = new ArrayList<Control>();	//list of controls in formula
-
+	private ArrayList<DropItem> items = new ArrayList<DropItem>();	//list of controls in formula
+	private QueryDefView parentView = null;
+	
+	private TreeDropDownViewer treeEditor = null;
 	
 	/**
 	 * Creates a new drop target panel.  After creating a drop
@@ -70,18 +72,15 @@ public class DropTargetPanel {
 	 * 
 	 * @param provider the source provider that provides the query valid 
 	 */
-	public DropTargetPanel(SourceProvider provider){
+	public DropTargetPanel(SourceProvider provider, QueryDefView view){
 		this.provider = provider;
+		this.parentView = view;
 	}
 	
-	/**
-	 * Sets the drop item factory.
-	 * @param factory
-	 */
-	public void setDropItemFactory(DropItemFactory factory){
-		this.factory = factory;
-	}
 	
+	public QueryDefView getParentView(){
+		return this.parentView;
+	}
 	/**
 	 * @return 
 	 */
@@ -95,10 +94,11 @@ public class DropTargetPanel {
 
 	/**
 	 * Clears all items from the query and hides the 
-	 * proxy,
+	 * proxy.
+	 * 
 	 */
 	public void clear(){
-		for (Control item: items){
+		for (DropItem item: items){
 			if (item == proxy){
 				continue;
 			}
@@ -106,10 +106,18 @@ public class DropTargetPanel {
 				item.dispose();
 			}
 		}
-		proxy.setVisible(false);
+		proxy.getWidget().setVisible(false);
 		items.clear();
 		dropTarget.redraw();
 		validate();
+	}
+	
+	/**
+	 * @return the current set of drop items associated
+	 * with this query
+	 */
+	public List<DropItem> getItems(){
+		return items;
 	}
 	
 	/**
@@ -121,7 +129,7 @@ public class DropTargetPanel {
 	public String getQueryString(){
 		StringBuilder query = new StringBuilder();
 		
-		for (Control item : items){
+		for (Object item : items){
 			if (item instanceof DropItem){
 				DropItem it = (DropItem)item;
 				query.append(it.asQueryPart());
@@ -131,6 +139,9 @@ public class DropTargetPanel {
 		return query.toString();
 	}
 	
+	public TreeDropDownViewer getTreeEditor(){
+		return this.treeEditor;
+	}
 	
 	/**
 	 * Validates the current query.
@@ -146,13 +157,35 @@ public class DropTargetPanel {
 				Parser parser = new Parser(is);
 				parser.Expression();
 				is.close();
-			} catch (Exception ex) {
+			} catch (Throwable ex) {
 				// failed to parse query
 				isvalid = false;
 			}
 		}
-		provider.setQueryValue(isvalid);
 		
+		provider.setQueryValue(isvalid);
+		if (parentView.getQuery() != null){
+			parentView.getQuery().setIsValid(isvalid);
+			parentView.getQuery().setQueryFilter(query);
+		}
+	}
+	
+	/**
+	 * Adds all items to the current query.  
+	 * <p>This does not fire the query changed event.
+	 * </p>
+	 * 
+	 * @param items
+	 */
+	public void addElements(List<DropItem> items) {
+		if (items != null) {
+			for (DropItem item : items) {
+				item.createWidget(this);
+				this.items.add(item);
+			}
+		}
+		orderElements();
+		validate();
 	}
 	
 	/**
@@ -160,14 +193,19 @@ public class DropTargetPanel {
 	 * @param item drop item to add
 	 */
 	public void addElement(DropItem item) {
+		item.createWidget(this);
+		
 		if (items.size() > 0){
 			if (!(item instanceof NotDropItem || item instanceof BracketDropItem)){
-				items.add(this.factory.createBooleanOpDropItem());	
+				DropItem it = DropItemFactory.INSTANCE.createBooleanOpDropItem();
+				it.createWidget(this);
+				items.add(it);	
 			}
 		}
 		items.add(item);
 		orderElements();
 		validate();
+		
 	}
 
 	/**
@@ -186,26 +224,29 @@ public class DropTargetPanel {
 	/**
 	 * Redraws the items in the query formula in the correct order
 	 */
-	private void orderElements() {
+	public void orderElements() {
 		int currx = 0;
 		int curry = 0;
 		int maxWidth = dropTarget.getBounds().width;
 		int height = 10;
+		int width = 0;
 		for (int i = 0; i < items.size(); i++) {
-			Point pnt = items.get(i).computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			Point pnt = items.get(i).getWidget().computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			height = pnt.y;
-			if (currx + pnt.x > maxWidth) {
+			if (currx + pnt.x > maxWidth && currx != 0) {
 				// move to next line
+				width = Math.max(width, currx);
 				curry += height;
 				currx = 0;
 			}
-			items.get(i).setBounds(currx, curry, pnt.x, height);
+			items.get(i).getWidget().setBounds(currx, curry, pnt.x, height);
 			currx += pnt.x;
-			if (items.get(i) instanceof Composite) {
-				((Composite) items.get(i)).layout();
+			if (items.get(i).getWidget() != null) {
+				items.get(i).getWidget().layout();
 			}
 		}
-		dropTargetContent.setSize(maxWidth, curry + height);
+		width = Math.max(width, currx);
+		dropTargetContent.setSize(width, curry + height);
 		dropTarget.redraw();
 
 	}
@@ -224,24 +265,19 @@ public class DropTargetPanel {
 	 */
 	public Composite createComposite(Composite parent) {
 
-		dropTarget = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.BORDER);
+		dropTarget = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dropTarget.addListener(SWT.Resize, new Listener() {
-
 			@Override
 			public void handleEvent(Event event) {
 				orderElements();
-
 			}
-		});
-
+		});		
+		
 		dropTargetContent = new Composite(dropTarget, SWT.NONE);
 		dropTargetContent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		dropTarget.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		dropTarget.setContent(dropTargetContent);
-
-		proxy = new ProxyItem(dropTargetContent);
-		proxy.setVisible(false);
 
 		DropTarget dtarget = new DropTarget(dropTarget, DND.DROP_MOVE);
 		dtarget.setTransfer(types);
@@ -258,7 +294,7 @@ public class DropTargetPanel {
 				}
 				//hide drop item and setup proxy
 				dp = (DropItem)selection.getFirstElement();
-				dp.setVisible(false);
+				dp.getWidget().setVisible(false);
 				int i = items.indexOf(dp);
 				if ( i < 0){
 					items.add(proxy);
@@ -267,12 +303,12 @@ public class DropTargetPanel {
 					items.remove(dp);
 				}
 				proxy.setLabelText(dp.getText());
-				proxy.setVisible(true);
+				proxy.getWidget().setVisible(true);
 				orderElements();
 			}
 
 			public void dragLeave(DropTargetEvent event) {
-				proxy.setVisible(false);
+				proxy.getWidget().setVisible(false);
 				items.remove(proxy);
 				orderElements();
 			}
@@ -297,26 +333,27 @@ public class DropTargetPanel {
 				//remove proxy and put back the drop item
 				int i = items.indexOf(proxy);
 				items.add(i, dp);
-				dp.setVisible(true);
+				dp.getWidget().setVisible(true);
 				items.remove(proxy);
-				proxy.setVisible(false);
+				proxy.getWidget().setVisible(false);
 				orderElements();
 				dp = null;
 				validate();
+				
 			}
 
 			private void moveElements(int x, int y) {
-				Control target = null;
+				DropItem target = null;
 				boolean before = false;
-				for (Control children : items) {
-					Point p = children.getParent().toDisplay(
-							children.getBounds().x, children.getBounds().y);
-					Rectangle r = new Rectangle(p.x, p.y,
-							children.getBounds().width,
-							children.getBounds().height);
+				for (DropItem children : items) {
+					Rectangle childBounds = children.getWidget().getBounds();
+					
+					Point p = children.getWidget().getParent().toDisplay(childBounds.x, childBounds.y);
+					Rectangle r = new Rectangle(p.x, p.y, childBounds.width,childBounds.height);
+					
 					if (r.contains(x, y)) {
 						target = children;
-						before = x < p.x + (children.getBounds().width / 2.0);
+						before = x < p.x + (childBounds.width / 2.0);
 						break;
 					}
 				}
@@ -338,10 +375,18 @@ public class DropTargetPanel {
 				}
 			}
 		});
-
+	
 		dropTarget.setSize(dropTarget.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		dropTargetContent.setSize(dropTarget.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
+		
+		treeEditor = new TreeDropDownViewer(parent.getShell());
+		
+		//create proxy item
+		proxy = new ProxyItem();
+		proxy.createWidget(this);
+		proxy.getWidget().setVisible(false);
+		
 		return dropTarget;
 	}
 }

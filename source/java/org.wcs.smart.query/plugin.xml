@@ -19,6 +19,13 @@
             name="Query Filter View"
             restorable="false">
       </view>
+      <view
+            class="org.wcs.smart.query.ui.querylist.QueryListView"
+            icon="images/icons/view16/query_list.png"
+            id="org.wcs.smart.query.QueryListView"
+            name="QueryList"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -50,6 +57,26 @@
                label="Show Query Perspective"
                mnemonic="Q"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -64,14 +91,171 @@
                   mnemonic="Q"
                   style="push"
                   tooltip="Create a new database query.">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.query.exportQuery"
                   icon="images/icons/etool16/exportquery.png"
                   label="Export Query"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.save"
+                  icon="images/icons/etool16/save.gif"
+                  id="org.wcs.smart.query.save.toolbar"
+                  label="Save"
+                  mnemonic="S"
+                  tooltip="Save the query">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.saveAs"
+                  icon="images/icons/etool16/saveas.gif"
+                  label="Save As"
+                  mnemonic="e"
+                  tooltip="Save as a new query">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
             </command>
          </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.query.ui.QueryDefView">
+         <command
+               commandId="org.wcs.smart.query.save"
+               icon="images/icons/etool16/save.gif"
+               label="Save"
+               mnemonic="S"
+               tooltip="Save the query">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.query.SmartQueryPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.clearQueryDefinition"
+               icon="images/icons/etool16/clear.png"
+               style="push"
+               tooltip="Clear the query">
+         </command>
+         <command
+               commandId="org.wcs.smart.query.runQuery"
+               icon="images/icons/etool16/run_query.png"
+               label="Run Current Query"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.wcs.smart.query.QueryListView">
+         <command
+               commandId="org.wcs.smart.query.AddFolder"
+               icon="images/icons/etool16/folder_add.png"
+               label="New Folder..."
+               style="push"
+               tooltip="adds a sub folder ">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="newfolder"
+                           property="org.wcs.smart.query.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.query.renameFolder"
+               label="Rename..."
+               style="push"
+               tooltip="rename the folder">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="rename"
+                           property="org.wcs.smart.query.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.query.DeleteItem"
+               icon="images/icons/etool16/delete.png"
+               label="Delete"
+               style="push"
+               tooltip="Delete the selected folder">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="delete"
+                           property="org.wcs.smart.query.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -97,6 +281,32 @@
             id="org.wcs.smart.query.exportQuery"
             name="Export Query">
       </command>
+      <command
+            id="org.wcs.smart.query.DeleteItem"
+            name="Delete Query or Folder">
+      </command>
+      <command
+            id="org.wcs.smart.query.AddFolder"
+            name="Add Sub-Folder">
+      </command>
+      <category
+            id="org.wcs.smart.query.category.save"
+            name="name">
+      </category>
+      <command
+            categoryId="org.wcs.smart.query.category.save"
+            id="org.wcs.smart.query.save"
+            name="Save Query">
+      </command>
+      <command
+            categoryId="org.wcs.smart.query.category.save"
+            id="org.wcs.smart.query.saveAs"
+            name="Save As">
+      </command>
+      <command
+            id="org.wcs.smart.query.renameFolder"
+            name="Rename Query Folder">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -111,22 +321,121 @@
       <handler
             class="org.wcs.smart.query.ui.ClearQueryHandler"
             commandId="org.wcs.smart.query.clearQueryDefinition">
-      </handler>
-      <handler
-            class="org.wcs.smart.query.ui.RunQueryHandler"
-            commandId="org.wcs.smart.query.runQuery">
          <enabledWhen>
             <with
-                  variable="org.wcs.smart.query.ui.queryvalid">
+                  variable="activeEditorId">
                <equals
-                     value="true">
+                     value="org.wcs.smart.query.ui.QueryResultsEditor">
                </equals>
             </with>
          </enabledWhen>
       </handler>
       <handler
+            class="org.wcs.smart.query.ui.RunQueryHandler"
+            commandId="org.wcs.smart.query.runQuery">
+         <enabledWhen>
+            <and>
+               <with
+                     variable="org.wcs.smart.query.ui.queryvalid">
+                  <equals
+                        value="true">
+                  </equals>
+               </with>
+               <with
+                     variable="activeEditorId">
+                  <equals
+                        value="org.wcs.smart.query.ui.QueryResultsEditor">
+                  </equals>
+               </with>
+            </and>
+         </enabledWhen>
+      </handler>
+      <handler
             class="org.wcs.smart.ui.tools.ExportQueryHandler"
             commandId="org.wcs.smart.query.exportQuery">
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.query.ui.QueryResultsEditor">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.querylist.DeleteItemHandler"
+            commandId="org.wcs.smart.query.DeleteItem">
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <test
+                        args="delete"
+                        property="org.wcs.smart.query.editable">
+                  </test>
+               </iterate>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.querylist.AddFolderHandler"
+            commandId="org.wcs.smart.query.AddFolder">
+         <activeWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <test
+                        args="newfolder"
+                        property="org.wcs.smart.query.editable">
+                  </test>
+               </iterate>
+            </with>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.SaveQueryHandler"
+            commandId="org.wcs.smart.query.save">
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.query.ui.QueryResultsEditor">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.SaveAsHandler"
+            commandId="org.wcs.smart.query.saveAs">
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.query.ui.QueryResultsEditor">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.querylist.RenameFolderHandler"
+            commandId="org.wcs.smart.query.renameFolder">
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <test
+                        args="rename"
+                        property="org.wcs.smart.query.editable">
+                  </test>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -144,23 +453,33 @@
       </sourceProvider>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.wcs.smart.query.ui.QueryDefView">
-         <command
-               commandId="org.wcs.smart.query.clearQueryDefinition"
-               icon="images/icons/etool16/clear.png"
-               style="push"
-               tooltip="Clear the query">
-         </command>
-         <command
-               commandId="org.wcs.smart.query.runQuery"
-               icon="images/icons/etool16/run_query.png"
-               label="Run Current Query"
-               style="push">
-         </command>
-      </menuContribution>
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.query.model.Query">
+      </class>
+      <class
+            class="org.wcs.smart.query.model.WaypointQuery">
+      </class>
+      <class
+            class="org.wcs.smart.query.model.QueryFolder">
+      </class>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.wcs.smart.query.querylist.QueryFolderEditablePropertyTester"
+            id="org.wcs.smart.query.isQueryFolderEditor"
+            namespace="org.wcs.smart.query"
+            properties="editable"
+            type="java.lang.Object">
+      </propertyTester>
+      <propertyTester
+            class="org.wcs.smart.query.querylist.RootFolderTester"
+            id="org.wcs.smart.query.isRootFolder"
+            namespace="org.wcs.smart.query"
+            properties="isRootFolder"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 
 </plugin>

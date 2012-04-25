@@ -48,6 +48,9 @@ public class AttributeDropItem extends DropItem{
 
 	private String text;
 	private String key;
+	
+	private String currentValue = null;
+	private String currentOp = null;	
 	private Label lblAttribute;
 	private Text value;
 	private Combo operators;
@@ -62,24 +65,16 @@ public class AttributeDropItem extends DropItem{
 	 * @param target drop target
 	 * @param att the category attribute to make up the drop item
 	 */
-	public AttributeDropItem(Composite parent, DropTargetPanel target, CategoryAttribute att) {
-		super(parent, target);
-
+	public AttributeDropItem(CategoryAttribute att) {
+		//super(parent, target);
 		this.type = att.getAttribute().getType();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
-		lblAttribute.setText(this.text);		
+		
 		if (att.getAttribute().getType() == AttributeType.NUMERIC){
-			this.key = "category:" + att.getCategory().getHkey() + " and attribute:n:" + att.getAttribute().getKeyId();
-			for (int i = 0; i < Operator.NUMERIC_OPS.length; i ++){
-				operators.add(Operator.NUMERIC_OPS[i].asString());
-			}
+			this.key = "category:" + att.getCategory().getHkey() + ":attribute:n:" + att.getAttribute().getKeyId();
 		}else if (att.getAttribute().getType() == AttributeType.TEXT){
-			this.key = "category:" + att.getCategory().getHkey() + " and attribute:s:" + att.getAttribute().getKeyId();			
-			for (int i = 0; i < Operator.STRING_OPS.length; i ++){
-				operators.add(Operator.STRING_OPS[i].asString());
-			}
+			this.key = "category:" + att.getCategory().getHkey() + ":attribute:s:" + att.getAttribute().getKeyId();			
 		}
-		operators.select(0);
 	}
 	
 	/**
@@ -89,23 +84,24 @@ public class AttributeDropItem extends DropItem{
 	 * @param target drop target
 	 * @param att the category attribute to make up the drop item
 	 */
-	public AttributeDropItem(Composite parent, DropTargetPanel target, Attribute att) {
-		super(parent, target);
+	public AttributeDropItem(Attribute att) {
+		//super(parent, target);
 		this.type = att.getType();
 		this.text = att.getName();
-		lblAttribute.setText(this.text);		
 		if (att.getType() == AttributeType.NUMERIC){
 			this.key = "attribute:n:" + att.getKeyId();
-			for (int i = 0; i < Operator.NUMERIC_OPS.length; i ++){
-				operators.add(Operator.NUMERIC_OPS[i].asString());
-			}
 		}else if (att.getType() == AttributeType.TEXT){
 			this.key = "attribute:s:" + att.getKeyId();
-			for (int i = 0; i < Operator.STRING_OPS.length; i ++){
-				operators.add(Operator.STRING_OPS[i].asString());
-			}
 		}
-		operators.select(0);
+	}
+	
+	/**
+	 * @param data - a string array of the operator and value
+	 */
+	public void initializeData(Object data){
+		String[] d = (String[]) data;
+		this.currentOp = d[0];
+		this.currentValue = d[1];
 	}
 
 	/**
@@ -121,12 +117,24 @@ public class AttributeDropItem extends DropItem{
 	 */
 	@Override
 	public String asQueryPart() {
+		StringBuilder querypart = new StringBuilder();
 		if (type == AttributeType.NUMERIC){
-			return this.key + " " + operators.getItem(operators.getSelectionIndex()) + " " + value.getText() ;
+			querypart.append (this.key);
+			querypart.append( " ");
+			querypart.append(Operator.NUMERIC_OPS[operators.getSelectionIndex()].asSmartValue());
+			querypart.append(" ");
+			querypart.append(value.getText());
+			
 		}else if (type == AttributeType.TEXT){
-			return this.key + " " + operators.getItem(operators.getSelectionIndex()) + " \"" + value.getText() + "\"";
+			querypart.append (this.key);
+			querypart.append( " ");
+			
+			querypart.append(Operator.STRING_OPS[operators.getSelectionIndex()].asSmartValue());
+			querypart.append(" \"");
+			querypart.append(value.getText());
+			querypart.append("\"");
 		}
-		return null;
+		return querypart.toString();
 	}
 
 	/**
@@ -144,7 +152,7 @@ public class AttributeDropItem extends DropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(4, false);
 		layout.marginWidth = 0;
@@ -154,7 +162,17 @@ public class AttributeDropItem extends DropItem{
 		
 		lblAttribute = new Label(main, SWT.NONE);
 		operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
-		
+		operators.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (currentOp != null && currentOp.equals(operators.getText())){
+					//no change
+				}else{
+					currentOp = operators.getText();
+					queryChanged();
+				}
+			}
+		});
 		FontData fd = (operators.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -165,8 +183,13 @@ public class AttributeDropItem extends DropItem{
 			
 			@Override
 			public void modifyText(ModifyEvent e) {
-				fireListeners();
-				value.setToolTipText(value.getText());
+				if (currentValue != null && currentValue.equals(value.getText())){
+					//nothing changed
+				}else{
+					queryChanged();
+					value.setToolTipText(value.getText());
+					currentValue = value.getText();
+				}
 			}
 		});
 		GridData gd = new GridData();
@@ -176,6 +199,29 @@ public class AttributeDropItem extends DropItem{
 		
 		initDrag(main);
 		initDrag(lblAttribute);
+		
+		lblAttribute.setText(this.text);
+		
+		Operator[] options = null;
+		if (type == AttributeType.NUMERIC){
+			options = Operator.NUMERIC_OPS;
+		}else if (type == AttributeType.TEXT){
+			options = Operator.STRING_OPS;
+		}
+		if (options != null){
+			int index = 0;
+			for (int i = 0; i < options.length; i ++){
+				operators.add(options[i].asString());
+				if (currentOp != null && currentOp.equals( options[i].asString() )){
+					index = i;
+				}
+			}
+			operators.select(index);
+		}
+		
+		if (currentValue != null){
+			value.setText(currentValue);
+		}
 	}
 
 }

@@ -99,23 +99,33 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ATT_TREE_KEY = 48;
   /** RegularExpression Id. */
-  int ATT_ITEM_VALUE_KEY = 49;
+  int CAT_ATT_STR_KEY = 49;
   /** RegularExpression Id. */
-  int PATROL_STR_KEY = 50;
+  int CAT_ATT_VALUE_KEY = 50;
   /** RegularExpression Id. */
-  int PATROL_BOOL_KEY = 51;
+  int CAT_ATT_BOOL_KEY = 51;
   /** RegularExpression Id. */
-  int PATROL_STR_ITEM = 52;
+  int CAT_ATT_LIST_KEY = 52;
   /** RegularExpression Id. */
-  int PATROLLEG_STR_ITEM = 53;
+  int CAT_ATT_TREE_KEY = 53;
   /** RegularExpression Id. */
-  int DM_KEY = 54;
+  int ATT_ITEM_VALUE_KEY = 54;
   /** RegularExpression Id. */
-  int LETTER = 55;
+  int PATROL_STR_KEY = 55;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 56;
+  int PATROL_BOOL_KEY = 56;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 57;
+  int PATROL_STR_ITEM = 57;
+  /** RegularExpression Id. */
+  int PATROLLEG_STR_ITEM = 58;
+  /** RegularExpression Id. */
+  int DM_KEY = 59;
+  /** RegularExpression Id. */
+  int LETTER = 60;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 61;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 62;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -171,6 +181,11 @@ public interface ParserConstants {
     "<ATT_BOOL_KEY>",
     "<ATT_LIST_KEY>",
     "<ATT_TREE_KEY>",
+    "<CAT_ATT_STR_KEY>",
+    "<CAT_ATT_VALUE_KEY>",
+    "<CAT_ATT_BOOL_KEY>",
+    "<CAT_ATT_LIST_KEY>",
+    "<CAT_ATT_TREE_KEY>",
     "<ATT_ITEM_VALUE_KEY>",
     "<PATROL_STR_KEY>",
     "<PATROL_BOOL_KEY>",
@@ -178,7 +193,7 @@ public interface ParserConstants {
     "<PATROLLEG_STR_ITEM>",
     "<DM_KEY>",
     "<LETTER>",
-    "\".\"",
+    "<SPECIAL_CHARS>",
     "<QUOTED_STRING>",
   };
 

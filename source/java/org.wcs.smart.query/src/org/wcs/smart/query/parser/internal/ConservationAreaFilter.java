@@ -24,9 +24,12 @@ package org.wcs.smart.query.parser.internal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -35,9 +38,31 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class ConservationAreaFilter implements Filter {
+public class ConservationAreaFilter implements IFilter {
+
+	/**
+	 * Parses a conservation area filter from
+	 * the string representation of the filter
+	 * 
+	 * @param caFilterAsString
+	 * @return
+	 */
+	public static ConservationAreaFilter parseFilter(String caFilterAsString) {
+		ConservationAreaFilter filter = new ConservationAreaFilter();
+		try {
+			String[] bits = caFilterAsString.split(",");
+			for (int i = 0; i < bits.length; i++) {
+				filter.addConservationArea(SmartUtils.decodeHex(bits[i]));
+
+			}
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"Could not parse conservation area filter.", ex);
+		}
+		return filter;
+	}
 	
-	private ArrayList<ConservationArea> filters = new ArrayList<ConservationArea>();
+	private ArrayList<byte[]> filters = new ArrayList<byte[]>();
 
 	
 	/**
@@ -52,28 +77,36 @@ public class ConservationAreaFilter implements Filter {
 	 * @param newCa conservation area
 	 */
 	public void addConservationArea(ConservationArea newCa){
-		filters.add(newCa);
+		filters.add(newCa.getUuid());
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 * Adds a conservation area uuid to the filter
+	 * @param uuid the conservation area uuid
+	 */
+	public void addConservationArea(byte[] uuid){
+		filters.add(uuid);
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("(");
+//		sb.append("(");
 		for (int i = 0; i < filters.size(); i ++){
 			if (i != 0){
 				sb.append(" , ");
 			}
-			sb.append( filters.get(i).getId() );
+			sb.append( SmartUtils.encodeHex( filters.get(i) ) );
 		}			
-		sb.append(")");
+//		sb.append(")");
 		return sb.toString();
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
@@ -84,7 +117,7 @@ public class ConservationAreaFilter implements Filter {
 		sb.append(tableMapping.get(Patrol.class));
 		sb.append(".ca_uuid IN (");
 		for (int i = 0; i < filters.size(); i++) {
-			String uuid = SmartUtils.encodeHex(filters.get(i).getUuid());
+			String uuid = SmartUtils.encodeHex(filters.get(i));
 			sb.append("x'" + uuid + "'");
 		}
 		sb.append(")");
@@ -94,7 +127,7 @@ public class ConservationAreaFilter implements Filter {
 	
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -102,7 +135,7 @@ public class ConservationAreaFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -110,7 +143,7 @@ public class ConservationAreaFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -118,9 +151,26 @@ public class ConservationAreaFilter implements Filter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+	}
+	
+	/**
+	 * There are no drop items for conservation area filters
+	 * @return null
+	 */
+	@Override
+	public DropItem[] getDropItems(Session session) throws Exception{
+		return null;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getChildren()
+	 */
+	@Override
+	public List<IFilter> getChildren() {
+		return null;
 	}
 }

@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -63,6 +64,8 @@ public class AttributeListDropItem extends DropItem{
 	private Font smallerFont;
 	private Attribute attribute = null;
 	
+	private ListItem currentSelection = null;
+	
 	/*
 	 * Job to load the attribute list options
 	 */
@@ -71,25 +74,27 @@ public class AttributeListDropItem extends DropItem{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
+			final ArrayList<ListItem> items = new ArrayList<ListItem>();
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
-				final ArrayList<ListItem> items = new ArrayList<ListItem>();
 				s.saveOrUpdate(attribute);
 				for (AttributeListItem item : attribute.getAttributeList()){
 					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
 				}
-				
-				Display.getDefault().asyncExec(new Runnable(){
-
-					@Override
-					public void run() {
-						listViewer.setInput(items.toArray(new ListItem[items.size()]));
-						
-					}});
-				
 			}finally{
+				s.getTransaction().rollback();
 				s.close();
 			}
+			Display.getDefault().asyncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					listViewer.setInput(items.toArray(new ListItem[items.size()]));
+					if (currentSelection != null){
+						listViewer.setSelection(new StructuredSelection(currentSelection));
+					}
+				}});
 			return Status.OK_STATUS;
 		}};
 		
@@ -100,13 +105,18 @@ public class AttributeListDropItem extends DropItem{
 	 * @param panel drop target
 	 * @param att the category attribute to make up the drop item
 	 */
-	public AttributeListDropItem(Composite parent, DropTargetPanel panel, CategoryAttribute att) {
-		super(parent, panel);
+	public AttributeListDropItem(CategoryAttribute att) {
+		//super(parent, panel);
 		this.key = "category:" + att.getCategory().getHkey() + " and attribute:l:" + att.getAttribute().getKeyId();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
 		this.attribute = att.getAttribute();
-		lblAttribute.setText(this.text + " = ");
-		loadItemsJobs.schedule();		
+	}
+	
+	/**
+	 * @param data - a listItem 
+	 */
+	public void initializeData(Object data){
+		currentSelection = (ListItem) data;
 	}
 	
 	/**
@@ -115,14 +125,11 @@ public class AttributeListDropItem extends DropItem{
 	 * @param panel drop target
 	 * @param att the attribute to make up the drop item
 	 */
-	public AttributeListDropItem(Composite parent, DropTargetPanel panel, Attribute att) {
-		super(parent, panel);
+	public AttributeListDropItem(Attribute att) {
+		//super(parent, panel);
 		this.key = "attribute:l:" + att.getKeyId();
 		this.text = att.getName() ;
 		this.attribute = att;
-		lblAttribute.setText(this.text + " = ");
-		loadItemsJobs.schedule();
-		
 	}
 	
 	/**
@@ -134,6 +141,9 @@ public class AttributeListDropItem extends DropItem{
 		if (smallerFont != null){
 			smallerFont.dispose();
 		}
+		
+		lblAttribute = null;
+		listViewer = null;
 	}
 
 	/**
@@ -152,12 +162,17 @@ public class AttributeListDropItem extends DropItem{
 		StringBuilder query = new StringBuilder(this.key);
 		query.append(" = ");
 		
-		IStructuredSelection sel = (IStructuredSelection) listViewer.getSelection();
-		if (sel != null && !sel.isEmpty()){
-			ListItem it = (ListItem) sel.getFirstElement();
-			if (it.getUuid() != null){
-				query.append(it.getKey());
+		ListItem it = null;
+		if (currentSelection != null){
+			it = currentSelection;
+		}else{
+			IStructuredSelection sel = (IStructuredSelection) listViewer.getSelection();
+			if (sel != null && !sel.isEmpty()){
+				it = (ListItem) sel.getFirstElement();
 			}
+		}
+		if (it != null && it.getUuid() != null){			
+			query.append(it.getKey());
 		}
 		return query.toString();
 	}
@@ -166,7 +181,7 @@ public class AttributeListDropItem extends DropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.marginTop = 0;
@@ -187,16 +202,24 @@ public class AttributeListDropItem extends DropItem{
 		listViewer.getCombo().setFont(smallerFont);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.setLabelProvider(ListItem.createLabelProvider());
-		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		
+		listViewer.addPostSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				fireListeners();
+				ListItem newSelection = (ListItem) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
+				if (! (currentSelection != null && currentSelection.equals(newSelection))){
+					queryChanged();	
+				}				 
 			}
 		});
 		listViewer.setInput(new ListItem[]{new ListItem("Loading")});
 		
 		initDrag(main);
 		initDrag(lblAttribute);
+		
+		
+		lblAttribute.setText(this.text + " = ");
+		loadItemsJobs.schedule();
 	}
 
 }

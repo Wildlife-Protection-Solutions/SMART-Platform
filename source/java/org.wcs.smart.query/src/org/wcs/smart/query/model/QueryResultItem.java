@@ -56,6 +56,8 @@ public class QueryResultItem {
 	private String transportType;
 	private Date wpDateTime;
 	private Date waypointTime;
+	private String leader;
+	private String pilot;
 	
 	private int waypointId;
 	private double waypointX;
@@ -89,6 +91,31 @@ public class QueryResultItem {
 	 */
 	public byte[] getObservationUuid(){
 		return this.observationUuid;
+	}
+	
+	/**
+	 * @return the patrol-leg leader
+	 */
+	public String getLeader(){
+		return this.leader;
+	}
+	/**
+	 * @param leader the patrol leader
+	 */
+	public void setLeader(String leader){
+		this.leader = leader;
+	}
+	/**
+	 * @return the patrol-leg pilot
+	 */
+	public String getPilot(){
+		return this.pilot;
+	}
+	/**
+	 * @param leader the pilot leader
+	 */
+	public void setPilot(String pilot){
+		this.pilot = pilot;
 	}
 	
 	/**

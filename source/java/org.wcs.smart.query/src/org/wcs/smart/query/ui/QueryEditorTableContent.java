@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.TableViewer;
@@ -37,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.ui.ISourceProviderListener;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -62,6 +64,7 @@ public class QueryEditorTableContent {
 	private QueryResultsTable resultsTable;
 	private Label lblStatus;
 	private ProgressBar progresBar;
+	private Composite runQueryComp;
 	private Composite tableComp;
 	private Composite progressComp;
 	private Composite stackComposite;
@@ -70,6 +73,7 @@ public class QueryEditorTableContent {
 	private Button btnCancel;
 	
 	private IProgressMonitor internalMonitor = null;
+	private Hyperlink runQueryLink;
 	
 	/**
 	 * Creates a new editor area
@@ -86,8 +90,18 @@ public class QueryEditorTableContent {
 	 * @param query the waypoint query to initialize data with
 	 */
 	public void initValues(WaypointQuery query) {
-		frmQueryArea.setText("Query: " + query.getName());
-		resultsTable.updateVisible(query.getVisibleColumns());
+		String name = query.getName();
+		String id = query.getId();
+		
+		if (name == null){
+			name = "<Noname>";
+		}
+		name = "Query: " +name;
+		if (id != null){
+			name += " [" + id + "]";
+		}
+		frmQueryArea.setText(name);
+		resultsTable.updateVisible(query.getVisibleColumnsAsArray());
 	}
 
 	/**
@@ -318,6 +332,8 @@ public class QueryEditorTableContent {
 				QueryPropertiesDialog dialog = new QueryPropertiesDialog(editor.getSite().getShell(), editor.getQuery(), resultsTable.getColumns());
 				if (dialog.open() == Window.OK){
 					initValues(editor.getQuery());
+					editor.updatePartName();
+					editor.setDirty(true);
 				}
 			}
 		});
@@ -328,9 +344,10 @@ public class QueryEditorTableContent {
 		stackComposite.setLayout(new StackLayout());
 		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
 				true));
+		runQueryComp = createRunQueryComp(stackComposite);
 		tableComp = createTableResultsComposite(stackComposite);
 		progressComp = createProcessingComposite(stackComposite);
-		((StackLayout) stackComposite.getLayout()).topControl = tableComp;
+		((StackLayout) stackComposite.getLayout()).topControl = runQueryComp;
 	}
 
 	/**
@@ -350,7 +367,30 @@ public class QueryEditorTableContent {
 
 		return main;
 	}
-
+	
+	/**
+	 * Creates the initial composite that prompts users
+	 * to run query.
+	 * 
+	 * @param parent
+	 * @return
+	 */
+	private Composite createRunQueryComp(Composite parent){
+		Composite main = toolkit.createComposite(parent);
+		main.setLayout(new GridLayout(1, false));
+		
+		runQueryLink = toolkit.createHyperlink(main, "Run Query...", SWT.NONE);
+		runQueryLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				editor.refreshQuery();
+			}
+		});
+		
+		
+		return main;
+	}
+	
 	/**
 	 * Creates the status area widget
 	 * @param parent

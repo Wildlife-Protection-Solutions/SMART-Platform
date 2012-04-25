@@ -24,7 +24,7 @@ package org.wcs.smart.query.ui.formulaDnd;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.parser.internal.BooleanOperator;
+import org.wcs.smart.query.parser.internal.Operator;
 
 /**
  * a NOT drop tiem
@@ -37,8 +37,8 @@ public class NotDropItem extends DropItem{
 	 * @param parent
 	 * @param panel
 	 */
-	public NotDropItem(Composite parent, DropTargetPanel panel) {
-		super(parent, panel);
+	public NotDropItem() {
+		//super(parent, panel);
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class NotDropItem extends DropItem{
 	 */
 	@Override
 	public String getText() {
-		return BooleanOperator.NOT.getGuiValue();
+		return Operator.NOT.getGuiValue();
 	}
 
 	/**
@@ -54,16 +54,25 @@ public class NotDropItem extends DropItem{
 	 */
 	@Override
 	public String asQueryPart() {
-		return BooleanOperator.NOT.asSql();
+		return Operator.NOT.asSmartValue();
 	}
 
 	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(BooleanOperator.NOT.getGuiValue());
+		lbl.setText(Operator.NOT.getGuiValue());
 		initDrag(lbl);		
+	}
+
+	/**
+	 * Nothing to initialize
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
+	 */
+	@Override
+	public void initializeData(Object data) {
+		
 	}
 }

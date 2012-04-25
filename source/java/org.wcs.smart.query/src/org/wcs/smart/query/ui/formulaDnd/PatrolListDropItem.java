@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -72,6 +73,8 @@ public class PatrolListDropItem extends DropItem{
 	
 	private ComboViewer listViewer;
 	private Font smallerFont = null;
+	
+	private ListItem currentSelection = null;
 	
 	/*
 	 * job for loading options
@@ -128,7 +131,9 @@ public class PatrolListDropItem extends DropItem{
 					@Override
 					public void run() {
 						listViewer.setInput(items.toArray(new ListItem[items.size()]));
-						
+						if (currentSelection != null){
+							listViewer.setSelection(new StructuredSelection(currentSelection));
+						}
 					}});
 				
 			}finally{
@@ -146,15 +151,12 @@ public class PatrolListDropItem extends DropItem{
 	 * @param target target item
 	 * @param option patrol filter option
 	 */
-	public PatrolListDropItem(Composite parent, DropTargetPanel target, PatrolFilter.PatrolFilterOption option) {
-		super(parent, target);
+	public PatrolListDropItem(PatrolFilter.PatrolFilterOption option) {
+		//super(parent, target);
 
 		this.keyPart = "patrol:" + option.getKeyPart();
 		this.text = option.getGuiName();
 		this.option = option;
-		lbl.setText(this.text + " = ");
-		
-		loadItemsJobs.schedule();
 	}
 
 	
@@ -164,6 +166,7 @@ public class PatrolListDropItem extends DropItem{
 			smallerFont.dispose();
 		}
 	}
+	
 	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
 	 */
@@ -189,16 +192,21 @@ public class PatrolListDropItem extends DropItem{
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder(this.keyPart);
 		sb.append(" equals ");
-		if (listViewer.getSelection() != null){
-			ListItem it = (ListItem)((IStructuredSelection)listViewer.getSelection()).getFirstElement();
-			if (it != null){
-				sb.append("\"");
-				if (option == PatrolFilterOption.PATROLTYPE){
-					sb.append(it.getKey().toUpperCase());
-				}else{
-					if (it.getUuid() != null){
-						sb.append( SmartUtils.encodeHex(it.getUuid()));
-					}
+		ListItem it = null;
+		
+		
+		if (currentSelection != null){
+			it = currentSelection;
+		}else if (listViewer.getSelection() != null){ 
+			it = (ListItem)((IStructuredSelection)listViewer.getSelection()).getFirstElement();
+		}
+		if (it != null){
+			sb.append("\"");
+			if (option == PatrolFilterOption.PATROLTYPE){
+				sb.append(it.getKey().toUpperCase());
+			}else{
+				if (it.getUuid() != null){
+					sb.append( SmartUtils.encodeHex(it.getUuid()));
 				}
 			}
 			sb.append("\"");
@@ -210,7 +218,7 @@ public class PatrolListDropItem extends DropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
@@ -237,7 +245,13 @@ public class PatrolListDropItem extends DropItem{
 		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				PatrolListDropItem.this.fireListeners();
+				ListItem newSelection =  (ListItem) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
+				if (currentSelection != null && newSelection.equals(currentSelection)){
+					//no change
+				}else{		
+					PatrolListDropItem.this.queryChanged();
+					currentSelection = newSelection;
+				}
 			}
 		});
 		
@@ -245,6 +259,18 @@ public class PatrolListDropItem extends DropItem{
 		
 		initDrag(main);
 		initDrag(lbl);
+
+		lbl.setText(this.text + " = ");	
+		loadItemsJobs.schedule();
 	}
 
+
+	
+	/**
+	 * @param data a list item
+	 */
+	@Override
+	public void initializeData(Object data) {
+		currentSelection = (ListItem)data;
+	}
 }

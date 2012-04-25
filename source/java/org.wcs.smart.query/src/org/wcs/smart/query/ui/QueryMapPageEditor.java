@@ -42,6 +42,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.map.udig.QueryService;
+import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
 /**
@@ -131,7 +132,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	@Override
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
-		if (!(input instanceof QueryResultsInput)){
+		if (!(input instanceof QueryInput)){
 			throw new RuntimeException("Invalid editor input.");
 		}
 		super.init(site, input);

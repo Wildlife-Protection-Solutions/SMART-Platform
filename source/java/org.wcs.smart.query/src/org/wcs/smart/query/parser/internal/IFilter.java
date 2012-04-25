@@ -23,18 +23,22 @@ package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
  * A query filter.
  * @author Emily
  * @since 1.0.0
  */
-public interface Filter {
+public interface IFilter {
 
 	/**
 	 * A class to represent and empty filter.
 	 */
-	public Filter EMPTY_FILTER = new Filter(){
+	public IFilter EMPTY_FILTER = new IFilter(){
 
 		@Override
 		public String asString() {
@@ -64,6 +68,16 @@ public interface Filter {
 
 		@Override
 		public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+		}
+		
+		@Override
+		public DropItem[] getDropItems(Session session){
+			return new DropItem[]{};
+		}
+
+		@Override
+		public List<IFilter> getChildren() {
+			return null;
 		}
 	};
 	
@@ -108,4 +122,18 @@ public interface Filter {
 	 * filter
 	 */
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes);
+	
+	/**
+	 * Converts the filter to a set of drop items
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
+	public DropItem[] getDropItems(Session session) throws Exception;
+	
+	/**
+	 * @return the children elements that make up this filter or
+	 * null if no children elements
+	 */
+	public List<IFilter> getChildren();
 }

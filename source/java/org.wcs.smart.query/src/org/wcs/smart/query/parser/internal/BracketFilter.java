@@ -21,8 +21,15 @@
  */
 package org.wcs.smart.query.parser.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.query.ui.formulaDnd.BracketDropItem.BracketType;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
 /**
  * A bracketed expression.  Of the form:
@@ -31,31 +38,32 @@ import java.util.HashSet;
  * @author Emily
  * @since 1.0.0
  */
-public class BracketFilter implements Filter{
+public class BracketFilter implements IFilter{
 
+	private IFilter filter;
+	
 	/**
 	 * Creates new bracket filter expression
 	 * 
 	 * @param f bracketed expression 
 	 * @return
 	 */
-	public static BracketFilter createFilter(Filter f){
+	public static BracketFilter createFilter(IFilter f){
 		return new BracketFilter(f);
 	}
 	
-	private Filter filter;
 	
 	/**
 	 * Creates new bracket filter expression
 	 * 
 	 * @param f bracketed expression
 	 */
-	private BracketFilter(Filter filter){
+	private BracketFilter(IFilter filter){
 		this.filter = filter;
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asString()
 	 */
 	@Override
 	public String asString(){
@@ -63,7 +71,7 @@ public class BracketFilter implements Filter{
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
@@ -72,14 +80,14 @@ public class BracketFilter implements Filter{
 	
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
 		return filter.hasEmployeeFilter();
 	}
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -87,7 +95,7 @@ public class BracketFilter implements Filter{
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -95,11 +103,33 @@ public class BracketFilter implements Filter{
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
 		filter.getAttributeFilters(attributes);
 	}
 	
+	public DropItem[] getDropItems(Session session) throws Exception{
+		DropItem[] its1 = filter.getDropItems(session);
+		
+		DropItem[] results = new DropItem[its1.length + 2];
+		for (int i = 0; i < its1.length; i ++){
+			results[i+1] = its1[i];
+		}
+		results[0] = DropItemFactory.INSTANCE.createOtherSingleBracketDropItem(BracketType.OPEN);
+		results[results.length - 1] = DropItemFactory.INSTANCE.createOtherSingleBracketDropItem(BracketType.CLOSE);
+		
+		return results;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getChildren()
+	 */
+	@Override
+	public List<IFilter> getChildren() {
+		List<IFilter> kids = new ArrayList<IFilter>();
+		kids.add(filter);
+		return kids;
+	}
 }
