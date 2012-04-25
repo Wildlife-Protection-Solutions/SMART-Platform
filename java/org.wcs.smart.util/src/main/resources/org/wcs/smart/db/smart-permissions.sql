@@ -19,8 +19,8 @@ GRANT SELECT ON smart.language TO manager;
 GRANT SELECT ON smart.language TO analyst;
 GRANT SELECT ON smart.language TO data_entry;
 
-GRANT SELECT ON smart.i18n_label TO manager;
-GRANT SELECT ON smart.i18n_label TO analyst;
+GRANT ALL PRIVILEGES ON smart.i18n_label TO manager;
+GRANT ALL PRIVILEGES ON smart.i18n_label TO analyst;
 GRANT SELECT ON smart.i18n_label TO data_entry;
 
 GRANT SELECT ON smart.station TO manager;
@@ -45,6 +45,8 @@ GRANT SELECT ON smart.dm_aggregation TO manager;
 GRANT SELECT ON smart.dm_attribute_list TO manager;
 GRANT SELECT ON smart.dm_attribute_tree TO manager;
 GRANT SELECT ON smart.DM_ATT_TREE_NODES TO manager;
+
+
 --analyst
 GRANT SELECT ON smart.dm_category TO analyst;
 GRANT SELECT ON smart.dm_cat_att_map TO analyst;
@@ -59,7 +61,6 @@ GRANT SELECT ON smart.DM_ATT_TREE_NODES TO analyst;
 GRANT SELECT ON smart.AREA_GEOMETRIES to analyst;
 GRANT SELECT ON smart.AREA_GEOMETRIES to manager;
 GRANT SELECT ON smart.AREA_GEOMETRIES to data_entry;
-
 
 
 -- PATROL
@@ -124,3 +125,10 @@ GRANT SELECT ON  smart.PATROL TO analyst;
 GRANT ALL PRIVILEGES  ON  smart.TRACK TO data_entry;
 GRANT ALL PRIVILEGES  ON  smart.TRACK TO manager;
 GRANT SELECT ON  smart.TRACK TO analyst;
+
+
+-- QUERY
+GRANT ALL PRIVILEGES ON smart.QUERY_FOLDER to manager;
+GRANT ALL PRIVILEGES  ON smart.WAYPOINT_QUERY to manager;
+GRANT ALL PRIVILEGES ON smart.QUERY_FOLDER to analyst;
+GRANT ALL PRIVILEGES  ON smart.WAYPOINT_QUERY to analyst;
