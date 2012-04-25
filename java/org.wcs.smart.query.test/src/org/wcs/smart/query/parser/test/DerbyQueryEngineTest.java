@@ -34,7 +34,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.WaypointQuery;
 import org.wcs.smart.query.parser.internal.ConservationAreaFilter;
-import org.wcs.smart.query.parser.internal.Filter;
+import org.wcs.smart.query.parser.internal.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
 /**
@@ -50,10 +50,10 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
 public class DerbyQueryEngineTest {
 
 	
-	private Filter parseQuery(String query) throws Exception{
+	private IFilter parseQuery(String query) throws Exception{
 		InputStream is = new ByteArrayInputStream(query.getBytes());
 		Parser parser = new Parser(is);		
-		Filter myQuery = parser.Expression();
+		IFilter myQuery = parser.Expression();
 		is.close();
 		return myQuery;
 	}

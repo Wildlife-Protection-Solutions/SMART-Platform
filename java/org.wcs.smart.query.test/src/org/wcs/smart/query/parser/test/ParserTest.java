@@ -27,7 +27,7 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.parser.internal.Filter;
+import org.wcs.smart.query.parser.internal.IFilter;
 import org.wcs.smart.query.parser.internal.parser.ParseException;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
@@ -44,7 +44,7 @@ public class ParserTest {
 	public void testCategory() throws Exception{
 		
 		String query = "category:pigs";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
 		query = "category:threats.biologicalresourceuse.species.pigs";
@@ -55,7 +55,7 @@ public class ParserTest {
 	@Test
 	public void testNumericAttribute() throws Exception{
 		String query = "attribute:n:size > 1.2";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
 		query = "attribute:n:age >= 3.4";
@@ -87,27 +87,31 @@ public class ParserTest {
 	@Test
 	public void testBooleanAttribute() throws Exception{
 		String query = "attribute:b:camp";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 	}
 	
 	@Test
 	public void testListAttribute() throws Exception{
 		String query = "attribute:l:weapontype = gun";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 	}
 	@Test
 	public void testTreeAttribute() throws Exception{
 		String query = "attribute:t:weapontype = gun.hand.jamesbond";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "attribute:t:species = ailuridae.ailurusfulgensred714.";
+		test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 	}
 	
 	@Test
 	public void testStringAttribute() throws Exception{
 		String query = "attribute:s:color equals \"red\"";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
 		query = "attribute:s:color contains \"white\"";
@@ -131,7 +135,7 @@ public class ParserTest {
 	@Test
 	public void testPatrolValueAttribute() throws Exception{
 		String query = "patrol:id equals \"abc\"";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
 		query = "patrol:station equals \"abc\"";
@@ -184,7 +188,7 @@ public class ParserTest {
 	@Test
 	public void testPatrolBooleanAttribute() throws Exception{
 		String query = "patrol:armed";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
 		query = "patrol:armed equals \"abc\"";
@@ -200,8 +204,8 @@ public class ParserTest {
 	
 	@Test
 	public void testBrackets() throws Exception{
-		String query = "( patrol:armed ) =";
-		Filter test = parseQuery(query);
+		String query = "( patrol:armed )";
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), "(patrol:armed)");
 
 		query = "( category:threats.fish.color.blue or attribute:n:age>=30) AND (patrol:id equals \"00001\" OR patrol:id equals \"90002\")";
@@ -213,7 +217,7 @@ public class ParserTest {
 	@Test
 	public void testNot() throws Exception{
 		String query = "NOT category:threats.pigs";
-		Filter test = parseQuery(query);
+		IFilter test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
 		query = "NOT (category:threats.pigs or category:threats.items)";
@@ -263,10 +267,87 @@ public class ParserTest {
 		Assert.assertTrue(error);
 	}
 	
-	private Filter parseQuery(String query) throws Exception{
+	
+	@Test
+	public void testNumericCategoryAttribute() throws Exception{
+		String query = "category:fishing:attribute:n:size > 1.2";
+		IFilter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:fishing:attribute:n:age >= 3.4";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:fishing:attribute:n:age <= 4.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:fishing:attribute:n:age < 5.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:fishing:attribute:n:age = 234.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:fishing:attribute:n:age != -12.3";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:fishing:attribute:n:age <> 0.0";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), "category:fishing:attribute:n:age != 0.0");
+	}
+	
+	
+	@Test
+	public void testBooleanCategoryAttribute() throws Exception{
+		String query = "category:fish:attribute:b:camp";
+		IFilter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	
+	@Test
+	public void testListCategoryAttribute() throws Exception{
+		String query = "category:hunging:attribute:l:weapontype = gun";
+		IFilter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	@Test
+	public void testTreeCategoryAttribute() throws Exception{
+		String query = "category:hungting:attribute:t:weapontype = gun.hand.jamesbond";
+		IFilter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+	}
+	
+	@Test
+	public void testStringCategoryAttribute() throws Exception{
+		String query = "category:a:attribute:s:color equals \"red\"";
+		IFilter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:a:attribute:s:color contains \"white\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "category:b:attribute:s:color notcontains \"purple\"";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		boolean ex = false;
+		try{
+			query = "category:asdfwqef:attribute:s:color notcontains purple";
+			test = parseQuery(query);
+		}catch (ParseException e){
+			ex = true;
+		}
+		Assert.assertTrue(ex);
+	}
+	
+	private IFilter parseQuery(String query) throws Exception{
 		InputStream is = new ByteArrayInputStream(query.getBytes());
 		Parser parser = new Parser(is);		
-		Filter myQuery = parser.Expression();
+		IFilter myQuery = parser.Expression();
 		is.close();
 		return myQuery;
 	}
