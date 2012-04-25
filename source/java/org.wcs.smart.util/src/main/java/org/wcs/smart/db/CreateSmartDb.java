@@ -22,7 +22,6 @@
 package org.wcs.smart.db;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,12 +30,8 @@ import java.sql.SQLException;
 import org.apache.derby.iapi.services.io.FileUtil;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Class for creating a new smart database.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -47,6 +42,7 @@ public class CreateSmartDb {
 		"org/wcs/smart/db/smart-tables.sql",
 		"org/wcs/smart/db/smart-tables-dm.sql",
 		"org/wcs/smart/db/smart-tables-patrol.sql",
+		"org/wcs/smart/db/smart-tables-query.sql",
 		"org/wcs/smart/db/smart-permissions.sql"
 	};
 	private static String userFile = "org/wcs/smart/db/smart-users.sql";

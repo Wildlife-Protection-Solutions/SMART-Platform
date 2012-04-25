@@ -46,6 +46,7 @@ CREATE TABLE smart.dm_attribute_tree
 	parent_uuid CHAR(16) FOR BIT DATA,
 	attribute_uuid CHAR(16) FOR BIT DATA,
 	is_active BOOLEAN NOT NULL,
+	hkey VARCHAR(32672) NOT NULL,
 	PRIMARY KEY (UUID)
 );
 
