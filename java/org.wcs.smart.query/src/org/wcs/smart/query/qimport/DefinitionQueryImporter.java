@@ -19,23 +19,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query;
+package org.wcs.smart.query.qimport;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.HashMap;
 
 import org.wcs.smart.query.model.WaypointQuery;
+import org.wcs.smart.query.xml.QueryXmlManager;
+import org.wcs.smart.query.xml.model.Query;
+import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
- * Listener for query changes
- * 
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
  * @author Emily
  * @since 1.0.0
  */
-public interface QueryChangedListener {
+public class DefinitionQueryImporter {
 
-	/**
-	 * Fired when the given query has changed.  A change in query:
-	 * occurs when the query filter has changed. 
-	 * 
-	 * @param query the query being changed.
-	 */
-	public void queryChanged(WaypointQuery query);
+	
+	public static WaypointQuery importQuery(File file) throws Exception{
+		
+		InputStream fin = new BufferedInputStream(new FileInputStream(file));
+		Query q = QueryXmlManager.readDataModel(fin);
+		
+		QueryType qt = q.getQuery();
+		
+		WaypointQuery wq = new WaypointQuery();
+		wq.setName(qt.getName());
+		
+		
+		
+		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
+		for (UuidItemType type : qt.getUuiditem()){
+			uuidLookup.put(type.getUuid(), type);
+		}
+		
+		
+		fin.close();
+		
+		
+		return null;
+	}
+	
+	
+	private Object lookupItem(){
+		
+	}
 }

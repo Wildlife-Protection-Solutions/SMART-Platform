@@ -84,8 +84,14 @@ public class QueryResultsTablePage  extends EditorPart  {
 		super.setSite(site);
 		super.setInput(input);
 		
+		
 	}
 
+	public void setQuery(){
+		content.initValues(parentEditor.getQuery());
+	}
+	
+	
 	/**
 	 * @return <code>false</code>
 	 * @see org.eclipse.ui.part.EditorPart#isDirty()
@@ -125,8 +131,6 @@ public class QueryResultsTablePage  extends EditorPart  {
 		layout.verticalSpacing = 0;
 		parent.setLayout(layout);
 		content = new QueryEditorTableContent(parent, parentEditor);
-		
-		content.initValues(parentEditor.getQuery());
 	}
 	
 	/**

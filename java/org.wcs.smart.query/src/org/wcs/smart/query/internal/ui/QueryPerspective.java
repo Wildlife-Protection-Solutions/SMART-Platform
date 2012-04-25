@@ -27,6 +27,7 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.wcs.smart.query.ui.QueryDefView;
+import org.wcs.smart.query.ui.querylist.QueryListView;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterView;
 
 /**
@@ -49,6 +50,8 @@ public class QueryPerspective implements IPerspectiveFactory {
 	public void createInitialLayout(IPageLayout layout) {	
 		layout.setEditorAreaVisible(true);
 
+		layout.addView(QueryListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
+		
 		//right side - filters and layer manager
 		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.query.queryFolder1", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA);
 		folder1.addView(QueryFilterView.ID);
@@ -59,7 +62,10 @@ public class QueryPerspective implements IPerspectiveFactory {
 		folder2.addView(QueryDefView.ID);
 		folder2.addPlaceholder(InfoView2.VIEW_ID);
 
+		
+		
 		layout.getViewLayout(QueryDefView.ID).setCloseable(false);
 		layout.getViewLayout(QueryFilterView.ID).setCloseable(false);
+		layout.getViewLayout(QueryListView.ID).setCloseable(false);
 	}
 }

@@ -47,20 +47,46 @@ import org.wcs.smart.query.QueryPlugIn;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class DropItem extends Composite {
+public abstract class DropItem {
 
 	private final static Transfer[] types = DropTargetPanel.types;
-	private DropTargetPanel targetPanel = null;
+	protected DropTargetPanel targetPanel = null;
+	
+	private Composite widget;
 	
 	/**
 	 * Creates a new drop item
-	 * @param parent parent composite
-	 * @param panel drop panel target
 	 */
-	public DropItem(Composite parent, DropTargetPanel panel) {
-		super(parent, SWT.NONE);
-		createCompositeInternal(parent);
-		targetPanel = panel;
+	public DropItem(){
+	}
+	
+	/**
+	 * Create the widget for the drop item 
+	 * attached to the given panel.
+	 * 
+	 * @param panel target drop panel for the drop item widget 
+	 */
+	public void createWidget(DropTargetPanel panel){
+		this.targetPanel = panel;
+		widget = createCompositeInternal(panel.getComposite());
+	}
+	
+	/**
+	 * Disposes of the drop items widget
+	 */
+	public void dispose(){
+		if (widget != null && !widget.isDisposed()){
+			widget.dispose();
+			widget = null;
+		}
+	}
+	
+	/**
+	 * @return the drop item widget or null
+	 * if widget not created
+	 */
+	public Composite getWidget(){
+		return this.widget;
 	}
 	
 	/**
@@ -70,21 +96,28 @@ public abstract class DropItem extends Composite {
 	public abstract String getText();
 	
 	/**
-	 * @return the drop item as a query filter
+	 * @return the drop item as a smart query filter
 	 */
 	public abstract String asQueryPart();
 	
+	
+	public abstract void initializeData(Object data);
+	
 	/**
-	 * fire any listeners registered with the drop panel
+	 * Called when a drop item modified the queries.
+	 * <p>This function notifies the required components
+	 * that the query has changed.</p>
 	 */
-	protected void fireListeners(){
+	protected void queryChanged(){
 		targetPanel.validate();
+		targetPanel.getParentView().fireQueryModifiedListeners();
 	}
 	
 	/**
 	 * @param parent parent composite
 	 */
-	private void createCompositeInternal(Composite parent){
+	protected Composite createCompositeInternal(Composite parent){
+		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginBottom = 2;
 		layout.marginLeft = 4;
@@ -94,11 +127,11 @@ public abstract class DropItem extends Composite {
 		layout.marginWidth = 0;
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
-		super.setLayout(layout);
-		this.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		main.setLayout(layout);
+		main.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		
 		
-		Composite inner = new Composite(this, SWT.BORDER);
+		Composite inner = new Composite(main, SWT.BORDER);
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)inner.getLayoutData()).heightHint = 23;
 
@@ -122,19 +155,22 @@ public abstract class DropItem extends Composite {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				targetPanel.removeElement(DropItem.this);
+				targetPanel.getParentView().fireQueryModifiedListeners();
 			}
 			
 		});
 		
-		initDrag(this);
+		initDrag(main);
 		initDrag(inner);
+		
+		return main;
 	}
 
 	/**
 	 * Creates the internals of the drop item
 	 * @param parent
 	 */
-	public abstract void createComposite(Composite parent);
+	protected abstract void createComposite(Composite parent);
 	
 
 	/**
@@ -160,11 +196,13 @@ public abstract class DropItem extends Composite {
 			@Override
 			public void dragFinished(DragSourceEvent event) {
 				LocalSelectionTransfer.getTransfer().setSelection(null);
-				if (!DropItem.this.isVisible()){
+				Composite w = DropItem.this.widget;
+				if (w!= null && !w.isVisible()){
 					//the widget is no longer used in the query so we need
 					//to ensure it is dispoed of properly
 					DropItem.this.dispose();
 				}
+				targetPanel.getParentView().fireQueryModifiedListeners();
 			}
 		});		
 	}

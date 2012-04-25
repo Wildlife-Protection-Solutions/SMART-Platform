@@ -32,12 +32,9 @@ import org.wcs.smart.query.ui.querytable.QueryTableColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A comparator for comparining query result items
+ * and sorting the results table.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -47,11 +44,18 @@ public class QueryResultItemComparator extends ViewerComparator{
 	private QueryTableViewerColumn column = null;
 	private int direction = SWT.DOWN;
 		
+	/**
+	 * @param tableViewer table viewer being sorted
+	 */
 	public QueryResultItemComparator(TableViewer tableViewer){
 		this.viewer = tableViewer;
 	}	
 	
 	
+	/**
+	 * Sets the sort column
+	 * @param sort the column to sort on
+	 */
 	public void setSortColumn(QueryTableViewerColumn sort){			
 		if (column != null &&column == sort){
 			if (direction == SWT.DOWN){
@@ -68,6 +72,9 @@ public class QueryResultItemComparator extends ViewerComparator{
 	}
 			
 		
+	/**
+	 * @see org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+	 */
 	@Override
 	public int compare(Viewer viewer, Object object1, Object object2){
 		if (column == null){
@@ -82,6 +89,12 @@ public class QueryResultItemComparator extends ViewerComparator{
 	}
 		
 	
+	/**
+	 * Compares to query result items
+	 * @param s1
+	 * @param s2
+	 * @return
+	 */
 	private int compareValue(QueryResultItem s1, QueryResultItem s2){
 		if (s1 == null && s2 == null){
 			return 0;
@@ -111,9 +124,6 @@ public class QueryResultItemComparator extends ViewerComparator{
 		if (compare != null){
 			return compare.compare(data1, data2);
 		}
-		
 		return 0;
 	}
-	
-	
 }

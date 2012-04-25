@@ -19,64 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui;
+package org.wcs.smart.query.ui.querylist;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.QueryInput;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Label provider for the query list view.
+ * 
  * @author Emily
  * @since 1.0.0
  */
-public class Test extends Dialog {
+public class QueryListLabelProvider extends LabelProvider {
 
 	/**
-	 * Create the dialog.
-	 * @param parentShell
+	 * Creates a new label provider
 	 */
-	public Test(Shell parentShell) {
-		super(parentShell);
+	public QueryListLabelProvider(){
 	}
-
+	
 	/**
-	 * Create contents of the dialog.
-	 * @param parent
+	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 	 */
-	@Override
-	protected Control createDialogArea(Composite parent) {
-		Composite container = (Composite) super.createDialogArea(parent);
-
-		return container;
+	@Override 
+	public Image getImage(Object element) {
+		if (element instanceof QueryFolder){
+			return JFaceResources.getImage(QueryPlugIn.FOLDER_ICON);
+		}else if (element instanceof QueryInput){
+			return JFaceResources.getImage(QueryPlugIn.WAYPOINT_QUERY_ICON);
+		}
+		return null;
 	}
-
+	
+	
 	/**
-	 * Create contents of the button bar.
-	 * @param parent
-	 */
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,
-				true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
-	}
-
-	/**
-	 * Return the initial size of the dialog.
+	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
 	@Override
-	protected Point getInitialSize() {
-		return new Point(450, 300);
+	public String getText(Object element) {
+		if (element instanceof QueryFolder){
+			return ((QueryFolder) element).getName() ;
+		}else if (element instanceof QueryInput){
+			return ((QueryInput) element).getName() + " [" + ((QueryInput)element).getId() + "]";
+		}
+		return super.getText(element);
 	}
+
 
 }

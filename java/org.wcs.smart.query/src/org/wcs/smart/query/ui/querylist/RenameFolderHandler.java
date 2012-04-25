@@ -19,23 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.parser.internal;
+package org.wcs.smart.query.ui.querylist;
+
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.query.model.QueryFolder;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Rename folder handler for the query list view
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeListItemValue {
+public class RenameFolderHandler extends AbstractHandler{
 
-	private String key;
 	
-	public AttributeListItemValue(String key){
-		this.key = key;
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
+		QueryListView view = (QueryListView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID);
+		
+		
+		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
+		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
+			return null;
+		}
+		
+		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
+		if (o instanceof QueryFolder){
+			view.editElement(o);
+		}
+		
+		
+		return null;
 	}
+
 }

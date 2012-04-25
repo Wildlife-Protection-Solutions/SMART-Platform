@@ -21,13 +21,17 @@
  */
 package org.wcs.smart.query.parser.internal;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
  * A query date filter.
@@ -41,7 +45,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
  * @author Emily
  * @since 1.0.0
  */
-public class DateFilter implements Filter {
+public class DateFilter implements IFilter {
 
 	/**
 	 * Possible date fields for date filters.
@@ -108,7 +112,7 @@ public class DateFilter implements Filter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
@@ -122,7 +126,7 @@ public class DateFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asSql(java.util.HashMap)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
@@ -212,7 +216,7 @@ public class DateFilter implements Filter {
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -220,7 +224,7 @@ public class DateFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -228,7 +232,7 @@ public class DateFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -236,10 +240,27 @@ public class DateFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+	}
+	
+	/**
+	 * There are no drop items for dates
+	 * @return null
+	 */
+	@Override
+	public DropItem[] getDropItems(Session session) throws Exception{
+		return null;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getChildren()
+	 */
+	@Override
+	public List<IFilter> getChildren() {
+		return null;
 	}
 
 }

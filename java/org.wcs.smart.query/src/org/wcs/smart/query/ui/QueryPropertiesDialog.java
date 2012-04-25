@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.ui;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -47,6 +47,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.query.IQueryFolderListener;
+import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.model.WaypointQuery;
 import org.wcs.smart.query.ui.querytable.QueryTableColumn;
 
@@ -118,16 +120,18 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		setMessage("Select the query properties.");
 		
 		Composite main = new Composite(parent, SWT.NONE);
-		
-		main.setLayout(new GridLayout(2, false));
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginTop = 10;
+		main.setLayout(gl);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lblName = new Label(main, SWT.NONE);
 		lblName.setText("Query Name:");
+		lblName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtName = new Text(main, SWT.BORDER);
 		txtName.setText(query.getName());
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -137,7 +141,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		
 		Label lblTableColumns = new Label(main, SWT.NONE);
 		lblTableColumns.setText("Output Columns:");
-		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		createColumnTable(main);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
@@ -145,6 +149,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		columnViewer.getTable().setLayoutData(gd);
 		
 		Composite hyperlinkComposite = new Composite(main, SWT.NONE);
+		hyperlinkComposite.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1) );
 		hyperlinkComposite.setLayout(new GridLayout(3, false));
 		
 		Link selectAll = new Link(hyperlinkComposite, SWT.NONE);
@@ -181,8 +186,11 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	 */
 	protected boolean performSave() {
 		
-		query.setName(txtName.getText());
-		ArrayList<String> columns = new ArrayList<String> ();
+		if (!query.getName().equals(txtName.getText())){
+			query.setName(txtName.getText());
+		}
+		
+		HashSet<String> columns = new HashSet<String> ();
 		for (int i = 0; i < columnViewer.getCheckedElements().length; i ++){
 			columns.add( ((QueryTableColumn)columnViewer.getCheckedElements()[i]  ).getKey()  );
 		}
@@ -219,7 +227,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			columnViewer.setAllChecked(true);
 		}else{
 			for (int i = 0; i < allColumns.length; i ++){
-				if (query.getVisibleColumns().contains(allColumns[i])){
+				if (query.getVisibleColumns().contains(allColumns[i].getKey())){
 					columnViewer.setChecked(allColumns[i], true);
 				}
 			}

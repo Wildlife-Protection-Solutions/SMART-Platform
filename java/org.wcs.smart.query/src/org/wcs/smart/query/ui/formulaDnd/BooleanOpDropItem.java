@@ -22,13 +22,15 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.query.parser.internal.BooleanOperator;
+import org.wcs.smart.query.parser.internal.Operator;
 
 /**
  * Boolean operator (and/or) drop item.
@@ -39,18 +41,27 @@ public class BooleanOpDropItem extends DropItem {
 	
 	private Combo operator;
 	private Font smallerFont;
+	private String currentSelection = null;
 	
-	private static BooleanOperator[] operators = new BooleanOperator[]{BooleanOperator.AND, BooleanOperator.OR};
+	private static Operator[] operators = new Operator[]{Operator.AND, Operator.OR};
 	
 	/**
 	 * Creates a new drop item.
 	 * @param parent parent composite
 	 * @param target drop panel target
 	 */
-	public BooleanOpDropItem(Composite parent, DropTargetPanel target) {
-		super(parent, target);
-		operator.select(0);
+	public BooleanOpDropItem() {
 	}
+	
+	/**
+	 * @param data - a string value representing the selected operator gui 
+	 * 
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
+	 */
+	public void initializeData(Object data){
+		currentSelection = (String)data;
+	}
+	
 
 	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
@@ -83,7 +94,7 @@ public class BooleanOpDropItem extends DropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		operator = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
 		for (int i = 0; i < operators.length; i ++){
 			operator.add(operators[i].getGuiValue());
@@ -94,7 +105,19 @@ public class BooleanOpDropItem extends DropItem {
 		smallerFont = new Font(Display.getCurrent(), fd);
 		operator.setFont(smallerFont);
 		operator.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		operator.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				currentSelection = operators[operator.getSelectionIndex()].asSql();
+			}
+		});
 		initDrag(operator);
+		
+		if (currentSelection != null){
+			operator.setText(currentSelection);
+		}else{
+			operator.select(0);
+		}
 	}
 
 }

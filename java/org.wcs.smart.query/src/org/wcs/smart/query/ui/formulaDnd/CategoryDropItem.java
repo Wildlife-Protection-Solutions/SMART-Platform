@@ -46,12 +46,12 @@ public class CategoryDropItem extends DropItem {
 	 * @param target drop panel target
 	 * @param category category for the drop item
 	 */
-	public CategoryDropItem(Composite parent, DropTargetPanel target, Category category) {
-		super(parent, target);
+	public CategoryDropItem(Category category) {
+		//super(parent, target);
 		
 		this.text = category.getFullCategoryName();
 		this.key = "category:" + category.getHkey();
-		lbl.setText(this.text);
+		
 	}
 
 	/**
@@ -74,10 +74,21 @@ public class CategoryDropItem extends DropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		initDrag(lbl);
+		
+		lbl.setText(this.text);
+	}
+
+	/**
+	 * Nothing to initialize
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
+	 */
+	@Override
+	public void initializeData(Object data) {
+		
 	}
 
 }

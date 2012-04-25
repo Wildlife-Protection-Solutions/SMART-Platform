@@ -23,7 +23,15 @@ package org.wcs.smart.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -33,8 +41,9 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyQueryEngine2;
 import org.wcs.smart.query.parser.internal.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.DateFilter;
-import org.wcs.smart.query.parser.internal.Filter;
+import org.wcs.smart.query.parser.internal.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
  * A class to represent a waypoint query.
@@ -42,15 +51,18 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
  * @author Emily
  * @since 1.0.0
  */
+@Entity
+@Table(name="smart.waypoint_query")
 public class WaypointQuery extends Query{
 	
 	private String strQueryFilter;
-	private Filter queryFilter;
+	private IFilter queryFilter;	//cached copy of the parsed query
 	
 	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
 	
-	private List<String> visibleTableColumns = null;
+	private Set<String> visibleTableColumns = null;
+	
 	private List<QueryResultItem> lastResults  = null;
 	
 	
@@ -59,13 +71,15 @@ public class WaypointQuery extends Query{
 	 * conservation area filter and no date filter
 	 */
 	public WaypointQuery(){
+		super();
 		
 		caFilter = new ConservationAreaFilter();
-		caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
+		if (SmartDB.getCurrentConservationArea() != null){
+			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
+		}
 		
 		dateFilter = null;
-		
-		super.setName("<No Name Query>");
+		strQueryFilter = "";
 	}
 	
 	/**
@@ -74,12 +88,21 @@ public class WaypointQuery extends Query{
 	 * 
 	 * @param pFilter query filter
 	 */
-	public WaypointQuery(Filter pFilter){
+	public WaypointQuery(IFilter pFilter){
 		this();
-		this.queryFilter = pFilter;
 		
+		this.queryFilter = pFilter;
+		this.strQueryFilter = pFilter.asString();
 	}
 	
+	
+	/**
+	 * @return the date filter; or null if date filter not set
+	 */
+	@Transient
+	public DateFilter getDateFilter(){
+		return this.dateFilter;
+	}
 	/**
 	 * Sets the date filter 
 	 * @param dateFilter
@@ -87,35 +110,63 @@ public class WaypointQuery extends Query{
 	public void setDateFilter(DateFilter dateFilter){
 		this.dateFilter = dateFilter;
 	}
-	/**
-	 * @return the date filter; or null if date filter not set
-	 */
-	public DateFilter getDateFilter(){
-		return this.dateFilter;
-	}
 	
-
+	
 	/**
 	 * Returns a list of columns that are visible in the output table.
 	 * @return a list of visible column
 	 */
-	public List<String> getVisibleColumns(){
-		return this.visibleTableColumns;
+	@Column(name = "column_filter")
+	public String getVisibleColumns(){
+		if (this.visibleTableColumns == null){
+			return null;
+		}
+		StringBuilder sb = new StringBuilder();
+		
+		for (String column : this.visibleTableColumns){
+			sb.append(column);
+			sb.append(",");
+		}
+		if (sb.length() > 0){
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		
+		return sb.toString();
 	}
 	
 	/**
 	 * Sets the columns that are visible in the output table.
 	 * @param columns
 	 */
-	public void setVisibleColumns(List<String> columns){
-		this.visibleTableColumns = columns;
+	public void setVisibleColumns(String columns){
+		if (columns == null){
+			return;
+		}
+		visibleTableColumns = new HashSet<String>();
+		String bits[] = columns.split(",");
+		for (int i = 0; i < bits.length; i++){
+			visibleTableColumns.add(bits[i]);
+		}
 	}
 	
+	/**
+	 * Sets the columns that are visible in the output table.
+	 * @param columns
+	 */
+	
+	public void setVisibleColumns(Set<String> columns){
+		this.visibleTableColumns = columns;
+	}
+	@Transient
+	public Set<String> getVisibleColumnsAsArray(){
+		return this.visibleTableColumns;
+	}
 	
 	/**
 	 * @return the conservation area filter
 	 */
-	public ConservationAreaFilter getConservationAreaFilter(){
+	@Transient
+	public ConservationAreaFilter getConservationAreaFilterAsFilter(){
 		return this.caFilter;
 	}
 	/**
@@ -124,6 +175,14 @@ public class WaypointQuery extends Query{
 	public void setConservationAreaFilter(ConservationAreaFilter filter){
 		this.caFilter = filter;
 	}
+	@Column(name="ca_filter")
+	public String getConservationAreaFilter(){
+		return this.caFilter.asString();
+	}
+	public void setConservationAreaFilter(String caFilterString){
+		this.caFilter = ConservationAreaFilter.parseFilter(caFilterString);
+	}
+	
 	
 	/**
 	 * Sets the query string.  At this point the
@@ -140,10 +199,8 @@ public class WaypointQuery extends Query{
 	/**
 	 * @return the query filter as string
 	 */
+	@Column(name = "query_filter")
 	public String getQueryFilter(){
-		if (this.strQueryFilter == null){
-			return "";
-		}
 		return this.strQueryFilter;
 	}
 	
@@ -153,13 +210,14 @@ public class WaypointQuery extends Query{
 	 * into the filter format.
 	 * @return 
 	 */
-	public Filter parseQueryFilter() throws Exception {
+	@Transient
+	private  IFilter parseQueryFilter() throws Exception {
 		if (strQueryFilter == null || strQueryFilter.length() == 0){
-			return Filter.EMPTY_FILTER;
+			return IFilter.EMPTY_FILTER;
 		}
 		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
 		Parser parser = new Parser(is);
-		Filter myQuery = parser.Expression();
+		IFilter myQuery = parser.Expression();
 		is.close();
 		return myQuery;
 	}
@@ -169,7 +227,8 @@ public class WaypointQuery extends Query{
 	 * @return the query filter in the filter format.  Will
 	 * attempt to parse the query if it has not been parsed
 	 */
-	public Filter getFilter(){
+	@Transient
+	public IFilter getFilter(){
 		if (queryFilter == null){
 			try{
 				queryFilter = parseQueryFilter();
@@ -187,6 +246,7 @@ public class WaypointQuery extends Query{
 	 * @return
 	 * @throws Exception
 	 */
+	@Transient
 	public List<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception{
 		
 		lastResults = null;
@@ -205,15 +265,61 @@ public class WaypointQuery extends Query{
 	 * Returns the results from last time the query was run.  Does not re-run the query.
 	 * @return the last run results
 	 */
+	@Transient
 	public List<QueryResultItem> getLastResults(){
 		return lastResults;
 	}
 	
 	/** public for testing purposes only */
+	@Transient
 	public List<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception{
 		DerbyQueryEngine2 engine = new DerbyQueryEngine2();
 		return engine.executeQuery(this, session, progressMonitor);
 	}
 	
+	
+	@Transient
+	public void generateDropItems(Session session) throws Exception{
+		//parses the query into a collection of drop items
+		IFilter query = parseQueryFilter();
+		if (items != null){
+			for (DropItem it : items){
+				it.dispose();
+			}
+			items.clear();
+		}else{
+			items = new ArrayList<DropItem>();
+		}
+		DropItem[] filterItems = query.getDropItems(session);
+		for (int i = 0; i < filterItems.length; i ++){
+			items.add(filterItems[i]);
+		}
+	}
+	
+	@Transient
+	private List<DropItem> items;
+	@Transient
+	public List<DropItem> getDropItems(){
+		return items;
+	}
+	@Transient
+	public void setDropItems(List<DropItem> items){
+		this.items = items;
+	}
+	
+	@Transient
+	public WaypointQuery clone(){
+		WaypointQuery q = new WaypointQuery();
+		q.setUuid(null);
+		q.setId( null );
+		q.setName(getName());
+		q.setConservationArea(getConservationArea());
+		q.setConservationAreaFilter(getConservationAreaFilter());
+		q.setDateFilter(getDateFilter());
+		q.setOwner(SmartDB.getCurrentEmployee());
+		q.setQueryFilter(getQueryFilter());
+		q.setVisibleColumns(this.getVisibleColumnsAsArray());
+		return q;
+	}
 	
 }

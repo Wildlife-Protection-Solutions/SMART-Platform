@@ -19,7 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui;
+package org.wcs.smart.query.model;
+
+import java.util.Arrays;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -28,24 +30,74 @@ import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.query.QueryPlugIn;
 
 /**
- * Editor input for query editor.
- * 
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
  * @author Emily
  * @since 1.0.0
  */
-public class QueryResultsInput implements IEditorInput {
+public class QueryInput implements IEditorInput {
 
+	
 	private byte[] uuid = null;
 	private String queryName = null;
+	private String id = null;
+	private boolean isShared;
 	
-	public QueryResultsInput(){
+	public QueryInput(){
 	}
 	
-	public QueryResultsInput(byte[] uuid, String queryName){
+	public QueryInput(Query query){
+		this(query.getUuid(), query.getName(), query.getId(), query.getIsShared());
+	}
+	
+	public QueryInput(byte[] uuid, String queryName, String id, boolean isShared){
 		this.uuid = uuid;
 		this.queryName = queryName;
+		this.id = id;
+		this.isShared = isShared;
 	}
 	
+	
+	/**
+	 * @return <code>true</code> if the query is shared <code>false</code> otherwise
+	 */
+	public boolean isShared(){
+		return this.isShared;
+	}
+	/**
+	 * @return the query id
+	 */
+	public String getId(){
+		return this.id;
+	}
+	/**
+	 * Sets the id;
+	 * @param newId
+	 * @return
+	 */
+	public void setId(String newId){
+		this.id = newId;
+	}
+	
+	/**
+	 * Sets the uuid associated with the input
+	 * 
+	 * @param uuid
+	 */
+	public void setUuid(byte[] uuid){
+		this.uuid = uuid;
+	}
+	/**
+	 * Updates the query name;
+	 * @param name
+	 */
+	public void setQueryName(String name){
+		this.queryName = name;
+	}
 	/**
 	 * @return the query name
 	 */
@@ -91,9 +143,9 @@ public class QueryResultsInput implements IEditorInput {
 	@Override
 	public String getName() {
 		if (queryName == null){
-			return "Query";
+			return "New Query";
 		}else{
-			return "Query : " + queryName;
+			return queryName;
 		}
 	}
 
@@ -116,5 +168,27 @@ public class QueryResultsInput implements IEditorInput {
 			return "Smart Query Editor - " + queryName;
 		}
 	}
+	
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(uuid);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		QueryInput other = (QueryInput) obj;
+		
+		if (uuid == null && other.uuid == null) return false;
+		if (!Arrays.equals(uuid, other.uuid))
+			return false;
+		return true;
+	}
+
 
 }

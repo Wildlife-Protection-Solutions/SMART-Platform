@@ -32,40 +32,53 @@ public class Operator {
 	/**
 	 * Equals (=) operator 
 	 */
-	public static Operator EQUALS = new Operator("=", "=");
+	public static Operator EQUALS = new Operator("=", "=", "=");
 	/**
 	 * Less Than (<) operator 
 	 */
-	public static Operator LESSTHAN = new Operator("<", "<");
+	public static Operator LESSTHAN = new Operator("<", "<", "<");
 	/**
 	 * Less Than Equals (<=) operator 
 	 */
-	public static Operator LESSTHANEQUALS = new Operator("<=", "<=");
+	public static Operator LESSTHANEQUALS = new Operator("<=", "<=", "<=");
 	/**
 	 * Great Than (>) operator 
 	 */
-	public static Operator GREATERTHAN = new Operator(">", ">");
+	public static Operator GREATERTHAN = new Operator(">", ">", ">");
 	/**
 	 * Great Than Equals (>=) operator 
 	 */
-	public static Operator GREATERTHANEQUALS = new Operator(">=", ">=");
+	public static Operator GREATERTHANEQUALS = new Operator(">=", ">=", ">=");
 	/**
 	 * Not Equals (!=) operator 
 	 */
-	public static Operator NOTEQUALS = new Operator("!=", "<>");
+	public static Operator NOTEQUALS = new Operator("!=", "<>", "!=");
 	/**
 	 * String like operator 
 	 */
-	public static Operator STR_EQUALS = new Operator("equals", "=");
+	public static Operator STR_EQUALS = new Operator("equals", "=", "equals");
 	/**
 	 * String contains operator 
 	 */
-	public static Operator STR_CONTAINS = new Operator("contains", "like");
+	public static Operator STR_CONTAINS = new Operator("contains", "like", "contains");
 	/**
 	 * String not contains operator
 	 */
-	public static Operator STR_NOTCONTAINS = new Operator("not contains", "not like");
+	public static Operator STR_NOTCONTAINS = new Operator("not contains", "not like", "notcontains");
 	
+	/**
+	 * Boolean and operator
+	 */
+	public static Operator AND = new Operator("AND", "AND", "and");
+	/**
+	 * Boolean or operator
+	 */
+	public static Operator OR = new Operator("OR", "OR", "or");
+	/**
+	 * Boolean not operator
+	 */
+	public static Operator NOT = new Operator("NOT", "NOT", "not");
+
 	/**
 	 * Valid numeric operators
 	 */
@@ -74,6 +87,10 @@ public class Operator {
 	 * Valid string operators
 	 */
 	public static Operator[] STRING_OPS = {STR_EQUALS, STR_CONTAINS, STR_NOTCONTAINS};
+	/**
+	 * Valid boolean operators
+	 */
+	public static Operator[] BOOLEANS_OPS = {AND, OR, NOT};
 	
 	/**
 	 * Parses an operator from the string value 
@@ -81,31 +98,39 @@ public class Operator {
 	 * @return the operator
 	 */
 	public static Operator parseOperator(String value){
-		if (value.equals("=")) return EQUALS;
-		if (value.equals("<")) return LESSTHAN;
-		if (value.equals("<=")) return LESSTHANEQUALS;
-		if (value.equals(">")) return GREATERTHAN;
-		if (value.equals(">=")) return GREATERTHANEQUALS;
-		if (value.equals("!=")) return NOTEQUALS;
-		if (value.equals("<>")) return NOTEQUALS;
-		
-		if (value.equals("equals")) return STR_EQUALS;
-		if (value.equals("contains")) return STR_CONTAINS;
-		if (value.equals("notcontains")) return STR_NOTCONTAINS;
-		
+		for (int i = 0; i < STRING_OPS.length; i ++){
+			if (STRING_OPS[i].asSmartValue().equalsIgnoreCase(value)){
+				return STRING_OPS[i];
+			}
+		}
+		for (int i = 0; i < NUMERIC_OPS.length; i ++){
+			if (NUMERIC_OPS[i].asSmartValue().equalsIgnoreCase(value)){
+				return NUMERIC_OPS[i];
+			}
+		}
+		if (value.equalsIgnoreCase("<>")){
+			return NOTEQUALS;
+		}
+		for (int i = 0; i < BOOLEANS_OPS.length; i ++){
+			if (BOOLEANS_OPS[i].asSmartValue().equalsIgnoreCase(value)){
+				return BOOLEANS_OPS[i];
+			}
+		}
 		return null;
 	}
 	
 	private String guiValue;
 	private String sqlOperator;
+	private String smartValue;
 	
 	/**
 	 * @param guiValue the operator gui value
 	 * @param sqlOperator the sql operator
 	 */
-	public Operator(String guiValue, String sqlOperator){
+	public Operator(String guiValue, String sqlOperator, String smartValue){
 		this.guiValue = guiValue;
 		this.sqlOperator = sqlOperator;
+		this.smartValue = smartValue;
 	}
 
 	/**
@@ -116,10 +141,17 @@ public class Operator {
 	}
 	
 	/**
-	 * @return the sql operator
+	 * @return the sql representation of the operator
 	 */
 	public String asSql(){
 		return sqlOperator;
+	}
+	
+	/**
+	 * @return the smart query representation of the operator
+	 */
+	public String asSmartValue(){
+		return this.smartValue;
 	}
 	
 	/**

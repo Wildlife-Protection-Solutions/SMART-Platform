@@ -24,11 +24,19 @@ package org.wcs.smart.query.export;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.List;
 
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.parser.internal.IFilter;
+import org.wcs.smart.query.parser.internal.PatrolFilter;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.query.xml.model.UuidItemType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query exporter that exports the query definition
@@ -50,9 +58,21 @@ public class DefinitionQueryExporter extends QueryExporter {
 	protected void init() throws Exception {
 		Query wpquery = new Query();
 		QueryType qt = new QueryType();
+		
+		qt.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode());
 		qt.setName(this.query.getName());
 		qt.setDefinition(this.query.getQueryFilter());
 		wpquery.setQuery(qt);
+		
+		IFilter queryFilter = this.query.getFilter();
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			processFilter(queryFilter, qt, s);
+		}finally{
+			s.getTransaction().rollback();
+			s.close();
+		}
 		
 		OutputStream fout = new BufferedOutputStream(new FileOutputStream(this.outputFile));
 		try{
@@ -60,7 +80,41 @@ public class DefinitionQueryExporter extends QueryExporter {
 		}finally{
 			fout.close();
 		}
+	}
+	
+	private void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
 		
+		if (f instanceof PatrolFilter){
+			PatrolFilter pf = (PatrolFilter)f;
+			
+			if (pf.getPatrolType().getType() == PatrolFilter.PATROL_FILTER_TYPE_UUID){
+				//we need to add a uuid type
+				UuidItemType item = new UuidItemType();
+				item.setUuid(pf.getValue());
+				//find item in database
+				
+				String[] data = pf.getPatrolType().getNames(session, SmartUtils.decodeHex(pf.getValue()));
+				if (data != null){
+					int index = 0;
+					if (data.length > 1){
+						item.setId(data[0]);
+						index = 1;
+					}
+					for (;index < data.length; index++){
+						item.getValue().add(data[index]);
+					}
+				}
+				
+				qt.getUuiditem().add(item);
+			}
+		}
+		
+		List<IFilter> kids = f.getChildren();
+		if (kids != null){
+			for (IFilter kid : kids){
+				processFilter(kid, qt, session);
+			}
+		}
 	}
 
 	/**

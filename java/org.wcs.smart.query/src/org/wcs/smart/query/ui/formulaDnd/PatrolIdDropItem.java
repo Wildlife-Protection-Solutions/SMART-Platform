@@ -38,8 +38,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+
 import org.wcs.smart.query.parser.internal.Operator;
 import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
 
@@ -62,6 +65,8 @@ public class PatrolIdDropItem  extends DropItem{
 	private Font smallerFont;
 	private Font smallerFont2;
 	
+	private String currentValue = null;
+	private String currentOp = null;
 	/*
 	 * job to load all patrol ids
 	 */
@@ -71,8 +76,10 @@ public class PatrolIdDropItem  extends DropItem{
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
 			try{
-				String q = "Select id FROM Patrol";
-				final List<String> data = s.createQuery(q).list();
+				String hql = "Select id FROM Patrol WHERE conservationArea = :ca";
+				Query q = s.createQuery(hql);
+				q.setParameter("ca", SmartDB.getCurrentConservationArea());
+				final List<String> data = q.list();
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
@@ -80,6 +87,7 @@ public class PatrolIdDropItem  extends DropItem{
 							value.add(id);
 						}		
 					}});
+				
 			}finally{
 				s.close();
 			}
@@ -93,18 +101,12 @@ public class PatrolIdDropItem  extends DropItem{
 	 * @param target drop panel target
 	 * @param PatrolFilterOption id patrol filter option
 	 */
-	public PatrolIdDropItem(Composite parent, DropTargetPanel target, PatrolFilterOption option) {
-		super(parent, target);
+	public PatrolIdDropItem(PatrolFilterOption option) {
+		//super(parent, target);
 		assert option == PatrolFilterOption.ID;
 		
 		this.text = option.getGuiName();
-		lblAttribute.setText(this.text);
 		this.key = "patrol:" + option.getKeyPart();
-		for (int i = 0; i < Operator.STRING_OPS.length; i ++){
-			operators.add(Operator.STRING_OPS[i].getGuiValue());
-		}
-		operators.select(0);
-		loadPIdJob.schedule();
 	}
 
 	/**
@@ -120,7 +122,7 @@ public class PatrolIdDropItem  extends DropItem{
 	 */
 	@Override
 	public String asQueryPart() {
-		return this.key + " " +  Operator.STRING_OPS[operators.getSelectionIndex()].getGuiValue() + " \"" + value.getText() + "\"";
+		return this.key + " " +  Operator.STRING_OPS[operators.getSelectionIndex()].asSmartValue() + " \"" + value.getText() + "\"";
 	}
 
 	/**
@@ -141,7 +143,7 @@ public class PatrolIdDropItem  extends DropItem{
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createComposite(Composite parent) {
+	protected void createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(4, false);
 		layout.marginWidth = 0;
@@ -157,16 +159,32 @@ public class PatrolIdDropItem  extends DropItem{
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
 		operators.setFont(smallerFont);
-		
-		value = new Combo(main, SWT.BORDER | SWT.DROP_DOWN);
-		value.addModifyListener(new ModifyListener() {
-			
+		operators.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				fireListeners();
-				value.setToolTipText(value.getText());
+				if (currentOp != null && currentOp.equals(operators.getText())){
+					//do nothing as has not changed
+				}else{
+					queryChanged();
+					currentOp = operators.getText();
+				}
 			}
 		});
+		
+		value = new Combo(main, SWT.BORDER | SWT.DROP_DOWN);
+		value.addModifyListener(new ModifyListener() {			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (currentValue != null && currentValue.equals(value.getText())){
+					//ignore; not changed
+				}else{
+					queryChanged();
+					value.setToolTipText(value.getText());
+					currentValue = value.getText();
+				}
+			}
+		});
+		
 		fd = (value.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont2 = new Font(Display.getCurrent(), fd);
@@ -179,6 +197,34 @@ public class PatrolIdDropItem  extends DropItem{
 		
 		initDrag(main);
 		initDrag(lblAttribute);
+		
+		
+		lblAttribute.setText(this.text);
+		
+		int index = 0;
+		for (int i = 0; i < Operator.STRING_OPS.length; i ++){
+			operators.add(Operator.STRING_OPS[i].getGuiValue());
+			if (currentOp != null && Operator.STRING_OPS[i].getGuiValue().equals(currentOp)){
+				index =i;
+			}
+		}
+		operators.select(index);
+		if (currentValue != null){
+			value.setText(currentValue);
+		}
+		
+		
+		loadPIdJob.schedule();
+	}
+
+	/**
+	 * @param data an array of string containing the operator gui value and filter value
+	 */
+	@Override
+	public void initializeData(Object data) {
+		this.currentOp = ((String[])data)[0];
+		this.currentValue = ((String[])data)[1];
+		
 	}
 
 }

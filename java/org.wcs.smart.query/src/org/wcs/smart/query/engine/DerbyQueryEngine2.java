@@ -33,6 +33,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -42,6 +43,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -53,7 +55,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.WaypointQuery;
 import org.wcs.smart.query.parser.internal.AttributeInfo;
-import org.wcs.smart.query.parser.internal.Filter;
+import org.wcs.smart.query.parser.internal.IFilter;
 
 /**
  * Query engine for executing queries using derby.
@@ -63,6 +65,10 @@ import org.wcs.smart.query.parser.internal.Filter;
  */
 public class DerbyQueryEngine2 implements QueryEngine {
 
+	private static final String QUERY_TEMP_SCHEMA = "smart_query";
+	private static final String QUERY_TEMP_TABLE_PREFIX = "query_results_";
+	private static final String QUERY_OB_TEMP_TABLE_PREFIX = "query_attributes_";
+	
 	/**
 	 * Maps database tables to a prefix to use in the query.
 	 */
@@ -79,13 +85,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		tablePrefix.put(Category.class, "c");
 		tablePrefix.put(AttributeTreeNode.class, "at");
 		tablePrefix.put(AttributeListItem.class, "al");
+		tablePrefix.put(PatrolLegMember.class, "plm");
 	}
 
 	private List<QueryResultItem> myResults = null;
-
-	private String tempSchema = "smart";
-	private String queryTempTable = "query_results_";
-	private String observationTempTable = "query_attributes_";
+	
+	private String queryTempTable = "";
+	private String observationTempTable = "";
 
 	/**
 	 * Executes the given query.
@@ -121,8 +127,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
-		queryTempTable = queryTempTable + System.nanoTime();
-		observationTempTable = observationTempTable + System.nanoTime();
+		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
+		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
 
 		myResults = null;
 		session.doWork(new Work() {
@@ -132,7 +138,11 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 				try {
 					monitor.subTask("Creating observation table");
-					if (query.getFilter() != Filter.EMPTY_FILTER && query.getFilter().hasAttributeFilter()) {
+					IFilter qFilter = query.getFilter();
+					if (qFilter == null){
+						return;
+					}
+					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
 						createObservationTable(c, query);
 					}
 					monitor.worked(1);
@@ -178,7 +188,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 */
 	private void dropTemporaryTables(Connection c) throws SQLException {
 		try {
-			String sql = "DROP TABLE " + tempSchema + "." + observationTempTable;
+//			String sql = "DROP TABLE " + QUERY_TEMP_SCHEMA + "." + observationTempTable;
+			String sql = "DROP TABLE " + observationTempTable;
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		} catch (Exception ex) {
@@ -186,7 +197,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		}
 
 		try {
-			String sql = "DROP TABLE " + tempSchema + "." + queryTempTable;
+			String sql = "DROP TABLE " + queryTempTable;
+//			String sql = "DROP TABLE " + QUERY_TEMP_SCHEMA + "." + queryTempTable;
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		} catch (Exception ex) {
@@ -209,7 +221,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + tempSchema + "." + observationTempTable + " (observation_uuid char(16) for bit data");
+//		sql.append("CREATE TABLE " + QUERY_TEMP_SCHEMA + "." + observationTempTable + " (observation_uuid char(16) for bit data");
+		sql.append("CREATE TABLE " + observationTempTable + " (observation_uuid char(16) for bit data");
 		for (AttributeInfo key : keys) {
 			sql.append(", " + key.getKey() + " "
 					+ this.getDataType(key.getType()));
@@ -221,7 +234,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		// -- populate table
 		sql = new StringBuilder();
-		sql.append("INSERT INTO " + tempSchema + "." + observationTempTable + " SELECT observation_uuid ");
+//		sql.append("INSERT INTO " + QUERY_TEMP_SCHEMA + "." + observationTempTable + " SELECT observation_uuid ");
+		sql.append("INSERT INTO " + observationTempTable + " SELECT observation_uuid ");
 		for (AttributeInfo key : keys) {
 			sql.append(", max(" + key.getKey() + ") as " + key.getKey() + " ");
 		}
@@ -236,7 +250,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				sql.append(" then l.keyid else null end as " + key.getKey() + " ");
 			} else if (key.getType() == AttributeType.TREE) {
 				tree = true;
-				sql.append(", case when c.key = '" + key.getKey() + "'");
+				sql.append(", case when c.keyid = '" + key.getKey() + "'");
 				sql.append(" then t.hkey else null end as ");
 				sql.append(key.getKey() + " ");
 				
@@ -269,7 +283,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	private void createTemporaryTable(Connection c) throws SQLException {
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + tempSchema + "." + queryTempTable + "(");
+//		sql.append("CREATE TABLE " + QUERY_TEMP_SCHEMA + "." + queryTempTable + "(");
+		sql.append("CREATE TABLE " + queryTempTable + "(");
 		sql.append("p_uuid char(16) for bit data,");
 		sql.append("p_id varchar(23),");
 		sql.append("p_station_uuid char(16) for bit data,");
@@ -285,19 +300,23 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append("pl_transport_uuid char(16) for bit data,");
 		sql.append("pld_patrol_day date,");
 		sql.append("wp_uuid char(16) for bit data,");
-		sql.append("ob_uuid char(16) for bit data)");
+		sql.append("ob_uuid char(16) for bit data,");
+		sql.append("plm_leader char(16) for bit data,");
+		sql.append("plm_pilot char(16) for bit data)");
 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 
 		//-- add indexes 
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + queryTempTable + "_wp_uuid_idx on " + tempSchema + "." + queryTempTable + "(wp_uuid)");
+//		sql.append("CREATE INDEX " + queryTempTable + "_wp_uuid_idx on " + QUERY_TEMP_SCHEMA + "." + queryTempTable + "(wp_uuid)");
+		sql.append("CREATE INDEX " + queryTempTable + "_wp_uuid_idx on " + queryTempTable + "(wp_uuid)");
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + queryTempTable + "_ob_uuid_idx on " + tempSchema + "." + queryTempTable + "(ob_uuid)");
+//		sql.append("CREATE INDEX " + queryTempTable + "_ob_uuid_idx on " + QUERY_TEMP_SCHEMA + "." + queryTempTable + "(ob_uuid)");
+		sql.append("CREATE INDEX " + queryTempTable + "_ob_uuid_idx on " +  queryTempTable + "(ob_uuid)");
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
@@ -314,7 +333,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			throws SQLException {
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO " + tempSchema + "." + queryTempTable );
+//		sql.append("INSERT INTO " + QUERY_TEMP_SCHEMA + "." + queryTempTable );
+		sql.append("INSERT INTO " + queryTempTable );
 		// ---- SELECT CLAUSE -----
 		sql.append(" SELECT ");
 		sql.append(tablePrefix.get(Patrol.class) + ".uuid, ");
@@ -332,7 +352,9 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(tablePrefix.get(PatrolLeg.class) + ".transport_uuid, ");
 		sql.append(tablePrefix.get(PatrolLegDay.class) + ".patrol_day, ");
 		sql.append(tablePrefix.get(Waypoint.class) + ".uuid, ");
-		sql.append(tablePrefix.get(WaypointObservation.class) + ".uuid ");
+		sql.append(tablePrefix.get(WaypointObservation.class) + ".uuid, ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.employee_uuid, ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.employee_uuid ");
 
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM ");
@@ -355,8 +377,20 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				+ tablePrefix.get(WaypointObservation.class));
 		sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = "
 				+ tablePrefix.get(WaypointObservation.class) + ".wp_uuid ");
-
-		if (q.getFilter() != Filter.EMPTY_FILTER) {
+		sql.append(" left join ");
+		sql.append(" smart.patrol_leg_members ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader ");
+		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.patrol_leg_uuid and  ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.is_leader ");
+		sql.append(" left join ");
+		sql.append(" smart.patrol_leg_members ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot ");
+		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.patrol_leg_uuid and  ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.is_pilot ");
+				
+		if (q.getFilter() != IFilter.EMPTY_FILTER) {
 			if (q.getFilter().hasAttributeFilter()
 					|| q.getFilter().hasCategoryFilter()) {
 				sql.append(" left join ");
@@ -369,7 +403,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 				if (q.getFilter().hasAttributeFilter()) {
 					sql.append(" left join ");
-					sql.append(tempSchema + "." + observationTempTable + " qa on qa.observation_uuid = ");
+//					sql.append(QUERY_TEMP_SCHEMA + "." + observationTempTable + " qa on qa.observation_uuid = ");
+					sql.append(observationTempTable + " qa on qa.observation_uuid = ");
 					sql.append(tablePrefix.get(WaypointObservation.class)
 							+ ".uuid");
 
@@ -388,7 +423,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			}
 		}
 		if (q.getConservationAreaFilter() != null) {
-			String filter = q.getConservationAreaFilter().asSql(tablePrefix);
+			String filter = q.getConservationAreaFilterAsFilter().asSql(tablePrefix);
 			if (filter.length() > 0) {
 				if (and) {
 					sql.append(" AND ");
@@ -397,7 +432,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				and = true;
 			}
 		}
-		if (q.getFilter() != Filter.EMPTY_FILTER) {
+		if (q.getFilter() != IFilter.EMPTY_FILTER) {
 			String filter = q.getFilter().asSql(tablePrefix);
 			if (filter.length() > 0) {
 				if (and) {
@@ -451,12 +486,12 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		QueryResultItem last = null;
 		try {
 			while (rs.next()) {
-				byte[] wpouuid = rs.getBytes(22);
+				byte[] wpouuid = rs.getBytes(24);
 				if (wpouuid != null && last != null
 						&& last.getObservationUuid() != null
 						&& Arrays.equals(wpouuid, last.getObservationUuid())) {
 					//same observation new attribute
-					Attribute att = getAttribute(rs.getBytes(24), session);
+					Attribute att = getAttribute(rs.getBytes(26), session);
 					if (att != null){
 						Object value = getAttributeValue(att, rs, session);
 						last.addAttribute(att.getKeyId(), value);
@@ -473,22 +508,26 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				it.setTeam(getTeamName(rs.getBytes(6), session));				
 				it.setObjectiveRating(rs.getInt(7));
 				it.setObjective(rs.getString(8));
-				it.setObjective(getMandateName(rs.getBytes(9), session));
+				it.setMandate(getMandateName(rs.getBytes(9), session));
 				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(10)));
 				it.setArmed(rs.getBoolean(11));
 				it.setTransportType(getTransportType(rs.getBytes(12), session));
 				it.setPatrolLegId(rs.getString(13));
 				it.setWpDateTime(rs.getDate(14));
-				it.setWaypointId(rs.getInt(15));
-				it.setWaypointX(rs.getDouble(16));
-				it.setWaypointY(rs.getDouble(17));
-				it.setWaypointTime(rs.getTime(18));
-				it.setWaypointDirection(rs.getFloat(19));
-				it.setWaypointDistance(rs.getFloat(20));
-				it.setWaypointComment(rs.getString(21));
+				
+				it.setLeader(getEmployeeName(rs.getBytes(15), session));
+				it.setPilot(getEmployeeName(rs.getBytes(16), session));
+				
+				it.setWaypointId(rs.getInt(17));
+				it.setWaypointX(rs.getDouble(18));
+				it.setWaypointY(rs.getDouble(19));
+				it.setWaypointTime(rs.getTime(20));
+				it.setWaypointDirection(rs.getFloat(21));
+				it.setWaypointDistance(rs.getFloat(22));
+				it.setWaypointComment(rs.getString(23));
 				it.setObservationUuid(wpouuid);
-				it.setCategory(getCategory(rs.getBytes(23), session));
-				Attribute att = getAttribute(rs.getBytes(24), session);
+				it.setCategory(getCategory(rs.getBytes(25), session));
+				Attribute att = getAttribute(rs.getBytes(26), session);
 				if (att != null){
 					Object value = getAttributeValue(att, rs, session);
 					it.addAttribute(att.getKeyId(), value);
@@ -517,16 +556,16 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		Object value = null;
 		switch (att.getType()) {
 		case NUMERIC:
-			value = rs.getDouble(25);
+			value = rs.getDouble(27);
 			break;
 		case BOOLEAN:
-			value = (rs.getDouble(25) >= 0.5);
+			value = (rs.getDouble(27) >= 0.5);
 			break;
 		case TEXT:
-			value = rs.getString(26);
+			value = rs.getString(28);
 			break;
 		case TREE:
-			byte[] nodeuuid = rs.getBytes(28);
+			byte[] nodeuuid = rs.getBytes(30);
 			if (nodeuuid != null) {
 				AttributeTreeNode i = (AttributeTreeNode) session.load(
 						AttributeTreeNode.class, nodeuuid);
@@ -534,7 +573,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			}
 			break;
 		case LIST:
-			byte[] listuuid = rs.getBytes(27);
+			byte[] listuuid = rs.getBytes(29);
 			if (listuuid != null) {
 				AttributeListItem i = (AttributeListItem) session.load(
 						AttributeListItem.class, listuuid);
@@ -613,6 +652,24 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	}
 	
 	/**
+	 * Loads the team object from the session
+	 * and returns the associated name.
+	 * 
+	 * @param suuid
+	 * @param session
+	 * @return
+	 */
+	private String getEmployeeName(byte[] uuid, Session session){
+		if (uuid != null){
+			Employee x = (Employee) session.load(Employee.class, uuid);
+			if (x != null) {
+				return x.getGivenName() + " " + x.getFamilyName() + " [" + x.getId() + "]";
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Loads the team mandate from the session
 	 * and returns the associated name.
 	 * 
@@ -660,10 +717,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		String[] results = { "p_uuid", "p_id", "p_start_date", "p_end_date",
 				"p_station_uuid", "p_team_uuid", "p_objective_rating",
 				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed",
-				"pl_transport_uuid", "pl_id", "pld_patrol_day" };
+				"pl_transport_uuid", "pl_id", "pld_patrol_day", "plm_leader", "plm_pilot" };
+		
 		String[] waypoints = { "id", "x", "y", "time", "direction", "distance",
 				"wp_comment" };
+		
 		String[] observations = { "uuid", "category_uuid" };
+		
 		String[] attributes = { "attribute_uuid", "number_value",
 				"string_value", "list_element_uuid", "tree_node_uuid" };
 
@@ -733,7 +793,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	private String FromClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(tempSchema + "." + queryTempTable);
+//		sql.append(QUERY_TEMP_SCHEMA + "." + queryTempTable);
+		sql.append(queryTempTable);
 		sql.append(" r");
 
 		if (includeObservations) {

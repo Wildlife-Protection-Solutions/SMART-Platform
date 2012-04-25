@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.AbstractSourceProvider;
 import org.eclipse.ui.ISources;
@@ -34,6 +35,7 @@ import org.eclipse.ui.ISources;
  * <li> Selected Filters - These are the filters selected (in the QueryFilterView)
  * to add to the current query.</li>
  * <li> Query Valid - true or false if the current query is valid.</li>
+ * <li> Query Definition - the current query definition in the querydefview</li>
  * </ul>
  *  
  * @author Emily
@@ -47,6 +49,10 @@ public class SourceProvider extends AbstractSourceProvider {
 
 	HashMap<String, Object> data = new HashMap<String, Object>();
 	
+	public SourceProvider(){
+		data.put(SELECTED_FILTERS, IEvaluationContext.UNDEFINED_VARIABLE);
+		data.put(QUERY_VALID, IEvaluationContext.UNDEFINED_VARIABLE);
+	}
 	/**
 	 * @see org.eclipse.ui.ISourceProvider#dispose()
 	 */
@@ -70,11 +76,11 @@ public class SourceProvider extends AbstractSourceProvider {
 	 * @param isValid <code>true</code> or <code>false</code> depending on the state of the
 	 * current query.
 	 */
-	public void setQueryValue(boolean isValid){
-		data.put(SELECTED_FILTERS, isValid);
+	public void setQueryValue(Boolean isValid){
+		data.put(QUERY_VALID, isValid);
 		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_VALID, isValid);
 	}
-	
+		
 	/**
 	 * @see org.eclipse.ui.ISourceProvider#getCurrentState()
 	 */

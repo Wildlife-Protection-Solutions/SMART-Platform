@@ -23,10 +23,18 @@ package org.wcs.smart.query.parser.internal;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.query.model.QueryHibernateManager;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.formulaDnd.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -35,7 +43,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeFilter implements Filter {
+public class AttributeFilter implements IFilter {
 	/**
 	 * Creates a new boolean attribute filter
 	 * @param attributeIdentifier the attribute identifier in the form "attribute:b:<key>"
@@ -141,18 +149,18 @@ public class AttributeFilter implements Filter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#asString()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
 		if (attributeType == AttributeType.BOOLEAN){
 			return fullIdentifier;
 		}else if (attributeType == AttributeType.NUMERIC){
-			return fullIdentifier + " " + op.asString() + " " + ((Double)value1).toString();
+			return fullIdentifier + " " + op.asSmartValue() + " " + ((Double)value1).toString();
 		}else if (attributeType == AttributeType.TEXT){
-			return fullIdentifier + " " + op.asString() + " \"" + ((String)value1) + "\"";
+			return fullIdentifier + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";
 		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
-			return fullIdentifier + " " + op.asString() + " " + ((String)value1);
+			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);
 		}
 		return "";
 	}
@@ -189,13 +197,14 @@ public class AttributeFilter implements Filter {
 		}else if (attributeType == AttributeType.LIST ){
 			return "( qa."+ attributeKey  + " " + op.asSql() + " '" + (String)value1 + "' )";
 		}else if (attributeType == AttributeType.TREE){
-			return "( qa." + attributeKey + " " + op.asSql() + " '" + (String)value1 + "' )";
+//			return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') ";
+			return "( qa." + attributeKey + " >= '" + (String)value1 + "' and qa." + attributeKey + "<'" + ((String)value1).substring(0,  ((String)value1).length() -1) + "/')";
 		}
 		return "";
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -203,7 +212,7 @@ public class AttributeFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -211,7 +220,7 @@ public class AttributeFilter implements Filter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.internal.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -219,11 +228,56 @@ public class AttributeFilter implements Filter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.Filter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
 		attributes.add(new AttributeInfo(attributeKey, attributeType));
 	}
+
+	
+	public DropItem[] getDropItems(Session session) throws Exception{
+		Attribute att = getAttribute(session);
+		DropItem it = DropItemFactory.INSTANCE.createAttributeDropItem(att);
+		initDropItem(it, session);
+		return new DropItem[]{it};
+	}
+	
+	public void initDropItem(DropItem it,  Session session){
+		if (attributeType == AttributeType.TEXT || attributeType == AttributeType.NUMERIC){
+			it.initializeData(new String[]{op.getGuiValue(), String.valueOf(value1)});
+			
+		}else if (attributeType == AttributeType.LIST){
+			AttributeListItem ali = QueryHibernateManager.getAttributeListItem(session, (String)value1);
+			ListItem li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
+			it.initializeData(li);
+		}else if (attributeType == AttributeType.TREE){
+			AttributeTreeNode ali = QueryHibernateManager.getAttributeTreeNode(session, (String)value1);
+			it.initializeData(ali);
+		}
+		
+	}
+	/**
+	 * Loads the attribute from the database
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
+	public Attribute getAttribute(Session session) throws Exception{
+		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		if (att == null){
+			throw new Exception("Query formula could not be parsed from the database.  Attribute " + attributeKey + " could not be found.");
+		}
+		return att;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getChildren()
+	 */
+	@Override
+	public List<IFilter> getChildren() {
+		return null;
+	}
+	
 }
 

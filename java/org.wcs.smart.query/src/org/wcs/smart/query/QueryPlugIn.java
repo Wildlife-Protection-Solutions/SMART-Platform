@@ -48,6 +48,16 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String QUERY_ICON = "org.wcs.smart.query.queryicon";
 	
+	/**
+	 * The query folder
+	 */
+	public static final String FOLDER_ICON = "org.wcs.smart.query.folder";
+	
+	/**
+	 * The waypoint query
+	 */
+	public static final String WAYPOINT_QUERY_ICON = "org.wcs.smart.query.waypointquery";
+	
 	/*
 	 * Load images
 	 */
@@ -58,12 +68,22 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(DELETE_MINI_ICON, descriptor);
 		}
-		
-		 descriptor = AbstractUIPlugin
-				.imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/querypatrol.gif"); //$NON-NLS-1$
+
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
+				"images/icons/obj16/querypatrol.gif"); //$NON-NLS-1$
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(QUERY_ICON, descriptor);
+		}
+
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
+				"images/icons/obj16/folder.png"); //$NON-NLS-1$
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(FOLDER_ICON, descriptor);
+		}
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
+				"images/icons/obj16/waypoint_query.png"); //$NON-NLS-1$
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(WAYPOINT_QUERY_ICON, descriptor);
 		}
 	}
 	
@@ -130,8 +150,13 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * @param message  Error message to display
 	 * @param t exception to log
 	 */
-	public static void displayLog(String message, Throwable t){
+	public static void displayLog(final String message, Throwable t){
 		log(message, t);
-		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", message);
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+			}});
+		
 	}
 }

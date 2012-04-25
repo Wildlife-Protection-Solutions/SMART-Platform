@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISourceProviderListener;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
@@ -61,14 +63,22 @@ public class QueryDefView extends ViewPart {
 	public static final String ID = "org.wcs.smart.query.ui.QueryDefView";
 	
 	private WaypointQuery current = null;	
-	private DropItemFactory dropItemFactory = null;
 	private DropTargetPanel dropTarget;
 
+	
+	
 	/* listener to update query definition when window changes */
 	private IPartListener2 editorListener = new IPartListener2() {
 		
 		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
+			if (partRef.getId().equals(QueryResultsEditor.ID) ){
+				IWorkbenchPart part = partRef.getPart(false);
+				if (part instanceof QueryResultsEditor){
+					setQuery(((QueryResultsEditor)part).getQuery());
+					dropTarget.validate();
+				}	
+			}
 		}
 		
 		@Override
@@ -89,6 +99,9 @@ public class QueryDefView extends ViewPart {
 		
 		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
+			if (partRef.getPage().findEditors(null, QueryResultsEditor.ID, IWorkbenchPage.MATCH_ID).length == 0){
+				setQuery(null);	
+			}
 		}
 		
 		@Override
@@ -98,12 +111,6 @@ public class QueryDefView extends ViewPart {
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			
-			if (partRef.getId().equals(QueryResultsEditor.ID) ){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof QueryResultsEditor){
-					setQuery(((QueryResultsEditor)part).getQuery());
-				}	
-			}
 		}
 	};;
 	
@@ -133,21 +140,22 @@ public class QueryDefView extends ViewPart {
 	 */
 	public void clearQuery(){
 		dropTarget.clear();
+		QueryEventManager.getInstance().fireQueryChangedListeners(current);
 	}
 
 	/**
 	 * @return the drop item factory for dropping items into the query
 	 */
 	public DropItemFactory getDropItemFactory(){
-		return this.dropItemFactory;
+		return DropItemFactory.INSTANCE;
 	}
 	
 	/**
 	 * Runs the current query
 	 */
 	public void runQuery(){
-		current.setQueryFilter( dropTarget.getQueryString() );
-		QueryEventManager.getInstance().fireQueryChangedListeners(current);
+		dropTarget.validate();
+		QueryEventManager.getInstance().fireQueryRunListeners(current);
 	}
 	
 	/**
@@ -180,35 +188,44 @@ public class QueryDefView extends ViewPart {
 					Object sourceValue) {
 				if (sourceName == SourceProvider.SELECTED_FILTERS){
 					IStructuredSelection selection = (IStructuredSelection)sourceValue;
+					boolean fireEvent = false;
 					for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
 						Object type = (Object) iterator.next();
 						if (type instanceof Category){
 							DropItem it = getDropItemFactory().createCategoryDropItem((Category) type);
 							dropTarget.addElement(it);
+							fireEvent = true;
 						}else if (type instanceof CategoryAttribute){
 							DropItem it = getDropItemFactory().createAttributeDropItem((CategoryAttribute) type);
 							if (it != null){
 								dropTarget.addElement(it);
+								fireEvent = true;
 							}
 						}else if (type instanceof PatrolFilterOption){
 							DropItem it = getDropItemFactory().createPatrolDropItem((PatrolFilterOption)type);
 							if (it != null){
 								dropTarget.addElement(it);
+								fireEvent = true;
 							}
 						}else if (type instanceof Attribute){
 							DropItem it = getDropItemFactory().createAttributeDropItem((Attribute)type);
 							if (it != null){
 								dropTarget.addElement(it);
+								fireEvent = true;
 							}
 						}else if (type instanceof QueryFilterContentProvider.OtherItems){
 							DropItem[] its = getDropItemFactory().createOtherDropItem((QueryFilterContentProvider.OtherItems)type);
 							if (its != null){
 								for (int i = 0; i < its.length; i ++){
 									dropTarget.addElement(its[i]);
+									fireEvent = true;
 								}
 							}
 						}
 						
+					}
+					if (fireEvent){
+						fireQueryModifiedListeners();
 					}
 				}
 				
@@ -224,11 +241,25 @@ public class QueryDefView extends ViewPart {
 	
 	
 	public void setQuery(WaypointQuery query){
+		if (current != null){
+			ArrayList<DropItem> items = new ArrayList<DropItem>();
+			items.addAll(dropTarget.getItems());
+			current.setDropItems(items);
+			
+			dropTarget.clear();
+		}
+		
 		current = query;
-		//TODO: update ui
-//		txtQueryDefinition.setText(query.getQueryFilter());
+		if (query != null){
+			dropTarget.addElements(current.getDropItems());
+		}else{
+			dropTarget.clear();
+		}
 	}
 	
+	public WaypointQuery getQuery(){
+		return this.current;
+	}
 	
 	@Override
 	public void setFocus() {
@@ -244,12 +275,13 @@ public class QueryDefView extends ViewPart {
 	private void createDragAndDropArea(Composite parent){
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
 		
-		dropTarget = new DropTargetPanel(provider);
+		dropTarget = new DropTargetPanel(provider, this);
 		dropTarget.createComposite(parent);
 		
-		dropItemFactory = new DropItemFactory(dropTarget);
-		dropTarget.setDropItemFactory(dropItemFactory);
-		
+	}
+	
+	public void fireQueryModifiedListeners(){
+		QueryEventManager.getInstance().fireQueryChangedListeners(current);
 	}
 	
 }

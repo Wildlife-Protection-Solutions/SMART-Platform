@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui.querytable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -210,13 +211,13 @@ public class QueryResultsTable {
 
 	}
 	
-	private List<String> visibleColumnKeys = null;
+	private Set<String> visibleColumnKeys = null;
 	/**
 	 * 
 	 * Updates the visible columns in the table.
 	 * @param visibleColumns
 	 */
-	public void updateVisible(List<String> visibleColumnKeys) {
+	public void updateVisible(Set<String> visibleColumnKeys) {
 		if (this.tableViewerColumns == null){
 			//not yet initialized; save to be used when 
 			//initialized
