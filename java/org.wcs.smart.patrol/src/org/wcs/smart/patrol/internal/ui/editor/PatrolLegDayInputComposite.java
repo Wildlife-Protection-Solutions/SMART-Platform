@@ -216,7 +216,7 @@ public class PatrolLegDayInputComposite {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (editor.getPatrolEditor().canEdit()){
+				if (editor.getPatrolEditor().canEdit() == null){
 					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 					btnDeleteWaypoint.setEnabled(enabled);
 					
@@ -237,7 +237,7 @@ public class PatrolLegDayInputComposite {
 		btnMoveWaypoint.setEnabled(false);
 		btnDeleteWaypoint.setEnabled(false);
 		
-		if (!editor.getPatrolEditor().canEdit()){
+		if (editor.getPatrolEditor().canEdit() != null){
 			dtEndTime.setEnabled(false);
 			dtStartTime.setEnabled(false);
 			restMinutes.setEditable(false);
@@ -821,10 +821,18 @@ public class PatrolLegDayInputComposite {
 			}
 		} else if (column == OtColumn.DIRECTION) {
 			needSave = true;
-			element.setDirection(( (Double)value).floatValue());
+			if (value == null){
+				element.setDirection(null);
+			}else{
+				element.setDirection(( (Double)value).floatValue());
+			}
 //			editor.setDirty(true);
 		} else if (column == OtColumn.DISTANCE) {
-			element.setDistance( ( (Double)value).floatValue());
+			if (element == null){
+				element.setDistance(null);
+			}else{
+				element.setDistance( ( (Double)value).floatValue());
+			}
 			needSave = true;
 //			editor.setDirty(true);
 		} else if (column == OtColumn.OBSERVATION) {
@@ -1047,7 +1055,7 @@ public class PatrolLegDayInputComposite {
 		 */
 		@Override
 		protected boolean canEdit(Object element) {
-			if (!PatrolLegDayInputComposite.this.editor.getPatrolEditor().canEdit()){
+			if (PatrolLegDayInputComposite.this.editor.getPatrolEditor().canEdit() != null){
 				return false;
 			}
 			return true;	

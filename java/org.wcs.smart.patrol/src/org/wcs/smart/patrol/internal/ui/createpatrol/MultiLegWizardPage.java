@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
+import java.util.ArrayList;
+
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 
 /**
  * Wizard page to select if the
@@ -134,6 +137,19 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
+		
+		if (btnNo.getSelection()){
+			if (p.getLegs().size() > 1){
+				PatrolLeg leg1 = p.getLegs().get(0);
+				ArrayList<PatrolLeg> newLegs = new ArrayList<PatrolLeg>();
+				newLegs.add(leg1);
+				leg1.setStartDate(p.getStartDate());
+				leg1.setEndDate(p.getEndDate());
+				leg1.setId("1");
+				leg1.setPatrol(p);
+				p.setLegs(newLegs);
+			}
+		}
 		return true;
 	}
 	

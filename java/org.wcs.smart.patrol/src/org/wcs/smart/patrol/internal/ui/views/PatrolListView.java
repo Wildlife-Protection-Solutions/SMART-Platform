@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -46,7 +47,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -72,6 +77,42 @@ public class PatrolListView extends ViewPart {
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView";
 	private TableViewer patrolListViewer;
 	private PatrolViewFilter filter = new PatrolViewFilter();
+	
+	
+	private IPartListener2 partListener = new IPartListener2() {
+		
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef) {
+			if (partRef.getId().equals(PatrolEditor.ID)){
+				IWorkbenchPart part = partRef.getPart(false);
+				if (part instanceof PatrolEditor){
+					patrolListViewer.setSelection(new StructuredSelection(  ((PatrolEditor) part).getEditorInput() ));
+				}
+			}
+			
+		}
+	};
 	
 	/*
 	 * Job that updates the patrol list based on the current filter
@@ -123,9 +164,11 @@ public class PatrolListView extends ViewPart {
 	 * Creates a new vies
 	 */
 	public PatrolListView() {
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
 	}
 
 	public void dispose() {		
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
 		super.dispose();

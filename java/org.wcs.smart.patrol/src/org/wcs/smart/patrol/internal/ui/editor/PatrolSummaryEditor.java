@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -56,6 +57,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -154,11 +156,25 @@ public class PatrolSummaryEditor extends EditorPart {
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+
+		
 		frmPatrolSummary = toolkit.createForm(container);
 		frmPatrolSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		GridLayout layout = new GridLayout(1, true);
 		frmPatrolSummary.getBody().setLayout(layout);
+		
+		String canEdit = editor.canEdit();
+		if (canEdit != null){
+			Composite warning = toolkit.createComposite(frmPatrolSummary.getBody());
+			warning.setLayout(new GridLayout(2, false));
+			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
+			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+			lblImage.setImage(x);
+			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE);
+			lblWarning.setText("This patrol cannot be modified: " + canEdit + ". Please contact administrator if editing is required.");
+			
+		}
 		
 		Section patrolSection = toolkit.createSection(frmPatrolSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED  );
 		patrolSection.setText("Patrol Information");
@@ -373,7 +389,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent, final PatrolItemComposite partEditor ){
 		Hyperlink editLink = toolkit.createHyperlink(parent, EDIT_LABEL, SWT.WRAP);
 		
-		if (!editor.canEdit()){
+		if (editor.canEdit() != null){
 			editLink.setEnabled(false);
 			editLink.setVisible(false);
 		}else {

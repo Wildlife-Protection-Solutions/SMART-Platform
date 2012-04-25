@@ -68,7 +68,7 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 				
 			}
 		});
-		setMessage("Setup Patrol Legs.  Patrol legs are identified by changes in the patrol leader or the patrol splitting into multiple groups.  To add a new leg use the 'Add Patrol Leg' button.");
+		setMessage("Setup Patrol Legs.  Patrol legs are identified by changes in the patrol leader or the patrol splitting into multiple groups.  Use the buttons below to add, remove, or edit legs.");
 		super.setControl(comp);
 	}
 	
