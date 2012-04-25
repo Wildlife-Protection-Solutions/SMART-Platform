@@ -21,27 +21,52 @@
  */
 package org.wcs.smart.query;
 
-import org.wcs.smart.query.model.QueryFolder;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A listener that listens for
+ * changes to query folders.  This
+ * include folders added, deleted and renamed
+ * and queries added, deleted, and saved.
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public interface IQueryFolderListener {
+	/**
+	 * A folder added event
+	 */
 	public static final int FOLDER_ADDED = 1;
+	/**
+	 * A folder renamed event
+	 */
 	public static final int FOLDER_RENAMED = 2;
+	/**
+	 * A folder deleted event
+	 */
 	public static final int FOLDER_DELETED = 3;
 	
+	/**
+	 * A query added event
+	 */
 	public static final int QUERY_ADDED = 4;
+	
+	/**
+	 * A query saved event
+	 */
 	public static final int QUERY_SAVED = 5;
+	/**
+	 * A query deleted event
+	 */
 	public static final int QUERY_DELETED = 6;
 	
+	/**
+	 * Called when an event occured that effects
+	 * a query folder.
+	 *  
+	 * @param eventType the type of event
+	 * @param object the object either a QueryFolder or Query that
+	 * was affect by the given event
+	 */
 	void folderChanged(int eventType, Object object);
 	
 }

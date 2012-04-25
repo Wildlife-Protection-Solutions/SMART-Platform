@@ -51,7 +51,6 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 	public HashMap<Integer, List<QueryInput>> queries = null;
 	
 	private boolean includeQueries = false;
-	private boolean includeCaFolders = false;
 	
 	public QueryListViewContentProvider(boolean includeQueries){
 		this.includeQueries = includeQueries;
@@ -66,6 +65,7 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput == null){

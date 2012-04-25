@@ -42,7 +42,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-
 import org.wcs.smart.query.parser.internal.Operator;
 import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
 

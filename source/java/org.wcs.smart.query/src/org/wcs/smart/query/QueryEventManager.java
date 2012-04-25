@@ -23,9 +23,6 @@ package org.wcs.smart.query;
 
 import java.util.ArrayList;
 
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.WaypointQuery;
 
 /**

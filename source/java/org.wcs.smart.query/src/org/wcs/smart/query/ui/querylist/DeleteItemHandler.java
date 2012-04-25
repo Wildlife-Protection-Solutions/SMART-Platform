@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.querylist;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -77,6 +78,9 @@ public class DeleteItemHandler extends AbstractHandler {
 	
 	
 	private void deleteQuery(QueryInput o, ExecutionEvent event) {
+		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Delete Query", "Are you sure you want to delete the query '" + o.getName() + " [" + o.getId() + "]'?  This action cannot be undone.")){
+			return;
+		}
 		//need to save and refresh query list view
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();

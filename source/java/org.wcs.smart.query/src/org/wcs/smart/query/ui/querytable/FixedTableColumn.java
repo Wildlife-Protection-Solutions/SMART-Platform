@@ -218,7 +218,13 @@ public class FixedTableColumn implements QueryTableColumn {
 		}else if (col.type == ColumnType.INTEGER){
 			return String.valueOf((Integer)value);
 		}else if (col.type == ColumnType.NUMBER){
-			return String.valueOf((Double)value);
+			if (value instanceof Double){
+				return String.valueOf((Double)value);
+			}else if (value instanceof Float){
+				return String.valueOf((Float)value);
+			}else if (value instanceof Integer){
+				return String.valueOf((Integer)value);
+			}
 		}
 		return "";
 

@@ -279,6 +279,13 @@ public class WaypointQuery extends Query{
 	
 	
 	@Transient
+	private List<DropItem> items;
+	/**
+	 * Generates all drop items for the query.
+	 * @param session hibernate session
+	 * @throws Exception
+	 */
+	@Transient
 	public void generateDropItems(Session session) throws Exception{
 		//parses the query into a collection of drop items
 		IFilter query = parseQueryFilter();
@@ -295,18 +302,25 @@ public class WaypointQuery extends Query{
 			items.add(filterItems[i]);
 		}
 	}
-	
-	@Transient
-	private List<DropItem> items;
+	/**
+	 * @return the drop items generated for the query
+	 */
 	@Transient
 	public List<DropItem> getDropItems(){
 		return items;
 	}
+	/**
+	 * @param items the drop items associated with the query
+	 */
 	@Transient
 	public void setDropItems(List<DropItem> items){
 		this.items = items;
 	}
 	
+	/**
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
 	@Transient
 	public WaypointQuery clone(){
 		WaypointQuery q = new WaypointQuery();

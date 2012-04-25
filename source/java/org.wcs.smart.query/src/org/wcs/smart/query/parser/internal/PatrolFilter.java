@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.parser.internal;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,18 +127,13 @@ public class PatrolFilter implements IFilter {
 			return this.type;
 		}
 
+		public Class<?> getSourceClass(){
+			return this.sourceClazz;
+		}
 		
 		public String[] getNames(Session session, byte[] uuid){
-			
-			List data = session.createCriteria(sourceClazz).add(Restrictions.eq("uuid", uuid)).list();
-			if (data.size() == 0){
-				//nothing found 
-				return null;
-			}else if (data.size() > 1){
-				//more than one thing found; this should never happen
-				return null;
-			}else{
-				Object x = data.get(0);
+			Object x = getObject(session, uuid);
+			if (x != null){
 				if (x instanceof SimpleListItem){
 					return new String[]{((SimpleListItem)x).findName(SmartDB.getCurrentConservationArea().getDefaultLanguage())};
 				}else if (x instanceof Employee){
@@ -148,6 +142,16 @@ public class PatrolFilter implements IFilter {
 				}
 			}
 			return null;
+		}
+		
+		public Object getObject(Session session, byte[] uuid){
+			List<?> data = session.createCriteria(sourceClazz).add(Restrictions.eq("uuid", uuid)).list();
+			if (data.size() == 0){
+				return null; //nothing found
+			}else if (data.size() > 1){
+				assert false; //should never happend
+			}
+			return data.get(0);
 		}
 	}
 
@@ -229,16 +233,31 @@ public class PatrolFilter implements IFilter {
 	}
 	
 	
+	/**
+	 * @return the patrol filter type
+	 */
 	public PatrolFilterOption getPatrolType(){
 		String patrolItem = patrolKey.split(":")[1];
 		PatrolFilterOption option = keyToColumnMap.get(patrolItem);
 		return option;
 	}
 	
+	/**
+	 * <p>Quotes have been removed</p>
+	 * @return the filter value as a string
+	 */
 	public String getValue(){
 		return  SmartUtils.stripQuotes((String)value) ;
 	}
 	
+	/**
+	 * The value to set the filter to (without quotes).
+	 * @param value
+	 */
+	public void setValue(String value){
+		this.value = "\"" + value + "\"";
+		
+	}
 	/**
 	 * @see org.wcs.smart.query.parser.internal.IFilter#asSql(java.util.HashMap)
 	 */

@@ -149,19 +149,34 @@ public class Query {
 		this.conservationArea = conservationArea;
 	}
 	
+	/**
+	 * @return <code>true</code> if conservation area level query; <code>false</code>
+	 * if user only query
+	 */
 	@Column(name="shared")
 	public boolean getIsShared(){
 		return this.isShared;
 	}
+	/**
+	 * Sets if the query is shared
+	 * @param isShared
+	 */
 	public void setIsShared(boolean isShared){
 		this.isShared = isShared;
 	}
 	
+	/**
+	 * @return the query folder associated with the query or <code>null</code>
+	 * if associated with the root folder
+	 */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="folder_uuid", referencedColumnName="uuid")
 	public QueryFolder getFolder(){
 		return this.ownerFolder;
 	}
+	/**
+	 * @param folder the query folder
+	 */
 	public void setFolder(QueryFolder folder){
 		this.ownerFolder = folder;
 	}
@@ -201,10 +216,17 @@ public class Query {
 		return true;
 	}
 	
+	/**
+	 * @return the state of the query
+	 */
 	@Transient
 	public boolean isValid(){
 		return this.isValid;
 	}
+	/**
+	 * The state of the query.
+	 * @param isValid
+	 */
 	public void setIsValid(boolean isValid){
 		this.isValid = isValid;
 	}
