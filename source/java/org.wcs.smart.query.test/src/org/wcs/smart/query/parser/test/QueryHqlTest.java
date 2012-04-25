@@ -29,7 +29,7 @@ import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.parser.internal.Filter;
+import org.wcs.smart.query.parser.internal.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
 /**
@@ -44,10 +44,10 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
  */
 public class QueryHqlTest {
 
-	private Filter parseQuery(String query) throws Exception{
+	private IFilter parseQuery(String query) throws Exception{
 		InputStream is = new ByteArrayInputStream(query.getBytes());
 		Parser parser = new Parser(is);		
-		Filter myQuery = parser.Expression();
+		IFilter myQuery = parser.Expression();
 		is.close();
 		return myQuery;
 	}
@@ -57,7 +57,7 @@ public class QueryHqlTest {
 		
 		Session session = Hibernate.openSession();
 		String query = null;
-		Filter test = null;
+		IFilter test = null;
 		org.hibernate.Query  q = null;
 		List results = null;
 		
