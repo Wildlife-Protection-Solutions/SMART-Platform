@@ -27,8 +27,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -125,29 +123,30 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	/**
 	 * 
-	 * @return true if the patrol can be edited false otherwise
+	 * @return null if the patrol can be editted, otherwise a string
+	 * that described reason why can't be edited.
 	 */
-	public boolean canEdit(){
+	public String canEdit(){
 		
 		//analyst users can never edit
 		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
-			return false;
+			return "Insufficient User Privledges";
 		}
 		
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){
-			return true;
+			return null;
 		}else if (patrol.getStartDate() == null){
-			return true;
+			return null;
 		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
 			Date d = new Date();
 			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
 			if (patrol.getStartDate().after(d)){
-				return true;
+				return null;
 			}else{
-				return false;
+				return "Patrol is older than " + ops.getEditTime() + " days" ;
 			}
 		}else{
-			return true;
+			return null;
 		}
 	}
 	
@@ -174,10 +173,14 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		super.setPartName("Patrol " + input.getPatrolId());
 		showBusy(true);
 		try {
+			
+			getPatrol();
+			
 			summaryEditor = new PatrolSummaryEditor(this);
 			int i = addPage(summaryEditor, getEditorInput());
 			setPageText(i, "Summary");
 			createDayPages();
+			
 			mapPage = new PatrolMapPageEditor(PatrolEditor.this);
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, "Map");

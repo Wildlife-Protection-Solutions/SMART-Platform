@@ -40,6 +40,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -421,49 +422,16 @@ public class XmlToPatrolConverter {
 	}
 	
 	
-	private  Employee findEmployeeByIdAndName(PatrolMemberType type){		
-		String sql = "FROM Employee WHERE givenName = :given AND familyName = :family AND id = :id AND conservationArea = :ca";
-		Query query = session.createQuery(sql);
-		query.setParameter("given", type.getGivenName());
-		query.setParameter("family", type.getFamilyName());
-		query.setParameter("id", type.getEmployeeId());
-		query.setParameter("ca", ca);
-		
-		List results = query.list();
-		if (results.size() == 0){
-			return null;
-		}else{
-			return (Employee)results.get(0);
-		}
+	private  Employee findEmployeeByIdAndName(PatrolMemberType type){	
+		return HibernateManager.findEmployeeByIdAndName(type.getEmployeeId(), type.getGivenName(), type.getFamilyName(), ca, session);
 	}
 	
-	private  Employee findEmployeeById(PatrolMemberType type){		
-		String sql = "FROM Employee WHERE id = :id AND conservationArea = :ca";
-		Query query = session.createQuery(sql);
-		query.setParameter("id", type.getEmployeeId());
-		query.setParameter("ca", ca);
-		
-		List results = query.list();
-		if (results.size() == 0){
-			return null;
-		}else{
-			return (Employee)results.get(0);
-		}
+	private  Employee findEmployeeById(PatrolMemberType type){
+		return HibernateManager.findEmployeeById(type.getEmployeeId(), ca, session);
 	}
 	
-	private  Employee findEmployeeByName(PatrolMemberType type){		
-		String sql = "FROM Employee WHERE givenName = :given AND familyName = :family AND conservationArea = :ca";
-		Query query = session.createQuery(sql);
-		query.setParameter("given", type.getGivenName());
-		query.setParameter("family", type.getFamilyName());
-		query.setParameter("ca", ca);
-		
-		List results = query.list();
-		if (results.size() == 0){
-			return null;
-		}else{
-			return (Employee)results.get(0);
-		}
+	private  Employee findEmployeeByName(PatrolMemberType type){
+		return HibernateManager.findEmployeeByName(type.getGivenName(), type.getFamilyName(), ca, session);
 	}
 	
 	private SimpleListItem findValue(String langCode, String value, String objectType){
@@ -484,8 +452,6 @@ public class XmlToPatrolConverter {
 		}else{
 			return (SimpleListItem)results.get(0);
 		}
-		
-		
 	}
 	
 

@@ -8,7 +8,8 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
          <menu
                id="org.wcs.smart.menu.patrol"
-               label="&amp;Patrol">
+               label="Patrol"
+               mnemonic="P">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
                   icon="images/icons/etool16/patrol_add.png"
@@ -177,14 +178,6 @@
                      </test>
                   </or>
                </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.patrol.exportPatrol"
-                  icon="images/icons/etool16/patrol_export.png"
-                  label="Export Patrol"
-                  mnemonic="x"
-                  style="push"
-                  tooltip="Export the current patrol to xml file">
             </command>
          </toolbar>
       </menuContribution>

@@ -107,7 +107,8 @@ public class EmployeeLabelProvider extends LabelProvider {
 			String text = "";
 			if (leaders != null && leaders.contains(element)) {
 				text = "[Leader] ";
-			} else if (pilots != null && pilots.contains(element)) {
+			} 
+			if (pilots != null && pilots.contains(element)) {
 				text += "[Pilot] ";
 			}
 			return text + ((Employee) element).getLabel();

@@ -54,6 +54,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
 import org.wcs.smart.patrol.xml.XmlToPatrolConverter;
 import org.wcs.smart.patrol.xml.model.PatrolType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class responsible for importing a patrol.
@@ -215,7 +216,7 @@ public class PatrolImporter {
 				StringBuilder sb = new StringBuilder();
 				for (String str: converter.getWarnings()){
 					sb.append(str);
-					sb.append(System.getProperty("line.separator"));
+					sb.append(SmartUtils.LINE_SEPARATOR);
 				}
 				ConfirmInputDialog dialog = new ConfirmInputDialog(
 						Display.getCurrent().getActiveShell(),

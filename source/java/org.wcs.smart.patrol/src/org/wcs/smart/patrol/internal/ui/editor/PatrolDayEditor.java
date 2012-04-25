@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -95,6 +97,18 @@ public class PatrolDayEditor extends EditorPart {
 		ScrolledForm frmSummary = toolkit.createScrolledForm(parent);
 		
 		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		
+		String canEdit = editor.canEdit();
+		if (canEdit != null){
+			Composite warning = toolkit.createComposite(frmSummary.getBody());
+			warning.setLayout(new GridLayout(2, false));
+			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
+			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+			lblImage.setImage(x);
+			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE);
+			lblWarning.setText("This patrol cannot be modified: " + canEdit + ". Please contact administrator if editing is required.");
+			
+		}
 		
 		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE");
 		StringBuilder text = new StringBuilder("Patrol Day: ");
