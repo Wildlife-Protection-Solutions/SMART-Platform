@@ -298,13 +298,17 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private void updateLangValue(Column type, Station stn, String newValue) {
 		Language lang = cmbLanguage.getCurrentSelection();
 		if (type == Column.NAME) {
-			if (!findLangValue(type, stn).equals(newValue)){
-				stn.updateName(lang, newValue);
-				setChangesMade(true);
+			if (!findLangValue(type, stn).equals(newValue.trim())){
+				if (newValue.trim().length() == 0){
+					//ignore change
+				}else{
+					stn.updateName(lang, newValue.trim());
+					setChangesMade(true);
+				}
 			}
 		} else if (type == Column.DESCIPTION) {
-			if (!findLangValue(type, stn).equals(newValue)){
-				stn.updateDescription(lang, newValue);
+			if (!findLangValue(type, stn).equals(newValue.trim())){
+				stn.updateDescription(lang, newValue.trim());
 				setChangesMade(true);
 			}
 		}

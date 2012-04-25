@@ -27,10 +27,10 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
@@ -40,8 +40,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -63,7 +63,7 @@ public class HibernateManager extends SmartHibernateManager{
 		Session x = openSession();
 		Transaction tx = x.beginTransaction();
 		try {
-			List results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", code)).list();
+			List<?> results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", code)).list();
 			if (results.size() > 0){
 				return (Language)results.get(0);
 			}else{
@@ -384,4 +384,83 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 		
 	}
+	
+	
+	/**
+	 * Searches the database for an employee with the the given id.
+	 * 
+	 * @param employeeId the employee id
+	 * @param ca the conservation area 
+	 * @param session hibernate sesion
+	 * @return the first employee found with the given id; <code>null</code> if no employee found
+	 */
+	public static Employee findEmployeeById(String employeeId, ConservationArea ca, Session session){		
+		String sql = "FROM Employee WHERE id = :id AND conservationArea = :ca";
+		Query query = session.createQuery(sql);
+		query.setParameter("id", employeeId);
+		query.setParameter("ca", ca);
+		
+		List<?> results = query.list();
+		if (results.size() == 0){
+			return null;
+		}else{
+			return (Employee)results.get(0);
+		}
+	}
+	
+	
+	/**
+	 * Searches the database for an employee with the given first
+	 * and last name.
+	 * 
+	 * @param givenName the given name
+	 * @param familyName the family name
+	 * @param ca the conservation area to search
+	 * @param session 
+	 * @return the first employee found with the name given and family names; <code>null</code> if no employee found
+	 */
+	public static Employee findEmployeeByName(String givenName, String familyName, ConservationArea ca, Session session){		
+		String sql = "FROM Employee WHERE givenName = :given AND familyName = :family AND conservationArea = :ca";
+		Query query = session.createQuery(sql);
+		query.setParameter("given", givenName);
+		query.setParameter("family", familyName);
+		query.setParameter("ca", ca);
+		
+		List<?> results = query.list();
+		if (results.size() == 0){
+			return null;
+		}else{
+			return (Employee)results.get(0);
+		}
+	}
+	
+	/**
+	 * Searches the database for an employee with the given id, given, and
+	 * family names.
+	 * 
+	 * @param employeeId employee id
+	 * @param givenName the given name 
+	 * @param familyName the family name 
+	 * @param ca the conservation area to search
+	 * @param session
+	 * @return the first employee found with the given id, family, and given names.  <code>null</code> if no employee found
+	 */
+	public static Employee findEmployeeByIdAndName(String employeeId, String givenName, String familyName, ConservationArea ca, Session session){		
+		String sql = "FROM Employee WHERE givenName = :given AND familyName = :family AND id = :id AND conservationArea = :ca";
+		Query query = session.createQuery(sql);
+		query.setParameter("given", givenName);
+		query.setParameter("family", familyName);
+		query.setParameter("id", employeeId);
+		query.setParameter("ca", ca);
+		
+		List<?> results = query.list();
+		if (results.size() == 0){
+			return null;
+		}else{
+			return (Employee)results.get(0);
+		}
+	}
+	
+	
+
 }

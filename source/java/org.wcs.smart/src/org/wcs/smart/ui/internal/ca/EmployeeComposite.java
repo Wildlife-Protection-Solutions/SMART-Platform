@@ -360,11 +360,28 @@ public class EmployeeComposite extends Composite {
 				cdSmartId.setDescriptionText("Smart user id must be provided.");
 				isComplete = false;
 			}
+			
+			if (txtSmartId.getText().trim().matches(".*[^a-zA-Z0-9_@\\.].*")){
+				cdSmartId.show();
+				cdSmartId.setDescriptionText("Smart user id can only contain character (a-Z), digits (0-9) and the characters '_' or '@' '.'.");
+				isComplete = false;
+			}
+			if (txtSmartId.getText().trim().length() < Employee.MIN_SMART_ID_LENGTH){
+				cdSmartId.show();
+				cdSmartId.setDescriptionText("Smart user id must be at least " + Employee.MIN_SMART_ID_LENGTH + " characters long.");
+				isComplete = false;
+			}
 			if (txtSmartPassword.getText().trim().isEmpty()
 					|| txtSmartId.getText().length() > Employee.MAX_SMART_PASSWORD_LENGTH) {
 				cdSmartPassword.show();
 				cdSmartPassword
-						.setDescriptionText("Smart password must be provided.");
+						.setDescriptionText("Smart password must be provided and must not contain only spaces.");
+				isComplete = false;
+			}
+			if (txtSmartPassword.getText().length()< Employee.MIN_SMART_PASSWORD_LENGTH){
+				cdSmartPassword.show();
+				cdSmartPassword
+						.setDescriptionText("Smart password must be at least " + Employee.MIN_SMART_PASSWORD_LENGTH + " in length.");
 				isComplete = false;
 			}
 			if (!txtSmartPassword.getText().equals(txtSmartPassword2.getText())) {
@@ -538,7 +555,7 @@ public class EmployeeComposite extends Composite {
 		e.setSmartUserLevel(null);
 		if (chSmartUser.getSelection()){
 			e.setSmartPassword(txtSmartPassword.getText());
-			e.setSmartUserId(txtSmartId.getText());
+			e.setSmartUserId(txtSmartId.getText().trim());
 			if (cmbSmartUserLevel != null){
 				IStructuredSelection a = (IStructuredSelection) cmbSmartUserLevel.getSelection();
 				if (!a.isEmpty()){

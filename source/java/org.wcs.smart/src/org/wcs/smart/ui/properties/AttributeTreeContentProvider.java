@@ -45,9 +45,11 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 
 	/**
 	 * 
-	 * @param active <code>true</code> if only active elements to be included; otherwise <code>false</code> includes all
+	 * Creates an attribute tree content provider that provides both
+	 * inactive and active nodes and starts with a 
+	 * root element.
 	 *
-	 */
+	 */  
 	public AttributeTreeContentProvider(){
 		this(false, true);
 	}
