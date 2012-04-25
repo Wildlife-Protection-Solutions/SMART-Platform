@@ -19,39 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.tools;
+package org.wcs.smart.query.ui.qimport;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.query.export.ExportQueryWizard;
-import org.wcs.smart.query.ui.QueryResultsEditor;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 /**
- * Handler for the export query button.
- * 
+ * Handler that displays the query import wizard dialog.
  * @author Emily
  * @since 1.0.0
  */
-public class ExportQueryHandler extends AbstractHandler implements IHandler {
+public class ImportQueryHandler extends AbstractHandler {
 
 	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
+	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();		
-		if (editor instanceof QueryResultsEditor){
-			final QueryResultsEditor ed = (QueryResultsEditor)editor;
-			ExportQueryWizard wizard = new ExportQueryWizard(ed.getQuery().getLastResults(), ed.getQueryResultsTable().getColumns(), ed.getQuery());
-			WizardDialog wd = new WizardDialog(editor.getSite().getShell(), wizard);
-			wd.open();
-		}
-			
+		ImportQueryWizard wizard = new ImportQueryWizard();
+		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
+		wd.open();
 		return null;
 	}
 

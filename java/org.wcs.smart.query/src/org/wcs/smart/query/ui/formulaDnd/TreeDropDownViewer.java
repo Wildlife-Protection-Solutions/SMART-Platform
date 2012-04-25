@@ -32,8 +32,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -47,9 +45,6 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterLabelProvider;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 

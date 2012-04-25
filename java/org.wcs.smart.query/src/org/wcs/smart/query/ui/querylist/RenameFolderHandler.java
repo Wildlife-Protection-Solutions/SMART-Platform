@@ -39,21 +39,16 @@ public class RenameFolderHandler extends AbstractHandler{
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
 		QueryListView view = (QueryListView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID);
-		
 		
 		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
 		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
 			return null;
 		}
-		
 		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
 		if (o instanceof QueryFolder){
 			view.editElement(o);
 		}
-		
-		
 		return null;
 	}
 

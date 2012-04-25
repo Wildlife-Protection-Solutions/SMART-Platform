@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.export;
+package org.wcs.smart.query.ui.export;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +33,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.export.QueryExporter;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.WaypointQuery;
 import org.wcs.smart.query.ui.querytable.QueryTableColumn;

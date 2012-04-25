@@ -19,59 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.qimport;
+package org.wcs.smart.query.ui.export;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.HashMap;
-
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.xml.QueryXmlManager;
-import org.wcs.smart.query.xml.model.Query;
-import org.wcs.smart.query.xml.model.QueryType;
-import org.wcs.smart.query.xml.model.UuidItemType;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.query.ui.QueryResultsEditor;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Handler for the export query button.
+ * 
  * @author Emily
  * @since 1.0.0
  */
-public class DefinitionQueryImporter {
+public class ExportQueryHandler extends AbstractHandler implements IHandler {
 
-	
-	public static WaypointQuery importQuery(File file) throws Exception{
-		
-		InputStream fin = new BufferedInputStream(new FileInputStream(file));
-		Query q = QueryXmlManager.readDataModel(fin);
-		
-		QueryType qt = q.getQuery();
-		
-		WaypointQuery wq = new WaypointQuery();
-		wq.setName(qt.getName());
-		
-		
-		
-		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
-		for (UuidItemType type : qt.getUuiditem()){
-			uuidLookup.put(type.getUuid(), type);
+	/**
+	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
+	 */
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();		
+		if (editor instanceof QueryResultsEditor){
+			final QueryResultsEditor ed = (QueryResultsEditor)editor;
+			ExportQueryWizard wizard = new ExportQueryWizard(ed.getQuery().getLastResults(), ed.getQueryResultsTable().getColumns(), ed.getQuery());
+			WizardDialog wd = new WizardDialog(editor.getSite().getShell(), wizard);
+			wd.open();
 		}
-		
-		
-		fin.close();
-		
-		
+			
 		return null;
 	}
-	
-	
-	private Object lookupItem(){
-		
-	}
+
 }

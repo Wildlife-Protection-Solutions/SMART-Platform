@@ -47,8 +47,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.model.WaypointQuery;
 import org.wcs.smart.query.ui.querytable.QueryTableColumn;
 

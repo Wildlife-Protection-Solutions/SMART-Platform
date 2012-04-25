@@ -19,9 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.export;
+package org.wcs.smart.query.ui.export;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -33,6 +35,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.query.export.CsvQueryExporter;
+import org.wcs.smart.query.export.DefinitionQueryExporter;
+import org.wcs.smart.query.export.QueryExporter;
+import org.wcs.smart.query.export.ShapeQueryExporter;
 
 /**
  * Query page for the query export wizard
@@ -90,6 +96,18 @@ public class ExportQueryTypePage extends WizardPage {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				setPageComplete(!outputOptions.getSelection().isEmpty());
+			}
+		});
+		outputOptions.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				if (!outputOptions.getSelection().isEmpty()){
+					setPageComplete(true);
+					
+					((ExportQueryWizard)getWizard()).getContainer().showPage( getWizard().getNextPage(ExportQueryTypePage.this) );
+				}
+				
 			}
 		});
 		setMessage("Select the export format");

@@ -38,19 +38,12 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
 import org.wcs.smart.query.ui.formulaDnd.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Query related database functions.
  * @author Emily
  * @since 1.0.0
  */
@@ -63,14 +56,23 @@ public class QueryHibernateManager {
 	private static NumberFormat QUERY_ID_FORMATTER = new DecimalFormat("000000");
 	
 	
+	/**
+	 * @return <code>true</code> if the current user can edit
+	 * conservation area queries; <code>false</code> otherwise
+	 */
 	public static boolean canModifyCaQueries(){
 		return SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN 
 				|| SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER;
 	}
 	
+	/**
+	 * Generates a query id from the database 
+	 * @param session
+	 * @return the newly generated query id
+	 */
 	public static String generateQueryId(Session session){
 		Query a = session.createQuery("SELECT max(id) FROM WaypointQuery");
-		List data = a.list();
+		List<?> data = a.list();
 		if (data == null || data.size() == 0 || data.get(0) == null){
 			return QUERY_ID_FORMATTER.format(1);
 		}else{
@@ -81,6 +83,13 @@ public class QueryHibernateManager {
 		
 	}
 	
+	/**
+	 * The list of query folders associated with the current conservation area.
+	 * 
+	 * @param session
+	 * @param includeCaFolder if the conservation area root folder should be included in the results
+	 * @return
+	 */
 	public static List<QueryFolder> getQueryFolders(Session session, boolean includeCaFolder){
 		List<QueryFolder> folders = new ArrayList<QueryFolder>();
 		
@@ -106,6 +115,7 @@ public class QueryHibernateManager {
 		
 		try{
 			if (includeCaFolder){
+				@SuppressWarnings("unchecked")
 				List<QueryFolder> rootFolders = session.createCriteria(QueryFolder.class)
 						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 						.add(Restrictions.isNull("employee"))
@@ -114,7 +124,7 @@ public class QueryHibernateManager {
 				caRootFolder.setChildren(rootFolders);
 			}
 
-			
+			@SuppressWarnings("unchecked")
 			List<QueryFolder> userFolders = session.createCriteria(QueryFolder.class)
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 					.add(Restrictions.eq("employee", SmartDB.getCurrentEmployee()))
@@ -130,6 +140,12 @@ public class QueryHibernateManager {
 		return folders;
 	}
 	
+	/**
+	 * A set of query proxies for all queries associated with the
+	 * current conservation area  and the current user. 
+	 * @param session
+	 * @return
+	 */
 	public static HashMap<Integer, List<QueryInput>> getQueryProxies(Session session){
 		
 		HashMap<Integer, List<QueryInput>> queries = new HashMap<Integer, List<QueryInput>>();
@@ -140,8 +156,8 @@ public class QueryHibernateManager {
 			hquery.setParameter("ca", SmartDB.getCurrentConservationArea());
 			hquery.setParameter("user", SmartDB.getCurrentEmployee()); 
 			
-			List results = hquery.list();
-			for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+			List<?> results = hquery.list();
+			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 				Object[] object = (Object[]) iterator.next();
 				QueryInput proxy = new QueryInput((byte[])object[0], (String)object[1], (String)object[4], (Boolean)object[3]);
 				
@@ -173,10 +189,19 @@ public class QueryHibernateManager {
 		return queries;
 	}
 	
+	/**
+	 * Loads an attribute from the given attribute key and the
+	 * current conservation area 
+	 * 
+	 * @param session
+	 * @param attributeKey attribute key
+	 * @return attribute loaded from the database or <code>null</code> if attribute not found
+	 */
 	public static Attribute getAttribute(Session session, String attributeKey){
 		Query q = session.createQuery("From Attribute where conservationArea = :ca and keyid = :key");
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		q.setParameter("key", attributeKey);
+		@SuppressWarnings("unchecked")
 		List<Attribute> results = q.list();
 		if (results.size() != 1 ){
 			return null;
@@ -186,22 +211,41 @@ public class QueryHibernateManager {
 		
 	}
 	
+	
+	/**
+	 * Loads an attribute list item for the given key and the
+	 * current conservation area 
+	 * 
+	 * @param session
+	 * @param attributeKey attribute key
+	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
+	 */
 	public static AttributeListItem getAttributeListItem(Session session, String attributeKey){
 		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key");
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		q.setParameter("key", attributeKey);
+		@SuppressWarnings("unchecked")
 		List<AttributeListItem> results = q.list();
 		if (results.size() != 1 ){
 			return null;
 		}else{
 			return results.get(0);
-		}
-		
+		}	
 	}
+	
+	/**
+	 * Loads an attribute tree not item item for the given hkey and the
+	 * current conservation area 
+	 * 
+	 * @param session
+	 * @param attributeHKey attribute tree node hkey
+	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
+	 */
 	public static AttributeTreeNode getAttributeTreeNode(Session session, String attributeHKey){
 		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key");
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		q.setParameter("key", attributeHKey);
+		@SuppressWarnings("unchecked")
 		List<AttributeTreeNode> results = q.list();
 		if (results.size() != 1 ){
 			return null;
@@ -212,25 +256,64 @@ public class QueryHibernateManager {
 	}
 	
 	
+	/**
+	 * Get the patrol mandate object.
+	 * 
+	 * @param session
+	 * @param value patrol mandate uuid as hex encoded string
+	 * @return
+	 * @throws Exception
+	 */
 	public static ListItem getPatrolMandate(Session session, String value)throws Exception{
 		return getListItem(session, "PatrolMandate", value);
 	}
 	
+	/**
+	 * Gets the station object
+	 * @param session
+	 * @param value station uuid as hex encoded string
+	 * @return
+	 * @throws Exception
+	 */
 	public static ListItem getStation(Session session, String value)throws Exception{
 		return getListItem(session, "Station", value);
 	}
 	
+	/**
+	 * Gets team object
+	 * @param session
+	 * @param value team uuid as hex encoded string
+	 * @return
+	 * @throws Exception
+	 */
 	public static ListItem getTeam(Session session, String value)throws Exception{
 		return getListItem(session, "Team", value);
 	}
 	
+	/**
+	 * Gets the transportation types listitem object 
+	 * @param session
+	 * @param value transportation type uuid as hex encoded string
+	 * @return
+	 * @throws Exception
+	 */
 	public static ListItem getTransportType(Session session, String value)throws Exception{
 		return getListItem(session, "PatrolTransportType", value);
 	}
 	
+	/**
+	 * Loads the list item for the given clazz and given uuid
+	 *  
+	 * @param session
+	 * @param clazz object type
+	 * @param value uuid an encoded hex string
+	 * @return resulting list item
+	 * @throws Exception
+	 */
 	private static ListItem getListItem(Session session, String clazz, String value)throws Exception{
 		Query q = session.createQuery("SELECT uuid, name FROM " + clazz + " WHERE uuid =:uuid");
 		q.setParameter("uuid", SmartUtils.decodeHex(value));
+		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1){
 			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
@@ -240,10 +323,18 @@ public class QueryHibernateManager {
 		}
 	}
 	
+	/**
+	 * Creates a list item for the given employee uuid
+	 * @param session
+	 * @param value employee uuid as hex encoded string
+	 * @return
+	 * @throws Exception
+	 */
 	public static ListItem getEmployee(Session session, String value) throws Exception{
 		Query q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid");
 		
 		q.setParameter("uuid", SmartUtils.decodeHex(value));
+		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1){
 			Object[] d = results.get(0);
@@ -255,10 +346,17 @@ public class QueryHibernateManager {
 	}
 	
 	
-	public static Category getCategory(Session session, String attributeKey){
+	/**
+	 * Loads the category for the given category key 
+	 * @param session
+	 * @param categoryKey
+	 * @return cateogyr object or <code>null</code> if not loaded
+	 */
+	public static Category getCategory(Session session, String categoryKey){
 		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key");
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", attributeKey);
+		q.setParameter("key", categoryKey);
+		@SuppressWarnings("unchecked")
 		List<Category> results = q.list();
 		if (results.size() != 1 ){
 			return null;

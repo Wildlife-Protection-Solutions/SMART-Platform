@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,15 +30,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
@@ -47,17 +43,12 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.HasLabel;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.LabelUserType;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * An object represnting a folder for saving 
+ * queries.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -78,46 +69,90 @@ public class QueryFolder extends HasLabel {
 	public QueryFolder(){}
 	
 	
+	/**
+	 * Two root folder exist that are not saved
+	 * in the database.  a "Conservation Area" folder
+	 * and a "My Queries" folder.  For these folders
+	 * isRootFolder returns <code>true</code> otherwise
+	 * this function returns false;
+	 * @return
+	 */
 	@Transient
 	public boolean isRootFolder(){
 		return this.isRootFolder;
 	}
+	/**
+	 * Two root folder exist that are not saved
+	 * in the database.  a "Conservation Area" folder
+	 * and a "My Queries" folder.  For these folders
+	 * isRootFolder returns <code>true</code> otherwise
+	 * this function returns false;
+	 * 
+	 */
 	public void setRootFolder(boolean root){
 		this.isRootFolder = root;
 	}
 	
+	/**
+	 * @return the parent folder or <code>null</code> if root folder
+	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="parent_uuid", referencedColumnName="uuid")
 	public QueryFolder getParentFolder() {
 		return parentFolder;
 	}
+	/**
+	 * @param parentFolder the parent folder or <code>null</code> if root folder
+	 */
 	public void setParentFolder(QueryFolder parentFolder) {
 		this.parentFolder = parentFolder;
 	}
 	
+	/**
+	 * @return the folder owner; or <code>null</code> if a conservation area folder
+	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="employee_uuid", referencedColumnName="uuid")
 	public Employee getEmployee() {
 		return employee;
 	}
+	/**
+	 * The folder owner; or <code>null</code> if a conservation area folder
+	 * @param employee
+	 */
 	public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
 	
+	/**
+	 * The conservation area this folder is associated with
+	 * @return
+	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
 		return conservationArea;
 	}
+	/**
+	 * The conservation area this folder is associated with
+	 * @param conservationArea
+	 */
 	public void setConservationArea(ConservationArea conservationArea) {
 		this.conservationArea = conservationArea;
 	}
 	
+	/**
+	 * @return the children folders
+	 */
 	@LazyCollection(LazyCollectionOption.FALSE)  //to fix hiberante bug with using fetchType=EAGER in @onetomany annoation
 	@OneToMany(mappedBy="parentFolder", cascade={CascadeType.ALL}, orphanRemoval = true)
 	public List<QueryFolder> getChildren(){
 		return this.childrenFolders;
 	}
+	/**
+	 * Sets the children folder
+	 * @param children
+	 */
 	public void setChildren(List<QueryFolder> children){
 		this.childrenFolders = children;
 	}
@@ -176,6 +211,10 @@ public class QueryFolder extends HasLabel {
 		return names;
 	}
 
+	/**
+	 * Sets all names
+	 * @param names
+	 */
 	public void setNames(Set<Label> names) {
 		this.names = names;
 	}

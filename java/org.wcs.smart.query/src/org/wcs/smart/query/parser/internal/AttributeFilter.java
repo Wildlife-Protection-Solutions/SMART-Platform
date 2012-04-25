@@ -149,6 +149,25 @@ public class AttributeFilter implements IFilter {
 	}
 	
 	/**
+	 * @return the unique attribute key
+	 */
+	public String getAttributeKey(){
+		return this.attributeKey;
+	}
+	/**
+	 * @return the type of attribute represented by the filter
+	 */
+	public AttributeType getAttributeType(){
+		return this.attributeType;
+	}
+	/**
+	 * @return the attribute filter value; the type depends on the attribute type
+	 */
+	public Object getValue(){
+		return this.value1;
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.IFilter#asString()
 	 */
 	@Override
@@ -236,6 +255,9 @@ public class AttributeFilter implements IFilter {
 	}
 
 	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.IFilter#getDropItems(org.hibernate.Session)
+	 */
 	public DropItem[] getDropItems(Session session) throws Exception{
 		Attribute att = getAttribute(session);
 		DropItem it = DropItemFactory.INSTANCE.createAttributeDropItem(att);
@@ -243,6 +265,13 @@ public class AttributeFilter implements IFilter {
 		return new DropItem[]{it};
 	}
 	
+	/**
+	 * Initializes the drop item with the 
+	 * values from this filter
+	 * 
+	 * @param it the drop item to initialize
+	 * @param session database session
+	 */
 	public void initDropItem(DropItem it,  Session session){
 		if (attributeType == AttributeType.TEXT || attributeType == AttributeType.NUMERIC){
 			it.initializeData(new String[]{op.getGuiValue(), String.valueOf(value1)});
