@@ -106,18 +106,8 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return
 	 */
 	public static List<Employee> getActiveEmployees(ConservationArea ca, Session s){
-		s.beginTransaction();
-		try {
-			List<Employee> results = s.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("endEmploymentDate")).list();
-			s.getTransaction().rollback();
-			return results;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			s.close();
-			SmartPlugIn.displayLog(null, "Could not load active employees. " + ex.getMessage(), ex);
-			
-		}
-		return null;
+		List<Employee> results = s.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("endEmploymentDate")).list();
+		return results;
 	}
 
 	/**
@@ -215,19 +205,16 @@ public class HibernateManager extends SmartHibernateManager{
 	 * 
 	 * @return list of stations
 	 */
-	private static List<Station> getStations(ConservationArea ca, Session s, boolean onlyActive){
-		   Transaction tx = s.beginTransaction();
-
-			Criteria st =null;
-			st = s.createCriteria(Station.class);
-			st.add( Restrictions.eq("conservationArea", ca));
-			if (onlyActive){
-				st.add(Restrictions.eq("isActive", true));
-			}
-			List<Station> people = st.list();
-			tx.rollback();
-
-			return people;
+	private static List<Station> getStations(ConservationArea ca, Session s,
+			boolean onlyActive) {
+		Criteria st = null;
+		st = s.createCriteria(Station.class);
+		st.add(Restrictions.eq("conservationArea", ca));
+		if (onlyActive) {
+			st.add(Restrictions.eq("isActive", true));
+		}
+		List<Station> people = st.list();
+		return people;
 	}
 	
 	
@@ -238,12 +225,10 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return list of agencies
 	 */
 	public static List<Agency> getAgencies(ConservationArea ca, Session s){
-	   Transaction tx = s.beginTransaction();
 		Criteria st = null;
 		st = s.createCriteria(Agency.class);
 		st.add( Restrictions.eq("conservationArea", ca));
 		List<Agency> people = st.list();		
-		tx.commit();
 		return people;		
 	}
 	

@@ -256,7 +256,9 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private List<Agency> getAgencies(){
 		if (agencies == null){
+			getSession().beginTransaction();
 			agencies = HibernateManager.getAgencies(ca, getSession());
+			getSession().getTransaction().rollback();
 		}
 		return agencies;
 	}

@@ -297,7 +297,10 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		tableViewer.setContentProvider(new ObservableListContentProvider());
 		
+		getSession().beginTransaction();
 		agencies = new WritableList(HibernateManager.getAgencies(ca, getSession()), Agency.class);
+		getSession().getTransaction().rollback();
+		
 		tableViewer.setInput(agencies);
 		
 		tableViewer.getTable().setHeaderVisible(true);
