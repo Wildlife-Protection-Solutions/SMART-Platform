@@ -22,16 +22,19 @@
 package org.wcs.smart.query.export;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.parser.internal.IFilter;
-import org.wcs.smart.query.parser.internal.PatrolFilter;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -47,39 +50,15 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class DefinitionQueryExporter extends QueryExporter {
+public class DefinitionQueryExporter implements IQueryExporter {
 
 	/**
 	 * Writes the xml definition.
 	 * 
-	 * @see org.wcs.smart.query.export.QueryExporter#init()
+	 * @see org.wcs.smart.query.export.WaypointQueryExporter#init()
 	 */
-	@Override
-	protected void init() throws Exception {
-		Query wpquery = new Query();
-		QueryType qt = new QueryType();
+	protected void init(File file, WaypointQuery query) throws Exception {
 		
-		qt.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode());
-		qt.setName(this.query.getName());
-		qt.setDefinition(this.query.getQueryFilter());
-		wpquery.setQuery(qt);
-		
-		IFilter queryFilter = this.query.getFilter();
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			processFilter(queryFilter, qt, s);
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
-		}
-		
-		OutputStream fout = new BufferedOutputStream(new FileOutputStream(this.outputFile));
-		try{
-			QueryXmlManager.writeDataModel(wpquery, fout);
-		}finally{
-			fout.close();
-		}
 	}
 	
 	private void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
@@ -87,13 +66,13 @@ public class DefinitionQueryExporter extends QueryExporter {
 		if (f instanceof PatrolFilter){
 			PatrolFilter pf = (PatrolFilter)f;
 			
-			if (pf.getPatrolType().getType() == PatrolFilter.PATROL_FILTER_TYPE_UUID){
+			if (pf.getPatrolOption().getType() == PatrolQueryOptionType.UUID){
 				//we need to add a uuid type
 				UuidItemType item = new UuidItemType();
 				item.setUuid(pf.getValue());
 				//find item in database
 				
-				String[] data = pf.getPatrolType().getNames(session, SmartUtils.decodeHex(pf.getValue()));
+				String[] data = pf.getPatrolOption().getNames(session, SmartUtils.decodeHex(pf.getValue()));
 				if (data != null){
 					int index = 0;
 					if (data.length > 1){
@@ -117,25 +96,10 @@ public class DefinitionQueryExporter extends QueryExporter {
 		}
 	}
 
-	/**
-	 * Does nothing.
-	 * 
-	 * @see org.wcs.smart.query.export.QueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem)
-	 */
-	@Override
-	protected void writeRow(QueryResultItem row) throws Exception {
-	}
+
 
 	/**
-	 * Does nothing.
-	 * @see org.wcs.smart.query.export.QueryExporter#finish()
-	 */
-	@Override
-	protected void finish() throws Exception {
-	}
-
-	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#getName()
+	 * @see org.wcs.smart.query.export.WaypointQueryExporter#getName()
 	 */
 	@Override
 	public String getName() {
@@ -143,19 +107,56 @@ public class DefinitionQueryExporter extends QueryExporter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#getDefaultExtension()
+	 * @see org.wcs.smart.query.export.WaypointQueryExporter#getDefaultExtension()
 	 */
 	@Override
 	public String getDefaultExtension() {
 		return "xml";
 	}
 
-	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#writeResults()
+
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
-	protected boolean writeResults() {
+	public boolean canExport(org.wcs.smart.query.model.Query query) {
+		if (query instanceof WaypointQuery){
+			return true;
+		}
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	@Override
+	public void export(org.wcs.smart.query.model.Query query, File file,
+			IProgressMonitor monitor) throws Exception {
+		Query wpquery = new Query();
+		QueryType xmlQuery = new QueryType();
+		
+		xmlQuery.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode());
+		xmlQuery.setName(query.getName());
+		xmlQuery.setDefinition(((WaypointQuery)query).getQueryFilter());
+		wpquery.setQuery(xmlQuery);
+		
+		IFilter queryFilter = ((WaypointQuery)query).getFilter();
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			processFilter(queryFilter, xmlQuery, s);
+		}finally{
+			s.getTransaction().rollback();
+			s.close();
+		}
+		
+		OutputStream fout = new BufferedOutputStream(new FileOutputStream(file));
+		try{
+			QueryXmlManager.writeDataModel(wpquery, fout);
+		}finally{
+			fout.close();
+		}		
 	}
 
 }

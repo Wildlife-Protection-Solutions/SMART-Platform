@@ -1,0 +1,124 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.export;
+
+import java.io.File;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
+
+/**
+ * A query exporter class for exporting waypoint
+ * query results.
+ * 
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public abstract class WaypointQueryExporter {
+
+	protected List<QueryResultItem> data;
+	protected List<WaypointQueryColumn> queryColumns; 
+	protected File outputFile;
+	
+	/**
+	 * Exports all the data.
+	 * 
+	 * @param monitor a progress monitor for displaying results.
+	 * 
+	 * @return <code>true</code> if export successful, <code>false</code> otherwise
+	 */
+	public boolean export(IProgressMonitor monitor) {
+		if (data == null) {
+			QueryPlugIn.displayLog(
+					"Query needs to be run before it can be exported.", null);
+			return false;
+		}
+		
+		monitor.beginTask("Export File", data.size() + 2);
+		try {
+			monitor.subTask("Initializing Query Writer");
+			init();
+			monitor.worked(1);
+
+			monitor.subTask("Writing Data");
+			for (QueryResultItem it : data) {
+				writeRow(it);
+				monitor.worked(1);
+				if (monitor.isCanceled()){
+					return false;
+				}
+			}
+
+			monitor.subTask("Finishing Query Writer ");
+			finish();
+			monitor.worked(1);
+
+			monitor.done();
+			return true;
+		} catch (Exception ex) {
+			QueryPlugIn.displayLog("Export failed: " + ex.getMessage(), ex);
+			return false;
+		}
+	}
+	
+	/**
+	 * Executes any tasks required before data is 
+	 * written.  Here writers can be initialized
+	 * and header lines written.
+	 * 
+	 * @throws Exception
+	 */
+	protected abstract void init() throws Exception;
+	
+	/**
+	 * Writes the query results item row.
+	 * @param row the row to write
+	 * @throws Exception
+	 */
+	protected abstract void writeRow(QueryResultItem row) throws Exception;
+	
+	/**
+	 * Executes any  tasks required after all
+	 * data is written.
+	 * @throws Exception
+	 */
+	protected abstract void finish() throws Exception;
+
+	/**
+	 * Sets the data to export
+	 * @param data the query results to export
+	 * @param queryColumns the columns to export
+	 * @param outputFile the file to export to
+	 * @param query the waypoint query to be exported
+	 */
+	public void setData(List<QueryResultItem> data, 
+			List<WaypointQueryColumn> queryColumns, 
+			File outputFile ){
+		this.data = data;
+		this.queryColumns = queryColumns;
+		this.outputFile = outputFile;
+	}
+}

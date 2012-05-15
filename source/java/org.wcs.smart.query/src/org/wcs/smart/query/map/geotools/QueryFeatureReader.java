@@ -29,8 +29,7 @@ import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.ui.querytable.QueryTableColumn;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
 
 /**
  * Feature reader for waypoint query.
@@ -42,9 +41,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 
 	private SimpleFeatureType ftype;
 	private Iterator<QueryResultItem> fIterator;
-	private QueryTableColumn[] columns;
-	
-	
+	private WaypointQuery query;
 	
 	/**
 	 * Creates a new feature reader.
@@ -52,12 +49,12 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	public QueryFeatureReader(WaypointQuery query, QueryTableColumn[] columns,
+	public QueryFeatureReader(WaypointQuery query,
 			SimpleFeatureType ftype) {
 		
 		this.ftype = ftype;
-		this.columns = columns;
 		this.fIterator = null;
+		this.query = query;
 		if (query.getLastResults() != null){
 			fIterator = query.getLastResults().iterator();
 		}
@@ -96,7 +93,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 			NoSuchElementException {
 		
 		QueryResultItem next = (QueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createFeature(next, this.columns, ftype);
+		SimpleFeature f = QueryResultItemFeature.createFeature(next, query.getQueryColumns(), ftype);
 		return f;
 	}
 	

@@ -23,7 +23,7 @@ package org.wcs.smart.query;
 
 import java.util.ArrayList;
 
-import org.wcs.smart.query.model.WaypointQuery;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Query event manager for managing query change events.
@@ -61,7 +61,7 @@ public class QueryEventManager {
 	 * 
 	 * @param query the query that was modified
 	 */
-	public void fireQueryChangedListeners(WaypointQuery query){
+	public void fireQueryChangedListeners(Query query){
 		for (IQueryListener listener: listeners){
 			listener.queryChanged(query);
 			
@@ -73,7 +73,7 @@ public class QueryEventManager {
 	 * 
 	 * @param query the query that is to be run 
 	 */
-	public void fireQueryRunListeners(WaypointQuery query){
+	public void fireQueryRunListeners(Query query){
 		for (IQueryListener listener: listeners){
 			listener.queryRun(query);
 			

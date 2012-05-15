@@ -25,7 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.parser.internal.PatrolFilter;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 
 /**
  * Patrol drop item that is represented as a boolean expression..
@@ -44,13 +44,10 @@ public class BooleanPatrolDropItem extends DropItem {
 	 * @param target drop target
 	 * @param filter patrol filter
 	 */
-	public BooleanPatrolDropItem(PatrolFilter.PatrolFilterOption filter) {
+	public BooleanPatrolDropItem(PatrolQueryOption filter) {
 		//super(parent, target);
-		
 		this.text = filter.getGuiName();
-		this.key = "patrol:" + filter.getKeyPart();
-		
-	
+		this.key = "patrol:" + filter.getKey();
 	}
 
 	/**
@@ -84,6 +81,30 @@ public class BooleanPatrolDropItem extends DropItem {
 	@Override
 	public void initializeData(Object data) {
 		
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
+	 */
+	@Override
+	public boolean isValueItem(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
+	 */
+	@Override
+	public boolean isFilterItem(){
+		return true;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 */
+	@Override
+	public boolean isGroupByItem(){
+		return false;
 	}
 
 }

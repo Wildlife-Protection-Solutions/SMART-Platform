@@ -24,7 +24,7 @@ package org.wcs.smart.query.ui.formulaDnd;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.parser.internal.Operator;
+import org.wcs.smart.query.parser.internal.filter.Operator;
 
 /**
  * a NOT drop tiem
@@ -74,5 +74,29 @@ public class NotDropItem extends DropItem{
 	@Override
 	public void initializeData(Object data) {
 		
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
+	 */
+	@Override
+	public boolean isValueItem(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
+	 */
+	@Override
+	public boolean isFilterItem(){
+		return true;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 */
+	@Override
+	public boolean isGroupByItem(){
+		return false;
 	}
 }

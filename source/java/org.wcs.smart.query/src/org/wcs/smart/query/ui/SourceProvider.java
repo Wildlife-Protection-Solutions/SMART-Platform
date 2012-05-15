@@ -36,6 +36,7 @@ import org.eclipse.ui.ISources;
  * to add to the current query.</li>
  * <li> Query Valid - true or false if the current query is valid.</li>
  * <li> Query Definition - the current query definition in the querydefview</li>
+ * 
  * </ul>
  *  
  * @author Emily
@@ -43,15 +44,20 @@ import org.eclipse.ui.ISources;
  */
 public class SourceProvider extends AbstractSourceProvider {
 
+	public static enum QueryDefinitionType{
+		QUERY_FILTER, QUERY_SUMMARY
+	}
+	
 	public final static String SELECTED_FILTERS = "org.wcs.smart.query.ui.filteradd";
 	public final static String QUERY_VALID = "org.wcs.smart.query.ui.queryvalid";
-	
+	public final static String QUERY_DEFINITION_TYPE = "org.wcs.smart.query.ui.querybuildertype";
 
 	HashMap<String, Object> data = new HashMap<String, Object>();
 	
 	public SourceProvider(){
 		data.put(SELECTED_FILTERS, IEvaluationContext.UNDEFINED_VARIABLE);
 		data.put(QUERY_VALID, IEvaluationContext.UNDEFINED_VARIABLE);
+		data.put(QUERY_DEFINITION_TYPE, IEvaluationContext.UNDEFINED_VARIABLE);
 	}
 	/**
 	 * @see org.eclipse.ui.ISourceProvider#dispose()
@@ -68,6 +74,11 @@ public class SourceProvider extends AbstractSourceProvider {
 	public void setFilterSelection(IStructuredSelection selection){
 		data.put(SELECTED_FILTERS, selection);		
 		fireSourceChanged(ISources.ACTIVE_PART_ID, SELECTED_FILTERS, selection);
+	}
+	
+	public void setQueryDefinitionType(QueryDefinitionType type){
+		data.put(QUERY_DEFINITION_TYPE, type);
+		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_DEFINITION_TYPE, type);
 	}
 	
 	/**
@@ -95,7 +106,7 @@ public class SourceProvider extends AbstractSourceProvider {
 	 */
 	@Override
 	public String[] getProvidedSourceNames() {
-		return new String[]{SELECTED_FILTERS, QUERY_VALID};
+		return new String[]{SELECTED_FILTERS, QUERY_VALID, QUERY_DEFINITION_TYPE};
 	}
 
 }

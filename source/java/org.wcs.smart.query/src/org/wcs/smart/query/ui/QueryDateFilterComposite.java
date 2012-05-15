@@ -36,12 +36,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.query.parser.internal.DateFilter;
-import org.wcs.smart.query.parser.internal.DateFilter.DATE_FIELD_OP;
-import org.wcs.smart.query.parser.internal.DateFilter.DATE_FILTER_OP;
+import org.wcs.smart.query.parser.internal.filter.DateFilter;
+import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FIELD_OP;
+import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FILTER_OP;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -60,6 +59,7 @@ public class QueryDateFilterComposite extends Composite {
 	private DateTime dtEnd;
 	private Label lbl1;
 	private Label lbl2;
+	private Composite main;
 	
 	
 	/**
@@ -94,11 +94,13 @@ public class QueryDateFilterComposite extends Composite {
 		
 		toolkit.adapt(dtStart, false, true);
 		toolkit.adapt(dtEnd, false, true);
+		toolkit.adapt(main, false, true);
+		toolkit.adapt(this, false, true);
 	}
 	
 	private void createComponent(){
-		final Composite main = new Composite(this, SWT.NONE);
-		main.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		main = new Composite(this, SWT.NONE);
+		
 		GridLayout layout = new GridLayout(7, false);
 		//layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
@@ -146,7 +148,7 @@ public class QueryDateFilterComposite extends Composite {
 				
 				DATE_FILTER_OP filter = (DATE_FILTER_OP) ((IStructuredSelection)cmbFilterOptions.getSelection()).getFirstElement();
 				setCustom(filter == DATE_FILTER_OP.CUSTOM);
-				java.sql.Date bits[] = DateFilter.getDate(filter);
+				java.sql.Date bits[] = DateFilter.findDates(filter);
 				if (bits != null){
 					if (filter == DATE_FILTER_OP.LAST_30_DAYS ||
 							filter == DATE_FILTER_OP.LAST_60_DAYS 

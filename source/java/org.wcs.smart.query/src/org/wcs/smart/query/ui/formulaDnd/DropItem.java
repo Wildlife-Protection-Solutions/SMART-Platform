@@ -49,8 +49,8 @@ import org.wcs.smart.query.QueryPlugIn;
  */
 public abstract class DropItem {
 
-	private final static Transfer[] types = DropTargetPanel.types;
-	protected DropTargetPanel targetPanel = null;
+	private final static Transfer[] types = FilterDropTargetPanel.types;
+	protected IDropPanel targetPanel = null;
 	
 	private Composite widget;
 	
@@ -66,7 +66,7 @@ public abstract class DropItem {
 	 * 
 	 * @param panel target drop panel for the drop item widget 
 	 */
-	public void createWidget(DropTargetPanel panel){
+	public void createWidget(IDropPanel panel){
 		this.targetPanel = panel;
 		widget = createCompositeInternal(panel.getComposite());
 	}
@@ -79,6 +79,17 @@ public abstract class DropItem {
 			widget.dispose();
 			widget = null;
 		}
+	}
+	
+	/**
+	 * Moves this drop item to a new panel.
+	 * 
+	 * @param newPanel new drop item panel
+	 */
+	public void moveParent(IDropPanel newPanel){
+		//TODO: no necessarily supported on all os's
+		widget.setParent(newPanel.getComposite());
+		targetPanel = newPanel;
 	}
 	
 	/**
@@ -101,7 +112,27 @@ public abstract class DropItem {
 	public abstract String asQueryPart();
 	
 	
+	/**
+	 * Initializes the selected values
+	 * associated with the drop item. Each drop
+	 * item spendifies what format the data must be in.
+	 * 
+	 * @param data
+	 */
 	public abstract void initializeData(Object data);
+	
+	/**
+	 * @return <code>true</code> if a summary value drop item
+	 */
+	public abstract boolean isValueItem();
+	/**
+	 * @return <code>true</code> if filter drop item
+	 */
+	public abstract boolean isFilterItem();
+	/**
+	 * @return <code>true</code> if group by drop item
+	 */
+	public abstract boolean isGroupByItem();
 	
 	/**
 	 * Called when a drop item modified the queries.
@@ -110,7 +141,7 @@ public abstract class DropItem {
 	 */
 	protected void queryChanged(){
 		targetPanel.validate();
-		targetPanel.getParentView().fireQueryModifiedListeners();
+		targetPanel.fireQueryChangedListeners();
 	}
 	
 	/**
@@ -155,7 +186,7 @@ public abstract class DropItem {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				targetPanel.removeElement(DropItem.this);
-				targetPanel.getParentView().fireQueryModifiedListeners();
+				targetPanel.fireQueryChangedListeners();
 			}
 			
 		});
@@ -202,7 +233,7 @@ public abstract class DropItem {
 					//to ensure it is dispoed of properly
 					DropItem.this.dispose();
 				}
-				targetPanel.getParentView().fireQueryModifiedListeners();
+				targetPanel.fireQueryChangedListeners();
 			}
 		});		
 	}

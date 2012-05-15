@@ -25,8 +25,9 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.query.parser.internal.PatrolFilter;
-import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.formulaDnd.BracketDropItem.BracketType;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
 
@@ -71,6 +72,8 @@ public class DropItemFactory {
 			item =  new AttributeListDropItem(attribute);
 		}else if (attribute.getAttribute().getType() == AttributeType.TREE){
 			item = new AttributeTreeDropItem(attribute);
+		}else if (attribute.getAttribute().getType() == AttributeType.BOOLEAN){
+			item = new AttributeDropItem(attribute);
 		}
 		return item;
 	}
@@ -89,6 +92,8 @@ public class DropItemFactory {
 			item =  new AttributeListDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.TREE){
 			item = new AttributeTreeDropItem(attribute);
+		}else if (attribute.getType() == AttributeType.BOOLEAN){
+			item = new AttributeDropItem(attribute);
 		}
 		return item;
 	}
@@ -107,20 +112,20 @@ public class DropItemFactory {
 	 * @param option
 	 * @return
 	 */
-	public DropItem createPatrolDropItem(PatrolFilter.PatrolFilterOption option){
+	public DropItem createPatrolFilterDropItem(PatrolQueryOption option){
 		DropItem item = null;
-		if (option == PatrolFilterOption.ARMED){
+		if (option == PatrolQueryOption.ARMED){
 			item = new BooleanPatrolDropItem( option);
-		}else if (option == PatrolFilterOption.ID){
+		}else if (option == PatrolQueryOption.ID){
 			item = new PatrolIdDropItem(option);
-		}else if (option == PatrolFilterOption.MANDATE || 
-				option == PatrolFilterOption.PATROLTYPE ||
-				option == PatrolFilterOption.TRANSPORT ||
-				option == PatrolFilterOption.STATION ||
-				option == PatrolFilterOption.EMPLOYEE ||
-				option == PatrolFilterOption.LEADER ||
-				option == PatrolFilterOption.TEAM||
-				option == PatrolFilterOption.PILOT){
+		}else if (option == PatrolQueryOption.MANDATE || 
+				option == PatrolQueryOption.PATROL_TYPE ||
+				option == PatrolQueryOption.PATROL_TRANSPORT_TYPE ||
+				option == PatrolQueryOption.STATION ||
+				option == PatrolQueryOption.EMPLOYEE ||
+				option == PatrolQueryOption.LEADER ||
+				option == PatrolQueryOption.TEAM||
+				option == PatrolQueryOption.PILOT){
 			item = new PatrolListDropItem( option);
 		}
 		return item;
@@ -150,6 +155,33 @@ public class DropItemFactory {
 	 */
 	public DropItem createOtherSingleBracketDropItem(BracketType type){
 			return  new BracketDropItem(type);
+	}
+	
+	/**
+	 * Creates a new patrol value drop item
+	 * @param item
+	 * @return
+	 */
+	public DropItem createPatrolValueDropItem(PatrolValueOption item){
+		return new PatrolValueDropItem(item);
+	}
+	
+	/**
+	 * Creates a new patrol group by drop item
+	 * @param item
+	 * @return
+	 */
+	public DropItem createPatrolGroupByDropItem(PatrolQueryOption item){
+		return new PatrolGroupByDropItem(item);
+	}
+	
+	/**
+	 * Creates a new date group by drop item
+	 * @param item
+	 * @return
+	 */
+	public DropItem createDateGroupByDropItem(DateGroupByOption item){
+		return new DateGroupByDropItem(item);
 	}
 	
 	

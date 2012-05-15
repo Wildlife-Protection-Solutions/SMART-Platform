@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.ui.querytable.QueryTableColumn.ColumnType;
+import org.wcs.smart.query.model.waypoint.WaypointQueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -108,7 +108,7 @@ public class QueryResultItemComparator extends ViewerComparator{
 		Object data2 = column.getColumn().getValue(s2);
 		
 		
-		QueryTableColumn.ColumnType type = column.getColumn().getType();
+		ColumnType type = column.getColumn().getType();
 		Comparator compare = null;
 		if (type == ColumnType.INTEGER){
 			compare = SmartUtils.nullIntegerComparator;

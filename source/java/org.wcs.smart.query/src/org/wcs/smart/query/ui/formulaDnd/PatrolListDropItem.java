@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,18 +42,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.query.parser.internal.PatrolFilter;
-import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -69,7 +60,7 @@ public class PatrolListDropItem extends DropItem{
 
 	private String keyPart;
 	private String text;
-	private PatrolFilterOption option;
+	private PatrolQueryOption option;
 	
 	private ComboViewer listViewer;
 	private Font smallerFont = null;
@@ -85,48 +76,10 @@ public class PatrolListDropItem extends DropItem{
 		protected IStatus run(IProgressMonitor monitor) {
 			
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
-				ConservationArea ca = SmartDB.getCurrentConservationArea();
-				final ArrayList<ListItem> items = new ArrayList<ListItem>();
-				
-				if (option == PatrolFilterOption.MANDATE){
-					List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, s);
-					for (PatrolMandate m : mandates){
-						items.add(new ListItem(m.getUuid(), m.getName()));
-					}
-				}else if (option == PatrolFilterOption.STATION){
-					List<Station> stations = PatrolHibernateManager.getActiveStations(ca, s);
-					for (Station m : stations){
-						items.add(new ListItem(m.getUuid(), m.getName()));
-					}
-				}else if (option == PatrolFilterOption.TEAM){
-					List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, s);
-					for (Team m : teams){
-						items.add(new ListItem(m.getUuid(), m.getName()));
-					}
-				}else if (option == PatrolFilterOption.TRANSPORT){
-					List<PatrolTransportType> transports = PatrolHibernateManager.getActivePatrolTransporationTypes(ca, s);
-					for (PatrolTransportType m : transports){
-						items.add(new ListItem(m.getUuid(), m.getName()));
-					}
-					
-				}else if (option == PatrolFilterOption.PATROLTYPE){
-					List<PatrolType> types = PatrolHibernateManager.getActivePatrolTypes(ca, s);
-					for (PatrolType m : types){
-						items.add(new ListItem(null, m.getType().getGuiName(), m.getType().name()));
-					}
-					
-				}else if (option == PatrolFilterOption.EMPLOYEE ||
-						option == PatrolFilterOption.LEADER ||
-						option == PatrolFilterOption.PILOT
-						){
-					List<Employee> types = HibernateManager.getActiveEmployees(ca, s);
-					for (Employee m : types){
-						items.add(new ListItem(m.getUuid(), m.getGivenName() + " " + m.getFamilyName() + " [" + m.getId() + "]"));
-					}
-				}
-			
-				Display.getDefault().asyncExec(new Runnable(){
+				final List<ListItem> items = option.getAllActiveValues(s);
+								Display.getDefault().asyncExec(new Runnable(){
 
 					@Override
 					public void run() {
@@ -135,8 +88,10 @@ public class PatrolListDropItem extends DropItem{
 							listViewer.setSelection(new StructuredSelection(currentSelection));
 						}
 					}});
-				
+			}catch (Exception ex){
+				QueryPlugIn.displayLog("Error loading items for list.", ex);
 			}finally{
+				s.getTransaction().rollback();
 				s.close();
 			}
 			return Status.OK_STATUS;
@@ -151,10 +106,10 @@ public class PatrolListDropItem extends DropItem{
 	 * @param target target item
 	 * @param option patrol filter option
 	 */
-	public PatrolListDropItem(PatrolFilter.PatrolFilterOption option) {
+	public PatrolListDropItem(PatrolQueryOption option) {
 		//super(parent, target);
 
-		this.keyPart = "patrol:" + option.getKeyPart();
+		this.keyPart = "patrol:" + option.getKey();
 		this.text = option.getGuiName();
 		this.option = option;
 	}
@@ -202,7 +157,7 @@ public class PatrolListDropItem extends DropItem{
 		}
 		if (it != null){
 			sb.append("\"");
-			if (option == PatrolFilterOption.PATROLTYPE){
+			if (option == PatrolQueryOption.PATROL_TYPE){
 				sb.append(it.getKey().toUpperCase());
 			}else{
 				if (it.getUuid() != null){
@@ -272,5 +227,29 @@ public class PatrolListDropItem extends DropItem{
 	@Override
 	public void initializeData(Object data) {
 		currentSelection = (ListItem)data;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
+	 */
+	@Override
+	public boolean isValueItem(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
+	 */
+	@Override
+	public boolean isFilterItem(){
+		return true;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 */
+	@Override
+	public boolean isGroupByItem(){
+		return false;
 	}
 }

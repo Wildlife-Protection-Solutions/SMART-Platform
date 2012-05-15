@@ -28,7 +28,7 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.ui.QueryResultsEditor;
+import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 
 /**
  * Handler for displaying query perspective

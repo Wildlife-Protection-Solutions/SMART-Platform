@@ -36,13 +36,14 @@ import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.parser.internal.AttributeFilter;
-import org.wcs.smart.query.parser.internal.CategoryFilter;
-import org.wcs.smart.query.parser.internal.ConservationAreaFilter;
-import org.wcs.smart.query.parser.internal.IFilter;
-import org.wcs.smart.query.parser.internal.PatrolFilter;
-import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.internal.filter.AttributeFilter;
+import org.wcs.smart.query.parser.internal.filter.CategoryFilter;
+import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
@@ -83,6 +84,7 @@ public class QueryDefinitionImporter {
 		
 		InputStream fin = new BufferedInputStream(new FileInputStream(file));
 		Query q = QueryXmlManager.readDataModel(fin);
+		fin.close();
 		
 		QueryType qt = q.getQuery();
 		
@@ -91,35 +93,36 @@ public class QueryDefinitionImporter {
 		WaypointQuery wq = new WaypointQuery();
 		wq.setName(qt.getName());
 		
-		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
 			uuidLookup.put(type.getUuid(), type);
 		}
 		
-		InputStream is = new ByteArrayInputStream(qt.getDefinition().getBytes());
-		Parser parser = new Parser(is);
-		IFilter queryFilter = parser.Expression();
-		is.close();
-		
-		
-		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			validateFilterPart(queryFilter, langCode, uuidLookup, session);
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
+		String strQueryFilter = "";
+		if (qt.getDefinition() != null && qt.getDefinition().length() > 0){
+			InputStream is = new ByteArrayInputStream(qt.getDefinition().getBytes());
+			Parser parser = new Parser(is);
+			IFilter queryFilter = parser.QueryFilter();
+			is.close();
+			
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try{
+				validateFilterPart(queryFilter, langCode, uuidLookup, session);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
+			}
+			strQueryFilter = queryFilter.asString();
 		}
 		
-		fin.close();
-		
-		
-		wq.setQueryFilter(queryFilter.asString());
+		wq.setQueryFilter(strQueryFilter);
 		wq.setConservationArea(SmartDB.getCurrentConservationArea());
 		wq.setOwner(SmartDB.getCurrentEmployee());
-		wq.setConservationAreaFilter(new ConservationAreaFilter());
+		
+		ConservationAreaFilter caFilter = new ConservationAreaFilter();
+		caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
+		wq.setConservationAreaFilter(caFilter);
 		
 		
 		return wq;
@@ -158,8 +161,8 @@ public class QueryDefinitionImporter {
 			String cathkey = catId.split(":")[1];
 			validateCategory(cathkey, session);
 		}else if (filter instanceof PatrolFilter){
-			PatrolFilterOption op = ((PatrolFilter) filter).getPatrolType();
-			if (op.getType() == PatrolFilter.PATROL_FILTER_TYPE_UUID){
+			PatrolQueryOption op = ((PatrolFilter) filter).getPatrolOption();
+			if (op.getType() == PatrolQueryOptions.PatrolQueryOptionType.UUID){
 				byte[] uuid = SmartUtils.decodeHex( ((PatrolFilter)filter).getValue() );
 				if (op.getObject(session, uuid)  != null){
 					//object exists in db

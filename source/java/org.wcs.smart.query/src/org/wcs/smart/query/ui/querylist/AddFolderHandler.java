@@ -58,46 +58,54 @@ public class AddFolderHandler extends AbstractHandler {
 		
 		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
 		if (o instanceof QueryFolder){
-			QueryFolder parent = (QueryFolder)o;
-			QueryFolder newFolder = new QueryFolder();
-			
-			newFolder.setConservationArea(parent.getConservationArea());
-			newFolder.setEmployee(parent.getEmployee());
-			if (!parent.isRootFolder()){
-				newFolder.setParentFolder(parent);
+			QueryFolder newFolder = addQueryFolder((QueryFolder)o);
+			if (newFolder != null){
+				QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_ADDED, newFolder);
 			}
-			if (parent.getChildren() == null){
-				parent.setChildren(new ArrayList<QueryFolder>());
-			}
-			parent.getChildren().add(newFolder);
-
-			Label lbl = new Label();
-			lbl.setElement(newFolder);
-			lbl.setLanguage(SmartDB.getCurrentLanguage());
-			lbl.setValue("New Folder");
-			newFolder.setNames(new HashSet<Label>());
-			newFolder.getNames().add(lbl);
-			newFolder.setName(lbl.getValue());
-			
-			//need to save and refresh query list view
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				s.save(newFolder);
-				s.save(lbl);
-				s.getTransaction().commit();
-			}catch (Exception ex){
-				QueryPlugIn.displayLog("Could not add folder: " + ex.getMessage(), ex); 
-			}finally{
-				s.close();
-			}
-
-			
-			QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_ADDED, newFolder);
 		}
 		
 		return null;
 		
+	}
+	
+	public static QueryFolder addQueryFolder(QueryFolder parent){
+		
+		QueryFolder newFolder = new QueryFolder();
+		
+		newFolder.setConservationArea(parent.getConservationArea());
+		newFolder.setEmployee(parent.getEmployee());
+		if (!parent.isRootFolder()){
+			newFolder.setParentFolder(parent);
+		}
+		if (parent.getChildren() == null){
+			parent.setChildren(new ArrayList<QueryFolder>());
+		}
+		parent.getChildren().add(newFolder);
+
+		Label lbl = new Label();
+		lbl.setElement(newFolder);
+		lbl.setLanguage(SmartDB.getCurrentLanguage());
+		lbl.setValue("New Folder");
+		newFolder.setNames(new HashSet<Label>());
+		newFolder.getNames().add(lbl);
+		newFolder.setName(lbl.getValue());
+		
+		//need to save and refresh query list view
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			s.save(newFolder);
+			s.save(lbl);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			QueryPlugIn.displayLog("Could not add folder: " + ex.getMessage(), ex);
+			return null;
+		}finally{
+			s.close();
+		}
+		
+		return newFolder;
+
 	}
 
 }
