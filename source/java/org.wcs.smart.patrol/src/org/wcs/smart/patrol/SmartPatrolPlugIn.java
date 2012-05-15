@@ -127,7 +127,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 			JFaceResources.getImageRegistry().put(MARINE_PATROL_ICON, descriptor);
 		}
 		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/car.png"); //$NON-NLS-1$
+				PLUGIN_ID, "images/icons/obj16/patrol_ground.png"); //$NON-NLS-1$
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(GROUND_PATROL_ICON, descriptor);
 		}

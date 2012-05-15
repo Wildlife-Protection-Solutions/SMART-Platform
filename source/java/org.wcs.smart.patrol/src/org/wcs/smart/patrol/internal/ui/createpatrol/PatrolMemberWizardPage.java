@@ -65,7 +65,10 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	public void createControl(Composite parent) {
 		
 		CreatePatrolWizard wizard = (CreatePatrolWizard)getWizard();
+		
+		wizard.getSession().beginTransaction();
 		allEmployees = HibernateManager.getActiveEmployees(wizard.getPatrol().getConservationArea(), wizard.getSession());
+		wizard.getSession().getTransaction().rollback();
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

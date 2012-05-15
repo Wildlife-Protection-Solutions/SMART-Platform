@@ -58,7 +58,7 @@ public class AttributeTableLabelProvider extends ColumnLabelProvider {
 					if (att.getNumberValue() < 0.5){
 						return Attribute.BOOLEAN_FALSE_LABEL;
 					}else{
-						return Attribute.BOOLEAN_FALSE_LABEL;
+						return Attribute.BOOLEAN_TRUE_LABEL;
 					}
 				}else if (this.attribute.getType() == AttributeType.NUMERIC){
 					if (att.getNumberValue() == null){

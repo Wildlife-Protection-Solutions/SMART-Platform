@@ -113,9 +113,9 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		
-		
 		patrolTypes = new WritableList(PatrolHibernateManager.getPatrolTypes(ca,
 				getSession()), PatrolMandate.class);
+		
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));

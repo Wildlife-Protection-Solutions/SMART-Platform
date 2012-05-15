@@ -116,7 +116,8 @@ public class EmployeeLabelProvider extends LabelProvider {
 			String text = "";
 			if (((PatrolLegMember) element).getIsLeader()) {
 				text = "[Leader]";
-			} else if (((PatrolLegMember) element).getIsPilot()) {
+			} 
+			if (((PatrolLegMember) element).getIsPilot()) {
 				text += "[Pilot]";
 			}
 			return text + ((PatrolLegMember) element).getMember().getLabel();

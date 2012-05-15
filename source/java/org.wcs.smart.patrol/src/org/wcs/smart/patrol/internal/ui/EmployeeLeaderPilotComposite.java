@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -108,7 +109,15 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
     		}
     	}    	
 		empListComposite.getSelectedEmployees();
-		empListComposite.setEmployeeData(HibernateManager.getActiveEmployees(p.getConservationArea(), session), current);
+		session.beginTransaction();
+		try{
+			empListComposite.setEmployeeData(HibernateManager.getActiveEmployees(p.getConservationArea(), session), current);
+			session.getTransaction().rollback();
+		}catch(Exception ex){
+			session.getTransaction().rollback();
+			session.close();
+			SmartPlugIn.displayLog(null, "Could not load active employees. " + ex.getMessage(), ex);			
+		}
 		leaderPilotComp.setEmployeeList(empListComposite.getSelectedEmployees(),p);
 	}
 	

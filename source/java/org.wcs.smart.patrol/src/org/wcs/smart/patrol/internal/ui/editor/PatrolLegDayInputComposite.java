@@ -828,7 +828,7 @@ public class PatrolLegDayInputComposite {
 			}
 //			editor.setDirty(true);
 		} else if (column == OtColumn.DISTANCE) {
-			if (element == null){
+			if (value == null){
 				element.setDistance(null);
 			}else{
 				element.setDistance( ( (Double)value).floatValue());
