@@ -46,6 +46,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.model.ListItem;
 
 /**
  * Attribute list type drop item.
@@ -220,6 +221,30 @@ public class AttributeListDropItem extends DropItem{
 		
 		lblAttribute.setText(this.text + " = ");
 		loadItemsJobs.schedule();
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
+	 */
+	@Override
+	public boolean isValueItem(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
+	 */
+	@Override
+	public boolean isFilterItem(){
+		return true;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 */
+	@Override
+	public boolean isGroupByItem(){
+		return false;
 	}
 
 }

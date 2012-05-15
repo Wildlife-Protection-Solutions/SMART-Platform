@@ -21,25 +21,17 @@
  */
 package org.wcs.smart.query.ui.qimport;
 
-import java.util.HashMap;
-import java.util.List;
-
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryHibernateManager;
-import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
-import org.wcs.smart.query.ui.querylist.QueryListViewContentProvider;
+import org.wcs.smart.query.ui.QueryFolderTreeComposite;
 
 /**
  * Query wizard page to select the query import folder location.
@@ -50,7 +42,7 @@ import org.wcs.smart.query.ui.querylist.QueryListViewContentProvider;
  */
 public class ImportQueryFolderPage extends WizardPage {
 
-	private TreeViewer tblViewer;
+	private QueryFolderTreeComposite folderTree;
 
 	/**
 	 * Creates a new query wizard page.
@@ -78,33 +70,14 @@ public class ImportQueryFolderPage extends WizardPage {
 		lbl.setText("Destination Folder:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		tblViewer = new TreeViewer(main, SWT.BORDER);
-		tblViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		tblViewer.setContentProvider(new QueryListViewContentProvider(false));
-		
-		tblViewer.setLabelProvider(new QueryListLabelProvider());
-		tblViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		folderTree= new QueryFolderTreeComposite(main);
+		folderTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		folderTree.addSelectionListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				setPageComplete(!tblViewer.getSelection().isEmpty());
+				setPageComplete(!event.getSelection().isEmpty());
 			}
 		});
-		
-
-		//load query folders
-		HashMap<Integer, List<QueryFolder>> data = new HashMap<Integer, List<QueryFolder>> ();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			List<QueryFolder> folders = QueryHibernateManager.getQueryFolders(session, QueryHibernateManager.canModifyCaQueries());
-			data.put(QueryListViewContentProvider.FOLDER_KEY, folders);
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
-		}		
-		tblViewer.setInput(data);
-		tblViewer.refresh();
-		tblViewer.expandToLevel(2);
 		
 		setMessage("Select import destination.");
 		setPageComplete(false);
@@ -115,6 +88,6 @@ public class ImportQueryFolderPage extends WizardPage {
 	 * @return the selected query folder
 	 */
 	public QueryFolder getFolder(){
-		return (QueryFolder)((IStructuredSelection)tblViewer.getSelection()).getFirstElement();
+		return (QueryFolder)((IStructuredSelection)folderTree.getSelection()).getFirstElement();
 	}
 }

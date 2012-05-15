@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query;
 
-import org.wcs.smart.query.model.WaypointQuery;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Listener for query changes
@@ -37,7 +37,7 @@ public interface IQueryListener {
 	 * 
 	 * @param query the query being changed.
 	 */
-	public void queryChanged(WaypointQuery query);
+	public void queryChanged(Query query);
 	
 	
 	/**
@@ -45,5 +45,5 @@ public interface IQueryListener {
 	 * 
 	 * @param query the query to run
 	 */
-	public void queryRun(WaypointQuery query);
+	public void queryRun(Query query);
 }

@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.query.ui.querytable;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.wcs.smart.query.model.waypoint.AttributeQueryColumn;
+import org.wcs.smart.query.model.waypoint.CategoryQueryColumn;
+import org.wcs.smart.query.model.waypoint.FixedQueryColumn;
+import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
 
 /**
  * A table viewer column for the query results table viewer.
@@ -35,9 +40,20 @@ import org.eclipse.swt.events.SelectionEvent;
  */
 public class QueryTableViewerColumn {
 	
-	private QueryTableColumn column;
+	private WaypointQueryColumn column;
 	private TableViewerColumn tcolumn;
 	
+	private static ColumnLabelProvider getLabelProvider(WaypointQueryColumn column){
+		if (column instanceof FixedQueryColumn){
+			return new FixedColumnLabelProvider(column);
+		}else if (column instanceof AttributeQueryColumn){
+			return new AttributeColumnLabelProvider(column);
+		}else if (column instanceof CategoryQueryColumn){
+			return new CategoryColumnLabelProvider(column);
+		}
+		return null;
+	}
+
 	/**
 	 * Adds the given column to the table viewer.
 	 * 
@@ -45,14 +61,19 @@ public class QueryTableViewerColumn {
 	 * @param column the column
 	 */
 	public QueryTableViewerColumn(TableViewer viewer, 
-			QueryTableColumn column,
+			WaypointQueryColumn column,
 			final QueryResultItemComparator sorter){
 		this.column = column;
 		
 		tcolumn = new TableViewerColumn(viewer, SWT.NONE);
 		tcolumn.getColumn().setText(column.getName());
 		tcolumn.getColumn().setWidth(100);
-		tcolumn.setLabelProvider(column.getLabelProvider());
+		if (column.isVisible()){
+			show();
+		}else{
+			hide();
+		}
+		tcolumn.setLabelProvider(getLabelProvider(column));
 		
 		tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -63,6 +84,9 @@ public class QueryTableViewerColumn {
 		});
 	}
 	
+	public boolean isVisible(){
+		return tcolumn.getColumn().getWidth() > 0;
+	}
 	/**
 	 * Shows the column
 	 */
@@ -86,7 +110,7 @@ public class QueryTableViewerColumn {
 	/**
 	 * @return the query results column represented by this table column
 	 */
-	public QueryTableColumn getColumn(){
+	public WaypointQueryColumn getColumn(){
 		return this.column;
 	}
 	

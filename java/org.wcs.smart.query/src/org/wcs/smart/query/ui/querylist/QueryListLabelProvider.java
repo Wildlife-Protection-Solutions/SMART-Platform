@@ -25,6 +25,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 
@@ -50,7 +51,11 @@ public class QueryListLabelProvider extends LabelProvider {
 		if (element instanceof QueryFolder){
 			return JFaceResources.getImage(QueryPlugIn.FOLDER_ICON);
 		}else if (element instanceof QueryInput){
-			return JFaceResources.getImage(QueryPlugIn.WAYPOINT_QUERY_ICON);
+			if (((QueryInput) element).getType() == QueryType.OBSERVATION){
+				return JFaceResources.getImage(QueryPlugIn.WAYPOINT_QUERY_ICON);
+			}else if (((QueryInput) element).getType() == QueryType.SUMMARY){
+				return JFaceResources.getImage(QueryPlugIn.SUMMARY_QUERY_ICON);
+			}
 		}
 		return null;
 	}

@@ -46,8 +46,8 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 
 /**
- * An object represnting a folder for saving 
- * queries.
+ * An object representing a folder for 
+ * saving queries.
  * 
  * @author Emily
  * @since 1.0.0

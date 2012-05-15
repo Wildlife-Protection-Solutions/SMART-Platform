@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.query.export.QueryExporter;
+import org.wcs.smart.query.export.IQueryExporter;
 
 /**
  * Query wizard page to select the output file format.
@@ -61,7 +61,7 @@ public class ExportQueryLocationPage extends WizardPage {
 	public void initValues(){
 		String location = System.getProperty("user.home");
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
-		QueryExporter exporter = wizard.getQueryExporter();
+		IQueryExporter exporter = wizard.getQueryExporter();
 		
 		String initFile = location + File.separator + wizard.getQueryName() + "." ;
 		if (exporter == null){

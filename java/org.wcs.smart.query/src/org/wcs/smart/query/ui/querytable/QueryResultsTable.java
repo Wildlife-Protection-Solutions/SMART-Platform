@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.query.ui.querytable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -34,15 +32,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
 
 /**
  * Creates a query results table for a given query.
@@ -54,14 +46,10 @@ import org.wcs.smart.query.model.QueryResultItem;
 public class QueryResultsTable {
 
 	private TableViewer table;
-	private QueryTableColumn[] columns;
 	private QueryTableViewerColumn[] tableViewerColumns;
 
 	private QueryResultItemComparator sorter;
 	
-	public QueryTableColumn[] getColumns(){
-		return this.columns;
-	}
 	/**
 	 * Creates the table widget
 	 * @param parent the parent widget
@@ -76,44 +64,30 @@ public class QueryResultsTable {
 		table.setItemCount(0);
 		sorter = new QueryResultItemComparator(table);
 		table.setComparator(sorter);
-		
-		//lets start a job to get the table column
+		return table;
+	}
+	
+	public void initQuery(final WaypointQuery query){
+		if (tableViewerColumns != null){
+			//columns already created
+			return;
+		}
 		Job job = new Job("Initialize query results table."){
-
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				
-				try {
-					PatrolOptions patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-					session.beginTransaction();
-					DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-					columns = findTableColumns(dm, patrolOps);
-
-				} finally {
-					session.getTransaction().rollback();
-					session.close();
-				}
-				//in display thread update table
-				Display.getDefault().asyncExec(new Runnable(){
-
+				// in display thread update table
+				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						tableViewerColumns = createColumns(table, columns, sorter);
-						//table.setContentProvider(new QueryResultLazyContentProvider());
+						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
 						table.setContentProvider(ArrayContentProvider.getInstance());
-						updateVisible(visibleColumnKeys);
-						visibleColumnKeys = null;
-					}});
-
+					}
+				});
 				return Status.OK_STATUS;
 			}
-			
 		};
+		
 		job.schedule();
-		
-		
-		return table;
 	}
 	
 	/**
@@ -137,47 +111,7 @@ public class QueryResultsTable {
 	}
 	
 	
-	/**
-	 * Finds all the table columns available for query output.
-	 * 
-	 * @param dm the conservation area data model
-	 * @param ops the patrol options 
-	 * 
-	 * @return an array of query table columns
-	 */
-	private QueryTableColumn[] findTableColumns(DataModel dm, PatrolOptions ops) {
-		ArrayList<QueryTableColumn> cols = new ArrayList<QueryTableColumn>();
-		for (int i = 0; i < FixedTableColumn.FIXED_COLUMN.values().length; i++) {
-			
-			FixedTableColumn.FIXED_COLUMN item = FixedTableColumn.FIXED_COLUMN.values()[i];
-			if (item == FixedTableColumn.FIXED_COLUMN.WAYPOINT_DIRECTION ||  
-					item == FixedTableColumn.FIXED_COLUMN.WAYPOINT_DISTANCE){
-				if (ops.getTrackDistanceDirection()){
-					cols.add(new FixedTableColumn(item));
-				}
-			}else{
-				cols.add(new FixedTableColumn(item));
-			}
-		}
-
-
-		// add data model category columns
-		int numCategory = 0;
-		for (Category cat : dm.getActiveCategories()) {
-			numCategory = Math.max(numCategory, getDepth(cat));
-		}
-
-		for (int i = 0; i < numCategory; i++) {
-			cols.add(new CategoryTableColumn("Observation Category  " + i, i));
-		}
-
-		for (Attribute att : dm.getAttributes()) {
-			String name = att.getName();
-			cols.add(new AttributeTableColumn(name, att.getKeyId(), att.getType()));
-		}
-
-		return cols.toArray(new QueryTableColumn[cols.size()]);
-	}
+	
 
 	/**
 	 * Creates the table viewer columns.
@@ -186,60 +120,50 @@ public class QueryResultsTable {
 	 * @param columns table column definition
 	 * @return list of table viewer columns
 	 */
-	private static QueryTableViewerColumn[] createColumns(TableViewer viewer, QueryTableColumn[] columns, QueryResultItemComparator sorter) {
-		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.length];
-		for (int i = 0; i < columns.length; i++) {
-			viewers[i] = new QueryTableViewerColumn(viewer,columns[i], sorter);
+	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<WaypointQueryColumn> columns, QueryResultItemComparator sorter) {
+		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
+		for (int i = 0; i < columns.size(); i++) {
+			viewers[i] = new QueryTableViewerColumn(
+					viewer,columns.get(i), sorter);
 		}
 		return viewers;
 	}
 
-	/**
-	 * Compute the maximum category depth.
-	 * 
-	 * @param cat category
-	 * @return maximum depth
-	 */
-	private int getDepth(Category cat) {
-		int maxDepth = 0;
-		for (Category child : cat.getChildren()) {
-			if (child.getIsActive()) {
-				maxDepth = Math.max(maxDepth, getDepth(child));
-			}
-		}
-		return maxDepth + 1;
-
-	}
 	
-	private Set<String> visibleColumnKeys = null;
 	/**
 	 * 
 	 * Updates the visible columns in the table.
 	 * @param visibleColumns
 	 */
-	public void updateVisible(Set<String> visibleColumnKeys) {
+	public void updateVisible(List<WaypointQueryColumn> queryColumns) {
 		if (this.tableViewerColumns == null){
-			//not yet initialized; save to be used when 
-			//initialized
-			this.visibleColumnKeys = visibleColumnKeys;
+			//not yet initialized 
 			return;
 		}
-		if (visibleColumnKeys == null){
+
+		if (queryColumns == null){
 			//show all
 			for (int i = 0; i < tableViewerColumns.length; i ++){
 				tableViewerColumns[i].show();
 			}
 		}else{
 			for (int i = 0; i < tableViewerColumns.length; i ++){
-				if (visibleColumnKeys.contains(tableViewerColumns[i].getColumn().getKey())){
-					tableViewerColumns[i].show();
-				}else{
-					tableViewerColumns[i].hide();
+				for (WaypointQueryColumn column :queryColumns){
+					if (column == tableViewerColumns[i].getColumn()){
+						if (queryColumns.get(i).isVisible()){
+							tableViewerColumns[i].show();
+						}else{
+							tableViewerColumns[i].hide();						
+						}
+						break;
+					}
 				}
+				
 			}
 		}
 	}
 	
 
-
+	
 }
+

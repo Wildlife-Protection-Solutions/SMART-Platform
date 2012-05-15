@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
-import java.util.ArrayList;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -50,12 +48,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Attribute tree drop item
  * @author Emily
  * @since 1.0.0
  */
@@ -85,7 +78,6 @@ public class AttributeTreeDropItem extends DropItem{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				final ArrayList<ListItem> items = new ArrayList<ListItem>();
 				s.saveOrUpdate(attribute);
 				if (attribute.getTree() != null){
 					for (AttributeTreeNode node : attribute.getTree()){
@@ -235,8 +227,12 @@ public class AttributeTreeDropItem extends DropItem{
 				} catch (InterruptedException ex) {
 					QueryPlugIn.log("error waiting for load items job", ex);
 				}
-				AttributeTreeDropItem.this.targetPanel.getTreeEditor().setAttribute(attribute);
-				AttributeTreeDropItem.this.targetPanel.getTreeEditor().positionAndShow(AttributeTreeDropItem.this.getWidget(), new ISelectionListener(){
+				 TreeDropDownViewer treeviewer = getTreeEditor();
+				 if (treeviewer == null){
+					 return;
+				 }
+				treeviewer.setAttribute(attribute);
+				treeviewer.positionAndShow(AttributeTreeDropItem.this.getWidget(), new ISelectionListener(){
 
 					@Override
 					public void selectionChanged(IWorkbenchPart part,
@@ -244,12 +240,14 @@ public class AttributeTreeDropItem extends DropItem{
 						if (selection != null && !selection.isEmpty()){
 							currentSelection = (AttributeTreeNode) ((IStructuredSelection) selection).getFirstElement();
 						}
-						if (currentSelection != null){
-							lblitem.setText(currentSelection.getName());
-						}else{
-							lblitem.setText("");
+						if (!lblitem.isDisposed()){
+							if (currentSelection != null){
+								lblitem.setText(currentSelection.getName());
+							}else{
+								lblitem.setText("");
+							}
 						}
-						AttributeTreeDropItem.this.targetPanel.orderElements();
+						AttributeTreeDropItem.this.targetPanel.layout();
 						AttributeTreeDropItem.this.queryChanged();
 					}});
 				
@@ -265,6 +263,37 @@ public class AttributeTreeDropItem extends DropItem{
 		
 		lblAttribute.setText(this.text + " = ");
 		loadItemsJobs.schedule();
+	}
+	
+	private TreeDropDownViewer getTreeEditor(){
+		if (this.targetPanel instanceof FilterDropTargetPanel){
+			((FilterDropTargetPanel)this.targetPanel).getTreeEditor();
+		}
+		return null;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
+	 */
+	@Override
+	public boolean isValueItem(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
+	 */
+	@Override
+	public boolean isFilterItem(){
+		return true;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 */
+	@Override
+	public boolean isGroupByItem(){
+		return false;
 	}
 
 }

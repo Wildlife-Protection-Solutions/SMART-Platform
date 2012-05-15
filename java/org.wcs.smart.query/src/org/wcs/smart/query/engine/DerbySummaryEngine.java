@@ -1,0 +1,546 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.engine;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.model.SummaryHeader;
+import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.query.model.SummaryQueryResult;
+import org.wcs.smart.query.model.SummaryResultKey;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
+import org.wcs.smart.query.parser.internal.summary.GroupByPart;
+import org.wcs.smart.query.parser.internal.summary.IGroupBy;
+import org.wcs.smart.query.parser.internal.summary.IValueItem;
+import org.wcs.smart.query.parser.internal.summary.PatrolGroupBy;
+import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.query.parser.internal.summary.ValuePart;
+import org.wcs.smart.util.SmartUtils;
+
+/**
+ * Query engine for executing summary
+ * queries.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class DerbySummaryEngine extends DerbyQueryEngine2{
+
+	private SummaryQueryResult sumResults = null;
+	
+	/**
+	 * Executes the given summary query.
+	 * 
+	 * @param query
+	 *            the query to execute
+	 * @param session
+	 *            open hibernate session
+	 * @param monitor
+	 *            progress monitor
+	 * 
+	 * @return the results of the query
+	 * @throws SQLException
+	 */
+	/*
+	 * The query execute process is as follows:
+	 * 
+	 * 1) If the query includes attributes then create a "cross join" table
+	 * of all observations and the required attributes. This table (observationTempTable)
+	 * looks as follows:
+	 * observation_uuid | attribute1 | attribute 2 | attribute 3 etc.
+	 * 
+	 * 2) A temporary table (queryTempTable) is created for holding all observations which
+	 * match the required filter.  This table contains all the patrol
+	 * to waypoint attributes and the observation id.  IT does 
+	 * not contain any of the matched attributes.
+	 * 
+	 * 3) For each patrol value to compute the results 
+	 * are commputed and added to the results.
+	 *  
+	 */
+	public SummaryQueryResult executeQuery(final SummaryQuery query,
+			final Session session, final IProgressMonitor monitor)
+			throws SQLException {
+
+		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
+		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
+
+		sumResults = new SummaryQueryResult();
+		
+		
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				monitor.beginTask("Running Query.", query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
+
+				try {
+					monitor.subTask("Loading header names");
+					getHeaderInfo(query, sumResults, session);
+					monitor.worked(1);
+					if (monitor.isCanceled()){
+						return;
+					}
+					
+					monitor.subTask("Creating observation table");
+					IFilter qFilter = query.getQueryDefinition().getQueryFilter();
+					if (qFilter == null){
+						qFilter = IFilter.EMPTY_FILTER;
+					}
+					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
+						createObservationTable(c, query.getQueryDefinition().getQueryFilter());
+					}
+					monitor.worked(1);
+					if (monitor.isCanceled()){
+						return;
+					}
+
+					monitor.subTask("Creating temporary table");
+					createTemporaryTable(c);
+					monitor.worked(1);
+					if (monitor.isCanceled()){
+						return;
+					}
+					
+					monitor.subTask("Populating results table");
+					populateTemporaryTable(qFilter, query.getDateFilter(), query.getConservationAreaFilterAsFilter(), false,c);
+					monitor.worked(1);
+					if (monitor.isCanceled()){
+						return;
+					}
+					
+					monitor.subTask("Processing Values");
+					List<IGroupBy> all = new ArrayList<IGroupBy>();
+					all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
+					all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
+					
+					sumResults.setData(
+							computeSummaryValues(c, session, 
+									new GroupByPart(all), 
+									query.getQueryDefinition().getValuePart(),
+									monitor));
+					
+					monitor.worked(1);
+				} finally {
+					// ensure temporary tables get dropped
+					dropTemporaryTables(c);
+					monitor.done();
+				}
+			}
+		});
+
+		return sumResults ;
+	}
+
+	/**
+	 * Compute the each value defined in the summary.
+	 * 
+	 * @param c database connection
+	 * @param s hibernate session
+	 * @param groupBy summary query gorup by part
+	 * @param values summary query values 
+	 * @param monitor progress monitor
+	 * @return map of results
+	 * @throws SQLException
+	 */
+	private HashMap<SummaryResultKey, Double> computeSummaryValues(Connection c,
+			Session s, 
+			GroupByPart groupBy, 
+			ValuePart values,
+			IProgressMonitor monitor) throws SQLException{
+	
+		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
+		for (IValueItem it : values.getValueItems()){
+			monitor.subTask("Processing Value: " + it.asString());
+			if (it instanceof PatrolValueItem){
+				results.putAll(getPatrolSummaryValue(c, s, groupBy, (PatrolValueItem)it));
+			}
+			monitor.worked(1);
+		}
+		return results;
+		
+	}
+	
+	/**
+	 * Computes a patrol summary value 
+	 * @param c database connection
+	 * @param s hibernate session 
+	 * @param groupBy query group by options
+	 * @param patrolItem patrol value to computer  
+	 * @return query results
+	 * @throws SQLException
+	 */
+	private HashMap<SummaryResultKey, Double> getPatrolSummaryValue(
+			Connection c, Session s, 
+			GroupByPart groupBy, 
+			PatrolValueItem patrolItem) throws SQLException{
+		
+		StringBuilder selectSql = new StringBuilder();
+		StringBuilder fromSql = new StringBuilder();
+		
+		fromSql.append(queryTempTable + " a ");
+		
+		String tmp = getNameByClass(patrolItem.getOption().getOptionClass()) ;
+		if (tmp != null){
+			selectSql.append(tmp + " as uniqueid");
+			selectSql.append(",");
+		}
+		
+		StringBuilder groupBySql = new StringBuilder();
+		StringBuilder groupByInnerSql = new StringBuilder();
+		
+		StringBuilder valueSql = new StringBuilder();
+		StringBuilder valueAggSql = new StringBuilder();
+
+		
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
+		
+		
+		valueSql.append(getFieldName(patrolItem));
+		valueAggSql.append(getAggFieldName(patrolItem));
+		
+		if (patrolItem.getOption().getOptionClass().equals(Track.class)){
+			fromSql.append(" left join ");
+			fromSql.append( "smart.track " + tablePrefix.get(Track.class) );
+			fromSql.append( " on a.pld_uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid " );
+		}
+		if (patrolItem.getOption() == PatrolValueOption.NUM_MEMBERS ||
+			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  ){
+			fromSql.append(" left join ");
+			fromSql.append( "smart.patrol_leg_members " + tablePrefix.get(PatrolLegMember.class) );
+			fromSql.append( " on a.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid " );
+		}
+		if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS ||
+			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS  ){
+			fromSql.append(" left join ");
+			fromSql.append( "smart.patrol_leg_day " + tablePrefix.get(PatrolLegDay.class));
+			fromSql.append( " on a.pld_uuid = " + tablePrefix.get(PatrolLegDay.class)+ ".uuid ");
+		}
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append(groupBySql);
+		if (groupBySql.length() > 0){
+			sql.append(",");
+		}
+		sql.append(valueAggSql);
+		sql.append(" FROM ( SELECT distinct ");
+		sql.append(selectSql);
+		sql.append(groupByInnerSql);
+		if (groupByInnerSql.length() > 0){
+			sql.append(",");
+		}
+		sql.append(valueSql);
+		sql.append(" FROM ");
+		sql.append(fromSql);
+		sql.append(") foo");
+		if (groupBySql.length() > 0){
+			sql.append(" GROUP BY " );
+			sql.append(groupBySql);
+		}
+		
+		//do something here with sql
+		QueryPlugIn.logSql(sql.toString());
+		
+		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
+
+		while(rs.next()){
+			String groupby[] = new String[groupBy.getGroupBys().size()];
+			
+			int rsindex = 1;
+			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
+				IGroupBy gb = groupBy.getGroupBys().get(i);
+				
+				String key = gb.asString() + ":";
+				switch (gb.getType()) {
+					case STRING:
+						key += rs.getString(rsindex++);
+						break;
+					case BYTE:
+						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
+						break;
+					case DATE:
+						key += rs.getDate(rsindex++).toString();
+				}
+				groupby[i] = key;
+			}
+			
+			SummaryResultKey key = new SummaryResultKey(patrolItem.asString(), groupby);
+			results.put(key, rs.getDouble(rsindex++));
+			
+		}
+		return results;
+	}
+
+	/**
+	 * Updates group by string builder string with
+	 * given group by part. 
+	 *  
+	 * @param groupBy
+	 * @param fromSql
+	 * @param groupBySql
+	 * @param groupByInnerSql
+	 */
+	private void createGroupBySql(GroupByPart groupBy,
+			StringBuilder fromSql,
+			StringBuilder groupBySql, 
+			StringBuilder groupByInnerSql) {
+		int itemcnt = 1;
+		for (IGroupBy gb : groupBy.getGroupBys()){
+			if (gb instanceof PatrolGroupBy){
+				String prefix = getTablePrefix((PatrolGroupBy) gb);
+				String name = getFieldName((PatrolGroupBy) gb);
+				if (prefix != null){
+					groupByInnerSql.append(prefix + ".");
+				}
+				groupByInnerSql.append(name + " as " + name + "_" + itemcnt);
+				groupBySql.append(name + "_" + itemcnt);
+				
+			}else if (gb instanceof DateGroupBy){
+				DateGroupByOption op = ((DateGroupBy)gb).getOption();
+				if (op == DateGroupByOption.DAY){
+					groupByInnerSql.append("pld_patrol_day as pld_patrol_day_" + itemcnt);
+					groupBySql.append("pld_patrol_day_" + itemcnt);
+				}else if (op == DateGroupByOption.MONTH){
+					groupBySql.append("datePart_" + itemcnt);
+					groupByInnerSql.append("trim(cast(month(pld_patrol_day) as char(2))) || '/' || cast(year(pld_patrol_day) as char(4)) as datePart_" + itemcnt);
+				}else if (op == DateGroupByOption.YEAR){
+					groupBySql.append("datePart_" + itemcnt);
+					groupByInnerSql.append("YEAR(pld_patrol_day) as datePart_" + itemcnt);
+				}
+			}else{
+				//throw new exception; should only be patrol group bys here for now
+			}
+			itemcnt++;
+			
+			groupBySql.append(",");
+			groupByInnerSql.append(",");
+			
+			if (gb instanceof PatrolGroupBy){
+				if (((PatrolGroupBy)gb).option == PatrolQueryOption.EMPLOYEE){
+					fromSql.append(" left join ");
+					fromSql.append(" smart.patrol_leg_members " + tablePrefix.get(PatrolLegMember.class));
+					fromSql.append(" on a.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid ");
+				}
+			}
+			
+		}
+		
+		if (groupBySql.length() > 0){
+			groupBySql.deleteCharAt(groupBySql.length() - 1);
+			groupByInnerSql.deleteCharAt(groupByInnerSql.length() - 1);
+		}
+	}
+	
+	
+	/**
+	 * Returns the column unique id based 
+	 * on the given class
+	 * @param clazz
+	 * @return
+	 */
+	private String getNameByClass(Class<?> clazz){
+		if (clazz.equals(Patrol.class)){
+			return "p_uuid";
+		}else if (clazz.equals(PatrolLeg.class)){
+			return "pl_uuid";
+		}else if (clazz.equals(PatrolLegDay.class) || clazz.equals(Track.class)){
+			return "pld_uuid";
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Converts a patrol value item to the column in the
+	 * temporary filter results table with associated
+	 * aggregation function.
+	 * 
+	 * @param item
+	 * @return
+	 */
+	private String getAggFieldName(PatrolValueItem item){
+		switch(item.getOption()){
+		case NUM_PATROLS:
+			return "count(p_uuid)";
+		case NUM_DAYS:
+			return " count(pld_patrol_day) ";
+		case NUM_NIGHTS:
+			return " sum( {fn timestampdiff(SQL_TSI_DAY, p_start_date,p_end_date)} ) ";
+		case DISTANCE:
+			return "sum(distance)";
+		case NUM_HOURS:
+			return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))";
+		case NUM_MEMBERS:
+			return "count(pl_member)";
+		case MAN_HOURS:
+			return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))";
+		}
+		assert false;
+		return "";
+	}
+	
+	private String getFieldName(PatrolValueItem item){
+		switch(item.getOption()){
+		case NUM_PATROLS:
+			return "p_uuid";
+		case NUM_DAYS:
+			return "pld_patrol_day";
+		case NUM_NIGHTS:
+			return "p_start_date,p_end_date";
+		case DISTANCE:
+			return tablePrefix.get(Track.class) + ".distance as distance";
+		case NUM_HOURS:
+			return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time," +
+			tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time";
+		case NUM_MEMBERS:
+			return tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member";
+		case MAN_HOURS:
+			return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time, " +
+			tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time, " +
+			tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member";
+		}
+		//TODO: should not get here
+		return null;
+	}
+	
+	
+	/**
+	 * Returns the patrol group by field from 
+	 * the temproary results table that contains
+	 * the given patrol group by item.
+	 * 
+	 * @param gb
+	 * @return
+	 */
+	private String getFieldName(PatrolGroupBy gb){
+		switch(gb.getOption()){
+		case ID:
+			return "p_id";
+		case STATION:
+			return "p_station_uuid";
+		case TEAM:
+			return "p_team_uuid";
+		case MANDATE:
+			return "p_mandate_uuid";
+		case PATROL_TYPE:
+			return "p_type";
+		case PATROL_TRANSPORT_TYPE:
+			return "pl_transport_uuid";
+		case LEADER:
+			return "plm_leader";
+		case EMPLOYEE:
+			return "employee_uuid";
+		}
+		assert false;
+		return "";
+	}
+	
+	/**
+	 * Table group item prefix from the query.
+	 * 
+	 * @param gb
+	 * @return
+	 */
+	private String getTablePrefix(PatrolGroupBy gb){
+		if (gb.getOption() == PatrolQueryOption.EMPLOYEE){
+			return tablePrefix.get(PatrolLegMember.class);
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Computes the header information for a given
+	 * query.
+	 * 
+	 * @param query the summary query
+	 * @param results the summary query results to update
+	 * @param session hibernate session
+	 */
+	public static void getHeaderInfo(SummaryQuery query, SummaryQueryResult results, Session session){
+		
+		// value headers
+		ValuePart vp = query.getQueryDefinition().getValuePart();
+		for (IValueItem item : vp.getValueItems()){
+			SummaryHeader header = new SummaryHeader(item.getName(session), item.asString(), true);
+			results.addValueHeader(header);
+		}
+		
+		for (IGroupBy item : query.getQueryDefinition().getRowGroupByPart().getGroupBys()){
+			if (item instanceof DateGroupBy){
+				((DateGroupBy) item).setDateFilter(query.getDateFilter());
+			}
+			List<ListItem> items = item.getItems(session);
+			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
+			for (int i = 0; i < items.size(); i ++){
+				ListItem it = items.get(i);
+				if (it.getUuid() != null){
+					rowHeader[i] = new SummaryHeader( it.getName(), item.asString(), SmartUtils.encodeHex( it.getUuid() ), false);
+				}else{
+					rowHeader[i] = new SummaryHeader( it.getName(), item.asString(), it.getKey(), false);
+				}
+				
+			}
+			results.addRowHeader(rowHeader);
+		}
+		
+		for (IGroupBy item : query.getQueryDefinition().getColumnGroupByPart().getGroupBys()){
+			if (item instanceof DateGroupBy){
+				((DateGroupBy) item).setDateFilter(query.getDateFilter());
+			}
+			List<ListItem> items = item.getItems(session);
+			SummaryHeader[] colHeader = new SummaryHeader[items.size()];
+			for (int i = 0; i < items.size(); i ++){
+				ListItem it = items.get(i);
+				if (it.getUuid() != null){
+					colHeader[i] = new SummaryHeader( it.getName(), item.asString(), SmartUtils.encodeHex( it.getUuid() ), false);
+				}else{
+					colHeader[i] = new SummaryHeader( it.getName(), item.asString(), it.getKey(), false);
+				}
+				
+			}
+			results.addColumnHeader(colHeader);
+		}
+		
+	}
+}

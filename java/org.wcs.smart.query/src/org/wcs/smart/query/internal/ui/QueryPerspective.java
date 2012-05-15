@@ -26,7 +26,7 @@ import net.refractions.udig.tool.info.internal.InfoView2;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
-import org.wcs.smart.query.ui.QueryDefView;
+import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querylist.QueryListView;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterView;
 

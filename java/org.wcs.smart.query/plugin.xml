@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.query.export.format" name="Query Export Format" schema="schema/org.wcs.smart.query.export.format.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view
             allowMultiple="false"
-            class="org.wcs.smart.query.ui.QueryDefView"
+            class="org.wcs.smart.query.ui.definition.QueryDefView"
             icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.ui.QueryDefView"
-            name="Smart Query Definition View"
+            name="Smart Query Definition"
             restorable="true">
       </view>
       <view
@@ -16,25 +17,32 @@
             class="org.wcs.smart.query.ui.queyfilter.QueryFilterView"
             icon="images/icons/view16/query_filter_op.png"
             id="org.wcs.smart.query.ui.QueryFilter"
-            name="Query Filter View"
+            name="Query Filter"
             restorable="false">
       </view>
       <view
             class="org.wcs.smart.query.ui.querylist.QueryListView"
             icon="images/icons/view16/query_list.png"
             id="org.wcs.smart.query.QueryListView"
-            name="QueryList"
+            name="Saved Queries"
             restorable="true">
       </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.query.ui.QueryResultsEditor"
+            class="org.wcs.smart.query.ui.waypoint.QueryResultsEditor"
             default="false"
             icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
-            name="Query Results">
+            name="Query Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.query.ui.summary.SummaryEditor"
+            default="false"
+            icon="images/icons/obj16/summary_table.png"
+            id="org.wcs.smart.query.ui.SummaryEditor"
+            name="Summary Editor">
       </editor>
    </extension>
    <extension
@@ -91,6 +99,23 @@
                   mnemonic="Q"
                   style="push"
                   tooltip="Create a new database query.">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.createSummary"
+                  icon="images/icons/etool16/addsummary.png"
+                  label="Create Summary"
+                  mnemonic="S"
+                  style="push"
+                  tooltip="Creates a new summary query">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -486,6 +511,10 @@
             id="org.wcs.smart.query.importQuery"
             name="Import Query">
       </command>
+      <command
+            id="org.wcs.smart.query.createSummary"
+            name="Create Summary Query">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -503,9 +532,14 @@
          <enabledWhen>
             <with
                   variable="activeEditorId">
-               <equals
-                     value="org.wcs.smart.query.ui.QueryResultsEditor">
-               </equals>
+               <or>
+                  <equals
+                        value="org.wcs.smart.query.ui.QueryResultsEditor">
+                  </equals>
+                  <equals
+                        value="org.wcs.smart.query.ui.SummaryEditor">
+                  </equals>
+               </or>
             </with>
          </enabledWhen>
       </handler>
@@ -522,9 +556,14 @@
                </with>
                <with
                      variable="activeEditorId">
-                  <equals
-                        value="org.wcs.smart.query.ui.QueryResultsEditor">
-                  </equals>
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.ui.QueryResultsEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.SummaryEditor">
+                     </equals>
+                  </or>
                </with>
             </and>
          </enabledWhen>
@@ -581,9 +620,14 @@
          <enabledWhen>
             <with
                   variable="activeEditorId">
-               <equals
-                     value="org.wcs.smart.query.ui.QueryResultsEditor">
-               </equals>
+               <or>
+                  <equals
+                        value="org.wcs.smart.query.ui.QueryResultsEditor">
+                  </equals>
+                  <equals
+                        value="org.wcs.smart.query.ui.SummaryEditor">
+                  </equals>
+               </or>
             </with>
          </enabledWhen>
       </handler>
@@ -593,9 +637,14 @@
          <enabledWhen>
             <with
                   variable="activeEditorId">
-               <equals
-                     value="org.wcs.smart.query.ui.QueryResultsEditor">
-               </equals>
+               <or>
+                  <equals
+                        value="org.wcs.smart.query.ui.QueryResultsEditor">
+                  </equals>
+                  <equals
+                        value="org.wcs.smart.query.ui.SummaryEditor">
+                  </equals>
+               </or>
             </with>
          </enabledWhen>
       </handler>
@@ -620,6 +669,10 @@
             class="org.wcs.smart.query.ui.qimport.ImportQueryHandler"
             commandId="org.wcs.smart.query.importQuery">
       </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateSummaryHandler"
+            commandId="org.wcs.smart.query.createSummary">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.services">
@@ -633,18 +686,25 @@
                name="org.wcs.smart.query.ui.queryvalid"
                priorityLevel="activePartId">
          </variable>
+         <variable
+               name="org.wcs.smart.query.ui.querybuildertype"
+               priorityLevel="activePartId">
+         </variable>
       </sourceProvider>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
+            class="org.wcs.smart.query.model.QueryFolder">
+      </class>
+      <class
             class="org.wcs.smart.query.model.Query">
       </class>
       <class
-            class="org.wcs.smart.query.model.WaypointQuery">
+            class="org.wcs.smart.query.model.waypoint.WaypointQuery">
       </class>
       <class
-            class="org.wcs.smart.query.model.QueryFolder">
+            class="org.wcs.smart.query.model.SummaryQuery">
       </class>
    </extension>
    <extension
@@ -663,6 +723,21 @@
             properties="isRootFolder"
             type="java.lang.Object">
       </propertyTester>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.query.export.ShapeQueryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.DefinitionQueryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.CsvWaypointQueryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.CsvSummaryExporter">
+      </Exporter>
    </extension>
 
 </plugin>

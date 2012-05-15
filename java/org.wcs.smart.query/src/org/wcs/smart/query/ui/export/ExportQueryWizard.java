@@ -23,7 +23,6 @@ package org.wcs.smart.query.ui.export;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -32,11 +31,10 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.export.QueryExporter;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.ui.querytable.QueryTableColumn;
+import org.wcs.smart.query.export.IQueryExporter;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Wizard for exporting query results.
@@ -45,9 +43,8 @@ import org.wcs.smart.query.ui.querytable.QueryTableColumn;
  */
 public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 
-	private List<QueryResultItem> data;
-	private QueryTableColumn[] columns;
-	private WaypointQuery query;
+	
+	private Query query;
 
 
 	private ExportQueryTypePage page1;
@@ -61,12 +58,11 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * @param columns the query columns to export
 	 * @param queryName the query name
 	 */
-	public ExportQueryWizard(List<QueryResultItem> data, 
-			QueryTableColumn[] columns, WaypointQuery query) {
+	public ExportQueryWizard(Query query) {
 		setWindowTitle("Export the current query.");
 		
-		this.data = data;
-		this.columns = columns;
+//		this.data = data;
+//		this.columns = columns;
 		this.query = query;
 	}
 
@@ -89,7 +85,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * @return the query exporter for the format selected
 	 * on the first query page.
 	 */
-	public QueryExporter getQueryExporter(){
+	public IQueryExporter getQueryExporter(){
 		return page1.getQueryExporter();
 	}
 	
@@ -99,6 +95,10 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	public String getQueryName(){
 		return this.query.getName();
+	}
+	
+	public Query getQuery(){
+		return this.query;
 	}
 	
 	/**
@@ -114,7 +114,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
-						QueryExporter exporter = getQueryExporter();
+						IQueryExporter exporter = getQueryExporter();
 						if (exporter == null){
 							hasError = true;
 							return;
@@ -127,11 +127,18 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 								return;
 							}
 						}
-						exporter.setData(data,  columns, outputFile, query);
-						if (!exporter.export(monitor)){
-							hasError = true;
+//						exporter.setData(data,  columns, outputFile, query);
+						exporter.export(query, outputFile, monitor);
+							
+						if (monitor.isCanceled()){
+							MessageDialog.openInformation(
+									Display.getDefault().getActiveShell(), "Export",
+									"Export cancelled.");
+						}else{
+							MessageDialog.openInformation(
+								Display.getDefault().getActiveShell(), "Export",
+								"Query results exported successfully.");
 						}
-						
 					} catch (Exception e) {
 						QueryPlugIn.displayLog(
 								"Export failed: " + e.getMessage(), e);

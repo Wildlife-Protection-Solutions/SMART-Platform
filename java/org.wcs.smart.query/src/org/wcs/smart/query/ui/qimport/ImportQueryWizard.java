@@ -44,13 +44,13 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.QueryHibernateManager;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.WaypointQuery;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
 import org.wcs.smart.query.qimport.QueryDefinitionImporter;
-import org.wcs.smart.query.ui.QueryResultsEditor;
+import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 import org.wcs.smart.util.SmartUtils;
 
 

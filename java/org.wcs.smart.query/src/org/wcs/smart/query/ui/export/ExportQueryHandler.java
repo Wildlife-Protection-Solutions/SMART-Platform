@@ -28,7 +28,7 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.query.ui.QueryResultsEditor;
+import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 
 /**
  * Handler for the export query button.
@@ -46,7 +46,7 @@ public class ExportQueryHandler extends AbstractHandler implements IHandler {
 		final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();		
 		if (editor instanceof QueryResultsEditor){
 			final QueryResultsEditor ed = (QueryResultsEditor)editor;
-			ExportQueryWizard wizard = new ExportQueryWizard(ed.getQuery().getLastResults(), ed.getQueryResultsTable().getColumns(), ed.getQuery());
+			ExportQueryWizard wizard = new ExportQueryWizard(ed.getQuery());
 			WizardDialog wd = new WizardDialog(editor.getSite().getShell(), wizard);
 			wd.open();
 		}

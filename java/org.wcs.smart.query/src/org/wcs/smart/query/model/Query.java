@@ -49,8 +49,29 @@ import org.wcs.smart.hibernate.SmartDB;
 
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class Query {
+public abstract class Query {
 	
+	//if you add another query type you must update
+	//the queryInput constructor
+	public enum QueryType{
+		OBSERVATION("WaypointQuery"),
+		SUMMARY("SummaryQuery");
+		
+		private String objectName;
+		
+		private QueryType(String objectName){
+			this.objectName = objectName;
+		}
+		
+		/**
+		 * The name of the java object
+		 * that represents this query type.
+		 * @return
+		 */
+		public String getObjectName(){
+			return this.objectName;
+		}
+	}
 	private byte[] uuid = null;
 	private String name = null;
 	private Employee owner = null;
@@ -122,7 +143,7 @@ public class Query {
 	/**
 	 * @return query owner
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="creator_uuid", referencedColumnName="uuid")
 	public Employee getOwner() {
 		return owner;
@@ -211,6 +232,9 @@ public class Query {
 			return false;
 		}
 		Query other = (Query) obj;
+		if (getUuid() == null && other.getUuid() == null){
+			return super.equals(obj);
+		}
 		if (!Arrays.equals(getUuid(), other.getUuid()))
 			return false;
 		return true;
@@ -231,4 +255,9 @@ public class Query {
 		this.isValid = isValid;
 	}
 	
+	/**
+	 * @return the type of query
+	 */
+	@Transient
+	public abstract QueryType getType();
 }

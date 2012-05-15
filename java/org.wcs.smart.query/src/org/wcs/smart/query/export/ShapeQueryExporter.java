@@ -21,11 +21,13 @@
  */
 package org.wcs.smart.query.export;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 
 import net.refractions.udig.catalog.URLUtils;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
@@ -34,7 +36,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryResultItemFeature;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
 
 /**
  * Shapefile query exporter.  Exports
@@ -43,10 +47,11 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class ShapeQueryExporter extends QueryExporter{
+public class ShapeQueryExporter extends WaypointQueryExporter implements IQueryExporter{
 
     private ShapefileDataStore shapefile = null;    
     private ArrayList<SimpleFeature> features = null;
+   
     /**
      * Creates new shapefile exporter
      */
@@ -56,7 +61,7 @@ public class ShapeQueryExporter extends QueryExporter{
 	/**
 	 * Creates a shapefile and initialises the schema.
 	 * 
-	 * @see org.wcs.smart.query.export.QueryExporter#init()
+	 * @see org.wcs.smart.query.export.WaypointQueryExporter#init()
 	 */
 	@Override
 	protected void init() throws Exception {
@@ -68,7 +73,7 @@ public class ShapeQueryExporter extends QueryExporter{
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.export.WaypointQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
 	protected void writeRow(QueryResultItem row) throws Exception {
@@ -76,7 +81,7 @@ public class ShapeQueryExporter extends QueryExporter{
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#finish()
+	 * @see org.wcs.smart.query.export.WaypointQueryExporter#finish()
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -86,28 +91,35 @@ public class ShapeQueryExporter extends QueryExporter{
 		shapefile.dispose();
 		
 	}
-	
-	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#getName()
-	 */
 	@Override
 	public String getName() {
 		return "Shapefile";
 	}
 
-	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#getDefaultExtension()
-	 */
 	@Override
 	public String getDefaultExtension() {
 		return "shp";
 	}
-	
-	/**
-	 * @see org.wcs.smart.query.export.QueryExporter#writeResults()
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
-	protected boolean writeResults() {
-		return true;
-	}	
+	public boolean canExport(Query query) {
+		if (query instanceof WaypointQuery){
+			return true;
+		}
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	@Override
+	public void export(Query query, File file, IProgressMonitor monitor)
+			throws Exception {
+		WaypointQuery q = ((WaypointQuery)query);
+		super.setData(q.getLastResults(), q.getQueryColumns(), file);
+		super.export(monitor);
+		
+	}
+		
 }

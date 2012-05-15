@@ -32,8 +32,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.query.parser.internal.PatrolFilter;
-import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -55,7 +54,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			new RootNode(RootNodeType.DATA_MODEL_FILTERS), 
 			new RootNode(RootNodeType.OTHER_ITEMS)};
 	
-	private PatrolFilter.PatrolFilterOption[] patrolOptions = null;
+	private PatrolQueryOption[] patrolOptions = null;
 	
 	/**
 	 * Data model children items
@@ -133,7 +132,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 		}else{
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
-			patrolOptions = (PatrolFilterOption[]) in.get(RootNodeType.PATROL_FILTERS);		
+			patrolOptions = (PatrolQueryOption[]) in.get(RootNodeType.PATROL_FILTERS);		
 			provider.inputChanged(viewer, oldInput, this.dataModel);	
 		}
 	}
@@ -153,7 +152,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof RootNode){
 			return ((RootNode)parentElement).getChildren();
-		}else if (parentElement instanceof PatrolFilter.PatrolFilterOption){
+		}else if (parentElement instanceof PatrolQueryOption){
 			return null;
 		//}else if (parentElement instanceof AREA FITLER){
 		}else if (parentElement instanceof DataModelItem){
@@ -185,7 +184,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	public Object getParent(Object element) {
 		if (element instanceof RootNode){
 			return null;
-		}else if (element instanceof PatrolFilter.PatrolFilterOption){
+		}else if (element instanceof PatrolQueryOption){
 			return roots[0];
 		//}else if (parentElement instanceof AREA FITLER){
 		}else if (element instanceof OtherItems){
@@ -205,7 +204,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	public boolean hasChildren(Object element) {
 		if (element instanceof RootNode){
 			return true;
-		}else if (element instanceof PatrolFilter.PatrolFilterOption){
+		}else if (element instanceof PatrolQueryOption){
 			return false;
 		}else if (element instanceof DataModelItem){
 			return true;

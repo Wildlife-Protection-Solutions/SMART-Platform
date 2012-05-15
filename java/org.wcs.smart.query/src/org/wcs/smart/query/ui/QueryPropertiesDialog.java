@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.query.ui;
 
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -47,8 +47,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.ui.querytable.QueryTableColumn;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
 
 /**
  * Dialog box for modifying query information.  This includes the query
@@ -59,11 +60,9 @@ import org.wcs.smart.query.ui.querytable.QueryTableColumn;
  */
 public class QueryPropertiesDialog extends TitleAreaDialog {
 
-	private WaypointQuery query;
+	private Query query;
 	private CheckboxTableViewer columnViewer;
 	private Text txtName;
-	
-	private QueryTableColumn[] allColumns;
 	
 
 	/**
@@ -71,11 +70,10 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	 * @param query the query to update
 	 * @param allCollumns all columns available to the query
 	 */
-	protected QueryPropertiesDialog(Shell parent, WaypointQuery query,
-			QueryTableColumn[] allCollumns) {
+	public QueryPropertiesDialog(Shell parent, 
+			Query query) {
 		super(parent);
 		this.query = query;
-		this.allColumns = allCollumns;
 	}
 	
 	
@@ -137,6 +135,20 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			}
 		});
 		
+		Label lblOwner = new Label(main, SWT.NONE);
+		lblOwner.setText("Creator:");
+		Label lblOwnerName = new Label(main, SWT.NONE);
+		lblOwnerName.setText(query.getOwner().getLabel());
+		
+		if (query instanceof WaypointQuery){
+			createWaypointQueryOptions(main);	
+		}
+		
+		return main;
+	}
+
+
+	private void createWaypointQueryOptions(Composite main) {
 		Label lblTableColumns = new Label(main, SWT.NONE);
 		lblTableColumns.setText("Output Columns:");
 		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -172,9 +184,6 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 				setChangesMade(true);
 			}
 		});
-		
-		
-		return main;
 	}
 
 	/**
@@ -188,11 +197,13 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			query.setName(txtName.getText());
 		}
 		
-		HashSet<String> columns = new HashSet<String> ();
-		for (int i = 0; i < columnViewer.getCheckedElements().length; i ++){
-			columns.add( ((QueryTableColumn)columnViewer.getCheckedElements()[i]  ).getKey()  );
+		if (query instanceof WaypointQuery){
+			List<WaypointQueryColumn> cols = ((WaypointQuery)query).getQueryColumns();
+			for (WaypointQueryColumn col : cols){
+				col.setVisible( columnViewer.getChecked(col) );
+			}
+			((WaypointQuery) query).updateVisibleColumns();
 		}
-		query.setVisibleColumns(columns);
 		setChangesMade(false);
 		return true;
 	}
@@ -206,13 +217,15 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		columnViewer.setContentProvider(ArrayContentProvider.getInstance());
 		columnViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
-				if (element instanceof QueryTableColumn){
-					return ((QueryTableColumn)element).getName();
+				if (element instanceof WaypointQueryColumn){
+					return ((WaypointQueryColumn)element).getName();
 				}
 				return super.getText(element);
 			}
 		});
-		columnViewer.setInput(allColumns);
+		
+		List<WaypointQueryColumn> cols = ((WaypointQuery)query).getQueryColumns();
+		columnViewer.setInput(cols.toArray());
 		columnViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -220,15 +233,10 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			}
 		});
 		
+
 		
-		if (query.getVisibleColumns() == null){
-			columnViewer.setAllChecked(true);
-		}else{
-			for (int i = 0; i < allColumns.length; i ++){
-				if (query.getVisibleColumns().contains(allColumns[i].getKey())){
-					columnViewer.setChecked(allColumns[i], true);
-				}
-			}
+		for (WaypointQueryColumn col : cols){
+			columnViewer.setChecked(col, col.isVisible());
 		}
 		
 		columnViewer.getTable().addKeyListener(new KeyListener(){

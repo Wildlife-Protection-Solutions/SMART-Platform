@@ -27,7 +27,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.WaypointQuery;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
 
 /**
  * A query engine for executing

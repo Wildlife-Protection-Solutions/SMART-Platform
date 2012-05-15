@@ -38,12 +38,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.parser.internal.Operator;
-import org.wcs.smart.query.parser.internal.PatrolFilter.PatrolFilterOption;
+import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.internal.filter.Operator;
 
 /**
  * Patrol id drop item. This consists of a list of 
@@ -70,15 +69,11 @@ public class PatrolIdDropItem  extends DropItem{
 	 * job to load all patrol ids
 	 */
 	private Job loadPIdJob = new Job("Loading Patrol Ids"){
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
 			try{
-				String hql = "Select id FROM Patrol WHERE conservationArea = :ca";
-				Query q = s.createQuery(hql);
-				q.setParameter("ca", SmartDB.getCurrentConservationArea());
-				final List<String> data = q.list();
+				final List<String> data = QueryHibernateManager.getPatrolIds(s);
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
@@ -100,12 +95,11 @@ public class PatrolIdDropItem  extends DropItem{
 	 * @param target drop panel target
 	 * @param PatrolFilterOption id patrol filter option
 	 */
-	public PatrolIdDropItem(PatrolFilterOption option) {
+	public PatrolIdDropItem(PatrolQueryOption option) {
 		//super(parent, target);
-		assert option == PatrolFilterOption.ID;
-		
+		assert option == PatrolQueryOption.ID;
 		this.text = option.getGuiName();
-		this.key = "patrol:" + option.getKeyPart();
+		this.key = "patrol:" + option.getKey();
 	}
 
 	/**
@@ -225,5 +219,27 @@ public class PatrolIdDropItem  extends DropItem{
 		this.currentValue = ((String[])data)[1];
 		
 	}
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
+	 */
+	@Override
+	public boolean isValueItem(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
+	 */
+	@Override
+	public boolean isFilterItem(){
+		return true;
+	}
 
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 */
+	@Override
+	public boolean isGroupByItem(){
+		return false;
+	}
 }

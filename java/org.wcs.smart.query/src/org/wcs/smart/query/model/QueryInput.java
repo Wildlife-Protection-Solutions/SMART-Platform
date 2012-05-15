@@ -28,40 +28,89 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * A query input for query editors. 
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class QueryInput implements IEditorInput {
-
 	
 	private byte[] uuid = null;
 	private String queryName = null;
 	private String id = null;
 	private boolean isShared;
+	private Query.QueryType type;
 	
-	public QueryInput(){
+	/**
+	 * Creates a new query input.
+	 * 
+	 * @param type the query type
+	 */
+	public QueryInput(Query.QueryType type){
+		this.type = type;
 	}
 	
+	/**
+	 * Creates a new query input based on the query.
+	 * 
+	 * @param query the query
+	 */
 	public QueryInput(Query query){
-		this(query.getUuid(), query.getName(), query.getId(), query.getIsShared());
+		this(query.getUuid(), query.getName(), query.getId(), query
+				.getIsShared(), query instanceof WaypointQuery ? Query.QueryType.OBSERVATION : query instanceof SummaryQuery ? Query.QueryType.SUMMARY : null);
 	}
 	
-	public QueryInput(byte[] uuid, String queryName, String id, boolean isShared){
+	/**
+	 * Creates a new query input based on the waypoint
+	 * query.
+	 * 
+	 * @param query the waypoint query
+	 */
+	public QueryInput(WaypointQuery query){
+		this(query.getUuid(), query.getName(), query.getId(), query.getIsShared(), Query.QueryType.OBSERVATION);
+	}
+	
+	/**
+	 * Creates a new query input based on the summary
+	 * query.
+	 * 
+	 * @param query the summary query
+	 */
+	public QueryInput(SummaryQuery query){
+		this(query.getUuid(), query.getName(), query.getId(), query.getIsShared(), Query.QueryType.SUMMARY);
+	}
+	
+	/**
+	 * Creates a new query input
+	 * @param uuid the query uuid
+	 * @param queryName the query name
+	 * @param id the query id
+	 * @param isShared if the query is shared or not
+	 * @param type the type of query
+	 */
+	public QueryInput(byte[] uuid, 
+			String queryName, 
+			String id, 
+			boolean isShared,
+			Query.QueryType type){
 		this.uuid = uuid;
 		this.queryName = queryName;
 		this.id = id;
 		this.isShared = isShared;
+		this.type = type;
 	}
 	
-	
+	/**
+	 * @return the query type
+	 */
+	public QueryType getType(){
+		return this.type;
+	}
+
 	/**
 	 * @return <code>true</code> if the query is shared <code>false</code> otherwise
 	 */
@@ -174,6 +223,11 @@ public class QueryInput implements IEditorInput {
 		return Arrays.hashCode(uuid);
 	}
 
+	/**
+	 * Two inputs are equals if they have the same uuid;
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

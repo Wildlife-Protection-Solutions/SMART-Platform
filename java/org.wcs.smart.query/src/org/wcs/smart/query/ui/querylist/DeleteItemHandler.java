@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
+import java.util.Iterator;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -56,19 +58,20 @@ public class DeleteItemHandler extends AbstractHandler {
 			return null;
 		}
 		
-		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
-		
+		IStructuredSelection selection = (IStructuredSelection)thisSelection;
 		QueryListViewContentProvider contentProvider = ((QueryListView)HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID)).getQueryListContentProvider();
 		
-		
-		if (o instanceof QueryFolder){
-			deleteFolder((QueryFolder)o, contentProvider);
-		}else if (o instanceof Query){
-			deleteQuery((Query)o, event);
-		}else if (o instanceof QueryInput){
-			deleteQuery((QueryInput)o, event);
+		for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+			Object o = (Object) iterator.next();
+			
+			if (o instanceof QueryFolder){
+				deleteFolder((QueryFolder)o, contentProvider);
+			}else if (o instanceof Query){
+				deleteQuery((Query)o, event);
+			}else if (o instanceof QueryInput){
+				deleteQuery((QueryInput)o, event);
+			}	
 		}
-		
 		return null;
 	}
 
@@ -85,13 +88,20 @@ public class DeleteItemHandler extends AbstractHandler {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			org.hibernate.Query q = s.createQuery("DELETE from WaypointQuery where uuid = :uuid");
+			org.hibernate.Query q = s.createQuery("DELETE from " + o.getType().getObjectName() + " WHERE uuid = :uuid");
 			q.setParameter("uuid", o.getUuid());
-			q.executeUpdate();
-			s.getTransaction().commit();
+			int deleted = q.executeUpdate();
+			if (deleted != 1){
+				QueryPlugIn.log("Could not delete query: '" + o.getName() + "'.  Nothing removed from database.", null);
+				s.getTransaction().rollback();
+				return;
+			}else{
+				s.getTransaction().commit();
+			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			QueryPlugIn.log("Could not delete query: '" + o.getName() + "'", ex);
+			return;
 		}finally{
 			s.close();
 		}
@@ -131,7 +141,6 @@ public class DeleteItemHandler extends AbstractHandler {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			
 			if (parent == null){
 				s.delete(folder);
 			}else{

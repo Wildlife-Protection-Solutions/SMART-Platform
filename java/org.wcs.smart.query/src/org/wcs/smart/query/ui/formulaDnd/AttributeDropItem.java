@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.query.parser.internal.Operator;
+import org.wcs.smart.query.parser.internal.filter.Operator;
 
 /**
  * Aattribute drop item for numeric, text, and boolean attributes.
@@ -74,6 +74,8 @@ public class AttributeDropItem extends DropItem{
 			this.key = "category:" + att.getCategory().getHkey() + ":attribute:n:" + att.getAttribute().getKeyId();
 		}else if (att.getAttribute().getType() == AttributeType.TEXT){
 			this.key = "category:" + att.getCategory().getHkey() + ":attribute:s:" + att.getAttribute().getKeyId();			
+		}else if (att.getAttribute().getType() == AttributeType.BOOLEAN){
+			this.key = "category:" + att.getCategory().getHkey() + ":attribute:b:" + att.getAttribute().getKeyId();
 		}
 	}
 	
@@ -92,16 +94,26 @@ public class AttributeDropItem extends DropItem{
 			this.key = "attribute:n:" + att.getKeyId();
 		}else if (att.getType() == AttributeType.TEXT){
 			this.key = "attribute:s:" + att.getKeyId();
+		}else if (att.getType() == AttributeType.BOOLEAN){
+			this.key = "attribute:b:" + att.getKeyId();
 		}
 	}
 	
 	/**
+	 * For String or Numberic Attribute:<br>
+	 * data is a string array of length two where the first 
+	 * value represents the operator and second the associated value
+	 * 
+	 * For Boolean Attributes:<b>
+	 * data should be null
 	 * @param data - a string array of the operator and value
 	 */
 	public void initializeData(Object data){
-		String[] d = (String[]) data;
-		this.currentOp = d[0];
-		this.currentValue = d[1];
+		if (data != null){
+			String[] d = (String[]) data;
+			this.currentOp = d[0];
+			this.currentValue = d[1];
+		}
 	}
 
 	/**
@@ -109,7 +121,12 @@ public class AttributeDropItem extends DropItem{
 	 */
 	@Override
 	public String getText() {
-		return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " " ;//+ value.getText() ;
+		if (operators != null){
+			return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " " ;//+ value.getText() ;
+		}else{
+			return this.text;
+		}
+		
 	}
 
 	/**
@@ -133,6 +150,8 @@ public class AttributeDropItem extends DropItem{
 			querypart.append(" \"");
 			querypart.append(value.getText());
 			querypart.append("\"");
+		}else if (type == AttributeType.BOOLEAN){
+			querypart.append(this.key);
 		}
 		return querypart.toString();
 	}
@@ -161,67 +180,95 @@ public class AttributeDropItem extends DropItem{
 		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		
 		lblAttribute = new Label(main, SWT.NONE);
-		operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
-		operators.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (currentOp != null && currentOp.equals(operators.getText())){
-					//no change
-				}else{
-					currentOp = operators.getText();
-					queryChanged();
+		if (type == AttributeType.TEXT || type == AttributeType.NUMERIC) {
+			operators = new Combo(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+			operators.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					if (currentOp != null
+							&& currentOp.equals(operators.getText())) {
+						// no change
+					} else {
+						currentOp = operators.getText();
+						queryChanged();
+					}
 				}
-			}
-		});
-		FontData fd = (operators.getFont().getFontData()[0]);
-		fd.setHeight(fd.getHeight() - 1);
-		smallerFont = new Font(Display.getCurrent(), fd);
-		operators.setFont(smallerFont);
-		
-		value = new Text(main, SWT.BORDER);
-		value.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (currentValue != null && currentValue.equals(value.getText())){
-					//nothing changed
-				}else{
-					queryChanged();
-					value.setToolTipText(value.getText());
-					currentValue = value.getText();
+			});
+			FontData fd = (operators.getFont().getFontData()[0]);
+			fd.setHeight(fd.getHeight() - 1);
+			smallerFont = new Font(Display.getCurrent(), fd);
+			operators.setFont(smallerFont);
+
+			value = new Text(main, SWT.BORDER);
+			value.addModifyListener(new ModifyListener() {
+
+				@Override
+				public void modifyText(ModifyEvent e) {
+					if (currentValue != null
+							&& currentValue.equals(value.getText())) {
+						// nothing changed
+					} else {
+						queryChanged();
+						value.setToolTipText(value.getText());
+						currentValue = value.getText();
+					}
 				}
+			});
+			GridData gd = new GridData();
+			gd.minimumWidth = 50;
+			gd.widthHint = 100;
+			value.setLayoutData(gd);
+
+			Operator[] options = null;
+			if (type == AttributeType.NUMERIC) {
+				options = Operator.NUMERIC_OPS;
+			} else if (type == AttributeType.TEXT) {
+				options = Operator.STRING_OPS;
 			}
-		});
-		GridData gd = new GridData();
-		gd.minimumWidth = 50;
-		gd.widthHint = 100;
-		value.setLayoutData(gd);
+			if (options != null) {
+				int index = 0;
+				for (int i = 0; i < options.length; i++) {
+					operators.add(options[i].asString());
+					if (currentOp != null
+							&& currentOp.equals(options[i].asString())) {
+						index = i;
+					}
+				}
+				operators.select(index);
+			}
+		}
 		
 		initDrag(main);
 		initDrag(lblAttribute);
 		
 		lblAttribute.setText(this.text);
-		
-		Operator[] options = null;
-		if (type == AttributeType.NUMERIC){
-			options = Operator.NUMERIC_OPS;
-		}else if (type == AttributeType.TEXT){
-			options = Operator.STRING_OPS;
-		}
-		if (options != null){
-			int index = 0;
-			for (int i = 0; i < options.length; i ++){
-				operators.add(options[i].asString());
-				if (currentOp != null && currentOp.equals( options[i].asString() )){
-					index = i;
-				}
-			}
-			operators.select(index);
-		}
-		
 		if (currentValue != null){
 			value.setText(currentValue);
 		}
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
+	 */
+	@Override
+	public boolean isValueItem(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
+	 */
+	@Override
+	public boolean isFilterItem(){
+		return true;
+	}
+
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 */
+	@Override
+	public boolean isGroupByItem(){
+		return false;
 	}
 
 }
