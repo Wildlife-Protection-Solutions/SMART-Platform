@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
 
@@ -102,7 +103,15 @@ public class TeamComposite extends PatrolItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	public void setValues(Patrol p, Session session) {
-		List<? extends Object> teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);		
+		List<? extends Object> teams = null;
+		session.beginTransaction();
+		try{
+			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
+			session.getTransaction().rollback();
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Could not load teams.", ex);
+			session.close();
+		}
 		
 		String none = "(None)";
 		List<Object> stns = new ArrayList<Object>();

@@ -52,6 +52,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolDateLegsDialog;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -283,8 +284,16 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			this.legs.add(tmpLeg);
 		}
 		
-		typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session, this.patrol.getPatrolType()); 
-		allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);		
+		session.beginTransaction();
+		try{
+			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session, this.patrol.getPatrolType()); 
+			allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);
+			session.getTransaction().rollback();
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
+			session.getTransaction().rollback();
+			session.close();
+		}
 		patrolLegViewer.setInput(legs);
 		
 		this.patrolStartDate = (Date)patrol.getStartDate().clone();

@@ -59,6 +59,7 @@ import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -115,7 +116,17 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		super(Display.getCurrent().getActiveShell(), "Patrol Teams");
 		
 		/* get mandates */
-		List<PatrolMandate> ms = PatrolHibernateManager.getActiveMandates(ca, getSession());
+		getSession().beginTransaction();
+		List<PatrolMandate> ms =  null;
+		try{
+			ms = PatrolHibernateManager.getActiveMandates(ca, getSession());
+			getSession().getTransaction().rollback();
+		}catch (Exception ex){
+			getSession().getTransaction().rollback();
+			getSession().close();
+			SmartPatrolPlugIn.displayLog("Could not load patrol mandates.", ex);
+			return;
+		}
 		ms.add(0, null);
 		mandates = ms.toArray(new PatrolMandate[ms.size()]);
 
@@ -144,7 +155,14 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		
-		teams = new WritableList(PatrolHibernateManager.getTeams(ca, getSession()), Team.class);
+		getSession().beginTransaction();
+		try{
+			teams = new WritableList(PatrolHibernateManager.getTeams(ca, getSession()), Team.class);
+			getSession().getTransaction().rollback();
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Error loading patrol teams.", ex);
+			getSession().close();
+		}
 		
 		
 		Composite container = new Composite(parent, SWT.NONE);

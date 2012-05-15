@@ -90,23 +90,14 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of stations
 	 */
 	private static List<Team> getTeams(ConservationArea ca, Session s, boolean onlyActive){
-		s.beginTransaction();
 		List<Team> list = null;
-		try{
-			Criteria query = s.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca));
-			if (onlyActive){
-				query.add(Restrictions.eq("isActive", true));
-			}
-			list = query.list();
-			s.getTransaction().rollback();
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol mandates.", ex);
-			s.close();
+		Criteria query = s.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca));
+		if (onlyActive){
+			query.add(Restrictions.eq("isActive", true));
 		}
+		list = query.list();
 		return list;
-		
 	}
-	
 	
 	
 	/**
@@ -139,21 +130,13 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return
 	 */
 	private static List<PatrolMandate> getMandates(ConservationArea ca, Session s, boolean onlyActive){
-		s.beginTransaction();
 		List<PatrolMandate> list = null;
-		try{
-			Criteria query = s.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca));
-			if (onlyActive){
-				query.add(Restrictions.eq("isActive", true));
-			}
-			list = query.list();
-			s.getTransaction().rollback();
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol mandates.", ex);
-			s.close();
+		Criteria query = s.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca));
+		if (onlyActive){
+			query.add(Restrictions.eq("isActive", true));
 		}
+		list = query.list();
 		return list;
-		
 	}
 	
 	/**
@@ -221,17 +204,11 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of active transportation types for the given patrol type
 	 */
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
-		s.beginTransaction();
 		List<PatrolTransportType> types = null;
-		try{
-			types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
-			s.getTransaction().rollback();
-			return types;
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
-			s.close();
-		}
-		return null;
+		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
+		s.getTransaction().rollback();
+		return types;
+		
 	}
 	
 	/**
@@ -244,22 +221,14 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of active transportation types for the given patrol type
 	 */
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s){
-		s.beginTransaction();
 		List<PatrolTransportType> types = null;
-		try{
-			String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix
-			Query q = s.createQuery(query);
-			q.setParameter("ca", ca);
-			q.setParameter("ca2", ca);
-			types = q.list();
-//			types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
-			s.getTransaction().commit();
-			return types;
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
-			s.close();
-		}
-		return null;
+		String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix
+		Query q = s.createQuery(query);
+		q.setParameter("ca", ca);
+		q.setParameter("ca2", ca);
+		types = q.list();
+//		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
+		return types;
 	}
 	
 	/**
@@ -272,22 +241,19 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of transportation types for the given patrol type
 	 */
 	public static List<PatrolTransportType> getPatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
-		s.beginTransaction();
 		List<PatrolTransportType> types = null;
-		try{
-			types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).list();
-			s.getTransaction().commit();
-			return types;
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
-			s.close();
-		}
-		return null;
+		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).list();
+		s.getTransaction().commit();
+		return types;
 	}
 	
 	/**
 	 * Gets all patrol types (active and in-active)
 	 * for a given conservation area.
+	 * <p>If types are not initialized
+	 * this initializes the types. As a result
+	 * this occurs within a transaction and cannot be wrapped within
+	 * another transaction</p>
 	 * 
 	 * @param ca conservation area
 	 * @param s active session
@@ -299,14 +265,16 @@ public class PatrolHibernateManager extends HibernateManager{
 	
 	/**
 	 * Gets active patrol types for a given
-	 * conservation area.
+	 * conservation area.  Will return none, if not yet created.
 	 * 
 	 * @param ca conservation area
 	 * @param s active session
 	 * @return list of active patrol types
 	 */
 	public static List<PatrolType> getActivePatrolTypes(ConservationArea ca, Session s){
-		return getPatrolTypes(ca, s, true);
+		Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca));
+		query.add(Restrictions.eq("isActive", true));
+		return query.list();
 	}
 
 	/**

@@ -151,7 +151,11 @@ public class XmlToPatrolConverter {
 			throw new Exception("Patrol transportation type " + xml.getTransportType().getValue() + " [" + xml.getTransportType().getLanguageCode() + "] could not be found.  Please ensure this transportation type exists.");
 		}
 		boolean found = false;
+		
+		session.beginTransaction();
 		List<PatrolTransportType> types =  PatrolHibernateManager.getPatrolTransporationTypes(ca, session, patrol.getPatrolType());
+		session.getTransaction().rollback();
+		
 		for (PatrolTransportType t: types){
 			if (t.equals(ttype)){
 				found = true;
