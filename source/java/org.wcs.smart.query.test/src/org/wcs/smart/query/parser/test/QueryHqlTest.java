@@ -28,8 +28,8 @@ import java.util.List;
 import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.parser.internal.IFilter;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
 /**

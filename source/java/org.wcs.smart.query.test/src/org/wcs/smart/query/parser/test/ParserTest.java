@@ -26,8 +26,8 @@ import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.parser.internal.IFilter;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.ParseException;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
@@ -39,7 +39,6 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
  */
 public class ParserTest {
 
-	
 	@Test
 	public void testCategory() throws Exception{
 		
@@ -347,7 +346,7 @@ public class ParserTest {
 	private IFilter parseQuery(String query) throws Exception{
 		InputStream is = new ByteArrayInputStream(query.getBytes());
 		Parser parser = new Parser(is);		
-		IFilter myQuery = parser.Expression();
+		IFilter myQuery = parser.QueryFilter();
 		is.close();
 		return myQuery;
 	}
