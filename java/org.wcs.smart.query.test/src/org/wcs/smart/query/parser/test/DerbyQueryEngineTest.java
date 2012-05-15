@@ -32,9 +32,9 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.WaypointQuery;
-import org.wcs.smart.query.parser.internal.ConservationAreaFilter;
-import org.wcs.smart.query.parser.internal.IFilter;
+import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
 /**
