@@ -21,14 +21,10 @@
  */
 package org.wcs.smart.ca.datamodel;
 
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Data model value attribute aggregation options 

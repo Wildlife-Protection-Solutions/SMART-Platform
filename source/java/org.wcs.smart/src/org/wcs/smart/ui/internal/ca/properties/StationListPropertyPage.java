@@ -141,9 +141,10 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		
-		
+		getSession().beginTransaction();
 		stations = new WritableList(HibernateManager.getStations(ca,
 				getSession()), Station.class);
+		getSession().getTransaction().rollback();
 
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));

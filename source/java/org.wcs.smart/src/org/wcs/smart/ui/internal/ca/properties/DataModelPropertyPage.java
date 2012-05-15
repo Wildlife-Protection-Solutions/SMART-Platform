@@ -449,6 +449,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			parentCat.getChildren().add(newCat);
 			viewer.setExpandedState(parentCat, true);
 		}
+		newCat.updateHkey();
 		
 		refreshTree();
 		setChangesMade(true);
