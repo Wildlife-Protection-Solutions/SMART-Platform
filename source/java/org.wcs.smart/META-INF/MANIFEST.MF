@@ -22,8 +22,7 @@ Require-Bundle: org.eclipse.ui,
  net.refractions.udig.tool.info;bundle-version="1.2.3";visibility:=reexport
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: .,
- swing2swt.jar
+Bundle-ClassPath: .
 Export-Package: org.eclipse.wb.swt,
  org.wcs.smart,
  org.wcs.smart.ca,
@@ -40,7 +39,6 @@ Export-Package: org.eclipse.wb.swt,
  org.wcs.smart.udig.catalog.smart.ui,
  org.wcs.smart.ui.map,
  org.wcs.smart.ui.properties,
- org.wcs.smart.util,
- swing2swt.layout
+ org.wcs.smart.util
 Eclipse-BuddyPolicy: global
 
