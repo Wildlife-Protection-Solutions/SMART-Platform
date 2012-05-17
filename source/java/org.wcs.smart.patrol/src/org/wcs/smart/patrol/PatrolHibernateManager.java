@@ -206,7 +206,6 @@ public class PatrolHibernateManager extends HibernateManager{
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
 		List<PatrolTransportType> types = null;
 		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
-		s.getTransaction().rollback();
 		return types;
 		
 	}
