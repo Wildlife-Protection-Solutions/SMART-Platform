@@ -77,30 +77,30 @@ public class ObjectiveComposite extends PatrolItemComposite{
 				fireChangeListeners();
 			}
 		});
-		lbl = new Label(center, SWT.NONE);
-		lbl.setText("Objective Achieved Rating:");
-		lbl.setToolTipText("Identify how well the objective was met on a rating scale");
-		
-		Composite scale = new Composite(center, SWT.NONE);
-		scale.setLayout(new GridLayout(3, false));
-		lbl = new Label(scale, SWT.NONE);
-		lbl.setText("Low");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		objectiveMet = new Scale(scale, SWT.HORIZONTAL);
-		objectiveMet.setMinimum(1);
-		objectiveMet.setMaximum(5);
-		objectiveMet.setPageIncrement(1);
-		objectiveMet.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				fireChangeListeners();
-			}
-		});
-		
-		objectiveMet.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		lbl = new Label(scale, SWT.NONE);
-		lbl.setText("High");
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+//		lbl = new Label(center, SWT.NONE);
+//		lbl.setText("Objective Achieved Rating:");
+//		lbl.setToolTipText("Identify how well the objective was met on a rating scale");
+//		
+//		Composite scale = new Composite(center, SWT.NONE);
+//		scale.setLayout(new GridLayout(3, false));
+//		lbl = new Label(scale, SWT.NONE);
+//		lbl.setText("Low");
+//		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+//		objectiveMet = new Scale(scale, SWT.HORIZONTAL);
+//		objectiveMet.setMinimum(1);
+//		objectiveMet.setMaximum(5);
+//		objectiveMet.setPageIncrement(1);
+//		objectiveMet.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				fireChangeListeners();
+//			}
+//		});
+//		
+//		objectiveMet.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+//		lbl = new Label(scale, SWT.NONE);
+//		lbl.setText("High");
+//		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		return main;
 	}
 
@@ -111,9 +111,9 @@ public class ObjectiveComposite extends PatrolItemComposite{
     	if (p.getObjective() != null){
     		txtObjective.setText(p.getObjective());
     	}
-    	if (p.getObjectiveRating() != null){
-    		objectiveMet.setSelection(p.getObjectiveRating());
-    	}
+//    	if (p.getObjectiveRating() != null){
+//    		objectiveMet.setSelection(p.getObjectiveRating());
+//    	}
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class ObjectiveComposite extends PatrolItemComposite{
 	 */
 	public boolean updatePatrol(Patrol p) {
 		p.setObjective(txtObjective.getText());
-		p.setObjectiveRating(objectiveMet.getSelection());
+//		p.setObjectiveRating(objectiveMet.getSelection());
 		return true;
 	}
 
