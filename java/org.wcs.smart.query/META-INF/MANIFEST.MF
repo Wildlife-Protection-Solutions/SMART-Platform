@@ -40,8 +40,6 @@ Export-Package: .,
  org.wcs.smart.query.ui.queyfilter,
  org.wcs.smart.query.ui.summary,
  org.wcs.smart.query.xml,
- org.wcs.smart.query.xml.model,
- swing2swt.layout
+ org.wcs.smart.query.xml.model
 Bundle-ClassPath: lib/opencsv-2.3.jar,
- .,
- swing2swt.jar
+ .
