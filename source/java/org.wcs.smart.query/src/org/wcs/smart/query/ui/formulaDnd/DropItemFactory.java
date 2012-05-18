@@ -184,7 +184,37 @@ public class DropItemFactory {
 		return new DateGroupByDropItem(item);
 	}
 	
-	
+	/**
+	 * Creates a new value drop item that represents an datamodel
+	 * attribute.
+	 * 
+	 * @param attribute
+	 * @return
+	 */
+	public DropItem createAttributeValueDropItem(Attribute attribute){
+		return new AttributeValueDropItem(attribute);
+	}
 
+	/**
+	 * Creates a new value drop item that represents an datamodel
+	 * attribute and associated category.
+	 * 
+	 * @param catAtt
+	 * @return
+	 */
+	public DropItem createAttributeValueDropItem(CategoryAttribute catAtt){
+		return new AttributeValueDropItem(catAtt);
+	}
 	
+	/**
+	 * Creates a new category value drop item that represents
+	 * the total number of observations of the given
+	 * category.
+	 * 
+	 * @param category
+	 * @return
+	 */
+	public DropItem createCategoryValueDropItem(Category category){
+		return new CategoryValueDropItem(category);
+	}	
 }

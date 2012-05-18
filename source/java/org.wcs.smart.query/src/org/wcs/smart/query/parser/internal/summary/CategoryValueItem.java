@@ -22,8 +22,19 @@
 package org.wcs.smart.query.parser.internal.summary;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
+/**
+ * A category value item that represents computing
+ * the total number of observations with the given
+ * category.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
 public class CategoryValueItem implements IValueItem {
 
 
@@ -38,33 +49,54 @@ public class CategoryValueItem implements IValueItem {
 		return new CategoryValueItem(key);
 	}
 	
-	public String key;
-	
+	private String key;
 	private String categoryHkey;
 	
+	/**
+	 * Creates a new category value item.
+	 * 
+	 * @param key category value key
+	 */
 	public CategoryValueItem(String key){
 		this.key = key;
-		
 		this.categoryHkey = key.split(":")[2];
-		
 	}
 	
+	/**
+	 * @return the category hkey
+	 */
+	public String getCategoryHKey(){
+		return this.categoryHkey;
+	}
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asString()
+	 */
 	public String asString(){
 		return this.key;
 	}
 
 	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
+	 */
 	public String getName(Session session){
-		//TODO: need to find the category name from the database
-		return this.key;
+		Category c = QueryHibernateManager.getCategory(session, categoryHkey);
+		if (c == null){
+			return this.key;
+		}
+		return "Count " +  c.getName();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
-		// TODO Auto-generated method stub
+		Category category = QueryHibernateManager.getCategory(session, categoryHkey);
+		if (category != null){
+			return DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
+		}
 		return null;
+		
 	}
 }

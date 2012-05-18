@@ -78,7 +78,7 @@ public class WaypointQuery extends Query{
 	 */
 	public WaypointQuery(){
 		super();
-		
+		setName("<No Name Query>");
 		caFilter = new ConservationAreaFilter();
 		if (SmartDB.getCurrentConservationArea() != null){
 			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());

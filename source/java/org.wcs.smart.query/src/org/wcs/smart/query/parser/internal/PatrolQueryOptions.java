@@ -28,6 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.measure.unit.BaseUnit;
+import javax.measure.unit.Unit;
+
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
@@ -105,10 +108,11 @@ public class PatrolQueryOptions {
 		NUM_PATROLS("Number of Patrols", "numpatrols", Patrol.class),
 		NUM_DAYS("Number of Days", "numdays", Patrol.class),
 		NUM_NIGHTS("Number of Nights", "numnights", Patrol.class),
-		DISTANCE("Distance", "distance", Track.class),
+		DISTANCE("Distance (km)", "distance", Track.class),
 		NUM_HOURS("Number of Hours", "numhours", PatrolLegDay.class),
 		NUM_MEMBERS("Number of Employees", "nummembers", PatrolLegMember.class),
-		MAN_HOURS("Person - Hours", "manhours", PatrolLegDay.class);
+		MAN_HOURS("Person - Hours", "manhours", PatrolLegDay.class),
+		MAN_DAYS("Person - Days", "mandays", PatrolLegDay.class);
 		
 		String key;		//unique key
 		String guiName; //display name

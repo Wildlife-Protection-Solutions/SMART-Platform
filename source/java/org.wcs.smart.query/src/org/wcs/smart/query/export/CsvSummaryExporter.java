@@ -22,10 +22,16 @@
 package org.wcs.smart.query.export;
 
 import java.io.File;
+import java.io.FileWriter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.query.model.SummaryQueryResult;
+import org.wcs.smart.util.SmartUtils;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * CSV Summary Exporter for exporting the
@@ -36,10 +42,18 @@ import org.wcs.smart.query.model.Query.QueryType;
  */
 public class CsvSummaryExporter implements IQueryExporter {
 
+	/**
+	 * 
+	 */
 	public CsvSummaryExporter() {
 	}
 
 
+	/**
+	 * Can only export summary queries
+	 * 
+	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
+	 */
 	@Override
 	public boolean canExport(Query query) {
 		if (query.getType() == QueryType.SUMMARY){
@@ -48,13 +62,69 @@ public class CsvSummaryExporter implements IQueryExporter {
 		return false;
 	}
 
+	/**
+	 * Makes use of the sumQuery.getLastResults() so the summary
+	 * query must be run before it can be exported.  
+	 * <p>
+	 * This is to ensure that the date filter has been set.
+	 * </p>
+	 * 
+	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
+	 */
 	@Override
-	public void export(Query query, File f, IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
+	public void export(Query query, File outputFile, IProgressMonitor monitor) throws Exception {
+		SummaryQuery sumQuery = (SummaryQuery)query;
+		SummaryQueryResult results = sumQuery.getLastResults();
+		if (results == null){
+			throw new Exception("You must run the query before you can export the results.");
+		}
+		
+		//column headers
+		CSVWriter writer = new CSVWriter(new FileWriter(outputFile), ',', '"',SmartUtils.LINE_SEPARATOR);
+		for (int i = 0; i < results.getColumnHeaders().size(); i ++){
+			String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
+		
+			for (int j = 0; j < results.getRowHeaders().size(); j ++){
+				data[j] = "";
+			}
+			for (int k = 0; k < results.getColumnHeaderValues()[i].length; k ++){
+				data[k + results.getRowHeaders().size()]= results.getColumnHeaderValues()[i][k].getName();
+			}
+			
+			writer.writeNext(data);
+		}
+		
+		//value headers
+		String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
+		for (int j = 0; j < results.getRowHeaders().size(); j ++){
+			data[j] = "";
+		}
+		for (int k = 0; k < results.getValueHeaders().size(); k ++){
+			data[k + results.getRowHeaders().size()]= results.getValueHeaders().get(k).getName();
+		}	
+		writer.writeNext(data);
+	
+		//row headers & data
+		for (int i = 0; i < results.getNumDataRows(); i ++){
+			data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
+			for (int j = 0; j < results.getRowHeaders().size(); j++){
+				data[j] = results.getRowHeaderValues()[i][j].getName();
+			}
+			for(int k = 0; k < results.getData()[i].length; k ++){
+				if (results.getData()[i][k] == null){
+					data[results.getRowHeaders().size() + k] = null;
+				}else{
+					data[results.getRowHeaders().size() + k] = String.valueOf(results.getData()[i][k]);
+				}
+			}
+			writer.writeNext(data);
+		}
+		
+		writer.close();
 
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.export.IQueryExporter#getName()
 	 */
 	@Override
@@ -62,12 +132,12 @@ public class CsvSummaryExporter implements IQueryExporter {
 		return "Comma Separated Values";
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.export.IQueryExporter#getDefaultExtension()
 	 */
 	@Override
 	public String getDefaultExtension() {
-		return "*.csv";
+		return "csv";
 	}
 
 }

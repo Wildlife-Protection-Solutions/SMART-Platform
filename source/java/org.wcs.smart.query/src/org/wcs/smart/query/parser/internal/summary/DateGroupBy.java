@@ -28,11 +28,14 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
+import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FILTER_OP;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
@@ -114,12 +117,21 @@ public class DateGroupBy implements IGroupBy {
 		if (df == null){
 			//TODO: fail
 		}else{
-			Date d[] = df.getDates();
-			
-			if (d.length >= 1){
-				startdate = d[0];
-			}else if (d.length >=2){
-				enddate = d[1];
+			if (df.getDateFilterOption() == DATE_FILTER_OP.ALL){
+				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca";
+				Query q = session.createQuery(hql);
+				q.setParameter("ca", SmartDB.getCurrentConservationArea());
+				List data = q.list();
+				if (data != null && data.size() >= 1 && data.get(0) != null){
+					startdate = (java.sql.Timestamp)data.get(0);
+				}
+			}else{
+				Date[] d = df.getDates();
+				if (d.length >= 1){
+					startdate = d[0];
+				}else if (d.length >=2){
+					enddate = d[1];
+				}
 			}
 		}
 		Calendar cals = GregorianCalendar.getInstance();

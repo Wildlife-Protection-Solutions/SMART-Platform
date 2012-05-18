@@ -49,8 +49,8 @@ import org.wcs.smart.query.ui.QueryPropertiesDialog;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**
- * A class that manages the tabular query editor
- * results page.
+ * A class that manages a table that display 
+ * the tabular results of a waypoint query.
  * 
  * 
  * @author Emily

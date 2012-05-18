@@ -72,6 +72,8 @@ public class SummaryQuery extends Query {
 	private List<DropItem> valueDropItems;
 	@Transient
 	private List<DropItem> filterDropItems;
+	@Transient
+	private SummaryQueryResult lastResults;
 	
 	/**
 	 * Creates a new waypoint query with the default
@@ -79,7 +81,7 @@ public class SummaryQuery extends Query {
 	 */
 	public SummaryQuery(){
 		super();
-		
+		setName("<No Name Summary>");
 		caFilter = new ConservationAreaFilter();
 		if (SmartDB.getCurrentConservationArea() != null){
 			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
@@ -195,6 +197,15 @@ public class SummaryQuery extends Query {
 	public String getQuery(){
 		return this.strQuery;
 	}
+
+	/**
+	 * 
+	 * @return Results from last query run
+	 */
+	@Transient
+	public SummaryQueryResult getLastResults(){
+		return this.lastResults;
+	}
 	
 	/**
 	 * Executes the query and returns the results
@@ -204,15 +215,18 @@ public class SummaryQuery extends Query {
 	 */
 	@Transient
 	public SummaryQueryResult getQueryResults(IProgressMonitor monitor) throws Exception{
-		
+		lastResults = null;
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
 			DerbySummaryEngine engine = new DerbySummaryEngine();
-			return engine.executeQuery(this, session, monitor);
+			lastResults = engine.executeQuery(this, session, monitor);
+			return lastResults;
 		}finally{
-			session.getTransaction().rollback();
-			session.close();
+			if (session.isOpen()){
+				session.getTransaction().rollback();
+				session.close();
+			}
 		}
 	}
 	

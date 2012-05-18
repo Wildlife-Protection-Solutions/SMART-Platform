@@ -84,8 +84,7 @@ public abstract class Query {
 	
 	
 	public Query(){
-
-		name = "<No Name Query>";
+		name = "<No Name >";
 		conservationArea = SmartDB.getCurrentConservationArea();
 		owner =  SmartDB.getCurrentEmployee();
 		ownerFolder = null;

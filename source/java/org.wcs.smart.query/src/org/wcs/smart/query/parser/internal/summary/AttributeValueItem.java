@@ -21,54 +21,157 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
-import org.hibernate.Session;
-import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import java.util.List;
 
+import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Aggregation;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+
+/**
+ * Creates a new value item that represents
+ * a numeric attribute or a 
+ * numeric attribute and it's associated category.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
 public class AttributeValueItem implements IValueItem {
 
 	/**
-	 * Creates a new category value item of the form
+	 * Creates a new attribute value item of the form
 	 * < ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < ATTRIBUTE_KEY >
 	 * 
 	 * @param key
 	 * @return
 	 */
-	public static AttributeValueItem createItem(String key){
-		return new AttributeValueItem(key);
+	public static AttributeValueItem createAttributeItem(String key){
+		return new AttributeValueItem(key, false);
+	}
+	
+	/**
+	 * Creates a new attribute value item with cateogry filter of the
+	 * form:
+	 * |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":attribute:n:" < AGG > ":" < DM_KEY > >
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static AttributeValueItem createCategoryAttributeItem(String key){
+		return new AttributeValueItem(key, true);
 	}
 	
 	public String key;
+	private String categoryKey = null;
 	private String attributeKey = null;;
-	private String aggregation = null;
+	private String aggregationKey = null;
+	private Aggregation aggregation = null;
 	
-	public AttributeValueItem(String key){
+	/**
+	 * Creates a new value item from the given key.
+	 * @param key key
+	 * @param includeCategory if the key includes a category
+	 */
+	public AttributeValueItem(String key, boolean includeCategory){
 		this.key = key;
-		String[] bits = key.split(":");
-		
-		if(!bits[1].equals("n")){
-			assert false;
+		if (includeCategory){
+			String[] bits = key.split(":");
+			if(!bits[3].equals("n")){
+				throw new IllegalStateException("Cannot create attribute value items from non-numeric attributes");
+			}
+			this.categoryKey = bits[1];
+			this.attributeKey = bits[5];
+			this.aggregationKey = bits[4];
+		}else{
+			String[] bits = key.split(":");
+			if(!bits[1].equals("n")){
+				throw new IllegalStateException("Cannot create attribute value items from non-numeric attributes");
+			}
+			this.attributeKey = bits[3];
+			this.aggregationKey = bits[2];
 		}
-		
-		this.attributeKey = bits[3];
-		this.aggregation = bits[2];
-		
 	}
 	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asString()
+	 */
 	public String asString(){
 		return this.key;
 	}
 
+	/**
+	 * @return the attribute key that makes up the value item
+	 */
+	public String getAttributeKey(){
+		return this.attributeKey;
+	}
+	
+	/**
+	 * @return the category key that makes up the item or
+	 * null if no category for this item
+	 * 
+	 */
+	public String getCategoryKey(){
+		return this.categoryKey;
+	}
+	
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
+	 */
 	public String getName(Session session){
-		//TODO: need to find the category name from the database
-		return this.key;
+		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		
+		if (att == null){
+			return "";
+		}
+		StringBuilder name = new StringBuilder();
+		name.append(getAggregation().getGuiName());
+		name.append(" ");
+		name.append(att.getName());
+		
+		if (categoryKey != null){
+			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
+			if (cat != null){
+				name.append( " (" + cat.getName() + ")");
+			}else{
+				name.append(" (not found) ");
+			}
+		}
+		return name.toString();
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * @return attribute aggregation 
+	 */
+	public Aggregation getAggregation() {
+		if (aggregation == null) {
+			List<Aggregation> aggs = DataModel.getAggregations();
+			for (Aggregation agg : aggs) {
+				if (agg.getName().equals(aggregationKey)) {
+					aggregation = agg;
+					break;
+				}
+			}
+		}
+		return this.aggregation;
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
-		//TODO
-		return null;
+		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		if (categoryKey == null){
+			return DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+		}
+		Category cat = QueryHibernateManager.getCategory(session, categoryKey);
+		return DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
 	}
 }

@@ -68,15 +68,8 @@ public class AttributeDropItem extends DropItem{
 	public AttributeDropItem(CategoryAttribute att) {
 		//super(parent, target);
 		this.type = att.getAttribute().getType();
-		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
-		
-		if (att.getAttribute().getType() == AttributeType.NUMERIC){
-			this.key = "category:" + att.getCategory().getHkey() + ":attribute:n:" + att.getAttribute().getKeyId();
-		}else if (att.getAttribute().getType() == AttributeType.TEXT){
-			this.key = "category:" + att.getCategory().getHkey() + ":attribute:s:" + att.getAttribute().getKeyId();			
-		}else if (att.getAttribute().getType() == AttributeType.BOOLEAN){
-			this.key = "category:" + att.getCategory().getHkey() + ":attribute:b:" + att.getAttribute().getKeyId();
-		}
+		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";		
+		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().queryKey +":" + att.getAttribute().getKeyId();
 	}
 	
 	/**
@@ -90,13 +83,7 @@ public class AttributeDropItem extends DropItem{
 		//super(parent, target);
 		this.type = att.getType();
 		this.text = att.getName();
-		if (att.getType() == AttributeType.NUMERIC){
-			this.key = "attribute:n:" + att.getKeyId();
-		}else if (att.getType() == AttributeType.TEXT){
-			this.key = "attribute:s:" + att.getKeyId();
-		}else if (att.getType() == AttributeType.BOOLEAN){
-			this.key = "attribute:b:" + att.getKeyId();
-		}
+		this.key = "attribute:" + att.getType().queryKey + ":" + att.getKeyId();
 	}
 	
 	/**
