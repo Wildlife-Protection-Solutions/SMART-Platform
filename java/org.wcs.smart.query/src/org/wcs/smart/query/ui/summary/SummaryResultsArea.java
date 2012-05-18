@@ -102,7 +102,7 @@ public class SummaryResultsArea extends Composite{
 		Composite main = toolkit.createComposite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		
-		runQueryLink = toolkit.createHyperlink(main, "Run Query...", SWT.NONE);
+		runQueryLink = toolkit.createHyperlink(main, "Run Summary...", SWT.NONE);
 		runQueryLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {

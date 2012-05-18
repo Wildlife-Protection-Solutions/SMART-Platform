@@ -73,10 +73,11 @@ TOKEN :
 {
 	 /*< VALUE_ITEM : ( < PATROL_VALUE_ITEM > | < DM_VALUE_ITEM > ) >*/
     < PATROL_VALUE_ITEM : ( "patrol:" < AGG > ":" < PATROL_VALUE_KEY > ) >
-|  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "distance" | "numhours" | "nummembers" | "manhours" ) >
+|  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "distance" | "numhours" | "nummembers" | "manhours" | "mandays") >
 /*|    < DM_VALUE_ITEM : ( < CAT_VALUE_KEY > | < ATTRIBUTE_VALUE_KEY > ) >*/
-|    < CAT_VALUE_KEY : "category:sum:" < DM_KEY > >
-|    < ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
+|    < SUM_CAT_VALUE_KEY : "category:sum:" < DM_KEY > >
+|    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
+|    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":attribute:n:" < AGG > ":" < DM_KEY > >
 |    < AGG  : ("sum" | "avg" | "min" | "max" ) >
 /*|    < GROUPBY_FILTER : < GROUPBY_ITEM > ("," < GROUPBY_ITEM >)*  >*/
 //|    < GROUPBY_ITEM : ( < PATROL_GROUPBY_ITEM > | < DM_GROUPBY_ITEM > | < DATE_GROUPBY_ITEM > ) >
@@ -157,12 +158,17 @@ IValueItem ValueItem() :
 			item = PatrolValueItem.createItem( token.image );
 		}
 	| 
-		< CAT_VALUE_KEY >		{			item = CategoryValueItem.createItem( token.image );
+		< SUM_CAT_VALUE_KEY >		{			item = CategoryValueItem.createItem( token.image );
 		}
 	| 
-		< ATTRIBUTE_VALUE_KEY >
+		< SUM_ATTRIBUTE_VALUE_KEY >
 		{
-			item = AttributeValueItem.createItem( token.image );
+			item = AttributeValueItem.createAttributeItem( token.image );
+		}
+	| 
+		< SUM_CAT_ATT_VALUE_KEY >
+		{
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		}
 	)
 	{

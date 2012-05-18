@@ -529,7 +529,7 @@ public class SummaryEditor extends EditorPart {
 		dateFilterComposite.adapt(toolkit);
 		dateFilterComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, "query properties...",SWT.NONE);
+		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, "summary properties...",SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		editQueryProp.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -554,7 +554,8 @@ public class SummaryEditor extends EditorPart {
 
 	private void createNameHeader(Composite main) {
 		compQueryName = new QueryHeaderComposite(main, "Summary:", 
-				toolkit, frmSummaryArea.getFont(), frmSummaryArea.getForeground());
+				toolkit, frmSummaryArea.getFont(), 
+				frmSummaryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compQueryName.addListener(SWT.Selection, new Listener(){
 

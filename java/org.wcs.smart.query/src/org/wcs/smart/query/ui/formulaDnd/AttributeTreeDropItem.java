@@ -112,16 +112,9 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	public AttributeTreeDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + " and attribute:t:" + att.getAttribute().getKeyId();
+		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().queryKey + ":" + att.getAttribute().getKeyId();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
 		this.attribute = att.getAttribute();
-	}
-	
-	/**
-	 * @param data - an attribute list item
-	 */
-	public void initializeData(Object data){
-		currentSelection = (AttributeTreeNode) data;
 	}
 	
 	/**
@@ -132,11 +125,19 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	public AttributeTreeDropItem(Attribute att) {
 		//super(parent, panel);
-		this.key = "attribute:t:" + att.getKeyId();
+		this.key = "attribute:" + att.getType().queryKey + ":" + att.getKeyId();
 		this.text = att.getName() ;
 		this.attribute = att;
 	}
+
 	
+	/**
+	 * @param data - an attribute list item
+	 */
+	public void initializeData(Object data){
+		currentSelection = (AttributeTreeNode) data;
+	}
+
 	/**
 	 * @see org.eclipse.swt.widgets.Widget#dispose()
 	 */
@@ -267,7 +268,7 @@ public class AttributeTreeDropItem extends DropItem{
 	
 	private TreeDropDownViewer getTreeEditor(){
 		if (this.targetPanel instanceof FilterDropTargetPanel){
-			((FilterDropTargetPanel)this.targetPanel).getTreeEditor();
+			return ((FilterDropTargetPanel)this.targetPanel).getTreeEditor();
 		}
 		return null;
 	}

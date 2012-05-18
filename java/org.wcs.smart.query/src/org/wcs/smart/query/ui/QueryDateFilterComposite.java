@@ -199,10 +199,8 @@ public class QueryDateFilterComposite extends Composite {
 	 */
 	public DateFilter getDateFilter(){
 		DATE_FILTER_OP filter = (DATE_FILTER_OP)  ((IStructuredSelection)cmbFilterOptions.getSelection()).iterator().next();
-		if (filter == DATE_FILTER_OP.ALL){
-			return null;
-		}
 		DATE_FIELD_OP field = (DATE_FIELD_OP) ((IStructuredSelection)cmbDateField.getSelection()).iterator().next();
+		
 		if (filter == DATE_FILTER_OP.CUSTOM){
 			java.sql.Date start = new java.sql.Date(SmartUtils.getDate(dtStart).getTime());
 			java.sql.Date end = new java.sql.Date(SmartUtils.getDate(dtEnd).getTime());

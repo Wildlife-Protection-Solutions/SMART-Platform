@@ -128,7 +128,7 @@ public class BooleanExpression implements IFilter{
 		
 		DropItem[] its1 = e1.getDropItems(session);
 		DropItem opDropItem = DropItemFactory.INSTANCE.createBooleanOpDropItem();
-		opDropItem.initializeData(op.getGuiValue());
+		opDropItem.initializeData(op.asSql());
 		DropItem[] its2 = e2.getDropItems(session);
 		
 		DropItem[] results = new DropItem[its1.length + its2.length + 1];

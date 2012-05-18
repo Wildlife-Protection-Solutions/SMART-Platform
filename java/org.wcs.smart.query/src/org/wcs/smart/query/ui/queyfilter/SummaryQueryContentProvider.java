@@ -1,15 +1,22 @@
 package org.wcs.smart.query.ui.queyfilter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
@@ -35,7 +42,15 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	private Object dateGroupByNode = new RootNode(NodeType.PATROL_DATE_GROUPBYS);
 	
 	private Object[] roots = new Object[]{patrolItemNode, dataModelItemNode};
-	private Object[] patrolRoots = new Object[]{patrolValueNode,patrolGroupByNode};
+	private Object[] patrolRoots = new Object[]{patrolGroupByNode,patrolValueNode};
+	
+	
+	//datamodel nodes
+	private RootNode dataModelValueNode = new RootNode(NodeType.DATAMODEL_VALUES);
+	private RootNode dataModelGroupByNode = new RootNode(NodeType.DATAMODEL_GROUPBYS);
+	
+	private RootNode dataModelValueCategory = new RootNode(NodeType.DATAMODEL_VALUE_CATEGORY);
+	private RootNode dataModelValueAttribute = new RootNode(NodeType.DATAMODEL_VALUE_ATTRIBUTES);
 	
 	private PatrolValueOption[] patrolValueOptions = null;
 	private PatrolQueryOption[] patrolGroupByOption = null;
@@ -65,7 +80,11 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		DATA_MODEL_ITEM("Data Model"),
 		PATROL_VALUES("Values"),
 		PATROL_GROUPBYS("Group Bys"),
-		PATROL_DATE_GROUPBYS("Date");
+		PATROL_DATE_GROUPBYS("Date"),
+		DATAMODEL_VALUES("Values"),
+		DATAMODEL_GROUPBYS("Group Bys"),
+		DATAMODEL_VALUE_CATEGORY("Categories & Attribute"),
+		DATAMODEL_VALUE_ATTRIBUTES("Attributes");
 		
 		private String name;
 		
@@ -149,11 +168,44 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				
 			}
 			return null;
-		}else{
+		}else if (parentElement instanceof SummaryDmObject){			
+			Object[] kids = provider.getChildren(  ((SummaryDmObject)parentElement).getObject() );
+			if (kids == null){ return null; }
+			Object[] results = new Object[kids.length];
+			boolean isValue = ((SummaryDmObject)parentElement).isValue();
+			int cnt = 0;
+			for (int i = 0; i < kids.length; i ++){
+				boolean add = false;
+				if (isValue){
+					if (kids[i] instanceof Attribute){
+						if (( (Attribute)kids[i]).getType() == AttributeType.NUMERIC){
+							add = true;
+						}
+					}else if (kids[i] instanceof CategoryAttribute){
+						if (( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.NUMERIC){
+							add = true;
+						}
+					}else if (kids[i] instanceof Category){
+						add = true;
+					}
+				}else{
+					if (kids[i] instanceof Category){
+						add = true;
+					}
+				}
+				if (add){
+					results[cnt++] = new SummaryDmObject(kids[i], isValue);
+				}
+			}
 			//assume data model
-			return provider.getChildren(parentElement);
+			if (cnt == 0){
+				return null;
+			}else{
+				return Arrays.copyOf(results, cnt);
+			}
 			
 		}
+		return null;
 	}
 
 	/**
@@ -181,10 +233,13 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		//}else if (parentElement instanceof AREA FITLER){
 		}else if (element instanceof DataModelItem){
 			return dataModelItemNode;
-		}else{
+		}else if (element instanceof SummaryDmObject){
 			//assume data model
-			return provider.getParent(element);	
+			return provider.getParent( ((SummaryDmObject)element).getObject() );	
+		}else{
+			return provider.getParent(element);
 		}
+
 	}
 
 	/**
@@ -201,6 +256,13 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		}else if (element instanceof DataModelItem){
 			return false;
 		//}else if (parentElement instanceof AREA FITLER){
+		}else if (element instanceof SummaryDmObject){
+			Object[] kids = getChildren(element);
+			if (kids == null || kids.length == 0){
+				return false;
+			}
+			return true;
+			//return provider.hasChildren(((SummaryDmObject) element).getObject());
 		}else{
 			//assume data model
 			return provider.hasChildren(element);
@@ -239,9 +301,38 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				kids[kids.length-1] = dateGroupByNode;
 				return kids;
 			}else if (type == NodeType.DATA_MODEL_ITEM){				
-
+				return new Object[]{dataModelGroupByNode, dataModelValueNode};
 			}else if (type == NodeType.PATROL_DATE_GROUPBYS){
 				return dateGroupByOptions;
+			}else if (type == NodeType.DATAMODEL_VALUES){
+				return new Object[]{dataModelValueCategory, dataModelValueAttribute};
+			}else if (type == NodeType.DATAMODEL_VALUE_CATEGORY){
+				Object[] kids = provider.getChildren(provider.getElements(null)[0]);
+				Object[] results = new Object[kids.length];
+				for (int i = 0; i < kids.length; i ++){
+					results[i] = new SummaryDmObject((DmObject)kids[i], true);
+				}
+				//assume data model
+				return results;
+			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
+				Set<Attribute> atts = dataModel.getAttributes();
+				Object[] results = new Object[atts.size()];
+				int cnt = 0;
+				for (Attribute att: atts){
+					if (att.getType() == AttributeType.NUMERIC){
+						results[cnt++] = new SummaryDmObject(att, true);
+					}
+				}
+				return Arrays.copyOf(results, cnt);
+				
+			}else if (type == NodeType.DATAMODEL_GROUPBYS){
+//				Object[] kids = provider.getChildren(provider.getElements(null)[0]);
+//				Object[] results = new Object[kids.length];
+//				for (int i = 0; i < kids.length; i ++){
+//					results[i] = new SummaryDmObject((DmObject)results[i], false);
+//				}
+//				//assume data model
+//				return results;
 			}
 			return null;
 		}
@@ -263,10 +354,16 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				 return JFaceResources.getImageRegistry().get(DataModelLabelProvider.DATA_MODEL_ICON);
 			}else if (type == NodeType.PATROL_DATE_GROUPBYS){
 				return JFaceResources.getImageRegistry().get(QueryPlugIn.CALENDAR_ICON);
-			}else if (type == NodeType.PATROL_GROUPBYS){
+			}else if (type == NodeType.PATROL_GROUPBYS ||
+					type == NodeType.DATAMODEL_GROUPBYS){
 				return JFaceResources.getImageRegistry().get(QueryPlugIn.GROUPBY_ICON);
-			}else if (type == NodeType.PATROL_VALUES){
+			}else if (type == NodeType.PATROL_VALUES ||
+					type == NodeType.DATAMODEL_VALUES){
 				return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON);
+			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
+				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.ATTRIBUTE_NUMBER_ICON);
+			}else if (type == NodeType.DATAMODEL_VALUE_CATEGORY){
+				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.CATEGORY_ICON);
 			}
 			return null;
 		}

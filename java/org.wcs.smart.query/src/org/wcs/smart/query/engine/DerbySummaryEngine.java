@@ -31,11 +31,15 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.model.WaypointObservation;
+import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.SummaryHeader;
@@ -46,6 +50,8 @@ import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
+import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;
 import org.wcs.smart.query.parser.internal.summary.IGroupBy;
@@ -192,6 +198,10 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			monitor.subTask("Processing Value: " + it.asString());
 			if (it instanceof PatrolValueItem){
 				results.putAll(getPatrolSummaryValue(c, s, groupBy, (PatrolValueItem)it));
+			}else if (it instanceof AttributeValueItem){
+				results.putAll(getAttributeValue(c, s, groupBy, (AttributeValueItem)it));
+			}else if (it instanceof CategoryValueItem){
+				results.putAll(getCategoryValue(c, s, groupBy, (CategoryValueItem)it));
 			}
 			monitor.worked(1);
 		}
@@ -243,13 +253,15 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			fromSql.append( " on a.pld_uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid " );
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_MEMBERS ||
-			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  ){
+			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  || 
+			patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
 			fromSql.append(" left join ");
 			fromSql.append( "smart.patrol_leg_members " + tablePrefix.get(PatrolLegMember.class) );
 			fromSql.append( " on a.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid " );
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS ||
-			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS  ){
+			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS ||
+			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
 			fromSql.append(" left join ");
 			fromSql.append( "smart.patrol_leg_day " + tablePrefix.get(PatrolLegDay.class));
 			fromSql.append( " on a.pld_uuid = " + tablePrefix.get(PatrolLegDay.class)+ ".uuid ");
@@ -311,6 +323,245 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		return results;
 	}
 
+	
+	/**
+	 * Computes a patrol summary value 
+	 * @param c database connection
+	 * @param s hibernate session 
+	 * @param groupBy query group by options
+	 * @param patrolItem patrol value to computer  
+	 * @return query results
+	 * @throws SQLException
+	 */
+	private HashMap<SummaryResultKey, Double> getAttributeValue(
+			Connection c, Session s, 
+			GroupByPart groupBy, 
+			AttributeValueItem attributeItem) throws SQLException{
+		
+		StringBuilder fromSql = new StringBuilder();
+		
+		fromSql.append(queryTempTable + " a ");
+		StringBuilder groupBySql = new StringBuilder();
+		StringBuilder groupByInnerSql = new StringBuilder();
+
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
+		
+		String valueSql = "a.ob_uuid";
+		StringBuilder valueAggSql = new StringBuilder();
+		valueAggSql.append(attributeItem.getAggregation().getName());
+		valueAggSql.append("(");
+		valueAggSql.append(tablePrefix.get(WaypointObservationAttribute.class));
+		valueAggSql.append(".number_value)");
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append(groupBySql);
+		if (groupBySql.length() > 0){
+			sql.append(",");
+		}
+		sql.append(valueAggSql);
+		sql.append(" FROM ( SELECT distinct ");
+		sql.append(groupByInnerSql);
+		if (groupByInnerSql.length() > 0){
+			sql.append(",");
+		}
+		sql.append(valueSql);
+		sql.append(" FROM ");
+		sql.append(fromSql);
+		
+		
+		sql.append(") foo");
+		
+		sql.append(" join smart.wp_observation_attributes ");
+		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
+		sql.append(" on foo.ob_uuid = ");
+		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
+		sql.append(".observation_uuid ");
+		sql.append(" join smart.dm_attribute ");
+		sql.append(tablePrefix.get(Attribute.class));
+		sql.append(" on ");
+		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
+		sql.append(".attribute_uuid = ");
+		sql.append(tablePrefix.get(Attribute.class));
+		sql.append(".uuid ");
+		if (attributeItem.getCategoryKey() != null){
+			sql.append(" join smart.wp_observation ");
+			sql.append(tablePrefix.get(WaypointObservation.class));
+			sql.append(" on foo.ob_uuid = ");
+			sql.append(tablePrefix.get(WaypointObservation.class));
+			sql.append(".uuid ");
+			sql.append(" join smart.dm_category ");
+			sql.append(tablePrefix.get(Category.class));
+			sql.append(" on ");
+			sql.append(tablePrefix.get(WaypointObservation.class));
+			sql.append(".category_uuid = ");
+			sql.append(tablePrefix.get(Category.class));
+			sql.append(".uuid ");
+		}
+		sql.append(" WHERE ");
+		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
+		sql.append(".number_value is not null and ");
+		sql.append(tablePrefix.get(Attribute.class));
+		sql.append(".keyid = '");
+		sql.append(attributeItem.getAttributeKey() + "'");
+		if (attributeItem.getCategoryKey() != null){
+			sql.append(" AND (");
+			sql.append(tablePrefix.get(Category.class));
+			sql.append(".hkey >= '");
+			sql.append(attributeItem.getCategoryKey());
+			sql.append("' and ");
+			sql.append(tablePrefix.get(Category.class));
+			sql.append(".hkey < '");
+			sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
+			sql.append("/') ");
+		}
+		if (groupBySql.length() > 0){
+			sql.append(" GROUP BY " );
+			sql.append(groupBySql);
+		}
+		
+		//do something here with sql
+		QueryPlugIn.logSql(sql.toString());
+		
+		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
+
+		while(rs.next()){
+			String groupby[] = new String[groupBy.getGroupBys().size()];
+			
+			int rsindex = 1;
+			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
+				IGroupBy gb = groupBy.getGroupBys().get(i);
+				
+				String key = gb.asString() + ":";
+				switch (gb.getType()) {
+					case STRING:
+						key += rs.getString(rsindex++);
+						break;
+					case BYTE:
+						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
+						break;
+					case DATE:
+						key += rs.getDate(rsindex++).toString();
+				}
+				groupby[i] = key;
+			}
+			
+			SummaryResultKey key = new SummaryResultKey(attributeItem.asString(), groupby);
+			results.put(key, rs.getDouble(rsindex++));			
+		}
+		return results;
+	}
+	
+	
+	
+	/**
+	 * Computes a category summaries 
+	 * @param c database connection
+	 * @param s hibernate session 
+	 * @param groupBy query group by options
+	 * @param patrolItem patrol value to computer  
+	 * @return query results
+	 * @throws SQLException
+	 */
+	private HashMap<SummaryResultKey, Double> getCategoryValue(
+			Connection c, Session s, 
+			GroupByPart groupBy, 
+			CategoryValueItem categoryItem) throws SQLException{
+		
+		StringBuilder fromSql = new StringBuilder();
+		
+		fromSql.append(queryTempTable + " a ");
+		StringBuilder groupBySql = new StringBuilder();
+		StringBuilder groupByInnerSql = new StringBuilder();
+
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
+		
+		String valueSql = "a.ob_uuid";
+		StringBuilder valueAggSql = new StringBuilder();
+		valueAggSql.append("count(ob_uuid)");
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append(groupBySql);
+		if (groupBySql.length() > 0){
+			sql.append(",");
+		}
+		sql.append(valueAggSql);
+		sql.append(" FROM ( SELECT distinct ");
+		sql.append(groupByInnerSql);
+		if (groupByInnerSql.length() > 0){
+			sql.append(",");
+		}
+		sql.append(valueSql);
+		sql.append(" FROM ");
+		sql.append(fromSql);
+		
+		
+		sql.append(") foo");
+		
+		sql.append(" join smart.wp_observation ");
+		sql.append(tablePrefix.get(WaypointObservation.class));
+		sql.append(" on foo.ob_uuid = ");
+		sql.append(tablePrefix.get(WaypointObservation.class));
+		sql.append(".uuid");
+		sql.append(" join smart.dm_category ");
+		sql.append(tablePrefix.get(Category.class));
+		sql.append(" on ");
+		sql.append(tablePrefix.get(WaypointObservation.class));
+		sql.append(".category_uuid = ");
+		sql.append(tablePrefix.get(Category.class));
+		sql.append(".uuid ");
+		
+		sql.append(" WHERE ");
+		sql.append(" (");
+		sql.append(tablePrefix.get(Category.class));
+		sql.append(".hkey >= '");
+		sql.append(categoryItem.getCategoryHKey());
+		sql.append("' and ");
+		sql.append(tablePrefix.get(Category.class));
+		sql.append(".hkey < '");
+		sql.append(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1));
+		sql.append("/') ");
+		
+		if (groupBySql.length() > 0){
+			sql.append(" GROUP BY " );
+			sql.append(groupBySql);
+		}
+		
+		//do something here with sql
+		QueryPlugIn.logSql(sql.toString());
+		
+		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
+
+		while(rs.next()){
+			String groupby[] = new String[groupBy.getGroupBys().size()];
+			
+			int rsindex = 1;
+			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
+				IGroupBy gb = groupBy.getGroupBys().get(i);
+				
+				String key = gb.asString() + ":";
+				switch (gb.getType()) {
+					case STRING:
+						key += rs.getString(rsindex++);
+						break;
+					case BYTE:
+						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
+						break;
+					case DATE:
+						key += rs.getDate(rsindex++).toString();
+				}
+				groupby[i] = key;
+			}
+			
+			SummaryResultKey key = new SummaryResultKey(categoryItem.asString(), groupby);
+			results.put(key, rs.getDouble(rsindex++));			
+		}
+		return results;
+	}
+	
 	/**
 	 * Updates group by string builder string with
 	 * given group by part. 
@@ -414,6 +665,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			return "count(pl_member)";
 		case MAN_HOURS:
 			return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))";
+		case MAN_DAYS:
+			return "count(pld_patrol_day) ";
 		}
 		assert false;
 		return "";
@@ -437,6 +690,9 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		case MAN_HOURS:
 			return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time, " +
 			tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time, " +
+			tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member";
+		case MAN_DAYS:
+			return "pld_patrol_day, " +
 			tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member";
 		}
 		//TODO: should not get here

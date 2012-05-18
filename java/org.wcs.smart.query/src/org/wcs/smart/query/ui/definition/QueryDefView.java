@@ -52,6 +52,7 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection;
+import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 
@@ -264,6 +265,21 @@ public class QueryDefView extends ViewPart {
 									}
 								}else if (type instanceof DateGroupByOption){
 									DropItem it = getDropItemFactory().createDateGroupByDropItem((DateGroupByOption)type);
+									if (it != null){
+										currentPanel.addItem(it);
+									}
+								}else if (type instanceof SummaryDmObject){
+									SummaryDmObject object = (SummaryDmObject) type;
+									DropItem it = null;
+									if (object.isValue()){
+										if (object.getObject() instanceof Attribute){
+											it = getDropItemFactory().createAttributeValueDropItem((Attribute) object.getObject());
+										}else if (object.getObject() instanceof CategoryAttribute){
+											it = getDropItemFactory().createAttributeValueDropItem((CategoryAttribute) object.getObject());
+										}else if (object.getObject() instanceof Category){
+										it = getDropItemFactory().createCategoryValueDropItem((Category) object.getObject());
+										}
+									}
 									if (it != null){
 										currentPanel.addItem(it);
 									}

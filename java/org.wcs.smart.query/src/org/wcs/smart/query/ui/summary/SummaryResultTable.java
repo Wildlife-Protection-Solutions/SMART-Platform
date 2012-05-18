@@ -407,13 +407,16 @@ public class SummaryResultTable extends Composite {
 		public void update(ViewerCell cell){
 			Object element = cell.getElement();
 			if (element instanceof SummaryHeader[]){
-				SummaryHeader header = ((SummaryHeader[])element)[cell.getColumnIndex()];
-				cell.setText(header.getName());
-			
-				if (header.isValue()){
-					cell.setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR_2));
-				}else{
+				SummaryHeader[] array = (SummaryHeader[])element;
+				if (array.length > cell.getColumnIndex()){
+					SummaryHeader header = ((SummaryHeader[])element)[cell.getColumnIndex()];
+					cell.setText(header.getName());
+							
+					if (header.isValue()){
+						cell.setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR_2));
+					}else{
 					
+					}
 				}
 			}	
 			super.update(cell);

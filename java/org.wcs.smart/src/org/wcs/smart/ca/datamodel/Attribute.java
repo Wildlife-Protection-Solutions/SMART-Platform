@@ -91,11 +91,16 @@ public class Attribute extends DmObject{
 	 * Represents the type of the data model attribute
 	 */
 	public enum AttributeType{
-		NUMERIC,
-		TEXT,
-		LIST,
-		TREE,
-		BOOLEAN
+		NUMERIC("n"),
+		TEXT("s"),
+		LIST("l"),
+		TREE("t"),
+		BOOLEAN("b");
+		
+		public String queryKey;
+		private AttributeType(String queryKey){
+			this.queryKey = queryKey;
+		}
 	}
 	
 	/**

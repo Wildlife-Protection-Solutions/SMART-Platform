@@ -574,9 +574,14 @@
          <enabledWhen>
             <with
                   variable="activeEditorId">
-               <equals
-                     value="org.wcs.smart.query.ui.QueryResultsEditor">
-               </equals>
+               <or>
+                  <equals
+                        value="org.wcs.smart.query.ui.QueryResultsEditor">
+                  </equals>
+                  <equals
+                        value="org.wcs.smart.query.ui.SummaryEditor">
+                  </equals>
+               </or>
             </with>
          </enabledWhen>
       </handler>

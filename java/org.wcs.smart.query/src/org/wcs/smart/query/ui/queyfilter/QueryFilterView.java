@@ -50,6 +50,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -104,8 +105,12 @@ public class QueryFilterView extends ViewPart {
 				session.beginTransaction();
 				try{
 					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+					//load into memory; no-lazy loading here.
 					for (Category cat: dm.getCategories()){
 						visitCategory(cat);
+					}
+					for (Attribute att: dm.getAttributes()){
+						att.getAggregations().size();
 					}
 				}finally{
 					session.getTransaction().rollback();
@@ -122,6 +127,7 @@ public class QueryFilterView extends ViewPart {
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, PatrolQueryOptions.PATROL_GROUBY_OPTIONS);
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS, PatrolQueryOptions.DateGroupByOption.values());
+				summaryInput.put(SummaryQueryContentProvider.NodeType.DATA_MODEL_ITEM, dm);
 				
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override

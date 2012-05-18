@@ -35,7 +35,8 @@ import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**
- * Query editor page that displays the tabluar results.
+ * Query editor page that displays waypoint query
+ * results.
  * 
  * @author Emily
  * @since 1.0.0

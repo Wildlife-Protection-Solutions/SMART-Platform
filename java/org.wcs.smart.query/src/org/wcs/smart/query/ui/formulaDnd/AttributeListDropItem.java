@@ -108,17 +108,11 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	public AttributeListDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + " and attribute:l:" + att.getAttribute().getKeyId();
+		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().queryKey + ":" + att.getAttribute().getKeyId();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
 		this.attribute = att.getAttribute();
 	}
-	
-	/**
-	 * @param data - a listItem 
-	 */
-	public void initializeData(Object data){
-		currentSelection = (ListItem) data;
-	}
+
 	
 	/**
 	 * Creates a new attribute list drop item
@@ -128,9 +122,17 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	public AttributeListDropItem(Attribute att) {
 		//super(parent, panel);
-		this.key = "attribute:l:" + att.getKeyId();
+		this.key = "attribute:" + att.getType().queryKey + ":" + att.getKeyId();
 		this.text = att.getName() ;
 		this.attribute = att;
+	}
+	
+	
+	/**
+	 * @param data - a listItem 
+	 */
+	public void initializeData(Object data){
+		currentSelection = (ListItem) data;
 	}
 	
 	/**
