@@ -1156,19 +1156,6 @@
 			<type>varchar(n)</type>
 		</word>
 		<word>
-			<id>70</id>
-			<length>null</length>
-			<decimal>null</decimal>
-			<array>false</array>
-			<array_dimension>null</array_dimension>
-			<unsigned>false</unsigned>
-			<args></args>
-			<description></description>
-			<logical_name>objective_rating</logical_name>
-			<physical_name>objective_rating</physical_name>
-			<type>tinyint</type>
-		</word>
-		<word>
 			<id>71</id>
 			<length>16</length>
 			<decimal>null</decimal>
