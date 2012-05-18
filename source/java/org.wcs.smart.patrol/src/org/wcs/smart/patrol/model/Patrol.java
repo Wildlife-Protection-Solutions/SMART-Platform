@@ -128,14 +128,14 @@ public class Patrol {
 		this.team = team;
 	}
 
-	@Column(name="objective_rating")
-	public Integer getObjectiveRating() {
-		return objectiveRating;
-	}
+//	@Column(name="objective_rating")
+//	public Integer getObjectiveRating() {
+//		return objectiveRating;
+//	}
 
-	public void setObjectiveRating(Integer objectiveRating) {
-		this.objectiveRating = objectiveRating;
-	}
+//	public void setObjectiveRating(Integer objectiveRating) {
+//		this.objectiveRating = objectiveRating;
+//	}
 
 	@Column(name="objective")
 	public String getObjective() {

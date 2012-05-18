@@ -255,17 +255,17 @@ public class PatrolSummaryEditor extends EditorPart {
 		((GridData)txtObjective.getLayoutData()).heightHint=80;
 		((GridData)txtObjective.getLayoutData()).widthHint=100;
 		
-		lbl = toolkit.createLabel(right, "Objective Rating:");
-		sclObjRating = new Scale(right, SWT.NONE);
-		toolkit.adapt(sclObjRating, false, false);
-		sclObjRating.setEnabled(false);
-		sclObjRating.setMinimum(1);
-		sclObjRating.setMaximum(5);
-		sclObjRating.setIncrement(1);
-		sclObjRating.setPageIncrement(1);
-		sclObjRating.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		editObjective = createEditLink(toolkit, right, new ObjectiveComposite());
-		editObjective.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false, 1, 1));
+//		lbl = toolkit.createLabel(right, "Objective Rating:");
+//		sclObjRating = new Scale(right, SWT.NONE);
+//		toolkit.adapt(sclObjRating, false, false);
+//		sclObjRating.setEnabled(false);
+//		sclObjRating.setMinimum(1);
+//		sclObjRating.setMaximum(5);
+//		sclObjRating.setIncrement(1);
+//		sclObjRating.setPageIncrement(1);
+//		sclObjRating.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		editObjective = createEditLink(toolkit, right, new ObjectiveComposite());
+//		editObjective.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false, 1, 1));
 		
 		
 		lbl = toolkit.createLabel(left, "Members:");
@@ -485,9 +485,9 @@ public class PatrolSummaryEditor extends EditorPart {
 				txtObjective.setText("");
 			}
 
-			if (patrol.getObjectiveRating() != null) {
-				sclObjRating.setSelection(patrol.getObjectiveRating());
-			}
+//			if (patrol.getObjectiveRating() != null) {
+//				sclObjRating.setSelection(patrol.getObjectiveRating());
+//			}
 
 			Set<Employee> allEmployee = new HashSet<Employee>();
 			Set<Employee> leaders = new HashSet<Employee>();

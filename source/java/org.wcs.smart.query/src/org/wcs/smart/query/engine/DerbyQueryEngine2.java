@@ -298,7 +298,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append("p_id varchar(23),");
 		sql.append("p_station_uuid char(16) for bit data,");
 		sql.append("p_team_uuid char(16) for bit data,");
-		sql.append("p_objective_rating smallint,");
+//		sql.append("p_objective_rating smallint,");
 		sql.append("p_objective varchar(8192),");
 		sql.append("p_mandate_uuid  char(16) for bit data,");
 		sql.append("p_type varchar(6),");
@@ -356,7 +356,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(tablePrefix.get(Patrol.class) + ".id, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".station_uuid, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".team_uuid, ");
-		sql.append(tablePrefix.get(Patrol.class) + ".objective_rating, ");
+//		sql.append(tablePrefix.get(Patrol.class) + ".objective_rating, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".objective, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".mandate_uuid, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".patrol_type, ");
@@ -527,7 +527,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				it.setPatrolEndDate(rs.getDate(4));
 				it.setStation(getStationName(rs.getBytes(5), session));				
 				it.setTeam(getTeamName(rs.getBytes(6), session));				
-				it.setObjectiveRating(rs.getInt(7));
+//				it.setObjectiveRating(rs.getInt(7));
 				it.setObjective(rs.getString(8));
 				it.setMandate(getMandateName(rs.getBytes(9), session));
 				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(10)));
@@ -736,10 +736,10 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 */
 	private String SelectClause(boolean includeObservations) {
 		String[] results = { "p_uuid", "p_id", "p_start_date", "p_end_date",
-				"p_station_uuid", "p_team_uuid", "p_objective_rating",
+				"p_station_uuid", "p_team_uuid", 
 				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed",
 				"pl_transport_uuid", "pl_id", "pld_patrol_day", "plm_leader", "plm_pilot" };
-		
+
 		String[] waypoints = { "id", "x", "y", "time", "direction", "distance",
 				"wp_comment" };
 		
