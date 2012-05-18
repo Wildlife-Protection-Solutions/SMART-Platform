@@ -64,7 +64,7 @@ public class Patrol {
 	private Station station;
 	private Team team;
 	private String id;
-	private Integer objectiveRating;
+//	private Integer objectiveRating;
 	private String objective;
 	private PatrolMandate mandate;
 	private PatrolType.Type patrolType;
