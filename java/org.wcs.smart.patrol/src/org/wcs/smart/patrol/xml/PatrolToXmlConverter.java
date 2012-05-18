@@ -53,7 +53,7 @@ public class PatrolToXmlConverter {
 		/* objective */
 		ObjectiveType obj = new ObjectiveType();
 		obj.setDescription(p.getObjective());
-		obj.setRating(p.getObjectiveRating());
+//		obj.setRating(p.getObjectiveRating());
 		xml.setObjective(obj);
 		
 		/* patrol type */

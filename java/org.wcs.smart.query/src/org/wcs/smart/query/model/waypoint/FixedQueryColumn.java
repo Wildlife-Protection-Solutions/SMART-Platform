@@ -46,7 +46,7 @@ public class FixedQueryColumn extends WaypointQueryColumn {
 		PATROL_STATION("Station", ColumnType.STRING, "patrol:station"),
 		PATROL_TEAM("Team", ColumnType.STRING, "patrol:team"),
 		PATROL_OBJETIVE("Objective", ColumnType.STRING,"patrol:objective"),
-		PATROL_RATING("Objective Rating", ColumnType.INTEGER,"patrol:rating"),
+//		PATROL_RATING("Objective Rating", ColumnType.INTEGER,"patrol:rating"),
 		PATROL_MANDATE("Mandate", ColumnType.STRING,"patrol:mandate"),
 		PATROL_ARMED("Armed", ColumnType.BOOLEAN,"patrol:armed"),
 		PATROL_LEG_ID("Patrol Leg Id", ColumnType.STRING, "patrol:legid"),
@@ -108,8 +108,8 @@ public class FixedQueryColumn extends WaypointQueryColumn {
 			return item.getMandate();
 		case PATROL_OBJETIVE:
 			return item.getObjective();
-		case PATROL_RATING:
-			return item.getObjectiveRating();
+//		case PATROL_RATING:
+//			return item.getObjectiveRating();
 		case PATROL_START_DATE:
 			return item.getPatrolStartDate();
 		case PATROL_STATION:

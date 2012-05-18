@@ -47,7 +47,7 @@ public class QueryResultItem {
 	private String station;
 	private String team;
 	private String objective;
-	private int objectiveRating;
+//	private int objectiveRating;
 	private String mandate;
 	private PatrolType.Type patrolType;
 	private byte[] patrolUuid;
@@ -241,18 +241,18 @@ public class QueryResultItem {
 		this.objective = objective;
 	}
 	
-	/**
-	 * @return patrol objective rating
-	 */
-	public int getObjectiveRating() {
-		return objectiveRating;
-	}
-	/**
-	 * @param objectiveRating patrol objective rating
-	 */
-	public void setObjectiveRating(int objectiveRating) {
-		this.objectiveRating = objectiveRating;
-	}
+//	/**
+//	 * @return patrol objective rating
+//	 */
+//	public int getObjectiveRating() {
+//		return objectiveRating;
+//	}
+//	/**
+//	 * @param objectiveRating patrol objective rating
+//	 */
+//	public void setObjectiveRating(int objectiveRating) {
+//		this.objectiveRating = objectiveRating;
+//	}
 	
 	/**
 	 * @return patrol mandate
