@@ -264,8 +264,8 @@ public class PatrolSummaryEditor extends EditorPart {
 //		sclObjRating.setIncrement(1);
 //		sclObjRating.setPageIncrement(1);
 //		sclObjRating.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-//		editObjective = createEditLink(toolkit, right, new ObjectiveComposite());
-//		editObjective.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false, 1, 1));
+		editObjective = createEditLink(toolkit, right, new ObjectiveComposite());
+		editObjective.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false, 3, 1));
 		
 		
 		lbl = toolkit.createLabel(left, "Members:");
