@@ -528,27 +528,27 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				it.setStation(getStationName(rs.getBytes(5), session));				
 				it.setTeam(getTeamName(rs.getBytes(6), session));				
 //				it.setObjectiveRating(rs.getInt(7));
-				it.setObjective(rs.getString(8));
-				it.setMandate(getMandateName(rs.getBytes(9), session));
-				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(10)));
-				it.setArmed(rs.getBoolean(11));
-				it.setTransportType(getTransportType(rs.getBytes(12), session));
-				it.setPatrolLegId(rs.getString(13));
-				it.setWpDateTime(rs.getDate(14));
+				it.setObjective(rs.getString(7));
+				it.setMandate(getMandateName(rs.getBytes(8), session));
+				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(9)));
+				it.setArmed(rs.getBoolean(10));
+				it.setTransportType(getTransportType(rs.getBytes(11), session));
+				it.setPatrolLegId(rs.getString(12));
+				it.setWpDateTime(rs.getDate(13));
 				
-				it.setLeader(getEmployeeName(rs.getBytes(15), session));
-				it.setPilot(getEmployeeName(rs.getBytes(16), session));
+				it.setLeader(getEmployeeName(rs.getBytes(14), session));
+				it.setPilot(getEmployeeName(rs.getBytes(15), session));
 				
-				it.setWaypointId(rs.getInt(17));
-				it.setWaypointX(rs.getDouble(18));
-				it.setWaypointY(rs.getDouble(19));
-				it.setWaypointTime(rs.getTime(20));
-				it.setWaypointDirection(rs.getFloat(21));
-				it.setWaypointDistance(rs.getFloat(22));
-				it.setWaypointComment(rs.getString(23));
+				it.setWaypointId(rs.getInt(16));
+				it.setWaypointX(rs.getDouble(17));
+				it.setWaypointY(rs.getDouble(18));
+				it.setWaypointTime(rs.getTime(19));
+				it.setWaypointDirection(rs.getFloat(20));
+				it.setWaypointDistance(rs.getFloat(21));
+				it.setWaypointComment(rs.getString(22));
 				it.setObservationUuid(wpouuid);
-				it.setCategory(getCategory(rs.getBytes(25), session));
-				Attribute att = getAttribute(rs.getBytes(26), session);
+				it.setCategory(getCategory(rs.getBytes(24), session));
+				Attribute att = getAttribute(rs.getBytes(25), session);
 				if (att != null){
 					Object value = getAttributeValue(att, rs, session);
 					it.addAttribute(att.getKeyId(), value);
