@@ -11,7 +11,7 @@ INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'sum', 'Sum' );
 INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'min', 'Minimum');
 INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'max', 'Maximum');
 INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'avg', 'Average' );
-INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'stdev', 'Standard Deviation' );
+--INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'stdev', 'Standard Deviation' );
 
 CREATE TABLE smart.dm_attribute
 (
