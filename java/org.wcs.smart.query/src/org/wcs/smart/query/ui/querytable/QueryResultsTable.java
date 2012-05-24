@@ -33,8 +33,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
+import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn;
 
 /**
  * Creates a query results table for a given query.
@@ -67,7 +67,7 @@ public class QueryResultsTable {
 		return table;
 	}
 	
-	public void initQuery(final WaypointQuery query){
+	public void initQuery(final ObservationQuery query){
 		if (tableViewerColumns != null){
 			//columns already created
 			return;
@@ -120,7 +120,7 @@ public class QueryResultsTable {
 	 * @param columns table column definition
 	 * @return list of table viewer columns
 	 */
-	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<WaypointQueryColumn> columns, QueryResultItemComparator sorter) {
+	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<ObservationQueryColumn> columns, QueryResultItemComparator sorter) {
 		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
 		for (int i = 0; i < columns.size(); i++) {
 			viewers[i] = new QueryTableViewerColumn(
@@ -135,7 +135,7 @@ public class QueryResultsTable {
 	 * Updates the visible columns in the table.
 	 * @param visibleColumns
 	 */
-	public void updateVisible(List<WaypointQueryColumn> queryColumns) {
+	public void updateVisible(List<ObservationQueryColumn> queryColumns) {
 		if (this.tableViewerColumns == null){
 			//not yet initialized 
 			return;
@@ -148,7 +148,7 @@ public class QueryResultsTable {
 			}
 		}else{
 			for (int i = 0; i < tableViewerColumns.length; i ++){
-				for (WaypointQueryColumn column :queryColumns){
+				for (ObservationQueryColumn column :queryColumns){
 					if (column == tableViewerColumns[i].getColumn()){
 						if (queryColumns.get(i).isVisible()){
 							tableViewerColumns[i].show();

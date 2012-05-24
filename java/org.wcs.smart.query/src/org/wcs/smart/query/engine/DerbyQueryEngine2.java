@@ -54,7 +54,7 @@ import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
@@ -86,21 +86,39 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		tablePrefix.put(WaypointObservationAttribute.class, "wpoa");
 		tablePrefix.put(Attribute.class, "a");
 		tablePrefix.put(Category.class, "c");
-		tablePrefix.put(AttributeTreeNode.class, "at");
-		tablePrefix.put(AttributeListItem.class, "al");
+		tablePrefix.put(AttributeTreeNode.class, "atn");
+		tablePrefix.put(AttributeListItem.class, "ali");
 		tablePrefix.put(PatrolLegMember.class, "plm");
 		tablePrefix.put(Track.class, "t");
 	}
 
+	
+	/**
+	 * Maps hibernate classes to database table names
+	 */
+	protected static HashMap<Class<?>, String> tableNames = new HashMap<Class<?>, String>();
+	static {
+		tableNames = new HashMap<Class<?>, String>();
+		tableNames.put(Patrol.class, "smart.patrol");
+		tableNames.put(PatrolLeg.class, "smart.patrol_leg");
+		tableNames.put(PatrolLegDay.class, "smart.patrol_leg_day");
+		tableNames.put(Waypoint.class, "smart.waypoint");
+		tableNames.put(WaypointObservation.class, "smart.wp_observation");
+		tableNames.put(WaypointObservationAttribute.class, "smart.wp_observation_attributes");
+		tableNames.put(Attribute.class, "smart.dm_attribute");
+		tableNames.put(Category.class, "smart.dm_category");
+		tableNames.put(AttributeTreeNode.class, "smart.dm_attribute_tree");
+		tableNames.put(AttributeListItem.class, "smart.dm_attribute_list");
+		tableNames.put(PatrolLegMember.class, "smart.patrol_leg_members");
+		tableNames.put(Track.class, "smart.track");
+	}
+	
 	protected String queryTempTable = "";
 	protected String observationTempTable = "";
 	
 	private List<QueryResultItem> myResults = null;
 	
 	
-	
-	
-
 	/**
 	 * Executes the given query.
 	 * 
@@ -131,7 +149,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * to get all attributes associated with a matching observations.
 	 */
 	@Override
-	public List<QueryResultItem> executeQuery(final WaypointQuery query,
+	public List<QueryResultItem> executeQuery(final ObservationQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
@@ -269,12 +287,20 @@ public class DerbyQueryEngine2 implements QueryEngine {
 						+ key.getKey() + " ");
 			}
 		}
-		sql.append("FROM smart.wp_observation_attributes as a join smart.dm_attribute c on a.attribute_uuid = c.uuid");
+		sql.append("FROM ");
+		sql.append(tableNames.get(WaypointObservationAttribute.class));
+		sql.append(" as a join ");
+		sql.append(tableNames.get(Attribute.class));
+		sql.append(" c on a.attribute_uuid = c.uuid");
 		if (list) {
-			sql.append(" LEFT JOIN smart.dm_attribute_list l on l.uuid = a.list_element_uuid ");
+			sql.append(" LEFT JOIN ");
+			sql.append(tableNames.get(AttributeListItem.class));
+			sql.append(" l on l.uuid = a.list_element_uuid ");
 		}
 		if (tree){
-			sql.append(" LEFT JOIN smart.dm_attribute_tree t on t.uuid = a.tree_node_uuid ");
+			sql.append(" LEFT JOIN ");
+			sql.append(tableNames.get(AttributeTreeNode.class));
+			sql.append(" t on t.uuid = a.tree_node_uuid ");
 		}
 		sql.append(") foo GROUP BY observation_uuid ");
 
@@ -375,14 +401,18 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM ");
-		sql.append(" smart.patrol " + tablePrefix.get(Patrol.class));
+		sql.append(tableNames.get(Patrol.class));
+		sql.append(" ");
+		sql.append(tablePrefix.get(Patrol.class));
 		sql.append(" inner join ");
-		sql.append(" smart.patrol_leg " + tablePrefix.get(PatrolLeg.class));
+		sql.append(tableNames.get(PatrolLeg.class));
+		sql.append(" " + tablePrefix.get(PatrolLeg.class));
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = "
 				+ tablePrefix.get(PatrolLeg.class) + ".patrol_uuid ");
 		sql.append(" inner join ");
-		sql.append(" smart.patrol_leg_day "
-				+ tablePrefix.get(PatrolLegDay.class));
+		sql.append(tableNames.get(PatrolLegDay.class));
+		sql.append(" ");
+		sql.append(tablePrefix.get(PatrolLegDay.class));
 		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = "
 				+ tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid ");
 		if (onlyObservations){
@@ -390,22 +420,27 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		}else{
 			sql.append(" left join ");
 		}
-		sql.append(" smart.waypoint " + tablePrefix.get(Waypoint.class));
+		sql.append(tableNames.get(Waypoint.class));
+		sql.append(" ");
+		sql.append(tablePrefix.get(Waypoint.class));
 		sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = "
 				+ tablePrefix.get(Waypoint.class) + ".leg_day_uuid ");
 		sql.append(" left join ");
-		sql.append(" smart.wp_observation "
-				+ tablePrefix.get(WaypointObservation.class));
+		sql.append(tableNames.get(WaypointObservation.class));
+		sql.append(" ");
+		sql.append(tablePrefix.get(WaypointObservation.class));
 		sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = "
 				+ tablePrefix.get(WaypointObservation.class) + ".wp_uuid ");
 		sql.append(" left join ");
-		sql.append(" smart.patrol_leg_members ");
+		sql.append(tableNames.get(PatrolLegMember.class));
+		sql.append(" ");
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader ");
 		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = ");
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.patrol_leg_uuid and  ");
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.is_leader ");
 		sql.append(" left join ");
-		sql.append(" smart.patrol_leg_members ");
+		sql.append(tableNames.get(PatrolLegMember.class));
+		sql.append(" ");
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot ");
 		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = ");
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.patrol_leg_uuid and  ");
@@ -415,8 +450,10 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			if (queryFilter.hasAttributeFilter()
 					|| queryFilter.hasCategoryFilter()) {
 				sql.append(" left join ");
-				sql.append(" smart.dm_category "
-						+ tablePrefix.get(Category.class));
+				sql.append(tableNames.get(Category.class));
+				sql.append(" ");
+				sql.append(tablePrefix.get(Category.class));
+				
 				sql.append(" on " + tablePrefix.get(Category.class)
 						+ ".uuid = "
 						+ tablePrefix.get(WaypointObservation.class)
@@ -507,12 +544,12 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		QueryResultItem last = null;
 		try {
 			while (rs.next()) {
-				byte[] wpouuid = rs.getBytes(24);
+				byte[] wpouuid = rs.getBytes(23);
 				if (wpouuid != null && last != null
 						&& last.getObservationUuid() != null
 						&& Arrays.equals(wpouuid, last.getObservationUuid())) {
 					//same observation new attribute
-					Attribute att = getAttribute(rs.getBytes(26), session);
+					Attribute att = getAttribute(rs.getBytes(25), session);
 					if (att != null){
 						Object value = getAttributeValue(att, rs, session);
 						last.addAttribute(att.getKeyId(), value);
@@ -577,16 +614,16 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		Object value = null;
 		switch (att.getType()) {
 		case NUMERIC:
-			value = rs.getDouble(27);
+			value = rs.getDouble(26);
 			break;
 		case BOOLEAN:
-			value = (rs.getDouble(27) >= 0.5);
+			value = (rs.getDouble(26) >= 0.5);
 			break;
 		case TEXT:
-			value = rs.getString(28);
+			value = rs.getString(27);
 			break;
 		case TREE:
-			byte[] nodeuuid = rs.getBytes(30);
+			byte[] nodeuuid = rs.getBytes(29);
 			if (nodeuuid != null) {
 				AttributeTreeNode i = (AttributeTreeNode) session.load(
 						AttributeTreeNode.class, nodeuuid);
@@ -594,7 +631,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			}
 			break;
 		case LIST:
-			byte[] listuuid = rs.getBytes(29);
+			byte[] listuuid = rs.getBytes(28);
 			if (listuuid != null) {
 				AttributeListItem i = (AttributeListItem) session.load(
 						AttributeListItem.class, listuuid);
@@ -820,26 +857,32 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		if (includeObservations) {
 			sql.append(" inner join ");
-			sql.append("smart.wp_observation "
-					+ tablePrefix.get(WaypointObservation.class));
+			sql.append(tableNames.get(WaypointObservation.class));
+			sql.append(" ");
+			sql.append(tablePrefix.get(WaypointObservation.class));
 			sql.append(" on " + tablePrefix.get(WaypointObservation.class)
 					+ ".uuid = r.ob_uuid ");
 
 			sql.append(" inner join ");
-			sql.append("smart.waypoint " + tablePrefix.get(Waypoint.class));
+			sql.append(tableNames.get(Waypoint.class));
+			sql.append(" ");
+			sql.append(tablePrefix.get(Waypoint.class));
 			sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = "
 					+ tablePrefix.get(WaypointObservation.class) + ".wp_uuid ");
 		} else {
 			sql.append(" inner join ");
-			sql.append("smart.waypoint " + tablePrefix.get(Waypoint.class));
+			sql.append(tableNames.get(Waypoint.class));
+			sql.append(" ");
+			sql.append(tablePrefix.get(Waypoint.class));
 			sql.append(" on " + tablePrefix.get(Waypoint.class)
 					+ ".uuid = r.wp_uuid ");
 		}
 
 		if (includeObservations) {
 			sql.append(" left join ");
-			sql.append(" smart.wp_observation_attributes "
-					+ tablePrefix.get(WaypointObservationAttribute.class));
+			sql.append(tableNames.get(WaypointObservationAttribute.class));
+			sql.append(" ");
+			sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 			sql.append(" on " + tablePrefix.get(WaypointObservation.class)
 					+ ".uuid = "
 					+ tablePrefix.get(WaypointObservationAttribute.class)

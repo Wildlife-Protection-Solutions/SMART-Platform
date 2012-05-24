@@ -21,16 +21,23 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.query.qimport.QueryImporter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -54,19 +61,16 @@ public class PatrolGroupBy implements IGroupBy {
 	public static final PatrolGroupBy createGroupBy(String key){
 		return new PatrolGroupBy(key);
 	}
-	
-	public String key;
+
 	public PatrolQueryOption option;
 	public String[] items;
 	
 	/**
 	 * Creates a new patrol group by option
-	 * @param key patrol group by item key of the format "patrol:key:<uuid>,<uuid>..."
+	 * @param key patrol group by item key of the format "patrol:key:<uuid>:<uuid>..."
 	 */
 	public PatrolGroupBy(String key){
-		this.key = key;
 		String[] bits = key.split(":");
-		
 		option = PatrolQueryOptions.findPatrolQueryOption(bits[1]);
 		if (bits.length > 2){
 			items = new String[bits.length - 2];
@@ -79,11 +83,32 @@ public class PatrolGroupBy implements IGroupBy {
 	}
 	
 	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getKeyPart()
+	 */
+	public String getKeyPart(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("patrol:");
+		sb.append(option.getKey());
+		return sb.toString();
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asString()
 	 */
 	@Override
 	public String asString() {
-		return this.key;
+		StringBuilder sb = new StringBuilder();
+		sb.append(getKeyPart());
+		sb.append(":");
+		if (items != null) {
+			for (int i = 0; i < items.length; i++) {
+				sb.append(items[i]);
+				if (i < items.length - 1) {
+					sb.append(":");
+				}
+			}
+		}
+		return sb.toString();
 	}
 	
 	/**
@@ -138,5 +163,84 @@ public class PatrolGroupBy implements IGroupBy {
 		}
 		return it;
 	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#isCategory()
+	 */
+	public boolean isCategory(){
+		return false;
+	}
 
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#validateAndImport(org.hibernate.Session)
+	 */
+	public List<String> validateAndImport(String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception{
+		//need to validate the items
+		
+		ArrayList<String> warnings = new ArrayList<String>();
+		if (items != null) {
+			for (int i = 0; i < items.length; i++) {
+				byte[] uuid = SmartUtils.decodeHex(items[i]);
+				if (option.getObject(session, uuid) == null) {
+					// this item does not exist in the database
+					if (SimpleListItem.class.isAssignableFrom(option.getSourceClass())) {
+						UuidItemType item = uuidLookup.get(items[i]);
+						if (item == null) {
+							throw new Exception("Could not resolve patrol filter: "+ asString() + ".");
+						}
+						SimpleListItem it = QueryHibernateManager.findValue(langCode, item.getValue().get(0), option.getSourceClass().getSimpleName(), session, warnings);
+						if (it == null) {
+							throw new Exception(
+									"Could not resolve patrol filter : "
+											+ asString()
+											+ ".  Could not find a value for "
+											+ option.getSourceClass()
+													.getSimpleName()
+											+ " that matches '"
+											+ item.getValue().get(0) + "'");
+						} else {
+							warnings.add("The unique identifier for "
+									+ option.getGuiName()
+									+ " filter does not match any idnetifiers in the database.  However the name '"
+									+ item.getValue().get(0)
+									+ "' was matched and will be used in the query instead.");
+							// update uuid
+							items[i] = SmartUtils.encodeHex(it.getUuid());
+						}
+					} else if (Employee.class.isAssignableFrom(option
+							.getSourceClass())) {
+						UuidItemType item = uuidLookup.get(items[i]);
+						if (item == null) {
+							throw new Exception(
+									"Could not resolve patrol filter: "
+											+ asString() + ".");
+						}
+						// lookup employee
+						Employee e = QueryImporter.findEmployee(item.getId(),
+								item.getValue().get(0), item.getValue().get(1),
+								session, warnings);
+						if (e != null) {
+							items[i] = SmartUtils.encodeHex(e.getUuid());
+						} else {
+							throw new Exception(
+									"Could not resolve patrol filter : "
+											+ asString()
+											+ ".  Could not find a matching employee with value '"
+											+ item.getValue().get(0) + " "
+											+ item.getValue().get(1) + " ["
+											+ item.getId() + "] ");
+						}
+					} else {
+						throw new Exception(
+								"Could not resolve patrol filter : "
+										+ asString());
+					}
+				}
+			}
+		}
+		if (warnings.size() > 0){
+			return warnings;
+		}
+		return null;
+	}
 }

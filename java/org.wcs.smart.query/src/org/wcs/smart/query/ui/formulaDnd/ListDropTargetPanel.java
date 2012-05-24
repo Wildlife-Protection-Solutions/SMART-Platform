@@ -189,6 +189,18 @@ public class ListDropTargetPanel implements IDropPanel{
 					return;
 			}
 		}
+		if (item instanceof ICombinableDropItem){
+			for (DropItem it : items){
+				if (it instanceof ICombinableDropItem){
+					if (((ICombinableDropItem)it).addItem(item)){
+						orderElements();
+						validate();
+						return;
+					}
+				}
+			}
+		}
+		
 		item.createWidget(this);
 		items.add(item);
 		orderElements();
@@ -217,12 +229,13 @@ public class ListDropTargetPanel implements IDropPanel{
 		
 		for (int i = 0; i < items.size(); i++) {
 			Point pnt = items.get(i).getWidget().computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			int height = Math.max(30, pnt.y);
 			maxWidth = Math.max(maxWidth, pnt.x);			
-			items.get(i).getWidget().setBounds(0, curry, pnt.x, pnt.y);
+			items.get(i).getWidget().setBounds(0, curry, pnt.x, height);
 			if (items.get(i).getWidget() != null) {
 				items.get(i).getWidget().layout();
 			}
-			curry += pnt.y;
+			curry += height;
 		}
 		dropTargetContent.setSize(maxWidth, curry);
 		dropTarget.redraw();

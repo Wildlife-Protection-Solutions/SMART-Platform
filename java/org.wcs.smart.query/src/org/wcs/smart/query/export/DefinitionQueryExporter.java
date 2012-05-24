@@ -25,16 +25,12 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOptionType;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
-import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -50,56 +46,13 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class DefinitionQueryExporter implements IQueryExporter {
+public abstract class DefinitionQueryExporter implements IQueryExporter {
 
-	/**
-	 * Writes the xml definition.
-	 * 
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#init()
-	 */
-	protected void init(File file, WaypointQuery query) throws Exception {
-		
-	}
-	
-	private void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
-		
-		if (f instanceof PatrolFilter){
-			PatrolFilter pf = (PatrolFilter)f;
-			
-			if (pf.getPatrolOption().getType() == PatrolQueryOptionType.UUID){
-				//we need to add a uuid type
-				UuidItemType item = new UuidItemType();
-				item.setUuid(pf.getValue());
-				//find item in database
-				
-				String[] data = pf.getPatrolOption().getNames(session, SmartUtils.decodeHex(pf.getValue()));
-				if (data != null){
-					int index = 0;
-					if (data.length > 1){
-						item.setId(data[0]);
-						index = 1;
-					}
-					for (;index < data.length; index++){
-						item.getValue().add(data[index]);
-					}
-				}
-				
-				qt.getUuiditem().add(item);
-			}
-		}
-		
-		List<IFilter> kids = f.getChildren();
-		if (kids != null){
-			for (IFilter kid : kids){
-				processFilter(kid, qt, session);
-			}
-		}
-	}
 
 
 
 	/**
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#getName()
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getName()
 	 */
 	@Override
 	public String getName() {
@@ -107,7 +60,7 @@ public class DefinitionQueryExporter implements IQueryExporter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#getDefaultExtension()
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getDefaultExtension()
 	 */
 	@Override
 	public String getDefaultExtension() {
@@ -120,13 +73,10 @@ public class DefinitionQueryExporter implements IQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
 	@Override
-	public boolean canExport(org.wcs.smart.query.model.Query query) {
-		if (query instanceof WaypointQuery){
-			return true;
-		}
-		return false;
-	}
+	public abstract  boolean canExport(org.wcs.smart.query.model.Query query);
 
+	public abstract void writeQuerySpecifics(org.wcs.smart.query.model.Query query, QueryType xmlQuery) throws Exception;
+	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -135,21 +85,14 @@ public class DefinitionQueryExporter implements IQueryExporter {
 			IProgressMonitor monitor) throws Exception {
 		Query wpquery = new Query();
 		QueryType xmlQuery = new QueryType();
+		wpquery.setQuery(xmlQuery);
 		
 		xmlQuery.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode());
 		xmlQuery.setName(query.getName());
-		xmlQuery.setDefinition(((WaypointQuery)query).getQueryFilter());
-		wpquery.setQuery(xmlQuery);
+		xmlQuery.setQueryType(query.getType().name());
 		
-		IFilter queryFilter = ((WaypointQuery)query).getFilter();
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			processFilter(queryFilter, xmlQuery, s);
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
-		}
+		writeQuerySpecifics(query, xmlQuery);
+		
 		
 		OutputStream fout = new BufferedOutputStream(new FileOutputStream(file));
 		try{
@@ -157,6 +100,42 @@ public class DefinitionQueryExporter implements IQueryExporter {
 		}finally{
 			fout.close();
 		}		
+	}
+	
+
+	/**
+	 * Converts a patrol option and associated uuid option to
+	 * a xml uuiditemtype
+	 * 
+	 * @param option
+	 * @param uuid
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
+	protected UuidItemType processPatrolOption(PatrolQueryOption option, String uuid, Session session) throws Exception{
+
+		if (option.getType() == PatrolQueryOptionType.UUID){
+			//we need to add a uuid type
+			UuidItemType item = new UuidItemType();
+			item.setUuid(uuid);
+			//find item in database
+			
+			String[] data = option.getNames(session, SmartUtils.decodeHex(uuid));
+			if (data != null){
+				int index = 0;
+				if (data.length > 1){
+					item.setId(data[0]);
+					index = 1;
+				}
+				for (;index < data.length; index++){
+					item.getValue().add(data[index]);
+				}
+			}
+			
+			return item;
+		}
+		return null;
 	}
 
 }

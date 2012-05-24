@@ -38,7 +38,7 @@ import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryResultItemFeature;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 
 /**
  * Shapefile query exporter.  Exports
@@ -47,7 +47,7 @@ import org.wcs.smart.query.model.waypoint.WaypointQuery;
  * @author Emily
  * @since 1.0.0
  */
-public class ShapeQueryExporter extends WaypointQueryExporter implements IQueryExporter{
+public class ShapeQueryExporter extends ObservationQueryExporter implements IQueryExporter{
 
     private ShapefileDataStore shapefile = null;    
     private ArrayList<SimpleFeature> features = null;
@@ -61,7 +61,7 @@ public class ShapeQueryExporter extends WaypointQueryExporter implements IQueryE
 	/**
 	 * Creates a shapefile and initialises the schema.
 	 * 
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#init()
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#init()
 	 */
 	@Override
 	protected void init() throws Exception {
@@ -73,7 +73,7 @@ public class ShapeQueryExporter extends WaypointQueryExporter implements IQueryE
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
 	protected void writeRow(QueryResultItem row) throws Exception {
@@ -81,7 +81,7 @@ public class ShapeQueryExporter extends WaypointQueryExporter implements IQueryE
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#finish()
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#finish()
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -105,7 +105,7 @@ public class ShapeQueryExporter extends WaypointQueryExporter implements IQueryE
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof WaypointQuery){
+		if (query instanceof ObservationQuery){
 			return true;
 		}
 		return false;
@@ -116,7 +116,7 @@ public class ShapeQueryExporter extends WaypointQueryExporter implements IQueryE
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor)
 			throws Exception {
-		WaypointQuery q = ((WaypointQuery)query);
+		ObservationQuery q = ((ObservationQuery)query);
 		super.setData(q.getLastResults(), q.getQueryColumns(), file);
 		super.export(monitor);
 		

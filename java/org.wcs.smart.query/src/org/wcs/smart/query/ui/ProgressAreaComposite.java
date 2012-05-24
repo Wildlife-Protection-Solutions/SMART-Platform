@@ -71,15 +71,15 @@ public class ProgressAreaComposite extends Composite {
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginLeft = 100;
 		gl.marginRight = 100;
-		gl.marginBottom = 150;
+//		gl.marginBottom = 50;
 		this.setLayout(gl);
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		outer = new Composite(this, SWT.NONE);
 		gl = new GridLayout(2, false);
-		gl.verticalSpacing = 15;
+//		gl.verticalSpacing = 15;
 		outer.setLayout(gl);
-		outer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		lblStatus = new Label(outer, SWT.NONE);
 		lblStatus.setText("");

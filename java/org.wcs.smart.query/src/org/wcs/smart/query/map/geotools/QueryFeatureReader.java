@@ -29,10 +29,10 @@ import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 
 /**
- * Feature reader for waypoint query.
+ * Feature reader for waypoint/observation query.
  * 
  * @author Emily
  * @since 1.0.0
@@ -41,7 +41,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 
 	private SimpleFeatureType ftype;
 	private Iterator<QueryResultItem> fIterator;
-	private WaypointQuery query;
+	private ObservationQuery query;
 	
 	/**
 	 * Creates a new feature reader.
@@ -49,7 +49,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	public QueryFeatureReader(WaypointQuery query,
+	public QueryFeatureReader(ObservationQuery query,
 			SimpleFeatureType ftype) {
 		
 		this.ftype = ftype;

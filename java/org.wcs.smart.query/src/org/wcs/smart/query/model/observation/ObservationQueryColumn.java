@@ -19,10 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model.waypoint;
+package org.wcs.smart.query.model.observation;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -35,12 +39,12 @@ import org.wcs.smart.query.model.QueryResultItem;
 
 /**
  * A column available for output 
- * by a waypoint query.
+ * by a observation query.
  * 
  * @author egouge
  * @since 1.0.0
  */
-public abstract class WaypointQueryColumn implements Cloneable{
+public abstract class ObservationQueryColumn implements Cloneable{
 
 
 	/**
@@ -71,7 +75,7 @@ public abstract class WaypointQueryColumn implements Cloneable{
 	 * @param key the unique identifier for the column
 	 * @param type the column data type
 	 */
-	public WaypointQueryColumn(String name, String key, ColumnType type){
+	public ObservationQueryColumn(String name, String key, ColumnType type){
 		this.name = name;
 		this.key = key;
 		this.type = type;
@@ -128,12 +132,12 @@ public abstract class WaypointQueryColumn implements Cloneable{
 		if (o == this){
 			return true;
 		}
-		if (!(o instanceof WaypointQueryColumn)){
+		if (!(o instanceof ObservationQueryColumn)){
 			return false;
 		}
 		
 		if (key != null){
-			return this.key.equals(((WaypointQueryColumn)o).key);
+			return this.key.equals(((ObservationQueryColumn)o).key);
 		}
 		return false;
 	}
@@ -161,10 +165,10 @@ public abstract class WaypointQueryColumn implements Cloneable{
 	/** Clones the object
 	 * @see java.lang.Object#clone()
 	 */
-	public abstract WaypointQueryColumn clone();
+	public abstract ObservationQueryColumn clone();
 	
 	
-	private static WaypointQueryColumn[] queryColumns = null;
+	private static ObservationQueryColumn[] queryColumns = null;
 	
 	/**
 	 * 
@@ -174,66 +178,77 @@ public abstract class WaypointQueryColumn implements Cloneable{
 	 * This function will access the database the first
 	 * time it is called, subsequent calls return cached values. 
 	 */
-	public static  WaypointQueryColumn[] getWaypointQueryColumns() {
+	public static  ObservationQueryColumn[] getWaypointQueryColumns() {
 		
 		if (queryColumns != null){
 			return cloneColumns(queryColumns);
 		}
 		
-		//load from the database 
-		DataModel dataModel = null;
-		PatrolOptions patrolOps = null;
-		Session session = HibernateManager.openSession();
-		
-		try {
-			patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-			session.beginTransaction();
-			dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-		
-		
-		ArrayList<WaypointQueryColumn> cols = new ArrayList<WaypointQueryColumn>();
-		
-		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
-			
-			FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
-			if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
-					item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+		Job j = new Job("load observation qury columns"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				//load from the database 
+				DataModel dataModel = null;
+				PatrolOptions patrolOps = null;
+				Session session = HibernateManager.openSession();
 				
-				if (patrolOps.getTrackDistanceDirection()){
-					cols.add(new FixedQueryColumn(item));
+				try {
+					patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					session.beginTransaction();
+					dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+					
+					ArrayList<ObservationQueryColumn> cols = new ArrayList<ObservationQueryColumn>();
+				
+					for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+						FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
+							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						
+							if (patrolOps.getTrackDistanceDirection()){
+								cols.add(new FixedQueryColumn(item));
+							}
+						}else{
+							cols.add(new FixedQueryColumn(item));
+						}
+					}
+
+					// add data model category columns
+					int numCategory = 0;
+					for (Category cat : dataModel.getActiveCategories()) {
+						numCategory = Math.max(numCategory, getDepth(cat));
+					}
+
+					for (int i = 0; i < numCategory; i++) {
+						cols.add(new CategoryQueryColumn("Observation Category  " + i, i));
+					}
+
+					for (Attribute att : dataModel.getAttributes()) {
+						String name = att.getName();
+						cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
+					}
+
+					queryColumns = cols.toArray(new ObservationQueryColumn[cols.size()]);
+				
+				} finally {
+					session.getTransaction().rollback();
+					session.close();
 				}
-			}else{
-				cols.add(new FixedQueryColumn(item));
+				return Status.OK_STATUS;
 			}
+		};
+		j.schedule();
+		try{
+			j.join();
+		}catch (Exception ex){
+			throw new IllegalStateException(ex);
 		}
-
-
-		// add data model category columns
-		int numCategory = 0;
-		for (Category cat : dataModel.getActiveCategories()) {
-			numCategory = Math.max(numCategory, getDepth(cat));
-		}
-
-		for (int i = 0; i < numCategory; i++) {
-			cols.add(new CategoryQueryColumn("Observation Category  " + i, i));
-		}
-
-		for (Attribute att : dataModel.getAttributes()) {
-			String name = att.getName();
-			cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
-		}
-
-		queryColumns = cols.toArray(new WaypointQueryColumn[cols.size()]);
 		
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
-		}
 		return  cloneColumns(queryColumns);
 	}
 	
-	private static WaypointQueryColumn[] cloneColumns(WaypointQueryColumn[] cols){
-		WaypointQueryColumn[] copies = new WaypointQueryColumn[cols.length];
+	private static ObservationQueryColumn[] cloneColumns(ObservationQueryColumn[] cols){
+		ObservationQueryColumn[] copies = new ObservationQueryColumn[cols.length];
 		for (int i = 0; i < copies.length; i ++){
 			copies[i] = cols[i].clone();
 		}

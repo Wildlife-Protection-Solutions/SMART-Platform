@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model.waypoint;
+package org.wcs.smart.query.model.observation;
 
 import org.wcs.smart.query.model.QueryResultItem;
 
@@ -34,7 +34,7 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class CategoryQueryColumn extends WaypointQueryColumn{
+public class CategoryQueryColumn extends ObservationQueryColumn{
 
 	private int level;	//the category level in the database.
 		
@@ -51,7 +51,7 @@ public class CategoryQueryColumn extends WaypointQueryColumn{
 	
 
 	/**
-	 * @see org.wcs.smart.query.model.waypoint.WaypointQueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
 	public Object getValue(QueryResultItem item) {
@@ -72,10 +72,10 @@ public class CategoryQueryColumn extends WaypointQueryColumn{
 
 
 	/**
-	 * @see org.wcs.smart.query.model.waypoint.WaypointQueryColumn#clone()
+	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#clone()
 	 */
 	@Override
-	public WaypointQueryColumn clone() {
+	public ObservationQueryColumn clone() {
 		CategoryQueryColumn newColumn = new CategoryQueryColumn(super.getName(), level);
 		return newColumn;
 	}

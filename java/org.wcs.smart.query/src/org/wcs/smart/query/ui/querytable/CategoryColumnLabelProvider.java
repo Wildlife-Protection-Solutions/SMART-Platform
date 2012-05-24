@@ -23,7 +23,7 @@ package org.wcs.smart.query.ui.querytable;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn;
 
 /**
  * 
@@ -37,9 +37,9 @@ import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
  * @since 1.0.0
  */
 public class CategoryColumnLabelProvider extends ColumnLabelProvider {
-	private WaypointQueryColumn column;
+	private ObservationQueryColumn column;
 
-	public CategoryColumnLabelProvider(WaypointQueryColumn column) {
+	public CategoryColumnLabelProvider(ObservationQueryColumn column) {
 		this.column = column;
 	}
 

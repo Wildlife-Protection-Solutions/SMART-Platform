@@ -27,25 +27,25 @@ import java.io.FileWriter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * CSV Query exporter for waypoint queries.
+ * CSV Query exporter for observation queries.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class CsvWaypointQueryExporter extends WaypointQueryExporter implements IQueryExporter {
+public class CsvObservationQueryExporter extends ObservationQueryExporter implements IQueryExporter {
 
 	private CSVWriter writer = null;
 	
 	/**
 	 * Creates a new exporter that exports to csv format
 	 */
-	public CsvWaypointQueryExporter(){}
+	public CsvObservationQueryExporter(){}
 	
 	/**
 	 * Close csv writer
@@ -59,7 +59,7 @@ public class CsvWaypointQueryExporter extends WaypointQueryExporter implements I
 	 * Initialise csv writer and writer
 	 * header line.
 	 * 
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#init()
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#init()
 	 */
 	@Override
 	protected void init() throws Exception {
@@ -73,7 +73,7 @@ public class CsvWaypointQueryExporter extends WaypointQueryExporter implements I
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem, java.io.OutputStream)
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem, java.io.OutputStream)
 	 */
 	@Override
 	protected void writeRow(QueryResultItem row)
@@ -87,7 +87,7 @@ public class CsvWaypointQueryExporter extends WaypointQueryExporter implements I
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#getName()
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getName()
 	 */
 	@Override
 	public String getName() {
@@ -95,7 +95,7 @@ public class CsvWaypointQueryExporter extends WaypointQueryExporter implements I
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.WaypointQueryExporter#getDefaultExtension()
+	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getDefaultExtension()
 	 */
 	@Override
 	public String getDefaultExtension() {
@@ -108,7 +108,7 @@ public class CsvWaypointQueryExporter extends WaypointQueryExporter implements I
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof WaypointQuery){
+		if (query instanceof ObservationQuery){
 			return true;
 		}
 		return false;
@@ -119,7 +119,7 @@ public class CsvWaypointQueryExporter extends WaypointQueryExporter implements I
 	 */
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
-		WaypointQuery q = ((WaypointQuery)query);
+		ObservationQuery q = ((ObservationQuery)query);
 		
 		super.setData(q.getLastResults(), q.getQueryColumns(), file);
 		super.export(monitor);

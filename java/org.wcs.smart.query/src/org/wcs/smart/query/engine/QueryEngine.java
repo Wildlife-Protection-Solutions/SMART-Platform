@@ -27,7 +27,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 
 /**
  * A query engine for executing
@@ -38,7 +38,7 @@ import org.wcs.smart.query.model.waypoint.WaypointQuery;
  */
 public interface QueryEngine {
 
-	public List<QueryResultItem> executeQuery(final WaypointQuery query,
+	public List<QueryResultItem> executeQuery(final ObservationQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException ;
 }

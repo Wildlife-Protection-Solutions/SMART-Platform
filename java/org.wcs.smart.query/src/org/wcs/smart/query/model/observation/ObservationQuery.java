@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model.waypoint;
+package org.wcs.smart.query.model.observation;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -47,14 +47,17 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
- * A class to represent a waypoint query.
+ * A class to represent an observation query.
+ * <p>Observation queries query each observation
+ * which consists of a category and a 
+ * set of attributes.</p>
  * 
  * @author Emily
  * @since 1.0.0
  */
 @Entity
 @Table(name="smart.waypoint_query")
-public class WaypointQuery extends Query{
+public class ObservationQuery extends Query{
 	
 	private String strQueryFilter;
 	private IFilter queryFilter;	//cached copy of the parsed query
@@ -63,7 +66,7 @@ public class WaypointQuery extends Query{
 	private DateFilter dateFilter;
 	
 	private String visibleTableColumnKeys = null;
-	private List<WaypointQueryColumn> queryColumns = null;
+	private List<ObservationQueryColumn> queryColumns = null;
 	
 	private List<QueryResultItem> lastResults  = null;
 	
@@ -76,7 +79,7 @@ public class WaypointQuery extends Query{
 	 * Creates a new waypoint query with the default
 	 * conservation area filter and no date filter
 	 */
-	public WaypointQuery(){
+	public ObservationQuery(){
 		super();
 		setName("<No Name Query>");
 		caFilter = new ConservationAreaFilter();
@@ -94,7 +97,7 @@ public class WaypointQuery extends Query{
 	 * 
 	 * @param pFilter query filter
 	 */
-	public WaypointQuery(IFilter pFilter){
+	public ObservationQuery(IFilter pFilter){
 		this();
 		
 		this.queryFilter = pFilter;
@@ -146,7 +149,7 @@ public class WaypointQuery extends Query{
 	public void updateVisibleColumns(){
 		StringBuilder sb = new StringBuilder();
 		boolean all = true;
-		for (WaypointQueryColumn col : queryColumns){
+		for (ObservationQueryColumn col : queryColumns){
 			if (col.isVisible() ){
 				sb.append(col.getKey());
 				sb.append(",");
@@ -168,7 +171,7 @@ public class WaypointQuery extends Query{
 	 * @return list of output columns available to the query.
 	 */
 	@Transient
-	public List<WaypointQueryColumn> getQueryColumns(){
+	public List<ObservationQueryColumn> getQueryColumns(){
 		if (this.queryColumns == null){
 			initQueryColumns();
 		}
@@ -179,9 +182,9 @@ public class WaypointQuery extends Query{
 	 * Loads the query columns
 	 */
 	private void initQueryColumns(){
-		WaypointQueryColumn[] cols = WaypointQueryColumn.getWaypointQueryColumns();
+		ObservationQueryColumn[] cols = ObservationQueryColumn.getWaypointQueryColumns();
 		
-		queryColumns = new ArrayList<WaypointQueryColumn>();
+		queryColumns = new ArrayList<ObservationQueryColumn>();
 		HashSet<String> visible = null;
 		if (visibleTableColumnKeys != null){
 			String[] bits = visibleTableColumnKeys.split(",");
@@ -369,8 +372,8 @@ public class WaypointQuery extends Query{
 	 * @see java.lang.Object#clone()
 	 */
 	@Transient
-	public WaypointQuery clone(){
-		WaypointQuery q = new WaypointQuery();
+	public ObservationQuery clone(){
+		ObservationQuery q = new ObservationQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());

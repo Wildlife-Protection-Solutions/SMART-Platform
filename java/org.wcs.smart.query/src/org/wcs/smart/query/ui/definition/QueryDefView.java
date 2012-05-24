@@ -39,6 +39,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryEventManager;
@@ -50,11 +51,11 @@ import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection;
 import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
-import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 
 /**
  * A view for building query definition.
@@ -197,7 +198,7 @@ public class QueryDefView extends ViewPart {
 		emptyComp = new Composite(stackComp, SWT.NONE);
 		emptyComp.setLayout(new GridLayout(1, false));
 		
-		WaypointQueryDefinitionComposite wp = new WaypointQueryDefinitionComposite(stackComp, this);
+		ObservationQueryDefinitionComposite wp = new ObservationQueryDefinitionComposite(stackComp, this);
 		definitionComposites.put(QueryType.OBSERVATION, wp);
 		SummaryQueryDefinitionComposite sum = new SummaryQueryDefinitionComposite(stackComp, this);
 		definitionComposites.put(QueryType.SUMMARY, sum);
@@ -278,6 +279,21 @@ public class QueryDefView extends ViewPart {
 											it = getDropItemFactory().createAttributeValueDropItem((CategoryAttribute) object.getObject());
 										}else if (object.getObject() instanceof Category){
 										it = getDropItemFactory().createCategoryValueDropItem((Category) object.getObject());
+										}
+									}else{
+										//category
+										if(object.getObject() instanceof Category){
+											it = getDropItemFactory().createCategoryGroupByDropItem( (Category) object.getObject()  );
+										}else if (object.getObject() instanceof Attribute){
+											it = getDropItemFactory().createAttributeGroupByDropItem((Attribute) object.getObject());
+										}else if (object.getObject() instanceof CategoryAttribute){
+											it = getDropItemFactory().createAttributeGroupByDropItem((CategoryAttribute) object.getObject());
+										}else if (object.getObject() instanceof AttributeTreeNode){
+											if (object.getObject2() != null){
+												it = getDropItemFactory().createAttributeTreeNodeGroupByDropItem((AttributeTreeNode)object.getObject(), (Category)object.getObject2());
+											}else{
+												it = getDropItemFactory().createAttributeTreeNodeGroupByDropItem((AttributeTreeNode)object.getObject());
+											}
 										}
 									}
 									if (it != null){

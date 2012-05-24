@@ -32,6 +32,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -82,11 +83,11 @@ public class QueryHibernateManager {
 		List<?> datab = b.list();
 		
 		int valuea = 1;
-		if( dataa != null && dataa.size() >= 1){
+		if( dataa != null && dataa.size() >= 1 && dataa.get(0) != null){
 			valuea = Integer.parseInt( (String)dataa.get(0) );
 		}
 		int valueb = 1;
-		if( datab != null && datab.size() >= 1){
+		if( datab != null && datab.size() >= 1 && datab.get(0) != null){
 			valueb = Integer.parseInt( (String)datab.get(0) );
 		}
 		int x = Math.max(valuea, valueb);
@@ -401,5 +402,140 @@ public class QueryHibernateManager {
 			return results.get(0);
 		}
 		
+	}
+	
+	
+	/**
+	 * 
+	 * Gets all the categories at a given level in the data tree.
+	 * @param session
+	 * @param level
+	 * @return
+	 */
+	public static List<Category> getCategories(Session session, int level){
+		String query = "FROM Category WHERE conservationArea = :ca AND smart.hkeyLength(hkey) = :level";
+		Query q = session.createQuery(query);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("level", level);
+		
+		List<Category> cats = q.list();
+		return cats;
+	}
+	
+	/**
+	 * 
+	 * Gets all the categories at a given level in the data tree.  Throws and exception if not found.
+	 * @param session
+	 * @param level
+	 * @return
+	 */
+	public static List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level){
+		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level";
+		Query q = session.createQuery(query);
+		q.setParameter("uuid", uuid);
+		q.setParameter("level", level);
+		
+		List<AttributeTreeNode> nodes = q.list();
+		return nodes;
+	}
+	
+	
+	
+	/**
+	 * Validates that a category with the given hkey exists.  Throws and exception if not found.
+	 * @param hkey
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void validateCategory(String hkey, Session session) throws Exception{
+		String hql = " FROM Category Where conservationArea = :ca and hkey = :key";
+		org.hibernate.Query q = session.createQuery(hql);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("key", hkey);
+		
+		if (q.list().size() != 1){
+			throw new Exception ("Could not find Category with key '" + hkey + "' in datamodel. ");
+		}
+	}
+	/**
+	 * Validates that an atttribute with the given key exists.  Throws an exception if not found.
+	 * @param key
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void validateAttribute(String key, Session session) throws Exception{
+		String hql = " FROM Attribute Where conservationArea = :ca and keyId = :key";
+		org.hibernate.Query q = session.createQuery(hql);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("key", key);
+		
+		if (q.list().size() != 1){
+			throw new Exception ("Could not find Attribute with key '" + key + "' in datamodel. ");
+		}
+	}
+	
+	/**
+	 * Validates that a given attribute list item exists.  Throws an exception if not found.
+	 * @param key
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void validateAttributeListItem(String key, Session session) throws Exception{
+		
+		String hql = " FROM AttributeListItem ai join ai.attribute a Where a.conservationArea = :ca and ai.keyId = :key";
+		org.hibernate.Query q = session.createQuery(hql);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("key", key);
+		
+		if (q.list().size() != 1){
+			throw new Exception ("Could not find Attribute List Item with key '" + key + "' in datamodel. ");
+		}
+	}
+	
+
+	/**
+	 * Validates that a given attribute tree node item exists.  Throws an exception if not found.
+	 * @param key
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void validateAttributeTreeNode(String key, Session session) throws Exception{
+		String hql = " FROM AttributeTreeNode ai join ai.attribute a Where a.conservationArea = :ca and ai.hkey = :hkey";
+		org.hibernate.Query q = session.createQuery(hql);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("hkey", key);
+		
+		if (q.list().size() != 1){
+			throw new Exception ("Could not find Attribute Tree Node with key '" + key + "' in datamodel. ");
+		}
+	}
+	
+	/**
+	 * Looks up the name of a simplelistitem.
+	 * 
+	 * @param langCode
+	 * @param value
+	 * @param objectType
+	 * @param session
+	 * @return
+	 */
+	public static SimpleListItem findValue(String langCode, String value, String objectType, Session session, List<String> warnings){
+		
+		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca ";
+		
+		org.hibernate.Query query = session.createQuery(sql);
+		query.setParameter("cd", langCode);
+		query.setParameter("value", value);
+		query.setParameter("ca", SmartDB.getCurrentConservationArea());
+		
+		List<?> results = query.list();
+		if (results.size() == 0){
+			return null;
+		}else if (results.size() > 1){
+			warnings.add("Multiple options found for " + objectType + " for value '" + value + "'. The first value found will be used.");
+			return (SimpleListItem)results.get(0);
+		}else{
+			return (SimpleListItem)results.get(0);
+		}
 	}
 }

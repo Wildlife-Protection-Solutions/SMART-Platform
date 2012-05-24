@@ -26,8 +26,8 @@ import java.util.Date;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn.ColumnType;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn.ColumnType;
 
 /**
  * Class represents one of the fixed table columns that do not change from
@@ -43,7 +43,7 @@ import org.wcs.smart.query.model.waypoint.WaypointQueryColumn.ColumnType;
  */
 public class FixedColumnLabelProvider extends ColumnLabelProvider {
 
-	private WaypointQueryColumn column;
+	private ObservationQueryColumn column;
 
 	/**
 	 * Creates a new fixed table column.
@@ -51,7 +51,7 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 	 * @param column
 	 *            the column definition
 	 */
-	public FixedColumnLabelProvider(WaypointQueryColumn column) {
+	public FixedColumnLabelProvider(ObservationQueryColumn column) {
 		this.column = column;
 	}
 

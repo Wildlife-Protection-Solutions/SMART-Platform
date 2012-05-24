@@ -99,82 +99,79 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String VALUE_ICON = "org.wcs.smart.query.value";
 	
-
+	/**
+	 * The value distance icon
+	 */
+	public static final String VALUE_DISTANCE_ICON = "org.wcs.smart.query.valuedistance";
+	
+	/**
+	 * The value num days icon
+	 */
+	public static final String VALUE_NUM_DAYS_ICON = "org.wcs.smart.query.valuenumdays";
+	
+	/**
+	 * The value number of employees icon
+	 */
+	public static final String VALUE_NUM_EMPLOYEES_ICON = "org.wcs.smart.query.valuenumemployees";
+	/**
+	 * The value number of number of hours icon
+	 */
+	public static final String VALUE_NUM_HOURS_ICON = "org.wcs.smart.query.valuenumhours";
+	/**
+	 * The value number of nights icon
+	 */
+	public static final String VALUE_NUM_NIGHTS_ICON = "org.wcs.smart.query.valuenumnights";
+	/**
+	 * The value number of patrols icon
+	 */
+	public static final String VALUE_NUM_PATROLS_ICON = "org.wcs.smart.query.valuenumpatrols";
+	
+	/**
+	 * Person days icons
+	 */
+	public static final String VALUE_PERSON_DAYS_ICON = "org.wcs.smart.query.valuepersondays";
+	
+	/**
+	 * Person hours icons
+	 */
+	public static final String VALUE_PERSON_HOURS_ICON = "org.wcs.smart.query.valuepersonhours";
 	
 	/*
 	 * Load images
 	 */
 	static {
-		ImageDescriptor descriptor = AbstractUIPlugin
-				.imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/delete.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(DELETE_MINI_ICON, descriptor);
-		}
-
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/querypatrol.gif"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(QUERY_ICON, descriptor);
-		}
-
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/summary_query.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(SUMMARY_QUERY_ICON, descriptor);
-		}
+		addImage("images/icons/obj16/delete.png",DELETE_MINI_ICON);
 		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/folder.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(FOLDER_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/waypoint_query.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(WAYPOINT_QUERY_ICON, descriptor);
-		}
+		addImage("images/icons/obj16/querypatrol.gif",QUERY_ICON);
+		addImage("images/icons/obj16/summary_query.png",SUMMARY_QUERY_ICON);
+		addImage("images/icons/obj16/folder.png",FOLDER_ICON);
+		addImage("images/icons/obj16/waypoint_query.png",WAYPOINT_QUERY_ICON);	
 		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/calendar.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(CALENDAR_ICON, descriptor);
-		}
+		addImage("images/icons/obj16/calendar.png",CALENDAR_ICON);
+		addImage("images/icons/obj16/calendar_day.png",CALENDAR_DAY_ICON);
+		addImage("images/icons/obj16/calendar_week.png",CALENDAR_WEEK_ICON);
+		addImage("images/icons/obj16/calendar_month.png",CALENDAR_MONTH_ICON);
+			
+		addImage("images/icons/obj16/calendar_year.png",CALENDAR_YEAR_ICON);
+		addImage("images/icons/obj16/group_by.png",GROUPBY_ICON);
+		addImage("images/icons/obj16/values.png",VALUE_ICON);
 		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/calendar_day.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(CALENDAR_DAY_ICON, descriptor);
-		}
+		addImage("images/icons/obj16/value_distance.png",VALUE_DISTANCE_ICON);
+		addImage("images/icons/obj16/value_numDays.png",VALUE_NUM_DAYS_ICON);
+		addImage("images/icons/obj16/value_numEmployees.png",VALUE_NUM_EMPLOYEES_ICON);
+		addImage("images/icons/obj16/value_numHours.png",VALUE_NUM_HOURS_ICON);
+		addImage("images/icons/obj16/value_numNights.png",VALUE_NUM_NIGHTS_ICON);
+		addImage("images/icons/obj16/value_numPatrol.png",VALUE_NUM_PATROLS_ICON);
+		addImage("images/icons/obj16/value_personDays.png",VALUE_PERSON_DAYS_ICON);
+		addImage("images/icons/obj16/value_personHours.png",VALUE_PERSON_HOURS_ICON);
 		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/calendar_week.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(CALENDAR_WEEK_ICON, descriptor);
-		}
 		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/calendar_month.png"); //$NON-NLS-1$
+	}
+	
+	private static void addImage(String path, String icon){
+		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID, path); 
 		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(CALENDAR_MONTH_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/calendar_year.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(CALENDAR_YEAR_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/group_by.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(GROUPBY_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID,
-				"images/icons/obj16/values.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(VALUE_ICON, descriptor);
+			JFaceResources.getImageRegistry().put(icon, descriptor);
 		}
 	}
 	

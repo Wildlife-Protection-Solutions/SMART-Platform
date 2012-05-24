@@ -163,8 +163,8 @@ public abstract class DropItem {
 		
 		
 		Composite inner = new Composite(main, SWT.BORDER);
-		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridData)inner.getLayoutData()).heightHint = 23;
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		//((GridData)inner.getLayoutData()).heightHint = 23;
 
 		layout = new GridLayout(2, false);
 		layout.marginBottom = 1;
@@ -178,6 +178,7 @@ public abstract class DropItem {
 		inner.setLayout(layout);
 		
 		createComposite(inner);
+		
 		Label lblX = new Label(inner, SWT.NONE);
 		lblX.setToolTipText("delete item");
 		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));

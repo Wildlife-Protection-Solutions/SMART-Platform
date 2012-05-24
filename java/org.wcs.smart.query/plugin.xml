@@ -31,7 +31,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.query.ui.waypoint.QueryResultsEditor"
+            class="org.wcs.smart.query.ui.observation.QueryResultsEditor"
             default="false"
             icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
@@ -706,7 +706,7 @@
             class="org.wcs.smart.query.model.Query">
       </class>
       <class
-            class="org.wcs.smart.query.model.waypoint.WaypointQuery">
+            class="org.wcs.smart.query.model.observation.ObservationQuery">
       </class>
       <class
             class="org.wcs.smart.query.model.SummaryQuery">
@@ -735,13 +735,16 @@
             class="org.wcs.smart.query.export.ShapeQueryExporter">
       </Exporter>
       <Exporter
-            class="org.wcs.smart.query.export.DefinitionQueryExporter">
-      </Exporter>
-      <Exporter
-            class="org.wcs.smart.query.export.CsvWaypointQueryExporter">
+            class="org.wcs.smart.query.export.CsvObservationQueryExporter">
       </Exporter>
       <Exporter
             class="org.wcs.smart.query.export.CsvSummaryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.ObservationQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.SummaryQueryDefinitionExporter">
       </Exporter>
    </extension>
 

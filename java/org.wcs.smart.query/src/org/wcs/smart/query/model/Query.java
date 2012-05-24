@@ -54,7 +54,7 @@ public abstract class Query {
 	//if you add another query type you must update
 	//the queryInput constructor
 	public enum QueryType{
-		OBSERVATION("WaypointQuery"),
+		OBSERVATION("ObservationQuery"),
 		SUMMARY("SummaryQuery");
 		
 		private String objectName;

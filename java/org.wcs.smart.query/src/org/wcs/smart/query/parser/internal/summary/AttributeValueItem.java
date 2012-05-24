@@ -174,4 +174,35 @@ public class AttributeValueItem implements IValueItem {
 		Category cat = QueryHibernateManager.getCategory(session, categoryKey);
 		return DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
 	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
+	 */
+	public boolean isCategory(){
+		return categoryKey != null;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
+	 */
+	public void validateDatabase(Session session) throws Exception{
+		if (categoryKey != null){
+			//ensure category key exists
+			QueryHibernateManager.validateCategory(categoryKey, session);
+		}else if (attributeKey != null){
+			//ensure attribute key exists
+			QueryHibernateManager.validateAttribute(attributeKey, session);
+		}else if(aggregationKey != null){
+			boolean found = false;
+			for (Aggregation agg : DataModel.getAggregations()){
+				if (agg.getName().equalsIgnoreCase(aggregationKey)){
+					found = true;
+					break;
+				}
+			}
+			if (!found){
+				throw new Exception("Aggregation : " + aggregationKey + " not supported.");
+			}
+		}
+	}
 }

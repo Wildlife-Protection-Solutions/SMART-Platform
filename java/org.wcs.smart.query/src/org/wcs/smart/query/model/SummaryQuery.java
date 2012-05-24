@@ -76,7 +76,7 @@ public class SummaryQuery extends Query {
 	private SummaryQueryResult lastResults;
 	
 	/**
-	 * Creates a new waypoint query with the default
+	 * Creates a new summary query with the default
 	 * conservation area filter and no date filter
 	 */
 	public SummaryQuery(){

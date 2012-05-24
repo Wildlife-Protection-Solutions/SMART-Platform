@@ -28,9 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.measure.unit.BaseUnit;
-import javax.measure.unit.Unit;
-
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
@@ -59,7 +56,7 @@ import org.wcs.smart.util.SmartUtils;
 /**
  * Class that defines Patrol based options for
  * queries.  This includes both values for summary queries
- * and filters for summary and waypoint queries.
+ * and filters for summary and observation queries.
  * 
  * @author egouge
  * @since 1.0.0
@@ -82,7 +79,7 @@ public class PatrolQueryOptions {
 	};
 	
 	/**
-	 * Patrol filter options for summary and waypoint queries
+	 * Patrol filter options for summary and observation queries
 	 */
 	public final static PatrolQueryOption[] PATROL_FILTER_OPTIONS = {
 			PatrolQueryOption.ID,
@@ -134,6 +131,28 @@ public class PatrolQueryOptions {
 		
 		public Class<?> getOptionClass(){
 			return this.clazz;
+		}
+		
+		public Image getIcon(){
+			switch(this){
+				case NUM_PATROLS:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_PATROLS_ICON);
+				case NUM_DAYS:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_DAYS_ICON);
+				case NUM_NIGHTS:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_NIGHTS_ICON);
+				case DISTANCE:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_DISTANCE_ICON);
+				case NUM_HOURS:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON);
+				case NUM_MEMBERS:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_EMPLOYEES_ICON);
+				case MAN_HOURS:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_PERSON_HOURS_ICON);
+				case MAN_DAYS:
+					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_PERSON_DAYS_ICON);
+			}
+			return null;
 		}
 	}
 	

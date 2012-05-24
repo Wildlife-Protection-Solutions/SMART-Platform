@@ -21,11 +21,13 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
  * Interface for group by parts of summary queries.
@@ -42,7 +44,7 @@ public interface IGroupBy {
 	 * @since 1.0.0
 	 */
 	public enum GroupByType{
-		STRING, BYTE, DATE
+		STRING, BYTE, DATE, KEY
 	}
 	
 	/**
@@ -50,6 +52,22 @@ public interface IGroupBy {
 	 * representation
 	 */
 	public String asString();
+	
+	/**
+	 * 
+	 * The key part of a group by is 
+	 * the part of the group by that uniquely identifies
+	 * what is being grouped by but does not include
+	 * which particular items should be included in
+	 * the results.  For example for CategoryGoupBys
+	 * <  CATEGORY_GROUP_BY : "category:" < LEVEL > ":" ( < DM_KEY > ":")* >
+	 * the key is the <  CATEGORY_GROUP_BY : "category:" < LEVEL> >.
+	 * 
+	 * 
+	 * @return only the key part of the 
+	 * group by
+	 */
+	public String getKeyPart();
 
 	/**
 	 * @return the group by type
@@ -68,4 +86,29 @@ public interface IGroupBy {
 	 * @return
 	 */
 	public DropItem asDropItem(Session session);
+	
+	/**
+	 * @return <code>true</code> if group by part includes category
+	 */
+	public boolean isCategory();
+	
+	
+	/**
+	 * Validates the current value item against the database.  This includes
+	 * ensuring that any keys/uuids exist in the database and updating
+	 * if required.
+	 * 
+	 * <p>Warnings are created when the process can continue but
+	 * incorrect values my be substitued.  Errors are thrown 
+	 * if the process cannot continue (ie attribute key not found in database).
+	 * </p>
+	 * 
+	 * @param langCode - the language code of the uuid lookup items
+	 * @param uuidLookup - a mapping from uuid to the associated name items can attempt to
+	 * be matched to names if uuids do not match
+	 * @param session
+	 * @return list of warnings or null if no warnings
+	 * @throws Exception if the item cannot be validated
+	 */
+	public List<String> validateAndImport(String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception;
 }

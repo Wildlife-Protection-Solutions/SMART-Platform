@@ -48,8 +48,8 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
+import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn;
 
 /**
  * Dialog box for modifying query information.  This includes the query
@@ -140,15 +140,15 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(query.getOwner().getLabel());
 		
-		if (query instanceof WaypointQuery){
-			createWaypointQueryOptions(main);	
+		if (query instanceof ObservationQuery){
+			createObservationQueryOptions(main);	
 		}
 		
 		return main;
 	}
 
 
-	private void createWaypointQueryOptions(Composite main) {
+	private void createObservationQueryOptions(Composite main) {
 		Label lblTableColumns = new Label(main, SWT.NONE);
 		lblTableColumns.setText("Output Columns:");
 		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -197,12 +197,12 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			query.setName(txtName.getText());
 		}
 		
-		if (query instanceof WaypointQuery){
-			List<WaypointQueryColumn> cols = ((WaypointQuery)query).getQueryColumns();
-			for (WaypointQueryColumn col : cols){
+		if (query instanceof ObservationQuery){
+			List<ObservationQueryColumn> cols = ((ObservationQuery)query).getQueryColumns();
+			for (ObservationQueryColumn col : cols){
 				col.setVisible( columnViewer.getChecked(col) );
 			}
-			((WaypointQuery) query).updateVisibleColumns();
+			((ObservationQuery) query).updateVisibleColumns();
 		}
 		setChangesMade(false);
 		return true;
@@ -217,14 +217,14 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		columnViewer.setContentProvider(ArrayContentProvider.getInstance());
 		columnViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
-				if (element instanceof WaypointQueryColumn){
-					return ((WaypointQueryColumn)element).getName();
+				if (element instanceof ObservationQueryColumn){
+					return ((ObservationQueryColumn)element).getName();
 				}
 				return super.getText(element);
 			}
 		});
 		
-		List<WaypointQueryColumn> cols = ((WaypointQuery)query).getQueryColumns();
+		List<ObservationQueryColumn> cols = ((ObservationQuery)query).getQueryColumns();
 		columnViewer.setInput(cols.toArray());
 		columnViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -235,7 +235,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		
 
 		
-		for (WaypointQueryColumn col : cols){
+		for (ObservationQueryColumn col : cols){
 			columnViewer.setChecked(col, col.isVisible());
 		}
 		

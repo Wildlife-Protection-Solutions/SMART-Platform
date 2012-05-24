@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.waypoint;
+package org.wcs.smart.query.ui.observation;
 
 import java.io.IOException;
 import java.util.List;

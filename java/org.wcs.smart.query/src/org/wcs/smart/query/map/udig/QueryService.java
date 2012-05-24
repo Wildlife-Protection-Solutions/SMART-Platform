@@ -41,7 +41,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 
 /**
  * A udig service for a smart waypoint queries.
@@ -63,7 +63,7 @@ public class QueryService extends IService {
 	private QueryDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
-	private WaypointQuery query = null;
+	private ObservationQuery query = null;
 	
 	/**
 	 * Creates a new query service 
@@ -80,7 +80,7 @@ public class QueryService extends IService {
 	 * 
 	 * @param query waypoint query
 	 */
-	public QueryService(WaypointQuery query){
+	public QueryService(ObservationQuery query){
 		this.query = query;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
@@ -91,7 +91,7 @@ public class QueryService extends IService {
 	/**
 	 * @return the waypoint query 
 	 */
-	public WaypointQuery getQuery(){
+	public ObservationQuery getQuery(){
 		return this.query;
 	}
 	

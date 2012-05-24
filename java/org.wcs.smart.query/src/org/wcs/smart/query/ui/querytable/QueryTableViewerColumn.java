@@ -27,10 +27,10 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.wcs.smart.query.model.waypoint.AttributeQueryColumn;
-import org.wcs.smart.query.model.waypoint.CategoryQueryColumn;
-import org.wcs.smart.query.model.waypoint.FixedQueryColumn;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
+import org.wcs.smart.query.model.observation.AttributeQueryColumn;
+import org.wcs.smart.query.model.observation.CategoryQueryColumn;
+import org.wcs.smart.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn;
 
 /**
  * A table viewer column for the query results table viewer.
@@ -40,10 +40,10 @@ import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
  */
 public class QueryTableViewerColumn {
 	
-	private WaypointQueryColumn column;
+	private ObservationQueryColumn column;
 	private TableViewerColumn tcolumn;
 	
-	private static ColumnLabelProvider getLabelProvider(WaypointQueryColumn column){
+	private static ColumnLabelProvider getLabelProvider(ObservationQueryColumn column){
 		if (column instanceof FixedQueryColumn){
 			return new FixedColumnLabelProvider(column);
 		}else if (column instanceof AttributeQueryColumn){
@@ -61,7 +61,7 @@ public class QueryTableViewerColumn {
 	 * @param column the column
 	 */
 	public QueryTableViewerColumn(TableViewer viewer, 
-			WaypointQueryColumn column,
+			ObservationQueryColumn column,
 			final QueryResultItemComparator sorter){
 		this.column = column;
 		
@@ -110,7 +110,7 @@ public class QueryTableViewerColumn {
 	/**
 	 * @return the query results column represented by this table column
 	 */
-	public WaypointQueryColumn getColumn(){
+	public ObservationQueryColumn getColumn(){
 		return this.column;
 	}
 	

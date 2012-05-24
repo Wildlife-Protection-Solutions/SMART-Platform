@@ -26,8 +26,8 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
-import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 
 /**
  * Save as handler

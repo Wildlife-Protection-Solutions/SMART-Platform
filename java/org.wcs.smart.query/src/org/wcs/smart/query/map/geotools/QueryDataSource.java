@@ -32,8 +32,8 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
+import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn;
 
 /**
  * Geotools data source for waypoint query.
@@ -48,7 +48,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 */
 	public static final String WAYPOINT_TYPE = "Waypoint";
 	
-	private WaypointQuery query;
+	private ObservationQuery query;
 	
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
@@ -57,7 +57,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public QueryDataSource(WaypointQuery query){
+	public QueryDataSource(ObservationQuery query){
 		this.query = query;
 	}
 
@@ -119,7 +119,7 @@ public class QueryDataSource extends AbstractDataStore{
 	}
 	
 	
-	public static String getFeatureSchemaDef(List<WaypointQueryColumn> columns){
+	public static String getFeatureSchemaDef(List<ObservationQueryColumn> columns){
 		
 		StringBuilder sb = new StringBuilder();
 		

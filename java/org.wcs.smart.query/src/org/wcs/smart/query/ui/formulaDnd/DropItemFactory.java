@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui.formulaDnd;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
@@ -217,4 +218,75 @@ public class DropItemFactory {
 	public DropItem createCategoryValueDropItem(Category category){
 		return new CategoryValueDropItem(category);
 	}	
+	
+	/**
+	 * Creates a new category group by drop item.  The category
+	 * provided should be the parent category.
+	 * 
+	 * @param category parent group by category
+	 * @return
+	 */
+	public DropItem createCategoryGroupByDropItem(Category category){
+		return new CategoryGroupByDropItem(category);
+	}
+	
+	public DropItem createCategoryGroupByDropItem(int treeLevel){
+		return new CategoryGroupByDropItem(treeLevel);
+	}
+	
+	/**
+	 * Creates a new category group by drop item.  The category
+	 * provided should be the parent category.
+	 * 
+	 * @param category parent group by category
+	 * @return
+	 */
+	public DropItem createAttributeGroupByDropItem(Attribute attribute){
+		if (attribute.getType() == AttributeType.LIST){
+			return new AttributeListGroupByDropItem(attribute);
+		}else if (attribute.getType() == AttributeType.TREE){
+			
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Creates a new category group by drop item.  The category
+	 * provided should be the parent category.
+	 * 
+	 * @param category parent group by category
+	 * @return
+	 */
+	public DropItem createAttributeGroupByDropItem(CategoryAttribute catAttribute){
+		if (catAttribute.getAttribute().getType() == AttributeType.LIST){
+			return new AttributeListGroupByDropItem(catAttribute);
+		}else if (catAttribute.getAttribute().getType() == AttributeType.TREE){
+			
+		}
+		return null;
+	}
+	
+	/**
+	 * Creates a new drop item for a tree attribute node with no
+	 * associated category.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	public DropItem createAttributeTreeNodeGroupByDropItem(AttributeTreeNode node){
+		return new AttributeTreeGroupByDropItem(node);
+	}
+	
+	/**
+	 * Creates a new drop item for a tree attribute node associated
+	 * with the specified category
+	 * 
+	 * @param node tree attribute node
+	 * @param category category
+	 * @return
+	 */
+	public DropItem createAttributeTreeNodeGroupByDropItem(AttributeTreeNode node, Category category){
+		return new AttributeTreeGroupByDropItem(node, category);
+	}
 }
