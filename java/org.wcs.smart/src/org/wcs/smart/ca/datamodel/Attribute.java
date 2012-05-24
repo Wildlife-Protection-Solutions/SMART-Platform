@@ -97,10 +97,39 @@ public class Attribute extends DmObject{
 		TREE("t"),
 		BOOLEAN("b");
 		
-		public String queryKey;
-		private AttributeType(String queryKey){
-			this.queryKey = queryKey;
+		public String typeKey;
+	
+		private AttributeType(String typeKey){
+			this.typeKey = typeKey;
 		}
+	}
+	
+	/**
+	 * Parses the attribute type key (n, l etc.) into an attribute type.
+	 * @param typeKey attribute type key
+	 * @return attribute type or null if not found
+	 */
+	public static final AttributeType decodeAttributeTypeKey(String typeKey){
+		for (int i = 0; i < AttributeType.values().length; i ++){
+			if (AttributeType.values()[i].typeKey.equalsIgnoreCase(typeKey)){
+				return AttributeType.values()[i];
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses the attribute type key into an attribute type.
+	 * @param type attribute type (tree, list etc.)
+	 * @return attribute type or null if not found
+	 */
+	public static final AttributeType decodeAttributeType(String type){
+		for (int i = 0; i < AttributeType.values().length; i ++){
+			if (AttributeType.values()[i].name().equalsIgnoreCase(type)){
+				return AttributeType.values()[i];
+			}
+		}
+		return null;
 	}
 	
 	/**
