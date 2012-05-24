@@ -55,4 +55,18 @@ public interface IValueItem {
 	 * @return
 	 */
 	public DropItem asDropItem(Session session);
+	
+	/**
+	 * @return <code>true</code> if valud item includes category
+	 */
+	public boolean isCategory();
+	
+	/**
+	 * Validates the current value item against the database.  This includes
+	 * ensuring that any keys/uuids exist in the database.
+	 *  
+	 * @param session
+	 * @throws Exception if the item cannot be validated
+	 */
+	public void validateDatabase(Session session) throws Exception;
 }

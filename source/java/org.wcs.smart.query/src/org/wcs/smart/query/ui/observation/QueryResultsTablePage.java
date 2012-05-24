@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.waypoint;
+package org.wcs.smart.query.ui.observation;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**
- * Query editor page that displays waypoint query
+ * Query editor page that displays observation query
  * results.
  * 
  * @author Emily

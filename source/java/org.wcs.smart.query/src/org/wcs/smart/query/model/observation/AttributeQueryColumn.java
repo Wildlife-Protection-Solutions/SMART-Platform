@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model.waypoint;
+package org.wcs.smart.query.model.observation;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.query.model.QueryResultItem;
@@ -33,7 +33,7 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeQueryColumn extends WaypointQueryColumn {
+public class AttributeQueryColumn extends ObservationQueryColumn {
 
 	/**
 	 * Creates a new attribute column.
@@ -67,7 +67,7 @@ public class AttributeQueryColumn extends WaypointQueryColumn {
 
 
 	/**
-	 * @see org.wcs.smart.query.model.waypoint.WaypointQueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
 	public Object getValue(QueryResultItem item) {
@@ -76,11 +76,11 @@ public class AttributeQueryColumn extends WaypointQueryColumn {
 
 
 	/**
-	 * @see org.wcs.smart.query.model.waypoint.WaypointQueryColumn#clone()
+	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#clone()
 	 */
 	@Override
-	public WaypointQueryColumn clone() {
-		WaypointQueryColumn newColumn = new AttributeQueryColumn(getName(), getKey(), getType());
+	public ObservationQueryColumn clone() {
+		ObservationQueryColumn newColumn = new AttributeQueryColumn(getName(), getKey(), getType());
 		return newColumn;
 	}
 }

@@ -47,14 +47,13 @@ TOKEN :
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
- | < ATT_ITEM_VALUE_KEY : < DM_KEY > >
 // | < PATROL_STR_KEY : ( < PATROL_STR_ITEM > |  < PATROLLEG_STR_ITEM > ) >
 // | < PATROL_VALUE_KEY : "patrol:" ( < PATROL_VALUE_ITEM > | < PATROLLEG_VALUE_ITEM > ) > 
  | < PATROL_BOOL_KEY : "patrol:" ("armed")  >// | < #PATROL_STR_ITEM : (< PATROL_ID_KEY > | < PATROL_STATION_KEY > | < PATROL_TEAM_KEY > | < PATROL_MANDATE_KEY > | < PATROL_TYPE_KEY > ) >
 // | < #PATROLLEG_STR_ITEM : (< PATROLLEG_TRANSPORT_KEY > | < PATROLLEG_LEADER_KEY > | < PATROLLEG_PILOT_KEY > | < PATROLLEG_MEMBER_KEY > ) >
 // | <  #PATROL_VALUE_ITEM : () >
 // | <  #PATROLLEG_VALUE_ITEM : () >
- |  < #DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
  | < PATROL_ID_KEY : "patrol:id" >
@@ -93,7 +92,15 @@ TOKEN :
 			< PATROL_TYPE_KEY> |
 			< PATROLLEG_TRANSPORT_KEY > |
 			< PATROLLEG_LEADER_KEY> |
-			< PATROLLEG_MEMBER_KEY > ) ":" (< LETTER > | < DIGIT > | ":" )*  >}
+			< PATROLLEG_MEMBER_KEY > ) ":" (< LETTER > | < DIGIT > | ":" )*  >
+| 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+| 	<  ATTRIBUTE_GROUPBY_ITEM :
+			( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+			( < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )*) >
+| 	<  CATEGORY_ATTRIBUTE_GROUPBY_ITEM :
+			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) > 
+}
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
 SumQueryDefinition SumQuery() :
@@ -212,15 +219,26 @@ IGroupBy GroupByItem() :
 		{
 			item = PatrolGroupBy.createGroupBy( token.image );
 		}
-	| 
-		< CATEGORY_KEY >
-		{
-			item = CategoryGroupBy.createGroupBy( token.image );
-		}
 	|
 		< DATE_GROUPBY_ITEM >
 		{
-		  	item = DateGroupBy.createGroupBy(token.image);		} 
+		  	item = DateGroupBy.createGroupBy(token.image);		}
+	|
+		< CATEGORY_GROUPBY_ITEM >
+		{		  
+		  	item = CategoryGroupBy.createGroupBy(token.image);
+		}
+	|
+		< ATTRIBUTE_GROUPBY_ITEM >
+		{
+		  	item = AttributeGroupBy.createAttributeGroupBy(token.image);
+		}
+	|
+		< CATEGORY_ATTRIBUTE_GROUPBY_ITEM >
+		{
+		  	item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
+		}	
+			 
 	)
 	{
 		 return item;
@@ -358,7 +376,7 @@ IFilter AttributeExpression():
 	(
 		< ATT_LIST_KEY > {key = token.image;}		    
 		<  EQUAL > {op = Operator.parseOperator(token.image);}
-		< ATT_ITEM_VALUE_KEY >  {value = token.image;}
+		< DM_KEY >  {value = token.image;}
 	)
 	{
 		filter = AttributeFilter.createListItemFilter(key,op,value);
@@ -368,7 +386,7 @@ IFilter AttributeExpression():
 	(
 		< CAT_ATT_LIST_KEY > {key = token.image;}		    
 		<  EQUAL > {op = Operator.parseOperator(token.image);}
-		< ATT_ITEM_VALUE_KEY >  {value = token.image;}
+		< DM_KEY >  {value = token.image;}
 	)
 	{
 		filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
@@ -380,7 +398,7 @@ IFilter AttributeExpression():
 	(
 		< ATT_TREE_KEY > {key = token.image;}		    
 		<  EQUAL > {op = Operator.parseOperator(token.image);}
-		< ATT_ITEM_VALUE_KEY >  {value = token.image;}
+		< DM_KEY >  {value = token.image;}
 	)
 	{
 		filter = AttributeFilter.createTreeItemFilter(key,op,value);
@@ -390,7 +408,7 @@ IFilter AttributeExpression():
 	(
 		< CAT_ATT_TREE_KEY > {key = token.image;}		    
 		<  EQUAL > {op = Operator.parseOperator(token.image);}
-		< ATT_ITEM_VALUE_KEY >  {value = token.image;}
+		< DM_KEY >  {value = token.image;}
 	)
 	{
 		filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);

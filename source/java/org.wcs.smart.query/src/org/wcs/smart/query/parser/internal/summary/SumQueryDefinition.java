@@ -89,4 +89,11 @@ public class SumQueryDefinition {
 	public IFilter getQueryFilter(){
 		return this.queryFilter;
 	}
+	
+	/**
+	 * @return the string representation of the query
+	 */
+	public String asQuery(){
+		return valuePart.asString() + "|" + rowGroupBy.asString() + "|" + colGroupBy.asString() + "|" + (queryFilter == null ? "" : queryFilter.asString());
+	}
 }

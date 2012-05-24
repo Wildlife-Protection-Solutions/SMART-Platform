@@ -112,7 +112,7 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	public AttributeTreeDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().queryKey + ":" + att.getAttribute().getKeyId();
+		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
 		this.attribute = att.getAttribute();
 	}
@@ -125,7 +125,7 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	public AttributeTreeDropItem(Attribute att) {
 		//super(parent, panel);
-		this.key = "attribute:" + att.getType().queryKey + ":" + att.getKeyId();
+		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId();
 		this.text = att.getName() ;
 		this.attribute = att;
 	}

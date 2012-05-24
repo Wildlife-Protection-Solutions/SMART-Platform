@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,8 +34,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -56,6 +63,8 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 	private IGroupByDropItem dropItem;
 	
 	private ListItem[] selectedItems;
+	private List<ListItem> allItems;
+	private Job getInputJob;
 	
 	/**
 	 * Creates new dialog
@@ -68,11 +77,15 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 	
 	/**
 	 * @param dropItem group by drop item
-	 * @param defaultSelection default selection
+	 * @param defaultSelection default selection; can be null if everything is to be selected
 	 */
 	public void setGroupByItem(final IGroupByDropItem dropItem, List<ListItem> defaultSelection) {
 		this.dropItem = dropItem;
-		selectedItems = defaultSelection.toArray(new ListItem[defaultSelection.size()]);
+		if (defaultSelection != null){
+			selectedItems = defaultSelection.toArray(new ListItem[defaultSelection.size()]);
+		}else{
+			selectedItems = new ListItem[0];
+		}
 	}
 	
 	/**
@@ -100,10 +113,18 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 	}
 	
 	/**
-	 * @return the list items selected by the user
+	 * @return the list items selected by the user or null
+	 * if all items selected
 	 */
 	public ListItem[] getSelectedItems(){
 		return this.selectedItems;
+	}
+	
+	/**
+	 * @return a list of all the options displayed to the user
+	 */
+	public List<ListItem> getAllOptions(){
+		return this.allItems;
 	}
 	
 	@Override
@@ -112,7 +133,7 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 		GridLayout gl = new GridLayout(1, false);
 		main.setLayout(gl);
 		
-		viewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
+		viewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
 		viewer.setLabelProvider(new LabelProvider(){
 			/**
 			 * The <code>LabelProvider</code> implementation of this
@@ -127,33 +148,69 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 			}
 		});
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
+		viewer.setInput(new String[]{"Loading...."});
+		viewer.getControl().setEnabled(false);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		((GridData)viewer.getControl().getLayoutData()).heightHint = 250;
+		viewer.getControl().addKeyListener(new KeyListener() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.character == ' '){
+					boolean value = viewer.getChecked( ((IStructuredSelection)viewer.getSelection()).getFirstElement() );
+					for (Iterator iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+						Object tp = (Object) iterator.next();
+						viewer.setChecked(tp, !value);
+						
+					}
+					e.doit = false;
+				}
+			}
+		});
 		
-		
-		Job getInput = new Job("Loading list items.") {
+		getInputJob = new Job("Loading list items.") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// TODO Auto-generated method stub
-				final List<ListItem> items = dropItem.getListItem();
+				allItems = dropItem.getListItem();
+				if (monitor.isCanceled()){
+					return Status.OK_STATUS;
+				}
 				if (viewer != null){
+					if (GroupByFilterDialog.this.getShell() == null ){
+						return Status.OK_STATUS;
+					}
 					GroupByFilterDialog.this.getShell().getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							viewer.setInput(items.toArray());
+							viewer.setInput(allItems.toArray());
 							viewer.refresh();	
 							if (selectedItems.length == 0){
 								viewer.setAllChecked(true);
 							}else{
 								viewer.setCheckedElements(selectedItems);
 							}
+							viewer.getControl().setEnabled(true);
 						}
 					});
 				}
+				getInputJob = null;
 				return Status.OK_STATUS;
 			}
 		};
-		getInput.schedule();
+		getInputJob.schedule();
+		this.getShell().addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				if (getInputJob != null){
+					getInputJob.cancel();
+				}
+				
+			}
+		});
 		
 		setMessage("Select the items to include");
 		setTitle("Group By Filters");

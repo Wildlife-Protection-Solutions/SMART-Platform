@@ -46,11 +46,13 @@ import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
-import org.wcs.smart.query.qimport.QueryDefinitionImporter;
-import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
+import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.qimport.QueryImporter;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.summary.SummaryEditor;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -105,9 +107,9 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 					File f = page1.getFile();
 					QueryFolder qf = page2.getFolder();
 					
-					QueryDefinitionImporter importer = new QueryDefinitionImporter();
+					QueryImporter importer = new QueryImporter();
 					try{
-						WaypointQuery query = importer.importQuery(f);
+						Query query = importer.importQuery(f);
 						
 						List<String> warnings = importer.getWarnings();
 						if (warnings.size() > 0){
@@ -154,7 +156,11 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						
 						//open query in editor
 						QueryInput qi = new QueryInput(query);
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, QueryResultsEditor.ID);
+						if (qi.getType() == QueryType.OBSERVATION){
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, QueryResultsEditor.ID);
+						}else if (qi.getType() == QueryType.SUMMARY){
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, SummaryEditor.ID);
+						}
 						
 					}catch (Exception ex){
 						QueryPlugIn.displayLog("Could not import query. " + ex.getMessage(), ex);

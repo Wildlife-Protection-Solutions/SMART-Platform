@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.waypoint;
+package org.wcs.smart.query.ui.observation;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
@@ -50,7 +50,7 @@ import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**
  * A class that manages a table that display 
- * the tabular results of a waypoint query.
+ * the tabular results of a observaton query.
  * 
  * 
  * @author Emily
@@ -84,9 +84,9 @@ public class QueryEditorTableContent {
 
 	/**
 	 * Initializes the form values with the query information
-	 * @param query the waypoint query to initialize data with
+	 * @param query the observation query to initialize data with
 	 */
-	public void initValues(WaypointQuery query) {
+	public void initValues(ObservationQuery query) {
 		compQueryName.setText(query.getName(), query.getId());
 		resultsTable.initQuery(query);
 		resultsTable.updateVisible(query.getQueryColumns());

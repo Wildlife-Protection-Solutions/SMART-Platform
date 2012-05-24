@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.waypoint;
+package org.wcs.smart.query.ui.observation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
@@ -74,7 +74,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 
 	public static final String ID = "org.wcs.smart.query.ui.QueryResultsEditor"; 
 
-	private WaypointQuery query;
+	private ObservationQuery query;
 	private QueryResultsTablePage page1;
 	private QueryMapPageEditor page2;
 	private boolean isDirty = false;
@@ -105,7 +105,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				query = (WaypointQuery) session.load(WaypointQuery.class, input.getUuid());
+				query = (ObservationQuery) session.load(ObservationQuery.class, input.getUuid());
 				
 				query.getDropItems();
 				query.generateDropItems(session);
@@ -159,7 +159,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			QueryInput input2 = ((QueryInput)input);
 			if (input2.getUuid() == null){
 				//create a new query
-				this.query = new WaypointQuery();
+				this.query = new ObservationQuery();
 				setDirty(false);
 			}else{
 				loadQueryLoad.schedule();
@@ -178,7 +178,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	/**
 	 * @return the query
 	 */
-	public WaypointQuery getQuery(){
+	public ObservationQuery getQuery(){
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
@@ -389,7 +389,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 					monitor.beginTask("Save As...", 3);
 					monitor.subTask("Cloning query...");
 					updateQuery();
-					WaypointQuery newQuery = getQuery().clone();
+					ObservationQuery newQuery = getQuery().clone();
 					
 					monitor.worked(1);
 					
@@ -412,7 +412,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 					newQuery.setConservationArea(SmartDB.getCurrentConservationArea());
 					
 					
-					WaypointQuery oldQuery = QueryResultsEditor.this.query;
+					ObservationQuery oldQuery = QueryResultsEditor.this.query;
 					
 					QueryResultsEditor.this.query = newQuery;
 					page1.setQuery();

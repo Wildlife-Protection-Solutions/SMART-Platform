@@ -21,51 +21,162 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.patrol.model.WaypointObservation;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.xml.model.UuidItemType;
 
+/**
+ * Class that represents a category
+ * group by class for a summary group by.
+ *  
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
 public class CategoryGroupBy implements IGroupBy {
 
-	
+	/**
+	 * Creates a new category group by of the form:
+	 *  <  CATEGORY_GROUP_BY : "category:" < DM_KEY > ":" ( < DM_KEY > ":")* >
+	 *  <p>The first DM_KEY is the parent class category hkey.  The
+	 *  remaining hkeys must be direct children of the parent
+	 *  hkey and are used to filter the results</p>
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public final static CategoryGroupBy createGroupBy(String key){
 		return new CategoryGroupBy(key);
 	}
 	
-	public String key;
-	public String categoryHkey = null;
-	public CategoryGroupBy(String key){
-		this.key = key;
-		this.categoryHkey = key.split(":")[1];
+	//private String categoryHkey = null;
+	private int treeLevel = 0;
+	private String[] filterHkeys = null;
+	
+	/**
+	 * @param key
+	 */
+	protected CategoryGroupBy(String key){
+		String bits[] = key.split(":");
+//		this.categoryHkey = bits[1];
+		this.treeLevel = Integer.parseInt(bits[1]);
+		if (bits.length - 2 > 0){
+			filterHkeys = new String[bits.length-2];
+			for (int i = 2; i < bits.length; i ++){
+				filterHkeys[i-2] = bits[i];
+			}
+		}
 	}
 	
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getKeyPart()
+	 */
+	public String getKeyPart(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("category:");
+//		sb.append(categoryHkey);
+		sb.append(treeLevel);
+		return sb.toString();
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asString()
+	 */
 	@Override
 	public String asString() {
-		return this.key;
+		StringBuilder sb = new StringBuilder();
+		sb.append(getKeyPart());
+		sb.append(":");
+		if (filterHkeys != null){
+			for (int i =0; i < filterHkeys.length; i ++){
+				sb.append(filterHkeys[i]);
+				if (i < filterHkeys.length-1){
+					sb.append(":");
+				}
+			}
+		}
+		return sb.toString();
 	}
 
+	/**
+	 * @return the tree level category
+	 */
+	public int getTreeLevel(){
+		return this.treeLevel;
+	}
 
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getType()
+	 */
 	public GroupByType getType(){
-		return GroupByType.BYTE;
+		return GroupByType.KEY;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.wp.sum.IGroupBy#getItems(org.hibernate.Session)
 	 */
 	@Override
 	public List<ListItem> getItems(Session session) {
-		return null;
+		//get children categories
+
+		//find all categories with treeLevel + 1 . in them  
+		List<ListItem> items = new ArrayList<ListItem>();
+		if (filterHkeys != null && filterHkeys.length > 0){
+			for (int i = 0; i < filterHkeys.length; i++){
+				Category cat = QueryHibernateManager.getCategory(session, filterHkeys[i]);
+				items.add( new ListItem(null, cat.getFullCategoryName(), cat.getHkey()) );		
+			}
+		}else{
+			for(Category child : QueryHibernateManager.getCategories(session, treeLevel)){
+				items.add(new ListItem(null, child.getFullCategoryName(), child.getHkey()));
+			}
+		}
+		
+		return items;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asDropItem(org.hibernate.Session)
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
-		// TODO Auto-generated method stub
+		DropItem it = DropItemFactory.INSTANCE.createCategoryGroupByDropItem(treeLevel);
+		if (filterHkeys != null){
+			ArrayList<ListItem> inits = new ArrayList<ListItem>();
+			for (int i = 0; i < filterHkeys.length; i ++){
+				Category child = QueryHibernateManager.getCategory(session, filterHkeys[i]);
+				inits.add(new ListItem(null, child.getName(), filterHkeys[i]));
+			}
+			it.initializeData(inits);
+		}
+		return it;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#isCategory()
+	 */
+	public boolean isCategory(){
+		return true;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#validateAndImport(org.hibernate.Session)
+	 */
+	public List<String> validateAndImport(String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception{
+		//ensure category key exists
+		for (int i = 0; i < filterHkeys.length; i ++){
+			QueryHibernateManager.validateCategory(filterHkeys[i], session);
+		}
 		return null;
+		
 	}
 }

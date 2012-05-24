@@ -27,20 +27,20 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn;
 
 /**
- * A query exporter class for exporting waypoint
+ * A query exporter class for exporting observation
  * query results.
  * 
  * 
  * @author Emily
  * @since 1.0.0
  */
-public abstract class WaypointQueryExporter {
+public abstract class ObservationQueryExporter {
 
 	protected List<QueryResultItem> data;
-	protected List<WaypointQueryColumn> queryColumns; 
+	protected List<ObservationQueryColumn> queryColumns; 
 	protected File outputFile;
 	
 	/**
@@ -112,10 +112,9 @@ public abstract class WaypointQueryExporter {
 	 * @param data the query results to export
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
-	 * @param query the waypoint query to be exported
 	 */
 	public void setData(List<QueryResultItem> data, 
-			List<WaypointQueryColumn> queryColumns, 
+			List<ObservationQueryColumn> queryColumns, 
 			File outputFile ){
 		this.data = data;
 		this.queryColumns = queryColumns;

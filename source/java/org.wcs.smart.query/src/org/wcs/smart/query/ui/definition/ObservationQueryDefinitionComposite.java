@@ -30,7 +30,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.services.ISourceProviderService;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDefinitionType;
@@ -38,12 +38,12 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
 
 /**
- * Waypoint query definition panel
+ * Observation query definition panel
  * 
  * @author egouge
  * @since 1.0.0
  */
-public class WaypointQueryDefinitionComposite extends QueryDefinitionComposite {
+public class ObservationQueryDefinitionComposite extends QueryDefinitionComposite {
 
 	
 	private FilterDropTargetPanel dropTarget;
@@ -52,7 +52,7 @@ public class WaypointQueryDefinitionComposite extends QueryDefinitionComposite {
 	/**
 	 * 
 	 */
-	public WaypointQueryDefinitionComposite(Composite parent, QueryDefView view) {
+	public ObservationQueryDefinitionComposite(Composite parent, QueryDefView view) {
 		super(parent, SWT.NONE);
 		this.view = view;
 		createComposite();
@@ -135,7 +135,7 @@ public class WaypointQueryDefinitionComposite extends QueryDefinitionComposite {
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)view.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
 		provider.setQueryValue(isvalid);
 		view.getQuery().setIsValid(isvalid);
-		((WaypointQuery)view.getQuery()).setQueryFilter(query);
+		((ObservationQuery)view.getQuery()).setQueryFilter(query);
 		
 	}
 
@@ -144,7 +144,7 @@ public class WaypointQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public void init() {
-		dropTarget.addElements(((WaypointQuery)view.getQuery()).getDropItems());
+		dropTarget.addElements(((ObservationQuery)view.getQuery()).getDropItems());
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class WaypointQueryDefinitionComposite extends QueryDefinitionComposite {
 	public void saveItems() {
 		ArrayList<DropItem> items = new ArrayList<DropItem>();
 		items.addAll(dropTarget.getItems());
-		((WaypointQuery)view.getQuery()).setDropItems(items);
+		((ObservationQuery)view.getQuery()).setDropItems(items);
 		
 	}
 	

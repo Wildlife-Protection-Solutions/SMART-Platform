@@ -94,4 +94,17 @@ public class PatrolValueItem implements IValueItem {
 		return item;
 	}
 
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
+	 */
+	public boolean isCategory(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
+	 */
+	public void validateDatabase(Session session) throws Exception{
+		
+	}
 }

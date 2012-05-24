@@ -127,7 +127,7 @@ public class QueryFilterView extends ViewPart {
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, PatrolQueryOptions.PATROL_GROUBY_OPTIONS);
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS, PatrolQueryOptions.DateGroupByOption.values());
-				summaryInput.put(SummaryQueryContentProvider.NodeType.DATA_MODEL_ITEM, dm);
+				summaryInput.put(SummaryQueryContentProvider.NodeType.GROUP_BY_NODE, dm);
 				
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override

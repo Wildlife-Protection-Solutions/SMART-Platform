@@ -34,6 +34,9 @@ import org.wcs.smart.query.model.ListItem;
 public interface IGroupByDropItem {
 
 	/**
+	 * Gets all possible options that can exist
+	 * in this group by.  Not the ones currently selected.
+	 * 
 	 * @return group by options
 	 */
 	public List<ListItem> getListItem();

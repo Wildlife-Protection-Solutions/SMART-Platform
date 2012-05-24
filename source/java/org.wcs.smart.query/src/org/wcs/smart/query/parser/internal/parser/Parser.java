@@ -127,9 +127,11 @@ public class Parser implements ParserConstants {
         IGroupBy item;
         List<IGroupBy> items = new ArrayList<IGroupBy>();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case CATEGORY_KEY:
     case DATE_GROUPBY_ITEM:
     case PATROL_GROUPBY_OPTION:
+    case CATEGORY_GROUPBY_ITEM:
+    case ATTRIBUTE_GROUPBY_ITEM:
+    case CATEGORY_ATTRIBUTE_GROUPBY_ITEM:
       item = GroupByItem();
                         items.add(item);
       break;
@@ -162,13 +164,21 @@ public class Parser implements ParserConstants {
       jj_consume_token(PATROL_GROUPBY_OPTION);
                         item = PatrolGroupBy.createGroupBy( token.image );
       break;
-    case CATEGORY_KEY:
-      jj_consume_token(CATEGORY_KEY);
-                        item = CategoryGroupBy.createGroupBy( token.image );
-      break;
     case DATE_GROUPBY_ITEM:
       jj_consume_token(DATE_GROUPBY_ITEM);
                         item = DateGroupBy.createGroupBy(token.image);
+      break;
+    case CATEGORY_GROUPBY_ITEM:
+      jj_consume_token(CATEGORY_GROUPBY_ITEM);
+                        item = CategoryGroupBy.createGroupBy(token.image);
+      break;
+    case ATTRIBUTE_GROUPBY_ITEM:
+      jj_consume_token(ATTRIBUTE_GROUPBY_ITEM);
+                        item = AttributeGroupBy.createAttributeGroupBy(token.image);
+      break;
+    case CATEGORY_ATTRIBUTE_GROUPBY_ITEM:
+      jj_consume_token(CATEGORY_ATTRIBUTE_GROUPBY_ITEM);
+                        item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
       break;
     default:
       jj_la1[6] = jj_gen;
@@ -351,8 +361,8 @@ public class Parser implements ParserConstants {
                                   key = token.image;
       jj_consume_token(EQUAL);
                             op = Operator.parseOperator(token.image);
-      jj_consume_token(ATT_ITEM_VALUE_KEY);
-                                         value = token.image;
+      jj_consume_token(DM_KEY);
+                             value = token.image;
                 filter = AttributeFilter.createListItemFilter(key,op,value);
       break;
     case CAT_ATT_LIST_KEY:
@@ -360,8 +370,8 @@ public class Parser implements ParserConstants {
                                       key = token.image;
       jj_consume_token(EQUAL);
                             op = Operator.parseOperator(token.image);
-      jj_consume_token(ATT_ITEM_VALUE_KEY);
-                                         value = token.image;
+      jj_consume_token(DM_KEY);
+                             value = token.image;
                 filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
       break;
     case ATT_TREE_KEY:
@@ -369,8 +379,8 @@ public class Parser implements ParserConstants {
                                   key = token.image;
       jj_consume_token(EQUAL);
                             op = Operator.parseOperator(token.image);
-      jj_consume_token(ATT_ITEM_VALUE_KEY);
-                                         value = token.image;
+      jj_consume_token(DM_KEY);
+                             value = token.image;
                 filter = AttributeFilter.createTreeItemFilter(key,op,value);
       break;
     case CAT_ATT_TREE_KEY:
@@ -378,8 +388,8 @@ public class Parser implements ParserConstants {
                                       key = token.image;
       jj_consume_token(EQUAL);
                             op = Operator.parseOperator(token.image);
-      jj_consume_token(ATT_ITEM_VALUE_KEY);
-                                         value = token.image;
+      jj_consume_token(DM_KEY);
+                             value = token.image;
                 filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
       break;
     default:
@@ -567,10 +577,10 @@ public class Parser implements ParserConstants {
       jj_la1_0 = new int[] {0x2002000,0x0,0x20000,0x0,0x0,0x20000,0x0,0x4080,0x2000,0x2000000,0x0,0x0,0x0,0x0,0x0,0x1fc0000,0x0,0x4080,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0xf8bff800,0x0,0x0,0x0,0x800,0x0,0x800,0x0,0x0,0xf8bff800,0x884000,0x42000,0xf8bff000,0xf8000000,0xf8021000,0x0,0x1c,0x0,};
+      jj_la1_1 = new int[] {0xfc7ff800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfc7ff800,0x484000,0x42000,0xfc7ff000,0xfc000000,0xfc021000,0x0,0x1c,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0xf,0x1d0,0x0,0x1d0,0x1400,0x0,0x1400,0x0,0x0,0xf,0x0,0x0,0xf,0xf,0xf,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x7,0xe8,0x0,0xe8,0x7a00,0x0,0x7a00,0x0,0x0,0x7,0x0,0x0,0x7,0x7,0x7,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -687,7 +697,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[78];
+    boolean[] la1tokens = new boolean[80];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -707,7 +717,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 78; i++) {
+    for (int i = 0; i < 80; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

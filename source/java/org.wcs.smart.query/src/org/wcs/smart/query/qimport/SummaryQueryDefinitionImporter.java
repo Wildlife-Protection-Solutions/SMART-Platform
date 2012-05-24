@@ -21,11 +21,6 @@
  */
 package org.wcs.smart.query.qimport;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +31,7 @@ import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.filter.AttributeFilter;
@@ -44,20 +39,27 @@ import org.wcs.smart.query.parser.internal.filter.CategoryFilter;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
-import org.wcs.smart.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.xml.QueryXmlManager;
-import org.wcs.smart.query.xml.model.Query;
+import org.wcs.smart.query.parser.internal.summary.GroupByPart;
+import org.wcs.smart.query.parser.internal.summary.IGroupBy;
+import org.wcs.smart.query.parser.internal.summary.IValueItem;
+import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
+import org.wcs.smart.query.parser.internal.summary.ValuePart;
+import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Importer for importing query definition files.
- * 
- * @author Emily
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
+ * @author egouge
  * @since 1.0.0
  */
-public class QueryDefinitionImporter {
+public class SummaryQueryDefinitionImporter{
 
 	/*
 	 * list of warnings generated during import process
@@ -79,53 +81,56 @@ public class QueryDefinitionImporter {
 	 * @throws Exception if the file cannot be converted to a query.
 	 * 
 	 */
-	public WaypointQuery importQuery(File file) throws Exception{
+	public SummaryQuery importQuery(QueryType qt) throws Exception{
 		warnings.clear();
 		
-		InputStream fin = new BufferedInputStream(new FileInputStream(file));
-		Query q = QueryXmlManager.readDataModel(fin);
-		fin.close();
-		
-		QueryType qt = q.getQuery();
-		
 		String langCode = qt.getLanguage();
-		
-		WaypointQuery wq = new WaypointQuery();
-		wq.setName(qt.getName());
+		SummaryQuery summaryQuery = new SummaryQuery();
+		summaryQuery.setName(qt.getName());
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
 			uuidLookup.put(type.getUuid(), type);
 		}
 		
-		String strQueryFilter = "";
-		if (qt.getDefinition() != null && qt.getDefinition().length() > 0){
-			InputStream is = new ByteArrayInputStream(qt.getDefinition().getBytes());
-			Parser parser = new Parser(is);
-			IFilter queryFilter = parser.QueryFilter();
-			is.close();
+		for (QueryPart part : qt.getQueryPart()) {
 			
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				validateFilterPart(queryFilter, langCode, uuidLookup, session);
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
+			if (part.getKey().equals("definition")) {
+				if (part.getValue() != null && part.getValue().length() > 0) {
+					
+					summaryQuery.setQuery(part.getValue());
+					Session session = HibernateManager.openSession();
+					session.beginTransaction();
+					try {
+						SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
+						if (sumDef.getQueryFilter() != null){
+							validateFilterPart(sumDef.getQueryFilter(), langCode, uuidLookup, session);
+						}
+						//process value items
+						validateValuePart(sumDef.getValuePart(), session);
+						
+						//process group by 
+						validateGroupByPart(sumDef.getColumnGroupByPart(), langCode, uuidLookup, session);
+						validateGroupByPart(sumDef.getRowGroupByPart(), langCode, uuidLookup, session);
+					
+						summaryQuery.setQuery(sumDef.asQuery(), sumDef);
+					} finally {
+						session.getTransaction().rollback();
+						session.close();
+					}
+				}
 			}
-			strQueryFilter = queryFilter.asString();
 		}
 		
-		wq.setQueryFilter(strQueryFilter);
-		wq.setConservationArea(SmartDB.getCurrentConservationArea());
-		wq.setOwner(SmartDB.getCurrentEmployee());
+		
+		summaryQuery.setConservationArea(SmartDB.getCurrentConservationArea());
+		summaryQuery.setOwner(SmartDB.getCurrentEmployee());
 		
 		ConservationAreaFilter caFilter = new ConservationAreaFilter();
 		caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		wq.setConservationAreaFilter(caFilter);
+		summaryQuery.setConservationAreaFilter(caFilter);
 		
-		
-		return wq;
+		return summaryQuery;
 	}
 	
 	/**
@@ -133,6 +138,22 @@ public class QueryDefinitionImporter {
 	 */
 	public ArrayList<String> getWarnings(){
 		return this.warnings;
+	}
+	
+	public void validateValuePart(ValuePart valuePart, Session session) throws Exception{
+		for (IValueItem item: valuePart.getValueItems()){
+			item.validateDatabase(session);
+		}
+	}
+	
+	
+	private void validateGroupByPart(GroupByPart groupBy, String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception{
+		for (IGroupBy part: groupBy.getGroupBys()){
+			List<String> warnings = part.validateAndImport(langCode, uuidLookup, session);
+			if (warnings != null){
+				this.warnings.addAll(warnings);
+			}
+		}		
 	}
 	
 	

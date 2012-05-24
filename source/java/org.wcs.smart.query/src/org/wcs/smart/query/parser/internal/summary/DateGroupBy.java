@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -38,6 +39,7 @@ import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FILTER_OP;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
  * Date Group By option.
@@ -65,11 +67,18 @@ public class DateGroupBy implements IGroupBy {
 	}
 	
 	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getKeyPart()
+	 */
+	public String getKeyPart(){
+		return "date:" + op.getKey();
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asString()
 	 */
 	@Override
 	public String asString() {
-		return "date:" + op.getKey();
+		return getKeyPart();
 	}
 
 
@@ -121,7 +130,7 @@ public class DateGroupBy implements IGroupBy {
 				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca";
 				Query q = session.createQuery(hql);
 				q.setParameter("ca", SmartDB.getCurrentConservationArea());
-				List data = q.list();
+				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null){
 					startdate = (java.sql.Timestamp)data.get(0);
 				}
@@ -179,5 +188,19 @@ public class DateGroupBy implements IGroupBy {
 	@Override
 	public DropItem asDropItem(Session session) {
 		return DropItemFactory.INSTANCE.createDateGroupByDropItem(op);
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#isCategory()
+	 */
+	public boolean isCategory(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#validateAndImport(org.hibernate.Session)
+	 */
+	public List<String> validateAndImport(String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception{
+		return null;
 	}
 }

@@ -81,7 +81,9 @@ public class AttributeListDropItem extends DropItem{
 			try{
 				s.saveOrUpdate(attribute);
 				for (AttributeListItem item : attribute.getAttributeList()){
-					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+					if (item.getIsActive()){
+						items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+					}
 				}
 			}finally{
 				s.getTransaction().rollback();
@@ -108,7 +110,7 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	public AttributeListDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().queryKey + ":" + att.getAttribute().getKeyId();
+		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
 		this.attribute = att.getAttribute();
 	}
@@ -122,7 +124,7 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	public AttributeListDropItem(Attribute att) {
 		//super(parent, panel);
-		this.key = "attribute:" + att.getType().queryKey + ":" + att.getKeyId();
+		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId();
 		this.text = att.getName() ;
 		this.attribute = att;
 	}
@@ -212,7 +214,8 @@ public class AttributeListDropItem extends DropItem{
 				ListItem newSelection = (ListItem) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
 				if (! (currentSelection != null && currentSelection.equals(newSelection))){
 					queryChanged();	
-				}				 
+				}			
+				currentSelection = newSelection;
 			}
 		});
 		listViewer.setInput(new ListItem[]{new ListItem("Loading")});

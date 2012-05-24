@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQueryColumn.ColumnType;
+import org.wcs.smart.query.model.observation.ObservationQueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
 /**

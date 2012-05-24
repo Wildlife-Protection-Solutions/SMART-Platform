@@ -99,4 +99,20 @@ public class CategoryValueItem implements IValueItem {
 		return null;
 		
 	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
+	 */
+	public boolean isCategory(){
+		return true;
+	}
+	
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
+	 */
+	public void validateDatabase(Session session) throws Exception{
+		//ensure category key exists
+		QueryHibernateManager.validateCategory(categoryHkey, session);
+	}
 }

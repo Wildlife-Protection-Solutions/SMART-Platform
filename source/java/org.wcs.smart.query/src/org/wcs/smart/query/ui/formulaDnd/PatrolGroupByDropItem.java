@@ -223,6 +223,9 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	
 	
 	/**
+	 * Opens and closes a hibernate session so this should
+	 * be executed in a separate thread.
+	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem#getListItem()
 	 */
 	@Override

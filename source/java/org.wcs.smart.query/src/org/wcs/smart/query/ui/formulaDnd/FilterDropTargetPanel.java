@@ -204,7 +204,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 		int width = 0;
 		for (int i = 0; i < items.size(); i++) {
 			Point pnt = items.get(i).getWidget().computeSize(SWT.DEFAULT, SWT.DEFAULT);
-			height = pnt.y;
+			height = Math.max(33,pnt.y);
 			if (currx + pnt.x > maxWidth && currx != 0) {
 				// move to next line
 				width = Math.max(width, currx);

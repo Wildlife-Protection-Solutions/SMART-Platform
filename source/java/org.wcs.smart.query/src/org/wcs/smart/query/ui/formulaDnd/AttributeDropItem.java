@@ -39,7 +39,8 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.parser.internal.filter.Operator;
 
 /**
- * Aattribute drop item for numeric, text, and boolean attributes.
+ * Attribute drop item for numeric, text, and boolean attributes in observation
+ * filters
  * 
  * @author Emily
  * @since 1.0.0
@@ -69,7 +70,7 @@ public class AttributeDropItem extends DropItem{
 		//super(parent, target);
 		this.type = att.getAttribute().getType();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";		
-		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().queryKey +":" + att.getAttribute().getKeyId();
+		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey +":" + att.getAttribute().getKeyId();
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public class AttributeDropItem extends DropItem{
 		//super(parent, target);
 		this.type = att.getType();
 		this.text = att.getName();
-		this.key = "attribute:" + att.getType().queryKey + ":" + att.getKeyId();
+		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId();
 	}
 	
 	/**

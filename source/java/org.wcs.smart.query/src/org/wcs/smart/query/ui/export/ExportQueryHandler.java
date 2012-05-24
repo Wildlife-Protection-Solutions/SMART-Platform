@@ -29,8 +29,8 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
-import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 
 /**
  * Handler for the export query button.

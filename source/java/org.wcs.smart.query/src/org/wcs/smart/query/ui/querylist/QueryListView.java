@@ -56,8 +56,8 @@ import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
-import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
 
 /**
  * View that displays saved queries to the user.

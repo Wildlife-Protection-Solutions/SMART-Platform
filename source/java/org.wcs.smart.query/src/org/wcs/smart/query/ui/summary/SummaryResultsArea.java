@@ -78,7 +78,6 @@ public class SummaryResultsArea extends Composite{
 		progressComp.adapt(toolkit);
 		
 		((StackLayout) stackComposite.getLayout()).topControl = runQueryComp;
-		
 	}
 	
 	private Composite createTableResultsComposite(Composite parent, FormToolkit toolkit){

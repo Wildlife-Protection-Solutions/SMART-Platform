@@ -29,7 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.ui.waypoint.QueryResultsEditor;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 
 /**
  * Handler for creating a new query.
