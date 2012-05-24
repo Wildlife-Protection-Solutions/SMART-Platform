@@ -97,7 +97,7 @@ public class Employee {
 	/**
 	 * Minimum number of years in the past employee birthdate must be.
 	 */
-	public static final int MIN_EMPLOYEE_AGE = 4;
+	public static final int MIN_EMPLOYEE_AGE = 10;
 	
 	/**
 	 * Smart user level.
