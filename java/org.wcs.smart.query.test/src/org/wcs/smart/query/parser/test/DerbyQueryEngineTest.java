@@ -32,7 +32,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
@@ -72,7 +72,7 @@ public class DerbyQueryEngineTest {
 		System.out.println(session.createCriteria(Patrol.class).list().size());
 		
 		String query = "category:threat.";
-		WaypointQuery q = new WaypointQuery(parseQuery(query));
+		ObservationQuery q = new ObservationQuery(parseQuery(query));
 		q.setConservationAreaFilter(ff);
 		
 		List<QueryResultItem> results = q.getQueryResults(session, new NullProgressMonitor());
