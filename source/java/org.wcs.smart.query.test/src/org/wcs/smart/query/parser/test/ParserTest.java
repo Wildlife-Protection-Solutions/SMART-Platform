@@ -26,7 +26,7 @@ import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.ParseException;
 import org.wcs.smart.query.parser.internal.parser.Parser;

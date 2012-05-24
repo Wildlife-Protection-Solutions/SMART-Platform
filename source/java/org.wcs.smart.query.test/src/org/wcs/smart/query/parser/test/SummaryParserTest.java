@@ -160,7 +160,7 @@ public class SummaryParserTest {
 		
 		valuePart = ""; 
 		rowGroupByPart = "";
-		colGroupByPart = "category:threats.pigs.angry,date:day";
+		colGroupByPart = "category:1:,date:day";
 		queryPart = "";
 		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
 		test = parseQuery(query);
@@ -182,7 +182,7 @@ public class SummaryParserTest {
 		
 		valuePart = ""; 
 		rowGroupByPart = "date:month";
-		colGroupByPart = "category:threats.pigs.angry,date:day";
+		colGroupByPart = "category:0:,date:day";
 		queryPart = "";
 		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
 		test = parseQuery(query);
@@ -249,6 +249,187 @@ public class SummaryParserTest {
 		String queryPart = "";
 		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
 		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+	}
+	
+	
+	@Test
+	public void testCategoryGroupBy() throws Exception{
+		
+		String valuePart = "";
+		String rowGroupByPart = "category:1:";
+		String colGroupByPart = "";
+		String queryPart = "";
+		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:0:threat.pigs.funny.1:threat.pigs.funny.2";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:2:threat.pigs.funny.1,category:3:threat.old.fun:threat.old.fun.a.:threat.old.fun.b:threat.old.fun.c";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+	}
+	
+	
+	@Test
+	public void testAttributeListGroupBy() throws Exception{
+		
+		String valuePart = "";
+		String rowGroupByPart = "attribute:l:type:";
+		String colGroupByPart = "";
+		String queryPart = "";
+		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "attribute:l:type:a:b";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "attribute:l:type:a,attribute:l:type:a:b:c,attribute:l:type:";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:threat.pigs.:attribute:l:type:";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:1:attribute:l:type:a:b";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:threat.pigs.:attribute:l:type:a,category:threat.pigs.:attribute:l:type:a:b:c,attribute:l:type:";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+	}
+	
+	
+	
+	@Test
+	public void testAttributeTreeGroupBy() throws Exception{
+		
+		String valuePart = "";
+		String rowGroupByPart = "attribute:t:type:2:";
+		String colGroupByPart = "";
+		String queryPart = "";
+		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "attribute:t:type:1:a:b";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "attribute:t:type:4:a,attribute:t:type:1:a:b:c,attribute:l:type:";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:threat.pigs.:attribute:t:type:1:";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:threat.pgis.:attribute:t:type:1:a:b";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "category:threat.pigs.:attribute:t:type:1:a,category:threat.pigs.:attribute:t:type:1:a:b:c,attribute:l:type:";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);

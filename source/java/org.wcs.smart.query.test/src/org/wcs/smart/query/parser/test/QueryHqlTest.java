@@ -28,7 +28,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.query.model.waypoint.WaypointQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 
@@ -112,7 +112,7 @@ public class QueryHqlTest {
 		
 		Session session = Hibernate.openSession();
 		String query = null;
-		WaypointQuery test = null;
+		ObservationQuery test = null;
 		org.hibernate.Query  q = null;
 		List results = null;
 		
