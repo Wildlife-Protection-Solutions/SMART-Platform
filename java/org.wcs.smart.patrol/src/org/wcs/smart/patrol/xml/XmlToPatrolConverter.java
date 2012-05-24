@@ -107,13 +107,16 @@ public class XmlToPatrolConverter {
 		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType()));
 		patrol.setObjective(xml.getObjective().getDescription());
 //		patrol.setObjectiveRating(xml.getObjective().getRating());
-		
-		PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate");
-		if (m == null){
-			//ERROR
-			throw new Exception("The patrol mandate " + xml.getMandate().getValue() + " [" + xml.getMandate().getLanguageCode() + "] could not be found for the current conservation area. ");
+		if (xml.getMandate() != null){
+			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate");
+			if (m == null){
+				//ERROR
+				throw new Exception("The patrol mandate " + xml.getMandate().getValue() + " [" + xml.getMandate().getLanguageCode() + "] could not be found for the current conservation area. ");
+			}else{
+				patrol.setMandate(m);
+			}
 		}else{
-			patrol.setMandate(m);
+			patrol.setMandate(null);
 		}
 		if (xml.getStation() != null){
 			Station station = (Station) findValue(xml.getStation().getLanguageCode(), xml.getStation().getValue(), "Station");
