@@ -65,7 +65,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	/**
 	 * Image descriptor for attribute list icon
 	 */
-	private static final String ATTRIBUTE_LIST_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_LIST_ICON"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_LIST_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_LIST_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for attribute tree icon
 	 */

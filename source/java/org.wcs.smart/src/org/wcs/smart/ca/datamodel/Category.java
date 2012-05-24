@@ -71,6 +71,59 @@ public class Category extends DmObject implements HkeyObject{
 	private boolean isActive;			//if active.
 	private String categoryHkey;	//the full key of the category "parent.parent.parent.me"
 	
+	
+	/*
+	 * CREATE FUNCTION smart.trimHkeyToLevel(level integer, hkey long varchar) returns varchar(32672)
+LANGUAGE JAVA
+deterministic 
+external name 'org.wcs.smart.ca.datamodel.Category.trimHkeyToLevel'
+PARAMETER STYLE JAVA
+NO SQL 
+RETURNS NULL ON NULL INPUT;
+	 */
+	public static String trimHkeyToLevel(int level, String hkey){
+		if (hkey == null || hkey.length() == 0) return null;
+		//all hkeys should end with '.'; if not return null
+		if (hkey.charAt(hkey.length() -1) != '.'){
+			return null;
+		}
+		if (level < 0) return null;
+		
+		int index = -1;
+		for (int i = 0; i <= level; i ++){
+			if (index == hkey.length() -1){
+				return null;
+			}
+			index = hkey.indexOf('.', index+1);
+			if (index < 0){
+				return null;
+			}
+		}
+		return hkey.substring(0, index+1);
+	}
+	
+	/*
+	 * CREATE FUNCTION smart.hkeyLength(hkey long varchar) returns integer
+LANGUAGE JAVA
+deterministic 
+external name 'org.wcs.smart.ca.datamodel.Category.hkeyLength'
+PARAMETER STYLE JAVA
+NO SQL 
+RETURNS NULL ON NULL INPUT;
+	 */
+	public static Integer hkeyLength(String hkey){
+		if (hkey == null) return null;
+		if (!hkey.endsWith(".")) return null;
+		int count = 0;
+		for (int i = 0; i < hkey.length(); i ++){
+			if (hkey.charAt(i) == '.'){
+				count ++;
+			}
+		}
+		return count - 1;
+	}
+	
+	
 	/**
 	 * Creates a new category
 	 */

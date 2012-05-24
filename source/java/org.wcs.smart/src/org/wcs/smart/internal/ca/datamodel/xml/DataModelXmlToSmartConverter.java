@@ -359,10 +359,9 @@ public class DataModelXmlToSmartConverter {
 	 * Determines attribute type
 	 */
 	private Attribute.AttributeType parseAttributeType(String xmlType) throws ParseException{
-		for (Attribute.AttributeType type: Attribute.AttributeType.values()){
-			if (type.name().equals(xmlType)){
-				return type;
-			}
+		Attribute.AttributeType newtype = Attribute.decodeAttributeType(xmlType);
+		if (newtype != null){
+			return newtype;
 		}
 		throw new ParseException("Cannot determine attribute type for " + xmlType + ".", 0);
 	}

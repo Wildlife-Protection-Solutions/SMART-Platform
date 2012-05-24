@@ -28,6 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
@@ -76,19 +80,33 @@ public class DataModel {
 	 */
 	public static List<Aggregation> getAggregations(){
 		if (aggregations == null){
-			Session s = HibernateManager.openSession();
-			try{
-				s.beginTransaction();
-				aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).list();
-			}catch (Exception ex){
-				SmartPlugIn.displayLog(null, "Cannot load aggregations from database.", ex);
-				return null;
-			}finally{
-				if (s.getTransaction().isActive()){
-					s.getTransaction().rollback();
+			//done in a job so it has it's own database connection
+			//otherwise i might close an existing connection when it should be.
+			Job loadAttributesJob = new Job("load attributes") {
+				
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).list();
+						s.getTransaction().rollback();
+					}catch (Exception ex){
+						SmartPlugIn.displayLog(null, "Cannot load aggregations from database.", ex);
+					}finally{
+						s.close();
+					}
+					return Status.OK_STATUS;
 				}
-				s.close();
+			};
+				
+			loadAttributesJob.schedule();
+			try{
+				loadAttributesJob.join();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(null, "Could not load aggregations", ex);
 			}
+			
 		}
 		return aggregations;
 	}
