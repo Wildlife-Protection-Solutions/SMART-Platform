@@ -23,7 +23,10 @@ package org.wcs.smart.ui.internal.ca;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
+
+import javax.persistence.Transient;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -76,6 +79,7 @@ public class EmployeeComposite extends Composite {
 	
 	private ControlDecoration cdGiveName;
 	private ControlDecoration cdFamilyName;
+	private ControlDecoration cdBirthDate;
 	private ControlDecoration cdSmartId;
 	private ControlDecoration cdSmartPassword;
 	private ControlDecoration cdSmartPassword2;
@@ -145,8 +149,8 @@ public class EmployeeComposite extends Composite {
 			dtEmploymentEnd.setLayoutData(data);	
 		}
 		createLabelField(this, Employee.BIRTHDATE + ":");
-		dtBirthDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN
-				| SWT.LONG);
+		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG, validate); 
+////////////////////////////////////////////////////////////////////
 		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
 		dtBirthDate.setLayoutData(data);
@@ -263,6 +267,7 @@ public class EmployeeComposite extends Composite {
 		
 		cdGiveName = createDecoration(txtGivenName);
 		cdFamilyName = createDecoration(txtFamilyName);
+		cdBirthDate= createDecoration(dtBirthDate);
 		cdSmartId = createDecoration(txtSmartId);
 		cdSmartPassword = createDecoration(txtSmartPassword);
 		cdSmartPassword2 = createDecoration(txtSmartPassword2);
@@ -309,6 +314,19 @@ public class EmployeeComposite extends Composite {
 		return txt;
 	}
 
+	private DateTime createDateField(Composite parent, int style, KeyListener validator) {
+		DateTime dt = new DateTime(parent, style);
+		dt.setYear(1950);
+		dt.setMonth(0);
+		dt.setDay(1);
+		if (validator != null) {
+			dt.addKeyListener(validator);
+		}
+		return dt;
+	}
+
+	
+	
 	/*
 	 * creates a label field
 	 */
@@ -329,7 +347,7 @@ public class EmployeeComposite extends Composite {
 	 */
 	public boolean validate() {
 
-		ControlDecoration cds[] = { cdGiveName, cdFamilyName, cdSmartId,
+		ControlDecoration cds[] = { cdGiveName, cdFamilyName, cdBirthDate, cdSmartId,
 				cdSmartPassword, cdSmartPassword2 };
 		for (int i = 0; i < cds.length; i++) {
 			cds[i].hide();
@@ -352,7 +370,16 @@ public class EmployeeComposite extends Composite {
 							+ Employee.MAX_NAME_LENGTH + " characters.");
 			isComplete = false;
 		}
+		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
+		Calendar now = new GregorianCalendar(); 
+		Calendar past = new GregorianCalendar(now.get(Calendar.YEAR) - Employee.MIN_EMPLOYEE_AGE, now.get(Calendar.MONTH),now.get(Calendar.DATE));
+		Calendar calBirthDate = new GregorianCalendar(dtBirthDate.getYear(), dtBirthDate.getMonth(), dtBirthDate.getDay());
 
+		if(past.before(calBirthDate)){
+			cdBirthDate.show();
+			cdBirthDate.setDescriptionText("Invalid Birth Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years in the past");
+			isComplete = false;
+		}
 		if (chSmartUser.getSelection()){
 			if (txtSmartId.getText().trim().isEmpty()
 					|| txtSmartId.getText().length() > Employee.MAX_SMART_ID_LENGTH) {

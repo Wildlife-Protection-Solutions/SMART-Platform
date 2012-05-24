@@ -22,7 +22,9 @@
 package org.wcs.smart.ca;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,6 +40,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -90,6 +93,11 @@ public class Employee {
 	 * Minimum smart password length
 	 */
 	public static final int MIN_SMART_PASSWORD_LENGTH = 4;
+	
+	/**
+	 * Minimum number of years in the past employee birthdate must be.
+	 */
+	public static final int MIN_EMPLOYEE_AGE = 4;
 	
 	/**
 	 * Smart user level.
