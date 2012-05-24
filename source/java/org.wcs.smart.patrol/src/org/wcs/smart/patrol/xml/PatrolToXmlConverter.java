@@ -169,18 +169,36 @@ public class PatrolToXmlConverter {
 		for (WaypointObservationAttribute att : observation.getAttributes()){
 			WaypointObservationAttributeType xml2 = new WaypointObservationAttributeType();
 			xml2.setAttributeKey(att.getAttribute().getKeyId());
+			boolean add = false;
 			if (att.getAttribute().getType().equals(AttributeType.BOOLEAN)){
-				xml2.setBValue(att.getNumberValue() >= 0.5);
+				if (att.getNumberValue() != null){
+					xml2.setBValue(att.getNumberValue() >= 0.5);
+					add = true;
+				}
 			}else if (att.getAttribute().getType().equals(AttributeType.LIST)){
-				xml2.setItemKey(att.getAttributeListItem().getKeyId());
+				if (att.getAttributeListItem() != null){
+					xml2.setItemKey(att.getAttributeListItem().getKeyId());
+					add = true;
+				}
 			}else if (att.getAttribute().getType().equals(AttributeType.NUMERIC)){
-				xml2.setDValue(att.getNumberValue());
+				if (att.getNumberValue() != null){
+					xml2.setDValue(att.getNumberValue());
+					add = true;
+				}
 			}else if (att.getAttribute().getType().equals(AttributeType.TEXT)){
-				xml2.setSValue(att.getStringValue());
+				if (att.getStringValue() != null){
+					xml2.setSValue(att.getStringValue());
+					add = true;
+				}
 			}else if (att.getAttribute().getType().equals(AttributeType.TREE)){
-				xml2.setItemKey(att.getAttributeTreeNode().getHkey());
+				if (att.getAttributeTreeNode() != null){
+					xml2.setItemKey(att.getAttributeTreeNode().getHkey());
+					add = true;
+				}
 			}
-			xml.getAttributes().add(xml2);
+			if (add){
+				xml.getAttributes().add(xml2);
+			}
 		}
 		return xml;
 	}
