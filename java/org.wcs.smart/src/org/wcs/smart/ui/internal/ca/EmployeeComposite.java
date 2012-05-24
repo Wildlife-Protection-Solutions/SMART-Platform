@@ -150,7 +150,6 @@ public class EmployeeComposite extends Composite {
 		}
 		createLabelField(this, Employee.BIRTHDATE + ":");
 		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG, validate); 
-////////////////////////////////////////////////////////////////////
 		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
 		dtBirthDate.setLayoutData(data);
