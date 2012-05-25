@@ -24,6 +24,24 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
 		Assert.assertEquals(test.getQueryFilter().asString(), queryPart);
 	}
+	
+	
+	@Test
+	public void testCombinedPatrolValues() throws Exception{
+		
+		String valuePart = "patrol:sum:numdays/patrol:sum:numdays";
+		String rowGroupByPart = "";
+		String colGroupByPart = "";
+		String queryPart = "";
+		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+	}
+	
 	@Test
 	public void testPatrolValues() throws Exception{
 		
