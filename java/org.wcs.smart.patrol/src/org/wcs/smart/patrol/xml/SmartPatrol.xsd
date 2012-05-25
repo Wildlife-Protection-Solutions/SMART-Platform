@@ -38,7 +38,6 @@ elementFormDefault="qualified">
     <complexType name="ObjectiveType">
     	<sequence>
     		<element name="description" type="string"></element>
-    		<element name="rating" type="int"></element>
     	</sequence>
     </complexType>
 

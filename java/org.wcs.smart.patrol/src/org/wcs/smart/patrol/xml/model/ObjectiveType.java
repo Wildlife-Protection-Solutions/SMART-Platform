@@ -25,7 +25,6 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="rating" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -36,14 +35,12 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ObjectiveType", propOrder = {
-    "description",
-    "rating"
+    "description"
 })
 public class ObjectiveType {
 
     @XmlElement(required = true)
     protected String description;
-    protected int rating;
 
     /**
      * Gets the value of the description property.
@@ -68,21 +65,4 @@ public class ObjectiveType {
     public void setDescription(String value) {
         this.description = value;
     }
-
-    /**
-     * Gets the value of the rating property.
-     * 
-     */
-    public int getRating() {
-        return rating;
-    }
-
-    /**
-     * Sets the value of the rating property.
-     * 
-     */
-    public void setRating(int value) {
-        this.rating = value;
-    }
-
 }
