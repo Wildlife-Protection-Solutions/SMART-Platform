@@ -53,15 +53,12 @@ public class SmartApp implements IApplication {
 
 	@Override
 	public void stop() {
-		
 		HibernateManager.endSessionFactory();
-		
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 		final Display display = workbench.getDisplay();
 		display.syncExec(new Runnable() {
 			public void run() {
-				if (!display.isDisposed())
-					workbench.close();
+				if (!display.isDisposed()) workbench.close();
 			}
 		});
 	}

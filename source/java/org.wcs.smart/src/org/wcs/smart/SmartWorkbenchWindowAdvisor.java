@@ -44,6 +44,8 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.ActionBarAdvisor;
@@ -68,6 +70,21 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 	private PerspectiveEditorTracker perspectiveTracker = null;
 	private PerspectiveEditorListener perspectiveListener = null;
 	
+	private IWorkbenchListener shutdownListener = new IWorkbenchListener() {
+		@Override
+		public boolean preShutdown(IWorkbench workbench, boolean forced) {
+			if (workbench.saveAllEditors(true)){
+				workbench.getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
+				return true;
+			}
+			return false;
+		}
+		
+		@Override
+		public void postShutdown(IWorkbench workbench) {
+		}
+	};
+	
     public SmartWorkbenchWindowAdvisor(IWorkbenchWindowConfigurer configurer) {
         super(configurer);
         
@@ -78,7 +95,8 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     public void dispose(){
     	super.dispose();
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
-    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(perspectiveTracker);    	
+    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(perspectiveTracker);
+    	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().removeWorkbenchListener(shutdownListener);
     	super.getWindowConfigurer().getWindow().removePerspectiveListener(perspectiveListener);
     }
     
@@ -101,7 +119,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     
     @Override
     public void postWindowOpen() {
-    	
+    	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().addWorkbenchListener(shutdownListener);
         //assign title to window
         getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getId() + " - " + SmartDB.getCurrentConservationArea().getName());
         
