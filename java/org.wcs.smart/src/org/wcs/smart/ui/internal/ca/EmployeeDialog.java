@@ -40,7 +40,6 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.ui.internal.ca.create.CaWizard_UserDef;
 
 /**
  * Dialog for creating new employees or

@@ -22,9 +22,7 @@
 package org.wcs.smart.ca;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,7 +38,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.wcs.smart.util.SmartUtils;
 
 
 /**
