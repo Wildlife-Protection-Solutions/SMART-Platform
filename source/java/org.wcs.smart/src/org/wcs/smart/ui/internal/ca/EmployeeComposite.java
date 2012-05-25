@@ -27,8 +27,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Comparator;
 
-import javax.persistence.Transient;
-
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -371,6 +369,7 @@ public class EmployeeComposite extends Composite {
 		if (cdEmploymentEnd != null){
 			cdEmploymentEnd.hide();
 		}
+		
 		boolean isComplete = true;
 		if (txtGivenName.getText().trim().isEmpty()
 				|| txtGivenName.getText().length() > Employee.MAX_NAME_LENGTH) {
@@ -401,7 +400,7 @@ public class EmployeeComposite extends Composite {
 		// test for startdate being at least Employee.MIN_EMPLOYEE_AGE since birthdate
 		min = new GregorianCalendar(dtBirthDate.getYear() + Employee.MIN_EMPLOYEE_AGE, dtBirthDate.getMonth(), dtBirthDate.getDay());
 		Calendar calStartDate = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay());
-
+		
 		if(calStartDate.before(min)){
 			cdEmploymentStart.show();
 			cdEmploymentStart.setDescriptionText("Invalid Start Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years after birthdate.");
@@ -484,12 +483,10 @@ public class EmployeeComposite extends Composite {
 		if (e.getEndEmploymentDate() != null){
 			chNotActive.setSelection(true);
 			dtEmploymentEnd.setEnabled(true);
-			
 			Calendar endDate = SmartUtils.convertDate(e.getEndEmploymentDate());
 			dtEmploymentEnd.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
 		}else{
 			chNotActive.setSelection(false);
-			
 			dtEmploymentEnd.setEnabled(false);
 		}
 		
