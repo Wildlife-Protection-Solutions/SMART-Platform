@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Comparator;
 
 import javax.persistence.Transient;
 
@@ -37,6 +38,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -50,8 +52,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
@@ -80,6 +84,8 @@ public class EmployeeComposite extends Composite {
 	private ControlDecoration cdGiveName;
 	private ControlDecoration cdFamilyName;
 	private ControlDecoration cdBirthDate;
+	private ControlDecoration cdEmploymentEnd;
+	private ControlDecoration cdEmploymentStart;
 	private ControlDecoration cdSmartId;
 	private ControlDecoration cdSmartPassword;
 	private ControlDecoration cdSmartPassword2;
@@ -112,7 +118,13 @@ public class EmployeeComposite extends Composite {
 				validate();
 			}
 		};
-
+		Listener dateValidate = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				validate();
+				
+			}
+		};
 		createLabelField(this, Employee.GIVEN_NAME + ":");
 		txtGivenName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
@@ -122,8 +134,8 @@ public class EmployeeComposite extends Composite {
 				Employee.MAX_NAME_LENGTH, validate);
 
 		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":");
-		dtEmploymentStart = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN
-				| SWT.LONG);
+		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
+				| SWT.LONG, dateValidate);
 		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
 		dtEmploymentStart.setLayoutData(data);
@@ -142,14 +154,19 @@ public class EmployeeComposite extends Composite {
 			});
 			
 			createLabelField(this, Employee.EMPLOYEMENT_ENDDATE + ":");
-			dtEmploymentEnd = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN
-					| SWT.LONG);
+			dtEmploymentEnd = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
+					| SWT.LONG, dateValidate);
 			data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 			data.horizontalIndent = 8;
-			dtEmploymentEnd.setLayoutData(data);	
+			dtEmploymentEnd.setLayoutData(data);
+
 		}
 		createLabelField(this, Employee.BIRTHDATE + ":");
-		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG, validate); 
+		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG, dateValidate);
+		//default the date to something other than today.
+		dtBirthDate.setYear(1950);
+		dtBirthDate.setMonth(0);
+		dtBirthDate.setDay(1);
 		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
 		dtBirthDate.setLayoutData(data);
@@ -267,6 +284,10 @@ public class EmployeeComposite extends Composite {
 		cdGiveName = createDecoration(txtGivenName);
 		cdFamilyName = createDecoration(txtFamilyName);
 		cdBirthDate= createDecoration(dtBirthDate);
+		cdEmploymentStart= createDecoration(dtEmploymentStart);
+		if (dtEmploymentEnd != null){
+			cdEmploymentEnd = createDecoration(dtEmploymentEnd);
+		}
 		cdSmartId = createDecoration(txtSmartId);
 		cdSmartPassword = createDecoration(txtSmartPassword);
 		cdSmartPassword2 = createDecoration(txtSmartPassword2);
@@ -313,13 +334,10 @@ public class EmployeeComposite extends Composite {
 		return txt;
 	}
 
-	private DateTime createDateField(Composite parent, int style, KeyListener validator) {
+	private DateTime createDateField(Composite parent, int style, Listener dateValidator) {
 		DateTime dt = new DateTime(parent, style);
-		dt.setYear(1950);
-		dt.setMonth(0);
-		dt.setDay(1);
-		if (validator != null) {
-			dt.addKeyListener(validator);
+		if (dateValidator != null) {
+			dt.addListener(SWT.Selection, dateValidator);
 		}
 		return dt;
 	}
@@ -345,19 +363,20 @@ public class EmployeeComposite extends Composite {
 	 * @return <code>false</code> if not complete, <code>true</code> otherwise
 	 */
 	public boolean validate() {
-
-		ControlDecoration cds[] = { cdGiveName, cdFamilyName, cdBirthDate, cdSmartId,
+		ControlDecoration cds[] = { cdGiveName, cdFamilyName, cdBirthDate, cdEmploymentStart, cdSmartId,
 				cdSmartPassword, cdSmartPassword2 };
 		for (int i = 0; i < cds.length; i++) {
 			cds[i].hide();
 		}
-
+		if (cdEmploymentEnd != null){
+			cdEmploymentEnd.hide();
+		}
 		boolean isComplete = true;
 		if (txtGivenName.getText().trim().isEmpty()
 				|| txtGivenName.getText().length() > Employee.MAX_NAME_LENGTH) {
 			cdGiveName.show();
 			cdGiveName
-					.setDescriptionText("Invalid give name.  The given name must be less than "
+					.setDescriptionText("Invalid given name.  The given name must be less than "
 							+ Employee.MAX_NAME_LENGTH + " characters.");
 			isComplete = false;
 		}
@@ -371,13 +390,32 @@ public class EmployeeComposite extends Composite {
 		}
 		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
 		Calendar now = new GregorianCalendar(); 
-		Calendar past = new GregorianCalendar(now.get(Calendar.YEAR) - Employee.MIN_EMPLOYEE_AGE, now.get(Calendar.MONTH),now.get(Calendar.DATE));
+		Calendar min = new GregorianCalendar(now.get(Calendar.YEAR) - Employee.MIN_EMPLOYEE_AGE, now.get(Calendar.MONTH),now.get(Calendar.DATE));
 		Calendar calBirthDate = new GregorianCalendar(dtBirthDate.getYear(), dtBirthDate.getMonth(), dtBirthDate.getDay());
 
-		if(past.before(calBirthDate)){
+		if(min.before(calBirthDate)){
 			cdBirthDate.show();
-			cdBirthDate.setDescriptionText("Invalid Birth Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years in the past");
+			cdBirthDate.setDescriptionText("Invalid Birth Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years in the past.");
 			isComplete = false;
+		}
+		// test for startdate being at least Employee.MIN_EMPLOYEE_AGE since birthdate
+		min = new GregorianCalendar(dtBirthDate.getYear() + Employee.MIN_EMPLOYEE_AGE, dtBirthDate.getMonth(), dtBirthDate.getDay());
+		Calendar calStartDate = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay());
+
+		if(calStartDate.before(min)){
+			cdEmploymentStart.show();
+			cdEmploymentStart.setDescriptionText("Invalid Start Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years after birthdate.");
+			isComplete = false;
+		}
+		if(dtEmploymentEnd != null){
+			//test for EmploymentEnd being before employment start
+			Calendar start = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay() );
+			Calendar end = new GregorianCalendar(dtEmploymentEnd.getYear(), dtEmploymentEnd.getMonth(), dtEmploymentEnd.getDay() );
+			if(end.before(start)){
+				cdEmploymentEnd.show();
+				cdEmploymentEnd.setDescriptionText("Invalid Employment End Date.  Must be after start date.");
+				isComplete = false;
+			}
 		}
 		if (chSmartUser.getSelection()){
 			if (txtSmartId.getText().trim().isEmpty()
@@ -462,6 +500,14 @@ public class EmployeeComposite extends Composite {
 			if (e.getRank() != null){
 				cmbViewerRank.setSelection(new StructuredSelection(e.getRank()));
 			}
+			ViewerComparator comp = new ViewerComparator(new Comparator<String>() {
+			    @Override
+			    public int compare(String arg0, String arg1) {
+			        return arg0.compareTo(arg1);
+			    }
+			});
+			cmbViewerRank.setComparator(comp); 
+			cmbViewerAgency.setComparator(comp); 
 		}
 		
 		if (e.getSmartUserId() != null){
@@ -500,7 +546,7 @@ public class EmployeeComposite extends Composite {
 				this.txtSmartPassword,
 				this.txtSmartPassword2,
 				this.dtBirthDate,
-				//this.dtEmploymentEnd,
+//				this.dtEmploymentEnd,
 				this.dtEmploymentStart,
 				this.opMale,
 				this.opFemale,
