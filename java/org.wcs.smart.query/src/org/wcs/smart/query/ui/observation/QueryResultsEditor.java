@@ -84,7 +84,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		public void queryChanged(Query query) {
 			if (query != null && query.equals(QueryResultsEditor.this.query)){
 				isDirty = true;
-				firePropertyChange(PROP_DIRTY);
+				firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 			}
 		}
 
@@ -191,10 +191,10 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	public void updatePartName(){
 		super.setPartName(query.getName());
 	}
-
+ 
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
-		firePropertyChange(PROP_DIRTY);
+		firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 	}
 	/**
 	 * This editor has two pages:
@@ -300,6 +300,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		//ensure query is valid
 		if (!query.isValid()){
 			MessageDialog.openError(getSite().getShell(), "Save", "You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
+			monitor.setCanceled(true);
 			return;
 		}
 				
@@ -312,12 +313,14 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			//new query; we need to get folder location
 			SaveQueryDialog dialog = new SaveQueryDialog(getContainer().getShell(), query, false);
 			if (dialog.open() != IDialogConstants.OK_ID){
+				monitor.setCanceled(true);
 				return;
 			}
 			
 			QueryFolder qf = dialog.getQueryFolder() ; 
 			if (qf == null){
 				QueryPlugIn.displayLog("Query not saved.  Could not determine folder.", null);
+				monitor.setCanceled(true);
 				return;
 			}
 			
@@ -333,7 +336,10 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			
 		}
 		
-		saveQuery(false);
+		if (!saveQuery(false)){
+			monitor.setCanceled(true);
+			return;
+		}
 		
 		if (newQuery){
 			QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, query);
@@ -346,11 +352,13 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		setDirty(false);
 	}
 
-	private void saveQuery(boolean generateDropItems){
+	private boolean saveQuery(boolean generateDropItems){
+		boolean newQuery = query.getId() == null;
+		
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			if (query.getId() == null){
+			if (newQuery){
 				query.setId(QueryHibernateManager.generateQueryId(s));
 				page1.setQuery();
 			}
@@ -360,9 +368,15 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			s.saveOrUpdate(query);
 			s.getTransaction().commit();
 			updatePartName();
+			return true;
 		}catch (Exception ex){
-			ex.printStackTrace();
+			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
 			s.getTransaction().rollback();
+			if (newQuery){
+				query.setUuid(null);
+				query.setId(null);
+			}
+			return false;
 		}finally{
 			s.close();
 		}
@@ -415,11 +429,14 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 					ObservationQuery oldQuery = QueryResultsEditor.this.query;
 					
 					QueryResultsEditor.this.query = newQuery;
-					page1.setQuery();
+					monitor.subTask("Saving query...");
+					if (!saveQuery(true)){
+						QueryResultsEditor.this.query = oldQuery;
+						return ;
+					}
 					monitor.worked(1);
 					
-					monitor.subTask("Saving query...");
-					saveQuery(true);
+					page1.setQuery();
 					monitor.worked(1);
 					
 					QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, query);
@@ -510,4 +527,5 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	public void setFocus() {
 		
 	}
+
 }

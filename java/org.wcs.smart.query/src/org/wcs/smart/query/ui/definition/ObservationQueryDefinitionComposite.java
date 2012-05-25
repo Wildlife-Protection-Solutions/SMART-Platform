@@ -131,12 +131,10 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 				isvalid = false;
 			}
 		}
-
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)view.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
 		provider.setQueryValue(isvalid);
 		view.getQuery().setIsValid(isvalid);
 		((ObservationQuery)view.getQuery()).setQueryFilter(query);
-		
 	}
 
 	/**

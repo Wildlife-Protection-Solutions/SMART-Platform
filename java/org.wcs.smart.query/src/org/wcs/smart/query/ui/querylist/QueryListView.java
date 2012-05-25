@@ -125,17 +125,19 @@ public class QueryListView extends ViewPart {
 		
 		@Override
 		public void folderChanged(int eventType, Object object) {
-	
-			queryList.setSelection(null);
-			focusCellManager.getFocusCell();
-			queryList.setSelection(null);
+//			System.out.println("folder changed");
+//			queryList.setSelection(null);
+//			focusCellManager.getFocusCell();
+//			queryList.setSelection(null);
+			
+			queryList.refresh();
 			
 			if (eventType == IQueryFolderListener.FOLDER_ADDED || 
 					eventType == IQueryFolderListener.QUERY_ADDED){
 				//may not be added if added in a different view
 				queryList.expandToLevel(object, 1);
 			}
-			queryList.refresh();
+			
 			if (eventType == IQueryFolderListener.FOLDER_ADDED){
 				editElement(object);
 			}
@@ -189,10 +191,7 @@ public class QueryListView extends ViewPart {
 		queryList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryList.setContentProvider(new QueryListViewContentProvider(true));
 		queryList.setLabelProvider(new QueryListLabelProvider());
-		
-		
 		queryList.addDoubleClickListener(new IDoubleClickListener() {
-			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object x = ((IStructuredSelection)queryList.getSelection()).getFirstElement();
@@ -205,20 +204,15 @@ public class QueryListView extends ViewPart {
 						}
 					} catch (Throwable t) {
 						QueryPlugIn.displayLog(t.getMessage(), t);
-
 					}
 				}
-				
 			}
 		});
 		
-		
-//		
 		queryList.setCellEditors(new CellEditor[] { new TextCellEditor(queryList.getTree()) });
 		queryList.setColumnProperties(new String[] { "col1" });
 		queryList.setCellModifier(new FolderNameCellEditor(queryList));
 		
-
 		focusCellManager = new TreeViewerFocusCellManager(queryList, new MultiFocusCellOwnerDrawHighlighter(queryList));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
 				queryList) {
