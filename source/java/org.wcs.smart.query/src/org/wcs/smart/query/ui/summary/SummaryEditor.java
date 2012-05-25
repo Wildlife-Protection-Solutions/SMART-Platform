@@ -361,7 +361,7 @@ public class SummaryEditor extends EditorPart {
 			
 			
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			if (isNew){
 				query.setUuid(null);
