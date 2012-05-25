@@ -32,7 +32,6 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -44,7 +43,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.query.model.SummaryHeader;
 import org.wcs.smart.query.model.SummaryQueryResult;
@@ -65,9 +63,7 @@ public class SummaryResultTable extends Composite {
 	private TableViewer topTable;
 	private TableViewer leftTable;
 	private TableViewer mainTable;
-	
-	private Cursor ewCursor = null;
-	
+		
 	private SummaryQueryResult results;
 	private Label lblSpacer;
 	
@@ -89,7 +85,6 @@ public class SummaryResultTable extends Composite {
 		if (toolkit != null){
 			toolkit.adapt(this);
 		}
-		ewCursor = Display.getDefault().getSystemCursor(SWT.CURSOR_SIZEWE);
 	}
 	
 	
@@ -195,6 +190,7 @@ public class SummaryResultTable extends Composite {
 		leftTable = new TableViewer(this, SWT.VIRTUAL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION | SWT.NO_SCROLL);
 		leftTable.getTable().setHeaderVisible(false);
 		leftTable.getTable().setLinesVisible(true);
+		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, true);
 		gd.heightHint = 200;
 		leftTable.getTable().setLayoutData(gd);
@@ -203,6 +199,23 @@ public class SummaryResultTable extends Composite {
 			TableViewerColumn tvc = new TableViewerColumn(leftTable, SWT.NONE);
 			tvc.getColumn().setWidth(DEFAULT_COL_SIZE);
 		}
+		
+		//add a listener so we can re-size the columns as we are not using the swt headers for resizing
+		TableResizeColumnListener leftListener = new TableResizeColumnListener(
+				leftTable.getTable(),
+				new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						Point x = leftTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
+						Rectangle left = leftTable.getTable().getBounds();
+						leftTable.getTable().setBounds(left.x, left.y, x.x, left.height);
+					}
+				},
+				null);
+		
+		leftTable.getTable().addListener(SWT.MouseMove, leftListener);
+		leftTable.getTable().addListener(SWT.MouseUp, leftListener);
+		leftTable.getTable().addListener(SWT.MouseDown, leftListener);
 		
 		leftTable.setContentProvider(new IStructuredContentProvider() {
 			@Override
@@ -265,85 +278,45 @@ public class SummaryResultTable extends Composite {
 		});
 		topTable.setLabelProvider(new SummaryHeaderLabelProvider());
 		
-		//add a listener so we can re-size the columns as we are not using the swt headers for resizing
-		Listener thisListener = new Listener(){
-			int moveIndex = -1;
-			int lastX = 0;
-			boolean mouseDown = false;
-			
-			@Override
-			public void handleEvent(Event event) {
-				
-				if (event.type == SWT.MouseDown){
-					//find column being re-sized
-					int width = 0;
-					for (int i = 0; i < topTable.getTable().getColumnCount(); i ++){
-						width = width + topTable.getTable().getColumn(i).getWidth();
-						if (width - 5 <= event.x && event.x <= width + 5){
-							moveIndex = i;
-						}
-					}
-					lastX = event.x;
-					mouseDown = true;
-					topTable.getTable().setCursor(ewCursor);
-					topTable.getTable().setCapture(true);
-					
-				}else if (event.type == SWT.MouseUp){
-					//reset
-					mouseDown = false;
-					moveIndex = -1;
-					lastX = 0;
-					topTable.getTable().setCapture(false);
-					topTable.getTable().setCursor(null);
-					
-					//update table width
-					int totalWidth = 0;
-					for (int i = 0; i < mainTable.getTable().getColumnCount(); i ++){
-						totalWidth += mainTable.getTable().getColumn(i).getWidth();
-					}
-					Rectangle top = topTable.getTable().getBounds();
-					Rectangle r = mainTable.getTable().getBounds();
-					
-					int x = top.x;
-					if (totalWidth < r.width){
-						x = -mainTable.getTable().getHorizontalBar().getSelection();
-					}
-					topTable.getTable().setBounds(x,top.y,Math.max(totalWidth,r.width),top.height);
-					//topTable.getTable().getParent().layout();
-					topTable.getTable().layout();
-					
-					
-				}else if (event.type == SWT.MouseMove){
-					if (moveIndex < 0){
-						topTable.getTable().setCursor(null);
-						int width = 0;
-						for (int i = 0; i < topTable.getTable().getColumnCount(); i ++){
-							width = width + topTable.getTable().getColumn(i).getWidth();
-							if (width - 5 <= event.x && event.x <= width + 5){
-								//can move = true;
-								topTable.getTable().setCursor(ewCursor);
-							}
-						}
-					}else if (mouseDown && moveIndex >= 0){
-						//resize colum in this table and the main table
-						int prev = lastX - event.x;
-						lastX = event.x;
-						TableColumn col = topTable.getTable().getColumn(moveIndex);
-						int newWidth = col.getWidth() - prev; 
-						if (newWidth < 10){
-							newWidth = 10;
-						}
-						col.setWidth(newWidth);
-						mainTable.getTable().getColumn(moveIndex).setWidth(newWidth);
-					}
-				}
-
-			}
-		};
 		
-		topTable.getTable().addListener(SWT.MouseMove , thisListener);
-		topTable.getTable().addListener(SWT.MouseDown, thisListener);
-		topTable.getTable().addListener(SWT.MouseUp, thisListener);
+		TableResizeColumnListener topListener = new TableResizeColumnListener(
+				topTable.getTable(), new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						// update table width
+						int totalWidth = 0;
+						for (int i = 0; i < mainTable.getTable()
+								.getColumnCount(); i++) {
+							totalWidth += mainTable.getTable().getColumn(i)
+									.getWidth();
+						}
+						Rectangle top = topTable.getTable().getBounds();
+						Rectangle r = mainTable.getTable().getBounds();
+
+						int x = top.x;
+						if (totalWidth < r.width) {
+							x = -mainTable.getTable().getHorizontalBar()
+									.getSelection();
+						}
+						topTable.getTable().setBounds(x, top.y,
+								Math.max(totalWidth, r.width), top.height);
+						// topTable.getTable().getParent().layout();
+						topTable.getTable().layout();
+					}
+				}, new Listener() {
+
+					@Override
+					public void handleEvent(Event event) {
+						int[] data = (int[]) event.data;
+						mainTable.getTable().getColumn(data[0])
+								.setWidth(data[1]);
+					}
+				});
+
+		
+		topTable.getTable().addListener(SWT.MouseMove , topListener);
+		topTable.getTable().addListener(SWT.MouseDown, topListener);
+		topTable.getTable().addListener(SWT.MouseUp, topListener);
 	}
 	
 
