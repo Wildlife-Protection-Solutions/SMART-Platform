@@ -287,6 +287,7 @@ public class SummaryEditor extends EditorPart {
 							getSite().getShell(),
 							"Save",
 							"You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
+			monitor.setCanceled(true);
 			return;
 		}
 
@@ -300,6 +301,7 @@ public class SummaryEditor extends EditorPart {
 			SaveQueryDialog dialog = new SaveQueryDialog(
 					getSite().getShell(), query, false);
 			if (dialog.open() != IDialogConstants.OK_ID) {
+				monitor.setCanceled(true);
 				return;
 			}
 
@@ -307,6 +309,7 @@ public class SummaryEditor extends EditorPart {
 			if (qf == null) {
 				QueryPlugIn.displayLog(
 						"Query not saved.  Could not determine folder.", null);
+				monitor.setCanceled(true);
 				return;
 			}
 
@@ -322,7 +325,10 @@ public class SummaryEditor extends EditorPart {
 
 		}
 
-		saveQuery(false);
+		if (!saveQuery(false)){
+			monitor.setCanceled(true);
+			return;
+		}
 
 		if (newQuery) {
 			QueryEventManager.getInstance().fireFolderChangedListeners(
@@ -338,11 +344,13 @@ public class SummaryEditor extends EditorPart {
 
 	}
 
-	private void saveQuery(boolean generateDropItems) {
+	private boolean saveQuery(boolean generateDropItems) {
+		boolean isNew = query.getId() == null;
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
+		
 		try {
-			if (query.getId() == null) {
+			if (isNew) {
 				query.setId(QueryHibernateManager.generateQueryId(s));
 			}
 			if (generateDropItems) {
@@ -351,15 +359,21 @@ public class SummaryEditor extends EditorPart {
 			s.saveOrUpdate(query);
 			s.getTransaction().commit();
 			
-			updatePartName();
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			s.getTransaction().rollback();
+			if (isNew){
+				query.setUuid(null);
+				query.setId(null);
+			}
+			return false;
 		} finally {
 			s.close();
 		}
-
+		updatePartName();
 		initQuery();
+		return true;
 	}
 
 	@Override
@@ -412,14 +426,14 @@ public class SummaryEditor extends EditorPart {
 							.getCurrentConservationArea());
 
 					SummaryQuery oldQuery = SummaryEditor.this.query;
-
 					SummaryEditor.this.query = newQuery;
-
-					
 					monitor.worked(1);
 
 					monitor.subTask("Saving query...");
-					saveQuery(true);
+					if (!saveQuery(true)){
+						SummaryEditor.this.query = oldQuery;
+						return;
+					}
 					monitor.worked(1);
 
 					QueryEventManager.getInstance().fireFolderChangedListeners(

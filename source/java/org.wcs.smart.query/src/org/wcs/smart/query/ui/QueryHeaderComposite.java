@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
@@ -53,6 +54,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  */
 public class QueryHeaderComposite extends Composite {
 
+	private static final int MAX_NAME_LENGTH = 1024;
+	
 	private Label lblName;
 	private Text txtName;
 	
@@ -132,8 +135,10 @@ public class QueryHeaderComposite extends Composite {
 				lblName.setVisible(true);
 				if (!cancelled){
 					if (!name.equals(txtName.getText())){
-						name = txtName.getText();
-						fireNameChange();
+						if (validateName(txtName.getText())){
+							name = txtName.getText();
+							fireNameChange();
+						}
 					}
 				}
 			}
@@ -153,13 +158,7 @@ public class QueryHeaderComposite extends Composite {
 					lblName.setVisible(true);
 					cancelled = true;
 				} else if (e.keyCode == SWT.CR) {
-					if (!name.equals(txtName.getText())){
-						name = txtName.getText();
-						fireNameChange();
-					}
 					txtName.setVisible(false);
-					lblName.setVisible(true);
-					
 				}
 			}
 
@@ -186,6 +185,14 @@ public class QueryHeaderComposite extends Composite {
 			public void mouseDoubleClick(MouseEvent e) {
 			}
 		});
+	}
+	
+	private boolean validateName(String name){
+		if (name.length() > MAX_NAME_LENGTH){
+			MessageDialog.openError(getShell(), "Name too long", "Maximum name length is " + MAX_NAME_LENGTH + " characters.");
+			return false;
+		}
+		return true;
 	}
 	
 	private void fireNameChange(){

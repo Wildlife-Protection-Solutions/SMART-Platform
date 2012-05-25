@@ -252,6 +252,7 @@ public class QueryDefView extends ViewPart {
 									DropItem it = getDropItemFactory().createPatrolValueDropItem((PatrolValueOption)type);
 									if (it != null){
 										currentPanel.addItem(it);
+										fireEvent = true;
 									}
 								}else if (type instanceof PatrolQueryOption){
 									DropItem it = null;
@@ -259,7 +260,7 @@ public class QueryDefView extends ViewPart {
 										it = getDropItemFactory().createPatrolFilterDropItem((PatrolQueryOption)type);
 									}else if (selection.getType() == QueryFilterSelection.FilterType.SUMMARY){
 										it = getDropItemFactory().createPatrolGroupByDropItem((PatrolQueryOption)type);
-									}
+									} 
 									if (it != null ){
 										currentPanel.addItem(it);
 										fireEvent = true;
@@ -268,6 +269,7 @@ public class QueryDefView extends ViewPart {
 									DropItem it = getDropItemFactory().createDateGroupByDropItem((DateGroupByOption)type);
 									if (it != null){
 										currentPanel.addItem(it);
+										fireEvent = true;
 									}
 								}else if (type instanceof SummaryDmObject){
 									SummaryDmObject object = (SummaryDmObject) type;
@@ -298,6 +300,7 @@ public class QueryDefView extends ViewPart {
 									}
 									if (it != null){
 										currentPanel.addItem(it);
+										fireEvent = true;
 									}
 								}
 								

@@ -177,7 +177,6 @@ public class FilterDropTargetPanel implements IDropPanel {
 		items.add(item);
 		orderElements();
 		validate();
-		
 	}
 
 	/**
