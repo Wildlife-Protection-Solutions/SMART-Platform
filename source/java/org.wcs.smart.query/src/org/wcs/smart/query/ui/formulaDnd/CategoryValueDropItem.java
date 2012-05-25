@@ -34,7 +34,7 @@ import org.wcs.smart.ca.datamodel.Category;
  * @author egouge
  * @since 1.0.0
  */
-public class CategoryValueDropItem extends DropItem {
+public class CategoryValueDropItem extends AbstractValueDropItem {
 
 	private Category category = null;
 
@@ -43,56 +43,22 @@ public class CategoryValueDropItem extends DropItem {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
 	 */
 	@Override
-	public String getText() {
+	public String getValueText() {
 		return "Count " + category.getFullCategoryName();
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueQueryPart()
 	 */
 	@Override
-	public String asQueryPart() {
+	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("category:sum:");
 		sb.append(category.getHkey());
 		return sb.toString();
-	}
-
-	/**
-	 * Nothing to initialize.
-	 * 
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
-	 */
-	@Override
-	public void initializeData(Object data) {
-
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem() {
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem() {
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem() {
-		return false;
 	}
 
 	/*
@@ -103,7 +69,7 @@ public class CategoryValueDropItem extends DropItem {
 	 * .swt.widgets.Composite)
 	 */
 	@Override
-	protected void createComposite(Composite parent) {
+	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 
 		GridLayout gl = new GridLayout(1, false);
@@ -112,7 +78,7 @@ public class CategoryValueDropItem extends DropItem {
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		main.setLayout(gl);
-		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		main.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, true));
 
 		Label lblText = new Label(main, SWT.NONE);
 		StringBuilder sb = new StringBuilder();
@@ -122,6 +88,14 @@ public class CategoryValueDropItem extends DropItem {
 		initDrag(main);
 		initDrag(lblText);
 
+	}
+
+	/** Does nothing
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)
+	 */
+	@Override
+	protected void initializeValueData(Object data) {
+		
 	}
 
 }

@@ -26,7 +26,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -57,6 +59,7 @@ import org.wcs.smart.query.parser.internal.summary.AttributeGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryGroupBy;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
+import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;
 import org.wcs.smart.query.parser.internal.summary.IGroupBy;
@@ -258,17 +261,41 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString());
-			if (it instanceof PatrolValueItem){
-				results.putAll(getPatrolSummaryValue(c, s, groupBy, (PatrolValueItem)it));
-			}else if (it instanceof AttributeValueItem){
-				results.putAll(getAttributeValue(c, s, groupBy, (AttributeValueItem)it));
-			}else if (it instanceof CategoryValueItem){
-				results.putAll(getCategoryValue(c, s, groupBy, (CategoryValueItem)it));
+			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it) ; 
+			if (data != null){
+				results.putAll( data );	
 			}
+			
 			monitor.worked(1);
 		}
 		return results;
 		
+	}
+
+
+	/**
+	 * Computes the data for a given value item
+	 * @param c
+	 * @param s
+	 * @param groupBy
+	 * @param it
+	 * @return
+	 * @throws SQLException
+	 */
+	private HashMap<SummaryResultKey, Double> computeValueItem(Connection c, 
+			Session s,
+			GroupByPart groupBy, 
+			IValueItem it) throws SQLException {
+		if (it instanceof PatrolValueItem){
+			return (getPatrolSummaryValue(c, s, groupBy, (PatrolValueItem)it));
+		}else if (it instanceof AttributeValueItem){
+			return  (getAttributeValue(c, s, groupBy, (AttributeValueItem)it));
+		}else if (it instanceof CategoryValueItem){
+			return (getCategoryValue(c, s, groupBy, (CategoryValueItem)it));
+		}else if (it instanceof CombinedValueItem){
+			return (getCombinedValue(c, s, groupBy, (CombinedValueItem)it));
+		}
+		return null;
 	}
 	
 	/**
@@ -429,20 +456,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		sql.append(".attribute_uuid = ");
 		sql.append(tablePrefix.get(Attribute.class));
 		sql.append(".uuid ");
-//		if (attributeItem.getCategoryKey() != null){
-//			sql.append(" join smart.wp_observation ");
-//			sql.append(tablePrefix.get(WaypointObservation.class));
-//			sql.append(" on foo.ob_uuid = ");
-//			sql.append(tablePrefix.get(WaypointObservation.class));
-//			sql.append(".uuid ");
-//			sql.append(" join smart.dm_category ");
-//			sql.append(tablePrefix.get(Category.class));
-//			sql.append(" on ");
-//			sql.append(tablePrefix.get(WaypointObservation.class));
-//			sql.append(".category_uuid = ");
-//			sql.append(tablePrefix.get(Category.class));
-//			sql.append(".uuid ");
-//		}
+
 		sql.append(" WHERE ");
 		sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 		sql.append(".number_value is not null and ");
@@ -450,14 +464,9 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		sql.append(".keyid = '");
 		sql.append(attributeItem.getAttributeKey() + "'");
 		if (attributeItem.getCategoryKey() != null){
-//			sql.append(" AND (");
-//			sql.append(tablePrefix.get(Category.class));
-//			sql.append(".hkey >= '");
 			sql.append("a.cat_hkey >= '");
 			sql.append(attributeItem.getCategoryKey());
 			sql.append("' and ");
-//			sql.append(tablePrefix.get(Category.class));
-//			sql.append(".hkey < '");
 			sql.append("a.cat_hkey < '");
 			sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
 			sql.append("/') ");
@@ -471,13 +480,20 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		QueryPlugIn.logSql(sql.toString());
 		
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		
 
-		
-//		return results;
 		return createValueResults(rs, groupBy, attributeItem.asString());
 	}
 	
+	/**
+	 * Reads the results from a database value query
+	 * and creates a set of summary results.
+	 * 
+	 * @param rs database value query result
+	 * @param groupBy group by part
+	 * @param valueKey value key 
+	 * @return map of summary result key
+	 * @throws SQLException
+	 */
 	private HashMap<SummaryResultKey, Double> createValueResults(ResultSet rs, GroupByPart groupBy, String valueKey) throws SQLException{
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		while(rs.next()){
@@ -511,6 +527,53 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		rs.close();
 		return results;
 	}
+	
+	/**
+	 * Computes a value that is consists of performing divide by
+	 * on two values.  It computes both values, then combines the results
+	 * into a new value set.
+	 * 
+	 * @param c database connection
+	 * @param s hibernate session 
+	 * @param groupBy query group by options
+	 * @param patrolItem patrol value to computer  
+	 * @return query results
+	 * @throws SQLException
+	 */
+	private HashMap<SummaryResultKey, Double> getCombinedValue(
+			Connection c, Session s, 
+			GroupByPart groupBy, 
+			CombinedValueItem item) throws SQLException{
+		
+		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1());
+		HashMap<SummaryResultKey, Double> values = new HashMap<SummaryResultKey, Double>();
+		
+		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, groupBy, item.getPart2());
+		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
+		
+		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values2.entrySet().iterator(); iterator.hasNext();) {
+			Entry<SummaryResultKey, Double> type = iterator.next();
+			type.getKey().setValueKey(item.asString());
+			values.put(type.getKey(), type.getValue());
+		}
+		
+		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+			Entry<SummaryResultKey, Double> type = iterator.next();
+			type.getKey().setValueKey(item.asString());
+			Double v2 = values.get(type.getKey());
+			if (v2 == null ){
+				type.setValue(null);
+			}else if (v2 == 0){
+				type.setValue(Double.NaN);
+			}else if (type.getValue() != null){
+				type.setValue(type.getValue() / v2);
+			}
+			results.put(type.getKey(), type.getValue());
+		}
+		return results;
+		
+	}
+	
 	
 	/**
 	 * Computes a category summaries 

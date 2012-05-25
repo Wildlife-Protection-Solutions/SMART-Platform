@@ -40,4 +40,6 @@ public interface IDropPanel {
 	 * @return the part of the query string represented by the drop panel
 	 */
 	public String getQueryString();
+	
+	
 }

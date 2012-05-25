@@ -47,12 +47,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.ListItem;
 
 /**
- * TODO Purpose of
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Tree group by drop item
  * 
  * @author egouge
  * @since 1.0.0
@@ -319,6 +314,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 					
 					updateLabel();
 					queryChanged();
+					targetPanel.layout();
 				}
 			}
 		});

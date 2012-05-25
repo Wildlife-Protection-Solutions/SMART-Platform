@@ -31,7 +31,7 @@ import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
  * @author egouge
  * @since 1.0.0
  */
-public class PatrolValueDropItem extends DropItem{
+public class PatrolValueDropItem extends AbstractValueDropItem{
 
 	
 	private PatrolValueOption item;
@@ -45,61 +45,37 @@ public class PatrolValueDropItem extends DropItem{
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
 	 */
 	@Override
-	public String getText() {
+	public String getValueText() {
 		return item.getGuiName();
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueQueryPart()
 	 */
 	@Override
-	public String asQueryPart() {
-		return "patrol:sum:" + item.getKeyPart();
+	public String getValueQueryPart() {
+		return ("patrol:sum:" + item.getKeyPart());
 	}
 
-	/**
-	 * Does nothing.
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
-	 */
-	@Override
-	public void initializeData(Object data) {
-		
-	}
+
 
 	@Override
-	protected void createComposite(Composite parent) {
+	protected void createValueComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(item.getGuiName());
-		
 		initDrag(lbl);
-		
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return true;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return false;
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
+	 * Does nothing
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)
 	 */
 	@Override
-	public boolean isGroupByItem(){
-		return false;
+	protected void initializeValueData(Object data) {
 	}
+	
 
 }

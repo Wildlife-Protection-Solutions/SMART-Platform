@@ -94,6 +94,19 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.EMPLOYEE
 	};
 	
+	
+	/**
+	 * Options for computing encounter rates
+	 */
+	public final static PatrolValueOption[] PATROL_ENCOUNTER_RATE_OPTIONS = {
+		PatrolValueOption.DISTANCE,
+		PatrolValueOption.NUM_HOURS,
+		PatrolValueOption.NUM_DAYS,
+		PatrolValueOption.MAN_DAYS,
+		PatrolValueOption.MAN_HOURS,
+		PatrolValueOption.NUM_PATROLS
+	};
+	
 	/**
 	 * Represents the possible patrol values for summary
 	 * queries.

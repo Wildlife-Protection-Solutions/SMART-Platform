@@ -74,7 +74,7 @@ public class QueryHibernateManager {
 	 * @return the newly generated query id
 	 */
 	public static String generateQueryId(Session session){
-		Query a = session.createQuery("select max(id) from WaypointQuery where conservationArea = :ca");
+		Query a = session.createQuery("select max(id) from ObservationQuery where conservationArea = :ca");
 		a.setParameter("ca", SmartDB.getCurrentConservationArea());
 		List<?> dataa = a.list();
 		

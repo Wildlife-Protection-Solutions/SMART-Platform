@@ -93,6 +93,14 @@ public class PatrolValueItem implements IValueItem {
 		DropItem item = DropItemFactory.INSTANCE.createPatrolValueDropItem(patrolOp);
 		return item;
 	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getDropItemInitializeData()
+	 */
+	@Override
+	public Object getDropItemInitializeData() {
+		return null;
+	}
 
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
@@ -107,4 +115,6 @@ public class PatrolValueItem implements IValueItem {
 	public void validateDatabase(Session session) throws Exception{
 		
 	}
+
+
 }
