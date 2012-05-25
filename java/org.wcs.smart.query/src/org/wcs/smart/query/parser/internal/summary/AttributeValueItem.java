@@ -162,17 +162,29 @@ public class AttributeValueItem implements IValueItem {
 		return this.aggregation;
 	}
 	
+	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
 		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		DropItem di = null;
 		if (categoryKey == null){
-			return DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+		}else{
+			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
+			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
 		}
-		Category cat = QueryHibernateManager.getCategory(session, categoryKey);
-		return DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
+		di.initializeData(new Object[]{getDropItemInitializeData(), null});
+		return di;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getInitializeData()
+	 */
+	public Object getDropItemInitializeData(){
+		return getAggregation();
 	}
 	
 	/**

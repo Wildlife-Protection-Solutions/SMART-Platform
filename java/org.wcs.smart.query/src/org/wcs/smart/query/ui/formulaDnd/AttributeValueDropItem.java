@@ -48,7 +48,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
  * @author egouge
  * @since 1.0.0
  */
-public class AttributeValueDropItem extends DropItem {
+public class AttributeValueDropItem extends AbstractValueDropItem {
 
 	private Attribute attribute = null;;
 	private Category category = null; 
@@ -83,11 +83,11 @@ public class AttributeValueDropItem extends DropItem {
 		listViewer = null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
 	 */
 	@Override
-	public String getText() {
+	public String getValueText() {
 		StringBuilder sb = new StringBuilder();
 		if (selectedAggregation != null){
 			sb.append(selectedAggregation.getGuiName());
@@ -100,10 +100,10 @@ public class AttributeValueDropItem extends DropItem {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
+	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueQueryPart()
 	 */
 	@Override
-	public String asQueryPart() {
+	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		if (category != null){
 			sb.append("category:");
@@ -127,39 +127,15 @@ public class AttributeValueDropItem extends DropItem {
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
 	 */
 	@Override
-	public void initializeData(Object data) {
+	public void initializeValueData(Object data) {
 		selectedAggregation = (Aggregation)data;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem() {
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem() {
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem() {
-		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	protected void createComposite(Composite parent) {
+	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		if (attribute.getAggregations().size() == 0){
 			GridLayout gl = new GridLayout(2, false);

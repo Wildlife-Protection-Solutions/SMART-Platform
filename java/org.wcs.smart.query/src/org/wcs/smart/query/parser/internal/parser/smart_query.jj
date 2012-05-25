@@ -78,6 +78,7 @@ TOKEN :
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
 |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":attribute:n:" < AGG > ":" < DM_KEY > >
 |    < AGG  : ("sum" | "avg" | "min" | "max" ) >
+//|    < PATROL_VALUE_ITEM_RATIO : < PATROL_VALUE_ITEM > <SLASH > <PATROL_VALUE_ITEM > >
 /*|    < GROUPBY_FILTER : < GROUPBY_ITEM > ("," < GROUPBY_ITEM >)*  >*/
 //|    < GROUPBY_ITEM : ( < PATROL_GROUPBY_ITEM > | < DM_GROUPBY_ITEM > | < DATE_GROUPBY_ITEM > ) >
 //|    < PATROL_GROUPBY_ITEM : ( < PATROL_ID_KEY > | < PATROL_STATION_KEY > | < PATROL_TEAM_KEY > | < PATROL_MANDATE_KEY > | < PATROL_TYPE_KEY > | < PATROLLEG_TRANSPORT_KEY > | < PATROLLEG_LEADER_KEY > ) >
@@ -157,15 +158,42 @@ ValuePart ValuePart() :
 	}  }
 
 IValueItem ValueItem() :
-{	IValueItem item;
+{
+	IValueItem item = null;
+	IValueItem item2 = null;
 }
 {
-	(		< PATROL_VALUE_ITEM >
-		{
+	(		item = SingleValueItem()
+		(		  
+			< SLASH >
+			item2 = SingleValueItem()
+		)?
+	 )
+	
+
+	{
+	  	if (item2 != null)	  	{
+	    	item = CombinedValueItem.createValueItem(item, item2);
+	  	}
+		 return item;
+	}
+}
+
+IValueItem SingleValueItem() :
+{
+	IValueItem item;
+}
+{
+	(
+		< PATROL_VALUE_ITEM >
+		{	
 			item = PatrolValueItem.createItem( token.image );
 		}
+		
 	| 
-		< SUM_CAT_VALUE_KEY >		{			item = CategoryValueItem.createItem( token.image );
+		< SUM_CAT_VALUE_KEY >
+		{
+			item = CategoryValueItem.createItem( token.image );
 		}
 	| 
 		< SUM_ATTRIBUTE_VALUE_KEY >
@@ -176,7 +204,7 @@ IValueItem ValueItem() :
 		< SUM_CAT_ATT_VALUE_KEY >
 		{
 			item = AttributeValueItem.createCategoryAttributeItem( token.image );
-		}
+		}	 
 	)
 	{
 		 return item;

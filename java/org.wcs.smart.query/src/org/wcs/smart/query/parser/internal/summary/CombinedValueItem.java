@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Societys
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,69 +22,77 @@
 package org.wcs.smart.query.parser.internal.summary;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
-import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
 /**
- * A category value item that represents computing
- * the total number of observations with the given
- * category.
+ * Represents an encounter rate value item which currently only supports
+ * computing anyvalue divided by a patrolOption value.  
+ * 
  * 
  * @author egouge
  * @since 1.0.0
  */
-public class CategoryValueItem implements IValueItem {
-
+public class CombinedValueItem implements IValueItem {
 
 	/**
-	 * Creates a new category value item of the form
-	 * "category:sum:<hkey>"
+	 * Creates a new combined value item from two
+	 * other value parts.
 	 * 
-	 * @param key
+	 * @param part1
+	 * @param part2
 	 * @return
 	 */
-	public static CategoryValueItem createItem(String key){
-		return new CategoryValueItem(key);
+	public static CombinedValueItem createValueItem(IValueItem part1, IValueItem part2){
+		return new CombinedValueItem(part1, part2);
 	}
 	
-	private String key;
-	private String categoryHkey;
+	private IValueItem part1;
+	private IValueItem part2;
 	
 	/**
-	 * Creates a new category value item.
+	 * Creates a new combined value item from two other value items
 	 * 
-	 * @param key category value key
+	 * @param part1
+	 * @param part2 the should be a PatrolValueItem
 	 */
-	public CategoryValueItem(String key){
-		this.key = key;
-		this.categoryHkey = key.split(":")[2];
+	protected CombinedValueItem(IValueItem part1, IValueItem part2){
+		this.part1 = part1;
+		assert(part2 instanceof PatrolValueItem);
+		this.part2 = part2;
 	}
 	
 	/**
-	 * @return the category hkey
+	 * @return the numerator value item
 	 */
-	public String getCategoryHKey(){
-		return this.categoryHkey;
+	public IValueItem getPart1(){
+		return this.part1;
 	}
+	
+	/**
+	 * @return the denominator value item
+	 */
+	public IValueItem getPart2(){
+		return this.part2;
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asString()
 	 */
-	public String asString(){
-		return this.key;
+	@Override
+	public String asString() {
+		return part1.asString() + "/" + part2.asString();
 	}
 
-	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
 	 */
-	public String getName(Session session){
-		Category c = QueryHibernateManager.getCategory(session, categoryHkey);
-		if (c == null){
-			return this.key;
-		}
-		return "Count " +  c.getName();
+	@Override
+	public String getName(Session session) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(part1.getName(session));
+		sb.append(" per ");
+		sb.append(part2.getName(session));
+		return sb.toString();
 	}
 
 	/**
@@ -92,34 +100,38 @@ public class CategoryValueItem implements IValueItem {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
-		Category category = QueryHibernateManager.getCategory(session, categoryHkey);
-		if (category != null){
-			return DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
-		}
-		return null;
-		
+		DropItem di = part1.asDropItem(session);
+		di.initializeData(getDropItemInitializeData());
+		return di;
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getInitializeData()
 	 */
 	public Object getDropItemInitializeData(){
-		return null;
+		Object[] data = new Object[2];
+		data[0] = part1.getDropItemInitializeData();
+		if (part2 instanceof PatrolValueItem){
+			data[1] = ((PatrolValueItem)part2).getOption() ;
+		}
+		return data;
 	}
 	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
 	 */
-	public boolean isCategory(){
-		return true;
+	@Override
+	public boolean isCategory() {
+		return part1.isCategory() || part2.isCategory();
 	}
-	
-	
+
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
 	 */
-	public void validateDatabase(Session session) throws Exception{
-		//ensure category key exists
-		QueryHibernateManager.validateCategory(categoryHkey, session);
+	@Override
+	public void validateDatabase(Session session) throws Exception {
+		part1.validateDatabase(session);
+		part2.validateDatabase(session);
 	}
+
 }

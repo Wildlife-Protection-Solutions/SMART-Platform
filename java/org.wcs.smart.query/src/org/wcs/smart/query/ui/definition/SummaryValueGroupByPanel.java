@@ -93,7 +93,7 @@ public class SummaryValueGroupByPanel {
 		
 		createInnerGroupByComposite(left, view);
 		
-		lstValues = new ListDropTargetPanel(view, true);
+		lstValues = new ListDropTargetPanel(view, false);
 		Composite comp = lstValues.createComposite(right);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		

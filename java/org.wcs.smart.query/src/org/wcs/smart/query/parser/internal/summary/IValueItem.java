@@ -69,4 +69,9 @@ public interface IValueItem {
 	 * @throws Exception if the item cannot be validated
 	 */
 	public void validateDatabase(Session session) throws Exception;
+	
+	/**
+	 * @return the object used to initailize the drop item
+	 */
+	public Object getDropItemInitializeData();
 }

@@ -37,11 +37,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.ListItem;
@@ -281,6 +279,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 					
 					updateLabel();
 					CategoryGroupByDropItem.this.queryChanged();
+					targetPanel.layout();
 				}
 			}
 		});

@@ -48,6 +48,10 @@ public class SummaryResultKey {
 		this.groupByKeys = groupByKeys;
 	}
 	
+	public void setValueKey(String valueKey){
+		this.valueKey = valueKey;
+	}
+	
 	/** Keys are equals if the valueKeys are the same
 	 * and the groupByKeys are the same
 	 * 
