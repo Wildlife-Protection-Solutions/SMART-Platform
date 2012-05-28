@@ -22,7 +22,6 @@
 package org.wcs.smart.geotools.data.smart;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;

@@ -1,12 +1,12 @@
 package org.wcs.smart.udig;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.tool.AbstractActionTool;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 
 /**
  * Zoom tool for map.

@@ -93,13 +93,13 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		txtWaypointId.addModifyListener(validation);
 		
 		lbl = new Label(legtype, SWT.NONE);
-		lbl.setText("Easting:" );
+		lbl.setText("Longitude:" );
 		txtEasting = new Text(legtype, SWT.BORDER);
 		txtEasting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtEasting.addModifyListener(validation);
 		
 		lbl = new Label(legtype, SWT.NONE);
-		lbl.setText("Northing:" );
+		lbl.setText("Latitude:" );
 		txtNorthing = new Text(legtype, SWT.BORDER);
 		txtNorthing.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtNorthing.addModifyListener(validation);
@@ -132,27 +132,27 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		}
 		
 		if (this.txtEasting.getText().trim().length() == 0){
-			return "Easting must be specified.";
+			return "Longitude must be specified.";
 		}
 		try{
 			double e = Double.parseDouble(txtEasting.getText());
 			if (e < -180 || e > 180){
-				return "Easting must be between -180 and 180";
+				return "Longitude must be between -180 and 180";
 			}
 		}catch (NumberFormatException ex){
-			return "Invalid easting value.";
+			return "Invalid longitude value.";
 		}
 		
 		if (this.txtNorthing.getText().trim().length() == 0){
-			return "Northing must be specified.";
+			return "Latitude Coordinate must be specified.";
 		}
 		try{
 			double n = Double.parseDouble(txtNorthing.getText());
 			if (n < -90 || n > 90){
-				return "Northing must be between -90 and 90";
+				return "Latitude must be between -90 and 90";
 			}
 		}catch (NumberFormatException ex){
-			return "Invalid northing value.";
+			return "Invalid latitude value.";
 		}
 		
 		

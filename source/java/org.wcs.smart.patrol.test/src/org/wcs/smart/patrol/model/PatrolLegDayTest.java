@@ -7,8 +7,6 @@ import java.util.GregorianCalendar;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
 
 public class PatrolLegDayTest {
 

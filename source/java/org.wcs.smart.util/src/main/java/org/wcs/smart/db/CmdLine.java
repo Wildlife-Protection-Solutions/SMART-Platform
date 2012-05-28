@@ -23,7 +23,6 @@ package org.wcs.smart.db;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 
 /**
  * 

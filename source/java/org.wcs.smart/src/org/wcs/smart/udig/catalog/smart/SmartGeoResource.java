@@ -31,7 +31,6 @@ import net.refractions.udig.catalog.IService;
 import net.refractions.udig.core.internal.CorePlugin;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.geotools.data.CachingFeatureSource;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;

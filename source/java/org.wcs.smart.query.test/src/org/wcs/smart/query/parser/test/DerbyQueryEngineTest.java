@@ -25,12 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.hibernate.Session;
 import org.junit.Test;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;

@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wcs.smart.query.model.observation.ObservationQuery;

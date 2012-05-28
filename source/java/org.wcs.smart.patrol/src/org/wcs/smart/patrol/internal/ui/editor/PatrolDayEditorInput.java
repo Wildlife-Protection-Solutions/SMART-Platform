@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.List;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;

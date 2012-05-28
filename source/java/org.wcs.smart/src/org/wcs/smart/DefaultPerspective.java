@@ -21,8 +21,6 @@
  */
 package org.wcs.smart;
 
-import net.refractions.udig.project.ui.internal.LayersView;
-
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.wcs.smart.ui.map.MapView;

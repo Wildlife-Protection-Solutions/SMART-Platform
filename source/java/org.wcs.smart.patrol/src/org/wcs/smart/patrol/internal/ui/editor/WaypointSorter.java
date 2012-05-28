@@ -26,7 +26,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TableColumn;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolLegDayInputComposite.OtColumn;
 import org.wcs.smart.patrol.model.Waypoint;
 

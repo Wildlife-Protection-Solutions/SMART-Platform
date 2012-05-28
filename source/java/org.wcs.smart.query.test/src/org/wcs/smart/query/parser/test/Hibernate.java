@@ -21,46 +21,17 @@
  */
 package org.wcs.smart.query.parser.test;
 
+import java.awt.Label;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.wcs.smart.ca.Agency;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.DescriptionLabel;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.HasLabel;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.Rank;
-import org.wcs.smart.ca.SimpleListItem;
-import org.wcs.smart.ca.Station;
-import org.wcs.smart.ca.datamodel.Aggregation;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.ca.datamodel.DmObject;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.model.Waypoint;
-import org.wcs.smart.patrol.model.WaypointAttachment;
-import org.wcs.smart.patrol.model.WaypointObservation;
-import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import javax.security.auth.login.Configuration;
+import javax.sound.midi.Track;
+
+import org.junit.experimental.categories.Category;
 
 /**
  * TODO Purpose of 
