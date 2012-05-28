@@ -21,28 +21,15 @@
  */
 package org.wcs.smart.patrol.model;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.annotations.Type;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.SimpleListItemWithDescription;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 
 /**
  * Team object.

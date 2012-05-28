@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 

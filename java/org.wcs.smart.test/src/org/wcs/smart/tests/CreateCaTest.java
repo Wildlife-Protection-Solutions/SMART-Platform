@@ -28,21 +28,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 
-import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * 

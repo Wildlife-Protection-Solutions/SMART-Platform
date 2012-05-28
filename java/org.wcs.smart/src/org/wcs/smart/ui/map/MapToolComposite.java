@@ -25,13 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.internal.tool.display.ModalItem;
-import net.refractions.udig.project.ui.internal.tool.display.ModalToolCategory;
 import net.refractions.udig.project.ui.internal.tool.display.ToolManager;
 import net.refractions.udig.project.ui.internal.tool.display.ToolProxy;
 import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.tool.info.InfoTool;
 
 import org.eclipse.swt.SWT;

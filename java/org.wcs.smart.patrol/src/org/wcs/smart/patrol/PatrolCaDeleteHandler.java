@@ -21,17 +21,11 @@
  */
 package org.wcs.smart.patrol;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.DescriptionLabel;
 import org.wcs.smart.ca.ICaDeleteHandler;
-import org.wcs.smart.patrol.model.Team;
 
 /**
  * Delete handler for deleting all patrol information attached 

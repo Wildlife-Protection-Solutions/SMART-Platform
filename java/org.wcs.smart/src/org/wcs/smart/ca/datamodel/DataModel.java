@@ -36,7 +36,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**

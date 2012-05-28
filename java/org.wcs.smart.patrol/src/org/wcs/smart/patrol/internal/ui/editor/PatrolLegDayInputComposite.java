@@ -157,7 +157,7 @@ public class PatrolLegDayInputComposite {
 	
 	
 	protected enum OtColumn {
-		ID("Waypoint Id", 1), EAST("Easting", 2), NORTH("Northing", 2), TIME(
+		ID("Waypoint Id", 1), EAST("Longitude", 2), NORTH("Latitude", 2), TIME(
 				"Time", 2), DIRECTION("Direction", 1), DISTANCE("Distance", 1), OBSERVATION(
 				"Observation", 4), COMMENT("Comment", 3), ATTACHMENTS(
 				"Attachments", 3);

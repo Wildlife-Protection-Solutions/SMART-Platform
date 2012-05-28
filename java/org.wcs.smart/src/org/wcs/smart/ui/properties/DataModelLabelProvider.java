@@ -36,7 +36,6 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
-import org.wcs.smart.ui.internal.ca.properties.DataModelPropertyPage;
 
 /**
  * Label provided for data model tree

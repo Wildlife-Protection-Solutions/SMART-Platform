@@ -30,8 +30,6 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
