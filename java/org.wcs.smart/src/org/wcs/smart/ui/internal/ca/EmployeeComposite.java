@@ -274,6 +274,21 @@ public class EmployeeComposite extends Composite {
 			});
 			cmbSmartUserLevel.setContentProvider(ArrayContentProvider.getInstance());
 			cmbSmartUserLevel.setInput(Employee.SmartUserLevel.values());
+			
+			ViewerComparator comp = new ViewerComparator(new Comparator<String>() {
+			    @Override
+			    public int compare(String arg0, String arg1) {
+			    	if(arg0.compareTo("DATA_ENTRY") == 0) return -1;
+			    	if(arg0.compareTo("ADMIN") == 0) return 1;
+			    	if(arg1.compareTo("DATA_ENTRY") == 0) return 1;
+			    	if(arg1.compareTo("ADMIN") == 0) return -1;
+			    	if(arg0.compareTo("ANALYST") == 0) return -1;
+			    	if(arg1.compareTo("ANALYST") == 0) return 1;
+			    	return 0;
+			    }
+			});
+			cmbSmartUserLevel.setComparator(comp); 
+
 			cmbSmartUserLevel.getCombo().select(0);
 		}
 		enableSmartUser(false);
