@@ -97,7 +97,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		currentCategory = ((ObservationWizard)getWizard()).getCurrentObservation();
 		
 		catAttributes = new ArrayList<Attribute>();
-		currentCategory.getAllAttribute(catAttributes);
+		currentCategory.getAllAttribute(catAttributes, true);
 		
 		Collection<WaypointObservation> currentObservations = ((ObservationWizard)getWizard()).getWaypointObservation(currentCategory);
 		
@@ -137,7 +137,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			btnDelete.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
-					for (Iterator iterator = ((IStructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
+					for (Iterator<?> iterator = ((IStructuredSelection)attributeTable.getSelection()).iterator(); iterator.hasNext();) {
 						WaypointObservation type = (WaypointObservation) iterator.next();
 						observations.remove(type);
 					}
@@ -192,7 +192,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		};
 		
-		for (Iterator iterator = observations.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = observations.iterator(); iterator.hasNext();) {
 			WaypointObservation type = (WaypointObservation) iterator.next();
 			for (Attribute att: required){
 				WaypointObservationAttribute oatt = type.findAttribute(att);

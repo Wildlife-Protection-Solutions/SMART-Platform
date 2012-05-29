@@ -63,7 +63,7 @@ public class AttributeTable {
 			IAttributeTableChangeListener listener){
 		
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-		currentCategory.getAllAttribute(attributes);
+		currentCategory.getAllAttribute(attributes, true);
 		
 		final TableViewer attributeTable = new TableViewer(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 	

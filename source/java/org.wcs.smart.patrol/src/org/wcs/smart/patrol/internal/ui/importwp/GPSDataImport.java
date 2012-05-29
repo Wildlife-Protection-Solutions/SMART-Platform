@@ -122,7 +122,7 @@ public class GPSDataImport {
 
 		return data;
 	}
-
+	
 	/**
 	 * Reads waypoints from a gpx file.
 	 * @param gpsFile the gps file name
@@ -159,6 +159,45 @@ public class GPSDataImport {
 		return ( date.equals(start) || date.after(start) ) &&  (date.equals(end) || date.before(end));
 	}
 	
+	/**
+	 * For each patrol leg day computes the track and returns the results.
+	 * 
+	 * Tracks are only created for patrol leg days with more than 1 waypoints.
+	 * 
+	 * @param patrolLegDays
+	 * @return
+	 */
+	public static HashMap<PatrolLegDay, Track> computeTracksFromWaypoints(List<PatrolLeg> patrolLegs){
+		HashMap<PatrolLegDay, Track> output = new HashMap<PatrolLegDay, Track> ();
+		for(PatrolLeg leg : patrolLegs){
+			for (PatrolLegDay day : leg.getPatrolLegDays()){
+				Track newTrack = createTrackFromWaypoints(day);
+				if (newTrack != null){
+					output.put(day, newTrack);
+				}
+			}
+		}
+		return output;
+	}
+
+
+	/**
+	 * Create track from the waypoints for a given patrol leg day.  If
+	 * < 2 waypoints then null is returned.
+	 * @param day
+	 * @return
+	 */
+	public static Track createTrackFromWaypoints(PatrolLegDay day) {
+		if (day.getWaypoints().size() < 2){
+			return null;
+		}
+		List<Coordinate> coords = new ArrayList<Coordinate>();
+		for (Waypoint wp : day.getWaypoints()){
+			coords.add(new Coordinate(wp.getX(), wp.getY(), SmartUtils.combineDateTime(wp.getPatrolLegDay().getDate(), wp.getTime()).getTime() ));
+		}
+		Track newTrack = convertToTrack(coords);
+		return newTrack;
+	}
 	
 	/**
 	 * Converts coordinates to tracks based on date (provided in Z) and the patrol leg dates.

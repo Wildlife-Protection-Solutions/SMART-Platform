@@ -22,9 +22,11 @@
 package org.wcs.smart.ui.properties;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -42,12 +44,14 @@ public class DataModelContentProvider implements ITreeContentProvider {
 
 	private boolean onlyCategories = false;
 	private boolean onlyEnabled = false;
+	private boolean allAttributes = false;
+	
 	/**
 	 * Creates a new content provider that provides
 	 * both enabled and disabled categories and attributes
 	 */
 	public DataModelContentProvider(){
-		this(false, false);
+		this(false, false, false);
 	}
 	
 	/**
@@ -58,10 +62,22 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	 * are provided
 	 */
 	public DataModelContentProvider(boolean onlyCategories, boolean onlyEnabled){
-		this.onlyCategories = onlyCategories;
-		this.onlyEnabled = onlyEnabled;
+		this(onlyCategories, onlyEnabled, false);
 	}
 	
+	/**
+	 * Creates a new content provider
+	 * @param onlyCategories if true only categories are provided 
+	 * otherwise both categories and attributes are provided
+	 * @param onlyEnabled if true only enabled categories and attributes
+	 * @param allAttributes - <code>true</code> if all direct & parent attributes are to be included in the categories children
+	 * are provided
+	 */
+	public DataModelContentProvider(boolean onlyCategories, boolean onlyEnabled, boolean allAttributes){
+		this.onlyCategories = onlyCategories;
+		this.onlyEnabled = onlyEnabled;
+		this.allAttributes = allAttributes;
+	}
 	/**
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
@@ -113,12 +129,14 @@ public class DataModelContentProvider implements ITreeContentProvider {
 				
 			if (!onlyCategories){
 				//add attributes
-				if (onlyEnabled){
-					children.addAll(category.getAttributes(true));
-				}else{
-					if (category.getAttributes() != null ){
-						children.addAll(category.getAttributes());
+				if (allAttributes){
+					List<Attribute> all = new ArrayList<Attribute>();
+					category.getAllAttribute(all, onlyEnabled);
+					for (Attribute att : all){
+						children.add(new CategoryAttribute(category, att));	
 					}
+				}else{
+					children.addAll(category.getAttributes(onlyEnabled));
 				}
 			}
 			return children.toArray();
@@ -163,9 +181,24 @@ public class DataModelContentProvider implements ITreeContentProvider {
 					if (((Category)element).getAttributes(true).size() > 0){
 						return true;
 					}
+					if (allAttributes){
+						List<Attribute> kids = new ArrayList<Attribute>();
+						((Category)element).getAllAttribute(kids, onlyEnabled);
+						if (kids.size() > 0){
+							return true;
+						}
+					}
 				}else{
-					if (((Category)element).getAttributes() != null && ((Category)element).getAttributes().size() > 0){
+					if (((Category)element).getAttributes() != null && 
+							((Category)element).getAttributes().size() > 0){
 						return true;
+					}
+					if (allAttributes){
+						List<Attribute> kids = new ArrayList<Attribute>();
+						((Category)element).getAllAttribute(kids, onlyEnabled);
+						if (kids.size() > 0){
+							return true;
+						}
 					}
 				}
 			}

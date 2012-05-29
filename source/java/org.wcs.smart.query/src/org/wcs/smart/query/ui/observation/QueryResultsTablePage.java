@@ -24,8 +24,11 @@ package org.wcs.smart.query.ui.observation;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -140,7 +143,8 @@ public class QueryResultsTablePage  extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(List<QueryResultItem> results, IProgressMonitor monitor){
+	public void updateAndShowTable(List<QueryResultItem> results, 
+			IProgressMonitor monitor){
 		content.setTableData(results, monitor);
 	}
 	

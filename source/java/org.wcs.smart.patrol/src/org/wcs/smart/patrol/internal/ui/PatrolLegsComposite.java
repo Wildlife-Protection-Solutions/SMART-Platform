@@ -85,10 +85,13 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private boolean canEditDates = false;
 	
 	private Link lnkEditDate;
+	private Session session;
+	
 
 	/**
 	 * Creates a new patrol legs composite
 	 * @param canEditDates true if the patrol dates can be changed, false if only legs can be modified
+	 * @param currentSession - database session
 	 */
 	public PatrolLegsComposite(boolean canEditDates) {
 		this.canEditDates = canEditDates;
@@ -133,7 +136,25 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		patrolLegViewer.createTable(main);
 		
 		Composite buttonPanel = new Composite(main, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout(4, false));
+		buttonPanel.setLayout(new GridLayout(5, false));
+		
+		final Button btnChangeTransport = new Button(buttonPanel, SWT.PUSH);
+		btnChangeTransport.setText("Change of Transport");
+		btnChangeTransport.setSelection(false);
+		btnChangeTransport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PatrolLeg pl =  (PatrolLeg)patrolLegViewer.getSelection().getFirstElement();
+				if (pl == null){
+					return;
+				}
+				PatrolTransportChangeDialog leaderDialg = new PatrolTransportChangeDialog(getShell(), pl, legs, session);
+				leaderDialg.open();
+				sortAndRefresh();
+				fireChangeListeners();
+			}
+
+		});
 		
 		final Button btnAddLeg = new Button(buttonPanel, SWT.PUSH);
 		btnAddLeg.setText("Change of Leader");
@@ -204,6 +225,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		patrolLegViewer.getTable().addSelectionChangedListener(new ISelectionChangedListener() {			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				btnChangeTransport.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty());
 				btnAddLeg.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty());
 				btnSplit.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty());
 				btnRemoveLeg.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty() && legs.size() > 1);
@@ -215,6 +237,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		btnSplit.setEnabled(false );
 		btnRemoveLeg.setEnabled(false );
 		btnEditLeg.setEnabled( false );
+		btnChangeTransport.setEnabled(false);
 		
 		return main;
 	}
@@ -244,6 +267,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public void setValues(Patrol p, Session session) {
+		this.session = session;
 		this.patrol = p;
 		this.legs = new WritableList();
 		

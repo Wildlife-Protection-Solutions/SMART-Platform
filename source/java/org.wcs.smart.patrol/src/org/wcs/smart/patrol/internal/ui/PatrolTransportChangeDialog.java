@@ -28,6 +28,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -40,32 +44,34 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Dialog for changing the leader of a given leg.  Takes a leg
- * and splits it into two, setting the leader on the second part 
- * of the leg to a newly selected leader.
+ * Dialog for changing the transport of a given leg.  Takes a leg
+ * and splits it into two, setting the transport type on the second part 
+ * of the leg to a newly transport Type.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
+public class PatrolTransportChangeDialog extends TitleAreaDialog{
 
 	private static final DateFormat DATE_TIME_FORMATTER = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+	
 	private PatrolLeg existingLeg;
 	private PatrolLeg newLeg;
 	
-	private LeaderPilotComposite leaderPilotcomp;
 	private DateTime startDate;
 	private DateTime startTime;
 	private Button opStart;
 	private Button opCustom;
 	private Collection<PatrolLeg> legsToUpdate;
-	
-
+	private PatrolTransportComposite compTransportType;
+	private Session session;
 	
 	/**
 	 * Creates a new dialog 
@@ -73,11 +79,12 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 	 * @param patrolLeg the patrol leg to split up
 	 * @param legsToUpdate the set of legs to add the new leg to 
 	 */
-	public PatrolLegLeaderChangeDialog(Shell parentShell, PatrolLeg patrolLeg,
-			Collection<PatrolLeg> legsToUpdate) {
+	public PatrolTransportChangeDialog(Shell parentShell, PatrolLeg patrolLeg, 
+			Collection<PatrolLeg> legsToUpdate, Session session) {
 		super(parentShell);
 		this.existingLeg = patrolLeg;
 		this.legsToUpdate = legsToUpdate;
+		this.session = session;
 		
 		// create a new leg for updating 
 		newLeg = new PatrolLeg();
@@ -92,7 +99,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		newLeg.setPatrol(existingLeg.getPatrol());
 		newLeg.setType(existingLeg.getType());
 		
-		String legId = existingLeg.getId() + " - Leader Change ";
+		String legId = existingLeg.getId() + " - Transport Change ";
 		if (legId.length() > PatrolLeg.ID_MAX_SIZE){
 			legId = legId.substring(0, PatrolLeg.ID_MAX_SIZE);
 		}
@@ -119,7 +126,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		Composite timecomp = new Composite(parent, SWT.NONE);
 		timecomp.setLayout(new GridLayout(2, false));
 		Label lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Date of Leader Change:");
+		lbl.setText("Date of Transport Change:");
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
 		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		startDate.addSelectionListener(new SelectionAdapter() {
@@ -141,7 +148,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		
 		//time of change
 		lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Time of Leader Change:");
+		lbl.setText("Time of Transport Change:");
 		
 		Composite opComp = new Composite(timecomp, SWT.NONE);
 		opComp.setLayout(new GridLayout(3, false));
@@ -165,12 +172,20 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		startTime.setTime(0, 0, 0);
 		
 		/* new leader/pilot */
-		leaderPilotcomp = new LeaderPilotComposite();
-		leaderPilotcomp.createComponent(parent, SWT.NONE);
-		leaderPilotcomp.setValues(this.newLeg, null);
+		compTransportType = new PatrolTransportComposite();
+		compTransportType.createComponent(parent, SWT.NONE);
+		boolean close = false;
+		if (!session.isOpen()){
+			session = HibernateManager.openSession();
+			close = true;
+		}
+		compTransportType.setValues(newLeg, session);
+		if (close){
+			session.close();
+		}
 		
-		super.getShell().setText("Change Leader");
-		setMessage("Select the date/time of the leader change and the new leader.");
+		super.getShell().setText("Change Transport Type");
+		setMessage("Select the date/time of the transport change and the new transport type.");
 		return parent;
 	}
 	
@@ -199,7 +214,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		//update dates, leader, & add leg
 		newLeg.setEndDate(existingLeg.getEndDate());
 		newLeg.setStartDate(newStart);
-		leaderPilotcomp.updatePatrol(newLeg);
+		compTransportType.updatePatrol(newLeg);
 		legsToUpdate.add(newLeg);
 		
 		//update the existing leg

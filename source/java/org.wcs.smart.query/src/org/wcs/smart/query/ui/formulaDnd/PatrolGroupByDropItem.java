@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -242,6 +243,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 			QueryPlugIn.displayLog("Error loading items for list.", ex);
 			s.close();
 		}
+		Collections.sort(items);
 		return items;
 		
 	}

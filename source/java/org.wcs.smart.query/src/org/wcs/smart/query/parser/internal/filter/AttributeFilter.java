@@ -208,9 +208,9 @@ public class AttributeFilter implements IFilter {
 			val = val.replaceAll("'", "''");
 			
 			if (op == Operator.STR_CONTAINS || op == Operator.STR_NOTCONTAINS){
-				queryStr = "( qa." + attributeKey + " " + op.asSql() + " '%" + val + "%' )";	
+				queryStr = "( LOWER(qa." + attributeKey + ") " + op.asSql() + " '%" + val.toLowerCase() + "%' )";	
 			}else if (op == Operator.STR_EQUALS){
-				queryStr = "( qa." + attributeKey + " " + op.asSql() + " '" + val + "' )";
+				queryStr = "( LOWER(qa." + attributeKey + ") " + op.asSql() + " '" + val.toLowerCase() + "' )";
 			}
 			return queryStr;
 		}else if (attributeType == AttributeType.LIST ){

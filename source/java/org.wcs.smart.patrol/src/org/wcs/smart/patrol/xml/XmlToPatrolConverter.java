@@ -192,7 +192,7 @@ public class XmlToPatrolConverter {
 				mem.setMember(e);
 				mem.setPatrolLeg(leg);
 				mem.setIsLeader(member.isIsLeader());
-				mem.setIsPilot(mem.getIsPilot());
+				mem.setIsPilot(member.isIsPilot());
 				leg.getMembers().add(mem);
 			}
 		}

@@ -302,6 +302,10 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			MessageDialog.openError(getSite().getShell(), "Save", "You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
 			monitor.setCanceled(true);
 			return;
+		}else if (query.getName().trim().length() == 0){
+			MessageDialog.openError(getSite().getShell(), "Save", "Query name must not be blank.");
+			monitor.setCanceled(true);
+			return;
 		}
 				
 		//update the query definition 
@@ -414,6 +418,12 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 					}
 					
 					newQuery.setName(dialog.getQueryName());
+					if (newQuery.getName().trim().length() == 0){
+						MessageDialog.openError(getSite().getShell(), "Save", "Query name must not be blank.");
+						monitor.setCanceled(true);
+						return;
+					}
+					
 					QueryFolder qf = dialog.getQueryFolder();
 					if (!qf.isRootFolder()){
 						newQuery.setFolder(qf);

@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -90,7 +91,6 @@ public class AttributeListDropItem extends DropItem{
 				s.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
-
 				@Override
 				public void run() {
 					listViewer.setInput(items.toArray(new ListItem[items.size()]));

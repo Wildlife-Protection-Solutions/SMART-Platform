@@ -29,6 +29,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 
 /**
  * Wizard page to select where to import waypoint data from
@@ -43,13 +44,16 @@ public class ImportWpTypeWizardPage extends WizardPage {
 	public static final String PAGE_NAME = "Import Waypoints and Tracks";
 	private Button opGPS;
 	private Button opGPX;
-
+	private Button opWaypoint;
+	
 	public static final int IMPORT_GPS = 2;
 	public static final int IMPORT_GPX = 4;
+	public static final int IMPORT_WAYPOINT = 6;
 	
 	//next pages
 	private ImportGPSWizardPage devicePage;
 	private ImportGpxWizardPage gpxPage;
+	private ImportFromWaypointWizardPage waypointPage;
 	
 	/**
 	 * @param pageName
@@ -84,19 +88,14 @@ public class ImportWpTypeWizardPage extends WizardPage {
 		opGPX.setText("GPX File");
 		opGPS.setSelection(true);
 		
+		if (  ((ImportGpsDataWizard)getWizard()).getType() == ImportType.TRACK ){
+			opWaypoint = new Button(ops, SWT.RADIO);
+			opWaypoint.setText("Generate from Waypoints");
+		}
+		
 		super.setMessage("Select the location where you wish to import " + ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s from.");
 		super.setControl(comp);
 	}
-
-	public int getImportType(){
-		if (opGPS.getSelection()){
-			return IMPORT_GPS;
-		}else if (opGPX.getSelection()){
-			return IMPORT_GPX;
-		}
-		return -1;
-	}
-	
 	
 	@Override
     public IWizardPage getNextPage() {
@@ -110,6 +109,11 @@ public class ImportWpTypeWizardPage extends WizardPage {
 				gpxPage = new ImportGpxWizardPage((ImportGpsDataWizard)getWizard());
 			}
 			return gpxPage;
+		}else if (opWaypoint.getSelection()){
+			if (waypointPage == null){
+				waypointPage = new ImportFromWaypointWizardPage((ImportGpsDataWizard)getWizard());
+			}
+			return waypointPage;
 		}
 		return null;
     }

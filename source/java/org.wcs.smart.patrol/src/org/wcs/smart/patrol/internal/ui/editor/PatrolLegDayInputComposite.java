@@ -370,7 +370,7 @@ public class PatrolLegDayInputComposite {
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
 		
-		importTrack = toolkit.createHyperlink(trackComp, "Import Track ...", SWT.NONE);
+		importTrack = toolkit.createHyperlink(trackComp, "Set Track ...", SWT.NONE);
 		importTrack.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				if (patrolLegDate.getTrack() != null){
@@ -673,6 +673,7 @@ public class PatrolLegDayInputComposite {
 	private void showImportTrackWizard(){
 		//Show Create Patrol Wizard
 		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate.getDate(), GPSDataImport.ImportType.TRACK);		
+
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
@@ -693,7 +694,12 @@ public class PatrolLegDayInputComposite {
 							
 							if (data != null){
 								if (importAll){
-									HashMap<PatrolLegDay, Track> tracks = GPSDataImport.convertTracks((List<Coordinate>)data, editor.getPatrolEditor().getPatrol().getLegs());
+									HashMap<PatrolLegDay, Track> tracks = null;
+									if (data.equals("CreateFromWaypoints")){
+										tracks = GPSDataImport.computeTracksFromWaypoints(editor.getPatrolEditor().getPatrol().getLegs());
+									}else{
+										tracks = GPSDataImport.convertTracks((List<Coordinate>)data, editor.getPatrolEditor().getPatrol().getLegs());
+									}
 									int count = 0;
 									for (Iterator<Entry<PatrolLegDay, Track>> iterator = tracks.entrySet().iterator(); iterator
 											.hasNext();) {
@@ -705,17 +711,22 @@ public class PatrolLegDayInputComposite {
 									}
 									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Tracks were imported for " + count + " patrol days.");
 								}else{
-									Track track = GPSDataImport.convertToTrack((List<Coordinate>)data);
-									track.setPatrolLegDay(patrolLegDate);
-									patrolLegDate.setTrack(track);
-									PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
-									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Track succesfully imported.");
+									Track track = null;
+									if (data.equals("CreateFromWaypoints")){
+										track = GPSDataImport.createTrackFromWaypoints(patrolLegDate);
+									}else{
+										track = GPSDataImport.convertToTrack((List<Coordinate>)data);
+									}
+									if (track != null){
+										track.setPatrolLegDay(patrolLegDate);
+										patrolLegDate.setTrack(track);
+										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
+										MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Track succesfully imported.");
+									}else{
+										MessageDialog.openInformation(editor.getSite().getShell(), "Import Error", "Track could not be generated.  At least two points are required to generate tracks.");
+									}
 								}
-//								editor.setDirty(true);
-//								editor.getPatrolEditor().doSave(null);
 								editor.getPatrolEditor().save(patrolLegDate);
-								//updateDistance();
-								
 							}
 						}catch (Exception ex){
 							SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);

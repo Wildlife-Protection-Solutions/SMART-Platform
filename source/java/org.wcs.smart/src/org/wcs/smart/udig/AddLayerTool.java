@@ -44,6 +44,7 @@ public class AddLayerTool extends AbstractActionTool {
 			@Override
 			public void run() {
 				MapImport mapImport = new MapImport();
+				mapImport.setLayerPosition(0);
 				mapImport.getDialog().open();	
 			}
 		});

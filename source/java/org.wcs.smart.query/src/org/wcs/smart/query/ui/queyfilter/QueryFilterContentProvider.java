@@ -101,7 +101,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Creates a new content provider 
 	 */
 	public QueryFilterContentProvider(){
-		provider = new DataModelContentProvider(false, true);
+		provider = new DataModelContentProvider(false, true, true);
 		
 	}
 
@@ -123,13 +123,16 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput != null && !(newInput instanceof Map)){
-			throw new IllegalArgumentException("new input must be map");
-		}
 		if (newInput == null){
 			patrolOptions = null;
 			provider.inputChanged(viewer, oldInput, null);
+		}else if (newInput instanceof String){
+			patrolOptions = null;
+			dataModel = null;
 		}else{
+			if (newInput != null && !(newInput instanceof Map)){
+				throw new IllegalArgumentException("new input must be map");
+			}
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
 			patrolOptions = (PatrolQueryOption[]) in.get(RootNodeType.PATROL_FILTERS);		
@@ -142,6 +145,9 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
+		if (dataModel == null && patrolOptions == null){
+			return new String[]{"Loading"};
+		}
 		return roots;
 	}
 

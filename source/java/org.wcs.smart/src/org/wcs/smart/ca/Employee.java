@@ -98,6 +98,9 @@ public class Employee {
 	
 	/**
 	 * Smart user level.
+	 * 
+	 * Do not change the ording or this as it is stored in the database
+	 * as the order it appears in this list.
 	 * @author Emily
 	 *
 	 */

@@ -223,7 +223,7 @@ public class DateFilter implements IFilter {
 		}else if (dateFilter == DATE_FILTER_OP.LAST_MONTH){
 			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) ";
 		}else if (dateFilter == DATE_FILTER_OP.CUSTOM){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) ";
+			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) ";
 			
 		}
 		return f;

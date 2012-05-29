@@ -134,7 +134,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	 * Creates a new content provider 
 	 */
 	public SummaryQueryContentProvider(){
-		provider = new DataModelContentProvider(false, true);
+		provider = new DataModelContentProvider(false, true, true);
 		
 	}
 
@@ -157,14 +157,19 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput != null && !(newInput instanceof Map)){
-			throw new IllegalArgumentException("new input must be map");
-		}
 		if (newInput == null){
 			patrolValueOptions = null;
 			patrolGroupByOption = null;
 			provider.inputChanged(viewer, oldInput, null);
+		}else if (newInput instanceof String){
+			patrolValueOptions = null;
+			patrolGroupByOption = null;
+			dataModel = null;
+			dateGroupByOptions = null;
 		}else{
+			if (newInput != null && !(newInput instanceof Map)){
+				throw new IllegalArgumentException("new input must be map");
+			}
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			this.dataModel = (DataModel)in.get(NodeType.GROUP_BY_NODE);
 			patrolValueOptions = (PatrolValueOption[])in.get(NodeType.PATROL_VALUES);
@@ -179,6 +184,13 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
+		if (patrolValueOptions == null &&
+			patrolGroupByOption == null &&
+			dataModel == null &&
+			dateGroupByOptions == null){
+			return new String[]{"Loading"};
+		}
+		
 		return new Object[]{groupByNode, valueNode};
 	}
 
