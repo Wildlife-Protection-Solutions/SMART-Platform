@@ -372,10 +372,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					s.beginTransaction();
 					try {
 						((DataModel)viewer.getInput()).save(s);
-						s.getTransaction().commit();
 						setChangesMade(false);
 					}catch (Exception ex){
 						SmartPlugIn.log(null, ex);

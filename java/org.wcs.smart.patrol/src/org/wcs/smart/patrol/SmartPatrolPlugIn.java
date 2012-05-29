@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 
 
 /**
@@ -163,6 +164,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		}
 	}
 	
+	private PatrolDataModelAdvisor advisor = new PatrolDataModelAdvisor();
 	/**
 	 * The constructor
 	 */
@@ -179,6 +181,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		
 		//adds the delete handler
 		ConservationAreaManager.getInstance().addDeleteHandler(new PatrolCaDeleteHandler(),PatrolCaDeleteHandler.EXECUTE_ORDER);
+		DataModelManager.getInstance().addDataModelAdvisor(advisor);
 	}
 
 	/*
@@ -187,6 +190,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		DataModelManager.getInstance().removeDataModelAdvisor(advisor);
 		super.stop(context);
 	}
 

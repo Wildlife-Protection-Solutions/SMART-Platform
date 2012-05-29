@@ -47,6 +47,10 @@ public class SummaryResultKey {
 		this.valueKey = valueKey;
 		this.groupByKeys = groupByKeys;
 	}
+	public SummaryResultKey(SummaryResultKey copy){
+		this.valueKey = copy.valueKey;
+		this.groupByKeys = copy.groupByKeys;
+	}
 	
 	public void setValueKey(String valueKey){
 		this.valueKey = valueKey;

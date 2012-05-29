@@ -61,6 +61,7 @@ public class QueryResultsTable {
 		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION);
 		table.getTable().setHeaderVisible(true);
 		table.getTable().setLinesVisible(true);
+		
 		table.setItemCount(0);
 		sorter = new QueryResultItemComparator(table);
 		table.setComparator(sorter);

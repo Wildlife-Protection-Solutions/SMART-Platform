@@ -54,6 +54,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 	
 	private QueryFolder selectedQuery = null;
 	private String queryName = null;
+	private QueryFolderTreeComposite treeComp;
 
 	/**
 	 * @param parent the parent shell
@@ -124,6 +125,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 				@Override
 				public void modifyText(ModifyEvent e) {
 					queryName = txtName.getText();
+					validate();
 				}
 			});
 			 
@@ -132,25 +134,36 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 			 lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
 		
-		QueryFolderTreeComposite treeComp = new QueryFolderTreeComposite(main);
+		treeComp = new QueryFolderTreeComposite(main);
 		treeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		treeComp.addSelectionListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				
 				if (!event.getSelection().isEmpty()){
-					SaveQueryDialog.this.getButton(IDialogConstants.OK_ID).setEnabled(true);
 					selectedQuery = (QueryFolder) ((IStructuredSelection)event.getSelection()).getFirstElement();					
 				}else{
-					SaveQueryDialog.this.getButton(IDialogConstants.OK_ID).setEnabled(false);
 					selectedQuery = null;
 				}
+				validate();
 			}
 		});
 		
 		return main;
 	}
 
+	private void validate(){
+		boolean ok = true;
+		setErrorMessage(null);
+		if (queryName.trim().length() == 0){
+			setErrorMessage("Query name must not be blank.");
+			ok = false;
+		}
+		if(treeComp.getSelection().isEmpty()){
+			ok = false;
+		}
+		SaveQueryDialog.this.getButton(IDialogConstants.OK_ID).setEnabled(ok);
+	}
 	
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()

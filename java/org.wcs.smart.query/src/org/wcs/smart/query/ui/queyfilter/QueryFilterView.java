@@ -54,6 +54,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
@@ -86,6 +88,14 @@ public class QueryFilterView extends ViewPart {
 
 	private Composite main;
 	
+	private IDataModelListener dataModelChangeListener = new IDataModelListener() {
+		@Override
+		public void modified() {
+			filterTreeViewer.setInput("Loading");
+			summaryTreeViewer.setInput("Loading");
+			initialize();
+		}
+	};
 	
 	public QueryFilterView() {
 	}
@@ -228,6 +238,7 @@ public class QueryFilterView extends ViewPart {
 			}
 		});
 		filterTreeViewer.setAutoExpandLevel(2);
+		filterTreeViewer.setInput("Loading...");
 		
 		fTree = new FilteredTree(summaryComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
 		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
@@ -242,6 +253,7 @@ public class QueryFilterView extends ViewPart {
 			}
 		});
 		summaryTreeViewer.setAutoExpandLevel(2);
+		summaryTreeViewer.setInput("Loading...");
 		
 		
 		Button btnAdd = new Button(outer, SWT.PUSH);
@@ -283,8 +295,16 @@ public class QueryFilterView extends ViewPart {
 				
 			}
 		});
+		
+		DataModelManager.getInstance().addChangeListener(dataModelChangeListener);
 	}
 
+	@Override
+	public void dispose(){
+		super.dispose();
+		DataModelManager.getInstance().removeChangeListener(dataModelChangeListener);
+	}
+	
 	@Override
 	public void setFocus() {
 	}

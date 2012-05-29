@@ -32,8 +32,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
+import org.hibernate.dialect.FirebirdDialect;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -428,19 +430,33 @@ public class DataModel {
 	
 	
 	/**
-	 * Saves a datamodel to the database using the given session
+	 * Saves a datamodel to the database using the given session.
+	 * <p>This method performs the save inside a transaction block
+	 * so calling this method much be done outside of a
+	 * transaction block.
+	 * </p>
 	 * 
 	 * @param session database connection
+	 * 
+	 * @throws HibernateException if changes cannot be saved
 	 */
 	public void save(Session session){
-	
-		for (Attribute att: attributes){
-			session.saveOrUpdate(att);
+		session.beginTransaction();
+		try {
+			for (Attribute att : attributes) {
+				session.saveOrUpdate(att);
+			}
+
+			for (Category c : categories) {
+				session.saveOrUpdate(c);
+			}
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
+		DataModelManager.getInstance().fireChangeListeners();
 		
-		for (Category c: categories){
-			session.saveOrUpdate(c);
-		}
 	}
 	
 	

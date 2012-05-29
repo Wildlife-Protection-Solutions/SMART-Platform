@@ -302,6 +302,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
+					if (it == null) return;
 					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, AttributeInfoPanel.this.lang);
 					int ret = dd.open();
 					if (ret == Window.CANCEL){

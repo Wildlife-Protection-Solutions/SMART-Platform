@@ -79,6 +79,8 @@ import org.wcs.smart.util.SmartUtils;
 public class DerbySummaryEngine extends DerbyQueryEngine2{
 
 	private SummaryQueryResult sumResults = null;
+	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
+	
 	
 	/**
 	 * Executes the given summary query.
@@ -118,6 +120,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
 
 		sumResults = new SummaryQueryResult();
+		cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 		
 		session.doWork(new Work() {
 			@Override
@@ -286,16 +289,25 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			Session s,
 			GroupByPart groupBy, 
 			IValueItem it) throws SQLException {
-		if (it instanceof PatrolValueItem){
-			return (getPatrolSummaryValue(c, s, groupBy, (PatrolValueItem)it));
-		}else if (it instanceof AttributeValueItem){
-			return  (getAttributeValue(c, s, groupBy, (AttributeValueItem)it));
-		}else if (it instanceof CategoryValueItem){
-			return (getCategoryValue(c, s, groupBy, (CategoryValueItem)it));
-		}else if (it instanceof CombinedValueItem){
-			return (getCombinedValue(c, s, groupBy, (CombinedValueItem)it));
+		
+		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(it.asString());
+		if (results != null){
+			return results;
 		}
-		return null;
+		if (it instanceof PatrolValueItem){
+			results = (getPatrolSummaryValue(c, s, groupBy, (PatrolValueItem)it));
+		}else if (it instanceof AttributeValueItem){
+			results =  (getAttributeValue(c, s, groupBy, (AttributeValueItem)it));
+		}else if (it instanceof CategoryValueItem){
+			results = (getCategoryValue(c, s, groupBy, (CategoryValueItem)it));
+		}else if (it instanceof CombinedValueItem){
+			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it));
+		}
+		if (results != null){
+			cachedValueToResults.put(it.asString(), results);
+		}
+		
+		return results;
 	}
 	
 	/**
@@ -553,22 +565,29 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		
 		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values2.entrySet().iterator(); iterator.hasNext();) {
 			Entry<SummaryResultKey, Double> type = iterator.next();
-			type.getKey().setValueKey(item.asString());
-			values.put(type.getKey(), type.getValue());
+
+			SummaryResultKey newKey = new SummaryResultKey(type.getKey());
+			newKey.setValueKey(item.asString());
+			
+			values.put(newKey, type.getValue());
 		}
 		
 		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
 			Entry<SummaryResultKey, Double> type = iterator.next();
-			type.getKey().setValueKey(item.asString());
-			Double v2 = values.get(type.getKey());
+			
+			SummaryResultKey key = new SummaryResultKey(type.getKey());
+			key.setValueKey(item.asString());
+			
+			Double value = type.getValue();
+			Double v2 = values.get(key);
 			if (v2 == null ){
-				type.setValue(null);
+				value = null;
 			}else if (v2 == 0){
-				type.setValue(Double.NaN);
-			}else if (type.getValue() != null){
-				type.setValue(type.getValue() / v2);
+				value = Double.NaN;
+			}else if (value != null){
+				value = (value / v2);
 			}
-			results.put(type.getKey(), type.getValue());
+			results.put(key, value);
 		}
 		return results;
 		

@@ -37,7 +37,7 @@ import org.eclipse.jface.viewers.LabelProvider;
  * @author Emily
  * @since 1.0.0
  */
-public class ListItem{
+public class ListItem implements Comparable<ListItem>{
 	
 	private byte[] uuid;
 	private String name;
@@ -137,5 +137,16 @@ public class ListItem{
 		if (!Arrays.equals(uuid, other.uuid))
 			return false;
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(ListItem o) {
+		if (o == null){
+			return -1;
+		}
+		return name.compareTo(o.getName());
 	}
 }

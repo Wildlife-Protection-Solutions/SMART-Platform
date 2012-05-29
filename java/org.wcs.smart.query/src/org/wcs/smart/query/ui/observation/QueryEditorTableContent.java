@@ -33,6 +33,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -71,7 +72,7 @@ public class QueryEditorTableContent {
 	
 	private Hyperlink runQueryLink;
 	private QueryHeaderComposite compQueryName;
-	
+	private Label lblNumResults;
 	/**
 	 * Creates a new editor area
 	 * @param parent parent composite
@@ -117,6 +118,7 @@ public class QueryEditorTableContent {
 				if (monitor.isCanceled()){
 					showCancelled();
 				}else{
+					lblNumResults.setText(String.valueOf(items.size()));
 					resultsTable.setInput(items);
 					showTable();
 				}
@@ -259,6 +261,15 @@ public class QueryEditorTableContent {
 	private Composite createTableResultsComposite(Composite parent) {
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout(1, false));
+		
+		Composite comp = toolkit.createComposite(main);
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		comp.setLayout(layout);
+		toolkit.createLabel(comp,  "Number of Records:");
+		lblNumResults = toolkit.createLabel(comp, "N/A");
+		
 		resultsTable = new QueryResultsTable();
 
 		TableViewer viewer = resultsTable.createTable(main);

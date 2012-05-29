@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -160,7 +161,7 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 			public void keyPressed(KeyEvent e) {
 				if (e.character == ' '){
 					boolean value = viewer.getChecked( ((IStructuredSelection)viewer.getSelection()).getFirstElement() );
-					for (Iterator iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+					for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 						Object tp = (Object) iterator.next();
 						viewer.setChecked(tp, !value);
 						

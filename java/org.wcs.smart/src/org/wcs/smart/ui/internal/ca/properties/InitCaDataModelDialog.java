@@ -325,10 +325,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						throw new InvocationTargetException(new IllegalStateException("No data model defined."), "No data model defined.");
 					}
 					monitor.setTaskName("Saving data model to database...");
-					Session s = getSession();
-					s.beginTransaction();
-					dm.save(s);
-					s.getTransaction().commit();
+					dm.save(getSession());
 					return ;
 				}
 			});

@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.internal.datamodel.DataModelAdvisor;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -80,7 +82,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		// add delete handler
-		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(),DeleteConservationAreaHandler.EXECUTE_ORDER);
+		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
+		
+		DataModelManager.getInstance().addDataModelAdvisor(new DataModelAdvisor());
 	}
 
 	/*

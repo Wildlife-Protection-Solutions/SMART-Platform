@@ -43,6 +43,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 
 /**
  * Wizard for importing data from GPS Device
@@ -197,7 +198,10 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 				importedData = GPSDataImport.convertPointsToTrack( ((ImportWpSelectWizardPage)lastPage).getSelectedWaypoints() );
 			}
 			
-		};
+		}else if (lastPage instanceof ImportFromWaypointWizardPage){
+			allData = ((ImportFromWaypointWizardPage)lastPage).importAll();
+			importedData = "CreateFromWaypoints";
+		}
 		
 		if (importedData  == null || (importedData instanceof Collection &&  ((Collection)importedData).size() == 0 )){
 			MessageDialog.openWarning(getShell(), "Import", "No " + this.type.guiName + " were found to import. This could be due to date formats or other GPS issues.  Try importing all " + this.type + " and selecting desired waypoints.");

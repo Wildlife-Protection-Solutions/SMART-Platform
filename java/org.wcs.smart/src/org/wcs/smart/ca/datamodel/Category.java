@@ -400,15 +400,13 @@ RETURNS NULL ON NULL INPUT;
 	 * @param attributes list to populate
 	 */
 	@Transient
-	public void getAllAttribute(List<Attribute> attributes){
+	public void getAllAttribute(List<Attribute> attributes, boolean onlyEnabled){
 		if (getParent() != null){
-			getParent().getAllAttribute(attributes);
-			
+			getParent().getAllAttribute(attributes, onlyEnabled);
 		}
-		if (getAttributes() != null){
-			for (CategoryAttribute cat : getAttributes(true)){
-				attributes.add(cat.getAttribute());
-			}
+		List<CategoryAttribute> atts = getAttributes(onlyEnabled);
+		for (CategoryAttribute att : atts){
+			attributes.add(att.getAttribute());
 		}
 	}
 	
@@ -427,26 +425,4 @@ RETURNS NULL ON NULL INPUT;
 		}
 	}
 	
-	
-//	@Override
-//	public int hashCode(){
-//		if (uuid != null){
-//			return Arrays.hashCode(uuid);
-//		}else{
-//			return super.hashCode();
-//		}
-//	}
-//	
-//	@Override
-//	public boolean equals(Object other){
-//		if (other != null && other instanceof Category){
-//			Category s = (Category)other;
-//			if (s.getUuid() == null && this.getUuid() == null){
-//				return super.equals(other);
-//			}else if (s.getUuid() != null && this.getUuid() != null){
-//				return Arrays.equals(s.getUuid(), this.getUuid());
-//			}
-//		}
-//		return false;
-//	}
 }

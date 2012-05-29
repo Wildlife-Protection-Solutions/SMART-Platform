@@ -179,13 +179,13 @@ public class PatrolFilter implements IFilter {
 		if (option.getType() == PatrolQueryOptionType.STRING){
 			if (option == PatrolQueryOption.PATROL_TYPE){
 				String x = prefix + "." + option.getColumnName() + " = '" + SmartUtils.stripQuotes((String)value) + "'";
-				return x;
+				return x;				
 			}else{
 				String value1 = SmartUtils.stripQuotes((String)value);
 				if (op == Operator.STR_CONTAINS || op == Operator.STR_NOTCONTAINS){
 					value1 = "%" + value1 + "%";
 				}
-				String x = prefix + "." + option.getColumnName() + " " + op.asSql() + " '" + value1 + "'";
+				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + op.asSql() + " '" + value1.toLowerCase() + "'";
 				return x;
 			}
 		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
