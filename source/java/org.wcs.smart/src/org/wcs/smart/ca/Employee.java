@@ -97,6 +97,11 @@ public class Employee {
 	public static final int MIN_EMPLOYEE_AGE = 10;
 	
 	/**
+	 * Max number of chars for the staff id
+	 */
+	public static final int MAX_ID_LENGTH = 32;
+	
+	/**
 	 * Smart user level.
 	 * 
 	 * Do not change the ording or this as it is stored in the database
@@ -144,6 +149,7 @@ public class Employee {
 		this.uuid = uuid;
 	}
 	
+	@Column(name="id")
 	public String getId() {
 		return id;
 	}
