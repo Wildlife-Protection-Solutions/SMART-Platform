@@ -65,6 +65,7 @@ public class EmployeeComposite extends Composite {
 	/* ui components */
 	protected Text txtGivenName = null;
 	protected Text txtFamilyName = null;
+	protected Text txtStaffId = null;
 	protected Composite composite = null;
 	protected Text txtSmartId = null;
 	protected Text txtSmartPassword = null;
@@ -130,7 +131,11 @@ public class EmployeeComposite extends Composite {
 		createLabelField(this, Employee.FAMILY_NAME + ":");
 		txtFamilyName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
-
+		
+		createLabelField(this, Employee.ID + ":");
+		txtStaffId = createTextField(this, SWT.NONE,
+				Employee.MAX_ID_LENGTH, validate);
+		
 		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":");
 		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
 				| SWT.LONG, dateValidate);
@@ -273,22 +278,7 @@ public class EmployeeComposite extends Composite {
 				}
 			});
 			cmbSmartUserLevel.setContentProvider(ArrayContentProvider.getInstance());
-			cmbSmartUserLevel.setInput(Employee.SmartUserLevel.values());
-			
-			ViewerComparator comp = new ViewerComparator(new Comparator<String>() {
-			    @Override
-			    public int compare(String arg0, String arg1) {
-			    	if(arg0.compareTo("DATA_ENTRY") == 0) return -1;
-			    	if(arg0.compareTo("ADMIN") == 0) return 1;
-			    	if(arg1.compareTo("DATA_ENTRY") == 0) return 1;
-			    	if(arg1.compareTo("ADMIN") == 0) return -1;
-			    	if(arg0.compareTo("ANALYST") == 0) return -1;
-			    	if(arg1.compareTo("ANALYST") == 0) return 1;
-			    	return 0;
-			    }
-			});
-			cmbSmartUserLevel.setComparator(comp); 
-
+			cmbSmartUserLevel.setInput(new Employee.SmartUserLevel[]{Employee.SmartUserLevel.DATA_ENTRY, Employee.SmartUserLevel.ANALYST, Employee.SmartUserLevel.MANAGER, Employee.SmartUserLevel.ADMIN});
 			cmbSmartUserLevel.getCombo().select(0);
 		}
 		enableSmartUser(false);
@@ -485,6 +475,7 @@ public class EmployeeComposite extends Composite {
 	public void initFields(Employee e){
 		txtGivenName.setText(e.getGivenName());
 		txtFamilyName.setText(e.getFamilyName());
+		txtStaffId.setText(e.getId());
 		
 		opFemale.setSelection(e.getGender() == Employee.DB_FEMALE);
 		opMale.setSelection(e.getGender() ==  Employee.DB_MALE);
@@ -554,6 +545,7 @@ public class EmployeeComposite extends Composite {
 		Control[] controls = new Control[]{
 				this.txtFamilyName,
 				this.txtGivenName,
+				this.txtStaffId,
 				this.txtSmartId,
 				this.txtSmartPassword,
 				this.txtSmartPassword2,
@@ -603,6 +595,8 @@ public class EmployeeComposite extends Composite {
 		e.setFamilyName(txtFamilyName.getText());
 		e.setGender(opFemale.getSelection() ? Employee.DB_FEMALE : Employee.DB_MALE);
 		e.setGivenName(txtGivenName.getText());
+		
+		e.setId(txtStaffId.getText());
 		
 		if (dtEmploymentEnd != null){
 			if (!chNotActive.getSelection()){

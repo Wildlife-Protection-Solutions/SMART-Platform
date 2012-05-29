@@ -190,7 +190,7 @@ public class EmployeeDialog extends Dialog {
 				if (toUpdate.getId() == null){
 					//creating new 
 					HibernateManager.generateEmployeeId(toUpdate, session);
-				}else{
+				}else if (toUpdate.getUuid() != null){
 					//validate that there will always be
 					//one employee with admin privileges 
 					//in the database

@@ -21,7 +21,7 @@ CREATE TABLE smart.employee
 (
 	uuid CHAR(16) FOR BIT DATA NOT NULL,
 	ca_uuid CHAR(16) FOR BIT DATA NOT NULL,
-	id VARCHAR(9) NOT NULL,
+	id VARCHAR(32) NOT NULL,
 	givenname VARCHAR(64) NOT NULL,
 	familyname VARCHAR(64) NOT NULL,
 	startemployementdate DATE NOT NULL,
