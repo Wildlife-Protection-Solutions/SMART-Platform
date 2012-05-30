@@ -24,26 +24,25 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
+import org.wcs.smart.patrol.internal.ui.CommentComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * Wizard page to gather patrol objective wizard page.
- * 
- * @author Emily
+ * Wizard page for collecting the patrol comment
+ * @author egouge
  * @since 1.0.0
  */
-public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
+public class CommentWizardPage extends NewPatrolWizardPage {
 
 	
-	private ObjectiveComposite objectiveComp = null;
+	private CommentComposite commentComp = null;
 
 
 	/**
 	 * 
 	 */
-	protected PatrolObjectiveWizardPage() {
-		super("Patrol Objective");
+	protected CommentWizardPage() {
+		super("Patrol Comment");
 		
 	}
 
@@ -53,9 +52,9 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		objectiveComp = new ObjectiveComposite();
-		setMessage("Enter the patrol objective.");
-		super.setControl(objectiveComp.createComponent(parent, SWT.NONE));
+		commentComp = new CommentComposite();
+		setMessage("Enter any comments associated with the patrol.");
+		super.setControl(commentComp.createComponent(parent, SWT.NONE));
 	}
 	
 	/**
@@ -63,7 +62,7 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
-		return objectiveComp.updatePatrol(p);
+		return commentComp.updatePatrol(p);
 	}
 	
 	/**
@@ -71,6 +70,6 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	 */
 	@Override
 	void initModel(Patrol p, Session session) {
-		objectiveComp.setValues(p, session);
+		commentComp.setValues(p, session);
 	}
 }
