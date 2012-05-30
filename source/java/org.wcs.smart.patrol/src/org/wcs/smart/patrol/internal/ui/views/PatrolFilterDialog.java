@@ -42,8 +42,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -88,7 +90,12 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 	private Button btnIncludeAllIds;
 	private Label lblPatrolId;
 	
+	private Listener validateListener = new Listener(){
 
+		@Override
+		public void handleEvent(Event event) {
+			validate();
+		}};
 	
 
 	/**
@@ -319,10 +326,31 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 
 		btnIncludeAllDate = new Button(dateComp, SWT.RADIO);
 		btnIncludeAllDate.setText("Include All Dates");
-		
+		btnIncludeAllDate.addListener(SWT.Selection, validateListener);
+		btnIncludeAllDate.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				if (btnIncludeAllDate.getSelection()){
+					dtEnd.setEnabled(false);
+					dtStart.setEnabled(false);
+				}
+			}
+		});
 		btnFilterDate = new Button(dateComp, SWT.RADIO);
 		btnFilterDate.setText("Filter Dates:");
-	
+		btnFilterDate.addListener(SWT.Selection, validateListener);
+		btnFilterDate.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				PatrolViewFilter.DateFilter ff = (PatrolViewFilter.DateFilter)((StructuredSelection)dateViewer.getSelection()).getFirstElement();
+				boolean enabled =  (ff != null && ff == PatrolViewFilter.DateFilter.CUSTOM);
+				dtStart.setEnabled(enabled);
+				dtEnd.setEnabled(enabled);
+				lblStartDateAnd.setEnabled(enabled);
+				lblStartDateBetween.setEnabled(enabled);
+			}
+		});
+		
 		Composite comp = new Composite(dateComp, SWT.NONE);
 		comp.setLayout(new GridLayout(5, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -350,14 +378,17 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 				lblStartDateBetween.setEnabled(enabled);
 			}
 		});
+		dateViewer.getCombo().addListener(SWT.Modify, validateListener );
 		lblStartDateBetween = new Label(comp, SWT.NONE);
 		lblStartDateBetween.setText("Contains Date Between");
 		
 		
 		dtStart = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
+		dtStart.addListener(SWT.Selection, validateListener );
 		lblStartDateAnd = new Label(comp, SWT.NONE);
 		lblStartDateAnd.setText(" and ");
 		dtEnd = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
+		dtEnd.addListener(SWT.Selection, validateListener );
 		
 		btnFilterDate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -374,6 +405,21 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		return dateComp;
 	}
 	
+	private void validate(){
+		setErrorMessage(null);
+		if (btnFilterDate.getSelection()){
+			IStructuredSelection dateSelection = (IStructuredSelection) this.dateViewer.getSelection();
+			if (dateSelection == null || dateSelection.isEmpty()){
+				setErrorMessage("Date option must be selected");
+				return;
+			}
+			if (dateSelection.getFirstElement().equals(PatrolViewFilter.DateFilter.CUSTOM)){
+				if (SmartUtils.getDate(dtStart).after(SmartUtils.getDate(dtEnd))){
+					setErrorMessage("End date must be after start date");
+				}
+			}
+		}
+	}
 
 	/*
 	 * Creates the id filter section

@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
@@ -70,6 +71,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
@@ -369,7 +371,12 @@ public class PatrolSummaryEditor extends EditorPart {
 				PatrolLegDay pld = (PatrolLegDay)((StructuredSelection)tblPatrolData.getSelection()).getFirstElement();
 				if (pld != null){
 					PatrolDayEditorInput input = new PatrolDayEditorInput(pld.getDate());
-					editor.setActiveEditor(editor.findEditors(input)[0]);
+					IEditorPart[] parts = editor.findEditors(input);
+					if (parts.length == 0){
+						SmartPatrolPlugIn.displayLog("Could not find appropriate day editor.", null);
+					}else{
+						editor.setActiveEditor(parts[0]);
+					}
 				}
 				
 			}

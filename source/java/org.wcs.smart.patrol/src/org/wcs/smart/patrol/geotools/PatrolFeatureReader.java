@@ -63,7 +63,9 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 			List<Waypoint> pnts = new ArrayList<Waypoint>();
 			for (PatrolLeg l : patrol.getLegs()){
 				for (PatrolLegDay d : l.getPatrolLegDays()){
-					pnts.addAll(d.getWaypoints());
+					if (d.getWaypoints() != null){
+						pnts.addAll(d.getWaypoints());
+					}
 				}
 			}
 			fIterator = pnts.iterator();
