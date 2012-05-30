@@ -136,6 +136,12 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String VALUE_PERSON_HOURS_ICON = "org.wcs.smart.query.valuepersonhours";
 	
+	
+	/**
+	 * Exclamation
+	 */
+	public static final String EXCLAMATION_ICON = "org.wcs.smart.query.exclamation";
+	
 	/*
 	 * Load images
 	 */
@@ -164,6 +170,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		addImage("images/icons/obj16/value_numPatrol.png",VALUE_NUM_PATROLS_ICON);
 		addImage("images/icons/obj16/value_personDays.png",VALUE_PERSON_DAYS_ICON);
 		addImage("images/icons/obj16/value_personHours.png",VALUE_PERSON_HOURS_ICON);
+		addImage("images/icons/obj16/exclamation.png",EXCLAMATION_ICON);
 		
 		
 	}

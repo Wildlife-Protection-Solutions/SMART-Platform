@@ -128,10 +128,11 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	 * @see org.wcs.smart.query.ui.IQueryDefinitionComposite#validate()
 	 */
 	@Override
-	public void validate() {
+	public String validate() {
 		String query = panel.getQueryString() + "|" + filterPanel.getQueryString();
 		boolean isvalid = true;
 		SumQueryDefinition def = null;
+		String error = null;
 		if (query.length() == 0) {
 			isvalid = false;
 		} else {
@@ -143,18 +144,28 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 			} catch (Throwable ex) {
 				// failed to parse query
 				isvalid = false;
+				error = ex.getMessage();
 			}
 		}
 		
 		if (isvalid && def.getValuePart().getValueItems().size() == 0){
 			isvalid = false;
+			error = "At least one value must be selected.";
+		}
+		if (isvalid){
+			String temp = SummaryQuery.validateQueryParts(def);
+			if (temp != null){
+				isvalid = false;
+				error = temp;
+			}
 		}
 		
-		provider.setQueryValue(isvalid);
+		provider.setQueryValue(isvalid, error);
 		if (parentView.getQuery() != null){
 			parentView.getQuery().setIsValid(isvalid);
 			((SummaryQuery)parentView.getQuery()).setQuery(query, def);
 		}
+		return error;
 	}
 
 	/**

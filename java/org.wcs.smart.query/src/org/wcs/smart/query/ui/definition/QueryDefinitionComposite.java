@@ -49,8 +49,10 @@ public abstract class QueryDefinitionComposite extends Composite{
 	
 	/**
 	 * Validates the query
+	 * @return <code>null</code> if validates okay or a message 
+	 * describing query error
 	 */
-	public abstract void validate();
+	public abstract String validate();
 	
 	/**
 	 * Saves the current items in the definition

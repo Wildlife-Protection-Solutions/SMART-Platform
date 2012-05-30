@@ -94,10 +94,10 @@ public class CategoryValueItem implements IValueItem {
 	public DropItem asDropItem(Session session) {
 		Category category = QueryHibernateManager.getCategory(session, categoryHkey);
 		if (category != null){
+			category.getFullCategoryName();		//cache this
 			return DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
 		}
 		return null;
-		
 	}
 	
 	/**

@@ -25,11 +25,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jface.action.StatusLineContributionItem;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISourceProviderListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -43,6 +51,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
@@ -134,6 +143,7 @@ public class QueryDefView extends ViewPart {
 			
 		}
 	};
+
 	
 	/**
 	 * Creates new query definition view.
@@ -169,7 +179,13 @@ public class QueryDefView extends ViewPart {
 	 * Validates the current query
 	 */
 	public void validate(){
-		currentPanel.validate();
+		String error = currentPanel.validate();
+//		if (error != null){
+//		
+//			((StatusLineContributionItem)getViewSite().getActionBars().getStatusLineManager().find(SmartActionBarAdvisor.APP_ERROR_ID)).setText(error);
+//		}else{
+//			((StatusLineContributionItem)getViewSite().getActionBars().getStatusLineManager().find(SmartActionBarAdvisor.APP_ERROR_ID)).setText("");
+//		}
 	}
 	
 	/**
@@ -185,16 +201,13 @@ public class QueryDefView extends ViewPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		//parent.setLayout(new GridLayout(1, false));
+		stackComp = new Composite(parent, SWT.BORDER);
 		
-		stackComp = new Composite(parent, SWT.NONE);
 		StackLayout layout = new StackLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth=0;
 		stackComp.setLayout(layout);
-		stackComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-				true));
-		
+		stackComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
 		emptyComp = new Composite(stackComp, SWT.NONE);
 		emptyComp.setLayout(new GridLayout(1, false));
 		
@@ -204,7 +217,7 @@ public class QueryDefView extends ViewPart {
 		definitionComposites.put(QueryType.SUMMARY, sum);
 		
 		((StackLayout)stackComp.getLayout()).topControl = emptyComp;
-		
+	
 		addSourceListener();
 	}
 	

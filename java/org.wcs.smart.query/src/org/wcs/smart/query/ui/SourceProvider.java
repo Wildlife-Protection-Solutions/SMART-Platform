@@ -50,6 +50,7 @@ public class SourceProvider extends AbstractSourceProvider {
 	
 	public final static String SELECTED_FILTERS = "org.wcs.smart.query.ui.filteradd";
 	public final static String QUERY_VALID = "org.wcs.smart.query.ui.queryvalid";
+	public final static String QUERY_ERROR_MESSAGE = "org.wcs.smart.query.ui.queryerrormessage";
 	public final static String QUERY_DEFINITION_TYPE = "org.wcs.smart.query.ui.querybuildertype";
 
 	HashMap<String, Object> data = new HashMap<String, Object>();
@@ -85,10 +86,12 @@ public class SourceProvider extends AbstractSourceProvider {
 	 * Sets the state of the current query.
 	 * 
 	 * @param isValid <code>true</code> or <code>false</code> depending on the state of the
+	 * @param errorMessage string error message description or null if query is valid
 	 * current query.
 	 */
-	public void setQueryValue(Boolean isValid){
+	public void setQueryValue(Boolean isValid, String errorMessage){
 		data.put(QUERY_VALID, isValid);
+		data.put(QUERY_ERROR_MESSAGE, errorMessage);
 		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_VALID, isValid);
 	}
 		
