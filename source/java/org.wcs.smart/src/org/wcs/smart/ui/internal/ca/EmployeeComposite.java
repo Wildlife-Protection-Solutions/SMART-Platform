@@ -132,9 +132,10 @@ public class EmployeeComposite extends Composite {
 		txtFamilyName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
 		
-		createLabelField(this, Employee.ID + ":");
+		Label lbl = createLabelField(this, Employee.ID + ":");
 		txtStaffId = createTextField(this, SWT.NONE,
 				Employee.MAX_ID_LENGTH, validate);
+		lbl.setToolTipText("If blank the Id will be auto-generated");
 		
 		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":");
 		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN

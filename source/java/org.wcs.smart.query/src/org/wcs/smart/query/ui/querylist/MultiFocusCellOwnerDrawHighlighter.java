@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ViewerRow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -113,8 +114,9 @@ public class MultiFocusCellOwnerDrawHighlighter extends FocusCellHighlighter {
 				
 				if ((event.detail & SWT.SELECTED) > 0 &&						
 						((StructuredSelection)viewer.getSelection()).size() == 1) {
-					ViewerCell focusCell = getFocusCell();
+//					ViewerCell focusCell = getFocusCell();
 					//ViewerRow row = viewer.getViewerRowFromItem(event.item);
+					ViewerCell focusCell = viewer.getCell(new Point(event.x, event.y));
 					if (focusCell == null){
 						return;
 					}

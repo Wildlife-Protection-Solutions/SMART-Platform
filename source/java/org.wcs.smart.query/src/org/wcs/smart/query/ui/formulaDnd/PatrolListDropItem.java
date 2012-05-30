@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -79,8 +80,8 @@ public class PatrolListDropItem extends DropItem{
 			s.beginTransaction();
 			try{
 				final List<ListItem> items = option.getAllActiveValues(s);
-								Display.getDefault().asyncExec(new Runnable(){
-
+				Collections.sort(items);
+				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						listViewer.setInput(items.toArray(new ListItem[items.size()]));

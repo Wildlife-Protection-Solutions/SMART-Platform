@@ -56,6 +56,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
+import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapView;
 
 /**
@@ -181,29 +182,9 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	
         /* --- Add initial layers to map --- */
     	final MapView view = (MapView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(MapView.ID);
-    	Job j = new Job("Load initial maps") {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-	    		params.put(SmartServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
-	    		SmartService ss = new SmartService(params);
-	    		CatalogPlugin.getDefault().getLocalCatalog().add(ss);
-		    	if (view != null){
-		    		try {
-		    			List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);
-						ApplicationGIS.addLayersToMap(view.getMap(),layers,0);
-						view.getMap().sendCommandASync(new ZoomExtentCommand());
-					} catch (IOException e) {
-						SmartPlugIn.log("Could not add layers to map.", e);
-					}
-		    	}
-				return Status.OK_STATUS;
-			}
-		};
-		j.schedule();
-
-
+    	LoadDefaultLayersJob job = new LoadDefaultLayersJob(view.getMap(), true);
+    	job.schedule();
+    	
     	/* --- Image Descriptors for PlugIn --- */
 		ImageDescriptor descriptor = AbstractUIPlugin
 				.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,

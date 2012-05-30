@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.udig.catalog.PatrolService;
+import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
 /**
@@ -63,6 +64,8 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	private IViewportModelListener initListener = null; 
 	
 	private PatrolService patrolService = null;
+	private LoadDefaultLayersJob loadDefaultLayers;
+	
 	private Job addLayerJob = new Job("Add Layers Job") {
 		
 		@Override
@@ -77,8 +80,10 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    		initListener = new IViewportModelListener() {
 					@Override
 					public void changed(ViewportModelEvent event) {
-						getMap().getViewportModel().removeViewportModelListener(initListener);
-						getMap().sendCommandASync(new ZoomExtentCommand());
+						if (getMap() != null){
+							getMap().getViewportModel().removeViewportModelListener(initListener);
+							getMap().sendCommandASync(new ZoomExtentCommand());
+						}
 						
 					}
 				};
@@ -145,6 +150,12 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 
 	private void addLayers(){
 		addLayerJob.schedule();
+		
+		if (loadDefaultLayers != null){
+			loadDefaultLayers.cancel();			
+		}
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayers.schedule();
 	}
 	
 	/**
@@ -168,7 +179,6 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-        
         addLayers();
         PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
 	}
@@ -178,14 +188,18 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
     @Override
     public void dispose() {
         super.dispose();
-
+        if (loadDefaultLayers != null){
+        	loadDefaultLayers.cancel();
+        	loadDefaultLayers = null;
+        }
+        addLayerJob.cancel();
+        
         PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
         
         //dispose of patrol service
         CatalogPlugin.getDefault().getLocalCatalog().remove(patrolService);
         patrolService.dispose(null);
         patrolService = null;
-        
         
         refreshJob.cancel();
         refreshJob = null;

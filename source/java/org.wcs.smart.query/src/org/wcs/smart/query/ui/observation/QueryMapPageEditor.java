@@ -26,6 +26,7 @@ import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.render.IViewportModelListener;
@@ -43,6 +44,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.map.udig.QueryService;
 import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
 /**
@@ -57,7 +59,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	private QueryResultsEditor parentEditor;
 	private QueryService queryService = null;
 	private IViewportModelListener initListener = null; 
-
+	private LoadDefaultLayersJob loadDefaultLayers = null;
 	/*
 	 * Job for adding query layer to map
 	 */
@@ -68,7 +70,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 			queryService = new QueryService(parentEditor.getQuery());
 	    	try {
 	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
-	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+	    		AddLayersCommand command = new AddLayersCommand(layers);
 	    		if (getMap() == null) return Status.CANCEL_STATUS;
 	    		getMap().sendCommandASync(command);
 	    		initListener = new IViewportModelListener() {
@@ -96,6 +98,21 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 			if (queryService != null){
 				try {
 					queryService.refresh(null);
+					List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
+					boolean found = false;
+					if (layers.size() > 0){
+						IGeoResource waypointLayer = layers.get(0);
+						for( ILayer layer : getMap().getLayersInternal() ) {
+		                	if(layer.getID().equals(waypointLayer.getIdentifier())){
+		                		found = true;
+		                		break;
+		                	}
+		                }
+					}
+					if (!found){
+						addLayerJob.schedule();
+					}
+				
 				} catch (IOException e) {
 					SmartPatrolPlugIn.log("Error refreshing patrol service.", e);
 				}
@@ -145,6 +162,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
+
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayers.schedule();
 	}
 
     
@@ -155,6 +175,12 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
     @Override
     public void dispose() {
         super.dispose();
+        if (loadDefaultLayers != null){
+        	loadDefaultLayers.cancel();
+        	loadDefaultLayers = null;
+        }
+        addLayerJob.cancel();
+        
         if (queryService != null){
         	CatalogPlugin.getDefault().getLocalCatalog().remove(queryService);
         	queryService.dispose(null);
