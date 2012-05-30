@@ -35,13 +35,22 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbySummaryEngine;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;
+import org.wcs.smart.query.parser.internal.summary.IGroupBy;
+import org.wcs.smart.query.parser.internal.summary.IValueItem;
+import org.wcs.smart.query.parser.internal.summary.PatrolGroupBy;
+import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.ValuePart;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -356,7 +365,6 @@ public class SummaryQuery extends Query {
 		List<DropItem> valueItems = part.getDropItems(session);
 		valueDropItems.addAll(valueItems);
 		
-		
 		//---- generate drop items for group by items ----
 		GroupByPart groupByPart = getQueryDefinition().getRowGroupByPart();
 		List<DropItem> groupbyItems = groupByPart.getDropItems(session);
@@ -377,6 +385,56 @@ public class SummaryQuery extends Query {
 			}
 			list.clear();
 		}
+	}
+	
+	/**
+	 * Validates the query parts.  Assumes the query
+	 * definition is formed from a valid string.
+	 * <p>
+	 * This validates the items in the query.
+	 * </p>
+	 * 
+	 * @param def the summary query definition
+	 * @return error string or null if query validates okay
+	 */
+	public static String validateQueryParts(SumQueryDefinition def){
+		List<IGroupBy> groupBys = new ArrayList<IGroupBy>();
+		if (def.getRowGroupByPart() != null){
+			groupBys.addAll(def.getRowGroupByPart().getGroupBys());
+		}
+		if (def.getColumnGroupByPart().getGroupBys() != null){
+			groupBys.addAll(def.getColumnGroupByPart().getGroupBys());
+		}
 		
+		for (IValueItem valueIt : def.getValuePart().getValueItems()){
+			if (valueIt instanceof PatrolValueItem){
+				PatrolValueItem pIt = (PatrolValueItem) valueIt;
+				if (pIt.getOption() == PatrolValueOption.NUM_NIGHTS){
+					//cannot group by patrol leader, patrol memeber, time period, or transport
+					for (IGroupBy groupBy : groupBys){
+						if (groupBy instanceof PatrolGroupBy){
+							Class<?> source = ((PatrolGroupBy)groupBy).getOption().getPatrolAttributeClass();
+							if (source.equals(PatrolLeg.class) || source.equals(PatrolLegMember.class)){
+								return "The value " + pIt.getOption().getGuiName() + " cannot be grouped by " + ((PatrolGroupBy)groupBy).getOption().getGuiName();
+							}
+						}else if (groupBy instanceof DateGroupBy){
+							return "The value " + pIt.getOption().getGuiName() + " cannot be grouped by date";
+						}
+					}
+				}else if (pIt.getOption() == PatrolValueOption.MAN_DAYS ||
+						pIt.getOption() == PatrolValueOption.MAN_HOURS || 
+						pIt.getOption() == PatrolValueOption.NUM_MEMBERS ){
+					
+					for (IGroupBy groupBy : groupBys){
+						if (groupBy instanceof PatrolGroupBy){
+							if (((PatrolGroupBy)groupBy).getOption() == PatrolQueryOption.EMPLOYEE){
+								return "The value " + pIt.getOption().getGuiName() + " cannot be grouped by " + ((PatrolGroupBy)groupBy).getOption().getGuiName();
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 }

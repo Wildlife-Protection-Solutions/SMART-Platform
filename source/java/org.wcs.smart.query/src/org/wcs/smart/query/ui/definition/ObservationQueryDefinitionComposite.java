@@ -115,7 +115,8 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	/**
 	 * @see org.wcs.smart.query.ui.definition.QueryDefinitionComposite#validate()
 	 */
-	public void validate(){
+	public String validate(){
+		String error =null;
 		String query = dropTarget.getQueryString().trim();
 		boolean isvalid = true;
 		if (query.length() == 0) {
@@ -129,12 +130,14 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 			} catch (Throwable ex) {
 				// failed to parse query
 				isvalid = false;
+				error = ex.getMessage();
 			}
 		}
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)view.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
-		provider.setQueryValue(isvalid);
+		provider.setQueryValue(isvalid, error);
 		view.getQuery().setIsValid(isvalid);
 		((ObservationQuery)view.getQuery()).setQueryFilter(query);
+		return error;
 	}
 
 	/**

@@ -457,6 +457,16 @@
                tooltip="Delete the selected item">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.trim.status">
+         <toolbar
+               id="org.wcs.smart.query.queryError">
+            <control
+                  class="org.wcs.smart.query.QueryErrorControlContribution">
+            </control>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
