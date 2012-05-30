@@ -187,8 +187,8 @@ public class EmployeeDialog extends Dialog {
 			
 			Transaction tx = session.beginTransaction();
 			try{
-				if (toUpdate.getId() == null){
-					//creating new 
+				if (toUpdate.getId() == ""){
+					//if blank, auto-generate an id for them
 					HibernateManager.generateEmployeeId(toUpdate, session);
 				}else if (toUpdate.getUuid() != null){
 					//validate that there will always be
