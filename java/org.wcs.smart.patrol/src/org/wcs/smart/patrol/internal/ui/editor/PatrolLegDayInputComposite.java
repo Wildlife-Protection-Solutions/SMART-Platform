@@ -65,6 +65,8 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -133,6 +135,9 @@ public class PatrolLegDayInputComposite {
 	private Hyperlink viewTrackPoints;
 	private Hyperlink importTrack;
 	private Text txtDistance;
+	
+	private Font okayFont;
+	private Font errorFont;
 	
 	private IPatrolEventListener trackListener = new IPatrolEventListener() {
 		@Override
@@ -311,6 +316,7 @@ public class PatrolLegDayInputComposite {
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
 		});
+
 		
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
@@ -355,6 +361,12 @@ public class PatrolLegDayInputComposite {
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		toolkit.createLabel(c, "Total Hours Patrolled:");
 		lblTotalHours = toolkit.createLabel(c, "N/A");
+		okayFont = lblTotalHours.getFont();
+		
+		FontData fd = okayFont.getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		errorFont = new Font(Display.getDefault(), fd);
+		
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.widthHint = 30;
 		lblTotalHours.setLayoutData(gd);
@@ -459,7 +471,12 @@ public class PatrolLegDayInputComposite {
 	public void dispose(){
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, waypointListener);
-		
+		if (okayFont != null && !okayFont.isDisposed()){
+			okayFont.dispose();
+		}
+		if (errorFont != null && !errorFont.isDisposed()){
+			errorFont.dispose();
+		}
 		mainComposite.dispose();
 	}
 	
@@ -586,7 +603,18 @@ public class PatrolLegDayInputComposite {
 	private void updateTotalHours(){
 		double d = Double.parseDouble(this.restMinutes.getText());
 		double time = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime() - d * 60 * 1000;
-		lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time / (1000 * 60 * 60)));
+		time = time / (1000 * 60 * 60);
+		lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time));
+		if (time < 0){
+			lblTotalHours.setFont(errorFont);
+			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+			lblTotalHours.setToolTipText("The start time is before the end time.");
+		}else{
+			lblTotalHours.setFont(okayFont);
+			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+			lblTotalHours.setToolTipText(null);
+		}
+		
 	}
 	
 	public void updateDistance(){
