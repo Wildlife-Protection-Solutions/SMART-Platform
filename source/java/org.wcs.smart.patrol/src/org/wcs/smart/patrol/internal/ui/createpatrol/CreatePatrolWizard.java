@@ -120,6 +120,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		super.addPage(new StationTeamWizardPage());
 		super.addPage(new PatrolMandateWizardPage());
 		super.addPage(new PatrolObjectiveWizardPage());
+		super.addPage(new CommentWizardPage());
 		super.addPage(new PatrolDateWizardPage());
 		super.addPage(new PatrolMemberWizardPage());
 		super.addPage(new PatrolLeaderWizardPage());

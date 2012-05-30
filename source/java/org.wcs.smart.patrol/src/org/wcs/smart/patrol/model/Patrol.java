@@ -64,13 +64,13 @@ public class Patrol {
 	private Station station;
 	private Team team;
 	private String id;
-//	private Integer objectiveRating;
 	private String objective;
 	private PatrolMandate mandate;
 	private PatrolType.Type patrolType;
 	private boolean isArmed;
 	private Date startDate;
 	private Date endDate;
+	private String comment;
 	
 	
 	private List<PatrolLeg> legs;
@@ -128,14 +128,14 @@ public class Patrol {
 		this.team = team;
 	}
 
-//	@Column(name="objective_rating")
-//	public Integer getObjectiveRating() {
-//		return objectiveRating;
-//	}
+	@Column(name="comment")
+	public String getComment() {
+		return this.comment;
+	}
 
-//	public void setObjectiveRating(Integer objectiveRating) {
-//		this.objectiveRating = objectiveRating;
-//	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 
 	@Column(name="objective")
 	public String getObjective() {

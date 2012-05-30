@@ -52,7 +52,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
@@ -72,6 +71,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
+import org.wcs.smart.patrol.internal.ui.CommentComposite;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.EmployeeLeaderPilotComposite;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
@@ -114,6 +114,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Text txtStation;
 	private Text txtTeam;
 	private Text txtObjective;
+	private Text txtComment;
 	private Text txtStartDate;
 	private Text txtEndDate;
 	private Text txtTransport;
@@ -121,10 +122,10 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Button btnArmed;
 	
 	private Hyperlink editObjective;
+	private Hyperlink editComment;
 	private Hyperlink editEmployee;
 	private Hyperlink editDates;
 	private TableViewer employeeList;
-	private Scale sclObjRating;
 	private Form frmPatrolSummary;
 
 	private PatrolEditor editor;
@@ -251,21 +252,22 @@ public class PatrolSummaryEditor extends EditorPart {
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		txtObjective = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		txtObjective .setEditable(false);
-		txtObjective .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		txtObjective .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)txtObjective.getLayoutData()).heightHint=80;
 		((GridData)txtObjective.getLayoutData()).widthHint=100;
-		
-//		lbl = toolkit.createLabel(right, "Objective Rating:");
-//		sclObjRating = new Scale(right, SWT.NONE);
-//		toolkit.adapt(sclObjRating, false, false);
-//		sclObjRating.setEnabled(false);
-//		sclObjRating.setMinimum(1);
-//		sclObjRating.setMaximum(5);
-//		sclObjRating.setIncrement(1);
-//		sclObjRating.setPageIncrement(1);
-//		sclObjRating.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		editObjective = createEditLink(toolkit, right, new ObjectiveComposite());
-		editObjective.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false, 3, 1));
+		editObjective.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
+		
+		
+		lbl = toolkit.createLabel(right, "Comment:");
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		txtComment = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		txtComment.setEditable(false);
+		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		((GridData)txtComment.getLayoutData()).heightHint=80;
+		((GridData)txtComment.getLayoutData()).widthHint=100;
+		editComment = createEditLink(toolkit, right, new CommentComposite());
+		editComment.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false,1,1));
 		
 		
 		lbl = toolkit.createLabel(left, "Members:");
@@ -470,7 +472,11 @@ public class PatrolSummaryEditor extends EditorPart {
 			} else {
 				txtMandate.setText("(none)");
 			}
-
+			if (patrol.getComment() != null){
+				txtComment.setText(patrol.getComment());
+			}else{
+				txtComment.setText("");
+			}
 			btnArmed.setSelection(patrol.isArmed());
 
 			if (patrol.getTeam() != null) {

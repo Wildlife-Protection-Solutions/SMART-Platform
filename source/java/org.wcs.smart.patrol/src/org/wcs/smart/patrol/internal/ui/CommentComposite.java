@@ -34,16 +34,15 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * Patrol item composite for selecting patrol objective and
- * how well object was met.
+ * Composite for collecting patrol comments.
  * 
- * @author Emily
+ * @author egouge
  * @since 1.0.0
  */
-public class ObjectiveComposite extends PatrolItemComposite{
-	private Text txtObjective;
+public class CommentComposite extends PatrolItemComposite{
+	private Text txtComment;
 
-	public ObjectiveComposite() {
+	public CommentComposite() {
 
 	}
 
@@ -59,20 +58,21 @@ public class ObjectiveComposite extends PatrolItemComposite{
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Objective:");
+		lbl.setText("Patrol Comments:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		txtObjective = new Text(center, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		txtComment = new Text(center, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
 		gd.widthHint = 150;
 		gd.heightHint = 80;
-		txtObjective.setLayoutData(gd);
-		txtObjective.addModifyListener(new ModifyListener() {			
+		txtComment.setLayoutData(gd);
+		txtComment.addModifyListener(new ModifyListener() {			
 			@Override
 			public void modifyText(ModifyEvent e) {
 				fireChangeListeners();
 			}
 		});
+
 		return main;
 	}
 
@@ -80,8 +80,8 @@ public class ObjectiveComposite extends PatrolItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	public void setValues(Patrol p, Session session) {
-    	if (p.getObjective() != null){
-    		txtObjective.setText(p.getObjective());
+    	if (p.getComment() != null){
+    		txtComment.setText(p.getComment());
     	}
 	}
 
@@ -89,7 +89,7 @@ public class ObjectiveComposite extends PatrolItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
 	public boolean updatePatrol(Patrol p) {
-		p.setObjective(txtObjective.getText());
+		p.setComment(txtComment.getText());
 		return true;
 	}
 
@@ -99,7 +99,7 @@ public class ObjectiveComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Objective";
+		return "Patrol Comments";
 	}
 	
 	/**
@@ -107,6 +107,6 @@ public class ObjectiveComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public int getAttribute() {
-		return PatrolEventManager.PATROL_OBJECTIVE;
+		return PatrolEventManager.PATROL_COMMENT;
 	}
 }

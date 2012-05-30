@@ -72,6 +72,12 @@ public class PatrolEventManager {
 	public static int PATROL_MANDATE = 7;
 	
 	/**
+	 * Patrol comment object
+	 */
+	public static int PATROL_COMMENT = 8;
+	
+	
+	/**
 	 * 
 	 * @return the patrol event manager instance
 	 */
