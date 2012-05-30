@@ -287,16 +287,18 @@ RETURNS NULL ON NULL INPUT;
 	
 	/**
 	 * Gets attributes that are active or inactive  
-	 * @param active <code>true</code> for active only attributes, <code>false</code> for in-active only attributes
+	 * @param active <code>true</code> for active only attributes, 
+	 * <code>false</code> for in-active only attributes
+	 * <code>null</code> for all attributes
 	 * @return list of only active or inactive attributes
 	 */
 	@Transient 
-	public List<CategoryAttribute> getAttributes(boolean active){
+	public List<CategoryAttribute> getAttributes(Boolean active){
 		List<CategoryAttribute> tmp = new ArrayList<CategoryAttribute>();
 		if (getAttributes() != null){
 			for (Iterator<CategoryAttribute> iterator = getAttributes().iterator(); iterator.hasNext();) {
 				CategoryAttribute category = (CategoryAttribute) iterator.next();
-				if (category.getIsActive() == active){
+				if (active == null || (active != null && category.getIsActive() == active)){
 					tmp.add(category);
 				}
 			}
@@ -398,9 +400,11 @@ RETURNS NULL ON NULL INPUT;
 	 * and working way down to the children
 	 * 
 	 * @param attributes list to populate
+	 * @param onlyEnabled <code>true</code> to include only enabled, <code>false</code> to include 
+	 * only in-active and <code>null</code> to include all
 	 */
 	@Transient
-	public void getAllAttribute(List<Attribute> attributes, boolean onlyEnabled){
+	public void getAllAttribute(List<Attribute> attributes, Boolean onlyEnabled){
 		if (getParent() != null){
 			getParent().getAllAttribute(attributes, onlyEnabled);
 		}

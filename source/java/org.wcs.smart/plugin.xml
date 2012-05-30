@@ -179,6 +179,16 @@
             </command>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.trim.command2">
+         <toolbar
+               id="org.wcs.smart.userNameInfo">
+            <control
+                  class="org.wcs.smart.UserNameControlContribution">
+            </control>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          id="smartapp"

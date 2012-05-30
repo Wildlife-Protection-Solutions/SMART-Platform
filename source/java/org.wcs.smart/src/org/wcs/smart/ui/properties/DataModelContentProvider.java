@@ -119,6 +119,8 @@ public class DataModelContentProvider implements ITreeContentProvider {
 		}else if (parentElement instanceof Category){
 			ArrayList<Object> children = new ArrayList<Object>();
 			Category category = ((Category)parentElement);
+			
+			//add children attributes
 			if (onlyEnabled){
 				children.addAll(category.getChildren(true));
 			}else{
@@ -129,14 +131,15 @@ public class DataModelContentProvider implements ITreeContentProvider {
 				
 			if (!onlyCategories){
 				//add attributes
+
 				if (allAttributes){
 					List<Attribute> all = new ArrayList<Attribute>();
-					category.getAllAttribute(all, onlyEnabled);
+					category.getAllAttribute(all, onlyEnabled ? true : null);
 					for (Attribute att : all){
 						children.add(new CategoryAttribute(category, att));	
 					}
 				}else{
-					children.addAll(category.getAttributes(onlyEnabled));
+					children.addAll(category.getAttributes(onlyEnabled ? true : null));
 				}
 			}
 			return children.toArray();
@@ -183,7 +186,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 					}
 					if (allAttributes){
 						List<Attribute> kids = new ArrayList<Attribute>();
-						((Category)element).getAllAttribute(kids, onlyEnabled);
+						((Category)element).getAllAttribute(kids, onlyEnabled ? true : null);
 						if (kids.size() > 0){
 							return true;
 						}
@@ -195,7 +198,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 					}
 					if (allAttributes){
 						List<Attribute> kids = new ArrayList<Attribute>();
-						((Category)element).getAllAttribute(kids, onlyEnabled);
+						((Category)element).getAllAttribute(kids, onlyEnabled ? true : null);
 						if (kids.size() > 0){
 							return true;
 						}

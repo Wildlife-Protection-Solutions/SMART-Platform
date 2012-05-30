@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -54,6 +55,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -141,8 +144,28 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		/* left data tree */
+		PatternFilter patternFilter = new PatternFilter(){			
+			protected boolean isChildMatch(Viewer viewer, Object element) {
+				Object parent = ((DataModelContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
+				if (parent != null) {
+					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
+				}
+				return false;
+			}
 
-		viewer = new TreeViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
+			@Override
+			protected boolean isLeafMatch(Viewer viewer, Object element) {
+				String labelText = ((DataModelLabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
+				if (labelText == null) {
+					return false;
+				}
+				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
+			}
+			
+		};
+		FilteredTree fTree = new FilteredTree(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
+		viewer = fTree.getViewer();
+//		viewer = new TreeViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new DataModelContentProvider());
 		//TODO: implement language support
 		viewer.setLabelProvider(new DataModelLabelProvider(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
