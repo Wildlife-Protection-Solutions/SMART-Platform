@@ -23,12 +23,14 @@ package org.wcs.smart.query.ui.definition;
 
 import java.util.ArrayList;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.ListDropTargetPanel;
@@ -74,23 +76,28 @@ public class SummaryValueGroupByPanel {
 		gl.horizontalSpacing = 0;
 		right.setLayout(gl);
 		
-		
 		Composite rightInner = new Composite(right, SWT.NONE);
-		gl = new GridLayout(1, false);
+		gl = new GridLayout(2, false);
 		rightInner.setLayout(gl);
 		
 		Label lblValues = new Label(rightInner, SWT.NONE);
+		lblValues.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON));
+		
+		lblValues = new Label(rightInner, SWT.NONE);
 		lblValues.setText("Values");
-		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		lblValues.setToolTipText("Add values to compute here from the 'Value Options' section of the Query Filters tree.");
 		
 		Composite leftInner = new Composite(left, SWT.NONE);
-		gl = new GridLayout(1, false);
+		gl = new GridLayout(2, false);
 		leftInner.setLayout(gl);
-		
 		Label lblGroupBys = new Label(leftInner, SWT.NONE);
-		lblGroupBys.setText("Group Bys");
-		lblGroupBys.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		lblGroupBys.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.GROUPBY_ICON));
 		
+		lblGroupBys = new Label(leftInner, SWT.NONE);
+		lblGroupBys.setText("Group Bys");
+		lblGroupBys.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		lblGroupBys.setToolTipText("Add items to group by here from the 'Group By Options' section of the Query Filters tree.");
 		createInnerGroupByComposite(left, view);
 		
 		lstValues = new ListDropTargetPanel(view, false);
@@ -125,20 +132,28 @@ public class SummaryValueGroupByPanel {
 		
 		
 		Composite rightInner = new Composite(right, SWT.NONE);
-		gl = new GridLayout(1, false);
+		gl = new GridLayout(2, false);
 		rightInner.setLayout(gl);
 		
-		Label lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setText("Column Headers");
-		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		Label lblImage = new Label(rightInner, SWT.NONE);
+		lblImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.COLUMN_HEADER_ICON));
+		
+		Label lblColumnHeaders = new Label(rightInner, SWT.NONE);
+		lblColumnHeaders.setText("Column Headers");
+		lblColumnHeaders.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		lblColumnHeaders.setToolTipText("These items will be table column headers.");
 		
 		Composite leftInner = new Composite(left, SWT.NONE);
-		gl = new GridLayout(1, false);
+		gl = new GridLayout(2, false);
 		leftInner.setLayout(gl);
 		
-		Label lblGroupBys = new Label(leftInner, SWT.NONE);
-		lblGroupBys.setText("Row Headers");
-		lblGroupBys.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		lblImage = new Label(leftInner, SWT.NONE);
+		lblImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.ROW_HEADER_ICON));
+		
+		Label lblRowHeaders = new Label(leftInner, SWT.NONE);
+		lblRowHeaders.setText("Row Headers");
+		lblRowHeaders.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		lblRowHeaders.setToolTipText("These items will be table row headers");
 		
 		lstRowGroupBy = new ListDropTargetPanel(view, true);
 		Composite comp = lstRowGroupBy.createComposite(left);

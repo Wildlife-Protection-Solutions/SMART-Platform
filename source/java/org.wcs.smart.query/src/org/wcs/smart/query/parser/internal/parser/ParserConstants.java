@@ -151,15 +151,17 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int QUERY_SPLITTER = 74;
   /** RegularExpression Id. */
-  int PATROL_GROUPBY_OPTION = 75;
+  int PATROL_UUID_GROUPBY_OPTION = 75;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 76;
+  int PATROL_STRING_GROUPBY_OPTION = 76;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 77;
+  int CATEGORY_GROUPBY_ITEM = 77;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 78;
+  int ATTRIBUTE_GROUPBY_ITEM = 78;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 79;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 79;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 80;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -241,7 +243,8 @@ public interface ParserConstants {
     "<AGG>",
     "<DATE_GROUPBY_ITEM>",
     "\"|\"",
-    "<PATROL_GROUPBY_OPTION>",
+    "<PATROL_UUID_GROUPBY_OPTION>",
+    "<PATROL_STRING_GROUPBY_OPTION>",
     "<CATEGORY_GROUPBY_ITEM>",
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",

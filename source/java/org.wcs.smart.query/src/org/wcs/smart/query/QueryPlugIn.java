@@ -142,6 +142,16 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String EXCLAMATION_ICON = "org.wcs.smart.query.exclamation";
 	
+	/**
+	 * Row Header
+	 */
+	public static final String ROW_HEADER_ICON = "org.wcs.smart.query.rowheader";
+	
+	/**
+	 * Column Header
+	 */
+	public static final String COLUMN_HEADER_ICON = "org.wcs.smart.query.columheader";
+	
 	/*
 	 * Load images
 	 */
@@ -171,6 +181,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		addImage("images/icons/obj16/value_personDays.png",VALUE_PERSON_DAYS_ICON);
 		addImage("images/icons/obj16/value_personHours.png",VALUE_PERSON_HOURS_ICON);
 		addImage("images/icons/obj16/exclamation.png",EXCLAMATION_ICON);
+		addImage("images/icons/obj16/row_header.png",ROW_HEADER_ICON);
+		addImage("images/icons/obj16/column_header.png",COLUMN_HEADER_ICON);
 		
 		
 	}

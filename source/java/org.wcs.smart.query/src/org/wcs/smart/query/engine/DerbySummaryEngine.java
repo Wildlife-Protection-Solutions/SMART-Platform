@@ -67,6 +67,7 @@ import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.parser.internal.summary.ValuePart;
+import org.wcs.smart.query.parser.internal.summary.IGroupBy.GroupByType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -518,7 +519,11 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				String key = gb.getKeyPart() + ":";
 				switch (gb.getType()) {
 					case STRING:
-						key += rs.getString(rsindex++);
+//						if (gb instanceof PatrolGroupBy ){
+//							key += "\"" + rs.getString(rsindex++) + "\"";
+//						}else{
+							key += rs.getString(rsindex++);
+//						}
 						break;
 					case BYTE:
 						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
@@ -967,7 +972,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					rowHeader[i] = new SummaryHeader( it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
 				}else{
 					rowHeader[i] = new SummaryHeader( it.getName(), item.getKeyPart(), it.getKey(), false);
-				}
+				}	
 				
 			}
 			results.addRowHeader(rowHeader);

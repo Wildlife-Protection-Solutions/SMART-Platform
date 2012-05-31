@@ -143,6 +143,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 		}
 		
 		createValueComposite(main);
+		
 		if (encounterRatio != null){
 			main.setLayout(new GridLayout(1, false));
 			
@@ -153,34 +154,10 @@ public abstract class AbstractValueDropItem extends DropItem {
 			Label lbl2 = new Label(main, SWT.NONE);
 			lbl2.setText(encounterRatio.getGuiName());
 			
+			createRateLink(main, "Change Rate...");
 		}else{
 			main.setLayout(new GridLayout(2, false));
-		
-			final Hyperlink link = new Hyperlink(main,  SWT.NONE);
-			link.setUnderlined(true);
-			link.setForeground( main.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-			link.setText("Compute Rate...");
-			
-			if (smallerFont != null){
-				FontData fd = (link.getFont().getFontData()[0]);
-				fd.setHeight(fd.getHeight() - 1);
-				smallerFont = new Font(Display.getCurrent(), fd);
-			}
-			
-			link.setFont(smallerFont);
-			link.setLayoutData(new GridData(SWT.BOTTOM, SWT.RIGHT, false, false));
-			link.addListener(SWT.MouseUp, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					EncounterRateDialog dialog = new EncounterRateDialog(main.getShell());
-					if (dialog.open() == Window.OK){
-						encounterRatio = dialog.getSelectedItems();
-					}
-					updateUi();
-					targetPanel.layout();
-					queryChanged();
-				}
-			});
+			createRateLink(main, "Compute Rate...");
 		}
 		
 		main.layout();
@@ -188,6 +165,46 @@ public abstract class AbstractValueDropItem extends DropItem {
 		
 	}
 	
+	/**
+	 * Creates the compute/change rate link
+	 * @param parent
+	 */
+	private void createRateLink(Composite parent, String text) {
+		final Hyperlink link = new Hyperlink(parent,  SWT.NONE);
+		
+		link.setUnderlined(true);
+		link.setForeground( main.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
+		link.setText(text);
+		
+		if (smallerFont != null){
+			FontData fd = (link.getFont().getFontData()[0]);
+			fd.setHeight(fd.getHeight() - 1);
+			smallerFont = new Font(Display.getCurrent(), fd);
+		}
+		
+		link.setFont(smallerFont);
+		link.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+		link.addListener(SWT.MouseUp, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				showRateDialog();
+			}
+		});
+	}
+	
+	/**
+	 * Displays the rate dialog and updates the encounter ratio as
+	 * required.
+	 */
+	private void showRateDialog() {
+		EncounterRateDialog dialog = new EncounterRateDialog(main.getShell());
+		if (dialog.open() == Window.OK){
+			encounterRatio = dialog.getSelectedItems();
+		}
+		updateUi();
+		targetPanel.layout();
+		queryChanged();
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)

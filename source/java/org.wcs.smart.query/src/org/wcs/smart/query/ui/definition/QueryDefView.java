@@ -95,20 +95,20 @@ public class QueryDefView extends ViewPart {
 		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
 			
-			if (partRef.getId().equals(QueryResultsEditor.ID) ||
-					partRef.getId().equals(SummaryEditor.ID)){
-				
-				IWorkbenchPart part = partRef.getPart(false);
-				
-				if (part instanceof QueryResultsEditor){
-					setQuery(((QueryResultsEditor)part).getQuery());
-				}else if (part instanceof SummaryEditor){
-					setQuery(((SummaryEditor)part).getQuery());
-				}
-				if (currentPanel != null){
-					currentPanel.validate();
-				}
-			}
+//			if (partRef.getId().equals(QueryResultsEditor.ID) ||
+//					partRef.getId().equals(SummaryEditor.ID)){
+//				
+//				IWorkbenchPart part = partRef.getPart(false);
+//				
+//				if (part instanceof QueryResultsEditor){
+//					setQuery(((QueryResultsEditor)part).getQuery());
+//				}else if (part instanceof SummaryEditor){
+//					setQuery(((SummaryEditor)part).getQuery());
+//				}
+//				if (currentPanel != null){
+//					currentPanel.validate();
+//				}
+//			}
 		}
 		
 		@Override
@@ -141,6 +141,25 @@ public class QueryDefView extends ViewPart {
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			
+			if (partRef.getId().equals(QueryResultsEditor.ID) ||
+					partRef.getId().equals(SummaryEditor.ID)){
+				IWorkbenchPart part = partRef.getPart(false);
+				
+				if (part instanceof QueryResultsEditor){
+					Query q =((QueryResultsEditor)part).getQuery();
+					if (q != current){
+						setQuery(q);
+					}
+				}else if (part instanceof SummaryEditor){
+					Query q =((SummaryEditor)part).getQuery();
+					if (q != current){
+						setQuery(q);
+					}
+				}
+				if (currentPanel != null){
+					currentPanel.validate();
+				}
+			}
 		}
 	};
 

@@ -24,7 +24,7 @@
             class="org.wcs.smart.query.ui.querylist.QueryListView"
             icon="images/icons/view16/query_list.png"
             id="org.wcs.smart.query.QueryListView"
-            name="Saved Queries"
+            name="Saved Queries/Summaries"
             restorable="true">
       </view>
    </extension>
@@ -126,11 +126,16 @@
                   </with>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.query.separator3"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.query.exportQuery"
                   icon="images/icons/etool16/exportquery.png"
                   label="Export Query"
-                  style="push">
+                  style="push"
+                  tooltip="Export the current query/summary">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -141,28 +146,17 @@
                   </with>
                </visibleWhen>
             </command>
-            <command
-                  commandId="org.wcs.smart.query.importQuery"
-                  icon="images/icons/etool16/importquery.png"
-                  label="Import Query"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
-            </command>
+            <separator
+                  name="org.wcs.smart.query.separator2"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.query.save"
                   icon="images/icons/etool16/save.gif"
                   id="org.wcs.smart.query.save.toolbar"
-                  label="Save Query"
+                  label="Save Query/Summary"
                   mnemonic="S"
-                  tooltip="Save the query">
+                  tooltip="Saves the query or summary">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -176,9 +170,9 @@
             <command
                   commandId="org.wcs.smart.query.saveAs"
                   icon="images/icons/etool16/saveas.gif"
-                  label="Save Query As"
+                  label="Save Query/Summary As"
                   mnemonic="e"
-                  tooltip="Save as a new query">
+                  tooltip="Save a copy of the query/summary">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -307,7 +301,7 @@
             <command
                   commandId="org.wcs.smart.query.createQuery"
                   icon="images/icons/etool16/addquery.png"
-                  label="Create Query"
+                  label="New Query ..."
                   mnemonic="Q"
                   style="push"
                   tooltip="Create a new database query.">
@@ -322,11 +316,24 @@
                </visibleWhen>
             </command>
             <command
+                  commandId="org.wcs.smart.query.createSummary"
+                  icon="images/icons/etool16/addsummary.png"
+                  label="New Summary ..."
+                  mnemonic="S"
+                  style="push"
+                  tooltip="Creates a new summary.">
+            </command>
+            <separator
+                  name="org.wcs.smart.query.separator8"
+                  visible="true">
+            </separator>
+            <command
                   commandId="org.wcs.smart.query.exportQuery"
                   icon="images/icons/etool16/exportquery.png"
-                  id="x"
-                  label="Export Query ..."
-                  style="push">
+                  label="Export Query/Summary ..."
+                  mnemonic="x"
+                  style="push"
+                  tooltip="Exports the current query or summary">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -340,9 +347,10 @@
             <command
                   commandId="org.wcs.smart.query.importQuery"
                   icon="images/icons/etool16/importquery.png"
-                  label="Import Query ..."
+                  label="Import Query/Summary ..."
                   mnemonic="i"
-                  style="push">
+                  style="push"
+                  tooltip="Imports a query or summary definition file">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -412,9 +420,9 @@
                commandId="org.wcs.smart.query.save"
                icon="images/icons/etool16/save.gif"
                id="org.wcs.smart.query.save.toolbar"
-               label="Save Query"
+               label="Save Query/Summary"
                mnemonic="S"
-               tooltip="Save the query">
+               tooltip="Save the query or summary">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -428,9 +436,9 @@
          <command
                commandId="org.wcs.smart.query.saveAs"
                icon="images/icons/etool16/saveas.gif"
-               label="Save Query As"
+               label="Save Query/Summary As"
                mnemonic="e"
-               tooltip="Save as a new query">
+               tooltip="Saves a copy of the query/summary">
             <visibleWhen
                   checkEnabled="false">
                <with
