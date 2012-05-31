@@ -14,8 +14,8 @@ public class SummaryParserTest {
 	public void testAll() throws Exception{
 		
 		String valuePart = "patrol:sum:numdays,patrol:sum:distance,patrol:avg:distance"; 
-		String rowGroupByPart = "patrol:station:,date:month";
-		String colGroupByPart = "patrol:station:,date:month";
+		String rowGroupByPart = "patrol:station:abcdef:efghi,date:month";
+		String colGroupByPart = "";//"patrol:station:\"\",date:month";
 		String queryPart = "patrol:station equals \"station1\"";
 		String query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + queryPart;
 		SumQueryDefinition test = parseQuery(query);
@@ -23,6 +23,18 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
 		Assert.assertEquals(test.getQueryFilter().asString(), queryPart);
+		
+		
+		valuePart = "patrol:sum:numdays,patrol:sum:distance"; 
+		rowGroupByPart = "patrol:id:\"ABC-EM_000001\":\"ABC-EM_000002\":\"ABC-EM_000003\":\"ABC-EM_000004\":\"ABC-EM_00000\"";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
 	}
 	
 	
@@ -166,7 +178,7 @@ public class SummaryParserTest {
 		Assert.assertNull(test.getQueryFilter());
 		
 		valuePart = ""; 
-		rowGroupByPart = "patrol:id:adfsf3234nasdf2345:2342146af,patrol:team:23423fadv";
+		rowGroupByPart = "patrol:id:\"adfsf3234nasdf2345\":\"2342146af\",patrol:team:23423fadv";
 		colGroupByPart = "";
 		queryPart = "";
 		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
