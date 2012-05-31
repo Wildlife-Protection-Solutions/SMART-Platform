@@ -22,6 +22,13 @@ public interface IDropPanel {
 	public void validate();
 	
 	/**
+	 * Called when an item is finished being dragged.
+	 * 
+	 * @param item the item being dragged
+	 */
+	public void finishDrag(DropItem item);
+	
+	/**
 	 * fires any listeners associated with the drop panel
 	 */
 	public void fireQueryChangedListeners();

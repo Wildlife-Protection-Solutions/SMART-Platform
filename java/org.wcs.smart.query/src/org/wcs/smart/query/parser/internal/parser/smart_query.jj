@@ -85,15 +85,19 @@ TOKEN :
 //|    < DM_GROUPBY_ITEM : < CATEGORY_KEY > >
 | 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" ) >
 |    < QUERY_SPLITTER : "|" >
-| 	< PATROL_GROUPBY_OPTION : (
-			< PATROL_ID_KEY > |
-			< PATROL_STATION_KEY > |
+|    < PATROL_UUID_GROUPBY_OPTION :(
+  			< PATROL_STATION_KEY > |
 			< PATROL_TEAM_KEY> |
 			< PATROL_MANDATE_KEY> |
 			< PATROL_TYPE_KEY> |
 			< PATROLLEG_TRANSPORT_KEY > |
 			< PATROLLEG_LEADER_KEY> |
-			< PATROLLEG_MEMBER_KEY > ) ":" (< LETTER > | < DIGIT > | ":" )*  >
+			< PATROLLEG_MEMBER_KEY > ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
+|    < PATROL_STRING_GROUPBY_OPTION :
+  			< PATROL_ID_KEY >  ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
+//| 	< PATROL_GROUPBY_OPTION : (
+//			< PATROL_UUID_GROUPBY_OPTION > |
+//			< PATROL_STRING_GROUPBY_OPTION > ) >
 | 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :
 			( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
@@ -242,7 +246,8 @@ IGroupBy GroupByItem() :
 {
 	(
 		(
-		  < PATROL_GROUPBY_OPTION >
+		  < PATROL_STRING_GROUPBY_OPTION > |
+		  < PATROL_UUID_GROUPBY_OPTION >
 		) 
 		{
 			item = PatrolGroupBy.createGroupBy( token.image );

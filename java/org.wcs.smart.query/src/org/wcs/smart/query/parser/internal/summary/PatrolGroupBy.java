@@ -75,7 +75,11 @@ public class PatrolGroupBy implements IGroupBy {
 		if (bits.length > 2){
 			items = new String[bits.length - 2];
 			for (int i = 2; i < bits.length; i ++){
-				items[i-2] = bits[i];
+				if (option.getType() == PatrolQueryOptionType.UUID){
+					items[i-2] = bits[i];
+				}else{
+					items[i-2] = SmartUtils.stripQuotes(bits[i]);
+				}
 			}
 		}else{
 			items = null;
@@ -102,7 +106,13 @@ public class PatrolGroupBy implements IGroupBy {
 		sb.append(":");
 		if (items != null) {
 			for (int i = 0; i < items.length; i++) {
-				sb.append(items[i]);
+				if (option.getType() == PatrolQueryOptionType.STRING){
+					sb.append("\"");
+					sb.append(items[i]);
+					sb.append("\"");
+				}else{
+					sb.append(items[i]);
+				}
 				if (i < items.length - 1) {
 					sb.append(":");
 				}
@@ -152,8 +162,12 @@ public class PatrolGroupBy implements IGroupBy {
 			if (items != null){
 				ListItem[] initItems = new ListItem[items.length];
 				for (int i = 0; i < initItems.length; i++) {
-					byte[] uuid = SmartUtils.decodeHex(items[i]);
-					initItems[i] = new ListItem(uuid, option.getName(session, uuid));
+					if (option.getType() == PatrolQueryOptionType.UUID){
+						byte[] uuid = SmartUtils.decodeHex(items[i]);
+						initItems[i] = new ListItem(uuid, option.getName(session, uuid));
+					}else{
+						initItems[i] = new ListItem(null, items[i], items[i]);
+					}
 				}
 				it.initializeData(initItems);
 			}

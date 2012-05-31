@@ -419,8 +419,6 @@ public class PatrolQueryOptions {
 		public List<ListItem> getValues(Session session, String[] keys){
 			List<ListItem> results = new ArrayList<ListItem>();
 			if (type == PatrolQueryOptionType.UUID){
-				
-				
 				byte[][] uuidkeys = new byte[keys.length][];
 				try {
 					for (int i = 0; i < keys.length; i++) {
@@ -450,7 +448,8 @@ public class PatrolQueryOptions {
 					for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 						Object object = (Object) iterator.next();
 						if (object instanceof Patrol){
-							results.add(new ListItem(((Patrol) object).getUuid(), ((Patrol) object).getId()));
+							//results.add(new ListItem(((Patrol) object).getUuid(), ((Patrol) object).getId()));
+							results.add(new ListItem( null, ((Patrol) object).getId(),((Patrol) object).getId() ));
 						}
 					}
 				}else if (this == PATROL_TYPE){
@@ -470,7 +469,6 @@ public class PatrolQueryOptions {
 		public List<ListItem> getAllActiveValues(Session session){
 			ArrayList<ListItem> items = new ArrayList<ListItem>();
 			if (this == ID){
-				//TODO: why uuid is not used here
 				List<String> pids = QueryHibernateManager.getPatrolIds(session);
 				for (String pid : pids){
 					items.add(new ListItem(null, pid, pid));

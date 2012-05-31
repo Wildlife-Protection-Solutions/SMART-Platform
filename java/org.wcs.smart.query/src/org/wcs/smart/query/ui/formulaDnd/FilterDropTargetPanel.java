@@ -61,6 +61,9 @@ public class FilterDropTargetPanel implements IDropPanel {
 	
 	private TreeDropDownViewer treeEditor = null;
 	
+
+	private DropItem dragItem;
+	
 	/**
 	 * Creates a new drop target panel.
 	 * 
@@ -229,6 +232,29 @@ public class FilterDropTargetPanel implements IDropPanel {
 		return dropTargetContent;
 	}
 
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
+	 */
+	@Override
+	public void finishDrag(DropItem di){
+		if (!items.contains(di)){
+			int index= items.indexOf(proxy);
+			items.remove(proxy);
+			proxy.getWidget().setVisible(false);
+			if (index >= 0){
+				items.add(index, di);
+			}else{
+				items.add(di);
+			}
+			di.getWidget().setVisible(true);
+			orderElements();
+			
+		}
+		dragItem = null;
+		fireQueryChangedListeners();
+	}
+	
 	/**
 	 * Creates the drop target composite
 	 * @param parent
@@ -254,33 +280,33 @@ public class FilterDropTargetPanel implements IDropPanel {
 		dtarget.setTransfer(types);
 		dtarget.addDropListener(new DropTargetAdapter() {
 
-			private DropItem dp;
 			
 			@Override
 			public void dragEnter(DropTargetEvent event) {
-
-				StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
-				if (selection == null) {
-					return;
+				if (dragItem == null){
+					StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
+					if (selection == null) {
+						return;
+					}
+					//hide drop item and setup proxy
+					dragItem = (DropItem)selection.getFirstElement();
 				}
-				//hide drop item and setup proxy
-				dp = (DropItem)selection.getFirstElement();
-				dp.getWidget().setVisible(false);
-				int i = items.indexOf(dp);
-				if ( i < 0){
-					items.add(proxy);
-				}else{
-					items.add(i, proxy);
-					items.remove(dp);
+				if (dragItem.getWidget().isVisible()){
+					dragItem.getWidget().setVisible(false);
+					int i = items.indexOf(dragItem);
+					if ( i < 0){
+						items.add(proxy);
+					}else{
+						items.add(i, proxy);
+						items.remove(dragItem);
+					}
 				}
-				proxy.setLabelText(dp.getText());
+				proxy.setLabelText(dragItem.getText());
 				proxy.getWidget().setVisible(true);
 				orderElements();
 			}
 
 			public void dragLeave(DropTargetEvent event) {
-				proxy.getWidget().setVisible(false);
-				items.remove(proxy);
 				orderElements();
 			}
 			
@@ -303,12 +329,12 @@ public class FilterDropTargetPanel implements IDropPanel {
 				moveElements(event.x, event.y);
 				//remove proxy and put back the drop item
 				int i = items.indexOf(proxy);
-				items.add(i, dp);
-				dp.getWidget().setVisible(true);
+				items.add(i, dragItem);
+				dragItem.getWidget().setVisible(true);
 				items.remove(proxy);
 				proxy.getWidget().setVisible(false);
 				orderElements();
-				dp = null;
+				dragItem = null;
 				validate();
 				
 			}
@@ -318,10 +344,8 @@ public class FilterDropTargetPanel implements IDropPanel {
 				boolean before = false;
 				for (DropItem children : items) {
 					Rectangle childBounds = children.getWidget().getBounds();
-					
 					Point p = children.getWidget().getParent().toDisplay(childBounds.x, childBounds.y);
 					Rectangle r = new Rectangle(p.x, p.y, childBounds.width,childBounds.height);
-					
 					if (r.contains(x, y)) {
 						target = children;
 						before = x < p.x + (childBounds.width / 2.0);

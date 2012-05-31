@@ -64,6 +64,8 @@ public class ListDropTargetPanel implements IDropPanel{
 	private boolean isUnique = false;
 	
 	private Set<ListDropTargetPanel> targetPanels;
+
+	private DropItem dragItem;
 	
 	/**
 	 * Creates a new drop target panel.
@@ -249,6 +251,34 @@ public class ListDropTargetPanel implements IDropPanel{
 		return dropTargetContent;
 	}
 
+	
+	/**
+	 * @see org.wcs.smart.query.ui.formulaDnd.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
+	 */
+	@Override
+	public void finishDrag(DropItem di){
+		if (di.targetPanel != this){
+			items.remove(di);
+		}
+		
+		if (di.targetPanel == this && !items.contains(di)){
+			int index= items.indexOf(proxy);
+		
+			if (index >= 0){
+				items.add(index, di);
+			}else{
+				items.add(di);
+			}
+			di.getWidget().setVisible(true);
+		}
+		items.remove(proxy);
+		proxy.getWidget().setVisible(false);
+		this.dragItem = null;
+		
+		orderElements();
+		fireQueryChangedListeners();
+	}
+	
 	/**
 	 * Creates the drop target composite
 	 * @param parent
@@ -274,39 +304,55 @@ public class ListDropTargetPanel implements IDropPanel{
 		dtarget.setTransfer(types);
 		dtarget.addDropListener(new DropTargetAdapter() {
 
-			private DropItem dp;
 			
 			@Override
 			public void dragEnter(DropTargetEvent event) {
-
+				
 				StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
 				if (selection == null) {
 					return;
 				}
 				//hide drop item and setup proxy
-				dp = (DropItem)selection.getFirstElement();
-				if (!targetPanels.contains(dp.targetPanel)){
+				dragItem = (DropItem)selection.getFirstElement();
+				
+
+				if (!targetPanels.contains(dragItem.targetPanel)){
 					event.detail  = DND.DROP_NONE;
-					this.dp = null;
+					dragItem = null;
 					return;
 				}
 				
-				dp.getWidget().setVisible(false);
-				int i = items.indexOf(dp);
-				if ( i < 0){
-					items.add(proxy);
-				}else{
-					items.add(i, proxy);
-					items.remove(dp);
+				if (dragItem.getWidget().isVisible()){
+					dragItem.getWidget().setVisible(false);
+					
+					int i = items.indexOf(dragItem);
+					if (!proxy.getWidget().isVisible()){
+						if ( i < 0 ){
+							items.add(proxy);
+						}else{
+							items.add(i, proxy);
+							items.remove(dragItem);
+						}
+						proxy.setLabelText(dragItem.getText());
+						proxy.getWidget().setVisible(true);
+					}
+				}else if (!proxy.getWidget().isVisible()){
+					//a different panel from the source
+					proxy.setLabelText(dragItem.getText());
+					proxy.getWidget().setVisible(true);
+					moveElements(event.x, event.y);
+					orderElements();
 				}
-				proxy.setLabelText(dp.getText());
-				proxy.getWidget().setVisible(true);
+				
 				orderElements();
 			}
 
 			public void dragLeave(DropTargetEvent event) {
-				proxy.getWidget().setVisible(false);
-				items.remove(proxy);
+				if (proxy.getWidget().isVisible() && dragItem.targetPanel != ListDropTargetPanel.this){
+					items.remove(proxy);
+					proxy.getWidget().setVisible(false);
+					orderElements();
+				}
 				orderElements();
 			}
 			
@@ -317,7 +363,7 @@ public class ListDropTargetPanel implements IDropPanel{
 			@Override
 			public void dragOver(DropTargetEvent event) {
 				if (event.detail != DND.DROP_NONE){
-					if (dp == null) return;
+					if (dragItem == null) return;
 					moveElements(event.x, event.y);
 					orderElements();
 				}
@@ -329,21 +375,25 @@ public class ListDropTargetPanel implements IDropPanel{
 
 			@Override
 			public void drop(DropTargetEvent event) {
-				if (event.detail == DND.DROP_NONE || dp == null){
+				if (event.detail == DND.DROP_NONE || dragItem == null){
 					return;
 				}
-				if (dp.targetPanel != ListDropTargetPanel.this){
-					dp.moveParent(ListDropTargetPanel.this);
+				if (dragItem.targetPanel != ListDropTargetPanel.this){
+					IDropPanel target =  dragItem.targetPanel;
+					dragItem.moveParent(ListDropTargetPanel.this);
+					target.finishDrag(dragItem);
 				}
+
 				moveElements(event.x, event.y);
 				//remove proxy and put back the drop item
 				int i = items.indexOf(proxy);
-				items.add(i, dp);
-				dp.getWidget().setVisible(true);
+				items.add(i, dragItem);
+				dragItem.getWidget().setVisible(true);
 				items.remove(proxy);
 				proxy.getWidget().setVisible(false);
+				
 				orderElements();
-				dp = null;
+				dragItem = null;
 				validate();
 				
 			}

@@ -43,6 +43,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -95,10 +96,12 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		queryPart.append(":");
 		if (filteredValues.size() > 0){
 			for (int i = 0; i < filteredValues.size(); i ++){
-				if (filteredValues.get(i).getUuid() != null){
+				if (groupBy.getType() == PatrolQueryOptionType.UUID){
 					queryPart.append(  SmartUtils.encodeHex( filteredValues.get(i).getUuid())  );
 				}else{
-					queryPart.append(  filteredValues.get(i).getKey() );
+					queryPart.append("\"");
+					queryPart.append(   filteredValues.get(i).getKey() );
+					queryPart.append("\"");
 				}
 				if (i != filteredValues.size() -1){
 					queryPart.append(":");
