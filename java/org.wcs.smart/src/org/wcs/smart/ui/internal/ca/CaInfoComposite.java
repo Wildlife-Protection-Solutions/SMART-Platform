@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite that contains conservation 
@@ -166,8 +168,8 @@ public class CaInfoComposite extends Composite {
 			cdIdentifier.show();
 			isValid = false;
 		}
-		if (txtIdentifier.getText().matches(".*[^a-zA-Z0-9_:\\-].*")){
-			cdIdentifier.setDescriptionText("A conservation area id can only contain the characters a-Z, the digist 0-9 or - or :" );
+		if (!SmartUtils.isSimpleString(txtIdentifier.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX) ){
+			cdIdentifier.setDescriptionText("A conservation area id can only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
 			cdIdentifier.show();
 			isValid = false;
 		}

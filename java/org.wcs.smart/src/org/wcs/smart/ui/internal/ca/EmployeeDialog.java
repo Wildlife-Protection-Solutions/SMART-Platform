@@ -60,6 +60,8 @@ public class EmployeeDialog extends Dialog {
 	private String title = null;
 	private Session session = null;
 	
+	public static String AUTO_GENERATE = "system generated";
+	
 	/**
 	 * Create the dialog.
 	 * 
@@ -187,8 +189,8 @@ public class EmployeeDialog extends Dialog {
 			
 			Transaction tx = session.beginTransaction();
 			try{
-				if (toUpdate.getId() == ""){
-					//if blank, auto-generate an id for them
+				if (toUpdate.getId().compareTo(AUTO_GENERATE) == 0){
+					//if they left the default "automatic", auto-generate an id for them
 					HibernateManager.generateEmployeeId(toUpdate, session);
 				}else if (toUpdate.getUuid() != null){
 					//validate that there will always be

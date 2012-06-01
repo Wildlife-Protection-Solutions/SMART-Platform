@@ -43,6 +43,7 @@ import javax.persistence.Table;
 public class Agency extends SimpleListItem{
 
 	public static final String NAME = "Agency";
+	public static final Integer MAX_AGENCY_LENGTH = 128;
 	
 	private ConservationArea ca;
 	private List<Rank> ranks;
