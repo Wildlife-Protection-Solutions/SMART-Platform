@@ -27,6 +27,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -60,6 +61,7 @@ import org.wcs.smart.ca.Rank;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Rank and Agency list property page
@@ -251,8 +253,14 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void updateAgencyValue(AgencyColumn col, Agency element, String newName){
 		if (col == AgencyColumn.NAME){
 			if (!findAgencyValue(col, element).endsWith(newName)){
-				element.updateName(cmbLanguage.getCurrentSelection(), newName);
-				setChangesMade(true);
+				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+					element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
+					setChangesMade(true);
+				}else{
+					//invalid agency name, don't update it.
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Agency Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					setChangesMade(false);
+				}
 			}
 		}
 	}
@@ -273,8 +281,16 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void updateRankValue(RankColumn col, Rank element, String newName){
 		if (col == RankColumn.NAME){
 			if (!findRankValue(col, element).endsWith(newName)){
-				element.updateName(cmbLanguage.getCurrentSelection(), newName);
-				setChangesMade(true);
+				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+					element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
+					setChangesMade(true);
+				}else{
+					//invalid agency name, don't update it.
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Rank Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					setChangesMade(false);
+				}
+
+
 			}
 		}
 	}

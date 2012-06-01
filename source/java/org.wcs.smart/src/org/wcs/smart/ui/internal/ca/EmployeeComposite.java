@@ -82,6 +82,7 @@ public class EmployeeComposite extends Composite {
 	
 	private ControlDecoration cdGiveName;
 	private ControlDecoration cdFamilyName;
+	private ControlDecoration cdStaffId;
 	private ControlDecoration cdBirthDate;
 	private ControlDecoration cdEmploymentEnd;
 	private ControlDecoration cdEmploymentStart;
@@ -135,8 +136,8 @@ public class EmployeeComposite extends Composite {
 		Label lbl = createLabelField(this, Employee.ID + ":");
 		txtStaffId = createTextField(this, SWT.NONE,
 				Employee.MAX_ID_LENGTH, validate);
-		lbl.setToolTipText("If blank the Id will be auto-generated");
-		
+		lbl.setToolTipText("If blank the Id will be auto-generated");		
+		txtStaffId.setText(EmployeeDialog.AUTO_GENERATE);
 		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":");
 		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
 				| SWT.LONG, dateValidate);
@@ -287,6 +288,7 @@ public class EmployeeComposite extends Composite {
 		
 		cdGiveName = createDecoration(txtGivenName);
 		cdFamilyName = createDecoration(txtFamilyName);
+		cdStaffId = createDecoration(txtStaffId);
 		cdBirthDate= createDecoration(dtBirthDate);
 		cdEmploymentStart= createDecoration(dtEmploymentStart);
 		if (dtEmploymentEnd != null){
@@ -367,7 +369,8 @@ public class EmployeeComposite extends Composite {
 	 * @return <code>false</code> if not complete, <code>true</code> otherwise
 	 */
 	public boolean validate() {
-		ControlDecoration cds[] = { cdGiveName, cdFamilyName, cdBirthDate, cdEmploymentStart, cdSmartId,
+
+		ControlDecoration cds[] = { cdGiveName, cdFamilyName, cdStaffId, cdBirthDate, cdEmploymentStart, cdSmartId,
 				cdSmartPassword, cdSmartPassword2 };
 		for (int i = 0; i < cds.length; i++) {
 			cds[i].hide();
@@ -378,19 +381,27 @@ public class EmployeeComposite extends Composite {
 		
 		boolean isComplete = true;
 		if (txtGivenName.getText().trim().isEmpty()
-				|| txtGivenName.getText().length() > Employee.MAX_NAME_LENGTH) {
+				|| ! SmartUtils.isSimpleString(txtGivenName.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
 			cdGiveName.show();
 			cdGiveName
 					.setDescriptionText("Invalid given name.  The given name must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters.");
+							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}
 		if (txtFamilyName.getText().trim().isEmpty()
-				|| txtFamilyName.getText().trim().length() > Employee.MAX_NAME_LENGTH) {
+				|| ! SmartUtils.isSimpleString(txtFamilyName.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH)) {
 			cdFamilyName.show();
 			cdFamilyName
 					.setDescriptionText("Invalid family name.  The given name must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters.");
+							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			isComplete = false;
+		}
+		if (txtStaffId.getText().trim().isEmpty()
+				|| ! SmartUtils.isSimpleString(txtStaffId.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_ID_LENGTH)) {
+			cdStaffId.show();
+			cdStaffId
+					.setDescriptionText("Invalid Staff ID.  The ID must be less than "
+							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}
 		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
@@ -424,29 +435,19 @@ public class EmployeeComposite extends Composite {
 		}
 		if (chSmartUser.getSelection()){
 			if (txtSmartId.getText().trim().isEmpty()
-					|| txtSmartId.getText().length() > Employee.MAX_SMART_ID_LENGTH) {
+					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH)) {
 				cdSmartId.show();
-				cdSmartId.setDescriptionText("Smart user id must be provided.");
-				isComplete = false;
-			}
-			
-			if (txtSmartId.getText().trim().matches(".*[^a-zA-Z0-9_@\\.].*")){
-				cdSmartId.show();
-				cdSmartId.setDescriptionText("Smart user id can only contain character (a-Z), digits (0-9) and the characters '_' or '@' '.'.");
-				isComplete = false;
-			}
-			if (txtSmartId.getText().trim().length() < Employee.MIN_SMART_ID_LENGTH){
-				cdSmartId.show();
-				cdSmartId.setDescriptionText("Smart user id must be at least " + Employee.MIN_SMART_ID_LENGTH + " characters long.");
+				cdSmartId.setDescriptionText("Smart user id must be provided. Must only use the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
 				isComplete = false;
 			}
 			if (txtSmartPassword.getText().trim().isEmpty()
-					|| txtSmartId.getText().length() > Employee.MAX_SMART_PASSWORD_LENGTH) {
+					|| ! SmartUtils.isSimpleString(txtSmartPassword.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_PASSWORD_LENGTH)) {
 				cdSmartPassword.show();
 				cdSmartPassword
-						.setDescriptionText("Smart password must be provided and must not contain only spaces.");
+						.setDescriptionText("Smart password must be provided and must only use the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
 				isComplete = false;
 			}
+			
 			if (txtSmartPassword.getText().length()< Employee.MIN_SMART_PASSWORD_LENGTH){
 				cdSmartPassword.show();
 				cdSmartPassword
@@ -477,7 +478,7 @@ public class EmployeeComposite extends Composite {
 		txtGivenName.setText(e.getGivenName());
 		txtFamilyName.setText(e.getFamilyName());
 		txtStaffId.setText(e.getId());
-		
+				
 		opFemale.setSelection(e.getGender() == Employee.DB_FEMALE);
 		opMale.setSelection(e.getGender() ==  Employee.DB_MALE);
 		
@@ -593,11 +594,11 @@ public class EmployeeComposite extends Composite {
 		e.setBirthDate(SmartUtils.getDate(dtBirthDate));
 		e.setStartEmploymentDate(SmartUtils.getDate(dtEmploymentStart));
 		
-		e.setFamilyName(txtFamilyName.getText());
+		e.setFamilyName(txtFamilyName.getText().trim());
 		e.setGender(opFemale.getSelection() ? Employee.DB_FEMALE : Employee.DB_MALE);
-		e.setGivenName(txtGivenName.getText());
+		e.setGivenName(txtGivenName.getText().trim());
 		
-		e.setId(txtStaffId.getText());
+		e.setId(txtStaffId.getText().trim());
 		
 		if (dtEmploymentEnd != null){
 			if (!chNotActive.getSelection()){

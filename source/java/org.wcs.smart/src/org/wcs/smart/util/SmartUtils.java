@@ -30,6 +30,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
@@ -46,7 +48,23 @@ import org.wcs.smart.ca.Language;
  * @since 1.0.0
  */
 public class SmartUtils {
-
+	
+	
+	public static enum regExLevel{
+		ALLOWED_CHARS_SIMPLE_REGEX("a-Z, 0-9", "[^-0-9a-z]"),
+		ALLOWED_CHARS_MED_REGEX("a-Z, 0-9 or - _ :", "[^-0-9a-z:_]" ),
+		ALLOWED_CHARS_COMPLEX_REGEX("a-Z, 0-9 or - _ : and spaces", "[^-0-9a-z :_]");
+	
+		public final String textDesc;
+		public final String regex;
+	
+		regExLevel(String textDesc, String regex){
+			this.textDesc = textDesc;
+			this.regex = regex;
+		}
+	}
+	
+	
 	public static NullComparator nullStringComparator = new NullComparator();
 	
 	public static NullComparator nullIntegerComparator = new NullComparator(new Comparator<Integer>() {
@@ -347,5 +365,37 @@ public class SmartUtils {
 		}
 		return str;
 		
+	}
+	
+	/**
+	 * check a string:
+	 * 1) only contains letters number and a few other common characters like spaces and _ - : & 
+	 * 2) is between 1-64 chars long 
+	 * 
+	 * @param str - the string which to validate
+	 * @return true if 
+	 */
+
+	public static Boolean isSimpleString (String str, regExLevel level, Integer maxChars){
+		Pattern p = Pattern.compile( level.regex , Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(str);
+		boolean b = m.find();
+
+
+		if (b || str.length() > maxChars || str.length() == 0 ){
+			return false;
+		}else{ 
+			//if it doesn't match any bad characters, is longer than 0 and less then max return true.
+			return true;
+		}
+		
+	}
+	//overloaded function to allow calls without passing last 2 parameters
+	public static Boolean isSimpleString (String str){
+		return isSimpleString(str, SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, 64);
+	}
+	//overloaded function to allow calls without passing maxchars
+	public static Boolean isSimpleString (String str, regExLevel level){
+		return isSimpleString(str, level, 64);
 	}
 }
