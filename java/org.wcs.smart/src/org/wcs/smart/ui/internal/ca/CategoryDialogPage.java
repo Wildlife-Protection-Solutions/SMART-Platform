@@ -25,16 +25,21 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ui.internal.ca.properties.CategoryInfoPanel;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog page for creating/editing category.
@@ -47,6 +52,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 	private Language defaultLang;
 	private Category toUpdate;
 	private List<Category> sibilings;
+	private Button okBtn; 
 	
 	private CategoryInfoPanel cip;
 	/**
@@ -92,6 +98,15 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 			protected Collection<Category> getSiblings() {
 				return sibilings;
 			}
+			
+			
+			@Override
+			protected boolean validate(){
+				boolean valid = super.validate();
+				if(okBtn != null)okBtn.setEnabled(!valid);
+				return valid;
+			}
+			
 		};
 		
 		cip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -113,8 +128,9 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		okBtn.setEnabled(false);
 	}
 	
 	@Override

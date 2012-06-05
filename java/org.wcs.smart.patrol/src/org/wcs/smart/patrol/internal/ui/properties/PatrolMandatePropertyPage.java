@@ -26,6 +26,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -52,12 +53,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Property page for managing patrol mandates.
@@ -262,8 +266,28 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private void updateLangValue(Column type, PatrolMandate mnd, String newValue) {
 		if (type == Column.NAME) {
 			if (!findLangValue(type, mnd).equals(newValue)){
-				mnd.updateName(cmbLanguage.getCurrentSelection(), newValue);
-				setChangesMade(true);
+				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolMandate.MAX_NAME_LENGTH)){
+					Integer matches = 0;
+					for (@SuppressWarnings("unchecked")	Iterator<PatrolMandate> itr = mandates.iterator(); itr.hasNext();) {
+						PatrolMandate a = itr.next();
+						if( a != mnd && a.findName(cmbLanguage.getCurrentSelection()).compareTo(newValue.trim())==0){
+							matches++;
+						}
+					} 
+					if(matches > 0){
+						//invalid name, don't update it.
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Invalid Mandate, it cannot be a duplicate.");
+						setChangesMade(false);
+					}else{					
+						mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
+						setChangesMade(true);
+					}
+				}else{
+					//invalid value, show error 
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					setChangesMade(false);
+				}
+				
 			}
 		}
 	}

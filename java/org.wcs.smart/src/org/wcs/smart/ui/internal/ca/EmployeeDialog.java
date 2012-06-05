@@ -60,7 +60,7 @@ public class EmployeeDialog extends Dialog {
 	private String title = null;
 	private Session session = null;
 	
-	public static String AUTO_GENERATE = "system generated";
+	public static String AUTO_GENERATE = "system-generated";
 	
 	/**
 	 * Create the dialog.
