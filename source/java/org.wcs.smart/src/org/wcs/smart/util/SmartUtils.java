@@ -376,26 +376,29 @@ public class SmartUtils {
 	 * @return true if 
 	 */
 
-	public static Boolean isSimpleString (String str, regExLevel level, Integer maxChars){
+	public static Boolean isSimpleString (String str, regExLevel level, Integer maxChars, Integer minChar){
 		Pattern p = Pattern.compile( level.regex , Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(str);
 		boolean b = m.find();
 
 
-		if (b || str.length() > maxChars || str.length() == 0 ){
+		if (b || str.length() > maxChars || str.length() < minChar ){
 			return false;
 		}else{ 
-			//if it doesn't match any bad characters, is longer than 0 and less then max return true.
 			return true;
 		}
 		
 	}
-	//overloaded function to allow calls without passing last 2 parameters
-	public static Boolean isSimpleString (String str){
-		return isSimpleString(str, SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, 64);
+	//overloaded function to allow calls without passing last parameter
+	public static Boolean isSimpleString (String str, regExLevel level, Integer maxChars){
+		return isSimpleString(str, level, maxChars,1);
 	}
-	//overloaded function to allow calls without passing maxchars
+	//overloaded function to allow calls without passing last 3 parameters
+	public static Boolean isSimpleString (String str){
+		return isSimpleString(str, SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, 64,1);
+	}
+	//overloaded function to allow calls without passing maxchars or minchars
 	public static Boolean isSimpleString (String str, regExLevel level){
-		return isSimpleString(str, level, 64);
+		return isSimpleString(str, level, 64, 1);
 	}
 }

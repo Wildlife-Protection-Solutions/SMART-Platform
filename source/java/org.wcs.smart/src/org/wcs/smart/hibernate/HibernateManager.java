@@ -292,7 +292,7 @@ public class HibernateManager extends SmartHibernateManager{
 	
 	/**
 	 * Validates the changes to the 
-	 * given employee to ensures that there is always have one 
+	 * given employee to ensures that there is always one 
 	 * admin user in the database.
 	 * <p>
 	 * If the employee that is being updated is the same

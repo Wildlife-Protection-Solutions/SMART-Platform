@@ -83,9 +83,8 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 			chMultiple.setEnabled(false);
 		}
 		
-		if (createNew){
-			txtName.addKeyListener(generateKeyListener);
-		}
+		txtName.addKeyListener(generateKeyListener);
+
 		
 	}
 

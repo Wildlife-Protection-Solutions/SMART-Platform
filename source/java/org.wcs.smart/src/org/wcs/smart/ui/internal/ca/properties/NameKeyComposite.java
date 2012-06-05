@@ -42,10 +42,12 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.HkeyObject;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite that has a method to add name and key fields.
@@ -59,11 +61,14 @@ public abstract class NameKeyComposite extends Composite {
 	protected Text txtName;
 	protected Text txtKey;
 	protected ControlDecoration cdKey;
+	protected ControlDecoration cdTxt;
 	
 	private Listener changeListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
-			validate();
+			if( validate() == false){
+				
+			}
 		}
 	};
 	
@@ -81,7 +86,7 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param defaultLang language being processed
 	 */
 	protected void updateFields(DmObject dmObject, Language defaultLang){
-		dmObject.updateName(defaultLang, txtName.getText());
+		dmObject.updateName(defaultLang, txtName.getText().trim());
 		dmObject.setKeyId(txtKey.getText());
 		if (dmObject instanceof HkeyObject){
 			((HkeyObject)dmObject).updateHkey();
@@ -152,6 +157,10 @@ public abstract class NameKeyComposite extends Composite {
 		txtKey.addListener(SWT.Modify, getChangeListener());
 		
 		cdKey = createDecoration(txtKey);
+		cdKey.setDescriptionText("Invalid key.  It must not be blank");
+		
+		cdTxt = createDecoration(txtName);
+		cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank");
 		
 		if (canEdit){
 			txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -211,10 +220,17 @@ public abstract class NameKeyComposite extends Composite {
 	protected boolean validate(){
 		boolean error = false;
 		cdKey.hide();
-		
-		if (txtKey.getText().length() == 0){
-			cdKey.setDescriptionText("Invalid key.  Ensure a name has been defined.");
+		cdTxt.hide();
+						
+		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+			cdKey.setDescriptionText("Invalid key.  It must not be blank, and can only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			cdKey.show();
+			error = true;
+		}
+		
+		if (!SmartUtils.isSimpleString(txtName.getText().trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+			cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank, and can only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdTxt.show();
 			error = true;
 		}
 		return error;

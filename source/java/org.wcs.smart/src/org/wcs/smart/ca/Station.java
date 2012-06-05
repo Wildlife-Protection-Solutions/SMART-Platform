@@ -46,6 +46,8 @@ public class Station extends SimpleListItemWithDescription {
 	public static final String NAME = "Name";
 	@Transient
 	public static final String DESCRIPTION = "Description";
+	public static final Integer MAX_STATION_NAME_LENGTH = 128;
+	public static final Integer MAX_STATION_DESC_LENGTH = 256;
 
 	private ConservationArea ca;
 	

@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.IEditorReference;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
@@ -252,10 +253,23 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private void updateAgencyValue(AgencyColumn col, Agency element, String newName){
 		if (col == AgencyColumn.NAME){
-			if (!findAgencyValue(col, element).endsWith(newName)){
+			if (!findAgencyValue(col, element).equals(newName)){
 				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
-					element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
-					setChangesMade(true);
+					Integer matches = 0;
+					for (@SuppressWarnings("unchecked")	Iterator<Agency> itr = agencies.iterator(); itr.hasNext();) {
+						Agency a = itr.next();
+						if( a != element && a.findName(cmbLanguage.getCurrentSelection()).compareTo(newName.trim())==0){
+							matches++;
+						}
+					} 
+					if(matches > 0){
+						//invalid agency name, don't update it.
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Agency Name cannot be a duplicate.");
+						setChangesMade(false);
+					}else{
+						element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
+						setChangesMade(true);
+					}
 				}else{
 					//invalid agency name, don't update it.
 					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Agency Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
@@ -280,10 +294,25 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private void updateRankValue(RankColumn col, Rank element, String newName){
 		if (col == RankColumn.NAME){
-			if (!findRankValue(col, element).endsWith(newName)){
+			if (!findRankValue(col, element).equals(newName)){
+						
 				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
-					element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
-					setChangesMade(true);
+					Integer matches = 0;
+					for (@SuppressWarnings("unchecked")	Iterator<Rank> itr = currentRankSet.iterator(); itr.hasNext();) {
+						Rank a = itr.next();
+						if( a != element && a.findName(cmbLanguage.getCurrentSelection()).compareTo(newName.trim())==0){
+							matches++;
+						}
+					} 
+
+					if(matches > 0){
+						//invalid agency name, don't update it.
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Rank cannot be a duplicate.");
+						setChangesMade(false);
+					}else{
+						element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
+						setChangesMade(true);
+					}
 				}else{
 					//invalid agency name, don't update it.
 					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Rank Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);

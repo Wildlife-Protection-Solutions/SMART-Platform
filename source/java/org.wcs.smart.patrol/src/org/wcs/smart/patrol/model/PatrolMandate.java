@@ -42,6 +42,8 @@ import org.wcs.smart.ca.SimpleListItem;
 public class PatrolMandate extends SimpleListItem{
 
 	public static final String NAME = "Mandate";
+
+	public static final Integer MAX_NAME_LENGTH = 64;
 	
 	private boolean isActive = true;
 	private ConservationArea ca;

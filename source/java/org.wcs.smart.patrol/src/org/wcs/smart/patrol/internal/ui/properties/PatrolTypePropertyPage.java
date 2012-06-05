@@ -26,6 +26,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -49,6 +50,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -57,6 +60,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Property page for managaing patrol types and
@@ -412,8 +416,29 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 					if (element instanceof PatrolTransportType){
 						PatrolTransportType ttype = (PatrolTransportType)element;
 						if (!ttype.findName(languageViewer.getCurrentSelection()).equals((String)value)){
-							ttype.updateName(languageViewer.getCurrentSelection(), (String)value);
-							setChangesMade(true);	
+							if(SmartUtils.isSimpleString(((String)value).trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolType.MAX_TRANSPORT_NAME_LENGTH)){
+								Integer matches = 0;
+								for (@SuppressWarnings("unchecked")	Iterator<PatrolTransportType> itr = patrolTransportTypes.iterator(); itr.hasNext();) {
+									PatrolTransportType a = itr.next();
+									if( a != element && a.findName(languageViewer.getCurrentSelection()).compareTo(((String)value).trim())==0){
+										matches++;
+									}
+								} 
+								if(matches > 0){
+									//invalid agency name, don't update it.
+									MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Value", "Transportation Option cannot be a duplicate.");
+									setChangesMade(false);
+								}else{
+									ttype.updateName(languageViewer.getCurrentSelection(), ((String)value).trim());
+									setChangesMade(true);
+								}
+							}else{
+								//invalid agency name, don't update it.
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Type", "Transportation type must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+								setChangesMade(false);
+							}
+							
+								
 						}
 						viewer.refresh();
 					}					

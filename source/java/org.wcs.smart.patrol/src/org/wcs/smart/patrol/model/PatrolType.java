@@ -74,7 +74,9 @@ public class PatrolType {
 		public String getGuiName(){
 			return this.guiName;
 		}
-	};
+	}
+
+	public static final Integer MAX_TRANSPORT_NAME_LENGTH = 128;
 	
 	private PatrolTypePk pk;
 	private boolean isActive;
