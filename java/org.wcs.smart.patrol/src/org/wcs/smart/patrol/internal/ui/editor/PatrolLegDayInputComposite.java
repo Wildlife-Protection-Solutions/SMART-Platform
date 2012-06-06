@@ -1022,8 +1022,12 @@ public class PatrolLegDayInputComposite {
 				last = t;
 			}
 		}
-
-		AddWaypointDialog add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x);
+		AddWaypointDialog add;
+		if(x == 0 && y == 0){
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell());
+		}else{
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x);
+		}
 		if (add.open() == Window.OK){
 			Waypoint wp = add.getWaypoint();
 			wp.setPatrolLegDay(patrolLegDate);

@@ -104,7 +104,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lbl.setText("Longitude:" );
 		txtEasting = new Text(legtype, SWT.BORDER);
 		txtEasting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtEasting.setText(String.valueOf(x));
+		if(x != 0)txtEasting.setText(String.valueOf(x));
 		txtEasting.addModifyListener(validation);
 		
 		
@@ -112,7 +112,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lbl.setText("Latitude:" );
 		txtNorthing = new Text(legtype, SWT.BORDER);
 		txtNorthing.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtNorthing.setText(String.valueOf(y));
+		if(y != 0)txtNorthing.setText(String.valueOf(y));
 		txtNorthing.addModifyListener(validation);
 		
 		
