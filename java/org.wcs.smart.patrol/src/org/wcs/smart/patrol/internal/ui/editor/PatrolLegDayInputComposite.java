@@ -121,8 +121,8 @@ public class PatrolLegDayInputComposite {
 	private Button btnDeleteWaypoint;
 	private Button btnMoveWaypoint;
 	
-	private  DoubleCellEditor doubleCellEditor;
-	private  DoubleCellEditor nullableDoubleCellEditor;
+	private DoubleCellEditor doubleCellEditor;
+	private DoubleCellEditor nullableDoubleCellEditor;
 	private IntegerCellEditor integerCellEditor;
 	private TimeCellEditor timeEditor;
 	private AttachmentCellEditor attachmentEditor;
@@ -1010,7 +1010,20 @@ public class PatrolLegDayInputComposite {
 	}
 	
 	private void addWaypoint() {
-		AddWaypointDialog add = new AddWaypointDialog(Display.getCurrent().getActiveShell());
+		double y = 0, x = 0;
+		Time last = null;
+		for (Iterator<Waypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
+			Waypoint e = (Waypoint) iterator.next();
+			Time t = (Time)getWaypointValue(e, OtColumn.TIME);
+			
+			if(last == null || t.after(last)){
+				y = (Double) getWaypointValue(e, OtColumn.NORTH);
+				x = (Double) getWaypointValue(e, OtColumn.EAST);
+				last = t;
+			}
+		}
+
+		AddWaypointDialog add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x);
 		if (add.open() == Window.OK){
 			Waypoint wp = add.getWaypoint();
 			wp.setPatrolLegDay(patrolLegDate);
