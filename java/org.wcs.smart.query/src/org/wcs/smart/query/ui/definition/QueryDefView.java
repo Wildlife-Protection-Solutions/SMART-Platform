@@ -25,19 +25,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.jface.action.StatusLineContributionItem;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISourceProviderListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -51,7 +43,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryEventManager;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
@@ -94,21 +85,6 @@ public class QueryDefView extends ViewPart {
 		
 		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
-			
-//			if (partRef.getId().equals(QueryResultsEditor.ID) ||
-//					partRef.getId().equals(SummaryEditor.ID)){
-//				
-//				IWorkbenchPart part = partRef.getPart(false);
-//				
-//				if (part instanceof QueryResultsEditor){
-//					setQuery(((QueryResultsEditor)part).getQuery());
-//				}else if (part instanceof SummaryEditor){
-//					setQuery(((SummaryEditor)part).getQuery());
-//				}
-//				if (currentPanel != null){
-//					currentPanel.validate();
-//				}
-//			}
 		}
 		
 		@Override
@@ -198,13 +174,7 @@ public class QueryDefView extends ViewPart {
 	 * Validates the current query
 	 */
 	public void validate(){
-		String error = currentPanel.validate();
-//		if (error != null){
-//		
-//			((StatusLineContributionItem)getViewSite().getActionBars().getStatusLineManager().find(SmartActionBarAdvisor.APP_ERROR_ID)).setText(error);
-//		}else{
-//			((StatusLineContributionItem)getViewSite().getActionBars().getStatusLineManager().find(SmartActionBarAdvisor.APP_ERROR_ID)).setText("");
-//		}
+		currentPanel.validate();
 	}
 	
 	/**
@@ -240,116 +210,160 @@ public class QueryDefView extends ViewPart {
 		addSourceListener();
 	}
 	
-	private void addSourceListener(){
+	private void addSourceListener() {
 		// add a listener for when items are added to the query
-				ISourceProviderService service = (ISourceProviderService)getSite().getService(ISourceProviderService.class);
-				SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.SELECTED_FILTERS);
-				provider.addSourceProviderListener(new ISourceProviderListener() {
-					
-					@SuppressWarnings("rawtypes")
-					@Override
-					public void sourceChanged(int sourcePriority, String sourceName,
-							Object sourceValue) {
-						if (currentPanel == null) return;
-						if (sourceName == SourceProvider.SELECTED_FILTERS){
-							QueryFilterSelection selection = (QueryFilterSelection)sourceValue;
-							boolean fireEvent = false;
-							for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
-								Object type = (Object) iterator.next();
-								if (type instanceof Category){
-									DropItem it = getDropItemFactory().createCategoryDropItem((Category) type);
-									currentPanel.addItem(it);
+		ISourceProviderService service = (ISourceProviderService) getSite()
+				.getService(ISourceProviderService.class);
+		SourceProvider provider = (SourceProvider) service
+				.getSourceProvider(SourceProvider.SELECTED_FILTERS);
+		provider.addSourceProviderListener(new ISourceProviderListener() {
+
+			@SuppressWarnings("rawtypes")
+			@Override
+			public void sourceChanged(int sourcePriority, String sourceName,
+					Object sourceValue) {
+				if (currentPanel == null)
+					return;
+				if (sourceName == SourceProvider.SELECTED_FILTERS) {
+					QueryFilterSelection selection = (QueryFilterSelection) sourceValue;
+					boolean fireEvent = false;
+					for (Iterator iterator = selection.iterator(); iterator
+							.hasNext();) {
+						Object type = (Object) iterator.next();
+						if (type instanceof Category) {
+							DropItem it = getDropItemFactory()
+									.createCategoryDropItem((Category) type);
+							currentPanel.addItem(it);
+							fireEvent = true;
+						} else if (type instanceof CategoryAttribute) {
+							DropItem it = getDropItemFactory()
+									.createAttributeDropItem(
+											(CategoryAttribute) type);
+							if (it != null) {
+								currentPanel.addItem(it);
+								fireEvent = true;
+							}
+						} else if (type instanceof Attribute) {
+							DropItem it = getDropItemFactory()
+									.createAttributeDropItem((Attribute) type);
+							if (it != null) {
+								currentPanel.addItem(it);
+								fireEvent = true;
+							}
+						} else if (type instanceof QueryFilterContentProvider.OtherItems) {
+							DropItem[] its = getDropItemFactory()
+									.createOtherDropItem(
+											(QueryFilterContentProvider.OtherItems) type);
+							if (its != null) {
+								for (int i = 0; i < its.length; i++) {
+									currentPanel.addItem(its[i]);
 									fireEvent = true;
-								}else if (type instanceof CategoryAttribute){
-									DropItem it = getDropItemFactory().createAttributeDropItem((CategoryAttribute) type);
-									if (it != null){
-										currentPanel.addItem(it);
-										fireEvent = true;
-									}
-								}else if (type instanceof Attribute){
-									DropItem it = getDropItemFactory().createAttributeDropItem((Attribute)type);
-									if (it != null){
-										currentPanel.addItem(it);
-										fireEvent = true;
-									}
-								}else if (type instanceof QueryFilterContentProvider.OtherItems){
-									DropItem[] its = getDropItemFactory().createOtherDropItem((QueryFilterContentProvider.OtherItems)type);
-									if (its != null){
-										for (int i = 0; i < its.length; i ++){
-											currentPanel.addItem(its[i]);
-											fireEvent = true;
-										}
-									}
-								}else if (type instanceof PatrolValueOption){
-									DropItem it = getDropItemFactory().createPatrolValueDropItem((PatrolValueOption)type);
-									if (it != null){
-										currentPanel.addItem(it);
-										fireEvent = true;
-									}
-								}else if (type instanceof PatrolQueryOption){
-									DropItem it = null;
-									if (selection.getType() == QueryFilterSelection.FilterType.FILTER){
-										it = getDropItemFactory().createPatrolFilterDropItem((PatrolQueryOption)type);
-									}else if (selection.getType() == QueryFilterSelection.FilterType.SUMMARY){
-										it = getDropItemFactory().createPatrolGroupByDropItem((PatrolQueryOption)type);
-									} 
-									if (it != null ){
-										currentPanel.addItem(it);
-										fireEvent = true;
-									}
-								}else if (type instanceof DateGroupByOption){
-									DropItem it = getDropItemFactory().createDateGroupByDropItem((DateGroupByOption)type);
-									if (it != null){
-										currentPanel.addItem(it);
-										fireEvent = true;
-									}
-								}else if (type instanceof SummaryDmObject){
-									SummaryDmObject object = (SummaryDmObject) type;
-									DropItem it = null;
-									if (object.isValue()){
-										if (object.getObject() instanceof Attribute){
-											it = getDropItemFactory().createAttributeValueDropItem((Attribute) object.getObject());
-										}else if (object.getObject() instanceof CategoryAttribute){
-											it = getDropItemFactory().createAttributeValueDropItem((CategoryAttribute) object.getObject());
-										}else if (object.getObject() instanceof Category){
-										it = getDropItemFactory().createCategoryValueDropItem((Category) object.getObject());
-										}
-									}else{
-										//category
-										if(object.getObject() instanceof Category){
-											it = getDropItemFactory().createCategoryGroupByDropItem( (Category) object.getObject()  );
-										}else if (object.getObject() instanceof Attribute){
-											it = getDropItemFactory().createAttributeGroupByDropItem((Attribute) object.getObject());
-										}else if (object.getObject() instanceof CategoryAttribute){
-											it = getDropItemFactory().createAttributeGroupByDropItem((CategoryAttribute) object.getObject());
-										}else if (object.getObject() instanceof AttributeTreeNode){
-											if (object.getObject2() != null){
-												it = getDropItemFactory().createAttributeTreeNodeGroupByDropItem((AttributeTreeNode)object.getObject(), (Category)object.getObject2());
-											}else{
-												it = getDropItemFactory().createAttributeTreeNodeGroupByDropItem((AttributeTreeNode)object.getObject());
-											}
-										}
-									}
-									if (it != null){
-										currentPanel.addItem(it);
-										fireEvent = true;
+								}
+							}
+						} else if (type instanceof PatrolValueOption) {
+							DropItem it = getDropItemFactory()
+									.createPatrolValueDropItem(
+											(PatrolValueOption) type);
+							if (it != null) {
+								currentPanel.addItem(it);
+								fireEvent = true;
+							}
+						} else if (type instanceof PatrolQueryOption) {
+							DropItem it = null;
+							if (selection.getType() == QueryFilterSelection.FilterType.FILTER) {
+								it = getDropItemFactory()
+										.createPatrolFilterDropItem(
+												(PatrolQueryOption) type);
+							} else if (selection.getType() == QueryFilterSelection.FilterType.SUMMARY) {
+								it = getDropItemFactory()
+										.createPatrolGroupByDropItem(
+												(PatrolQueryOption) type);
+							}
+							if (it != null) {
+								currentPanel.addItem(it);
+								fireEvent = true;
+							}
+						} else if (type instanceof DateGroupByOption) {
+							DropItem it = getDropItemFactory()
+									.createDateGroupByDropItem(
+											(DateGroupByOption) type);
+							if (it != null) {
+								currentPanel.addItem(it);
+								fireEvent = true;
+							}
+						} else if (type instanceof SummaryDmObject) {
+							SummaryDmObject object = (SummaryDmObject) type;
+							DropItem it = null;
+							if (object.isValue()) {
+								if (object.getObject() instanceof Attribute) {
+									it = getDropItemFactory()
+											.createAttributeValueDropItem(
+													(Attribute) object
+															.getObject());
+								} else if (object.getObject() instanceof CategoryAttribute) {
+									it = getDropItemFactory()
+											.createAttributeValueDropItem(
+													(CategoryAttribute) object
+															.getObject());
+								} else if (object.getObject() instanceof Category) {
+									it = getDropItemFactory()
+											.createCategoryValueDropItem(
+													(Category) object
+															.getObject());
+								}
+							} else {
+								// category
+								if (object.getObject() instanceof Category) {
+									it = getDropItemFactory()
+											.createCategoryGroupByDropItem(
+													(Category) object
+															.getObject());
+								} else if (object.getObject() instanceof Attribute) {
+									it = getDropItemFactory()
+											.createAttributeGroupByDropItem(
+													(Attribute) object
+															.getObject());
+								} else if (object.getObject() instanceof CategoryAttribute) {
+									it = getDropItemFactory()
+											.createAttributeGroupByDropItem(
+													(CategoryAttribute) object
+															.getObject());
+								} else if (object.getObject() instanceof AttributeTreeNode) {
+									if (object.getObject2() != null) {
+										it = getDropItemFactory()
+												.createAttributeTreeNodeGroupByDropItem(
+														(AttributeTreeNode) object
+																.getObject(),
+														(Category) object
+																.getObject2());
+									} else {
+										it = getDropItemFactory()
+												.createAttributeTreeNodeGroupByDropItem(
+														(AttributeTreeNode) object
+																.getObject());
 									}
 								}
-								
 							}
-							if (fireEvent){
-								fireQueryModifiedListeners();
+							if (it != null) {
+								currentPanel.addItem(it);
+								fireEvent = true;
 							}
 						}
-						
+
 					}
-					
-					@SuppressWarnings("rawtypes")
-					@Override
-					public void sourceChanged(int sourcePriority, Map sourceValuesByName) {
-						
+					if (fireEvent) {
+						fireQueryModifiedListeners();
 					}
-				});
+				}
+
+			}
+
+			@SuppressWarnings("rawtypes")
+			@Override
+			public void sourceChanged(int sourcePriority, Map sourceValuesByName) {
+
+			}
+		});
 	}
 	/**
 	 * @return the drop item factory for dropping items into the query
@@ -374,7 +388,6 @@ public class QueryDefView extends ViewPart {
 			currentPanel = definitionComposites.get(current.getType());
 			currentPanel.init();
 		}else{
-//			dropTarget.clear();
 			currentPanel = null;
 		}
 		showCurrentPanel();
@@ -399,10 +412,7 @@ public class QueryDefView extends ViewPart {
 	@Override
 	public void setFocus() {
 	}
-	
-	
-	
-	
+		
 	public void fireQueryModifiedListeners(){
 		QueryEventManager.getInstance().fireQueryChangedListeners(current);
 	}

@@ -110,7 +110,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 				query.getDropItems();
 				query.generateDropItems(session);
 			}catch (Exception ex){
-				QueryPlugIn.log("Could not load query " + input.getName(), ex);
+				QueryPlugIn.displayLog("Could not parse query: " + input.getName()+ ".\n\n" + ex.getMessage(), ex);
 			}finally{
 				session.getTransaction().rollback();
 				session.close();

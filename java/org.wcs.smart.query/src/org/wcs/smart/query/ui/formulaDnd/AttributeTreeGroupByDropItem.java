@@ -88,6 +88,17 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		this.category = category;
 	}
 
+	public AttributeTreeGroupByDropItem(Attribute attribute, int level){
+		this.attribute = attribute;
+		this.level = level;
+		filters = new ArrayList<ListItem>();
+	}
+	
+	public AttributeTreeGroupByDropItem(Attribute attribute, int level, Category category){
+		this(attribute, level);
+		this.category = category;
+	}
+	
 	/**
 	 * Adds another drop item to this
 	 * attribute tree drop item. Used to combine drop

@@ -244,8 +244,6 @@ public class DropItemFactory {
 	public DropItem createAttributeGroupByDropItem(Attribute attribute){
 		if (attribute.getType() == AttributeType.LIST){
 			return new AttributeListGroupByDropItem(attribute);
-		}else if (attribute.getType() == AttributeType.TREE){
-			
 		}
 		return null;
 	}
@@ -261,11 +259,36 @@ public class DropItemFactory {
 	public DropItem createAttributeGroupByDropItem(CategoryAttribute catAttribute){
 		if (catAttribute.getAttribute().getType() == AttributeType.LIST){
 			return new AttributeListGroupByDropItem(catAttribute);
-		}else if (catAttribute.getAttribute().getType() == AttributeType.TREE){
-			
 		}
 		return null;
 	}
+
+	/**
+	 * Creates a new drop item for a tree attribute node with no
+	 * associated category.
+	 * 
+	 * @param attribute the attribute
+	 * @param level the level in the tree of the items in the group by
+	 * @return
+	 */
+	public DropItem createAttributeTreeNodeGroupByDropItem(Attribute attribute, int level){
+		return new AttributeTreeGroupByDropItem(attribute, level);
+	}
+	
+
+	/**
+	 * Creates a new drop item for a tree attribute node with the 
+	 * associated category.
+	 * 
+	 * @param attribute the attribute
+	 * @param cateogry associated category
+	 * @param level the level in the tree of the items in the group by
+	 * @return
+	 */
+	public DropItem createAttributeTreeNodeGroupByDropItem(Attribute attribute, int level, Category category){
+		return new AttributeTreeGroupByDropItem(attribute, level, category);
+	}
+
 	
 	/**
 	 * Creates a new drop item for a tree attribute node with no

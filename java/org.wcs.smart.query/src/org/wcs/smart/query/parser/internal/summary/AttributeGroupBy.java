@@ -260,9 +260,18 @@ public class AttributeGroupBy implements IGroupBy {
 		DropItem it = null;
 		if (categoryHkey != null){
 			Category category = QueryHibernateManager.getCategory(session, categoryHkey);
-			it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
+			if (attributeType == AttributeType.LIST){
+				it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
+			}else{
+				it = DropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute, getTreeLevel(), category);
+			}
 		}else{
-			it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(attribute);
+			if (attributeType == AttributeType.LIST){
+				it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(attribute);
+			}else{
+				it = DropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute, getTreeLevel());
+			}
+			
 		}
 
 		if (attributeType == AttributeType.LIST){

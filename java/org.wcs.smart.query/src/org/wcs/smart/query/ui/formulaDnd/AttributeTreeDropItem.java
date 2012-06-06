@@ -78,7 +78,7 @@ public class AttributeTreeDropItem extends DropItem{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				s.saveOrUpdate(attribute);
+				attribute = (Attribute) s.load(Attribute.class, attribute.getUuid());
 				if (attribute.getTree() != null){
 					for (AttributeTreeNode node : attribute.getTree()){
 						visitTreeNode(node);
@@ -112,7 +112,7 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	public AttributeTreeDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
+		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
 		this.attribute = att.getAttribute();
 	}
