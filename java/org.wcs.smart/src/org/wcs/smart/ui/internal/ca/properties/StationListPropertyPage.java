@@ -63,7 +63,6 @@ import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -304,7 +303,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (type == Column.NAME) {
 			if (!findLangValue(type, stn).equals(newValue.trim())){
 
-				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_NAME_LENGTH)){
+				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_NAME_LENGTH)){
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<Station> itr = stations.iterator(); itr.hasNext();) {
 						Station a = itr.next();
@@ -322,17 +321,17 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 					}
 				}else{
 					//invalid value, show error 
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 					setChangesMade(false);
 				}
 			}
 		} else if (type == Column.DESCIPTION) {
 			if (!findLangValue(type, stn).equals(newValue.trim())){
-				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_DESC_LENGTH, 0)){
+				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_DESC_LENGTH, 0)){
 					stn.updateDescription(lang, newValue.trim());
 					setChangesMade(true);
 				}else{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Description", "Description must not contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Description", "Description must not contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 					setChangesMade(false);
 				}
 			}

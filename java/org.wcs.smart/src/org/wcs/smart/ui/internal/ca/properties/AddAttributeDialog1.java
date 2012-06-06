@@ -21,18 +21,19 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -179,24 +180,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		Table tblAttributes = checkboxTableViewer.getTable();
 		tblAttributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
 				true, 1, 1));
-		checkboxTableViewer.setContentProvider(new IStructuredContentProvider() {
-					private Set<Attribute> attributes;
-
-					@Override
-					public void inputChanged(Viewer viewer, Object oldInput,
-							Object newInput) {
-						this.attributes = (Set<Attribute>) newInput;
-					}
-
-					@Override
-					public void dispose() {
-					}
-
-					@Override
-					public Object[] getElements(Object inputElement) {
-						return attributes.toArray();
-					}
-				});
+		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 
 		checkboxTableViewer.setLabelProvider(new LabelProvider() {
 			/**
@@ -213,7 +197,15 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
 		});
-		checkboxTableViewer.setInput(dm.getAttributes());
+		ArrayList<Attribute> attributeList = new ArrayList<Attribute>();
+		attributeList.addAll(dm.getAttributes());
+		Collections.sort(attributeList, new Comparator<Attribute>() {
+			@Override
+			public int compare(Attribute o1, Attribute o2) {
+				return o1.findName(defaultLang).compareTo(o2.findName(defaultLang));
+			}
+		});
+		checkboxTableViewer.setInput(attributeList.toArray());
 
 		if (dm.getAttributes().size() == 0) {
 			btnAddExsiting.setSelection(false);
@@ -222,7 +214,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		}
 
 		final AttributeInfoPanel attributeInfo = new AttributeInfoPanel(
-				compAddExisting, SWT.NONE, false, false, defaultLang) {
+				compAddExisting, SWT.NONE, false, false, defaultLang, null) {
 			@Override
 			public Collection<Attribute> getSiblings() {
 				return null;

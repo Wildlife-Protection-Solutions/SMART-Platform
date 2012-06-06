@@ -137,8 +137,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static void displayLog(Shell currentShell, String message, Throwable t){
 		log(message, t);
 		if (currentShell == null){
-			if (Display.getCurrent() != null && Display.getCurrent().getActiveShell() != null){
-				currentShell = Display.getCurrent().getActiveShell();
+			if (Display.getCurrent() != null && Display.getDefault().getActiveShell() != null){
+				currentShell = Display.getDefault().getActiveShell();
 			}
 		}
 		MessageDialog.openError(currentShell, "Error", message);

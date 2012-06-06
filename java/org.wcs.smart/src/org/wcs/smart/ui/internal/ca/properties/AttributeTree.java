@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -50,9 +55,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
@@ -69,7 +77,7 @@ public class AttributeTree {
 
 	private TreeViewer viewer = null;
 	private AttributeTreeChangeListener listener = null;
-	
+	private Session currentSession = null;
 	
 	/**
 	 * Sets the listener fired when modifications occur.  
@@ -88,10 +96,12 @@ public class AttributeTree {
 	 * Sets the attribute input to the attribute tree
 	 * 
 	 * @param attribute
+	 * @param currentSession current hibernate session
 	 */
-	public void setInput(Attribute attribute){
+	public void setInput(Attribute attribute, Session currentSession){
+		this.currentSession = currentSession;
 		viewer.setInput(attribute);
-		refreshTree(viewer);
+		refreshTree();
 	}
 
 	
@@ -159,18 +169,19 @@ public class AttributeTree {
 		
 		final Button btnAdd = new Button(buttonPanel, SWT.NONE);
 		btnAdd.setText("Add");
-		btnAdd.setEnabled(true);
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnAdd.setEnabled(false);
 		btnAdd.setToolTipText("Add category to attribute tree.");
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				addItem(viewer, currentLanguage);
+				addItem(currentLanguage);
 			}
 		});
 
 		final Button btnEdit = new Button(buttonPanel, SWT.NONE);
 		btnEdit.setEnabled(false);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setToolTipText("Modify selected category.");
 		btnEdit.addSelectionListener(new SelectionAdapter(){
@@ -184,6 +195,7 @@ public class AttributeTree {
 		btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		btnDisable.setToolTipText("Disable selected category.");
 		btnDisable.setEnabled(false);
+		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDisable.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -203,6 +215,7 @@ public class AttributeTree {
 		final Button btnDisableAll = new Button(buttonPanel, SWT.NONE);
 		btnDisableAll.setText(DialogConstants.DISABLE_BUTTON_TEXT + " All");
 		btnDisableAll.setToolTipText("Disable all categories.");
+		btnDisableAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDisableAll.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -219,6 +232,7 @@ public class AttributeTree {
 		final Button btnEnableeAll = new Button(buttonPanel, SWT.NONE);
 		btnEnableeAll.setText(DialogConstants.ENABLE_BUTTON_TEXT + " All");
 		btnEnableeAll.setToolTipText("Enable all categories.");
+		btnEnableeAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnEnableeAll.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -232,16 +246,43 @@ public class AttributeTree {
 			}
 		});
 		
+		
+		lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		final Button btnDelete = new Button(buttonPanel, SWT.NONE);
+		btnDelete.setText("Delete");
+		btnDelete.setEnabled(false);
+		btnDelete.setToolTipText("Delete selected items");
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnDelete.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteNodes(currentLanguage);	
+			}
+		});
+		
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (viewer.getSelection().isEmpty()){
+					btnAdd.setEnabled(false);
+					btnEdit.setEnabled(false);
+					btnDisable.setEnabled(false);
+					btnDelete.setEnabled(false);
+					return;
+				}
 				Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 				if (x instanceof AttributeTreeContentProvider.RootNode){
 					btnEdit.setEnabled(false);
 					btnDisable.setEnabled(false);
+					btnDelete.setEnabled(false);
+					btnAdd.setEnabled(true);
 				}else if (x instanceof AttributeTreeNode){
 					btnEdit.setEnabled(true);
 					btnDisable.setEnabled(true);
+					btnDelete.setEnabled(true);
+					btnAdd.setEnabled(true);
 					if (((AttributeTreeNode)x).getIsActive()){
 						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					}else{
@@ -255,6 +296,69 @@ public class AttributeTree {
 		return comp;
 	}
 	
+	
+	
+	private void deleteNodes(Language currentLanguage) {
+		StringBuilder itemsToDelete = new StringBuilder();
+		final ArrayList<AttributeTreeNode> toDelete = new ArrayList<AttributeTreeNode>();
+		
+		for (Iterator iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof AttributeTreeNode){
+				itemsToDelete.append(((AttributeTreeNode) x).findName(currentLanguage) + ", ");
+				toDelete.add(0, (AttributeTreeNode)x);
+			}
+		}
+		if(toDelete.size() == 0){
+			return;
+		}
+		itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
+		itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
+				
+				
+		boolean ret = MessageDialog.openConfirm(viewer.getTree().getShell(), "Delete", 
+						"Are you sure you want to delete the node items: " + 
+						itemsToDelete.toString() + "?");
+		if (!ret){
+			return;
+		}
+				
+		runInProgressDialog(new IRunnableWithProgress() {
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+				InterruptedException {
+				Attribute a = (Attribute)viewer.getInput();
+				for (AttributeTreeNode node : toDelete){
+					boolean delete = DataModelManager.getInstance().validateDelete(node, monitor, AttributeTree.this.currentSession);
+					if (delete){
+						if (node.getParent() != null){
+							node.getParent().getChildren().remove(node);
+							node.setParent(null);
+							node.setAttribute(null);
+						}else{
+							a.getTree().remove(node);
+							node.setAttribute(null);
+						}
+					}
+				}
+				refreshTree();
+				fireChangeListener();
+			}
+		});
+	}
+	
+	/*
+	 * Run a taks in a progress monitor
+	 * @param runnable
+	 */
+	private void runInProgressDialog(IRunnableWithProgress runnable){
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(viewer.getTree().getShell());
+		try {
+			dialog.run(false, true, runnable);		
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(viewer.getTree().getShell(), "Error occurred.", ex);
+		}
+	}
 	/*
 	 * Enables the attribute tree node and all its children
 	 */
@@ -324,14 +428,14 @@ public class AttributeTree {
 				return;
 			}
 		}
-		refreshTree(viewer);
+		refreshTree();
 		fireChangeListener();
 	}
 	
 	/*
 	 * adds item to tree
 	 */
-	private void addItem(TreeViewer viewer, Language currentLanguage){
+	private void addItem(Language currentLanguage){
 		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		Attribute a = (Attribute)viewer.getInput();
 		if (x instanceof AttributeTreeContentProvider.RootNode || x instanceof AttributeTreeNode){
@@ -375,7 +479,7 @@ public class AttributeTree {
 				it.setNodeOrder(siblings.size());
 			}
 		
-			refreshTree(viewer);
+			refreshTree();
 			fireChangeListener();
 		}
 	}
@@ -383,7 +487,7 @@ public class AttributeTree {
 	/*
 	 * refresh the tree
 	 */
-	private void refreshTree(TreeViewer viewer) {
+	private void refreshTree() {
 		viewer.refresh();
 	}
 	

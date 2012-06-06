@@ -64,7 +64,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
@@ -83,21 +83,22 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 
 	public static final String ID = "org.wcs.smart.ca.DataModelPropertyPage";
 	
+	/* ui components */
 	private TreeViewer viewer;
 
 	private Button btnAddCategory;
 	private Button btnAddAttribute;
+	private Button btnDisableElement;
+	private Button btnDeleteElement;
 	
 	private CategoryInfoPanel catInfoPanel;
 	private AttributeInfoPanel attInfoPanel;
 	private Composite infoInnerPanel;
 	private Composite emptyComposite;
 
-	private Button btnDisableElement;
-
 	private Button btnModifyElement;
 	
-	
+	/* data model */
 	private DataModel dataModel = null;
 	
 	/**
@@ -133,7 +134,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		
+		getSession().beginTransaction();
 		parent.setLayout(new GridLayout(1, false));		
 	
 		Composite thisparent = new Composite(parent, SWT.BORDER);
@@ -203,7 +204,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout(3, false));
+		buttonPanel.setLayout(new GridLayout(4, false));
 		buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		btnAddCategory = new Button(buttonPanel, SWT.PUSH);
@@ -240,6 +241,19 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		});
 		setButtonLayoutData(btnDisableElement);
 		
+		btnDeleteElement = new Button(buttonPanel, SWT.NONE);
+		btnDeleteElement.setEnabled(false);
+		btnDeleteElement.setText("Delete");
+		btnDeleteElement.setToolTipText("Deletes the selected category/attribute.");
+		btnDeleteElement.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				deleteElement();
+			}
+		});
+		setButtonLayoutData(btnDeleteElement);
+		
+		
 		Group infoPanel = new Group(rightPanel, SWT.SHADOW_ETCHED_IN);
 		((Group)infoPanel).setText("Properties");
 		
@@ -258,7 +272,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 		};
 		
-		attInfoPanel = new AttributeInfoPanel(infoInnerPanel, SWT.NONE, false, false, SmartDB.getCurrentConservationArea().getDefaultLanguage()) {			
+		attInfoPanel = new AttributeInfoPanel(infoInnerPanel, SWT.NONE, false,
+				false, SmartDB.getCurrentConservationArea()
+						.getDefaultLanguage(), getSession()) {
 			@Override
 			public Collection<Attribute> getSiblings() {
 				return null;
@@ -299,6 +315,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 //				
 		viewer.refresh();
 		setMessage("Manage conservation area data model.");
+		
+		getSession().getTransaction().rollback();
 		return thisparent;
 	}
 
@@ -350,36 +368,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 	}
 	
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession();
-			session.refresh(ca);
-		}
-		return session;
-	}
-	
-//	private void importXml(){
-//		FileDialog fd = new FileDialog(this.getShell(), SWT.OPEN);
-//		String file = fd.open();
-//		if (file == null){
-//			//nothing selected
-//			return;
-//		}
-//		File f = new File(file);
-//		
-//		try{
-//			DataModel newDataModel = DataModelXMLConverter.convert(f);
-//			MessageDialog.openInformation(getShell(), "Great!", "Imported Successfully!");
-//			viewer.setAutoExpandLevel(3);
-//			viewer.setInput(newDataModel);
-//			viewer.refresh();
-//			viewer.expandToLevel(3);
-//		}catch (Exception ex){
-//			SmartPlugIn.displayLog(ex.getMessage(), ex);
-//		}
-//		setChangesMade(true);
-//	}
-	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#performSave()
 	 */
@@ -426,9 +414,111 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}else if (o instanceof CategoryAttribute){
 			((DataModel)viewer.getInput()).disableAttribute((CategoryAttribute)o, !((CategoryAttribute)o).getIsActive());
 		}
+		updateInfoPanel();
 		refreshTree();
 		setChangesMade(true);
+		
 	}	
+	
+	private void runInProgressDialog(IRunnableWithProgress runnable){
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+		try {
+			dialog.run(false, true, runnable);		
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(getShell(), "Error occurred.", ex);
+		}
+	}
+	
+	/*
+	 * Deletes the currently selected item
+	 */
+	private void deleteElement(){
+		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		if (o instanceof Category){
+			final Category cat  = (Category)o;
+			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category : " +cat.getFullCategoryName());
+			if (!ret){
+				return;
+			}
+			
+			runInProgressDialog(new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+					boolean delete = DataModelManager.getInstance().validateDelete(cat, monitor, getSession());
+					if (delete){
+						cat.getParent().getChildren().remove(cat);
+						cat.setParent(null);
+					}
+				}
+			});
+			
+		}else if (o instanceof CategoryAttribute){
+			final CategoryAttribute catAtt  = (CategoryAttribute)o;
+			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category/attribute relationship:\nCategory: '" + catAtt.getCategory().getFullCategoryName() + "'\nAttribute: '" + catAtt.getAttribute().getName() + "'");
+			if (!ret){
+				return;
+			}
+			runInProgressDialog(new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					boolean delete = DataModelManager.getInstance().validateDelete(catAtt, monitor, getSession());
+					if (delete){
+						catAtt.getCategory().getAttributes().remove(catAtt);
+						if (catAtt.getCategory().getUuid() == null || catAtt.getAttribute().getUuid() == null){
+							getSession().evict(catAtt);
+						}else{
+							getSession().delete(catAtt);
+							getSession().flush();
+							getSession().evict(catAtt);
+						}
+						
+						//at this point we should try to delete the attribute as well
+						boolean contains = false;
+						for (Category root :dataModel.getCategories()){
+							if (containsAttribute(root, catAtt.getAttribute())){
+								contains = true;
+								break;
+							}
+						}
+						if (!contains){
+							boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "The attribute " + catAtt.getAttribute().getName() + " is not longer associated with any categories.  Would you like to delete this attribute?");
+							if (ret){
+								delete = DataModelManager.getInstance().validateDelete(catAtt.getAttribute(), monitor, getSession());
+								if (delete){
+									dataModel.getAttributes().remove(catAtt.getAttribute());
+									if (catAtt.getAttribute().getUuid() != null){
+										getSession().delete(catAtt.getAttribute());
+									}
+								}
+							}
+						}
+					}
+				}
+			});
+		}else{
+			return;
+		}
+		
+		refreshTree();
+		setChangesMade(true);
+		updateInfoPanel();
+	}
+
+	
+	private boolean containsAttribute(Category cat, Attribute att){
+		if (cat.getAttributes().contains(new CategoryAttribute(cat,att))){
+			return true;
+		}else{
+			for (Category kid : cat.getChildren()){
+				if (containsAttribute(kid, att)){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	/*
 	 * adds a category
 	 */
@@ -447,6 +537,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		newCat.setChildren(null);		
 		newCat.setConservationArea(ca);
 		newCat.setIsActive(true);
+		newCat.setChildren(new ArrayList<Category>());
 		
 		CategoryDialogPage dd = new CategoryDialogPage(getShell(), newCat, siblings, ca.getDefaultLanguage());
 		int ret = dd.open();
@@ -498,15 +589,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 			Set<CategoryAttribute> usages = ((DataModel)viewer.getInput()).findAttribute(((CategoryAttribute)o).getAttribute());
 			if (usages.size() > 1){
-//				StringBuilder categories = new StringBuilder();
-//				for (CategoryAttribute it : usages){
-//					categories.append(it.getCategory().findName())
-//				}
 				MessageDialog.openWarning(getShell(), "Modify Warning", "This attribute is referenced by  multiple categories.  Modifying it will affect all categories that reference this attribute.");
 			}
-			
 
-			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(), ((CategoryAttribute)o).getAttribute(), ((DataModel)viewer.getInput()).getAttributes(),ca.getDefaultLanguage());			
+			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(),
+					((CategoryAttribute) o).getAttribute(),
+					((DataModel) viewer.getInput()).getAttributes(),
+					ca.getDefaultLanguage(), getSession());			
 			//show new attribute dialog
 			int ret = d2.open();
 			if (ret == Window.CANCEL){
@@ -540,7 +629,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}else if (ret == AddAttributeDialog1.NEXT){
 			Attribute att = new Attribute();
 			
-			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(), att, ((DataModel)viewer.getInput()).getAttributes(),ca.getDefaultLanguage());
+			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(), att,
+					((DataModel) viewer.getInput()).getAttributes(),
+					ca.getDefaultLanguage(), getSession());
 			
 			//show new attribute dialog
 			ret = d2.open();
@@ -582,20 +673,21 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			btnAddAttribute.setEnabled( ((Category)o).getIsActive() );
 			btnAddCategory.setEnabled( ((Category)o).getIsActive() );
 			btnModifyElement.setEnabled( ((Category)o).getIsActive() );
-
+			btnDeleteElement.setEnabled( true );
+			
 			if (((Category)o).getIsActive()){
 				btnDisableElement.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 			}else{
 				btnDisableElement.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 			}
 			btnDisableElement.setEnabled(true);
-		}
-		if (o instanceof CategoryAttribute){
+		}else if (o instanceof CategoryAttribute){
 			attInfoPanel.setAttribute( ((CategoryAttribute)o).getAttribute() );
 			((StackLayout)infoInnerPanel.getLayout()).topControl = attInfoPanel;
 			btnAddCategory.setEnabled(false);
 			btnAddAttribute.setEnabled(false);
 			btnModifyElement.setEnabled( ((CategoryAttribute)o).getIsActive());
+			btnDeleteElement.setEnabled( true );
 			
 			if (((CategoryAttribute)o).getIsActive()){
 				btnDisableElement.setText(DialogConstants.DISABLE_BUTTON_TEXT);
@@ -603,14 +695,22 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				btnDisableElement.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 			}
 			btnDisableElement.setEnabled(true);
-		}
-		if (o instanceof DataModelContentProvider.RootNode){
+		} else	if (o instanceof DataModelContentProvider.RootNode){
 			btnAddCategory.setEnabled(true);
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 			btnAddAttribute.setEnabled(false);
 			
 			btnModifyElement.setEnabled(false);
 			btnDisableElement.setEnabled(false);
+			btnDeleteElement.setEnabled(false);
+		} else{
+			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			
+			btnAddCategory.setEnabled(false);
+			btnAddAttribute.setEnabled(false);
+			btnModifyElement.setEnabled(false);
+			btnDisableElement.setEnabled(false);
+			btnDeleteElement.setEnabled(false);			
 		}
 		infoInnerPanel.layout();
 	}

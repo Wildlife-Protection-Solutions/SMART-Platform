@@ -21,49 +21,67 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import org.hibernate.Session;
+
+/**
+ * An interface plugins can implement and register
+ * with the DataModelManager that will allow
+ * plugins to advise if certain actions
+ * can occur to the datamodel. 
+ * 
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
 public interface IDataModelAdvisor {
 
 	/**
 	 * 
-	 * @param category
+	 * @param category the category to delete
+	 * @param session the current open hibernate session
 	 * @return null if okay to delete category; otherwise a string message to 
 	 * display to user explaining whey item cannot be deleted.
 	 */
-	String canDelete(Category category);
+	String canDelete(Category category, Session session);
 	
 	
 	/**
 	 * 
-	 * @param attribute 
+	 * @param attribute the attribute to delete
+	 * @param session the current open hibernate session 
+	 * 
 	 * @return null if okay to delete attribute; otherwise a string message to 
 	 * display to user explaining whey item cannot be deleted.
 	 */
-	String canDelete(Attribute attribute);
+	String canDelete(Attribute attribute, Session session);
 	
 	
 	/**
 	 * 
 	 * @param categoryAttribute
+	 * @param session the current open hibernate session
 	 * @return null if okay to delete connection between category & attribute; otherwise a string message to 
 	 * display to user explaining whey item cannot be deleted.
 	 */
-	String canDelete(CategoryAttribute categoryAttribute);
+	String canDelete(CategoryAttribute categoryAttribute, Session session);
 
 	/**
 	 * 
-	 * @param item
+	 * @param item the attribute list item to delete
+	 * @param session the current open hibernate session
 	 * @return null if okay to delete attribute list item; otherwise a string message to 
 	 * display to user explaining whey item cannot be deleted.
 	 */
-	String canDelete(AttributeListItem item);
+	String canDelete(AttributeListItem item, Session session);
 	
 	
 	/**
 	 * 
-	 * @param node
+	 * @param node the tree node to delete
+	 * @param session the current open hibernate session
 	 * @return null if okay to delete attribute tree node; otherwise a string message to 
 	 * display to user explaining whey item cannot be deleted.
 	 */
-	String canDelete(AttributeTreeNode node);
+	String canDelete(AttributeTreeNode node, Session session);
 	
 }

@@ -48,7 +48,6 @@ public class SmartGeoResourceInfo extends IGeoResourceInfo {
 	
 	public SmartGeoResourceInfo( SmartGeoResource resource, IProgressMonitor monitor){
 		this.title = resource.areaType.getGuiName();
-		
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);

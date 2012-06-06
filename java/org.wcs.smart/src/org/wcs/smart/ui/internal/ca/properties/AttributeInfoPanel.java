@@ -21,14 +21,19 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -60,6 +65,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -67,6 +74,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -106,12 +114,13 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	
 	private ArrayList<IValidationListener> listeners = new ArrayList<IValidationListener>();
 	private Button btnDisableListItem;
+	private Button btnDeleteListItem;
 	
 	private WritableList attributeList = new WritableList();
 	private Language lang;
 	
 	private AttributeTree attTree = null;
-	
+	private Session currentSession = null;
 	/**
 	 * Creates a new attribute panel
 	 * @param parent parent composite
@@ -119,12 +128,16 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * @param canEdit <code>true</code> if the panel supports editing of the attributes; <code>false</code> if only viewable 
 	 * @param createNew <code>true</code> if a new attribute is being created, <code>false</code> if attribute is being updated
 	 * @param lang language being updated
+	 * @param currentSession can be null if panel not editable
 	 */
-	public AttributeInfoPanel(Composite parent, int style, boolean canEdit, boolean createNew, Language lang) {
+	public AttributeInfoPanel(Composite parent, int style, 
+			boolean canEdit, boolean createNew, 
+			Language lang, Session currentSession) {
+		
 		super(parent, style);
 		
 		this.lang = lang;
-		
+		this.currentSession = currentSession;
 		setLayout(new GridLayout(3, false));
 		
 		/* Type */
@@ -277,7 +290,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 			
 			Button btnAddList = new Button(buttonPanel, SWT.NONE);
-			btnAddList.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+			btnAddList.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 			btnAddList.setText("Add");
 			btnAddList.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -296,7 +309,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				}
 			});
 			Button btnEditList = new Button(buttonPanel, SWT.NONE);
-			btnEditList.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+			btnEditList.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 			btnEditList.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			btnEditList.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -313,7 +326,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				}
 			});
 			btnDisableListItem = new Button(buttonPanel, SWT.NONE);
-			btnDisableListItem.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+			btnDisableListItem.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 			btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 			btnDisableListItem.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -324,11 +337,43 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					validate();
 				}
 			});
+			
+			btnDeleteListItem = new Button(buttonPanel, SWT.NONE);
+			btnDeleteListItem.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+			btnDeleteListItem.setText("Delete");
+			btnDeleteListItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					final AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
+					boolean ret = MessageDialog.openConfirm(getShell(), "Delete", 
+							"Are you sure you want to delete the list item: " + 
+							it.findName(AttributeInfoPanel.this.lang) + "?");
+					if (!ret){
+						return;
+					}
+					
+					runInProgressDialog(new IRunnableWithProgress() {
+						@Override
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+							InterruptedException {
+							boolean delete = DataModelManager.getInstance().validateDelete(it, monitor, AttributeInfoPanel.this.currentSession);
+							if (delete){
+								attributeList.remove(it);
+								it.setAttribute(null);
+								lstAttributeList.refresh();
+								validate();
+							}
+						}
+					});
+				}
+			});
+			
 			lstAttributeList.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					btnDisableListItem.setEnabled(it != null);
+					btnDeleteListItem.setEnabled(it != null);
 					if (it != null && it.getIsActive()){
 						btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					}else{
@@ -424,6 +469,19 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		validate();
 	}
 
+	/**
+	 * Run a taks in a progress monitor
+	 * @param runnable
+	 */
+	private void runInProgressDialog(IRunnableWithProgress runnable){
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+		try {
+			dialog.run(false, true, runnable);		
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(getShell(), "Error occurred.", ex);
+		}
+	}
+	
 	/**
 	 * Validates attribute input
 	 * @return <code>true</code> if all fields validate correctly, <code>false</code> if error exists
@@ -585,7 +643,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
 				treeComposite.setVisible(false);
 				if(attTree != null){
-					attTree.setInput(att);
+					attTree.setInput(att, currentSession);
 				}
 			}
 		}

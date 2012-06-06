@@ -48,6 +48,14 @@
                label="File"
                mnemonic="F">
             <command
+                  commandId="org.wcs.smart.bcakup"
+                  icon="images/icons/etool16/backup.png"
+                  label="Backup System"
+                  mnemonic="B"
+                  style="push"
+                  tooltip="Backup the smart database and files.">
+            </command>
+            <command
                   commandId="org.wcs.smart.changeUserPassword"
                   icon="images/icons/etool16/changepass.png"
                   id="org.wcs.menu.file.changeuserpassword"
@@ -280,6 +288,10 @@
             id="org.wcs.smart.changeUserPassword"
             name="Change UserName Password">
       </command>
+      <command
+            id="org.wcs.smart.backup"
+            name="Backup System">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -326,6 +338,10 @@
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ChangeUserNameHandler"
             commandId="org.wcs.smart.changeUserPassword">
+      </handler>
+      <handler
+            class="org.wcs.smart.backup.BackupHandler"
+            commandId="org.wcs.smart.backup">
       </handler>
    </extension>
    <extension

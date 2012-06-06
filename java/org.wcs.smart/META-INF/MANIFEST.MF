@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.ui,
  net.refractions.udig.tool.info;bundle-version="1.2.3";visibility:=reexport
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/commons-compress-1.4.1.jar
 Export-Package: org.eclipse.wb.swt,
  org.wcs.smart,
  org.wcs.smart.ca,

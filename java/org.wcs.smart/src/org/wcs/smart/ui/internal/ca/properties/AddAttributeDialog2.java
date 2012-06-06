@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 
@@ -52,6 +53,8 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	private Attribute toUpdate;	//attribute to update
 	
 	private AttributeInfoPanel attributePanel;  //attribute panel
+	private Session currentSession;
+	
 	/**
 	 * creates a new dialog
 	 * 
@@ -59,14 +62,16 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	 * @param toUpdate Attribute to update
 	 * @param siblings Sibling attributes to the attribute being updated
 	 * @param defaultLang the current language being modified
+	 * @param currentSession active hibernate session
 	 */
-	protected AddAttributeDialog2(Shell parentShell,  Attribute toUpdate,  Collection<Attribute> siblings, Language defaultLang) {
+	protected AddAttributeDialog2(Shell parentShell,  
+			Attribute toUpdate,  Collection<Attribute> siblings, 
+			Language defaultLang, Session currentSession) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
 		this.siblings = siblings;
 		this.defaultLang = defaultLang;
-		
-
+		this.currentSession = currentSession;
 	}
 	
 	
@@ -101,11 +106,13 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 		composite.setLayout(new GridLayout(1, false));
 
 
-		attributePanel = new AttributeInfoPanel(composite, SWT.NONE, true, toUpdate.getKeyId() == null, defaultLang){
+		attributePanel = new AttributeInfoPanel(composite, SWT.NONE, 
+				true, toUpdate.getKeyId() == null, defaultLang, this.currentSession){
 			@Override
 			public Collection<Attribute> getSiblings() {
 				return siblings;
 			}};
+		
 		attributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		attributePanel.addValidationListener(new AttributeInfoPanel.IValidationListener() {
 			@Override

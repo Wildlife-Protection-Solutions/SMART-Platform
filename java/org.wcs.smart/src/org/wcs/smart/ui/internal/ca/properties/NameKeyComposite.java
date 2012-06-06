@@ -66,9 +66,7 @@ public abstract class NameKeyComposite extends Composite {
 	private Listener changeListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
-			if( validate() == false){
-				
-			}
+			validate();
 		}
 	};
 	
@@ -222,14 +220,14 @@ public abstract class NameKeyComposite extends Composite {
 		cdKey.hide();
 		cdTxt.hide();
 						
-		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
-			cdKey.setDescriptionText("Invalid key.  It must not be blank, and can only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+			cdKey.setDescriptionText("Invalid key.  It must not be blank, and can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			cdKey.show();
 			error = true;
 		}
 		
-		if (!SmartUtils.isSimpleString(txtName.getText().trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
-			cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank, and can only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+		if (!SmartUtils.isSimpleString(txtName.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+			cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank, and can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			cdTxt.show();
 			error = true;
 		}

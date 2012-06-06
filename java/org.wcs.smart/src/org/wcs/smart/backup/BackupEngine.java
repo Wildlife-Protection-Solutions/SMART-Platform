@@ -19,22 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ca.datamodel;
+package org.wcs.smart.backup;
+
+import java.io.File;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.SmartProperties;
+import org.wcs.smart.util.ZipUtil;
 
 /**
- * 
- * Listener plugins can implement and register
- * with the DataModelManager that will notify them
- * of changes to the data model.
- * 
- * @author Emily
- *
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
+ * @author egouge
+ * @since 1.0.0
  */
-public interface IDataModelListener {
+public class BackupEngine {
 
-	/**
-	 * This method is called when the
-	 * data model is saved to the database.
-	 */
-	void modified();
+	
+	
+	public void backupSystem(IProgressMonitor monitor){
+		File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY));
+		File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
+		
+		File[] dirsToBackup = new File[]{filestore, database};
+		
+		monitor.beginTask("Backing Up Database and Files", 2);
+		
+		try{
+			ZipUtil.createZip(dirsToBackup, new File("C:\temp\backuptest.zip"), monitor);
+		}catch (Exception ex){
+			ex.printStackTrace();
+		}
+	}
 }
