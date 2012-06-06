@@ -44,12 +44,20 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	private Text txtWaypointId;
 	private Text txtEasting;
 	private Text txtNorthing;
-
+	private double y;
+	private double x;
+	
 	private Waypoint newWaypoint;
 	public AddWaypointDialog(Shell parentShell) {
 		super(parentShell);
 	}
-
+	
+	public AddWaypointDialog(Shell parentShell, double y, double x) {
+		super(parentShell);
+		this.x = x;
+		this.y =y;
+	}
+	
 	public Waypoint getWaypoint(){
 		return newWaypoint;
 		
@@ -96,13 +104,17 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lbl.setText("Longitude:" );
 		txtEasting = new Text(legtype, SWT.BORDER);
 		txtEasting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtEasting.setText(String.valueOf(x));
 		txtEasting.addModifyListener(validation);
+		
 		
 		lbl = new Label(legtype, SWT.NONE);
 		lbl.setText("Latitude:" );
 		txtNorthing = new Text(legtype, SWT.BORDER);
 		txtNorthing.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtNorthing.setText(String.valueOf(y));
 		txtNorthing.addModifyListener(validation);
+		
 		
 		setMessage("Add a new waypoint.");
 		super.getShell().setText("Add Waypoints");
