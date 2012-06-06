@@ -50,8 +50,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Agency;
-import org.wcs.smart.ca.Rank;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -416,7 +414,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 					if (element instanceof PatrolTransportType){
 						PatrolTransportType ttype = (PatrolTransportType)element;
 						if (!ttype.findName(languageViewer.getCurrentSelection()).equals((String)value)){
-							if(SmartUtils.isSimpleString(((String)value).trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolType.MAX_TRANSPORT_NAME_LENGTH)){
+							if(SmartUtils.isSimpleString(((String)value).trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolType.MAX_TRANSPORT_NAME_LENGTH)){
 								Integer matches = 0;
 								for (@SuppressWarnings("unchecked")	Iterator<PatrolTransportType> itr = patrolTransportTypes.iterator(); itr.hasNext();) {
 									PatrolTransportType a = itr.next();
@@ -434,7 +432,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 								}
 							}else{
 								//invalid agency name, don't update it.
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Type", "Transportation type must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Type", "Transportation type must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 								setChangesMade(false);
 							}
 							

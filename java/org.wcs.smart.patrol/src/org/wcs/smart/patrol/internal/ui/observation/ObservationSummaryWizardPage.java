@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.observation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.WaypointObservation;
+import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
  * Observation input wizard summary page. This page displays all the observations
@@ -134,12 +136,24 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 				lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 
-			List<WaypointObservation> wob = ob.getValue();
+//			List<WaypointObservation> wob = ob.getValue();
+			//only  keep observations with data
+			List<WaypointObservation> items = new ArrayList<WaypointObservation>();
+			for (WaypointObservation wo :ob.getValue()){
+				for (WaypointObservationAttribute att: wo.getAttributes()){
+					if (att.hasValue()){
+						items.add(wo);
+						break;
+					}
+				}
+			}
 			
-			if (wob.size() > 1 || (wob.size() == 1 && (wob.get(0).getAttributes() != null && wob.get(0).getAttributes().size() > 0))){
+			//if (wob.size() > 1 || (wob.size() == 1 && (wob.get(0).getAttributes() != null && wob.get(0).getAttributes().size() > 0))){
+			if (items.size() > 0){
 				TableViewer viewer = AttributeTable.createAttributeTable(false, entryComp, ob.getKey(), null);
 				viewer.setContentProvider(ArrayContentProvider.getInstance());
-				viewer.setInput(ob.getValue().toArray());
+				
+				viewer.setInput(items.toArray());
 				GridData gd = new GridData(SWT.FILL, SWT.FILL,true, false);
 				gd.heightHint = Math.min(viewer.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y, 50);
 				viewer.getTable().setLayoutData(gd);

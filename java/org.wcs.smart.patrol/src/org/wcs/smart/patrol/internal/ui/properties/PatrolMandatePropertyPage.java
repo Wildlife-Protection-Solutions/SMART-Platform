@@ -53,8 +53,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Agency;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -266,7 +264,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private void updateLangValue(Column type, PatrolMandate mnd, String newValue) {
 		if (type == Column.NAME) {
 			if (!findLangValue(type, mnd).equals(newValue)){
-				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolMandate.MAX_NAME_LENGTH)){
+				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolMandate.MAX_NAME_LENGTH)){
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<PatrolMandate> itr = mandates.iterator(); itr.hasNext();) {
 						PatrolMandate a = itr.next();
@@ -284,7 +282,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					}
 				}else{
 					//invalid value, show error 
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 					setChangesMade(false);
 				}
 				
