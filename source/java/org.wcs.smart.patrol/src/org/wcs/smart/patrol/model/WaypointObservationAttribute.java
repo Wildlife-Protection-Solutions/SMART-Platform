@@ -124,6 +124,9 @@ public class WaypointObservationAttribute {
 		this.dValue = value;
 	}
 	
+	public boolean hasValue(){
+		return this.dValue != null || this.listItem != null || this.nodeItem != null || this.sValue != null;
+	}
 	
 	@Transient
 	public String validate(){

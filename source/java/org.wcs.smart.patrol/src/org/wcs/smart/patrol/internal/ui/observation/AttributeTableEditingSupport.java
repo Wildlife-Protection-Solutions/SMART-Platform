@@ -204,13 +204,13 @@ public class AttributeTableEditingSupport extends EditingSupport {
 				att.setNumberValue(0.0);
 			}
 		} else if (type == AttributeType.LIST) {
-			if (((AttributeListItem) value) == null) {
+			if (((AttributeListItem) value).getUuid() == null) {
 				att.setAttributeListItem(null);
 			} else {
 				att.setAttributeListItem((AttributeListItem) value);
 			}
 		} else if (type == AttributeType.TEXT) {
-			if (((String) value).trim().length() == 0) {
+			if (value == null || ((String)value).trim().length() == 0){
 				att.setStringValue(null);
 			} else {
 				att.setStringValue((String) value);
@@ -218,7 +218,12 @@ public class AttributeTableEditingSupport extends EditingSupport {
 		} else if (type == AttributeType.TREE) {
 			//updated in cell editor
 		} else if (type == AttributeType.NUMERIC) {
-			att.setNumberValue((Double) value);
+			if (value == null){
+//				//remove as it has been set to null
+				att.setNumberValue(null);
+			}else{
+				att.setNumberValue((Double) value);
+			}
 		}
 		
 		fireChangeListeners();

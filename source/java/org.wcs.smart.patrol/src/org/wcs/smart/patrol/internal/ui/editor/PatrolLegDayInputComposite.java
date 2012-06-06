@@ -471,9 +471,6 @@ public class PatrolLegDayInputComposite {
 	public void dispose(){
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, waypointListener);
-		if (okayFont != null && !okayFont.isDisposed()){
-			okayFont.dispose();
-		}
 		if (errorFont != null && !errorFont.isDisposed()){
 			errorFont.dispose();
 		}

@@ -23,10 +23,12 @@ package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -54,6 +56,8 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
+import org.wcs.smart.patrol.model.WaypointObservation;
+import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -267,11 +271,31 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	public void save(Collection<Waypoint> waypoints) {
 		saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		try{
 		saveSession.beginTransaction();
 		for (Waypoint wp : waypoints){
 			saveSession.saveOrUpdate(wp);
+			saveSession.flush();
+			//remove observations with no data
+			if (wp.getObservations() != null) {
+				for (WaypointObservation wo : wp.getObservations()) {
+					List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+					for (WaypointObservationAttribute att : wo
+							.getAttributes()) {
+						if (!att.hasValue()) {
+							toDelete.add(att);
+						}
+					}
+					wo.getAttributes().removeAll(toDelete);
+				}
+			}
 		}
 		saveSession.getTransaction().commit();
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Could not save changes.  Please close patrol and re-open it before proceeding. \n\n" + ex.getMessage(), ex);
+			saveSession.getTransaction().rollback();
+			
+		}
 		saveSession.close();
 	}
 	
@@ -380,6 +404,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return mapPage.getStatusLineManager();
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getAdapter(Class adaptee) {
 		if (adaptee.isAssignableFrom(Map.class)) {
 			return getMap();

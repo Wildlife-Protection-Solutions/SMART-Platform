@@ -253,7 +253,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		for (Entry<Category,List<WaypointObservation>> entry : this.observations.entrySet()){
 			wobservations.addAll(entry.getValue());	
 		}
-		
 		//set the waypoint of all observations
 		for (WaypointObservation ob : wobservations){
 			ob.setWaypoint(wp);
@@ -263,9 +262,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		if (wp.getObservations() == null){
 			wp.setObservations(new ArrayList<WaypointObservation>());
 		}
+		
 		wp.getObservations().clear();
 		wp.getObservations().addAll(wobservations);
-		
+
 		return true;
 	}
 
