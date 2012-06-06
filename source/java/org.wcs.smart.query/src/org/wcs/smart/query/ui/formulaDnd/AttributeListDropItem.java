@@ -22,7 +22,7 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -80,8 +81,9 @@ public class AttributeListDropItem extends DropItem{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				s.saveOrUpdate(attribute);
-				for (AttributeListItem item : attribute.getAttributeList()){
+				@SuppressWarnings("unchecked")
+				List<AttributeListItem> litems = s.createCriteria(AttributeListItem.class).add(Restrictions.eq("attribute", attribute)).list();
+				for (AttributeListItem item : litems){
 					if (item.getIsActive()){
 						items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
 					}
@@ -110,7 +112,7 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	public AttributeListDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + " and attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
+		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
 		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
 		this.attribute = att.getAttribute();
 	}

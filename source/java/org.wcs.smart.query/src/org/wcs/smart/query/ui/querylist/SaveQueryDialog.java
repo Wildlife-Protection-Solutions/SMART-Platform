@@ -65,7 +65,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 	public SaveQueryDialog(Shell parent, Query query, boolean includeName) {
 		super(parent);
 		this.includeName = includeName;
-		this.queryName = "Copy of " + query.getName();
+		this.queryName = query.getName();
 	}
 	
 	
@@ -104,6 +104,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 		getShell().setText("Save Query");
 		if (this.includeName){
 			setMessage("Select the new query name and location to save query.");
+			queryName = "Copy of " + queryName;
 		}else{
 			setMessage("Select location to save the query '" + queryName + "'");
 		}
@@ -121,7 +122,6 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 			 txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			 txtName.setText(queryName);
 			 txtName.addModifyListener(new ModifyListener() {
-				
 				@Override
 				public void modifyText(ModifyEvent e) {
 					queryName = txtName.getText();
