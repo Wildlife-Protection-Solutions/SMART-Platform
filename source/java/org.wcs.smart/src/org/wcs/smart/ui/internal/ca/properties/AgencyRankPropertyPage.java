@@ -128,7 +128,6 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 
 	@Override
 	protected Composite createContent(Composite parent) {
-				
 		Composite container = new Composite(parent, SWT.NULL);
 		container.setLayout(new GridLayout(3, false));
 		
@@ -190,7 +189,9 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					enableRank(false);
 				}else{
 					Agency agent = (Agency)selection.getFirstElement();
+					getSession().beginTransaction();
 					currentRankSet = new WritableList(agent.getRanks(), Rank.class);
+					getSession().getTransaction().rollback();
 					tblRank.setInput(currentRankSet);
 					current = agent;
 					enableRank(true);
@@ -254,7 +255,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void updateAgencyValue(AgencyColumn col, Agency element, String newName){
 		if (col == AgencyColumn.NAME){
 			if (!findAgencyValue(col, element).equals(newName)){
-				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<Agency> itr = agencies.iterator(); itr.hasNext();) {
 						Agency a = itr.next();
@@ -272,7 +273,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					}
 				}else{
 					//invalid agency name, don't update it.
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Agency Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Agency Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 					setChangesMade(false);
 				}
 			}
@@ -296,7 +297,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		if (col == RankColumn.NAME){
 			if (!findRankValue(col, element).equals(newName)){
 						
-				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<Rank> itr = currentRankSet.iterator(); itr.hasNext();) {
 						Rank a = itr.next();
@@ -315,7 +316,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					}
 				}else{
 					//invalid agency name, don't update it.
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Rank Name must not be blank, nor contain characters other than " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Rank Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 					setChangesMade(false);
 				}
 
@@ -441,9 +442,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				if(agt.getUuid() != null){
 					s.delete(agt);
 				}
-			}
-
-				
+			}				
 			for(Iterator<Agency> iterator = agencies.iterator(); iterator.hasNext();){
 				Agency agt = (Agency) iterator.next();
 				s.saveOrUpdate(agt);
@@ -454,9 +453,9 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			setChangesMade(false);
 			return true;
 		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(),"Error saving agency/rank updates.  Please close and re-open dialog." + ex.getLocalizedMessage(), ex);
 			tx.rollback();
-			s.close();
-			SmartPlugIn.displayLog(getShell(),"Error saving agency/rank updates.  " + ex.getLocalizedMessage(), ex);
+			s.close();			
 		}
 		return false;
 	}

@@ -168,8 +168,8 @@ public class CaInfoComposite extends Composite {
 			cdIdentifier.show();
 			isValid = false;
 		}
-		if (!SmartUtils.isSimpleString(txtIdentifier.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX) ){
-			cdIdentifier.setDescriptionText("A conservation area id can only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
+		if (!SmartUtils.isSimpleString(txtIdentifier.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX) ){
+			cdIdentifier.setDescriptionText("A conservation area id can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
 			cdIdentifier.show();
 			isValid = false;
 		}

@@ -358,13 +358,11 @@ public class HibernateManager extends SmartHibernateManager{
 			DataModel dm = new DataModel(ca, rootCategories, attribute);
 			return dm;
 		}catch (final Exception ex){
+			SmartPlugIn.displayLog(null, "Cannot load conservation area data model.", ex);
+			if (s.getTransaction().isActive()){
+				s.getTransaction().rollback();
+			}
 			s.close();
-			Display.getDefault().asyncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(null, "Cannot load conservation area data model.", ex);
-				}});
-		
 			return null;
 		}
 		

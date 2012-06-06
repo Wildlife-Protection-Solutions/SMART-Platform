@@ -278,7 +278,7 @@ RETURNS NULL ON NULL INPUT;
 	 * @return list of attributes associated directly 
 	 * with category
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.category", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.category", cascade={CascadeType.ALL}, orphanRemoval = false)
 	@OrderBy(clause = "att_order")
 //	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<CategoryAttribute> getAttributes(){

@@ -50,15 +50,28 @@ import org.wcs.smart.ca.Language;
 public class SmartUtils {
 	
 	
-	public static enum regExLevel{
+	/**
+	 * Various pre-defined regex expressions
+	 * for validating strings in smart.
+	 */
+	public static enum RegExLevel{
+		/**
+		 * Allows only chars and digits (a-Z and 0-9)
+		 */
 		ALLOWED_CHARS_SIMPLE_REGEX("a-Z, 0-9", "[^-0-9a-z]"),
+		/**
+		 * Allows chars, digits, - _ and :
+		 */
 		ALLOWED_CHARS_MED_REGEX("a-Z, 0-9 or - _ :", "[^-0-9a-z:_]" ),
+		/**
+		 * Allows chars, digits, 0 _ : and spaces
+		 */
 		ALLOWED_CHARS_COMPLEX_REGEX("a-Z, 0-9 or - _ : and spaces", "[^-0-9a-z :_]");
-	
+		
 		public final String textDesc;
 		public final String regex;
 	
-		regExLevel(String textDesc, String regex){
+		RegExLevel(String textDesc, String regex){
 			this.textDesc = textDesc;
 			this.regex = regex;
 		}
@@ -368,37 +381,64 @@ public class SmartUtils {
 	}
 	
 	/**
-	 * check a string:
-	 * 1) only contains letters number and a few other common characters like spaces and _ - : & 
-	 * 2) is between 1-64 chars long 
-	 * 
+	 * Checks a string:
+	 * <ol>
+	 * <li> only contains letters number and a few other common characters like spaces and _ - : & 
+	 * <li>is between 1-64 chars long 
+	 * </ol>
 	 * @param str - the string which to validate
-	 * @return true if 
+	 * @param level the regex level to match to
+	 * @param maxChars the maximum number of characters in the string
+	 * @param minChar the minimum number of characters
+	 * @return <code>true</code> if matches the required parameters, <code>false</code> otherwise 
 	 */
-
-	public static Boolean isSimpleString (String str, regExLevel level, Integer maxChars, Integer minChar){
+	public static Boolean isSimpleString (String str, RegExLevel level, 
+			Integer maxChars, Integer minChar){
 		Pattern p = Pattern.compile( level.regex , Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(str);
 		boolean b = m.find();
-
-
 		if (b || str.length() > maxChars || str.length() < minChar ){
 			return false;
 		}else{ 
 			return true;
-		}
-		
+		}		
 	}
-	//overloaded function to allow calls without passing last parameter
-	public static Boolean isSimpleString (String str, regExLevel level, Integer maxChars){
+
+	/**
+	 * Determines if a string matches the given requirements and is
+	 * at least one character long.
+	 * 
+	 * @param str the string to match
+	 * @param level the regexlevel to match it to
+	 * @param maxChars the maximum number of characters
+	 * @return <code>true</code> if meets the above requirements, <code>false</code> otherwise
+	 */
+	public static Boolean isSimpleString (String str, RegExLevel level, Integer maxChars){
 		return isSimpleString(str, level, maxChars,1);
 	}
-	//overloaded function to allow calls without passing last 3 parameters
+	
+	/**
+	 * Determines if a string is at least one character long,
+	 * no longer than 64 characters, and matches the 
+	 * ALLOWED_CHARS_MED_REGEX expression.
+	 * 
+	 * @param str the string to match
+	 * @return <code>true</code> if meets the above requirements, <code>false</code> otherwise
+	 */
 	public static Boolean isSimpleString (String str){
-		return isSimpleString(str, SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, 64,1);
+		return isSimpleString(str, SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, 64,1);
 	}
-	//overloaded function to allow calls without passing maxchars or minchars
-	public static Boolean isSimpleString (String str, regExLevel level){
+
+	/**
+	 * Determines if a string is at least one character long,
+	 * no longer than 64 characters, and macthes the 
+	 * provided expression.
+	 * 
+	 * @param str the string to match
+	 * @param level the regex level to match to
+	 * @return <code>true</code> if meets the above requirements, <code>false</code> otherwise
+	 */
+	public static Boolean isSimpleString (String str, RegExLevel level){
 		return isSimpleString(str, level, 64, 1);
 	}
 }

@@ -179,10 +179,13 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 					//yes
 					if (!performSave()){
 						return false;
+					}else{
+						setReturnCode(IDialogConstants.OK_ID);
 					}
 				}
 			}
 		}
+		
 		if (session != null && session.isOpen()){
 			session.close();
 		}

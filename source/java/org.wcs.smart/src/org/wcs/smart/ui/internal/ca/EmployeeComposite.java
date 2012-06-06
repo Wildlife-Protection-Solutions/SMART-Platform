@@ -381,27 +381,27 @@ public class EmployeeComposite extends Composite {
 		
 		boolean isComplete = true;
 		if (txtGivenName.getText().trim().isEmpty()
-				|| ! SmartUtils.isSimpleString(txtGivenName.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
+				|| ! SmartUtils.isSimpleString(txtGivenName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
 			cdGiveName.show();
 			cdGiveName
 					.setDescriptionText("Invalid given name.  The given name must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}
 		if (txtFamilyName.getText().trim().isEmpty()
-				|| ! SmartUtils.isSimpleString(txtFamilyName.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH)) {
+				|| ! SmartUtils.isSimpleString(txtFamilyName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH)) {
 			cdFamilyName.show();
 			cdFamilyName
 					.setDescriptionText("Invalid family name.  The given name must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}
 		if (txtStaffId.getText().trim().isEmpty()
-				|| ! SmartUtils.isSimpleString(txtStaffId.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_ID_LENGTH)) {
+				|| ! SmartUtils.isSimpleString(txtStaffId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_ID_LENGTH)) {
 			cdStaffId.show();
 			cdStaffId
 					.setDescriptionText("Invalid Staff ID.  The ID must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}
 		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
@@ -435,16 +435,16 @@ public class EmployeeComposite extends Composite {
 		}
 		if (chSmartUser.getSelection()){
 			if (txtSmartId.getText().trim().isEmpty()
-					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH)) {
+					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH)) {
 				cdSmartId.show();
-				cdSmartId.setDescriptionText("Smart user id must be provided. Must only use the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
+				cdSmartId.setDescriptionText("Smart user id must be provided. Must only use the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
 				isComplete = false;
 			}
 			if (txtSmartPassword.getText().trim().isEmpty()
-					|| ! SmartUtils.isSimpleString(txtSmartPassword.getText(), SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_PASSWORD_LENGTH)) {
+					|| ! SmartUtils.isSimpleString(txtSmartPassword.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_PASSWORD_LENGTH)) {
 				cdSmartPassword.show();
 				cdSmartPassword
-						.setDescriptionText("Smart password must be provided and must only use the characters " + SmartUtils.regExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
+						.setDescriptionText("Smart password must be provided and must only use the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
 				isComplete = false;
 			}
 			

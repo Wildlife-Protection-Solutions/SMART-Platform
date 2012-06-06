@@ -42,6 +42,7 @@ public class SmartProperties {
 	public static final String SMART_DB_KEY = "db.dbname";
 	public static final String FILESTORE_KEY = "filestore";
 	public static final String GPS_BABLE_KEY = "gpsbabel";
+	public static final String BACKUP_DIRECTORY_KEY = "backup.directory";
 	
 	private Properties prop = null;
 	

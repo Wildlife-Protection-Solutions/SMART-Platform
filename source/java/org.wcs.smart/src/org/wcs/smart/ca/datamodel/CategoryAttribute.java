@@ -154,7 +154,26 @@ public class CategoryAttribute {
 	public void setIsActive(boolean isActive){
 		this.isActive = isActive;
 	}
+
+	/**
+	 * @param o
+	 * @return
+	 */
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof CategoryAttribute){
+			return this.id.equals(((CategoryAttribute)o).id);
+		}
+		return false;
+	}
 	
+	/**
+	 * @return
+	 */
+	@Override
+	public int hashCode(){
+		return id.hashCode();
+	}
 	
 	/**
 	 * Primary key object for category attribute association 
@@ -162,6 +181,8 @@ public class CategoryAttribute {
 	 */
 	@Embeddable
 	private static class CategoryAttributePk implements Serializable {
+		private static final long serialVersionUID = 1L;
+		
 		private Category category;
 		private Attribute attribute;
 		

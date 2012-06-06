@@ -101,8 +101,9 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("Loading data model...", 0);
-					
+					session.beginTransaction();
 					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+					session.getTransaction().rollback();
 					monitor.done();					
 				}
 			});
