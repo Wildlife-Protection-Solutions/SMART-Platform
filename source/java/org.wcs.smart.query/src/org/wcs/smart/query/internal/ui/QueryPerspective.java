@@ -62,8 +62,6 @@ public class QueryPerspective implements IPerspectiveFactory {
 		folder2.addView(QueryDefView.ID);
 		folder2.addPlaceholder(InfoView2.VIEW_ID);
 
-		
-		
 		layout.getViewLayout(QueryDefView.ID).setCloseable(false);
 		layout.getViewLayout(QueryFilterView.ID).setCloseable(false);
 		layout.getViewLayout(QueryListView.ID).setCloseable(false);

@@ -74,8 +74,14 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 				return "No";
 			}
 		} else if (type == ColumnType.DATE) {
+			if ((Date)value == null){
+				return "";
+			}
 			return DateFormat.getDateInstance().format((Date) value);
 		} else if (type == ColumnType.TIME) {
+			if ((Date)value == null){
+				return "";
+			}
 			return DateFormat.getTimeInstance().format((Date) value);
 		} else if (type == ColumnType.STRING) {
 			return (String) value;

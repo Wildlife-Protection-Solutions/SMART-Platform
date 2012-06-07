@@ -507,8 +507,16 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	}
 
 	
+	/**
+	 * Determines if a particular category or parent category
+	 * contains the given
+	 * attribute 
+	 * @param cat
+	 * @param att
+	 * @return
+	 */
 	private boolean containsAttribute(Category cat, Attribute att){
-		if (cat.getAttributes().contains(new CategoryAttribute(cat,att))){
+		if (cat.getAttributes() != null && cat.getAttributes().contains(new CategoryAttribute(cat,att))){
 			return true;
 		}else{
 			for (Category kid : cat.getChildren()){

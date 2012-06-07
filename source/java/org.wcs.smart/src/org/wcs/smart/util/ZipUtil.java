@@ -33,12 +33,22 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * A collection of zip utilities
+ * A collection of zip utilities.
  * 
  * @since 1.0.0
  */
 public class ZipUtil {
 
+	/**
+	 * Creates a zip file collecting together
+	 * all the data in the provided directories.
+	 * 
+	 * @param directories directories to include in zip
+	 * @param outputZipFile output zip file name
+	 * @param monitor progress monitor
+	 * @return <code>true</code> if successful <code>false</code> if error
+	 * @throws IOException
+	 */
 	public static boolean createZip(
 			File[] directories, 
 			File outputZipFile, 
@@ -54,7 +64,7 @@ public class ZipUtil {
             bOut = new BufferedOutputStream(fOut);
             tOut = new ZipArchiveOutputStream(bOut);
             for (int i = 0; i < directories.length; i ++){
-            	addFileToZip(tOut, directories[i], directories[i].getName(), monitor);	
+            	addFileToZip(tOut, directories[i], "", monitor);	
             }
             
         } finally {
@@ -84,8 +94,7 @@ public class ZipUtil {
     	monitor.subTask("processing: " + path.getAbsolutePath());
     	
         String entryName = base + path.getName();
-        ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName);
- 
+        ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
         zOut.putArchiveEntry(zipEntry);
         
         if(monitor.isCanceled()){

@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.engine.DerbyPatrolEngine;
 import org.wcs.smart.query.engine.DerbyQueryEngine2;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
