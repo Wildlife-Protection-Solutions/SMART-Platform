@@ -44,6 +44,12 @@
             id="org.wcs.smart.query.ui.SummaryEditor"
             name="Summary Editor">
       </editor>
+      <editor
+            class="org.wcs.smart.query.ui.patrol.PatrolQueryEditor"
+            default="false"
+            id="org.wcs.smart.query.PatrolQueryEditor"
+            name="Patrol Query">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -557,6 +563,9 @@
                   <equals
                         value="org.wcs.smart.query.ui.SummaryEditor">
                   </equals>
+                  <equals
+                        value="org.wcs.smart.query.PatrolQueryEditor">
+                  </equals>
                </or>
             </with>
          </enabledWhen>
@@ -581,6 +590,9 @@
                      <equals
                            value="org.wcs.smart.query.ui.SummaryEditor">
                      </equals>
+                     <equals
+                           value="org.wcs.smart.query.PatrolQueryEditor">
+                     </equals>
                   </or>
                </with>
             </and>
@@ -598,6 +610,9 @@
                   </equals>
                   <equals
                         value="org.wcs.smart.query.ui.SummaryEditor">
+                  </equals>
+                  <equals
+                        value="org.wcs.smart.query.PatrolQueryEditor">
                   </equals>
                </or>
             </with>
@@ -650,6 +665,9 @@
                   <equals
                         value="org.wcs.smart.query.ui.SummaryEditor">
                   </equals>
+                  <equals
+                        value="org.wcs.smart.query.PatrolQueryEditor">
+                  </equals>
                </or>
             </with>
          </enabledWhen>
@@ -666,6 +684,9 @@
                   </equals>
                   <equals
                         value="org.wcs.smart.query.ui.SummaryEditor">
+                  </equals>
+                  <equals
+                        value="org.wcs.smart.query.PatrolQueryEditor">
                   </equals>
                </or>
             </with>

@@ -54,6 +54,8 @@ public class QueryResultItem {
 	private boolean armed;
 	private String patrolLegId;
 	private String transportType;
+	private Date plStartDate;
+	private Date plEndDate;
 	private Date wpDateTime;
 	private Date waypointTime;
 	private String leader;
@@ -428,5 +430,19 @@ public class QueryResultItem {
 	 */
 	public void setWaypointComment(String wpComment) {
 		this.waypointComment = wpComment;
+	}
+	
+	public void setPatrolLegStartDate(Date date){
+		this.plStartDate = date;
+	}
+	public void setPatrolLegEndDate(Date date){
+		this.plEndDate = date;
+	}
+	
+	public Date getPatrolLegStartDate(){
+		return this.plStartDate;
+	}
+	public Date getPatrolLegEndDate(){
+		return this.plEndDate;
 	}
 }

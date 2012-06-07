@@ -22,26 +22,45 @@
 package org.wcs.smart.backup;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.util.ZipUtil;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Engine responsible for backing up the SMART system.
+ * 
  * @author egouge
  * @since 1.0.0
  */
 public class BackupEngine {
 
+	/**
+	 * @return the default backup file name based on the current date
+	 */
+	public static String getDefaultFileName(){
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		return "SMART_" + format.format(new Date()) + ".db.bak.zip"; 
+	}
 	
-	
-	public void backupSystem(IProgressMonitor monitor){
+	/**
+	 * Backs up all SMART data to the given output file.
+	 * 
+	 * @param outputFile output file
+	 * @param monitor progress monitor
+	 * @return <code>true</code> if backup successful, <code>false</code> if cancelled or failed
+	 * @throws IOException
+	 */
+	public static boolean  backupSystem(File outputFile, IProgressMonitor monitor) throws IOException{
+		if (outputFile.exists()){
+			if (!outputFile.delete()){
+				throw new IllegalStateException("Output file '" + outputFile.getAbsolutePath() + "' could not be deleted.");
+			}
+		}
+		
 		File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY));
 		File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
 		
@@ -49,10 +68,6 @@ public class BackupEngine {
 		
 		monitor.beginTask("Backing Up Database and Files", 2);
 		
-		try{
-			ZipUtil.createZip(dirsToBackup, new File("C:\temp\backuptest.zip"), monitor);
-		}catch (Exception ex){
-			ex.printStackTrace();
-		}
+		return ZipUtil.createZip(dirsToBackup, outputFile, monitor);
 	}
 }

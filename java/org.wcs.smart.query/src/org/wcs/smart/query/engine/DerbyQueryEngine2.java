@@ -681,7 +681,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	private String getStationName(byte[] suuid, Session session){
+	protected String getStationName(byte[] suuid, Session session){
 		if (suuid != null){
 			Station x = (Station) session.load(Station.class, suuid);
 			if (x != null) {
@@ -699,7 +699,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	private String getTeamName(byte[] tuuid, Session session){
+	protected String getTeamName(byte[] tuuid, Session session){
 		if (tuuid != null){
 			Team x = (Team) session.load(Team.class, tuuid);
 			if (x != null) {
@@ -717,7 +717,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	private String getEmployeeName(byte[] uuid, Session session){
+	protected String getEmployeeName(byte[] uuid, Session session){
 		if (uuid != null){
 			Employee x = (Employee) session.load(Employee.class, uuid);
 			if (x != null) {
@@ -735,7 +735,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	private String getMandateName(byte[] muuid, Session session){
+	protected String getMandateName(byte[] muuid, Session session){
 		if (muuid != null){
 			PatrolMandate x = (PatrolMandate) session.load(PatrolMandate.class, muuid);
 			if (x != null) {
@@ -753,7 +753,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	private String getTransportType(byte[] uuid, Session session){
+	protected String getTransportType(byte[] uuid, Session session){
 		if (uuid != null){
 			PatrolTransportType x = (PatrolTransportType) session.load(
 					PatrolTransportType.class, uuid);

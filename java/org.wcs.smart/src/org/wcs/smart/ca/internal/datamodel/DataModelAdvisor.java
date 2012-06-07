@@ -55,9 +55,9 @@ public class DataModelAdvisor implements IDataModelAdvisor {
 	 */
 	@Override
 	public String canDelete(Category category, Session session) {
-		if (category.getAttributes().size() > 0){
+		if (category.getAttributes() != null && category.getAttributes().size() > 0){
 			return "Category cannot be removed until all attributes are also removed.";
-		}else if (category.getChildren().size() > 0){
+		}else if (category.getChildren() != null && category.getChildren().size() > 0){
 			return "Category cannot be removed until all children are also removed.";
 		}
 		return null;

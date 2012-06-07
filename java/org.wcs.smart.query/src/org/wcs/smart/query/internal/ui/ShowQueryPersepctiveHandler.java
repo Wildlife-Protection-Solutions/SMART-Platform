@@ -59,7 +59,7 @@ public class ShowQueryPersepctiveHandler extends AbstractHandler {
 			}
 			if (!found){
 				//open a new editor 
-				CreateQueryHandler h = new CreateQueryHandler();
+				CreateQueryHandler h = new CreateQueryHandler(false);
 				h.execute(event);
 			}
 		} catch (WorkbenchException e) {

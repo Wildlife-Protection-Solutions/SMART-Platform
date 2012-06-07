@@ -41,7 +41,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
  * A udig service for a smart waypoint queries.
@@ -63,7 +66,7 @@ public class QueryService extends IService {
 	private QueryDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
-	private ObservationQuery query = null;
+	private Query query = null;
 	
 	/**
 	 * Creates a new query service 
@@ -89,9 +92,22 @@ public class QueryService extends IService {
 	}
 	
 	/**
-	 * @return the waypoint query 
+	 * Creates a new query service using the given patrol query.
+	 * 
+	 * @param query patrol query
 	 */
-	public ObservationQuery getQuery(){
+	public QueryService(PatrolQuery query){
+		this.query = query;
+		this.params = new HashMap<String, Serializable>();
+		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
+		this.url = QueryServiceExtension.createURL(this.params);
+		
+	}
+	
+	/**
+	 * @return the query 
+	 */
+	public Query getQuery(){
 		return this.query;
 	}
 	
@@ -208,7 +224,11 @@ public class QueryService extends IService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		ds = new QueryDataSource(query);
+                		if (query.getType() == QueryType.OBSERVATION){
+                			ds = new QueryDataSource((ObservationQuery)query);
+                		}else{
+                			//NOT YET SUPPORTED
+                		}
                 	}else{
                 		//use factory
                 		QueryDataSourceFactory dsf = new QueryDataSourceFactory();

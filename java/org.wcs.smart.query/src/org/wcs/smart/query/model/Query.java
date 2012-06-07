@@ -38,6 +38,10 @@ import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.patrol.PatrolQueryEditor;
+import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
  * Parent query class that contains fields
@@ -54,13 +58,16 @@ public abstract class Query {
 	//if you add another query type you must update
 	//the queryInput constructor
 	public enum QueryType{
-		OBSERVATION("ObservationQuery"),
-		SUMMARY("SummaryQuery");
+		OBSERVATION("ObservationQuery", QueryResultsEditor.ID),
+		SUMMARY("SummaryQuery", SummaryEditor.ID),
+		PATROL("PatrolQuery", PatrolQueryEditor.ID);
 		
 		private String objectName;
+		private String editorId;
 		
-		private QueryType(String objectName){
+		private QueryType(String objectName, String editorId){
 			this.objectName = objectName;
+			this.editorId = editorId;
 		}
 		
 		/**
@@ -70,6 +77,15 @@ public abstract class Query {
 		 */
 		public String getObjectName(){
 			return this.objectName;
+		}
+		
+		/**
+		 * 
+		 * @return the editor associated
+		 * with the give query type/
+		 */
+		public String getEditorId(){
+			return this.editorId;
 		}
 	}
 	private byte[] uuid = null;

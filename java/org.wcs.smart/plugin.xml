@@ -48,7 +48,7 @@
                label="File"
                mnemonic="F">
             <command
-                  commandId="org.wcs.smart.bcakup"
+                  commandId="org.wcs.smart.backup"
                   icon="images/icons/etool16/backup.png"
                   label="Backup System"
                   mnemonic="B"
