@@ -59,6 +59,10 @@ import org.wcs.smart.util.SmartUtils;
 @Table(name="smart.patrol")
 public class Patrol {
 
+	public static final String AUTO_GENERATE_TEXT = "system-generated";
+
+	public static final Integer MAX_ID_LENGTH = 32;
+	
 	private byte[] uuid;
 	private ConservationArea ca;
 	private Station station;
@@ -304,5 +308,7 @@ public class Patrol {
 		return "Patrol" + File.separator + id + "_" + SmartUtils.getDirectoryPath(uuid);
 		
 	}
+
+
 	
 }

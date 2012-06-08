@@ -71,7 +71,10 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
 		buttonPanel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
-		List<PatrolType> types = PatrolHibernateManager.getActivePatrolTypes(p.getConservationArea(), ((CreatePatrolWizard)getWizard()).getSession() );
+		Session session  = ((CreatePatrolWizard)getWizard()).getSession();
+		session.beginTransaction();
+		List<PatrolType> types = PatrolHibernateManager.getActivePatrolTypes(p.getConservationArea(),  session);
+		session.getTransaction().rollback();
 		for (PatrolType t: types){
 			Button btn = new Button(buttonPanel, SWT.RADIO);
 			btn.setText(t.getType().getGuiName());

@@ -63,6 +63,7 @@ import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
@@ -160,10 +161,13 @@ public class PatrolListView extends ViewPart {
 		}
 	};
 
+	
+		
 	/**
 	 * Creates a new vies
 	 */
 	public PatrolListView() {
+		
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
 	}
 
@@ -224,7 +228,8 @@ public class PatrolListView extends ViewPart {
 		
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolListener);
-	
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolListener);
+		
 		patrolListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override

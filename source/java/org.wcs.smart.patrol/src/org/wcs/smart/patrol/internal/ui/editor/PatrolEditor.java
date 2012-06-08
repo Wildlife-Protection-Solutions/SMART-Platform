@@ -91,6 +91,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}
 			if (p != null && p.equals(patrol)){
 				updateSummaryPage();
+				
+
 			}
 		}
 	};
@@ -169,7 +171,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return this.patrol;
 	}
 
-	
+	public void updatePartName(){
+		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
+		super.setPartName("Patrol " + input.getPatrolId());
+		PatrolEventManager manager = PatrolEventManager.getInstance();
+		manager.patrolChanged(PatrolEventManager.PATROL_ID, patrol);
+	}
 	
 	@Override
 	protected void createPages() {
