@@ -21,24 +21,8 @@
  */
 package org.wcs.smart.ui.internal.startup;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Dialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.startup.SmartStartUp;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * This dialog is shown to users if no conservation areas exist in the database
@@ -47,11 +31,7 @@ import org.wcs.smart.startup.SmartStartUp;
  * @author Emily Gouge
  * 
  */
-public class StartUpDialog extends Dialog {
-
-	protected Object result;
-	protected Shell shell;
-
+public class StartUpDialog extends InitializeDialog {
 
 	/**
 	 * Create the dialog.
@@ -60,134 +40,41 @@ public class StartUpDialog extends Dialog {
 	 * @param style
 	 */
 	public StartUpDialog(Shell parent) {
-		super(parent, SWT.APPLICATION_MODAL);
-		setText("Welcome To Smart");
+		super(parent);
+
 	}
 
 	/**
-	 * Open the dialog.
-	 * 
-	 * @return the result
+	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#onCancel()
 	 */
-	public Object open() {
-		createContents();
-
-		Rectangle bds = shell.getDisplay().getMonitors()[0].getBounds();
-		Point p = shell.getSize();
-
-		int nLeft = (bds.width - p.x) / 2;
-		int nTop = (bds.height - p.y) / 2;
-
-		shell.setBounds(nLeft, nTop, p.x, p.y);
-		shell.open();
-		shell.layout();
-		Display display = getParent().getDisplay();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
-		return result;
+	@Override
+	public void onCancel() {
+		HibernateManager.endSessionFactory(false);
+		System.exit(0);
 	}
 
 	/**
-	 * Create contents of the dialog.
+	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#getHeaderText()
 	 */
-	private void createContents() {
-		shell = new Shell(getParent(), SWT.BORDER | SWT.TITLE);
-		shell.setSize(448, 324);
-		shell.setText(getText());
-		shell.setLayout(new FormLayout());
-
-		Composite composite_1 = new Composite(shell, SWT.NONE);
-		FormData fd_composite_1 = new FormData();
-		fd_composite_1.left = new FormAttachment(0);
-		fd_composite_1.right = new FormAttachment(0, 442);
-		fd_composite_1.top = new FormAttachment(0);
-		composite_1.setLayoutData(fd_composite_1);
-		composite_1.setLayout(new RowLayout(SWT.HORIZONTAL));
-
-		DialogHeader dh = new DialogHeader(composite_1, SWT.BORDER);
-		dh.setLayoutData(new RowData(438, SWT.DEFAULT));
-		dh.setHeader("Welcome To SMART");
-
-		Composite composite = new Composite(shell, SWT.NONE);
-		FormData fd_composite = new FormData();
-		fd_composite.top = new FormAttachment(composite_1, 17);
-		fd_composite.right = new FormAttachment(100, -67);
-		fd_composite.left = new FormAttachment(0, 77);
-		composite.setLayoutData(fd_composite);
-
-		Label lblNewLabel = new Label(composite, SWT.WRAP);
-		lblNewLabel.setLocation(0, 0);
-		lblNewLabel.setSize(276, 34);
-		lblNewLabel
-				.setText("There are no conservation areas currently setup. Would you like to:");
-
-		final Button opCreateNew = new Button(composite, SWT.RADIO);
-		opCreateNew.setLocation(32, 40);
-		opCreateNew.setSize(256, 16);
-		opCreateNew.setText("Create a New Conservation Area");
-		opCreateNew.setSelection(true);
-
-		final Button opRestore = new Button(composite, SWT.RADIO);
-		opRestore.setLocation(32, 62);
-		opRestore.setSize(256, 16);
-		opRestore.setText("Restore a Backup");
-
-		Button btnContinue = new Button(shell, SWT.NONE);
-		fd_composite.bottom = new FormAttachment(100, -92);
-		FormData fd_btnContinue = new FormData();
-		fd_btnContinue.bottom = new FormAttachment(100, -10);
-		fd_btnContinue.right = new FormAttachment(100, -145);
-		btnContinue.setLayoutData(fd_btnContinue);
-		btnContinue.setText("Continue");
-
-		btnContinue.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (opCreateNew.getSelection()) {
-					createNewConservationArea();
-				} else if (opRestore.getSelection()) {
-					MessageDialog.openInformation(
-							StartUpDialog.this.getParent(),
-							"Not Yet Completed", "Not yet implemented");
-				} else {
-					MessageDialog
-							.openError(shell, "Error",
-									"Invalid option selected.  Please select one of the above options.");
-				}
-			}
-
-		});
-
-		Button btnCancel = new Button(shell, SWT.NONE);
-		FormData fd_btnCancel = new FormData();
-		fd_btnCancel.top = new FormAttachment(btnContinue, 0, SWT.TOP);
-		fd_btnCancel.right = new FormAttachment(btnContinue, -36);
-		btnCancel.setLayoutData(fd_btnCancel);
-		btnCancel.setText("Cancel");
-		btnCancel.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent c) {
-				System.exit(0);
-			}
-		});
-
-		Label label = new Label(shell, SWT.SEPARATOR | SWT.HORIZONTAL);
-		FormData fd_label = new FormData();
-		fd_label.top = new FormAttachment(btnContinue, -11, SWT.TOP);
-		fd_label.right = new FormAttachment(composite_1, 0, SWT.RIGHT);
-		fd_label.bottom = new FormAttachment(btnContinue, -9);
-		fd_label.left = new FormAttachment(composite_1, 0, SWT.LEFT);
-		label.setLayoutData(fd_label);
-
+	@Override
+	public String getHeaderText() {
+		return "Welcome to SMART";
 	}
 
-	private void createNewConservationArea() {
-		if (SmartStartUp.openCreateNewCaWizard(shell)) {
-			// hide this page
-			shell.dispose();
-		}
+	/**
+	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#getMessageText()
+	 */
+	@Override
+	public String getMessageText() {
+		return "No conservation areas currently exist.  Would you like to:";
 	}
+
+	/**
+	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#getDialogText()
+	 */
+	@Override
+	public String getDialogText() {
+		return "Welcome To SMART";
+	}
+
 }

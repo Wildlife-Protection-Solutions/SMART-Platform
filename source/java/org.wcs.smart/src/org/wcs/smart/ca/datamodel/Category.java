@@ -41,6 +41,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Language;
 
 /**
  * Conservation Area data model category object.
@@ -392,6 +393,20 @@ RETURNS NULL ON NULL INPUT;
 			return getName();
 		}else{
 			return getName() + " - " + parent.getFullCategoryName();
+		}
+	}
+	
+	/**
+	 * 
+	 * @return the category name concatenated with
+	 * all parent category names for a given language
+	 */
+	@Transient
+	public String getFullCategoryName(Language lang){
+		if (parent == null){
+			return findName(lang);
+		}else{
+			return findName(lang) + " - " + parent.getFullCategoryName(lang);
 		}
 	}
 	

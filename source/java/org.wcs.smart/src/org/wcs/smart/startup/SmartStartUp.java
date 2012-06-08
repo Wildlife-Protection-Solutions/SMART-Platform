@@ -80,8 +80,10 @@ public class SmartStartUp {
 				return false;
 			}
 			//disconnect from the database & setup correct user level
-			HibernateManager.endSessionFactory();
+			HibernateManager.endSessionFactory(true);
 			SmartDB.setCurrentUser(e, ca);
+			
+			HibernateManager.openSession();
 			return true;
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(null, "Error logging in user", ex);

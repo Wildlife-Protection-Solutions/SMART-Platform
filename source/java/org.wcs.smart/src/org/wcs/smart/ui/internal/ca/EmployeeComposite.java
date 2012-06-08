@@ -125,6 +125,12 @@ public class EmployeeComposite extends Composite {
 				
 			}
 		};
+		Label lbl = createLabelField(this, Employee.ID + ":");
+		txtStaffId = createTextField(this, SWT.NONE,
+				Employee.MAX_ID_LENGTH, validate);
+		lbl.setToolTipText("If set to '" + EmployeeDialog.AUTO_GENERATE + "' the id will be automatically assigned by the system");		
+		txtStaffId.setText(EmployeeDialog.AUTO_GENERATE);
+		
 		createLabelField(this, Employee.GIVEN_NAME + ":");
 		txtGivenName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
@@ -133,11 +139,7 @@ public class EmployeeComposite extends Composite {
 		txtFamilyName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
 		
-		Label lbl = createLabelField(this, Employee.ID + ":");
-		txtStaffId = createTextField(this, SWT.NONE,
-				Employee.MAX_ID_LENGTH, validate);
-		lbl.setToolTipText("If blank the Id will be auto-generated");		
-		txtStaffId.setText(EmployeeDialog.AUTO_GENERATE);
+		
 		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":");
 		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
 				| SWT.LONG, dateValidate);

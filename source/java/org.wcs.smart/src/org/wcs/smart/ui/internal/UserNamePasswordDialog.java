@@ -50,8 +50,19 @@ public class UserNamePasswordDialog extends Dialog{
 	private String username;
 	private String password;
 	
-	protected UserNamePasswordDialog(Shell parentShell) {
+	private String dialogTitle;
+	private String confirmationMessage;
+	private String okText;
+	
+	public UserNamePasswordDialog(Shell parentShell, 
+			String dialogTitle, 
+			String confirmationMessage,
+			String okText) {
 		super(parentShell);
+	
+		this.dialogTitle = dialogTitle;
+		this.confirmationMessage = confirmationMessage;
+		this.okText = okText;
 	}
 
 	@Override
@@ -82,14 +93,14 @@ public class UserNamePasswordDialog extends Dialog{
 		composite.setLayout(new GridLayout(2, false));
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		Label lbl = new Label(composite, SWT.NONE);
-		lbl.setText("Enter your username and password to confirm that you want to delete this conservation area:");
+		Label lbl = new Label(composite, SWT.WRAP);
+		lbl.setText(confirmationMessage);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		((GridData)lbl.getLayoutData()).widthHint = 400;
 		
 		lbl = new Label(composite, SWT.NONE);
 		lbl.setText("");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-		
 		
 		Label lblUsername = new Label(composite, SWT.NONE);
 		lblUsername.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -105,7 +116,7 @@ public class UserNamePasswordDialog extends Dialog{
 		txtPassword = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-		super.getShell().setText("Delete Conservation Area");
+		super.getShell().setText(dialogTitle);
 		return parent;
 	}
 	
@@ -116,7 +127,7 @@ public class UserNamePasswordDialog extends Dialog{
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Delete",
+		createButton(parent, IDialogConstants.OK_ID, okText,
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);

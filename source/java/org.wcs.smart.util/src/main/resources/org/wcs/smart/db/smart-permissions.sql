@@ -6,6 +6,8 @@ GRANT ALL PRIVILEGES ON smart.language TO login;
 GRANT ALL PRIVILEGES  ON smart.i18n_label TO login;
 GRANT ALL PRIVILEGES  ON smart.station TO login;
 GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO login;
+GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE TO login;
+GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_FREEZE_DATABASE TO login;
 
 GRANT SELECT ON smart.conservation_area TO manager;
 GRANT SELECT ON smart.conservation_area TO analyst;

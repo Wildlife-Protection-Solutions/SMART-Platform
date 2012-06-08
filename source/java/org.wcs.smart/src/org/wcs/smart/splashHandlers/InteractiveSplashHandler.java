@@ -52,7 +52,9 @@ import org.eclipse.ui.splash.AbstractSplashHandler;
 import org.eclipse.wb.swt.ResourceManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.startup.SmartStartUp;
+import org.wcs.smart.ui.internal.startup.InitializeDialog;
 import org.wcs.smart.ui.internal.startup.StartUpAdvancedDialog;
 import org.wcs.smart.ui.internal.startup.StartUpDialog;
 
@@ -135,11 +137,11 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 //		txtUserName.setText("username1000002");
 //		txtPassword.setText("pass1000002");
 //		
-		txtUserName.setText("smart");
+//		txtUserName.setText("smart");
 //		txtPassword.setText("darrin");
 //		txtUserName.setText("analyst");
-		txtPassword.setText("smart");
-		handleButtonOKWidgetSelected();
+//		txtPassword.setText("smart");
+//		handleButtonOKWidgetSelected();
 
 		doEventLoop();
 		
@@ -203,6 +205,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private void handleButtonCancelWidgetSelected() {
 		// Abort the loading of the RCP application
 		getSplash().getDisplay().close();
+		HibernateManager.endSessionFactory(false);
 		System.exit(0);		
 	}
 	
@@ -238,10 +241,10 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	private void handleButtonAdvancedSelected(){
 		StartUpAdvancedDialog dialog = new StartUpAdvancedDialog(getSplash());
-		dialog.open();
-		
-		//on close refresh startup screen
-		startup();
+		if (dialog.open() != InitializeDialog.CANCEL){
+			//on close refresh startup screen
+			startup();
+		}
 	}
 	
 	/**

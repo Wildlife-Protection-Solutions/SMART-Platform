@@ -29,6 +29,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.WorkbenchAdvisor;
 import org.wcs.smart.hibernate.HibernateManager;
 
+/**
+ * Smart application 
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
 public class SmartApp implements IApplication {
 
 	@Override
@@ -53,7 +59,6 @@ public class SmartApp implements IApplication {
 
 	@Override
 	public void stop() {
-		HibernateManager.endSessionFactory();
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 		final Display display = workbench.getDisplay();
 		display.syncExec(new Runnable() {

@@ -23,8 +23,6 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,7 +30,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
 
 /**
  * Category information panel for displaying and editing
@@ -45,19 +42,7 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 
 	protected Button chMultiple;
 	protected Language lang;
-	
-	private KeyListener generateKeyListener = new KeyListener() {
-		@Override
-		public void keyReleased(KeyEvent e) {
-			String newKey = DataModel.generateKey(txtName.getText(), getSiblings());
-			txtKey.setText(newKey);
-		}
-		
-		@Override
-		public void keyPressed(KeyEvent e) {
-		}
-	};
-	
+
 	/**
 	 * Creates a new category information panel
 	 * @param parent
@@ -82,9 +67,6 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 		if (!canEdit){
 			chMultiple.setEnabled(false);
 		}
-		
-		txtName.addKeyListener(generateKeyListener);
-
 		
 	}
 

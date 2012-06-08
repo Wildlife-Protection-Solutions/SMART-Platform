@@ -53,6 +53,7 @@ import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
@@ -83,6 +84,9 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		
 		@Override
 		public void postShutdown(IWorkbench workbench) {
+			//close database connection
+			HibernateManager.endSessionFactory(false);
+			
 		}
 	};
 	
@@ -97,7 +101,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	super.dispose();
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(perspectiveTracker);
-    	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().removeWorkbenchListener(shutdownListener);
+    	//getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().removeWorkbenchListener(shutdownListener);
     	super.getWindowConfigurer().getWindow().removePerspectiveListener(perspectiveListener);
     }
     

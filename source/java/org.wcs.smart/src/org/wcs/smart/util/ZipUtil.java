@@ -63,8 +63,22 @@ public class ZipUtil {
             fOut = new FileOutputStream(outputZipFile);
             bOut = new BufferedOutputStream(fOut);
             tOut = new ZipArchiveOutputStream(bOut);
+            int count = 0;
             for (int i = 0; i < directories.length; i ++){
-            	addFileToZip(tOut, directories[i], "", monitor);	
+            	count += SmartUtils.countFiles(directories[i]);
+            }
+            
+            monitor.beginTask("Creating zip file", count);
+            for (int i = 0; i < directories.length; i ++){
+            	if (directories[i].isDirectory() && directories[i].list().length == 0){
+            		//empty directory; create an empty file as a placeholder
+            		ZipArchiveEntry zipEntry = new ZipArchiveEntry(directories[i].getName()); 
+                    tOut.putArchiveEntry(zipEntry);
+                    //IOUtils.copy(new FileInputStream(path), zOut);
+                    tOut.closeArchiveEntry();
+            	}else{
+            		addFileToZip(tOut, directories[i], "", monitor);
+            	}
             }
             
         } finally {
@@ -90,23 +104,24 @@ public class ZipUtil {
     private static boolean addFileToZip(ZipArchiveOutputStream zOut, 
     		File path, 
     		String base, IProgressMonitor monitor) throws IOException {
-        
-    	monitor.subTask("processing: " + path.getAbsolutePath());
     	
-        String entryName = base + path.getName();
-        ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
-        zOut.putArchiveEntry(zipEntry);
-        
+    	monitor.subTask("processing: " + path.getAbsolutePath());
+    	String entryName = base + path.getName();
         if(monitor.isCanceled()){
         	return false;
         }
+        monitor.worked(1);
+       
         if (path.isFile()) {
-            IOUtils.copy(new FileInputStream(path), zOut);
+            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
+            zOut.putArchiveEntry(zipEntry);
+            FileInputStream in = new FileInputStream(path);
+            IOUtils.copy(in, zOut);
+            in.close();
             zOut.closeArchiveEntry();
+            
         } else {
-            zOut.closeArchiveEntry();
             File[] children = path.listFiles();
- 
             if (children != null) {
                 for (File child : children) {
                     if (!addFileToZip(zOut, child, entryName + "/", monitor)){

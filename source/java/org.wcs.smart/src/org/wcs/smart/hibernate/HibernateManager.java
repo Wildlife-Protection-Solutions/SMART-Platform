@@ -37,6 +37,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.backup.DerbyRestoreEngine;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -77,6 +78,17 @@ public class HibernateManager extends SmartHibernateManager{
 			tx.rollback();
 			x.close();
 		}
+	}
+	
+	/**
+	 * Closes the current session factory.
+	 * 
+	 * @param reconnect should be true if the application
+	 * is going to re-connect to the database.
+	 */
+	public static void endSessionFactory(boolean reconnect){
+		SmartHibernateManager.endSessionFactory();
+		DerbyHibernateExtensions.shutDown(reconnect);
 	}
 	
 	

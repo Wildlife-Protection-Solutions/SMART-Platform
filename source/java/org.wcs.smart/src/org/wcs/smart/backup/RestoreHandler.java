@@ -24,8 +24,6 @@ package org.wcs.smart.backup;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -33,68 +31,85 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ui.internal.backup.BackupDialog;
+import org.wcs.smart.ui.internal.backup.RestoreBackupDialog;
 
 /**
- * Handler for performing backup command.
- * 
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
  * @author egouge
  * @since 1.0.0
  */
-public class BackupHandler extends AbstractHandler {
+public class RestoreHandler {
 
-	private boolean backupState = false;
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		executeBackup(HandlerUtil.getActiveShell(event));
-		return null;
-	}
+	public void execute(final Shell shell) throws ExecutionException {
 
-	public void executeBackup(final Shell shell){
-		backupState = false;
+		if (!MessageDialog.openConfirm(shell, "Restore", "Restoring a backup file will cause" +
+				" all conservation areas in the existing database to be removed and replaced" +
+				" with the data in the backup file.\n\nAre you sure you want to continue?")){
+			return;
+		}
 		
-		final BackupDialog dialog = new BackupDialog(shell);
+		if (!DerbyRestoreEngine.validateUserRestore(shell)){
+			return;
+		}
+		
+		MessageDialog confirm = new MessageDialog(
+				shell,
+				"Confirm Restore",null,
+				"It is recommeneded you backup the current database before restoring.  Would you like to backup now?",
+				MessageDialog.QUESTION_WITH_CANCEL,
+				new String[]{IDialogConstants.YES_LABEL,
+						IDialogConstants.NO_LABEL,
+						IDialogConstants.CANCEL_LABEL
+				},0);
+		int ret = confirm.open();
+		if (ret == 0){
+			//perform backup
+			BackupHandler handler = new BackupHandler();
+			handler.executeBackup(shell);
+			if (!handler.backupOk()){
+				MessageDialog.openError(shell, "Error", "Error occurred during backup process.  Restore will not proceed.");
+			}
+			
+		}else if (ret == 1){
+			
+		}else if (ret == 2){
+			return;
+		}
+		
+
+		
+		final RestoreBackupDialog dialog = new RestoreBackupDialog(shell);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}
 		try {
 			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(false, true, new IRunnableWithProgress() {
+			pmdDialog.run(false, false, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					File f = dialog.getSelectedFile();
 					try{
-						if(DerbyBackupEngine.backupSystem(f, monitor)){					
-							MessageDialog.openInformation(shell, "Backup Complete", "System backed up successfully to file: \n\n" +  f.getAbsolutePath());
-							backupState = true;
-						}else if (monitor.isCanceled()){
-							MessageDialog.openError(shell, "Backup Failed", "Backup process cancelled");
-						}else{
-							MessageDialog.openError(shell, "Backup Failed", "Backup did not complete.  Please try again.");
-						}
+						DerbyRestoreEngine.restoreSystem(f, monitor);				
+						MessageDialog.openInformation(shell, "Restore Complete", "System restore completed");
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,
-								"Backup Failed. " + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(shell,"Restore Failed.\n\n" + ex.getMessage(), ex);
 					}
 
 				}
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Backup Failed. " + ex.getMessage(), ex);
+					"Restore Failed. " + ex.getMessage(), ex);
 		}
+		return;
 	}
-	
-	
-	public boolean backupOk(){
-		return backupState;
-	}
+
 }

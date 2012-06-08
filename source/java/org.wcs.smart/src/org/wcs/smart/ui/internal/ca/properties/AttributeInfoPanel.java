@@ -62,7 +62,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -121,6 +123,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	
 	private AttributeTree attTree = null;
 	private Session currentSession = null;
+	
+	private boolean canEdit = false;
 	/**
 	 * Creates a new attribute panel
 	 * @param parent parent composite
@@ -138,6 +142,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		this.lang = lang;
 		this.currentSession = currentSession;
+		this.canEdit = canEdit;
 		setLayout(new GridLayout(3, false));
 		
 		/* Type */
@@ -223,8 +228,16 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		txtMinValue = new Text(numericComposite, SWT.BORDER);
 		txtMinValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		txtMinValue.setBounds(0, 0, 76, 21);
-		cdMinValue = createDecoration(txtMinValue);
-		txtMinValue.addListener(SWT.Modify, getChangeListener());
+		
+		if (canEdit){
+			cdMinValue = createDecoration(txtMinValue);
+			txtMinValue.addListener(SWT.Modify, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					validate();
+				}
+			});
+		}
 		
 		Label lblNewLabel_4 = new Label(numericComposite, SWT.NONE);
 		lblNewLabel_4.setAlignment(SWT.RIGHT);
@@ -234,8 +247,17 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		txtMaxValue = new Text(numericComposite, SWT.BORDER);
 		txtMaxValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		txtMaxValue.setBounds(0, 0, 76, 21);
-		cdMaxValue = createDecoration(txtMaxValue);		
-		txtMaxValue.addListener(SWT.Modify,  getChangeListener());
+		
+		if (canEdit){
+			cdMaxValue = createDecoration(txtMaxValue);		
+			txtMaxValue.addListener(SWT.Modify, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					validate();
+				}
+			});
+		}
+		
 		if (!canEdit){
 			txtMinValue.setEditable(false);
 			txtMaxValue.setEditable(false);
@@ -278,7 +300,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		list.setBounds(0, 0, 88, 68);
 		lstAttributeList.setContentProvider(new ObservableListContentProvider());
 		lstAttributeList.setInput(attributeList);
-		cdAttList = createDecoration(lstAttributeList.getControl());
+		if (canEdit){
+			cdAttList = createDecoration(lstAttributeList.getControl());
+		}
 		lstAttributeList.setLabelProvider(new AttributeListLabelProvider());
 		
 		if (!canEdit){
@@ -466,7 +490,9 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		booleanComposite = new Composite(optionComposite, SWT.NONE);
 		
 		selectOption();
-		validate();
+		if (canEdit){
+			validate();
+		}
 	}
 
 	/**
@@ -649,7 +675,10 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}
 		selectOption();
 		
-		validate();
+		if (canEdit){
+			//can edit
+			validate();
+		}
 	}
 	
 	/**

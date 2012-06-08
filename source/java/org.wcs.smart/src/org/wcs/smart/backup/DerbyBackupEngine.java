@@ -27,7 +27,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -36,7 +39,7 @@ import org.wcs.smart.util.ZipUtil;
  * @author egouge
  * @since 1.0.0
  */
-public class BackupEngine {
+public class DerbyBackupEngine {
 
 	/**
 	 * @return the default backup file name based on the current date
@@ -54,6 +57,7 @@ public class BackupEngine {
 	 * @return <code>true</code> if backup successful, <code>false</code> if cancelled or failed
 	 * @throws IOException
 	 */
+	//apache derby database backup: http://db.apache.org/derby/docs/10.0/manuals/admin/hubprnt43.html
 	public static boolean  backupSystem(File outputFile, IProgressMonitor monitor) throws IOException{
 		if (outputFile.exists()){
 			if (!outputFile.delete()){
@@ -61,13 +65,27 @@ public class BackupEngine {
 			}
 		}
 		
-		File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY));
-		File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
-		
-		File[] dirsToBackup = new File[]{filestore, database};
-		
-		monitor.beginTask("Backing Up Database and Files", 2);
-		
-		return ZipUtil.createZip(dirsToBackup, outputFile, monitor);
+		Session session = HibernateManager.openSession();
+		try{
+			try{
+				//here we freeze the database to put it into a state for copying
+				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()");
+				q.executeUpdate();
+				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY));
+				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
+			
+				File[] dirsToBackup = new File[]{filestore, database};
+			
+				monitor.beginTask("Backing Up Database and Files", 2);
+			
+				return ZipUtil.createZip(dirsToBackup, outputFile, monitor);
+			}finally{
+				//now un-freeze			
+				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE()");
+				q.executeUpdate();
+			}
+		}finally{
+			session.close();
+		}
 	}
 }

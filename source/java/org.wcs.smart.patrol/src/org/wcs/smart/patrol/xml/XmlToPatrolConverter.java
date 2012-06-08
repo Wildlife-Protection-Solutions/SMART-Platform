@@ -86,12 +86,36 @@ public class XmlToPatrolConverter {
 		
 	}
 	
+	/**
+	 * @return any warnings generated during the import process
+	 */
 	public List<String> getWarnings(){
 		return warnings;
 	}
+	
+	/**
+	 * @return the imported patrol
+	 */
 	public Patrol getImportedPatrol(){
 		return patrol;
 	}
+	
+	
+	/**
+	 * Imports a patrol from an xml object.
+	 * <p>
+	 * Use getImportedPatrol() to retrieve the imported
+	 * patrol object.
+	 * </p>
+	 * <p>User getWarings() to retireve any warnings
+	 * that ocurred during the import process.
+	 * </p> 
+	 * @param xml
+	 * @param session
+	 * @param ca
+	 * @param attachmentLocation
+	 * @throws Exception
+	 */
 	public void fromXml(PatrolType xml, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
 		this.session = session;
 		this.ca = ca;
@@ -103,7 +127,8 @@ public class XmlToPatrolConverter {
 		patrol.setConservationArea(ca);
 		patrol.setEndDate(xml.getEndDate().toGregorianCalendar().getTime());
 		patrol.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
-
+		patrol.setComment(xml.getComment());
+		
 		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType()));
 		patrol.setObjective(xml.getObjective().getDescription());
 //		patrol.setObjectiveRating(xml.getObjective().getRating());

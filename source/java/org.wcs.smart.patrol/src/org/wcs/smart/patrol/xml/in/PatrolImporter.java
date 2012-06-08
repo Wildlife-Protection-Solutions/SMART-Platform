@@ -30,15 +30,20 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -200,6 +205,22 @@ public class PatrolImporter {
 			throws Exception {
 		Session session = HibernateManager.openSession();
 		try{
+			monitor.subTask("Validating");
+			//check if a patrol in the database with the given patorl id already exists
+			if (xmlPatrol.getId() != null){
+				Criteria c = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("id", xmlPatrol.getId())).setProjection(Projections.rowCount());
+				Long cnt = (Long)c.uniqueResult();
+				if (cnt > 0){
+					MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Import Patrol", 
+							null, "The database already contains a patrol with the id '" + xmlPatrol.getId() + "' provided in the file.  If you continue a new patrol with a new " +
+									"id will be generated, potentially duplicating data.\n\nDo you want to continue with the import?", MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+					int ret = dialog.open();
+					if (ret == 1){
+						//do not import
+						return null;
+					}
+				}
+			}		
 			monitor.subTask("Converting");
 			XmlToPatrolConverter converter = new XmlToPatrolConverter();
 			converter.fromXml(xmlPatrol, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);

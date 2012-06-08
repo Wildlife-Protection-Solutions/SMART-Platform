@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
@@ -60,15 +59,9 @@ public abstract class NameKeyComposite extends Composite {
 	
 	protected Text txtName;
 	protected Text txtKey;
+	
 	protected ControlDecoration cdKey;
 	protected ControlDecoration cdTxt;
-	
-	private Listener changeListener = new Listener() {
-		@Override
-		public void handleEvent(Event event) {
-			validate();
-		}
-	};
 	
 	/**
 	 * 
@@ -99,11 +92,11 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param defaultLang language
 	 */
 	protected void initFields(DmObject dmObject, Language defaultLang){
-		if (txtName != null ){
-			txtName.setText(dmObject.findName(defaultLang));
-		}
 		if (txtKey != null && dmObject.getKeyId() != null){
 			txtKey.setText(dmObject.getKeyId());
+		}
+		if (txtName != null ){
+			txtName.setText(dmObject.findName(defaultLang));
 		}
 	}
 	/**
@@ -152,15 +145,21 @@ public abstract class NameKeyComposite extends Composite {
 		txtKey = new Text(parent, SWT.BORDER);
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		txtKey.addListener(SWT.Modify, getChangeListener());
-		
-		cdKey = createDecoration(txtKey);
-		cdKey.setDescriptionText("Invalid key.  It must not be blank");
-		
-		cdTxt = createDecoration(txtName);
-		cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank");
 		
 		if (canEdit){
+			txtName.addListener(SWT.Modify, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					validate();					
+				}
+			});
+			
+			cdKey = createDecoration(txtKey);
+			cdKey.setDescriptionText("Invalid key.  It must not be blank");
+			
+			cdTxt = createDecoration(txtName);
+			cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank");
+			
 			txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
 			Button btnChangeKey = new Button(parent, SWT.NONE);
@@ -217,16 +216,17 @@ public abstract class NameKeyComposite extends Composite {
 	 */
 	protected boolean validate(){
 		boolean error = false;
+		
 		cdKey.hide();
 		cdTxt.hide();
 						
-		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_KEY_LENGTH)){
 			cdKey.setDescriptionText("Invalid key.  It must not be blank, and can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			cdKey.show();
 			error = true;
 		}
 		
-		if (!SmartUtils.isSimpleString(txtName.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
+		if (!SmartUtils.isSimpleString(txtName.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH)){
 			cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank, and can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			cdTxt.show();
 			error = true;
@@ -238,12 +238,6 @@ public abstract class NameKeyComposite extends Composite {
 	 * @return the siblings of the current dmobject being modified
 	 */
 	protected abstract Collection<? extends DmObject> getSiblings();
-	/**
-	 * 
-	 * @return listener that calls the validate function when event occurs
-	 */
-	protected Listener getChangeListener(){
-		return changeListener;
-	}
+
 }
 
