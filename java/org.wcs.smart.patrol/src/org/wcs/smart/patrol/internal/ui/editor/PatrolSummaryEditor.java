@@ -77,6 +77,7 @@ import org.wcs.smart.patrol.internal.ui.CommentComposite;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.EmployeeLeaderPilotComposite;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
+import org.wcs.smart.patrol.internal.ui.PatrolIdComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolLegsComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolMandateComposite;
@@ -123,6 +124,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	
 	private Button btnArmed;
 	
+	private Hyperlink editId;
 	private Hyperlink editObjective;
 	private Hyperlink editComment;
 	private Hyperlink editEmployee;
@@ -208,8 +210,13 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		toolkit.createLabel(right, "Patrol ID:");
 		txtPatrolId = toolkit.createFormText(right, false);
-		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		txtPatrolId.setData(FormToolkit.KEY_DRAW_BORDER, null);
+		
+	
+		editId = createEditLink(toolkit, right, new PatrolIdComposite());
+		editId.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
+				
 		
 		toolkit.createLabel(left, "Patrol Type:");
 		txtPatrolType = toolkit.createFormText(left, false);
@@ -384,7 +391,6 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		dataSection.setClient(compData);
 		
-		frmPatrolSummary.setText(editor.getPatrol().getId());
 		initValues();
 	}
 
@@ -438,6 +444,11 @@ public class PatrolSummaryEditor extends EditorPart {
 		if (ret == IDialogConstants.OK_ID){
 			PatrolEventManager.getInstance().patrolChanged(comp.getAttribute(), editor.getPatrol());
 			this.initValues();
+			
+			PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
+			input.setId(editor.getPatrol().getId());
+			editor.updatePartName();
+			
 			return true;
 		}
 		return false;
@@ -460,13 +471,15 @@ public class PatrolSummaryEditor extends EditorPart {
 	}
 
 	/**
-	 * Updates the widges with the value from the patrol.
+	 * Updates the widgets with the value from the patrol.
 	 */
 	private void initValues(){
 		Session session = HibernateManager.openSession();
 		try {
 			Patrol patrol = editor.getPatrol();
 			session.update(patrol);
+			frmPatrolSummary.setText(editor.getPatrol().getId());
+			
 			txtPatrolId.setText(patrol.getId(), false, false);
 			txtPatrolType.setText(patrol.getPatrolType().getGuiName(), false, false);
 			if (patrol.getStation() == null) {

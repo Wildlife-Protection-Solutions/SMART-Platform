@@ -52,7 +52,7 @@ CREATE TABLE smart.patrol
 (
 	UUID CHAR(16) for bit data NOT NULL,
 	CA_UUID CHAR(16) for bit data  NOT NULL,
-	ID VARCHAR(23) NOT NULL,
+	ID VARCHAR(32) NOT NULL,
 	STATION_UUID CHAR(16) for bit data,
 	TEAM_UUID CHAR(16) for bit data,
 	OBJECTIVE VARCHAR(8192),

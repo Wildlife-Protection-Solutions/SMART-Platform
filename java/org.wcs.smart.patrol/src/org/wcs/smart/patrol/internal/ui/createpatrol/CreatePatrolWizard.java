@@ -26,9 +26,11 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -52,6 +54,8 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	private boolean canFinish = false;
 	private IWizardPage lastPage = null;
 
+	private PatrolIdWizardPage page1;
+
 	/**
 	 * Creates a new wizard.
 	 */
@@ -59,7 +63,9 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		setWindowTitle("Create New Patrol");
 
 		patrol = new Patrol();
+		
 		patrol.setConservationArea(SmartDB.getCurrentConservationArea());
+		patrol.setId(PatrolHibernateManager.generatePatrolId(patrol, getSession()));
 	}
 
 	/**
@@ -113,7 +119,9 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	@Override
 	public void addPages() {
 		((WizardDialog) getContainer()).addPageChangingListener(this);
-
+		page1 = new PatrolIdWizardPage();
+		
+		super.addPage(page1);
 		super.addPage(new PatrolTypeWizardPage());
 		super.addPage(new TransportTypeWizardPage());
 		super.addPage(new PatrolArmedWizardPage());
@@ -126,8 +134,14 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		super.addPage(new PatrolLeaderWizardPage());
 		super.addPage(new MultiLegWizardPage());
 		super.addPage(new PatrolLegsWizardPage());
-
+		
 	}
+	
+	@Override
+	 public void createPageControls(Composite pageContainer) {
+		 super.createPageControls(pageContainer);
+		 page1.initModel(patrol, getSession());
+	 }
 
 	/**
 	 * 

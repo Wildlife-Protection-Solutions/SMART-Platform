@@ -67,6 +67,13 @@ public class PatrolEditorInput implements IEditorInput {
 	}
 	
 	/**
+	 * @param id
+	 */
+	public void setId(String id){
+		this.id = id;
+	}
+	
+	/**
 	 * @return start date
 	 */ 
 	public Date getStartDate(){

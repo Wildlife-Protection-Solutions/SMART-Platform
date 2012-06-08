@@ -76,6 +76,10 @@ public class PatrolEventManager {
 	 */
 	public static int PATROL_COMMENT = 8;
 	
+	/**
+	 * Patrol id
+	 */
+	public static int PATROL_ID = 9;
 	
 	/**
 	 * 

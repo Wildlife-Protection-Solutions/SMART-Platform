@@ -381,7 +381,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	public static boolean savePatrol(Patrol patrol, Session session, boolean saveWaypoints){
 		session.beginTransaction();
 		try{
-			if (patrol.getId() == null){
+			if (patrol.getId() == null || patrol.getId().compareTo(Patrol.AUTO_GENERATE_TEXT) == 0){
 				String id = PatrolHibernateManager.generatePatrolId(patrol, session);
 				patrol.setId(id);
 			}
