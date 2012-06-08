@@ -57,6 +57,11 @@ public class DmObject extends HasLabel{
 	 * Maximum length of the key identifier
 	 */
 	public static final int MAX_KEY_LENGTH = 128;
+	
+	/**
+	 * Maximum length of the name identifier
+	 */
+	public static final int MAX_NAME_LENGTH = 1024;
 
 	private Set<Label> names;	//names
 	private String name;		//default name		

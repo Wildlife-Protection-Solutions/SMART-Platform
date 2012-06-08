@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.derby.impl.sql.compile.GetCurrentConnectionNode;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -59,6 +60,7 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -101,6 +103,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	/* data model */
 	private DataModel dataModel = null;
 	
+	
+	
 	/**
 	 * Creates new data model property page
 	 */
@@ -128,6 +132,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		return canClose;
 	}
 	
+	private Language getLanguage(){
+		//TODO: implement language for this dialog
+		return SmartDB.getCurrentConservationArea().getDefaultLanguage();
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
@@ -169,7 +177,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 //		viewer = new TreeViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new DataModelContentProvider());
 		//TODO: implement language support
-		viewer.setLabelProvider(new DataModelLabelProvider(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+		viewer.setLabelProvider(new DataModelLabelProvider(getLanguage()));
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		viewer.setAutoExpandLevel(3);
 		viewer.setInput(this.dataModel);
@@ -425,7 +433,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		try {
 			dialog.run(false, true, runnable);		
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), "Error occurred.", ex);
+			SmartPlugIn.displayLog(getShell(), "An error has occurred. " + ex.getMessage() + ".\n\nPlease close the data model window and re-open it.", ex);
+			getSession().close();
 		}
 	}
 	
@@ -436,7 +445,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (o instanceof Category){
 			final Category cat  = (Category)o;
-			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category : " +cat.getFullCategoryName());
+			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category : " + cat.getFullCategoryName(getLanguage()));
 			if (!ret){
 				return;
 			}
@@ -447,15 +456,24 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					InterruptedException {
 					boolean delete = DataModelManager.getInstance().validateDelete(cat, monitor, getSession());
 					if (delete){
-						cat.getParent().getChildren().remove(cat);
-						cat.setParent(null);
+						if (cat.getParent() != null){
+							cat.getParent().getChildren().remove(cat);
+							cat.setParent(null);
+						}else{
+							 ((DataModel) viewer.getInput()).getCategories().remove(cat);
+							 if (cat.getUuid() != null){
+								 getSession().delete(cat);
+							}
+							getSession().flush();
+							getSession().evict(cat);
+						}
 					}
 				}
 			});
 			
 		}else if (o instanceof CategoryAttribute){
 			final CategoryAttribute catAtt  = (CategoryAttribute)o;
-			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category/attribute relationship:\nCategory: '" + catAtt.getCategory().getFullCategoryName() + "'\nAttribute: '" + catAtt.getAttribute().getName() + "'");
+			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category/attribute relationship:\nCategory: '" + catAtt.getCategory().getFullCategoryName(getLanguage()) + "'\nAttribute: '" + catAtt.getAttribute().findName(getLanguage()) + "'");
 			if (!ret){
 				return;
 			}
@@ -483,7 +501,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 						}
 						if (!contains){
-							boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "The attribute " + catAtt.getAttribute().getName() + " is not longer associated with any categories.  Would you like to delete this attribute?");
+							boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "The attribute " + catAtt.getAttribute().findName(getLanguage()) + " is not longer associated with any categories.  Would you like to delete this attribute?");
 							if (ret){
 								delete = DataModelManager.getInstance().validateDelete(catAtt.getAttribute(), monitor, getSession());
 								if (delete){
@@ -546,6 +564,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		newCat.setConservationArea(ca);
 		newCat.setIsActive(true);
 		newCat.setChildren(new ArrayList<Category>());
+		newCat.setIsMultiple(true);
 		
 		CategoryDialogPage dd = new CategoryDialogPage(getShell(), newCat, siblings, ca.getDefaultLanguage());
 		int ret = dd.open();

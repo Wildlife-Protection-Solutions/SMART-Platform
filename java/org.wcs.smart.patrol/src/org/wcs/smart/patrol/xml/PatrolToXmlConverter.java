@@ -43,6 +43,10 @@ public class PatrolToXmlConverter {
 	public static PatrolType toXml(Patrol p ) throws DatatypeConfigurationException{
 		
 		PatrolType xml = new PatrolType();
+		
+		/* patrol id */
+		xml.setId(p.getId());
+		
 		/* start & end dates */
 		xml.setEndDate(toXmlDate(p.getEndDate()));
 		xml.setStartDate(toXmlDate(p.getStartDate()));
@@ -72,6 +76,10 @@ public class PatrolToXmlConverter {
 		for (PatrolLeg leg: p.getLegs()){
 			xml.getLegs().add(convertPatrolLeg(leg));
 		}
+		
+		/* comment */
+		xml.setComment(p.getComment());
+		
 		return xml;
 		
 	}

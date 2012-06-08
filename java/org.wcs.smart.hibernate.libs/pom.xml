@@ -3,7 +3,7 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wcs.smart</groupId>
-	<artifactId>libs</artifactId>
+	<artifactId>hibernate</artifactId>
 	<version>1.2.3</version>
 	<name>SMART - Spatial Monitoring and Reporting Tool</name>
 	<packaging>pom</packaging>
@@ -46,11 +46,11 @@
             <artifactId>javassist</artifactId>
             <version>3.15.0-GA</version>
         </dependency>
-        <dependency>
-            <groupId>ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <version>1.2.3</version>
-        </dependency>
+		<dependency>
+    		<groupId>net.sf.ehcache</groupId>
+    		<artifactId>ehcache-core</artifactId>
+    		<version>2.5.2</version>
+		</dependency>
         
          <!-- <dependency>
             <groupId>junit</groupId>

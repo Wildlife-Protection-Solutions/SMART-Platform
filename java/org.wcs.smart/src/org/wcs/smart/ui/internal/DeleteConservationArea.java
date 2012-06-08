@@ -60,7 +60,10 @@ public class DeleteConservationArea extends AbstractHandler {
 			return null;
 		}
 		
-		UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell());
+		UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(),
+				"Delete Conservation Area",
+				"Enter your username and password to confirm that you want to delete this conservation area.",
+				"Delete");
 		if (dialog.open() == Window.CANCEL){
 			return null;
 		}

@@ -64,9 +64,9 @@ public class SmartUtils {
 		 */
 		ALLOWED_CHARS_MED_REGEX("a-Z, 0-9 or - _ :", "[^-0-9a-z:_]" ),
 		/**
-		 * Allows chars, digits, 0 _ : and spaces
+		 * Allows chars, digits, 0 _ : & and spaces
 		 */
-		ALLOWED_CHARS_COMPLEX_REGEX("a-Z, 0-9 or - _ : and spaces", "[^-0-9a-z :_]");
+		ALLOWED_CHARS_COMPLEX_REGEX("a-Z, 0-9 or - _ : & and spaces", "[^-0-9a-z :_&]");
 		
 		public final String textDesc;
 		public final String regex;
@@ -440,5 +440,24 @@ public class SmartUtils {
 	 */
 	public static Boolean isSimpleString (String str, RegExLevel level){
 		return isSimpleString(str, level, 64, 1);
+	}
+	
+	/**
+	 * Counts all the files in a directory including
+	 * all sub-directories.
+	 * 
+	 * @param directory the directory to start at
+	 * @return the total number of files
+	 */
+	public static int countFiles(File directory){
+		int count = 0;
+		for (File f : directory.listFiles()){
+			if (f.isFile()){
+				count++;
+			}else{
+				count += countFiles(f);
+			}
+		}
+		return count;
 	}
 }

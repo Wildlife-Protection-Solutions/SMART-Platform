@@ -43,13 +43,16 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.backup.DerbyBackupEngine;
 
 /**
- * Dialog for displaying system
- * backup options to the user.
- * 
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
  * @author egouge
  * @since 1.0.0
  */
-public class BackupDialog extends TitleAreaDialog {
+public class RestoreBackupDialog extends TitleAreaDialog {
 
 	private Text txtBackupFile;
 	private File selectedFile;
@@ -57,7 +60,7 @@ public class BackupDialog extends TitleAreaDialog {
 	/**
 	 * @param parentShell
 	 */
-	public BackupDialog(Shell parentShell) {
+	public RestoreBackupDialog(Shell parentShell) {
 		super(parentShell);
 	}
 	
@@ -67,7 +70,7 @@ public class BackupDialog extends TitleAreaDialog {
 	 */
 	private String generateBackupFileName() throws IOException{
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
-		File f = new File(backupDir + File.separator + DerbyBackupEngine.getDefaultFileName());
+		File f = new File(backupDir + File.separator );
 		return f.getCanonicalPath();
 	}
 	
@@ -93,11 +96,11 @@ public class BackupDialog extends TitleAreaDialog {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtBackupFile = new Text(main, SWT.DEFAULT);
-		try{
-			txtBackupFile.setText(generateBackupFileName());
-		}catch (IOException ex){
-			ex.printStackTrace();
-		}
+//		try{
+//			txtBackupFile.setText(generateBackupFileName());
+//		}catch (IOException ex){
+//			ex.printStackTrace();
+//		}
 		txtBackupFile.setEditable(true);
 		txtBackupFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		int width = txtBackupFile.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
@@ -112,7 +115,7 @@ public class BackupDialog extends TitleAreaDialog {
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
+				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 				File f = new File(txtBackupFile.getText());
 				fd.setFilterPath(f.getParent());
 				fd.setFileName(f.getName());
@@ -131,9 +134,9 @@ public class BackupDialog extends TitleAreaDialog {
 			}
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));		
-		setTitle("Backup Smart System");
-		setMessage("Select the file to backup the system to.");
-		super.getShell().setText("Backup");
+		setTitle("Restore SMART backup");
+		setMessage("Select the file to restore.");
+		super.getShell().setText("Restore");
 		return composite;
 	}
 	
@@ -144,7 +147,7 @@ public class BackupDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Backup", true);
+		createButton(parent, IDialogConstants.OK_ID, "Restore", true);
 		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
 		getButton(IDialogConstants.CANCEL_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);
@@ -157,10 +160,9 @@ public class BackupDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			File file = new File(txtBackupFile.getText());
-			if (file.exists()){
-				if (!MessageDialog.openConfirm(getShell(), "Confirm Overwrite", "The file '" + file.getAbsolutePath() + "' already exists.\n\nAre you sure you want to overwrite it?")){
-					return;
-				}
+			if (!file.exists()){
+				MessageDialog.openError(getShell(), "File error", "The file '" + file.getAbsolutePath() + "' does not exist.");
+				return;
 			}
 			selectedFile = file;
 			super.setReturnCode(IDialogConstants.OK_ID);

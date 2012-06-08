@@ -65,13 +65,6 @@ public class SmartHibernateManager {
 		sessionFactory = null;
 	}
 	
-	public static void reset(){
-		if (sessionFactory != null){
-			sessionFactory.close();
-		}
-		sessionFactory = null;
-	}
-	
 	
 	/**
 	 * Creates a new session factory.
@@ -80,6 +73,8 @@ public class SmartHibernateManager {
 	public  static synchronized final void createSessionFactory(){
 		
 		if (sessionFactory == null){
+
+			
 			Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml"));
 			
 			config.setProperty("hibernate.connection.username", userName);
@@ -94,7 +89,8 @@ public class SmartHibernateManager {
 			if (!((SessionFactoryImplementor)sessionFactory).getSettings().getDialect().supportsSequences()){
 				//fail
 				throw new IllegalStateException("You can't use this database - it does not support sequences");
-			}				
+			}
+
 		}
 	}
 	
@@ -111,9 +107,6 @@ public class SmartHibernateManager {
 		if (session == null || !session.isOpen() ){
 			session = sessionFactory.openSession();
 			sessionMapsThreadLocal.set(session);
-//			System.out.println("Creating new session : " +Thread.currentThread().getId());
-//		}else{
-//			System.out.println("Re-using session : " +Thread.currentThread().getId());
 		}
 		
 		return session;
@@ -139,7 +132,7 @@ public class SmartHibernateManager {
 	/**
 	 * Closes the current session factory.
 	 */
-	public static final void endSessionFactory(){
+	protected static void endSessionFactory(){
 		if (sessionFactory != null){
 			sessionFactory.close();
 		}
@@ -148,6 +141,9 @@ public class SmartHibernateManager {
 	
 	private static final String MAPPING_ID = "org.wcs.smart.hibernate.mapping";
 	
+	/**
+	 * @return gets all hibernate mappings
+	 */
 	private static final List<Class>  getMappings(){
 		List<Class> items = new ArrayList<Class>();
 		if (Platform.getExtensionRegistry() == null) return Collections.EMPTY_LIST;

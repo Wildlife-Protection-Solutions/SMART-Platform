@@ -19,59 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.startup;
+package org.wcs.smart.hibernate;
 
-import org.eclipse.swt.widgets.Shell;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.engine.SessionFactoryImplementor;
 
 /**
- * Displays the advanced dialog associated
- * with the login page. 
- * 
- * @author Emily Gouge
- *
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
+ * @author egouge
+ * @since 1.0.0
  */
-public class StartUpAdvancedDialog extends InitializeDialog {
+public class DerbyHibernateExtensions {
 
 	/**
-	 * Create the dialog.
+	 * Correctly shuts down the derby database.
 	 * 
-	 * @param parent
-	 * @param style
+	 * @param reconnect should be <code>true</code> if there is any change
+	 * the application is going to reconnect to the database.
 	 */
-	public StartUpAdvancedDialog(Shell parent) {
-		super(parent);
-
-	}
-
-	/**
-	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#onCancel()
-	 */
-	@Override
-	public void onCancel() {
+	public static void shutDown(boolean reconnect){
+		try {
+			DriverManager.getConnection("jdbc:derby:;shutdown=true");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-	}
+		if (reconnect){
+			try{
+				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+			}catch (Exception ex){
+			}
+		}
 
-	/**
-	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#getHeaderText()
-	 */
-	@Override
-	public String getHeaderText() {
-		return "SMART Advanced Options";
-	}
-
-	/**
-	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#getMessageText()
-	 */
-	@Override
-	public String getMessageText() {
-		return "Would you like to:";
-	}
-
-	/**
-	 * @see org.wcs.smart.ui.internal.startup.InitializeDialog#getDialogText()
-	 */
-	@Override
-	public String getDialogText() {
-		return "Advanced Options";
 	}
 }

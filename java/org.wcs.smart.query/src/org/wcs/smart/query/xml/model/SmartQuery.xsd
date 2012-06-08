@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/query/" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/query/" 
+elementFormDefault="qualified">
+
+    <complexType name="QueryType">
+    	<sequence>
+    		<element name="queryPart" type="tns:QueryPart"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="uuiditem" type="tns:UuidItemType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="name" type="string"></attribute>
+    	<attribute name="language" type="string"></attribute>
+    	<attribute name="queryType" type="string"></attribute>
+    </complexType>
+
+    <element name="SmartQuery" type="tns:Query" />
+    
+
+
+    <complexType name="Query">
+    	<sequence>
+    		<element name="query" type="tns:QueryType" maxOccurs="1" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="UuidItemType">
+    	<sequence>
+    		<element name="id" type="string"></element>
+    		<element name="value" type="string" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="uuid" type="string"></attribute>
+    </complexType>
+
+    <complexType name="QueryPart">
+    	<sequence>
+    		<element name="value" type="string"></element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    </complexType>
+</schema>

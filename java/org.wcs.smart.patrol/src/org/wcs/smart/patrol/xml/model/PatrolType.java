@@ -61,7 +61,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "objective",
     "team",
     "station",
-    "legs"
+    "legs",
+    "comment"
 })
 public class PatrolType {
 
@@ -82,7 +83,10 @@ public class PatrolType {
     protected XMLGregorianCalendar endDate;
     @XmlAttribute(name = "isArmed")
     protected Boolean isArmed;
-
+    protected String comment;
+    @XmlAttribute(name = "id")
+    protected String id;
+    
     /**
      * Gets the value of the mandate property.
      * 
@@ -304,4 +308,52 @@ public class PatrolType {
         this.isArmed = value;
     }
 
+    
+    /**
+     * Gets the value of the comment property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getComment() {
+        return comment;
+    }
+
+    /**
+     * Sets the value of the comment property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+    
+    /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
 }

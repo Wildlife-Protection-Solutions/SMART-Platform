@@ -59,8 +59,14 @@ import org.wcs.smart.util.SmartUtils;
 @Table(name="smart.patrol")
 public class Patrol {
 
+	/**
+	 * Text to identify patrol id as auto-generated
+	 */
 	public static final String AUTO_GENERATE_TEXT = "system-generated";
 
+	/**
+	 * Maximum patrol id length
+	 */
 	public static final Integer MAX_ID_LENGTH = 32;
 	
 	private byte[] uuid;
