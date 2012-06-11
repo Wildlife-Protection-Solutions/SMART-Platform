@@ -22,7 +22,6 @@
 package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -39,22 +38,16 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.SmartProperties;
-import org.wcs.smart.backup.DerbyBackupEngine;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Dialog for restoring backup file.
+ * 
  * @author egouge
  * @since 1.0.0
  */
 public class RestoreBackupDialog extends TitleAreaDialog {
 
-	private Text txtBackupFile;
+	private Text txtRestorefile;
 	private File selectedFile;
 	
 	/**
@@ -64,18 +57,9 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 		super(parentShell);
 	}
 	
-	/**
-	 * @return the default backup file name
-	 * @throws IOException
-	 */
-	private String generateBackupFileName() throws IOException{
-		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
-		File f = new File(backupDir + File.separator );
-		return f.getCanonicalPath();
-	}
 	
 	/**
-	 * @return the backup file selected by the user
+	 * @return the restore file selected by the user
 	 */
 	public File getSelectedFile(){
 		return this.selectedFile;
@@ -95,20 +79,15 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 		lbl.setText("Backup File:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		txtBackupFile = new Text(main, SWT.DEFAULT);
-//		try{
-//			txtBackupFile.setText(generateBackupFileName());
-//		}catch (IOException ex){
-//			ex.printStackTrace();
-//		}
-		txtBackupFile.setEditable(true);
-		txtBackupFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		int width = txtBackupFile.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		txtRestorefile = new Text(main, SWT.DEFAULT);
+		txtRestorefile.setEditable(true);
+		txtRestorefile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		int width = txtRestorefile.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		if (width > 400){
 			width = 400;
 		}
-		((GridData)txtBackupFile.getLayoutData()).widthHint = width;
-		txtBackupFile.setSelection(txtBackupFile.getText().length());
+		((GridData)txtRestorefile.getLayoutData()).widthHint = width;
+		txtRestorefile.setSelection(txtRestorefile.getText().length());
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
 		btnBrowse.setText("Browse...");
@@ -116,7 +95,7 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-				File f = new File(txtBackupFile.getText());
+				File f = new File(txtRestorefile.getText());
 				fd.setFilterPath(f.getParent());
 				fd.setFileName(f.getName());
 				fd.setFilterNames(new String[]{"zip (*.zip)", "*.*"});
@@ -129,7 +108,7 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 					if (!file.endsWith(".zip")){
 						file = file + ".zip";
 					}
-					txtBackupFile.setText(file);
+					txtRestorefile.setText(file);
 				}
 			}
 		});
@@ -159,7 +138,7 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			File file = new File(txtBackupFile.getText());
+			File file = new File(txtRestorefile.getText());
 			if (!file.exists()){
 				MessageDialog.openError(getShell(), "File error", "The file '" + file.getAbsolutePath() + "' does not exist.");
 				return;
