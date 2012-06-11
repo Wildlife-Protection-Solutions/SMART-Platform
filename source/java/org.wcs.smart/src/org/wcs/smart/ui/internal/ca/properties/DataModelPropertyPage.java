@@ -29,8 +29,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.derby.impl.sql.compile.GetCurrentConnectionNode;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -103,6 +104,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	/* data model */
 	private DataModel dataModel = null;
 	
+	private Transaction currentTransaction = null;
 	
 	
 	/**
@@ -117,6 +119,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	}
 	
 	
+	/**
+	 * Sets the data model
+	 * @param dm
+	 */
 	public void setDataModel(DataModel dm){
 		this.dataModel = dm;
 		if (viewer != null){
@@ -125,30 +131,70 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 	}
 	
+	/**
+	 * Starts a new transaction and opens the dialog
+	 */
 	@Override
-	public boolean  close(){
-		boolean canClose = super.close();
-
-		return canClose;
+	public int open(){
+		currentTransaction = getSession().beginTransaction();
+		return super.open();
 	}
 	
+	/** Validates the user wants to save changes.  If no the current transaction is rolled back,
+	 * if yes the transaction is committed, if cancel <code>false</code>.
+	 * 
+	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#validateSave()
+	 */
+	@Override
+	protected boolean validateSave(){
+		if (getErrorMessage() != null){
+			if (!MessageDialog.openQuestion(getShell(), "Close", "Changes have been made that cannot be saved.  Are you sure you want to close?")){
+				return false;
+			}
+		}else{
+			MessageDialog md = new MessageDialog(getShell(), "Save Changes?", null, "There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			int ret = md.open();
+			if (ret == 2){
+				//cancel
+				return false;
+			}else if (ret == 0){
+				//yes
+				if (!performSave()){
+					return false;
+				}else{
+					setReturnCode(IDialogConstants.OK_ID);
+				}
+			}else if (ret == 1){
+				if (currentTransaction != null){
+					try{
+						currentTransaction.rollback();
+					}catch (Exception ex){}
+				}
+				currentTransaction = null;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * @return the current language the data model is dealing in
+	 */
 	private Language getLanguage(){
 		//TODO: implement language for this dialog
 		return SmartDB.getCurrentConservationArea().getDefaultLanguage();
 	}
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		getSession().beginTransaction();
 		parent.setLayout(new GridLayout(1, false));		
 	
 		Composite thisparent = new Composite(parent, SWT.BORDER);
 		thisparent.setLayout(new GridLayout(1, false));
 		thisparent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		
+		
 		SashForm comp = new SashForm(thisparent, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -174,9 +220,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		};
 		FilteredTree fTree = new FilteredTree(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
 		viewer = fTree.getViewer();
-//		viewer = new TreeViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new DataModelContentProvider());
-		//TODO: implement language support
 		viewer.setLabelProvider(new DataModelLabelProvider(getLanguage()));
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		viewer.setAutoExpandLevel(3);
@@ -197,15 +241,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		});
 		
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateInfoPanel();
-				
 			}
 		});
-		
-		
 		
 		Composite rightPanel = new Composite(comp, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
@@ -293,8 +333,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		infoButtonPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		infoButtonPanel.setLayout(new GridLayout(1, false));
 		
-	
-		
 		btnModifyElement = new Button(infoButtonPanel, SWT.NONE);
 		btnModifyElement.setEnabled(false);
 		btnModifyElement.setText(DialogConstants.EDIT_BUTTON_TEXT);
@@ -307,7 +345,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		});
 		setButtonLayoutData(btnModifyElement);		
 		
-//		
 		Composite bottomComp = new Composite(thisparent, SWT.NONE);
 		bottomComp.setLayout(new GridLayout(1, false));
 		/* import button @ bottom */
@@ -319,15 +356,16 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				exportXml();
 			}
 		});
-		//exportButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 2,1));
-//				
+			
 		viewer.refresh();
 		setMessage("Manage conservation area data model.");
 		
-		getSession().getTransaction().rollback();
 		return thisparent;
 	}
 
+	/**
+	 * Exports the current model as defined (not necessary saved) to an xml file.
+	 */
 	private void exportXml(){
 		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
 		fd.setFilterNames(new String[]{"Xml File (.xml)"});
@@ -376,7 +414,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 	}
 	
-	/* (non-Javadoc)
+	/**
+	 * Commits the current open transaction.
+	 * 
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#performSave()
 	 */
 	@Override
@@ -392,7 +432,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					try {
-						((DataModel)viewer.getInput()).save(s);
+						currentTransaction.commit();
+						currentTransaction = session.beginTransaction();
 						setChangesMade(false);
 					}catch (Exception ex){
 						SmartPlugIn.log(null, ex);
@@ -401,11 +442,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				}
 			});
 		} catch (Throwable ex) {
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
-			}
+			try{
+				if (currentTransaction != null && currentTransaction.isActive()){
+					currentTransaction.rollback();
+				}
+			}catch (Exception ex2){}
+			currentTransaction = null;
 			s.close();
-			SmartPlugIn.displayLog(errorShell,"Error saving data model changes.", ex);
+			SmartPlugIn.displayLog(errorShell,"Error saving data model changes.  Please close this dialog and re-open it before continuing. \n\n" + ex.getMessage(), ex);
 			return false;
 		}
 		return true;
@@ -428,6 +472,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 	}	
 	
+	/**
+	 * Runs a task in a progress monitor dialog.
+	 * @param runnable
+	 */
 	private void runInProgressDialog(IRunnableWithProgress runnable){
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try {
@@ -501,8 +549,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 						}
 						if (!contains){
-							boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "The attribute " + catAtt.getAttribute().findName(getLanguage()) + " is not longer associated with any categories.  Would you like to delete this attribute?");
-							if (ret){
+							MessageDialog dialog = new MessageDialog(getShell(), "Delete", null,
+									"The attribute '" + catAtt.getAttribute().findName(getLanguage()) + "' is not longer associated with any categories.  Would you like to delete this attribute?", 
+									MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+							int ret = dialog.open();
+							if (ret == 0){  //YES
 								delete = DataModelManager.getInstance().validateDelete(catAtt.getAttribute(), monitor, getSession());
 								if (delete){
 									dataModel.getAttributes().remove(catAtt.getAttribute());
@@ -527,10 +578,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	
 	/**
 	 * Determines if a particular category or parent category
-	 * contains the given
-	 * attribute 
-	 * @param cat
-	 * @param att
+	 * contains the given attribute 
+	 * 
+	 * @param cat category to test
+	 * @param att attribute to look for
 	 * @return
 	 */
 	private boolean containsAttribute(Category cat, Attribute att){
@@ -545,6 +596,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 		return false;
 	}
+	
 	/*
 	 * adds a category
 	 */
@@ -578,6 +630,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			newCat.setParent(null);
 			newCat.setCategoryOrder(dm.getCategories().size());
 			dm.getCategories().add(newCat);
+			getSession().saveOrUpdate(newCat);
 		}else if (o instanceof Category){
 			Category parentCat = (Category)o;
 			if (parentCat.getChildren() == null){
@@ -668,6 +721,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			att.setConservationArea(ca);
 			DataModel dm = (DataModel)viewer.getInput();
 			dm.addAttribute(att, parent);
+			session.saveOrUpdate(att);
 			viewer.setExpandedState(parent, true);
 			refreshTree();
 		}

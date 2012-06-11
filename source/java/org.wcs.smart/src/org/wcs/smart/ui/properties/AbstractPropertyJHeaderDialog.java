@@ -164,25 +164,8 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	@Override
 	public boolean close(){
 		if (changesMade){
-			if (getErrorMessage() != null){
-				if (!MessageDialog.openQuestion(getShell(), "Close", "Changes have been made that cannot be saved.  Are you sure you want to close?")){
-					return false;
-				}
-			}else{
-				MessageDialog md = new MessageDialog(getShell(), "Save Changes?", null, "There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
-				int ret = md.open();
-				if (ret == 2){
-					//cancel
-					return false;
-				}
-				if (ret == 0){
-					//yes
-					if (!performSave()){
-						return false;
-					}else{
-						setReturnCode(IDialogConstants.OK_ID);
-					}
-				}
+			if (!validateSave()){
+				return false;
 			}
 		}
 		
@@ -190,6 +173,35 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 			session.close();
 		}
 		return super.close();  
+	}
+	
+	/**
+	 * Validates if the current changes should be saved
+	 * 
+	 * @return <code>true</code> if users wishes to save and save was successful, <code>true</code> if user does not want to save, <code>false</code> if
+	 * cancel pressed or error occured while saving.
+	 */
+	protected boolean validateSave(){
+		if (getErrorMessage() != null){
+			if (!MessageDialog.openQuestion(getShell(), "Close", "Changes have been made that cannot be saved.  Are you sure you want to close?")){
+				return false;
+			}
+		}else{
+			MessageDialog md = new MessageDialog(getShell(), "Save Changes?", null, "There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			int ret = md.open();
+			if (ret == 2){
+				//cancel
+				return false;
+			}else if (ret == 0){
+				//yes
+				if (!performSave()){
+					return false;
+				}else{
+					setReturnCode(IDialogConstants.OK_ID);
+				}
+			}
+		}
+		return true;
 	}
 	
 	/**
