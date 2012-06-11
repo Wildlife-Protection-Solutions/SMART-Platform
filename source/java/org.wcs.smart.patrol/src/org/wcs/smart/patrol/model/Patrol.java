@@ -311,8 +311,7 @@ public class Patrol {
 	 */
 	@Transient
 	public String getPatrolDatastorePath(){
-		return "Patrol" + File.separator + id + "_" + SmartUtils.getDirectoryPath(uuid);
-		
+		return "Patrol" + File.separator + SmartUtils.getDirectoryPath(uuid);
 	}
 
 

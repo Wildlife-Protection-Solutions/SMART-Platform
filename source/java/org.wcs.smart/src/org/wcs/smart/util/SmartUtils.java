@@ -225,7 +225,7 @@ public class SmartUtils {
 	}
 
 	/**
-	 * Crestes the given directory.  
+	 * Creates the given directory.  
 	 * @param dir the directory to created
 	 * @return <code>false</code> if not created, <code>true</code> otherwise
 	 */
