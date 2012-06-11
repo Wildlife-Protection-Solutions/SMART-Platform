@@ -24,7 +24,6 @@ package org.wcs.smart.backup;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -35,18 +34,18 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ui.internal.backup.RestoreBackupDialog;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Handler for restoring backup file.
  * @author egouge
  * @since 1.0.0
  */
 public class RestoreHandler {
 
-	public void execute(final Shell shell) throws ExecutionException {
+	/**
+	 * Runs the handler
+	 * @param shell the current shell
+	 * 
+	 */
+	public void execute(final Shell shell) {
 
 		if (!MessageDialog.openConfirm(shell, "Restore", "Restoring a backup file will cause" +
 				" all conservation areas in the existing database to be removed and replaced" +
@@ -77,13 +76,12 @@ public class RestoreHandler {
 			}
 			
 		}else if (ret == 1){
-			
+			//no - continue without preforming backup
 		}else if (ret == 2){
+			//cancel
 			return;
 		}
-		
-
-		
+			
 		final RestoreBackupDialog dialog = new RestoreBackupDialog(shell);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;

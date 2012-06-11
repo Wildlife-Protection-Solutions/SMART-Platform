@@ -47,12 +47,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.internal.UserNamePasswordDialog;
 
 /**
- * TODO Purpose of
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Backup restore engine for restoring
+ * backup files.
  * 
  * @author egouge
  * @since 1.0.0
@@ -60,7 +56,13 @@ import org.wcs.smart.ui.internal.UserNamePasswordDialog;
 public class DerbyRestoreEngine {
 
 	/**
-	 * Validates that a restore can occur.
+	 * Validates that a restore can occur. 
+	 * <p>Prompts the user as required.</p>
+	 * 
+	 * <p>A backup can be restored if:</p>
+	 * <li> there are no conservation areas in the database (empty database)</li>
+	 * <li>the user enters a username/password that is an admin user in one of the 
+	 * conservation areas in the database.</li>
 	 * 
 	 * @param currentShell the current shell for displaying input boxes
 	 * @return <code>true</code> if can restore, <code>false</code> otherwise
@@ -76,6 +78,7 @@ public class DerbyRestoreEngine {
 			Long cnt = (Long) session.createCriteria(ConservationArea.class)
 					.setProjection(Projections.rowCount()).uniqueResult();
 			if (cnt == 0) {
+				//there are not conservation areas
 				return true;
 			}
 
@@ -125,6 +128,23 @@ public class DerbyRestoreEngine {
 	
 
 	/**
+	 * Restores a backup file using the following process:
+	 * 
+	 * <ul>
+	 * <li> extracts the contents of the backup file to a temporary directory</li>
+	 * <li>ensures that both the database and filestore files exist in the backup file</li>
+	 * <li>shuts down the existing database</li>
+	 * <li>moves the existing database and filestore to a temporary location</li>
+	 * <li>copies the database and filestore from the temporary directory to the SMART location</li>
+	 * <li>deletes the temporary directory, copied original database and filestore</li>
+	 * </ul>
+	 * 
+	 * <p>If an error occurs it does it's best to restore the system to the original state;
+	 * however this is not always possible.  If this occurs then the system must
+	 * be restored manually.</p>
+	 * 
+	 * @param backupFile the backup file to restore
+	 * @param monitor the progress monitor
 	 */
 	public static void restoreSystem(File backupFile, IProgressMonitor monitor)
 			throws Exception {

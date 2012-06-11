@@ -22,19 +22,11 @@
 package org.wcs.smart.hibernate;
 
 import java.sql.DriverManager;
-import java.sql.SQLException;
-
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.engine.SessionFactoryImplementor;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Database specific extensions for the derby database.
+ * 
+ * 
  * @author egouge
  * @since 1.0.0
  */
@@ -50,11 +42,13 @@ public class DerbyHibernateExtensions {
 		try {
 			DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		} catch (Exception e) {
-			e.printStackTrace();
+			//eatme - this will always through an exception
+			//e.printStackTrace();
 		}
 		
 		if (reconnect){
 			try{
+				//without this hibernate will not re-connect to the database propery
 				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
 			}catch (Exception ex){
 			}

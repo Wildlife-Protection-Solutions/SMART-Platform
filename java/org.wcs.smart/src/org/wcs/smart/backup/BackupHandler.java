@@ -56,6 +56,10 @@ public class BackupHandler extends AbstractHandler {
 		return null;
 	}
 
+	/**
+	 * Execute the backup commend; prompting user as required
+	 * @param shell current shell
+	 */
 	public void executeBackup(final Shell shell){
 		backupState = false;
 		
