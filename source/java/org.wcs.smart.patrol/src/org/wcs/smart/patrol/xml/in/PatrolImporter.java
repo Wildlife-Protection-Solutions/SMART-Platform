@@ -178,10 +178,11 @@ public class PatrolImporter {
 			monitor.subTask("Reading XML");
 			ptype = PatrolXmlManager.readDataModel(in);
 			monitor.worked(1);
-		}catch (Exception ex){
-			ptype = null;
 		}finally{
 			in.close();
+		}
+		if (ptype == null){
+			throw new Exception("Error reading xml patrol.  Please ensure valid patrol xml file.");
 		}
 		return convertAndSave(ptype, null, monitor);
 	}
@@ -324,10 +325,15 @@ class ConfirmInputDialog extends InputDialog{
 	
 	@Override
 	protected Control createDialogArea(Composite parent){
-		Control res = super.createDialogArea(parent);
-		((GridData)this.getText().getLayoutData()).heightHint = 200;
+		Composite res = (Composite) super.createDialogArea(parent);
+		((GridData)(res.getChildren()[0]).getLayoutData()).grabExcessVerticalSpace = false;
+		
+		//((GridData)this.getText().getLayoutData()).heightHint = 200;
 		((GridData)this.getText().getLayoutData()).widthHint = 500;
+		((GridData)this.getText().getLayoutData()).grabExcessVerticalSpace = true;
 		this.getText().setEditable(false);
+		
+		((GridData)parent.getLayoutData()).heightHint = 400;
 		return res;
 	}
 	

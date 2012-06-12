@@ -33,11 +33,15 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.ui.ShowPatrolPersepctiveHandler;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -54,7 +58,9 @@ public class ImportPatrolHandler extends AbstractHandler  {
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		final IWorkbench activeWorkbench = HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench();
+		
 		ImportPatrolDialog dialog = new ImportPatrolDialog (Display.getCurrent().getActiveShell());
 		if (dialog.open() != IDialogConstants.OK_ID){
 			return null;
@@ -79,12 +85,18 @@ public class ImportPatrolHandler extends AbstractHandler  {
 						if (p != null) {
 							PatrolEventManager.getInstance().patrolAdded(p);
 
-							PatrolEditorInput input = new PatrolEditorInput(p
+							
+							try{
+								activeWorkbench.showPerspective(PatrolPerspective.ID, activeWorkbench.getActiveWorkbenchWindow());
+								PatrolEditorInput input = new PatrolEditorInput(p
 									.getUuid(), p.getId(), p.getPatrolType(), p
 									.getStartDate(), p.getEndDate());
-							PlatformUI.getWorkbench()
+								PlatformUI.getWorkbench()
 									.getActiveWorkbenchWindow().getActivePage()
 									.openEditor(input, PatrolEditor.ID);
+							}catch (Exception ex){
+								SmartPatrolPlugIn.log("Error loading imported patrol.", ex);
+							}
 						}
 					} catch (Exception e) {
 						SmartPatrolPlugIn.displayLog("Patrol not imported. "
