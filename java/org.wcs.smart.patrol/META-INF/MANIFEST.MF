@@ -23,3 +23,4 @@ Export-Package: org.wcs.smart.patrol,
  org.wcs.smart.patrol.model
 Bundle-ClassPath: lib/commons-exec-1.1.jar,
  .
+Bundle-Vendor: org.wcs.smart

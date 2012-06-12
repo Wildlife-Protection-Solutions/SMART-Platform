@@ -130,7 +130,9 @@ public class XmlToPatrolConverter {
 		patrol.setComment(xml.getComment());
 		
 		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType()));
-		patrol.setObjective(xml.getObjective().getDescription());
+		if (xml.getObjective() != null){
+			patrol.setObjective(xml.getObjective().getDescription());
+		}
 //		patrol.setObjectiveRating(xml.getObjective().getRating());
 		if (xml.getMandate() != null){
 			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate");
