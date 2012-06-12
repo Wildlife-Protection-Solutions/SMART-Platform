@@ -43,3 +43,4 @@ Export-Package: .,
  org.wcs.smart.query.xml.model
 Bundle-ClassPath: lib/opencsv-2.3.jar,
  .
+Bundle-Vendor: org.wcs.smart

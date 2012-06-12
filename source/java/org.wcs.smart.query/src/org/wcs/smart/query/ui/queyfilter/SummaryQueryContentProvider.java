@@ -23,10 +23,10 @@ package org.wcs.smart.query.ui.queyfilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -482,7 +482,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				//assume data model
 				return results;
 			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
-				Set<Attribute> atts = dataModel.getAttributes();
+				Collection<Attribute> atts = dataModel.getAttributes();
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
@@ -503,7 +503,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				//assume data model
 				return results;
 			}else if (type == NodeType.DATAMODEL_GROUPBY_ATTRIBUTES){
-				Set<Attribute> atts = dataModel.getAttributes();
+				Collection<Attribute> atts = dataModel.getAttributes();
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
