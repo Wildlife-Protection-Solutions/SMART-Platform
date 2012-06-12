@@ -54,11 +54,18 @@ public class BackupDialog extends TitleAreaDialog {
 	private Text txtBackupFile;
 	private File selectedFile;
 	
+	private String title;
+	private String message;
+	private String buttonText;
+	
 	/**
 	 * @param parentShell
 	 */
-	public BackupDialog(Shell parentShell) {
+	public BackupDialog(Shell parentShell, String title, String message, String buttonText) {
 		super(parentShell);
+		this.title = title;
+		this.message = message;
+		this.buttonText = buttonText;
 	}
 	
 	/**
@@ -89,7 +96,7 @@ public class BackupDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Backup File:");
+		lbl.setText("File:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtBackupFile = new Text(main, SWT.DEFAULT);
@@ -131,9 +138,9 @@ public class BackupDialog extends TitleAreaDialog {
 			}
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));		
-		setTitle("Backup Smart System");
-		setMessage("Select the file to backup the system to.");
-		super.getShell().setText("Backup");
+		setTitle(title);
+		setMessage(message); //"Select the file to backup the system to."
+		super.getShell().setText(title);
 		return composite;
 	}
 	
@@ -144,7 +151,7 @@ public class BackupDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Backup", true);
+		createButton(parent, IDialogConstants.OK_ID, buttonText, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
 		getButton(IDialogConstants.CANCEL_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);

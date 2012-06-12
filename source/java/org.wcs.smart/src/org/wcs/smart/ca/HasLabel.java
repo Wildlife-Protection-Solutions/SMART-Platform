@@ -72,7 +72,7 @@ public class HasLabel {
 		if (other != null && other instanceof HasLabel){
 			HasLabel s = (HasLabel)other;
 			if (s.getUuid() == null && this.getUuid() == null){
-				return s.hashCode() == hashCode();
+				return this == s;
 			}else if (s.getUuid() != null && this.getUuid() != null){
 				return Arrays.equals(s.getUuid(), this.getUuid());
 			}

@@ -24,7 +24,6 @@ package org.wcs.smart.ca.datamodel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
@@ -339,7 +338,7 @@ RETURNS NULL ON NULL INPUT;
 	 * @param clonedAttributes a list of cloned attributes to be used when associating attributes with a category
 	 * @return cloned cateogry
 	 */
-	public Category clone(ConservationArea newCa, Category parent, Set<Attribute> clonedAttributes, String defaultLang){
+	public Category clone(ConservationArea newCa, Category parent, List<Attribute> clonedAttributes, String defaultLang){
 		
 		Category clone = new Category();
 		clone.copyValues(this, newCa, ca, defaultLang);

@@ -158,7 +158,7 @@ public class DataModelXmlToSmartConverter {
 		//there may be attributes linked to no categories
 		for (Attribute attribute : attributeLookUp.values()){
 			if (!dm.getAttributes().contains(attribute)){
-				dm.addAttribute(attribute, null);
+				dm.addNewAttribute(attribute, null);
 			}
 		}
 		

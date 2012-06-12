@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -663,7 +664,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 								}
 							}
 						});
-				attributeList = new WritableList(att.getAttributeList(),
+				Collection<AttributeListItem> collection = att.getAttributeList();
+				attributeList = new WritableList(collection,
 						AttributeListItem.class);
 				lstAttributeList.setInput(attributeList);
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
@@ -718,15 +720,16 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}else if (att.getType().equals(Attribute.AttributeType.TEXT)){
 			att.setRegex(txtRegex.getText());
 		}else if (att.getType().equals(Attribute.AttributeType.LIST)){
+			
 			if (att.getAttributeList() == null){
 				att.setAttributeList(new ArrayList<AttributeListItem>());
-				att.getAttributeList().addAll(attributeList);
+			}else{
+				att.getAttributeList().clear();
 			}
 			for (int i = 0; i < attributeList.size(); i ++){
 				((AttributeListItem)attributeList.get(i)).setListOrder(i);
-			}
-			for (AttributeListItem item : att.getAttributeList()){
-				item.setAttribute(att);
+				((AttributeListItem)attributeList.get(i)).setAttribute(att);
+				att.getAttributeList().add((AttributeListItem)attributeList.get(i));
 			}
 		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
 			if(attTree != null){

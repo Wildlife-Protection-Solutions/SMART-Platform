@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
-import org.hibernate.dialect.FirebirdDialect;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -50,7 +49,7 @@ public class DataModel {
 
 	private ConservationArea ca;	//the conservation area of the data model
 	private List<Category> categories;	//the root categories for the data model
-	private Set<Attribute> attributes; // all attributes associated with datamodel	
+	private List<Attribute> attributes; // all attributes associated with datamodel	
 	
 	private static List<Aggregation> aggregations; //set of valid aggregations
 	
@@ -67,7 +66,7 @@ public class DataModel {
 		this.categories = new ArrayList<Category>();
 		this.categories.addAll(rootCategories);
 		
-		this.attributes = new HashSet<Attribute>();
+		this.attributes = new ArrayList<Attribute>();
 		this.attributes.addAll(attributes);
 	}
 	
@@ -160,7 +159,8 @@ public class DataModel {
 	}
 	
 	/**
-	 * Adds the given attribute to the given category.
+	 * Adds the given attribute which is not yet
+	 * in the datamodel to the datamodel and the given category.
 	 * 
 	 * <p>
 	 * If category is null, then it will be added to the attribute
@@ -172,15 +172,28 @@ public class DataModel {
 	 * @return the newly created {@link CategoryAttribute} association of
 	 * null if no category provided
 	 */
-	public CategoryAttribute addAttribute(Attribute att, Category cat){
+	public CategoryAttribute addNewAttribute(Attribute att, Category cat){
 		attributes.add(att);
-		if (cat != null){
-			if (cat.getAttributes() == null){
+		return addExistingAttribute(att, cat);
+		
+	}
+	
+	/**
+	 * Adds an attribute already defined in the datamodel to the 
+	 * given category
+	 * 
+	 * @param att
+	 * @param cat
+	 * @return
+	 */
+	public CategoryAttribute addExistingAttribute(Attribute att, Category cat ){
+		if (cat != null) {
+			if (cat.getAttributes() == null) {
 				cat.setAttributes(new ArrayList<CategoryAttribute>());
 			}
-			for (CategoryAttribute catatt: cat.getAttributes()){
-				if (catatt.getAttribute().equals(att)){
-					//attribute already exists
+			for (CategoryAttribute catatt : cat.getAttributes()) {
+				if (catatt.getAttribute().equals(att)) {
+					// attribute already exists
 					return null;
 				}
 			}
@@ -190,11 +203,10 @@ public class DataModel {
 			ca.setIsActive(true);
 			ca.setOrder(cat.getAttributes().size());
 			cat.getAttributes().add(ca);
-		
+
 			return ca;
 		}
 		return null;
-		
 	}
 	
 	/**
@@ -351,7 +363,7 @@ public class DataModel {
 	 * @return all attributes associated with any category
 	 * in the data model.
 	 */
-	public Set<Attribute> getAttributes(){
+	public List<Attribute> getAttributes(){
 		return this.attributes;
 	}
 	
@@ -477,7 +489,7 @@ public class DataModel {
 		
 		//attributes
 		if (this.getAttributes() != null){
-			clone.attributes = new HashSet<Attribute>();
+			clone.attributes = new ArrayList<Attribute>();
 			for (Attribute att: this.getAttributes()){
 				clone.attributes.add(att.clone(newCa,defaultLang));
 			}

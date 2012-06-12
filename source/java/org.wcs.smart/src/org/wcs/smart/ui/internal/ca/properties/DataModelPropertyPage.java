@@ -482,6 +482,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			dialog.run(false, true, runnable);		
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(getShell(), "An error has occurred. " + ex.getMessage() + ".\n\nPlease close the data model window and re-open it.", ex);
+			try{
+				if (currentTransaction != null && currentTransaction.isActive()){
+					currentTransaction.rollback();
+					currentTransaction = null;
+				}
+			}catch (Exception ex2){
+				SmartPlugIn.log("Error in data model dialog", ex2);
+			}
 			getSession().close();
 		}
 	}
@@ -534,6 +542,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						catAtt.getCategory().getAttributes().remove(catAtt);
 						if (catAtt.getCategory().getUuid() == null || catAtt.getAttribute().getUuid() == null){
 							getSession().evict(catAtt);
+							getSession().flush();
 						}else{
 							getSession().delete(catAtt);
 							getSession().flush();
@@ -588,9 +597,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		if (cat.getAttributes() != null && cat.getAttributes().contains(new CategoryAttribute(cat,att))){
 			return true;
 		}else{
-			for (Category kid : cat.getChildren()){
-				if (containsAttribute(kid, att)){
-					return true;
+			if (cat.getChildren() != null){
+				for (Category kid : cat.getChildren()){
+					if (containsAttribute(kid, att)){
+						return true;
+					}
 				}
 			}
 		}
@@ -682,6 +693,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				return;
 			}
 			refreshTree();
+			try{
+				getSession().flush();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(getShell(), "Error editing element.  Please close and re-start.\n\n" + ex.getMessage(), ex);
+			}
 			
 		}
 		updateInfoPanel();
@@ -720,7 +736,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			att.setConservationArea(ca);
 			DataModel dm = (DataModel)viewer.getInput();
-			dm.addAttribute(att, parent);
+			dm.addNewAttribute(att, parent);
 			session.saveOrUpdate(att);
 			viewer.setExpandedState(parent, true);
 			refreshTree();

@@ -460,4 +460,23 @@ public class SmartUtils {
 		}
 		return count;
 	}
+	
+	/**
+	 * Creates a temporary directory.
+	 * 
+	 * @return the temporary directory 
+	 */
+	public static File createTemporaryDirectory(){
+		File baseDir = new File(System.getProperty("java.io.tmpdir"));
+		String basename = "smart_" + Long.toString(System.nanoTime());
+		
+		for (int i = 0; i < 1000; i ++){
+			File tempDir = new File(baseDir, basename + "_"+ i);
+			if (tempDir.mkdir()){
+				return tempDir;
+			}
+		}
+		throw new IllegalStateException("Failed to create temporary directory");
+		
+	}
 }

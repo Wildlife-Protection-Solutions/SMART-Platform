@@ -168,6 +168,9 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 				}
 				
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+				fd.setFilterExtensions(new String[]{"*.xml", "*.*"});
+				fd.setFilterNames(new String[]{"xml (*.xml)", "All Files (*.*"});
+				
 				String file = fd.open();
 				if (file != null) {
 					final File f = new File(file);
