@@ -45,6 +45,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.internal.UserNamePasswordDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Backup restore engine for restoring
@@ -156,26 +157,8 @@ public class DerbyRestoreEngine {
 
 		monitor.setTaskName("Extracting contents of backup-file");
 		/* extract contents of backup file to temporary directory */
-		File temp = null;
-		try {
-			temp = File.createTempFile("smart",
-					Long.toString(System.nanoTime()));
-		} catch (Exception ex) {
-			throw new Exception(
-					"Could not create temporary directory for extracting backup."
-							+ "\n\n " + ex.getMessage(), ex);
-		}
-		if (temp.exists()) {
-			if (!temp.delete()) {
-				throw new Exception(
-						"Could not extract zip file to temporary working directory");
-			}
-		}
-		if (!temp.mkdir()) {
-			throw new Exception(
-					"Could not extract zip file to temporary working directory");
-		}
-
+		File temp = SmartUtils.createTemporaryDirectory();
+		
 		try {
 			unzipFolder(new ZipFile(backupFile), backupFile.length(), temp,
 					new String[] { "null" });

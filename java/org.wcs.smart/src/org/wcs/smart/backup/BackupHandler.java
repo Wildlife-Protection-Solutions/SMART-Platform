@@ -63,7 +63,7 @@ public class BackupHandler extends AbstractHandler {
 	public void executeBackup(final Shell shell){
 		backupState = false;
 		
-		final BackupDialog dialog = new BackupDialog(shell);
+		final BackupDialog dialog = new BackupDialog(shell,"Backup SMART System", "Select the file to backup the system to.", "Backup");
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}

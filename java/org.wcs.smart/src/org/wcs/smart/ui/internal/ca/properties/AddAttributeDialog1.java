@@ -178,8 +178,9 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(compAddExisting,
 				SWT.BORDER | SWT.FULL_SELECTION);
 		Table tblAttributes = checkboxTableViewer.getTable();
-		tblAttributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-				true, 1, 1));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+		gd.heightHint = 300;
+		tblAttributes.setLayoutData(gd);
 		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 
 		checkboxTableViewer.setLabelProvider(new LabelProvider() {
@@ -283,7 +284,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	private void addAttributes(Category cat, DataModel dm) {
 		Object[] checked = checkboxTableViewer.getCheckedElements();
 		for (int i = 0; i < checked.length; i++) {
-			dm.addAttribute((Attribute) checked[i], cat);
+			dm.addExistingAttribute((Attribute) checked[i], cat);
 		}
 	}
 

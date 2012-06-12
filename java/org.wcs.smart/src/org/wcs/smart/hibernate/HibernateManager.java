@@ -24,20 +24,26 @@ package org.wcs.smart.hibernate;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
+import org.hibernate.EntityMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.persister.entity.Joinable;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.backup.DerbyRestoreEngine;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -47,6 +53,7 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.internal.ca.export.TableInfo;
 
 /**
  * Hibernate manager to manage database connections.
@@ -78,6 +85,37 @@ public class HibernateManager extends SmartHibernateManager{
 			tx.rollback();
 			x.close();
 		}
+	}
+	
+	
+	public static List<TableInfo> getTableInformation(){
+		if (sessionFactory == null){
+			return null;
+		}
+		
+		List<TableInfo> data = new ArrayList<TableInfo>();
+		Map<String, ClassMetadata> x = sessionFactory.getAllClassMetadata();
+		for (Iterator<ClassMetadata> i = x.values().iterator(); i.hasNext();) {
+			ClassMetadata m = i.next();
+			
+			if (m instanceof Joinable){
+				Joinable j = ((Joinable)m);
+				System.out.println(j.getTableName());
+				if (((AbstractEntityPersister)m).getRootTableName().equals(j.getTableName())){
+					System.out.println("ADD");
+					TableInfo info = new TableInfo(m.getMappedClass(EntityMode.POJO), j.getTableName());
+					for (int k = 0; k < m.getPropertyTypes().length; k ++){
+						if (m.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
+							//info.setCaPropertyName(m.getPropertyNames()[k]);
+							info.setCaPropertyName(((AbstractEntityPersister)m).getPropertyColumnNames(k)[0]);
+						}
+					}
+					data.add(info);
+				}
+				
+			}
+		}
+		return data;
 	}
 	
 	/**

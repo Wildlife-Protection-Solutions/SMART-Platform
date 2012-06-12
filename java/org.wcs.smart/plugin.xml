@@ -48,6 +48,20 @@
                label="File"
                mnemonic="F">
             <command
+                  commandId="org.wcs.smart.exportCa"
+                  label="Export Conservation Area ..."
+                  mnemonic="a"
+                  style="push"
+                  tooltip="Exports all data associated with the current conservation area">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="org.wcs.smart.backup"
                   icon="images/icons/etool16/backup.png"
                   label="Backup System"
@@ -292,6 +306,10 @@
             id="org.wcs.smart.backup"
             name="Backup System">
       </command>
+      <command
+            id="org.wcs.smart.exportCa"
+            name="Export Conservation Area ...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -342,6 +360,10 @@
       <handler
             class="org.wcs.smart.backup.BackupHandler"
             commandId="org.wcs.smart.backup">
+      </handler>
+      <handler
+            class="org.wcs.smart.backup.ExportCaHandler"
+            commandId="org.wcs.smart.exportCa">
       </handler>
    </extension>
    <extension
@@ -449,7 +471,8 @@
             class="org.wcs.smart.ca.datamodel.Aggregation">
       </class>
       <class
-            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode"
+            conservationAreaExportQuery="select a.* from AttributeTreeNode a join a.attribute att where att.conservationArea = :ca">
       </class>
       <class
             class="org.wcs.smart.ca.datamodel.Attribute">
