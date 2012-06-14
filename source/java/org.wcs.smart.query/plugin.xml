@@ -45,7 +45,7 @@
             name="Summary Editor">
       </editor>
       <editor
-            class="org.wcs.smart.query.ui.patrol.PatrolQueryEditor"
+            class="org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor"
             default="false"
             id="org.wcs.smart.query.PatrolQueryEditor"
             name="Patrol Query">
@@ -749,6 +749,9 @@
       </class>
       <class
             class="org.wcs.smart.query.model.SummaryQuery">
+      </class>
+      <class
+            class="org.wcs.smart.query.model.patrol.PatrolQuery">
       </class>
    </extension>
    <extension
