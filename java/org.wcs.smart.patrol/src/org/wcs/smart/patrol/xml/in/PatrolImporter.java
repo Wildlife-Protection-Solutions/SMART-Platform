@@ -49,6 +49,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
 import org.wcs.smart.patrol.xml.XmlToPatrolConverter;
 import org.wcs.smart.patrol.xml.model.PatrolType;
@@ -204,7 +205,7 @@ public class PatrolImporter {
 	 */
 	private static Patrol  convertAndSave(PatrolType xmlPatrol, File attachmentDirectory, IProgressMonitor monitor)
 			throws Exception {
-		Session session = HibernateManager.openSession();
+		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try{
 			monitor.subTask("Validating");
 			//check if a patrol in the database with the given patorl id already exists
