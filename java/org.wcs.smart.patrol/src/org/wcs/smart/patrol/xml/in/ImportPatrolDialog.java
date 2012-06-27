@@ -33,8 +33,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -48,6 +51,11 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 
 	private Text txtFile;
 	private String fileName;
+	private Text txtDirectory;
+	private Button btnOpSingle;
+	private Button btnOpMuliple;
+	private Button btnFileBrowse;
+	private Button btnDirectoryBrowse;
 
 	/**
 	 * Creates a new dialog
@@ -55,14 +63,18 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 	 */
 	public ImportPatrolDialog(Shell parentShell) {
 		super(parentShell);
-		setTitle("Import Patrol Data");
+
 	}
 
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
-		fileName = txtFile.getText();
+		if (btnOpMuliple.getSelection()){
+			fileName = txtDirectory.getText();
+		}else{
+			fileName = txtFile.getText();
+		}
 		super.buttonPressed(buttonId);
 	}
 
@@ -92,11 +104,36 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(3, false));
+		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label lbl = new Label(main, SWT.NONE);
+		
+		btnOpSingle = new Button(main, SWT.RADIO);
+		btnOpSingle.setText("Import Single Patrol");
+		btnOpSingle.addListener(SWT.Selection, new Listener() {			
+			@Override
+			public void handleEvent(Event event) {
+				if (btnOpSingle.getSelection()){
+					if (txtFile.getText().length() > 0) {
+						getButton(IDialogConstants.OK_ID).setEnabled(true);
+					}else{
+						getButton(IDialogConstants.OK_ID).setEnabled(false);
+					}
+				}
+				
+				txtFile.setEnabled(btnOpSingle.getSelection());
+				btnFileBrowse.setEnabled(btnOpSingle.getSelection());
+				btnDirectoryBrowse.setEnabled(!btnOpSingle.getSelection());
+				txtDirectory.setEnabled(!btnOpSingle.getSelection());
+			}
+		});
+		Composite single = new Composite(main, SWT.NONE);
+		single.setLayout(new GridLayout(3, false));
+		single.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)single.getLayout()).marginLeft = 15;
+		
+		Label lbl = new Label(single, SWT.NONE);
 		lbl.setText("Source File:");
-		txtFile = new Text(main, SWT.BORDER);
+		txtFile = new Text(single, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtFile.addModifyListener(new ModifyListener() {
 
@@ -107,9 +144,9 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 				}
 			}
 		});
-		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
-		btnBrowse.addSelectionListener(new SelectionAdapter() {
+		btnFileBrowse = new Button(single, SWT.NONE);
+		btnFileBrowse.setText("Browse...");
+		btnFileBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(ImportPatrolDialog.this
@@ -125,10 +162,73 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 					txtFile.setText(f);
 					getButton(IDialogConstants.OK_ID).setEnabled(true);
 				}
+				
 			}
 		});
 		
-		setMessage("Select the zip or xml file to import.");
+		btnOpMuliple = new Button(main, SWT.RADIO);
+		btnOpMuliple.setText("Import Multiple Patrols");
+		btnOpMuliple.addListener(SWT.Selection, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				if (btnOpMuliple.getSelection()){
+					if (txtDirectory.getText().length() > 0) {
+						getButton(IDialogConstants.OK_ID).setEnabled(true);
+					}else{
+						getButton(IDialogConstants.OK_ID).setEnabled(false);
+					}
+				}
+				
+				txtFile.setEnabled(btnOpSingle.getSelection());
+				btnFileBrowse.setEnabled(btnOpSingle.getSelection());
+				btnDirectoryBrowse.setEnabled(!btnOpSingle.getSelection());
+				txtDirectory.setEnabled(!btnOpSingle.getSelection());
+				
+			}
+		});
+		
+		Composite multi = new Composite(main, SWT.NONE);
+		multi.setLayout(new GridLayout(3, false));
+		multi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)multi.getLayout()).marginLeft = 15;
+		lbl = new Label(multi, SWT.NONE);
+		lbl.setText("Source Directory:");
+		txtDirectory = new Text(multi, SWT.BORDER);
+		txtDirectory.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtDirectory.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (txtDirectory.getText().length() > 0) {
+					getButton(IDialogConstants.OK_ID).setEnabled(true);
+				}
+			}
+		});
+		btnDirectoryBrowse = new Button(multi, SWT.NONE);
+		btnDirectoryBrowse.setText("Browse...");
+		btnDirectoryBrowse.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DirectoryDialog dd = new DirectoryDialog(ImportPatrolDialog.this.getShell(), SWT.OPEN);
+				dd.setMessage("Select folder containing patrol exports");
+				dd.setFilterPath(txtDirectory.getText());
+				String f = dd.open();
+				if (f != null) {
+					txtDirectory.setText(f);
+					getButton(IDialogConstants.OK_ID).setEnabled(true);
+				}
+			}
+		});
+		
+		txtFile.setEnabled(btnOpSingle.getSelection());
+		btnFileBrowse.setEnabled(btnOpSingle.getSelection());
+		btnDirectoryBrowse.setEnabled(!btnOpSingle.getSelection());
+		txtDirectory.setEnabled(!btnOpSingle.getSelection());
+		
+		setMessage("Select the patrol data location.");
+		setTitle("Import Patrol Data");
+		getShell().setText("Import Patrols");
 		return composite;
 	}
 
