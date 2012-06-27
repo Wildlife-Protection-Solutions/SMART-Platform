@@ -41,6 +41,7 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	 * To be executed before the conservation area is deleted
 	 */
 	public static final int EXECUTE_ORDER = 1;
+	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ca.ICaDeleteListener#beforeDelete(org.wcs.smart.ca.ConservationArea, org.hibernate.Session)
 	 */
@@ -56,14 +57,7 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 		monitor.subTask("Deleting Patrol Types");
 		deletePatrolTypes(ca, session);		
 	}
-	
-	
-//	private void deletePatrolOptions(ConservationArea ca, Session session) throws Exception{
-//		Query q = session.createQuery("delete from PatrolOptions where uuid = :ca");
-//		q.setParameter("ca", ca.getUuid());
-//		q.executeUpdate();
-//	}
-//	
+
 	private void deletePatrols(ConservationArea ca, Session session) throws Exception{
 		Query q = session.createQuery("delete from Patrol where conservationArea = :ca");
 		q.setParameter("ca", ca);
@@ -88,16 +82,6 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	}
 	
 	private void deletePatrolTeams(ConservationArea ca, Session session) throws Exception{
-//		List teams = session.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca)).list();
-//		
-//		for (Iterator iterator = teams.iterator(); iterator.hasNext();) {
-//			Team t = (Team) iterator.next();
-//			for (DescriptionLabel desc : t.getDescriptions()){
-//				session.delete(desc);
-//			}
-////			session.delete(t);
-//		}
-		
 		Query q = session.createQuery("delete from Team where conservationArea = :ca");
 		q.setParameter("ca", ca);
 		q.executeUpdate();
