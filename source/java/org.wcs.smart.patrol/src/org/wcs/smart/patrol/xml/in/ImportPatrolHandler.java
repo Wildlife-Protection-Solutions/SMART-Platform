@@ -28,6 +28,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -38,41 +39,86 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.ui.ShowPatrolPersepctiveHandler;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * Command handler for importing patrol data
- * from xml file.
+ * Command handler for importing patrol data from xml file.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class ImportPatrolHandler extends AbstractHandler  {
-
+public class ImportPatrolHandler extends AbstractHandler {
 
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final IWorkbench activeWorkbench = HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench();
-		
-		ImportPatrolDialog dialog = new ImportPatrolDialog (Display.getCurrent().getActiveShell());
-		if (dialog.open() != IDialogConstants.OK_ID){
-			return null;
-		}
-		
-		final File file = new File( dialog.getFileName() );
+		final IWorkbench activeWorkbench = HandlerUtil
+				.getActiveWorkbenchWindow(event).getWorkbench();
 
-		if (!file.exists()){
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", "The file " + file.toString() + " cannot be found. ");
+		ImportPatrolDialog dialog = new ImportPatrolDialog(Display.getCurrent()
+				.getActiveShell());
+		if (dialog.open() != IDialogConstants.OK_ID) {
 			return null;
 		}
 
+		final File file = new File(dialog.getFileName());
+		if (!file.exists()) {
+			MessageDialog.openError(Display.getCurrent().getActiveShell(),
+					"Error", "The location " + file.toString()
+							+ " cannot be found. ");
+			return null;
+		}
+		
+		if (file.isFile()) {
+			importFile(activeWorkbench, file);
+		}else if (file.isDirectory()){
+			importDirectory(activeWorkbench, file);
+		}
+		return null;
+	}
+
+	public void importDirectory(final IWorkbench activeWorkbench, final File directory){
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		
+		try {
+			pmd.run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					File[] files = directory.listFiles();
+					monitor.beginTask("Loading Patrols", files.length);
+					IProgressMonitor nullPm = new NullProgressMonitor();
+						
+					for (int i = 0; i < files.length; i ++){
+						monitor.subTask("Processing " + files[i].toString());
+						monitor.worked(1);
+						
+						if (files[i].isDirectory()) continue;
+						
+						try{
+							Patrol p = PatrolImporter.importPatrol(files[i], nullPm);
+							if (p != null) {
+								PatrolEventManager.getInstance().patrolAdded(p);
+							}
+						}catch (Exception ex){
+							SmartPatrolPlugIn.displayLog("File " + files[i].toString() + " not imported: " + ex.getMessage(), ex);
+						}	
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPatrolPlugIn.displayLog(
+					"Patrol not imported. " + e.getMessage(), e);
+		}
+	}
+	
+	
+	public void importFile(final IWorkbench activeWorkbench, final File file) {
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display
 				.getCurrent().getActiveShell());
 		try {
@@ -85,17 +131,21 @@ public class ImportPatrolHandler extends AbstractHandler  {
 						if (p != null) {
 							PatrolEventManager.getInstance().patrolAdded(p);
 
-							
-							try{
-								activeWorkbench.showPerspective(PatrolPerspective.ID, activeWorkbench.getActiveWorkbenchWindow());
-								PatrolEditorInput input = new PatrolEditorInput(p
-									.getUuid(), p.getId(), p.getPatrolType(), p
-									.getStartDate(), p.getEndDate());
+							try {
+								activeWorkbench.showPerspective(
+										PatrolPerspective.ID, activeWorkbench
+												.getActiveWorkbenchWindow());
+								PatrolEditorInput input = new PatrolEditorInput(
+										p.getUuid(), p.getId(), p
+												.getPatrolType(), p
+												.getStartDate(), p.getEndDate());
 								PlatformUI.getWorkbench()
-									.getActiveWorkbenchWindow().getActivePage()
-									.openEditor(input, PatrolEditor.ID);
-							}catch (Exception ex){
-								SmartPatrolPlugIn.log("Error loading imported patrol.", ex);
+										.getActiveWorkbenchWindow()
+										.getActivePage()
+										.openEditor(input, PatrolEditor.ID);
+							} catch (Exception ex) {
+								SmartPatrolPlugIn.log(
+										"Error loading imported patrol.", ex);
 							}
 						}
 					} catch (Exception e) {
@@ -108,10 +158,6 @@ public class ImportPatrolHandler extends AbstractHandler  {
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
 					"Patrol not imported. " + e.getMessage(), e);
-		}			
-		
-		return null;
+		}
 	}
-
-
 }
