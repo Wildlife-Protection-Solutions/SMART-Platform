@@ -184,7 +184,7 @@ public abstract class ObservationQueryColumn implements Cloneable{
 			return cloneColumns(queryColumns);
 		}
 		
-		Job j = new Job("load observation qury columns"){
+		Job j = new Job("load observation query columns"){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

@@ -14,8 +14,6 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: .,
- au.com.bytecode.opencsv,
- au.com.bytecode.opencsv.bean,
  org.wcs.smart.query,
  org.wcs.smart.query.engine,
  org.wcs.smart.query.export,
@@ -42,6 +40,5 @@ Export-Package: .,
  org.wcs.smart.query.ui.summary,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
-Bundle-ClassPath: lib/opencsv-2.3.jar,
- .
+Bundle-ClassPath: .
 Bundle-Vendor: org.wcs.smart
