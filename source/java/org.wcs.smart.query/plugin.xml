@@ -750,9 +750,6 @@
       <class
             class="org.wcs.smart.query.model.SummaryQuery">
       </class>
-      <class
-            class="org.wcs.smart.query.model.patrol.PatrolQuery">
-      </class>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
