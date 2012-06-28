@@ -36,8 +36,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.backup.RestoreHandler;
 import org.wcs.smart.startup.SmartStartUp;
+import org.wcs.smart.ui.internal.backup.RestoreHandler;
 
 /**
  * Abstract dialog for start-up smart dialogs.

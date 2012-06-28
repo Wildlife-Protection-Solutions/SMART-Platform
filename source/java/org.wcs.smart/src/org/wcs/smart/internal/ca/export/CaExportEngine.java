@@ -1,0 +1,139 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.internal.ca.export;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartProperties;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.export.ICaDataExportEngine;
+import org.wcs.smart.ca.export.ICaDataExporter;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
+
+/**
+ * Main process for exporting a conservation area.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class CaExportEngine {
+
+	/**
+	 * Export code extension point
+	 */
+	private static final String EXPORT_EXTENSION_ID = "org.wcs.smart.ca.export";
+	
+	/**
+	 * @return the default backup file name based on the current date
+	 */
+	public static String getDefaultFileName(){
+		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		try{
+			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getCanonicalPath();
+		}catch (Exception ex){
+			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getAbsolutePath();
+		}
+	}
+	
+	/**
+	 * Exports the current conservation area to the given file.
+	 * @param destFile output file
+	 * @param monitor progress monitor
+	 * 
+	 */
+	public void export(File destFile, IProgressMonitor monitor){
+		
+		Session session = HibernateManager.openSession();
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		try{
+			File tempDir = SmartUtils.createTemporaryDirectory();
+		
+			/* write a conservation area info file */
+			writeConservationAreaInfo(tempDir, ca);
+			
+			/* run through the exporters exporting data */
+			List<ICaDataExporter> exporters = getExportExtensions();
+			ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
+			for (ICaDataExporter exporter: exporters){
+				exporter.exportData(engine, monitor);
+			}
+			
+			/* zip up files */
+			ZipUtil.createZip(new File[]{tempDir}, destFile, monitor);
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(null,
+					"Conservation area export failed.\n\n" + ex.getMessage(), ex);
+		}finally{
+			session.close();
+		}
+	}
+	
+	/**
+	 * Writes a simple text file with conservation area information.
+	 * 
+	 * @param directory
+	 * @param ca
+	 * @throws IOException
+	 */
+	private void writeConservationAreaInfo(File directory, ConservationArea ca) throws IOException{
+		FileWriter fw = new FileWriter(new File(directory, "conservationarea.dat"));
+		fw.write(ca.getId());
+		fw.write(SmartUtils.LINE_SEPARATOR);
+		fw.write(ca.getName());
+		fw.write(SmartUtils.LINE_SEPARATOR);
+		fw.write(ca.getDescription());
+		fw.close();
+	}
+	
+	/**
+	 * @return list of ca data exporter extension points
+	 */
+	private List<ICaDataExporter> getExportExtensions(){
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<ICaDataExporter> items = new ArrayList<ICaDataExporter>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXPORT_EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				items.add((ICaDataExporter)e.createExecutableExtension("caExporter"));
+			}
+		}catch (Exception ex){
+			ex.printStackTrace();
+		}
+		return items;
+	}
+}

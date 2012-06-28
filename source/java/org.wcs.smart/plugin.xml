@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.ca.export" name="Conservation Area Data Exporter" schema="schema/org.wcs.smart.ca.export.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"
@@ -358,11 +359,11 @@
             commandId="org.wcs.smart.changeUserPassword">
       </handler>
       <handler
-            class="org.wcs.smart.backup.BackupHandler"
+            class="org.wcs.smart.ui.internal.backup.BackupHandler"
             commandId="org.wcs.smart.backup">
       </handler>
       <handler
-            class="org.wcs.smart.backup.ExportCaHandler"
+            class="org.wcs.smart.ui.internal.backup.ExportCaHandler"
             commandId="org.wcs.smart.exportCa">
       </handler>
    </extension>
@@ -437,7 +438,7 @@
             banner="images/icons/wizban/smart_wiz.png"
             class="org.wcs.smart.udig.catalog.smart.ui.SmartAreaWizardPage"
             description="Wizard for loading smart area datasets"
-            icon="images/icons/smart16.gif"
+            icon="images/icons/smart128.gif"
             name="Smart Area Connection Page">
       </wizardPage>
    </extension>
@@ -450,12 +451,14 @@
             class="org.wcs.smart.ca.Agency">
       </class>
       <class
+            ca_property=".agency.conservationArea"
             class="org.wcs.smart.ca.Rank">
       </class>
       <class
             class="org.wcs.smart.ca.Employee">
       </class>
       <class
+            ca_property=".id.language.ca"
             class="org.wcs.smart.ca.Label">
       </class>
       <class
@@ -471,6 +474,7 @@
             class="org.wcs.smart.ca.datamodel.Aggregation">
       </class>
       <class
+            ca_property=".attribute.conservationArea"
             class="org.wcs.smart.ca.datamodel.AttributeTreeNode"
             conservationAreaExportQuery="select a.* from AttributeTreeNode a join a.attribute att where att.conservationArea = :ca">
       </class>
@@ -478,12 +482,14 @@
             class="org.wcs.smart.ca.datamodel.Attribute">
       </class>
       <class
+            ca_property=".attribute.conservationArea"
             class="org.wcs.smart.ca.datamodel.AttributeListItem">
       </class>
       <class
             class="org.wcs.smart.ca.datamodel.Category">
       </class>
       <class
+            ca_property=".id.category.conservationArea"
             class="org.wcs.smart.ca.datamodel.CategoryAttribute">
       </class>
       <class
@@ -521,6 +527,18 @@
             onToolbar="false"
             tooltip="Zoom to map extents">
       </actionTool>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.export">
+      <exporter
+            caExporter="org.wcs.smart.internal.ca.export.HibernateDataExporter">
+      </exporter>
+      <exporter
+            caExporter="org.wcs.smart.internal.ca.export.DataStoreDataExporter">
+      </exporter>
+      <exporter
+            caExporter="org.wcs.smart.internal.ca.export.DataModelExporter">
+      </exporter>
    </extension>
 
 </plugin>

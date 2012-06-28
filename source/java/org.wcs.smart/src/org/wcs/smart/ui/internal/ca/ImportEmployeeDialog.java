@@ -1,0 +1,214 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.ui.internal.ca;
+
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.in.EmployeeCsvImporter;
+import org.wcs.smart.hibernate.HibernateManager;
+
+
+/**
+ * Dialog for selecting a CSV file to import.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class ImportEmployeeDialog extends TitleAreaDialog {
+
+	
+	private Text txtFile;
+	private String fileName = null;
+	private boolean skipHeader = false;
+	private Button btnSkipHeader;
+	
+	/**
+	 * Create the dialog.
+	 * 
+	 * @param parent
+	 * 
+	 */
+	public ImportEmployeeDialog(Shell parent) {
+		super(parent);
+	
+	}
+
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+
+	
+	
+	/**
+	 * Create contents of the dialog.
+	 */
+	@Override
+	public Control createDialogArea(Composite parent){
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		main.setLayout(new GridLayout(3, false));
+		
+		final FileDialog fd = new FileDialog(getShell());
+		fd.setFilterExtensions(new String[]{"*.csv", "*.*"});
+		fd.setFilterNames(new String[]{"Comma Separated Values (*.csv)", "All Files (*.*)"});
+		
+		Label lbl = new Label(main, SWT.NONE);
+		lbl.setText("CSV File:");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtFile = new Text(main, SWT.BORDER);
+		txtFile.addListener(SWT.Modify, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				if (txtFile.getText().length() > 0){
+					getButton(IDialogConstants.OK_ID).setEnabled(true);
+				}else{
+					getButton(IDialogConstants.OK_ID).setEnabled(false);
+				}
+				
+			}
+		});
+		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		Button btnBrowse = new Button(main, SWT.NONE);
+		btnBrowse.setText("Browse");
+		btnBrowse.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				fd.setFileName(txtFile.getText());
+				String file = fd.open();
+				if (file != null){
+					txtFile.setText(file);
+				}
+				
+			}
+		});
+		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		btnSkipHeader = new Button(main, SWT.CHECK);
+		btnSkipHeader.setText("Includes Header Line (skip the first line when importing)");
+		btnSkipHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		
+		Text txtinfo = new Text(main, SWT.NONE | SWT.READ_ONLY);
+		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		txtinfo.setText("The CSV file must have the following format:\n "
+				+ "ID,GIVEN NAME,FAMILY NAME,BIRTHDATE(yyyy-mm-dd),GENDER(M/F),START EMPLOYMENT(yyyy-mm-dd),END EMPLOYMENT(yyyy-mm-dd),RANK,AGENCY\n\n"
+				+ "The following fields are optional: ID, END EMPLOYEMENT, RANK, AGANCY");
+		
+		getShell().setText("Import Employees");
+		setMessage("Import employee data from csv file.");
+		return parent;
+		
+	}
+	
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		Button btn = createButton(parent, IDialogConstants.OK_ID, "Import", true);
+		btn.setEnabled(false);
+		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+	}
+	
+	/**
+	 * @return the selected filename
+	 */
+	private String getFileName(){
+		return this.fileName;
+	}
+	/**
+	 * @return if the first line is to be skipped or not
+	 */
+	public boolean getSkipHeader(){
+		return this.skipHeader;
+	}
+	
+	@Override
+	protected void buttonPressed(int buttonId) {
+		fileName = txtFile.getText();
+		skipHeader = btnSkipHeader.getSelection();
+		if (IDialogConstants.OK_ID == buttonId) {
+			setReturnCode(OK);
+			loadData();
+			close();
+		} else if (IDialogConstants.CANCEL_ID == buttonId) {
+			setReturnCode(CANCEL);
+			close();
+		}
+	}
+	
+	/**
+	 * Loads employee data into the database.
+	 */
+	private void loadData(){
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+		try{
+		dialog.run(false, true, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				Session session = HibernateManager.openSession();
+				try{
+					EmployeeCsvImporter importer = new EmployeeCsvImporter();
+					if(importer.importCsvFile(new File(getFileName()), getSkipHeader(), monitor, session)){
+						MessageDialog.openInformation(getShell(), "Import Employees", "Employee data loaded successfully");
+					}else{
+						MessageDialog.openError(getShell(), "Import Employees", "Empoyee data not imported.");
+					}
+				}catch (Exception ex){
+					SmartPlugIn.displayLog(getShell(), "Failed to load employee data\n\n" + ex.getMessage(), ex);		
+				}finally{
+					session.close();
+				}
+				
+			}
+		});
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), "Failed to load employee data. " + ex.getMessage(), ex);
+		}
+	}
+	
+
+}

@@ -45,8 +45,13 @@ public class DerbyBackupEngine {
 	 * @return the default backup file name based on the current date
 	 */
 	public static String getDefaultFileName(){
+		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-		return "SMART_" + format.format(new Date()) + ".db.bak.zip"; 
+		try{
+			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getCanonicalPath();
+		}catch (Exception ex){
+			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getAbsolutePath(); 
+		}
 	}
 	
 	/**

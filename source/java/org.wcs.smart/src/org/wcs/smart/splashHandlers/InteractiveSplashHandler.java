@@ -38,6 +38,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -49,7 +51,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.splash.AbstractSplashHandler;
-import org.eclipse.wb.swt.ResourceManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -85,6 +86,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private ComboViewer cmvConservationArea  = null;
 	private Label progressLabel  = null;
 	private Label lblAdvanced = null;
+	
+	private Font newFont;
 	
 	//widgets to enable/disable
 	private ArrayList<Control> widgets = null;
@@ -137,10 +140,10 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 //		txtUserName.setText("username1000002");
 //		txtPassword.setText("pass1000002");
 //		
-//		txtUserName.setText("smart");
+		txtUserName.setText("smart");
 //		txtPassword.setText("darrin");
 //		txtUserName.setText("analyst");
-//		txtPassword.setText("smart");
+		txtPassword.setText("smart");
 //		handleButtonOKWidgetSelected();
 
 		doEventLoop();
@@ -157,6 +160,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				splash.getDisplay().sleep();
 			}
 		}
+		newFont.dispose();
 	}
 
 	/**
@@ -254,8 +258,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		fCompositeLogin = new Composite(getSplash(), SWT.BORDER);
 		GridLayout layout = new GridLayout(F_COLUMN_COUNT, false);
-		layout.marginLeft = 50;
-		layout.marginRight = 50;
+		layout.marginLeft = 120;
+		layout.marginRight = 5;
 		fCompositeLogin.setLayout(layout);		
 		
 		Composite spanner = new Composite(fCompositeLogin, SWT.NONE);
@@ -274,7 +278,12 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		Label lblLabel = new Label(fCompositeLogin, SWT.NONE);
 		lblLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblLabel.setText("Conservation Area:");
-
+		
+		FontData[] fd = lblLabel.getFont().getFontData();
+		fd[0].setStyle(SWT.BOLD);
+		newFont = new Font(getSplash().getDisplay(), fd[0]);
+		lblLabel.setFont(newFont);
+		lblLabel.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		Combo cmbConservationArea = new Combo(fCompositeLogin, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbConservationArea.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -291,6 +300,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		Label lblUserName = new Label(fCompositeLogin, SWT.NONE);
 		lblUserName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblUserName.setText("User Name:");
+		lblUserName.setFont(newFont);
+		lblUserName.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		txtUserName = new Text(fCompositeLogin, SWT.BORDER);
 		txtUserName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -299,8 +310,10 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		Label lblPassword = new Label(fCompositeLogin, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblPassword.setText("Password");
-
+		lblPassword.setText("Password:");
+		lblPassword.setFont(newFont);
+		lblPassword.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		
 		txtPassword = new Text(fCompositeLogin, SWT.PASSWORD | SWT.BORDER);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		txtPassword.addKeyListener(new KeyAdapter() {
@@ -316,10 +329,12 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		lblAdvanced = new Label(fCompositeLogin, SWT.NONE | SWT.READ_ONLY);
 		lblAdvanced.setText("Advanced...");
+		
+		
 		data = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
 		lblAdvanced.setLayoutData(data);
 		lblAdvanced.setVisible(true);// false
-		lblAdvanced.setForeground(ResourceManager.getColor(SWT.COLOR_DARK_BLUE));
+		lblAdvanced.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		lblAdvanced.setCursor( new Cursor(getSplash().getDisplay(),  SWT.CURSOR_HAND));
 		widgets.add(lblAdvanced);
 		
