@@ -66,10 +66,23 @@
                </appinfo>
             </annotation>
          </attribute>
-      </complexType>
-   </element>
+         <attribute name="ca_property" type="string">
+            <annotation>
+               <documentation>
+                  Only required if the table does not have a conservationArea attribute.
 
-   <element name="new_element" type="string">
+Represents a hql string the links the current table to the table that has the conservation area attribute.
+
+For example for the AttributeTreeNode class (smart.dm_attribute_tree) table the string should be
+&quot;.attribute.conservationArea&quot;.
+String should always start with a .
+
+If this is not provided and the table does not have a conservation area field then this class will not be automatically included in the conservation area exports and the data from this table will have
+to be exported manually using a datamodel export listener.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
    </element>
 
    <annotation>
