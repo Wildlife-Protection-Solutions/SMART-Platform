@@ -32,14 +32,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.hql.QueryTranslator;
+import org.hibernate.hql.QueryTranslatorFactory;
+import org.hibernate.impl.SessionFactoryImpl;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Manage hibernate connections and mappings.
+ * 
  * @author Emily
  * @since 1.0.0
  */
@@ -52,6 +51,12 @@ public class SmartHibernateManager {
 	
 	public static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
 	 
+	/**
+	 * Sets the user name and password to connect to database with.
+	 * 
+	 * @param username
+	 * @param password
+	 */
 	public static void setUserName(String username, String password){
 		userName = username;
 		passWord = password;
@@ -73,8 +78,6 @@ public class SmartHibernateManager {
 	public  static synchronized final void createSessionFactory(){
 		
 		if (sessionFactory == null){
-
-			
 			Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml"));
 			
 			config.setProperty("hibernate.connection.username", userName);
@@ -90,8 +93,29 @@ public class SmartHibernateManager {
 				//fail
 				throw new IllegalStateException("You can't use this database - it does not support sequences");
 			}
-
 		}
+	}
+	
+	/**
+	 * Convert hql to sql
+	 * @param hqlQueryText
+	 * @return
+	 */
+	public static String toSql(String hqlQueryText) {
+		if (hqlQueryText != null && hqlQueryText.trim().length() > 0) {
+
+			final QueryTranslatorFactory translatorFactory = ((SessionFactoryImpl) sessionFactory)
+					.getSettings().getQueryTranslatorFactory();
+
+			final SessionFactoryImplementor factory = (SessionFactoryImplementor) sessionFactory;
+
+			final QueryTranslator translator = translatorFactory
+					.createQueryTranslator(hqlQueryText, hqlQueryText,
+							Collections.EMPTY_MAP, factory);
+			translator.compile(Collections.EMPTY_MAP, false);
+			return translator.getSQLString();
+		}
+		return null;
 	}
 	
 	/**
@@ -144,9 +168,9 @@ public class SmartHibernateManager {
 	/**
 	 * @return gets all hibernate mappings
 	 */
-	private static final List<Class>  getMappings(){
-		List<Class> items = new ArrayList<Class>();
-		if (Platform.getExtensionRegistry() == null) return Collections.EMPTY_LIST;
+	private static final List<Class<?>>  getMappings(){
+		List<Class<?>> items = new ArrayList<Class<?>>();
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
 		try {
 			for (IConfigurationElement e : config) {
@@ -157,5 +181,27 @@ public class SmartHibernateManager {
 		}
 		return items;
 	}
-		
+
+	/**
+	 * For a given hibernate mapped class this returns the 
+	 * the ca_property field of the extension point.
+	 * 
+	 * @param clazz the mapped hibernate query
+	 * @return the ca_property 
+	 */
+	public static final String getHqlExportQuery(Class<?> clazz){
+		if (Platform.getExtensionRegistry() == null) return null;
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				Class<?> clzz = Class.forName(e.getAttribute("class"));
+				if (clzz == clazz){
+					return e.getAttribute("ca_property");
+				}
+			}
+		}catch (Exception ex){
+			ex.printStackTrace();
+		}
+		return null;
+	}
 }
