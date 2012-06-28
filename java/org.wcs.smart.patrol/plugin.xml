@@ -444,30 +444,38 @@
             class="org.wcs.smart.patrol.model.Team">
       </class>
       <class
+            ca_property=".patrol.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolLeg">
       </class>
       <class
             class="org.wcs.smart.patrol.model.Patrol">
       </class>
       <class
+            ca_property=".patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolLegDay">
       </class>
       <class
+            ca_property=".id.patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolLegMember">
       </class>
       <class
+            ca_property=".patrolLegDay.patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.Waypoint">
       </class>
       <class
+            ca_property=".waypoint.patrolLegDay.patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.WaypointAttachment">
       </class>
       <class
+            ca_property=".waypoint.patrolLegDay.patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.WaypointObservation">
       </class>
       <class
+            ca_property=".id.observation.waypoint.patrolLegDay.patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.WaypointObservationAttribute">
       </class>
       <class
+            ca_property=".patrolLegDay.patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.patrol.model.Track">
       </class>
    </extension>
