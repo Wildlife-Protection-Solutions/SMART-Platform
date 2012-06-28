@@ -87,7 +87,16 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 	}
 	
-	
+	/**
+	 * For each hibernate mapping which maps 1-1 to a database
+	 * table this function returns the information about that
+	 * database table and hibernate mapping includes 
+	 * the database table name, the mapped hibernate class, and
+	 * the conservationarea property of the database table (if
+	 * it exists).
+	 * 
+	 * @return
+	 */
 	public static List<TableInfo> getTableInformation(){
 		if (sessionFactory == null){
 			return null;
@@ -97,16 +106,13 @@ public class HibernateManager extends SmartHibernateManager{
 		Map<String, ClassMetadata> x = sessionFactory.getAllClassMetadata();
 		for (Iterator<ClassMetadata> i = x.values().iterator(); i.hasNext();) {
 			ClassMetadata m = i.next();
-			
 			if (m instanceof Joinable){
 				Joinable j = ((Joinable)m);
-				System.out.println(j.getTableName());
 				if (((AbstractEntityPersister)m).getRootTableName().equals(j.getTableName())){
-					System.out.println("ADD");
 					TableInfo info = new TableInfo(m.getMappedClass(EntityMode.POJO), j.getTableName());
+					//find conservation area property if available
 					for (int k = 0; k < m.getPropertyTypes().length; k ++){
 						if (m.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
-							//info.setCaPropertyName(m.getPropertyNames()[k]);
 							info.setCaPropertyName(((AbstractEntityPersister)m).getPropertyColumnNames(k)[0]);
 						}
 					}
@@ -116,6 +122,26 @@ public class HibernateManager extends SmartHibernateManager{
 			}
 		}
 		return data;
+	}
+	
+	/**
+	 * Given a hibernate entity class returns the mapped
+	 * database table or null if cannot determined mapped
+	 * database table.
+	 * 
+	 * @param hibernateClass
+	 * @return
+	 */
+	public static String getTableName(Class<?> hibernateClass){
+		if (sessionFactory == null){
+			return null;
+		}
+		ClassMetadata m = sessionFactory.getClassMetadata(hibernateClass);
+		if (m instanceof Joinable){
+			return ((Joinable)m).getTableName();
+		}
+		return null;
+		
 	}
 	
 	/**
@@ -136,10 +162,12 @@ public class HibernateManager extends SmartHibernateManager{
 	 * 
 	 * @return a list of conservation areas in the database
 	 */
+	
 	public static List<ConservationArea> getConservationAreas() {
 		Session x = openSession();
 		Transaction tx = x.beginTransaction();
 		try {
+			@SuppressWarnings("unchecked")
 			List<ConservationArea> areas = x.createQuery("from ConservationArea order by id").list();	
 			tx.commit();
 			return areas;
@@ -156,6 +184,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return
 	 */
 	public static List<Employee> getActiveEmployees(ConservationArea ca, Session s){
+		@SuppressWarnings("unchecked")
 		List<Employee> results = s.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("endEmploymentDate")).list();
 		return results;
 	}
@@ -172,7 +201,7 @@ public class HibernateManager extends SmartHibernateManager{
 		Transaction tx = session.beginTransaction();
 		try{
 			String query = "select count(*) from Employee where conservationArea = :ca and smartUserId = :userId";
-			List cnt = session.createQuery(query).setEntity("ca", ca).setString("userId", userName).list();
+			List<?> cnt = session.createQuery(query).setEntity("ca", ca).setString("userId", userName).list();
 			boolean ok = false;
 			if ( (Long) cnt.get(0) > 0){
 				ok = false;
@@ -208,6 +237,7 @@ public class HibernateManager extends SmartHibernateManager{
 			employee.add( Restrictions.eq("conservationArea", ca));
 			employee.add(Restrictions.isNull("endEmploymentDate"));
 			
+			@SuppressWarnings("unchecked")
 			List<Employee> people = employee.list();
 			tx.commit();
 			if (people.size() == 1){
@@ -246,6 +276,7 @@ public class HibernateManager extends SmartHibernateManager{
 	public static List<Station> getActiveStations(ConservationArea ca, Session s){
 		return getStations(ca, s, true);
 	}
+	
 	/**
 	 * Returns a list of all the stations for a given conservation area.
 	 * 
@@ -263,6 +294,7 @@ public class HibernateManager extends SmartHibernateManager{
 		if (onlyActive) {
 			st.add(Restrictions.eq("isActive", true));
 		}
+		@SuppressWarnings("unchecked")
 		List<Station> people = st.list();
 		return people;
 	}
@@ -278,6 +310,7 @@ public class HibernateManager extends SmartHibernateManager{
 		Criteria st = null;
 		st = s.createCriteria(Agency.class);
 		st.add( Restrictions.eq("conservationArea", ca));
+		@SuppressWarnings("unchecked")
 		List<Agency> people = st.list();		
 		return people;		
 	}
@@ -300,7 +333,7 @@ public class HibernateManager extends SmartHibernateManager{
 		int year = c.get(Calendar.YEAR);
 		
 		String query = (((SessionFactoryImplementor)sessionFactory).getSettings().getDialect().getSequenceNextValString("smart.smart_user_id_seq"));
-		List results = session.createSQLQuery(query).list();
+		List<?> results = session.createSQLQuery(query).list();
 		e.setId(year + "" + ID_FORMATTER.format(results.get(0)));
 	}
 	
@@ -401,6 +434,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param s database connection
 	 * @return data model loaded or <code>null</code> if error occurred
 	 */
+	@SuppressWarnings("unchecked")
 	public static DataModel loadDataModel(ConservationArea ca, Session s){
 		try{
 			List<Category> rootCategories = s.createCriteria(Category.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("parent")).list();

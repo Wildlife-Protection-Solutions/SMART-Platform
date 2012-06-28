@@ -22,7 +22,6 @@
 package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -39,8 +38,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.SmartProperties;
-import org.wcs.smart.backup.DerbyBackupEngine;
 
 /**
  * Dialog for displaying system
@@ -57,26 +54,20 @@ public class BackupDialog extends TitleAreaDialog {
 	private String title;
 	private String message;
 	private String buttonText;
+	private String defaultFileName;
 	
 	/**
 	 * @param parentShell
 	 */
-	public BackupDialog(Shell parentShell, String title, String message, String buttonText) {
+	public BackupDialog(Shell parentShell, String title, String message, String buttonText, String defaultFileName) {
 		super(parentShell);
 		this.title = title;
 		this.message = message;
 		this.buttonText = buttonText;
+		this.defaultFileName = defaultFileName;
 	}
 	
-	/**
-	 * @return the default backup file name
-	 * @throws IOException
-	 */
-	private String generateBackupFileName() throws IOException{
-		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
-		File f = new File(backupDir + File.separator + DerbyBackupEngine.getDefaultFileName());
-		return f.getCanonicalPath();
-	}
+
 	
 	/**
 	 * @return the backup file selected by the user
@@ -100,11 +91,8 @@ public class BackupDialog extends TitleAreaDialog {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtBackupFile = new Text(main, SWT.DEFAULT);
-		try{
-			txtBackupFile.setText(generateBackupFileName());
-		}catch (IOException ex){
-			ex.printStackTrace();
-		}
+		txtBackupFile.setText(this.defaultFileName);
+		
 		txtBackupFile.setEditable(true);
 		txtBackupFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		int width = txtBackupFile.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;

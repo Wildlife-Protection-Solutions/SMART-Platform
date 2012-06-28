@@ -33,6 +33,7 @@ import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -58,10 +59,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
+import org.wcs.smart.ui.internal.ca.ImportEmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -156,9 +159,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
-		
-		employees = new WritableList(ca.getEmployees(), Employee.class);
-		
+	
 		container = new Composite(parent, SWT.NULL);
 		container.setLayout(new GridLayout(2, false));
 		
@@ -179,7 +180,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		tblEmployee = createEmployeeTableViewer(container);
 		tblEmployee.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		((GridData)tblEmployee.getTable().getLayoutData()).heightHint = tblEmployee.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		tblEmployee.setInput(employees);
 		
 		tblEmployee.setFilters(new ViewerFilter[]{nameFilter, activeFilter});
 		
@@ -235,7 +235,19 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		});	
 		Button btnImport = new Button(composite, SWT.NONE);
 		btnImport.setText("Import ...");
-		
+		btnImport.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				ImportEmployeeDialog dialog = new ImportEmployeeDialog(getShell());
+				int ret = dialog.open();
+				if (ret == IDialogConstants.CANCEL_ID){
+					return;
+				}else{
+					refreshEmployeeList();
+				}
+				
+			}
+		});
 		container.addPaintListener(new PaintListener() {
 			boolean called =false;
 			@Override
@@ -245,11 +257,17 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				
 			}
 		});
-		
+		refreshEmployeeList();
 		setMessage("Manage the employees.");
 		return container;
 	}
 
+	private void refreshEmployeeList(){
+		employees = new WritableList(getSession().createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(), Employee.class);
+		
+		tblEmployee.setInput(employees);
+		tblEmployee.refresh();
+	}
 	/*
 	 * gets agencies for current conservation area
 	 */

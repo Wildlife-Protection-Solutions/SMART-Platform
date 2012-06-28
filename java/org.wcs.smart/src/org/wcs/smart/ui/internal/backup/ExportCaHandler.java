@@ -19,95 +19,69 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.backup;
+package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ui.internal.backup.RestoreBackupDialog;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.ca.export.CaExportEngine;
 
 /**
- * Handler for restoring backup file.
+ * Handler for exporting conservation area
+ * data.
+ * 
  * @author egouge
  * @since 1.0.0
  */
-public class RestoreHandler {
+public class ExportCaHandler extends AbstractHandler {
 
 	/**
-	 * Runs the handler
-	 * @param shell the current shell
-	 * 
+	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
-	public void execute(final Shell shell) {
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		exportCa(HandlerUtil.getActiveShell(event));
+		return null;
+	}
 
-		if (!MessageDialog.openConfirm(shell, "Restore", "Restoring a backup file will cause" +
-				" all conservation areas in the existing database to be removed and replaced" +
-				" with the data in the backup file.\n\nAre you sure you want to continue?")){
-			return;
-		}
-		
-		if (!DerbyRestoreEngine.validateUserRestore(shell)){
-			return;
-		}
-		
-		MessageDialog confirm = new MessageDialog(
-				shell,
-				"Confirm Restore",null,
-				"It is recommeneded you backup the current database before restoring.  Would you like to backup now?",
-				MessageDialog.QUESTION_WITH_CANCEL,
-				new String[]{IDialogConstants.YES_LABEL,
-						IDialogConstants.NO_LABEL,
-						IDialogConstants.CANCEL_LABEL
-				},0);
-		int ret = confirm.open();
-		if (ret == 0){
-			//perform backup
-			BackupHandler handler = new BackupHandler();
-			handler.executeBackup(shell);
-			if (!handler.backupOk()){
-				MessageDialog.openError(shell, "Error", "Error occurred during backup process.  Restore will not proceed.");
-			}
-			
-		}else if (ret == 1){
-			//no - continue without preforming backup
-		}else if (ret == 2){
-			//cancel
-			return;
-		}
-			
-		final RestoreBackupDialog dialog = new RestoreBackupDialog(shell);
+	/**
+	 * Execute the backup commend; prompting user as required
+	 * @param shell current shell
+	 */
+	public void exportCa(final Shell shell){
+		final BackupDialog dialog = new BackupDialog(shell,"Export Conservation Area", "Select the file to export the '" + SmartDB.getCurrentConservationArea().getName() + "' conservation area to.", "Export", CaExportEngine.getDefaultFileName());
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}
 		try {
 			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(false, false, new IRunnableWithProgress() {
+			pmdDialog.run(false, true, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					File f = dialog.getSelectedFile();
-					try{
-						DerbyRestoreEngine.restoreSystem(f, monitor);				
-						MessageDialog.openInformation(shell, "Restore Complete", "System restore completed");
-					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,"Restore Failed.\n\n" + ex.getMessage(), ex);
-					}
 
+					CaExportEngine exporter = new CaExportEngine();
+					exporter.export(f, monitor);
 				}
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Restore Failed. " + ex.getMessage(), ex);
+					"Conservation area export failed.\n\n" + ex.getMessage(), ex);
 		}
-		return;
 	}
-
+	
+	
 }
