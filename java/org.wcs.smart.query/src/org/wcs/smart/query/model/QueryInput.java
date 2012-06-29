@@ -29,7 +29,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.model.observation.ObservationQuery;
 
 /**
  * A query input for query editors. 
@@ -61,27 +60,8 @@ public class QueryInput implements IEditorInput {
 	 */
 	public QueryInput(Query query){
 		this(query.getUuid(), query.getName(), query.getId(), query
-				.getIsShared(), query instanceof ObservationQuery ? Query.QueryType.OBSERVATION : query instanceof SummaryQuery ? Query.QueryType.SUMMARY : null);
-	}
-	
-	/**
-	 * Creates a new query input based on the observation
-	 * query.
-	 * 
-	 * @param query the observation query
-	 */
-	public QueryInput(ObservationQuery query){
-		this(query.getUuid(), query.getName(), query.getId(), query.getIsShared(), Query.QueryType.OBSERVATION);
-	}
-	
-	/**
-	 * Creates a new query input based on the summary
-	 * query.
-	 * 
-	 * @param query the summary query
-	 */
-	public QueryInput(SummaryQuery query){
-		this(query.getUuid(), query.getName(), query.getId(), query.getIsShared(), Query.QueryType.SUMMARY);
+				.getIsShared(), 
+				query.getType());
 	}
 	
 	/**

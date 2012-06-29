@@ -81,10 +81,10 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	private IQueryListener qListener = new IQueryListener() {
 		@Override
 		public void queryChanged(Query query) {
-//			if (query != null && query.equals(PatrolQueryResultsEditor.this.query)){
+			if (query != null && query.equals(PatrolQueryResultsEditor.this.query)){
 				isDirty = true;
 				firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
-			//}
+			}
 		}
 
 		@Override

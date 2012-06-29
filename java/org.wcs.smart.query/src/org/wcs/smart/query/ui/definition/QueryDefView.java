@@ -208,10 +208,10 @@ public class QueryDefView extends ViewPart {
 		
 		ObservationQueryDefinitionComposite wp = new ObservationQueryDefinitionComposite(stackComp, this);
 		definitionComposites.put(QueryType.OBSERVATION, wp);
+		definitionComposites.put(QueryType.PATROL, wp);	//patrols are the same
 		SummaryQueryDefinitionComposite sum = new SummaryQueryDefinitionComposite(stackComp, this);
 		definitionComposites.put(QueryType.SUMMARY, sum);
-		ObservationQueryDefinitionComposite pat = new ObservationQueryDefinitionComposite(stackComp, this);
-		definitionComposites.put(QueryType.PATROL, pat);
+		
 		
 		((StackLayout)stackComp.getLayout()).topControl = emptyComp;
 	

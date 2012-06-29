@@ -55,10 +55,11 @@ public class ObservationQuery extends SimpleQuery{
 	
 	
 	/**
-	 * Creates a new waypoint query with the default
+	 * Creates a new observation query with the default
 	 * conservation area filter and no date filter
 	 */
 	public ObservationQuery(){
+		super();
 	}
 	
 	

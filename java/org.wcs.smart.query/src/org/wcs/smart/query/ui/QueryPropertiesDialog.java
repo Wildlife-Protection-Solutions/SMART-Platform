@@ -49,9 +49,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
  * Dialog box for modifying query information.  This includes the query
@@ -142,10 +140,8 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(query.getOwner().getLabel());
 		
-		if (query instanceof ObservationQuery){
-			createObservationQueryOptions(main);	
-		}else if (query instanceof PatrolQuery){
-			createPatrolQueryOptions(main);
+		if (query instanceof SimpleQuery){
+			createObservationQueryOptions(main);
 		}
 		
 		return main;
@@ -189,45 +185,6 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			}
 		});
 	}
-
-	private void createPatrolQueryOptions(Composite main) {
-		Label lblTableColumns = new Label(main, SWT.NONE);
-		lblTableColumns.setText("Output Columns:");
-		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		
-		createColumnTable(main);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
-		gd.heightHint = 200;
-		columnViewer.getTable().setLayoutData(gd);
-		
-		Composite hyperlinkComposite = new Composite(main, SWT.NONE);
-		hyperlinkComposite.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1) );
-		hyperlinkComposite.setLayout(new GridLayout(3, false));
-		
-		Link selectAll = new Link(hyperlinkComposite, SWT.NONE);
-		selectAll.setText("<a>Select All</a>");
-		selectAll.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				columnViewer.setAllChecked(true);
-				setChangesMade(true);
-			}
-		});
-		Label lbl = new Label(hyperlinkComposite, SWT.VERTICAL | SWT.SEPARATOR);
-		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
-		gd.heightHint = selectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		lbl.setLayoutData(gd);
-		Link deselectAll = new Link(hyperlinkComposite, SWT.NONE);
-		deselectAll.setText("<a>De-Select All</a>");
-		deselectAll.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				columnViewer.setAllChecked(false);
-				setChangesMade(true);
-			}
-		});
-	}
-
 	
 	/**
 	 * Updates the query.
@@ -239,19 +196,12 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		if (!query.getName().equals(txtName.getText())){
 			query.setName(txtName.getText());
 		}
-		
-		if (query instanceof ObservationQuery){
-			List<QueryColumn> cols = ((ObservationQuery)query).getQueryColumns();
+		if (query instanceof SimpleQuery){
+			List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
 			for (QueryColumn col : cols){
 				col.setVisible( columnViewer.getChecked(col) );
 			}
-			((ObservationQuery) query).updateVisibleColumns();
-		}else if (query instanceof PatrolQuery){
-			List<QueryColumn> cols = ((PatrolQuery)query).getQueryColumns();
-			for (QueryColumn col : cols){
-				col.setVisible( columnViewer.getChecked(col) );
-			}
-			((PatrolQuery) query).updateVisibleColumns();
+			((SimpleQuery) query).updateVisibleColumns();
 		}
 		setChangesMade(false);
 		return true;

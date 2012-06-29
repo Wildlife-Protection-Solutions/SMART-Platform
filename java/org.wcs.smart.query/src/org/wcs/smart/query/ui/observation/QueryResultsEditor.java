@@ -188,10 +188,17 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		return this.query;
 	}
 
+	/**
+	 * Updates the editor name with the query name
+	 */
 	public void updatePartName(){
 		super.setPartName(query.getName());
 	}
  
+	/**
+	 * Sets the dirty state of the editor
+	 * @param isDirty
+	 */
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
 		firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
