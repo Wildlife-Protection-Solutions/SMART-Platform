@@ -235,10 +235,17 @@ RETURNS NULL ON NULL INPUT;
 	}
 	
 	/**
-	 * Updates the hkey of this object
+	 * Updates the hkey of this object and
+	 * children objects.
 	 */
 	public void updateHkey(){
 		setHkey(computeHkey());
+		
+		if (getChildren() != null){
+			for (Category cat: getChildren()){
+				cat.updateHkey();
+			}
+		}
 	}
 	
 	

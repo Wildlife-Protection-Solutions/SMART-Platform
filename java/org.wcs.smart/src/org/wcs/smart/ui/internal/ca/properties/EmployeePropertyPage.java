@@ -288,7 +288,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private void createNewEmployee(){
 		EmployeeDialog dia = new EmployeeDialog(getShell(), null, ca, getAgencies(), getSession());
 		dia.open();
-		tblEmployee.refresh();
+		refreshEmployeeList();
 	}
 	
 	/**

@@ -137,8 +137,10 @@ public class EmployeeDialog extends Dialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Save", true);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", true);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		btn.setEnabled(false);
+		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		
 	}
 	
 	@Override
