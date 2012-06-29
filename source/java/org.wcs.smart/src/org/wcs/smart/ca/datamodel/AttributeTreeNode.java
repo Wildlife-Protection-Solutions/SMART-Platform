@@ -92,9 +92,16 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	
 	/**
 	 * Updates the hkey of this object
+	 * and children tree nodes.
 	 */
 	public void updateHkey(){
 		setHkey(computeHkey());
+		
+		if (getChildren() != null){
+			for (AttributeTreeNode child : getChildren()){
+				child.updateHkey();
+			}
+		}
 	}
 	
 	
