@@ -51,6 +51,13 @@ public class PatrolQuery extends SimpleQuery {
 	private List<QueryColumn> queryColumns = null;
 
 	
+	/**
+	 * Creates a new patrol query with the default
+	 * conservation area filter and no date filter
+	 */
+	public PatrolQuery(){
+		super();
+	}
 
 	/**
 	 * Returns a list of columns that are visible in the output table.
@@ -77,6 +84,7 @@ public class PatrolQuery extends SimpleQuery {
 	 * QueryColumn columns.
 	 */
 	@Transient
+	@Override
 	public void updateVisibleColumns(){
 		StringBuilder sb = new StringBuilder();
 		boolean all = true;

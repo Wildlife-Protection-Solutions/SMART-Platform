@@ -23,7 +23,6 @@ package org.wcs.smart.query.ui;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -143,8 +142,7 @@ public class QueryDateFilterComposite extends Composite {
 			}
 		});
 		if(type == QueryType.PATROL){
-			DATE_FIELD_OP[] all = DateFilter.DATE_FIELD_OP.values();
-			DATE_FIELD_OP[] pat_opt = new DATE_FIELD_OP[] {all[1], all[2]}; 
+			DATE_FIELD_OP[] pat_opt = new DATE_FIELD_OP[] {DATE_FIELD_OP.PATROL_START,DATE_FIELD_OP.PATROL_END}; 
 			cmbDateField.setInput(pat_opt);
 			cmbDateField.getCombo().select(0);
 		}else{

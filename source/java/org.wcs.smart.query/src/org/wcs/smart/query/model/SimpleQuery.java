@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.model;
 
 import java.io.ByteArrayInputStream;
@@ -6,6 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -13,7 +37,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.engine.DerbyQueryEngine2;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
@@ -21,6 +44,21 @@ import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
+/**
+ * 
+ * A simple query contains exactly one
+ * queryFilter, one Conservation Area files,
+ * one DateFiler and one set of drop items.
+ * 
+ *  <p>All query results  
+ * 
+ * 
+ * @author jeff
+ * @author egouge 
+ * 
+ */
+@Entity
+@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public abstract class SimpleQuery extends Query {
 	@Transient
 	private List<DropItem> items;
@@ -47,7 +85,7 @@ public abstract class SimpleQuery extends Query {
 		}
 		
 		dateFilter = null;
-	strQueryFilter = "";
+		strQueryFilter = "";
 	}
 	
 	/**
@@ -82,10 +120,24 @@ public abstract class SimpleQuery extends Query {
 		return this.strQueryFilter;
 	}
 	
+	/**
+	 * May call the database, so if performance important
+	 * need to call inside job
+	 * @return list of output columns available to the query.
+	 */
 	@Transient
-	abstract public List<QueryColumn> getQueryColumns();
+	public abstract List<QueryColumn> getQueryColumns();
 
-
+	
+	/**
+	 * Updates the visible columns based 
+	 * on the isVisible field of the associated
+	 * WaypointQueryColumn columns.
+	 */
+	@Transient
+	public abstract void updateVisibleColumns();
+	
+	
 	/**
 	 * 
 	 * @return the query filter in the filter format.  Will
@@ -166,7 +218,15 @@ public abstract class SimpleQuery extends Query {
 		return lastResults;
 	}
 	
-	/** public for testing purposes only */
+	
+	/* public for testing purposes only */
+	/**
+	 * Runs the query and returns the results
+	 * @param session
+	 * @param progressMonitor
+	 * @return
+	 * @throws Exception
+	 */
 	@Transient
 	public abstract List<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception;
 
@@ -193,6 +253,8 @@ public abstract class SimpleQuery extends Query {
 			items.add(filterItems[i]);
 		}
 	}
+	
+	
 	
 	/**
 	 * @return the drop items generated for the query

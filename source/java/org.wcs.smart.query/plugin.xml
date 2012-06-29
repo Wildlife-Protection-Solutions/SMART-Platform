@@ -753,6 +753,9 @@
       <class
             class="org.wcs.smart.query.model.patrol.PatrolQuery">
       </class>
+      <class
+            class="org.wcs.smart.query.model.SimpleQuery">
+      </class>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
