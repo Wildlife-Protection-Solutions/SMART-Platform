@@ -23,7 +23,7 @@ package org.wcs.smart.query.ui.querytable;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
  * An table column in the results table that represents an attribute.
@@ -36,9 +36,9 @@ import org.wcs.smart.query.model.observation.ObservationQueryColumn;
  */
 public class AttributeColumnLabelProvider extends ColumnLabelProvider {
 
-	private ObservationQueryColumn column;
+	private QueryColumn column;
 
-	public AttributeColumnLabelProvider(ObservationQueryColumn column) {
+	public AttributeColumnLabelProvider(QueryColumn column) {
 		this.column = column;
 	}
 

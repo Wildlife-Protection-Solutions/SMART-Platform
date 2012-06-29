@@ -38,7 +38,6 @@ import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.internal.datamodel.DataModelAdvisor;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * The activator class controls the plug-in life cycle

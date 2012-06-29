@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.util.SmartUtils;
 
 /**

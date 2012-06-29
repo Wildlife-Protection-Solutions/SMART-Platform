@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 
 /**
@@ -38,7 +39,7 @@ import org.wcs.smart.query.model.observation.ObservationQuery;
  */
 public interface QueryEngine {
 
-	public List<QueryResultItem> executeQuery(final ObservationQuery query,
+	public List<QueryResultItem> executeQuery(final SimpleQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException ;
 }

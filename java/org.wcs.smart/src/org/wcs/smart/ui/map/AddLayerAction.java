@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui.map;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapImport;
 
 import org.eclipse.jface.action.IAction;

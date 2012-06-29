@@ -30,12 +30,19 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDefinitionType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
+import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
  * Observation query definition panel
@@ -136,7 +143,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)view.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
 		provider.setQueryValue(isvalid, error);
 		view.getQuery().setIsValid(isvalid);
-		((ObservationQuery)view.getQuery()).setQueryFilter(query);
+		((SimpleQuery)view.getQuery()).setQueryFilter(query);
 		return error;
 	}
 
@@ -145,7 +152,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	 */
 	@Override
 	public void init() {
-		dropTarget.addElements(((ObservationQuery)view.getQuery()).getDropItems());
+		dropTarget.addElements(((SimpleQuery)view.getQuery()).getDropItems());
 	}
 
 	/**
@@ -155,7 +162,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	public void saveItems() {
 		ArrayList<DropItem> items = new ArrayList<DropItem>();
 		items.addAll(dropTarget.getItems());
-		((ObservationQuery)view.getQuery()).setDropItems(items);
+		((SimpleQuery)view.getQuery()).setDropItems(items);
 		
 	}
 	

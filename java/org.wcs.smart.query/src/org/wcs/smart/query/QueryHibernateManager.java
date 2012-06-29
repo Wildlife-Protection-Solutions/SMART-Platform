@@ -178,7 +178,7 @@ public class QueryHibernateManager {
 		
 		try{
 			for (int i = 0; i < QueryType.values().length; i++) {
-				if (QueryType.values()[i] == QueryType.PATROL) continue;
+
 				Query hquery = session
 						.createQuery("SELECT a.uuid, a.name, a.folder.uuid, a.isShared, a.id "
 								+ "FROM "

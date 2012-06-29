@@ -24,16 +24,15 @@ package org.wcs.smart.query.ui.patrol;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
+
 
 /**
  * This file contains the table results section
@@ -45,16 +44,14 @@ import org.wcs.smart.query.parser.internal.filter.DateFilter;
  */
 public class PatrolQueryTableResultsPage extends EditorPart  {
 
-	
-	
-	private PatrolQueryEditor parentEditor;
-
+	private PatrolQueryResultsEditor parentEditor;
+	private PatrolQueryEditorTableContent content ;
 	
 	/**
 	 * Creates new editor page
 	 * @param parent
 	 */
-	public PatrolQueryTableResultsPage(PatrolQueryEditor parent) {
+	public PatrolQueryTableResultsPage(PatrolQueryResultsEditor parent) {
 		this.parentEditor = parent;
 	}
 
@@ -86,8 +83,7 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	}
 
 	public void setQuery(){
-		//TODO: init the table/header information
-		//To get the query being set use parentEditor.getQuery()
+		content.initValues(parentEditor.getQuery());
 	}
 	
 	
@@ -114,8 +110,7 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	 * @return the date filter associated with the query
 	 */
 	public DateFilter getDateFilter(){
-		//TODO: return the date from the QueryDateFilterComposite you will add to this page
-		return null;
+		return this.content.getDateFilter();
 	}
 	
 	
@@ -124,12 +119,16 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		//TODO: fill me in using the QueryEditorTableContent as an example
-		Label lblDoMe = new Label(parent, SWT.NONE);
-		lblDoMe.setText("Copy the code in the QueryResultTablePage and QueryEditorTableContent");
-		
-		
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		parent.setLayout(layout);
+		content = new PatrolQueryEditorTableContent(parent, parentEditor);
 	}
+		
+	
 	
 	/**
 	 * Updates the table with the new results and ensure
@@ -139,27 +138,30 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	 */
 	public void updateAndShowTable(List<QueryResultItem> results, 
 			IProgressMonitor monitor){
-		//TODO:  update the results table and show it
+		content.setTableData(results, monitor);
 	}
 	
 	/**
 	 * Displays the progress bar
 	 */
 	public void showProgressArea(){
-		//TODO: show the progress area
+		content.showProgressArea();
 	}
 	
 	/**
 	 * @return a progress monitor that updates the progress area
 	 */
 	public IProgressMonitor createProgressMonitor(){
-		//TODO: create a progress monitor that writes data to the 
-		//progress area.  See QueryEditorTableContent
-		return new NullProgressMonitor();
+		return content.createProgressMonitor();
 	}
 	
 	@Override
 	public void setFocus() {
+	}
+
+
+	public PatrolResultsTable getQueryResultsTable() {
+		return content.getQueryResultsTable();
 	}
 }
 

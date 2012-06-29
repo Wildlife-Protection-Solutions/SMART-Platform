@@ -27,7 +27,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumn;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -53,7 +53,7 @@ public class QueryResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createFeature(QueryResultItem it, List<ObservationQueryColumn> columns, SimpleFeatureType  ftype){
+	public static SimpleFeature createFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
 		data[0] = it.getPatrolId() + "_" + it.getWaypointId() + "_" + System.nanoTime();

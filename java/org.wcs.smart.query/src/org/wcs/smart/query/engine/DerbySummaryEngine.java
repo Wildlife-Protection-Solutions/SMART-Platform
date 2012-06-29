@@ -67,7 +67,6 @@ import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.parser.internal.summary.ValuePart;
-import org.wcs.smart.query.parser.internal.summary.IGroupBy.GroupByType;
 import org.wcs.smart.util.SmartUtils;
 
 /**

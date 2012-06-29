@@ -29,8 +29,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.QueryInput;
 
 /**
  * Handler for creating a new query that

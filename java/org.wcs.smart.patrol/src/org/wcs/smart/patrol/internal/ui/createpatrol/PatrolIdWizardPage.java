@@ -21,31 +21,12 @@
  */
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
-import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.patrol.internal.ui.PatrolIdComposite;
+import org.wcs.smart.patrol.model.Patrol;
 
 /**
  * Wizard page to set the patrol id.
