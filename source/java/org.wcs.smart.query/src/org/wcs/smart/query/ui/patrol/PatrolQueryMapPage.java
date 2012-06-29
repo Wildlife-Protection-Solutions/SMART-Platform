@@ -44,7 +44,6 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.map.udig.QueryService;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
@@ -60,7 +59,7 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
  */
 public class PatrolQueryMapPage  extends SmartMapEditorPart{
 	
-	private PatrolQueryEditor parentEditor;
+	private PatrolQueryResultsEditor parentEditor;
 	private QueryService queryService = null;
 	private IViewportModelListener initListener = null; 
 	private LoadDefaultLayersJob loadDefaultLayers = null;
@@ -134,7 +133,7 @@ public class PatrolQueryMapPage  extends SmartMapEditorPart{
 	 * @param parent
 	 *            parent editor
 	 */
-	public PatrolQueryMapPage(PatrolQueryEditor parent) {
+	public PatrolQueryMapPage(PatrolQueryResultsEditor parent) {
 		this.parentEditor = parent;
 	}
 

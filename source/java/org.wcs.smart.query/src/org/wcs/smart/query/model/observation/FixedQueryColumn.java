@@ -33,7 +33,7 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class FixedQueryColumn extends ObservationQueryColumn {
+public class FixedQueryColumn extends QueryColumn {
 
 	/**
 	 * The defined fixed columns.
@@ -52,6 +52,8 @@ public class FixedQueryColumn extends ObservationQueryColumn {
 		PATROL_LEG_ID("Patrol Leg Id", ColumnType.STRING, "patrol:legid"),
 		PATROL_LEG_LEADER("Leader", ColumnType.STRING, "patrol:leader"),
 		PATROL_LEG_PILOT("Pilot", ColumnType.STRING, "patrol:pilot"),
+		PATROL_LEG_START_DATE("Patrol Leg Start Date", ColumnType.DATE, "patrolleg:startdate"),
+		PATROL_LEG_END_DATE("Patrol Leg End Date", ColumnType.DATE, "patrolleg:enddate"),
 		TRANSPORT_TYPE("Patrol Transport Type", ColumnType.STRING,"patrol:transporttype"),
 		WAYPOINT_ID("Waypoint Id", ColumnType.INTEGER,"waypoint:id"),
 		WAYPOINT_DATE("Waypoint Date", ColumnType.DATE,"waypoint:date"),
@@ -88,7 +90,7 @@ public class FixedQueryColumn extends ObservationQueryColumn {
 
 
 	/**
-	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	public Object getValue(QueryResultItem item) {
 		switch (column) {
@@ -118,6 +120,10 @@ public class FixedQueryColumn extends ObservationQueryColumn {
 			return item.getLeader();
 		case PATROL_LEG_PILOT:
 			return item.getPilot();
+		case PATROL_LEG_START_DATE:
+			return item.getPatrolLegStartDate();
+		case PATROL_LEG_END_DATE:
+			return item.getPatrolLegEndDate();
 		case PATROL_TEAM:
 			return item.getTeam();
 		case PATROL_TYPE:
@@ -146,10 +152,10 @@ public class FixedQueryColumn extends ObservationQueryColumn {
 
 
 	/**
-	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#clone()
+	 * @see org.wcs.smart.query.model.observation.QueryColumn#clone()
 	 */
 	@Override
-	public ObservationQueryColumn clone() {
+	public QueryColumn clone() {
 		FixedQueryColumn newColumn = new FixedQueryColumn(this.column);
 		return newColumn;
 	}

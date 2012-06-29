@@ -94,7 +94,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 					}
 					
 					monitor.subTask("Populating results table");
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), false, c);
+					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;

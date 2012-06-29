@@ -30,7 +30,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.wcs.smart.query.model.observation.AttributeQueryColumn;
 import org.wcs.smart.query.model.observation.CategoryQueryColumn;
 import org.wcs.smart.query.model.observation.FixedQueryColumn;
-import org.wcs.smart.query.model.observation.ObservationQueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
  * A table viewer column for the query results table viewer.
@@ -40,10 +40,10 @@ import org.wcs.smart.query.model.observation.ObservationQueryColumn;
  */
 public class QueryTableViewerColumn {
 	
-	private ObservationQueryColumn column;
+	private QueryColumn column;
 	private TableViewerColumn tcolumn;
 	
-	private static ColumnLabelProvider getLabelProvider(ObservationQueryColumn column){
+	private static ColumnLabelProvider getLabelProvider(QueryColumn column){
 		if (column instanceof FixedQueryColumn){
 			return new FixedColumnLabelProvider(column);
 		}else if (column instanceof AttributeQueryColumn){
@@ -61,7 +61,7 @@ public class QueryTableViewerColumn {
 	 * @param column the column
 	 */
 	public QueryTableViewerColumn(TableViewer viewer, 
-			ObservationQueryColumn column,
+			QueryColumn column,
 			final QueryResultItemComparator sorter){
 		this.column = column;
 		
@@ -110,7 +110,7 @@ public class QueryTableViewerColumn {
 	/**
 	 * @return the query results column represented by this table column
 	 */
-	public ObservationQueryColumn getColumn(){
+	public QueryColumn getColumn(){
 		return this.column;
 	}
 	

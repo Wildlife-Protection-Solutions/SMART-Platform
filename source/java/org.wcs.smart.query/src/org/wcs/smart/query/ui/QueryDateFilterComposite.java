@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -38,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FIELD_OP;
 import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FILTER_OP;
@@ -76,7 +78,24 @@ public class QueryDateFilterComposite extends Composite {
 		layout.marginBottom = 10;
 		setLayout(layout);
 		
-		createComponent();
+		createComponent(QueryType.OBSERVATION);
+	}
+	
+	/**
+	 * create new composite 
+	 */
+	public QueryDateFilterComposite(Composite parent, QueryType type) {
+		super(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(4, false);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		layout.marginTop = 10;
+		layout.marginBottom = 10;
+		setLayout(layout);
+		
+		createComponent(type);
 	}
 	
 	/**
@@ -98,7 +117,7 @@ public class QueryDateFilterComposite extends Composite {
 		toolkit.adapt(this, false, true);
 	}
 	
-	private void createComponent(){
+	private void createComponent(QueryType type){
 		main = new Composite(this, SWT.NONE);
 		
 		GridLayout layout = new GridLayout(7, false);
@@ -123,8 +142,15 @@ public class QueryDateFilterComposite extends Composite {
 				return super.getText(element);
 			}
 		});
-		cmbDateField.setInput(DateFilter.DATE_FIELD_OP.values());
-		cmbDateField.getCombo().select(0);
+		if(type == QueryType.PATROL){
+			DATE_FIELD_OP[] all = DateFilter.DATE_FIELD_OP.values();
+			DATE_FIELD_OP[] pat_opt = new DATE_FIELD_OP[] {all[1], all[2]}; 
+			cmbDateField.setInput(pat_opt);
+			cmbDateField.getCombo().select(0);
+		}else{
+			cmbDateField.setInput(DateFilter.DATE_FIELD_OP.values());
+			cmbDateField.getCombo().select(0);
+		}
 		
 		cmbFilterOptions = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbFilterOptions.setContentProvider(ArrayContentProvider.getInstance());

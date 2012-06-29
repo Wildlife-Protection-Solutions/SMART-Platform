@@ -44,7 +44,7 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author egouge
  * @since 1.0.0
  */
-public abstract class ObservationQueryColumn implements Cloneable{
+public abstract class QueryColumn implements Cloneable{
 
 
 	/**
@@ -75,7 +75,7 @@ public abstract class ObservationQueryColumn implements Cloneable{
 	 * @param key the unique identifier for the column
 	 * @param type the column data type
 	 */
-	public ObservationQueryColumn(String name, String key, ColumnType type){
+	public QueryColumn(String name, String key, ColumnType type){
 		this.name = name;
 		this.key = key;
 		this.type = type;
@@ -132,12 +132,12 @@ public abstract class ObservationQueryColumn implements Cloneable{
 		if (o == this){
 			return true;
 		}
-		if (!(o instanceof ObservationQueryColumn)){
+		if (!(o instanceof QueryColumn)){
 			return false;
 		}
 		
 		if (key != null){
-			return this.key.equals(((ObservationQueryColumn)o).key);
+			return this.key.equals(((QueryColumn)o).key);
 		}
 		return false;
 	}
@@ -165,10 +165,11 @@ public abstract class ObservationQueryColumn implements Cloneable{
 	/** Clones the object
 	 * @see java.lang.Object#clone()
 	 */
-	public abstract ObservationQueryColumn clone();
+	public abstract QueryColumn clone();
 	
 	
-	private static ObservationQueryColumn[] queryColumns = null;
+	private static QueryColumn[] queryColumns = null;
+	private static QueryColumn[] patrolQueryColumns = null;
 	
 	/**
 	 * 
@@ -178,7 +179,7 @@ public abstract class ObservationQueryColumn implements Cloneable{
 	 * This function will access the database the first
 	 * time it is called, subsequent calls return cached values. 
 	 */
-	public static  ObservationQueryColumn[] getWaypointQueryColumns() {
+	public static  QueryColumn[] getWaypointQueryColumns() {
 		
 		if (queryColumns != null){
 			return cloneColumns(queryColumns);
@@ -198,7 +199,7 @@ public abstract class ObservationQueryColumn implements Cloneable{
 					session.beginTransaction();
 					dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
 					
-					ArrayList<ObservationQueryColumn> cols = new ArrayList<ObservationQueryColumn>();
+					ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				
 					for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 						FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
@@ -208,6 +209,9 @@ public abstract class ObservationQueryColumn implements Cloneable{
 							if (patrolOps.getTrackDistanceDirection()){
 								cols.add(new FixedQueryColumn(item));
 							}
+						}else if(item == FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE||
+									item == FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE){
+							//do nothing, don't want these columns in a waypoint query
 						}else{
 							cols.add(new FixedQueryColumn(item));
 						}
@@ -228,7 +232,7 @@ public abstract class ObservationQueryColumn implements Cloneable{
 						cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
 					}
 
-					queryColumns = cols.toArray(new ObservationQueryColumn[cols.size()]);
+					queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				
 				} finally {
 					session.getTransaction().rollback();
@@ -246,9 +250,77 @@ public abstract class ObservationQueryColumn implements Cloneable{
 		
 		return  cloneColumns(queryColumns);
 	}
+
 	
-	private static ObservationQueryColumn[] cloneColumns(ObservationQueryColumn[] cols){
-		ObservationQueryColumn[] copies = new ObservationQueryColumn[cols.length];
+	/**
+	 * 
+	 * @return query columns available to a patrol query based
+	 * on the patrol options 
+	 */
+	
+	public static  QueryColumn[] getPatrolQueryColumns() {
+		
+		if (patrolQueryColumns != null){
+			return cloneColumns(patrolQueryColumns);
+		}
+		
+		Job j = new Job("load patrol query columns"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				//load from the database 
+
+				PatrolOptions patrolOps = null;
+				Session session = HibernateManager.openSession();
+				
+				try {
+					patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					
+					ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+				
+					for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+						FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
+							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						
+							if (patrolOps.getTrackDistanceDirection()){
+								cols.add(new FixedQueryColumn(item));
+							}
+						}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
+									item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME){
+							// do nothing, don't want these columns for patrol queries
+						}else{
+							cols.add(new FixedQueryColumn(item));
+						}
+					}
+
+					patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				
+				} finally {
+					session.close();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
+		try{
+			j.join();
+		}catch (Exception ex){
+			throw new IllegalStateException(ex);
+		}
+		
+		return  cloneColumns(patrolQueryColumns);
+	}
+
+	
+	private static QueryColumn[] cloneColumns(QueryColumn[] cols){
+		QueryColumn[] copies = new QueryColumn[cols.length];
 		for (int i = 0; i < copies.length; i ++){
 			copies[i] = cols[i].clone();
 		}

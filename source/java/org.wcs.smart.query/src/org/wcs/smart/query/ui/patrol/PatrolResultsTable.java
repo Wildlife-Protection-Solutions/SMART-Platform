@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.querytable;
+package org.wcs.smart.query.ui.patrol;
 
 import java.util.List;
 
@@ -33,8 +33,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
+import org.wcs.smart.query.ui.querytable.QueryResultItemComparator;
+import org.wcs.smart.query.ui.querytable.QueryTableViewerColumn;
 
 /**
  * Creates a query results table for a given query.
@@ -43,7 +45,7 @@ import org.wcs.smart.query.model.observation.QueryColumn;
  * @author Emily
  *
  */
-public class QueryResultsTable {
+public class PatrolResultsTable {
 
 	private TableViewer table;
 	private QueryTableViewerColumn[] tableViewerColumns;
@@ -68,7 +70,7 @@ public class QueryResultsTable {
 		return table;
 	}
 	
-	public void initQuery(final ObservationQuery query){
+	public void initQuery(final PatrolQuery query){
 		if (tableViewerColumns != null){
 			//columns already created
 			return;

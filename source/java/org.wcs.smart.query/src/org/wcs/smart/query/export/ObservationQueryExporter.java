@@ -27,7 +27,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
  * A query exporter class for exporting observation
@@ -40,7 +40,7 @@ import org.wcs.smart.query.model.observation.ObservationQueryColumn;
 public abstract class ObservationQueryExporter {
 
 	protected List<QueryResultItem> data;
-	protected List<ObservationQueryColumn> queryColumns; 
+	protected List<QueryColumn> queryColumns; 
 	protected File outputFile;
 	
 	/**
@@ -114,7 +114,7 @@ public abstract class ObservationQueryExporter {
 	 * @param outputFile the file to export to
 	 */
 	public void setData(List<QueryResultItem> data, 
-			List<ObservationQueryColumn> queryColumns, 
+			List<QueryColumn> queryColumns, 
 			File outputFile ){
 		this.data = data;
 		this.queryColumns = queryColumns;

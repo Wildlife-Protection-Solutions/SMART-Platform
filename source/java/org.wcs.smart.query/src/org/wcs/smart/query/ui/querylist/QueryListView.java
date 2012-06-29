@@ -57,6 +57,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
@@ -201,6 +202,8 @@ public class QueryListView extends ViewPart {
 							getSite().getPage().openEditor((QueryInput)x, QueryResultsEditor.ID);
 						}else if (((QueryInput)x).getType() == QueryType.SUMMARY){
 							getSite().getPage().openEditor((QueryInput)x, SummaryEditor.ID);
+						}else if (((QueryInput)x).getType() == QueryType.PATROL){
+							getSite().getPage().openEditor((QueryInput)x, PatrolQueryResultsEditor.ID);
 						}
 					} catch (Throwable t) {
 						QueryPlugIn.displayLog(t.getMessage(), t);

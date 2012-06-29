@@ -25,21 +25,17 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ui.internal.ca.properties.CategoryInfoPanel;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog page for creating/editing category.

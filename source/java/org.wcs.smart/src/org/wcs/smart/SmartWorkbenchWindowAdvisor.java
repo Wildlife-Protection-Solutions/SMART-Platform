@@ -21,22 +21,9 @@
  */
 package org.wcs.smart;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
-import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.LayersView;
 import net.refractions.udig.project.ui.internal.MapPart;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -55,8 +42,6 @@ import org.eclipse.ui.application.WorkbenchWindowAdvisor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.udig.catalog.smart.SmartService;
-import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapView;
 

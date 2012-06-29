@@ -26,8 +26,8 @@ import java.util.Date;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQueryColumn;
-import org.wcs.smart.query.model.observation.ObservationQueryColumn.ColumnType;
+import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumn.ColumnType;
 
 /**
  * Class represents one of the fixed table columns that do not change from
@@ -43,7 +43,7 @@ import org.wcs.smart.query.model.observation.ObservationQueryColumn.ColumnType;
  */
 public class FixedColumnLabelProvider extends ColumnLabelProvider {
 
-	private ObservationQueryColumn column;
+	private QueryColumn column;
 
 	/**
 	 * Creates a new fixed table column.
@@ -51,7 +51,7 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 	 * @param column
 	 *            the column definition
 	 */
-	public FixedColumnLabelProvider(ObservationQueryColumn column) {
+	public FixedColumnLabelProvider(QueryColumn column) {
 		this.column = column;
 	}
 

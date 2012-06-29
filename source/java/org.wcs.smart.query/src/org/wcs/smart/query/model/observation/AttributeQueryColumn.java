@@ -33,7 +33,7 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeQueryColumn extends ObservationQueryColumn {
+public class AttributeQueryColumn extends QueryColumn {
 
 	/**
 	 * Creates a new attribute column.
@@ -67,7 +67,7 @@ public class AttributeQueryColumn extends ObservationQueryColumn {
 
 
 	/**
-	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
 	public Object getValue(QueryResultItem item) {
@@ -76,11 +76,11 @@ public class AttributeQueryColumn extends ObservationQueryColumn {
 
 
 	/**
-	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#clone()
+	 * @see org.wcs.smart.query.model.observation.QueryColumn#clone()
 	 */
 	@Override
-	public ObservationQueryColumn clone() {
-		ObservationQueryColumn newColumn = new AttributeQueryColumn(getName(), getKey(), getType());
+	public QueryColumn clone() {
+		QueryColumn newColumn = new AttributeQueryColumn(getName(), getKey(), getType());
 		return newColumn;
 	}
 }

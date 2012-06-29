@@ -54,6 +54,7 @@ import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
@@ -149,7 +150,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * to get all attributes associated with a matching observations.
 	 */
 	@Override
-	public List<QueryResultItem> executeQuery(final ObservationQuery query,
+	public List<QueryResultItem> executeQuery(final SimpleQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
@@ -184,7 +185,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 					}
 					
 					monitor.subTask("Populating results table");
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), true, c);
+					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), true, c);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;

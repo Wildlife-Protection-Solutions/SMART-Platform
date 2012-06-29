@@ -34,7 +34,7 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class CategoryQueryColumn extends ObservationQueryColumn{
+public class CategoryQueryColumn extends QueryColumn{
 
 	private int level;	//the category level in the database.
 		
@@ -51,7 +51,7 @@ public class CategoryQueryColumn extends ObservationQueryColumn{
 	
 
 	/**
-	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
 	public Object getValue(QueryResultItem item) {
@@ -72,10 +72,10 @@ public class CategoryQueryColumn extends ObservationQueryColumn{
 
 
 	/**
-	 * @see org.wcs.smart.query.model.observation.ObservationQueryColumn#clone()
+	 * @see org.wcs.smart.query.model.observation.QueryColumn#clone()
 	 */
 	@Override
-	public ObservationQueryColumn clone() {
+	public QueryColumn clone() {
 		CategoryQueryColumn newColumn = new CategoryQueryColumn(super.getName(), level);
 		return newColumn;
 	}

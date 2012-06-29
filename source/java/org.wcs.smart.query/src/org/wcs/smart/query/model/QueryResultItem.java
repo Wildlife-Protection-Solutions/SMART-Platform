@@ -431,7 +431,6 @@ public class QueryResultItem {
 	public void setWaypointComment(String wpComment) {
 		this.waypointComment = wpComment;
 	}
-	
 	public void setPatrolLegStartDate(Date date){
 		this.plStartDate = date;
 	}
@@ -445,4 +444,5 @@ public class QueryResultItem {
 	public Date getPatrolLegEndDate(){
 		return this.plEndDate;
 	}
+
 }

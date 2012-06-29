@@ -43,7 +43,6 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
-import org.wcs.smart.patrol.model.PatrolLegDay;
 
 /**
  * Wizard for importing data from GPS Device
