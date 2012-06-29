@@ -432,12 +432,14 @@
             class="org.wcs.smart.patrol.model.PatrolMandate">
       </class>
       <class
+            ca_property=".id.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolType">
       </class>
       <class
             class="org.wcs.smart.patrol.model.PatrolTransportType">
       </class>
       <class
+            ca_property=".uuid"
             class="org.wcs.smart.patrol.model.PatrolOptions">
       </class>
       <class
