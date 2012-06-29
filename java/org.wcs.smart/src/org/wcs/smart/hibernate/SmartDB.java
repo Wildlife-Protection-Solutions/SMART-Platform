@@ -57,10 +57,10 @@ public class SmartDB {
 			this.username = user;
 			this.password = pass;
 		}
-		String getUserName(){
+		public String getUserName(){
 			return this.username;
 		}
-		String getPassword(){
+		public String getPassword(){
 			return this.password;
 		}
 	};

@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.startup.SmartStartUp;
+import org.wcs.smart.ui.internal.backup.ImportCaHandler;
 import org.wcs.smart.ui.internal.backup.RestoreHandler;
 
 /**
@@ -136,6 +137,9 @@ public abstract class InitializeDialog  extends Dialog {
 		final Button opRestore = new Button(opComp, SWT.RADIO);
 		opRestore.setText("Restore a Backup");
 
+		final Button opImport = new Button(opComp, SWT.RADIO);
+		opImport.setText("Import a Conservation Area");
+		
 		Label lbl = new Label(shell, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,false));
 		
@@ -145,9 +149,7 @@ public abstract class InitializeDialog  extends Dialog {
 		gl.horizontalSpacing = 20;
 		gl.marginHeight = 10;
 		buttonComp.setLayout(gl);
-		
-		
-		
+				
 		Button btnCancel = new Button(buttonComp, SWT.NONE);
 		btnCancel.setText("Cancel");
 		btnCancel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true));
@@ -171,6 +173,8 @@ public abstract class InitializeDialog  extends Dialog {
 					createConservationArea();
 				} else if (opRestore.getSelection()) {
 					restoreBackup();
+				}else if (opImport.getSelection()){
+					importCa();
 				} else {
 					MessageDialog
 							.openError(shell, "Error",
@@ -212,6 +216,19 @@ public abstract class InitializeDialog  extends Dialog {
 		}
 	}
 	
+	/**
+	 * Starts the process for restoring a database
+	 */
+	private void importCa(){
+		ImportCaHandler handler = new ImportCaHandler();
+		try{
+			handler.execute(shell);
+			shell.dispose();
+		}catch(Exception ex){
+			MessageDialog.openError(shell, "Import Error", "Error occurred while importing Conservation Area.\n\n" + ex.getMessage());
+			SmartPlugIn.log("Error during import.", ex);
+		}
+	}
 	
 	/**
 	 * Code executed when cancelled pressed

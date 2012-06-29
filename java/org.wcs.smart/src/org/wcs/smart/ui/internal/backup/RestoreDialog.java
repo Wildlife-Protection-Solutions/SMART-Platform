@@ -45,16 +45,26 @@ import org.eclipse.swt.widgets.Text;
  * @author egouge
  * @since 1.0.0
  */
-public class RestoreBackupDialog extends TitleAreaDialog {
+public class RestoreDialog extends TitleAreaDialog {
 
 	private Text txtRestorefile;
 	private File selectedFile;
 	
+	private String title;
+	private String message;
+	private String dialogTitle;
+	private String okButtonText;
 	/**
 	 * @param parentShell
 	 */
-	public RestoreBackupDialog(Shell parentShell) {
+	public RestoreDialog(Shell parentShell, String title, 
+			String message, String dialogTitle,String okButtonText) {
 		super(parentShell);
+		
+		this.title = title;
+		this.message = message;
+		this.dialogTitle = dialogTitle;
+		this.okButtonText = okButtonText;
 	}
 	
 	
@@ -76,7 +86,7 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Backup File:");
+		lbl.setText("File:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtRestorefile = new Text(main, SWT.DEFAULT);
@@ -113,9 +123,13 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 			}
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));		
-		setTitle("Restore SMART backup");
-		setMessage("Select the file to restore.");
-		super.getShell().setText("Restore");
+//		setTitle("Restore SMART backup");
+//		setMessage("Select the file to restore.");
+//		super.getShell().setText("Restore");
+		
+		setTitle(this.title);
+		setMessage(this.message);
+		super.getShell().setText(this.dialogTitle);
 		return composite;
 	}
 	
@@ -126,7 +140,8 @@ public class RestoreBackupDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Restore", true);
+		//createButton(parent, IDialogConstants.OK_ID, "Restore", true);
+		createButton(parent, IDialogConstants.OK_ID, this.okButtonText, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
 		getButton(IDialogConstants.CANCEL_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);

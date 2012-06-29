@@ -37,7 +37,7 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Derby implementation of a CaDataExporter
+ * Derby implementation of a ICaDataExportEngine
  * 
  * @author egouge
  * @since 1.0.0
@@ -64,7 +64,10 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		String sql = "select a.columnname FROM " +
 				"sys.syscolumns a, sys.systables b, sys.sysschemas c " +
 				" WHERE a.referenceid = b.tableid and b.schemaid = c.schemaid and " +
-				"c.schemaname || '.' || b.tablename = '" + tableName.toUpperCase() + "' order by a.columnnumber";
+				"c.schemaname || '.' || b.tablename = '" + 
+				tableName.toUpperCase() + "' " +
+				" AND (a.autoincrementvalue is null and columndefault is null) " + //not an generated always identity column
+				"order by a.columnnumber";
 		
 		@SuppressWarnings("unchecked")
 		List<String> data = getSession().createSQLQuery(sql).list();
@@ -121,11 +124,8 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		query.append(" = x''" );
 		query.append(SmartUtils.encodeHex(getConservationArea().getUuid()));
 		query.append("''" );
-		
-		SQLQuery sqlQuery = getSession().createSQLQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query.toString() + "', '" +
-				createFileName(getExportLocation(), tableName + ".dat").getAbsolutePath() + "', null, null, null)" );
-		
-		sqlQuery.executeUpdate();		
+
+		writeQuery(tableName, query.toString());
 	}
 
 	/* (non-Javadoc)
@@ -150,7 +150,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		sql = sql.replace("?", " x''" + SmartUtils.encodeHex(getConservationArea().getUuid()) + "''");
 
 		//find the alias for the first table in the query
-		Pattern pattern = Pattern.compile(".*from\\s+[^\\s,]*\\s([^,]*),.*");
+		Pattern pattern = Pattern.compile(".*from\\s+[^\\s,]*\\s([^,\\s]*)[,\\s].*");
 		Matcher matcher = pattern.matcher(sql);
 		matcher.find();
 		String key = matcher.group(1);
@@ -182,13 +182,13 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeQuery(String tableName, String query){
 		SQLQuery sqlQuery = getSession().createSQLQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" +
-				createFileName(getExportLocation(), tableName + ".dat").getAbsolutePath() + "', null, null, null)" );
+				createFileName(getExportLocation(), tableName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" );
 		
 		sqlQuery.executeUpdate();
 	}
 	
 	private File createFileName(File destDir, String tableName){
-		File dir = new File(destDir, "database");
+		File dir = new File(destDir, CaExporter.DATABASE_DIR);
 		SmartUtils.createDirectory(dir);
 		File f = new File(dir, File.separator + tableName);
 		return f;

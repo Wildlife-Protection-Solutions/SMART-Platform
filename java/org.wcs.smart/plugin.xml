@@ -445,6 +445,7 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
+            ca_property=".uuid"
             class="org.wcs.smart.ca.ConservationArea">
       </class>
       <class
