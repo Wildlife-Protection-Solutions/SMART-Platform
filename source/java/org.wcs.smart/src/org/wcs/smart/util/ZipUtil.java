@@ -26,9 +26,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -65,7 +68,11 @@ public class ZipUtil {
             tOut = new ZipArchiveOutputStream(bOut);
             int count = 0;
             for (int i = 0; i < directories.length; i ++){
-            	count += SmartUtils.countFiles(directories[i]);
+            	if (directories[i].isDirectory()){
+            		count += SmartUtils.countFiles(directories[i]);
+            	}else{
+            		count++;
+            	}
             }
             
             monitor.beginTask("Creating zip file", count);
@@ -135,4 +142,81 @@ public class ZipUtil {
         }
         return true;
     }
+    
+    
+    /**
+     * @param file  the zip file
+     * @param destinationLocation the destination for unzipped file
+     * @return
+     * @throws Exception  
+     */
+    public static void unzipFolder(File file,
+			File destinationLocation)
+			throws Exception {
+    	
+    	ZipFile archiveFile = new ZipFile(file);
+    	String[] outputZipRootFolder = new String[] { "null" };
+    	
+		try {
+			byte[] buf = new byte[65536];
+
+			Enumeration<ZipArchiveEntry> entries = archiveFile.getEntries();
+			while (entries.hasMoreElements()) {
+				ZipArchiveEntry zipEntry = entries.nextElement();
+				String name = zipEntry.getName();
+				name = name.replace('\\', '/');
+				int i = name.indexOf('/');
+				if (i > 0) {
+					outputZipRootFolder[0] = name.substring(0, i);
+				}
+				// name = name.substring(i + 1);
+
+				File destinationFile = new File(destinationLocation, name);
+				if (name.endsWith("/")) {
+					if (!destinationFile.isDirectory()
+							&& !destinationFile.mkdirs()) {
+						throw new Exception(
+								"Could not create temp directory: '"
+										+ destinationFile.getPath());
+					}
+					continue;
+				} else if (name.indexOf('/') != -1) {
+					// Create the the parent directory if it doesn't exist
+					File parentFolder = destinationFile.getParentFile();
+					if (!parentFolder.isDirectory()) {
+						if (!parentFolder.mkdirs()) {
+							throw new Exception(
+									"Could not create temp directory: '"
+											+ parentFolder.getPath());
+						}
+					}
+				}
+
+				FileOutputStream fos = null;
+				try {
+					fos = new FileOutputStream(destinationFile);
+					int n;
+					InputStream entryContent = archiveFile
+							.getInputStream(zipEntry);
+					while ((n = entryContent.read(buf)) != -1) {
+						if (n > 0) {
+							fos.write(buf, 0, n);
+						}
+					}
+				} finally {
+					if (fos != null) {
+						fos.close();
+					}
+				}
+			}
+		} catch (IOException e) {
+			throw new Exception("Unzip failed: " + e.getMessage(), e);
+		} finally {
+			try {
+				archiveFile.close();
+			} catch (IOException e) {
+			}
+		}
+
+	}
 }

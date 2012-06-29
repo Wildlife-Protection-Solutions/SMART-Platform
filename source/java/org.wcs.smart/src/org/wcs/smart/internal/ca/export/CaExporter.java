@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -50,8 +51,26 @@ import org.wcs.smart.util.ZipUtil;
  * @author egouge
  * @since 1.0.0
  */
-public class CaExportEngine {
+public class CaExporter {
 
+	/**
+	 * The name of the conservation area data file in the exported
+	 * data.
+	 */
+	public static final String CA_INFO_FILENAME = "conservationarea.dat";
+	
+	/**
+	 * The name of the directory where the database data is stored
+	 */
+	public static final String DATABASE_DIR = "database";
+	
+	/**
+	 * The name of the directory where the filestore data is 
+	 * stored
+	 */
+	public static final String FILESTORE_DIR = "filestore";
+	
+	
 	/**
 	 * Export code extension point
 	 */
@@ -75,8 +94,10 @@ public class CaExportEngine {
 	 * @param destFile output file
 	 * @param monitor progress monitor
 	 * 
+	 * @return true if data exported correctly, false if error occurred
+	 * 
 	 */
-	public void export(File destFile, IProgressMonitor monitor){
+	public boolean export(File destFile, IProgressMonitor monitor){
 		
 		Session session = HibernateManager.openSession();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
@@ -94,10 +115,18 @@ public class CaExportEngine {
 			}
 			
 			/* zip up files */
-			ZipUtil.createZip(new File[]{tempDir}, destFile, monitor);
+			ZipUtil.createZip(tempDir.listFiles(), destFile, monitor);
+			
+			try{
+				FileUtils.deleteDirectory(tempDir);
+			}catch(Exception ex){
+				SmartPlugIn.log("Could not delete temporary directory: " + tempDir.getAbsolutePath(), ex);
+			}
+			return true;
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(null,
 					"Conservation area export failed.\n\n" + ex.getMessage(), ex);
+			return false;
 		}finally{
 			session.close();
 		}
@@ -111,7 +140,9 @@ public class CaExportEngine {
 	 * @throws IOException
 	 */
 	private void writeConservationAreaInfo(File directory, ConservationArea ca) throws IOException{
-		FileWriter fw = new FileWriter(new File(directory, "conservationarea.dat"));
+		FileWriter fw = new FileWriter(new File(directory, CA_INFO_FILENAME));
+		fw.write(SmartUtils.encodeHex(ca.getUuid()));
+		fw.write(SmartUtils.LINE_SEPARATOR);
 		fw.write(ca.getId());
 		fw.write(SmartUtils.LINE_SEPARATOR);
 		fw.write(ca.getName());

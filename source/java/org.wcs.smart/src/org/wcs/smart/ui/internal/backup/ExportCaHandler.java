@@ -29,13 +29,14 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.ca.export.CaExportEngine;
+import org.wcs.smart.internal.ca.export.CaExporter;
 
 /**
  * Handler for exporting conservation area
@@ -60,7 +61,7 @@ public class ExportCaHandler extends AbstractHandler {
 	 * @param shell current shell
 	 */
 	public void exportCa(final Shell shell){
-		final BackupDialog dialog = new BackupDialog(shell,"Export Conservation Area", "Select the file to export the '" + SmartDB.getCurrentConservationArea().getName() + "' conservation area to.", "Export", CaExportEngine.getDefaultFileName());
+		final BackupDialog dialog = new BackupDialog(shell,"Export Conservation Area", "Select the file to export the '" + SmartDB.getCurrentConservationArea().getName() + "' conservation area to.", "Export", CaExporter.getDefaultFileName());
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}
@@ -73,8 +74,10 @@ public class ExportCaHandler extends AbstractHandler {
 						throws InvocationTargetException, InterruptedException {
 					File f = dialog.getSelectedFile();
 
-					CaExportEngine exporter = new CaExportEngine();
-					exporter.export(f, monitor);
+					CaExporter exporter = new CaExporter();
+					if (exporter.export(f, monitor)){
+						MessageDialog.openInformation(shell, "Export Conservation Area", "Conservation area exported successfully.");
+					}
 				}
 			});
 		} catch (Exception ex) {

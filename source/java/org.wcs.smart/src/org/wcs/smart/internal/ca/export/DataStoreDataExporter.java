@@ -51,7 +51,7 @@ public class DataStoreDataExporter implements ICaDataExporter {
 	@Override
 	public void exportData(ICaDataExportEngine exportEngine,
 			IProgressMonitor monitor) throws Exception {
-		File filestore = new File(exportEngine.getExportLocation() + File.separator + "filestore");
+		File filestore = new File(exportEngine.getExportLocation() + File.separator + CaExporter.FILESTORE_DIR);
 		SmartUtils.createDirectory(filestore);
 		File filestoreLocation = new File(exportEngine.getConservationArea().getFileDataStoreLocation());
 		FileUtils.copyDirectory(filestoreLocation, filestore);
