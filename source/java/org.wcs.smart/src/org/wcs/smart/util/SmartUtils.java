@@ -373,6 +373,7 @@ public class SmartUtils {
 	 * @return string with quotes removed
 	 */
 	public static String stripQuotes(String str){
+		if (str == null) return str;
 		if (str.charAt(0)=='"' && str.charAt(str.length()-1) == '"'){
 			return str.substring(1, str.length() - 1);
 		}

@@ -780,7 +780,7 @@
             class="org.wcs.smart.query.export.ShapeQueryExporter">
       </Exporter>
       <Exporter
-            class="org.wcs.smart.query.export.CsvObservationQueryExporter">
+            class="org.wcs.smart.query.export.CsvSimpleQueryExporter">
       </Exporter>
       <Exporter
             class="org.wcs.smart.query.export.CsvSummaryExporter">

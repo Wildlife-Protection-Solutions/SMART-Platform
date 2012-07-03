@@ -30,14 +30,14 @@ import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
- * A query exporter class for exporting observation
+ * A query exporter class for exporting observation and patrol
  * query results.
  * 
  * 
  * @author Emily
  * @since 1.0.0
  */
-public abstract class ObservationQueryExporter {
+public abstract class SimpleQueryExporter {
 
 	protected List<QueryResultItem> data;
 	protected List<QueryColumn> queryColumns; 
