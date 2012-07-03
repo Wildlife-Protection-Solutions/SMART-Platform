@@ -27,6 +27,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
@@ -42,6 +43,8 @@ public class SaveAsHandler extends AbstractHandler {
 		if (editor instanceof QueryResultsEditor){
 			editor.doSaveAs();
 		}else if (editor instanceof SummaryEditor){
+			editor.doSaveAs();
+		}else if (editor instanceof PatrolQueryResultsEditor){
 			editor.doSaveAs();
 		}
 		return null;

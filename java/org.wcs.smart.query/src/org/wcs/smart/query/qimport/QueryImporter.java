@@ -76,6 +76,8 @@ public class QueryImporter {
 			return importSummary(qt);
 		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name())){
 			return importObservation(qt);
+		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
+			return importObservation(qt);
 		}else{
 			throw new Exception("Could not import query of type " + qt.getQueryType());
 		}
@@ -102,13 +104,12 @@ public class QueryImporter {
 	 * processes observation query
 	 */
 	private org.wcs.smart.query.model.Query importObservation(QueryType qt) throws Exception{
-		ObservationQueryDefinitionImporter importer = new ObservationQueryDefinitionImporter();
+		SimpleQueryDefinitionImporter importer = new SimpleQueryDefinitionImporter();
 		org.wcs.smart.query.model.Query query = importer.importQuery(qt);
 		warnings.addAll(importer.getWarnings());
 		return query;
 	}
-	
-	
+		
 	
 	/**
 	 * Attempts to find an employee based on the values.

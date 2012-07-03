@@ -27,25 +27,27 @@ import java.io.FileWriter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * CSV Query exporter for observation queries.
+ * CSV Query exporter for simple queries.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class CsvObservationQueryExporter extends ObservationQueryExporter implements IQueryExporter {
+public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQueryExporter {
 
 	private CSVWriter writer = null;
 	
 	/**
 	 * Creates a new exporter that exports to csv format
 	 */
-	public CsvObservationQueryExporter(){}
+	public CsvSimpleQueryExporter(){}
 	
 	/**
 	 * Close csv writer
@@ -59,7 +61,7 @@ public class CsvObservationQueryExporter extends ObservationQueryExporter implem
 	 * Initialise csv writer and writer
 	 * header line.
 	 * 
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#init()
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#init()
 	 */
 	@Override
 	protected void init() throws Exception {
@@ -73,7 +75,7 @@ public class CsvObservationQueryExporter extends ObservationQueryExporter implem
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem, java.io.OutputStream)
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem, java.io.OutputStream)
 	 */
 	@Override
 	protected void writeRow(QueryResultItem row)
@@ -81,13 +83,18 @@ public class CsvObservationQueryExporter extends ObservationQueryExporter implem
 		
 		String data[] = new String[queryColumns.size()]; 
 		for (int i = 0; i < data.length; i ++){
-			data[i] = queryColumns.get(i).getName(); 
+			Object temp = queryColumns.get(i).getValue(row);
+			if(temp != null){
+				data[i] = temp.toString();
+			}else{
+				data[i] = "";
+			}
 		}
 		writer.writeNext(data);
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getName()
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#getName()
 	 */
 	@Override
 	public String getName() {
@@ -95,7 +102,7 @@ public class CsvObservationQueryExporter extends ObservationQueryExporter implem
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getDefaultExtension()
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#getDefaultExtension()
 	 */
 	@Override
 	public String getDefaultExtension() {
@@ -108,7 +115,7 @@ public class CsvObservationQueryExporter extends ObservationQueryExporter implem
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof ObservationQuery){
+		if (query instanceof ObservationQuery || query instanceof PatrolQuery){
 			return true;
 		}
 		return false;
@@ -119,7 +126,7 @@ public class CsvObservationQueryExporter extends ObservationQueryExporter implem
 	 */
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
-		ObservationQuery q = ((ObservationQuery)query);
+		SimpleQuery q = ((SimpleQuery)query);
 		
 		super.setData(q.getLastResults(), q.getQueryColumns(), file);
 		super.export(monitor);

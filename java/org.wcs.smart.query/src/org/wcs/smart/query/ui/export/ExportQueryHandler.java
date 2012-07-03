@@ -30,6 +30,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
@@ -51,6 +52,8 @@ public class ExportQueryHandler extends AbstractHandler implements IHandler {
 			query = ((QueryResultsEditor) editor).getQuery();
 		}else if (editor instanceof SummaryEditor){
 			query = ((SummaryEditor) editor).getQuery();
+		}else if (editor instanceof PatrolQueryResultsEditor){
+			query = ((PatrolQueryResultsEditor) editor).getQuery();
 		}
 		if (query != null){
 			ExportQueryWizard wizard = new ExportQueryWizard(query);

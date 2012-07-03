@@ -52,7 +52,7 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 
 
 	/**
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getName()
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#getName()
 	 */
 	@Override
 	public String getName() {
@@ -60,7 +60,7 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#getDefaultExtension()
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#getDefaultExtension()
 	 */
 	@Override
 	public String getDefaultExtension() {

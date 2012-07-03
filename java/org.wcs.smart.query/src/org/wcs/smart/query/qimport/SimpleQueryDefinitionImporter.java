@@ -33,7 +33,9 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.filter.AttributeFilter;
@@ -53,7 +55,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class ObservationQueryDefinitionImporter {
+public class SimpleQueryDefinitionImporter {
 
 	/*
 	 * list of warnings generated during import process
@@ -75,11 +77,17 @@ public class ObservationQueryDefinitionImporter {
 	 * @throws Exception if the file cannot be converted to a query.
 	 * 
 	 */
-	public ObservationQuery importQuery(QueryType qt) throws Exception{
+	public SimpleQuery importQuery(QueryType qt) throws Exception{
 		warnings.clear();
-		
+		SimpleQuery wq;
+
 		String langCode = qt.getLanguage();
-		ObservationQuery wq = new ObservationQuery();
+		if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name())){
+			wq = new ObservationQuery();	
+		}else {
+			wq = new PatrolQuery();
+		}
+		
 		wq.setName(qt.getName());
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();

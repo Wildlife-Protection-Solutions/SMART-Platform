@@ -47,7 +47,7 @@ import org.wcs.smart.query.model.observation.ObservationQuery;
  * @author Emily
  * @since 1.0.0
  */
-public class ShapeQueryExporter extends ObservationQueryExporter implements IQueryExporter{
+public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExporter{
 
     private ShapefileDataStore shapefile = null;    
     private ArrayList<SimpleFeature> features = null;
@@ -61,7 +61,7 @@ public class ShapeQueryExporter extends ObservationQueryExporter implements IQue
 	/**
 	 * Creates a shapefile and initialises the schema.
 	 * 
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#init()
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#init()
 	 */
 	@Override
 	protected void init() throws Exception {
@@ -73,7 +73,7 @@ public class ShapeQueryExporter extends ObservationQueryExporter implements IQue
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem)
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#writeRow(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
 	protected void writeRow(QueryResultItem row) throws Exception {
@@ -81,7 +81,7 @@ public class ShapeQueryExporter extends ObservationQueryExporter implements IQue
 	}
 
 	/**
-	 * @see org.wcs.smart.query.export.ObservationQueryExporter#finish()
+	 * @see org.wcs.smart.query.export.SimpleQueryExporter#finish()
 	 */
 	@SuppressWarnings("unchecked")
 	@Override

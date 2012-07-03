@@ -26,7 +26,9 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.xml.model.QueryPart;
@@ -46,7 +48,7 @@ public class ObservationQueryDefinitionExporter extends DefinitionQueryExporter 
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof ObservationQuery){
+		if (query instanceof ObservationQuery || query instanceof PatrolQuery ){
 			return true;
 		}
 		return false;
@@ -59,11 +61,11 @@ public class ObservationQueryDefinitionExporter extends DefinitionQueryExporter 
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery) throws Exception {
 		QueryPart defPart = new QueryPart();
 		defPart.setKey("definition");
-		defPart.setValue( ((ObservationQuery)query).getQueryFilter() );
+		defPart.setValue( ((SimpleQuery)query).getQueryFilter() );
 		
 		xmlQuery.getQueryPart().add(defPart);
 				
-		IFilter queryFilter = ((ObservationQuery)query).getFilter();
+		IFilter queryFilter = ((SimpleQuery)query).getFilter();
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{

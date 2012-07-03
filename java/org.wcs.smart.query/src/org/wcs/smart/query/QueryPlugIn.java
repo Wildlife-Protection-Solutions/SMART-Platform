@@ -62,6 +62,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	/**
 	 * The waypoint query
 	 */
+	public static final String PATROL_QUERY_ICON = "org.wcs.smart.query.patrolquery";
+
+	/**
+	 * The waypoint query
+	 */
 	public static final String SUMMARY_QUERY_ICON = "org.wcs.smart.query.summaryquery";
 	
 	
@@ -163,6 +168,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		addImage("images/icons/obj16/summary_query.png",SUMMARY_QUERY_ICON);
 		addImage("images/icons/obj16/folder.png",FOLDER_ICON);
 		addImage("images/icons/obj16/waypoint_query.png",WAYPOINT_QUERY_ICON);	
+		addImage("images/icons/obj16/patrol_query.png",PATROL_QUERY_ICON);
 		
 		addImage("images/icons/obj16/calendar.png",CALENDAR_ICON);
 		addImage("images/icons/obj16/calendar_day.png",CALENDAR_DAY_ICON);
