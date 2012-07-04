@@ -66,7 +66,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 				" WHERE a.referenceid = b.tableid and b.schemaid = c.schemaid and " +
 				"c.schemaname || '.' || b.tablename = '" + 
 				tableName.toUpperCase() + "' " +
-				" AND (a.autoincrementvalue is null || (a.autoincrementvalue is not null and columndefault is not null)) " + //not an generated always identity column
+				" AND (a.autoincrementvalue is null or (a.autoincrementvalue is not null and a.columndefault is not null)) " + //not an generated always identity column
 				"order by a.columnnumber";
 		
 		@SuppressWarnings("unchecked")

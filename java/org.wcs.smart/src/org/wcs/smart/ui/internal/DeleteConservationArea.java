@@ -32,6 +32,9 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -68,13 +71,22 @@ public class DeleteConservationArea extends AbstractHandler {
 			return null;
 		}
 		
-		if (!(dialog.getUserName().equals(SmartDB.getCurrentEmployee().getSmartUserId())
+		if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
 			&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)){
 			
 			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", "Invalid username and password.");
 			return null;
 		}
 		
+		
+		//prompt to save dirty editors
+		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i = 0; i < windows.length; i ++){
+			IWorkbenchPage[] pages = windows[i].getPages();
+			for (int j = 0; j < pages.length; j ++){
+				pages[j].closeAllEditors(false);
+			}
+		}
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 		try{

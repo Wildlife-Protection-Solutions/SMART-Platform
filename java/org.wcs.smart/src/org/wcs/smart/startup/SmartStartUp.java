@@ -23,7 +23,9 @@ package org.wcs.smart.startup;
 
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -77,6 +79,7 @@ public class SmartStartUp {
 		try{
 			Employee e = HibernateManager.validateUser(userName, password, ca);
 			if (e == null){
+				MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Error", "The username and password does not exist for the selected conservation area.");
 				return false;
 			}
 			//disconnect from the database & setup correct user level
