@@ -83,10 +83,11 @@ public class ImportPatrolHandler extends AbstractHandler {
 	}
 
 	public void importDirectory(final IWorkbench activeWorkbench, final File directory){
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		final Display display = Display.getCurrent();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
 		
 		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
+			pmd.run(false, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
@@ -107,7 +108,20 @@ public class ImportPatrolHandler extends AbstractHandler {
 							}
 						}catch (Exception ex){
 							SmartPatrolPlugIn.displayLog("File " + files[i].toString() + " not imported: " + ex.getMessage(), ex);
-						}	
+						}
+						
+						while(display.readAndDispatch()){}
+						
+						if (monitor.isCanceled()){
+							display.syncExec(new Runnable() {
+								@Override
+								public void run() {
+									MessageDialog.openInformation(display.getActiveShell(), "Cancelled", "The import has been cancelled.  All patrols loaded to this point will remain in the database.");									
+								}
+							});
+							
+							return;
+						}
 					}
 				}
 			});
