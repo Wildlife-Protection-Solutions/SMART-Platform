@@ -47,6 +47,7 @@
       <editor
             class="org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor"
             default="false"
+            icon="images/icons/obj16/patrol_query.png"
             id="org.wcs.smart.query.ui.PatrolQueryResultsEditor"
             name="Patrol Query">
       </editor>
