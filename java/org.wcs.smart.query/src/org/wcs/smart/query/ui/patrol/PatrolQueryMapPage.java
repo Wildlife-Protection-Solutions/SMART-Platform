@@ -48,12 +48,8 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Patrol query map page for viewing the results
+ * of the patrol query.
  * @author egouge
  * @since 1.0.0
  */

@@ -50,12 +50,7 @@ import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Query importer for importing summary query definitions
  * @author egouge
  * @since 1.0.0
  */

@@ -72,6 +72,7 @@ public class QueryResultItem {
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
 	private byte[] observationUuid;
+	private byte[] track;
 	
 	
 	/**
@@ -445,4 +446,10 @@ public class QueryResultItem {
 		return this.plEndDate;
 	}
 
+	public byte[] getTrack(){
+		return this.track;
+	}
+	public void setTrack(byte[] track){
+		this.track = track;
+	}
 }

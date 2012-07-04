@@ -29,19 +29,19 @@ import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
- * Feature reader for waypoint/observation query.
+ * A patrol query geotools feature reader.
  * 
- * @author Emily
+ * @author egouge
  * @since 1.0.0
  */
-public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
+public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
 	private Iterator<QueryResultItem> fIterator;
-	private ObservationQuery query;
+	private PatrolQuery  query;
 	
 	/**
 	 * Creates a new feature reader.
@@ -49,7 +49,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	public QueryFeatureReader(ObservationQuery query,
+	public PatrolQueryFeatureReader(PatrolQuery query,
 			SimpleFeatureType ftype) {
 		
 		this.ftype = ftype;
@@ -93,7 +93,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 			NoSuchElementException {
 		
 		QueryResultItem next = (QueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, query.getQueryColumns(), ftype);
+		SimpleFeature f = QueryResultItemFeature.createTrackFeature(next, query.getQueryColumns(), ftype);
 		return f;
 	}
 	

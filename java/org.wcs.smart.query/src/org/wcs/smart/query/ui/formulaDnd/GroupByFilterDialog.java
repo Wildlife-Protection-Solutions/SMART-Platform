@@ -173,7 +173,6 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 		getInputJob = new Job("Loading list items.") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				// TODO Auto-generated method stub
 				allItems = dropItem.getListItem();
 				if (monitor.isCanceled()){
 					return Status.OK_STATUS;

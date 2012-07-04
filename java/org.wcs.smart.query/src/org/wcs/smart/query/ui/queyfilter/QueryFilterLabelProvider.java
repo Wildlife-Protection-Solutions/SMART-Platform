@@ -54,7 +54,7 @@ public class QueryFilterLabelProvider extends LabelProvider {
 		if (element instanceof PatrolQueryOption){
 			return PatrolQueryOptions.getImage((PatrolQueryOption) element);
 		}else if (element instanceof PatrolValueOption){
-			//TODO:
+			//TODO: insert patrol image here
 		}else if (element instanceof QueryFilterContentProvider.RootNode){
 			return ((QueryFilterContentProvider.RootNode)element).getImage();
 		//}else if (element instanceof AREAFILTER)

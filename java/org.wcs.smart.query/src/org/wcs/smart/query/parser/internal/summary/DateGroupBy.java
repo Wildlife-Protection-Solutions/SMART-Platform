@@ -124,7 +124,7 @@ public class DateGroupBy implements IGroupBy {
 		Date startdate = new Date();
 		Date enddate = new Date();
 		if (df == null){
-			//TODO: fail
+			throw new IllegalStateException("Invalid date filter.");
 		}else{
 			if (df.getDateFilterOption() == DATE_FILTER_OP.ALL){
 				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca";

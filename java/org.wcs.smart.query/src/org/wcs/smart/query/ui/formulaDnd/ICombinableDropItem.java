@@ -22,16 +22,21 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 /**
- * TODO Purpose of 
+ * Drop item that has the ability to add another
+ * drop item to it. 
  * <p>
- * <ul>
- * <li></li>
- * </ul>
+ * This is used in summaries when grouping by 
+ * different items in the data tree.
  * </p>
  * @author egouge
  * @since 1.0.0
  */
 public interface ICombinableDropItem {
 
+	/**
+	 * Adds another item to the existing drop item
+	 * @param item drop item to add
+	 * @return <code>true</code> if added, <code>false</code> if cannot be added to this drop item
+	 */
 	public boolean addItem(DropItem item);
 }

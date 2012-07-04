@@ -36,6 +36,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.query.QueryPlugIn;
@@ -57,9 +58,17 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 	private List<QueryResultItem> myResults;
 	
 
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<QueryResultItem> executeQuery(
 			final PatrolQuery query,
-//			final ObservationQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
@@ -131,7 +140,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 
 		StringBuilder sql = new StringBuilder();
 		
-		sql.append(" SELECT distinct ");
+		sql.append(" SELECT ");
 		sql.append(buildSelectClause());
 		sql.append(" FROM ");
 		sql.append(buildFromClause());
@@ -158,6 +167,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 				it.setPatrolLegEndDate(rs.getDate(14));
 				it.setLeader(getEmployeeName(rs.getBytes(15), session));
 				it.setPilot(getEmployeeName(rs.getBytes(16), session));
+				it.setTrack(rs.getBytes(17));
 			
 				items.add(it);
 			}
@@ -183,7 +193,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 				"pl_end_date",
 				//"pld_patrol_day", 
 				"plm_leader", 
-				"plm_pilot" };
+				"plm_pilot", "track" };
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < results.length; i++) {
@@ -238,7 +248,8 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append("wp_uuid char(16) for bit data,");
 		sql.append("ob_uuid char(16) for bit data,");
 		sql.append("plm_leader char(16) for bit data,");
-		sql.append("plm_pilot char(16) for bit data)");
+		sql.append("plm_pilot char(16) for bit data,");
+		sql.append("track blob)");
 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
@@ -299,7 +310,8 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append("cast(null as char for bit data), ");	//waypoint uuid
 		sql.append("cast(null as char for bit data), "); 	//observation uuid
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.employee_uuid, ");
-		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.employee_uuid ");
+		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.employee_uuid, ");
+		sql.append(tablePrefix.get(Track.class) + ".geometry");
 
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM ");
@@ -318,6 +330,12 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = "
 				+ tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid ");
 		
+		sql.append(" left join ");
+		sql.append(tableNames.get(Track.class));
+		sql.append(" ");
+		sql.append(tablePrefix.get(Track.class));
+		sql.append(" on " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = "
+				+ tablePrefix.get(PatrolLegDay.class) + ".uuid ");
 		
 		sql.append(" left join ");
 		sql.append(tableNames.get(PatrolLegMember.class));

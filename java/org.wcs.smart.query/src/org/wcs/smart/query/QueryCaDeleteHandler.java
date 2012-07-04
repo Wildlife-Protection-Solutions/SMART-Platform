@@ -49,9 +49,8 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 		deleteObservationQueries(ca, session);
 		monitor.subTask("Deleting Summary Queries");
 		deleteSummaryQueries(ca, session);
-		//TODO: uncomment this after patrol queries added
-//		monitor.subTask("Deleting Patrol Queries");
-//		deletePatrolQueries(ca, session);		
+		monitor.subTask("Deleting Patrol Queries");
+		deletePatrolQueries(ca, session);		
 		monitor.subTask("Deleting Query Folders");
 		deleteQueryFolders(ca, session);		
 	}
@@ -67,12 +66,12 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 		q.setParameter("ca", ca);
 		q.executeUpdate();
 	}
-	//TODO: uncomment htis after patrol queries added
-//	private void deletePatrolQueries(ConservationArea ca, Session session) throws Exception{
-//		Query q = session.createQuery("delete from PatrolQuery where conservationArea = :ca");
-//		q.setParameter("ca", ca);
-//		q.executeUpdate();
-//	}
+
+	private void deletePatrolQueries(ConservationArea ca, Session session) throws Exception{
+		Query q = session.createQuery("delete from PatrolQuery where conservationArea = :ca");
+		q.setParameter("ca", ca);
+		q.executeUpdate();
+	}
 	
 	private void deleteQueryFolders(ConservationArea ca, Session session) throws Exception{
 		Query q = session.createQuery("delete from QueryFolder where conservationArea = :ca");

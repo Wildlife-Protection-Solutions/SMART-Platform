@@ -38,12 +38,7 @@ import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Dialog for selecting encourter rate variables.
  * @author egouge
  * @since 1.0.0
  */

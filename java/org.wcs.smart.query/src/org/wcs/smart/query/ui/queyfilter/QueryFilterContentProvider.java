@@ -165,11 +165,9 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			if (parentElement == DataModelItem.CATEGORIES){
 					return provider.getChildren(provider.getElements(null)[0]);	
 			}else if (parentElement == DataModelItem.ATTRIBUTES){
-//				DataModel dm = provider.
 				List<Attribute> atts = new ArrayList<Attribute>();
 				for (Attribute a : this.dataModel.getAttributes()){
-					//TODO: check categories and only include attributes with at least one active 
-					//category
+					//TODO: check categories and only include attributes with at least one active category
 					atts.add(a);
 				}
 				return atts.toArray(new Attribute[atts.size()]);

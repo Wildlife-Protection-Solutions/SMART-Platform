@@ -36,7 +36,7 @@ public class QueryServiceInfo extends IServiceInfo{
 	public QueryServiceInfo(QueryService service){
 		this.description = "Connects to a smart query.";
 		this.icon = JFaceResources.getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
-		this.keywords = new String[]{"Conservation Area", "SMART", "Query", "Waypoint"};
+		this.keywords = new String[]{"Conservation Area", "SMART", "Query", "Waypoint", "Patrol", "Track"};
 		this.title = "SMART Query " + service.getQuery().getName();
 	}
 	

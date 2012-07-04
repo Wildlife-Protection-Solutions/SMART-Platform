@@ -38,7 +38,9 @@ import net.refractions.udig.ui.UDIGDisplaySafeLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.geotools.data.DataStore;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
 import org.wcs.smart.query.model.Query;
@@ -47,7 +49,7 @@ import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
- * A udig service for a smart waypoint queries.
+ * A udig service for a smart waypoint or patrol queries.
  * 
  * 
  * @author Emily
@@ -63,7 +65,7 @@ public class QueryService extends IService {
 	private Map<String, Serializable> params;
 	private URL url;	
 	private List<QueryGeoResource> members;
-	private QueryDataSource ds = null;
+	private DataStore ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
 	private Query query = null;
@@ -161,7 +163,11 @@ public class QueryService extends IService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
+					if (query instanceof ObservationQuery){
+						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
+					}else if (query instanceof PatrolQuery){
+						members.add(new QueryGeoResource(this, PatrolQueryDataSource.PATROL_TYPE));
+					}
 				}
 			}
 		}
@@ -218,7 +224,7 @@ public class QueryService extends IService {
 	 * @return the query data source 
 	 * @throws IOException
 	 */
-	public QueryDataSource getDataStore( IProgressMonitor monitor ) throws IOException {
+	public DataStore getDataStore( IProgressMonitor monitor ) throws IOException {
 		if (this.ds == null) {
             dsInstantiationLock.lock();
             try {
@@ -226,8 +232,8 @@ public class QueryService extends IService {
                 	if (query != null){
                 		if (query.getType() == QueryType.OBSERVATION){
                 			ds = new QueryDataSource((ObservationQuery)query);
-                		}else{
-                			//NOT YET SUPPORTED
+                		}else if (query.getType() == QueryType.PATROL){
+                			ds = new PatrolQueryDataSource((PatrolQuery)query);
                 		}
                 	}else{
                 		//use factory
