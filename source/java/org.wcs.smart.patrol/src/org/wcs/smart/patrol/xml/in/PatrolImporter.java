@@ -332,6 +332,7 @@ class ConfirmInputDialog extends InputDialog{
 		//((GridData)this.getText().getLayoutData()).heightHint = 200;
 		((GridData)this.getText().getLayoutData()).widthHint = 500;
 		((GridData)this.getText().getLayoutData()).grabExcessVerticalSpace = true;
+		((GridData)this.getText().getLayoutData()).verticalAlignment = SWT.FILL;
 		this.getText().setEditable(false);
 		
 		((GridData)parent.getLayoutData()).heightHint = 400;

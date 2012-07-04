@@ -176,7 +176,9 @@ public class XmlToPatrolConverter {
 		leg.setPatrol(parent);		
 		leg.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
 		
-		PatrolTransportType ttype = (PatrolTransportType)findValue(xml.getTransportType().getLanguageCode(), xml.getTransportType().getValue(), "PatrolTransportType");
+		PatrolTransportType ttype = 
+				(PatrolTransportType)findTransportationValue(xml.getTransportType().getLanguageCode(), xml.getTransportType().getValue(), patrol.getPatrolType());
+				
 		if (ttype == null){
 			throw new Exception("Patrol transportation type " + xml.getTransportType().getValue() + " [" + xml.getTransportType().getLanguageCode() + "] could not be found.  Please ensure this transportation type exists.");
 		}
@@ -193,7 +195,7 @@ public class XmlToPatrolConverter {
 			}
 		}
 		if (!found){
-			throw new Exception("Invalid patrol transportation type " + xml.getTransportType() + " for patrol type " + patrol.getPatrolType().getGuiName() + ".  Enusre the transportation type exists for the given patrol type in the database.");
+			throw new Exception("Invalid patrol transportation type " + xml.getTransportType().getValue() + " [" + xml.getTransportType().getLanguageCode() + "] for patrol type " + patrol.getPatrolType().getGuiName() + ".  Ensure the transportation type exists for the given patrol type in the database.");
 		}
 		leg.setType(ttype);
 		
@@ -425,14 +427,30 @@ public class XmlToPatrolConverter {
 		}else{
 			Attribute att = (Attribute) results.get(0);
 			//ensure attribute exists for category
-			for (CategoryAttribute caatt : category.getAttributes()){
-				if (caatt.getAttribute().equals(att)){
-					//found so all is good
-					return att;
-				}
+			if (findCategoryAttribute(category, att)){
+				return att;
 			}
 		}
 		return null;
+	}
+	
+	/*
+	 * Searches for a given attribute in the category provided or
+	 * one of the parent categories.  Well return false if attribute not
+	 * found.  True if attribute found.
+	 */
+	private boolean findCategoryAttribute(Category root, Attribute attribute){
+		for (CategoryAttribute att: root.getAttributes()){
+			if (att.getAttribute().equals(attribute)){
+				return true;
+			}
+		}
+		if (root.getParent() != null){
+			return findCategoryAttribute(root.getParent(), attribute);
+		}else{
+			//attribute not found
+			return false;
+		}
 	}
 	
 	private Category findCategory(String key){
@@ -488,6 +506,28 @@ public class XmlToPatrolConverter {
 		}
 	}
 	
+	private SimpleListItem findTransportationValue(String langCode, String value, org.wcs.smart.patrol.model.PatrolType.Type type){
+		
+		String sql = "SELECT c FROM Language a, Label b, PatrolTransportType c WHERE b.id.language = a.uuid " +
+				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca and " +
+				"c.patrolType = :patrolType";
+		
+		Query query = session.createQuery(sql);
+		query.setParameter("cd", langCode);
+		query.setParameter("value", value);
+		query.setParameter("ca", ca);
+		query.setParameter("patrolType", type);
+		
+		List results = query.list();
+		if (results.size() == 0){
+			return null;
+		}else if (results.size() > 1){
+			warnings.add("Multiple options found for PatrolTransportType. Using the first value found.");
+			return (SimpleListItem)results.get(0);
+		}else{
+			return (SimpleListItem)results.get(0);
+		}
+	}
 
 }
 
