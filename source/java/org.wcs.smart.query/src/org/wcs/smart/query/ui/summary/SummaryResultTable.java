@@ -142,9 +142,7 @@ public class SummaryResultTable extends Composite {
 		mainTable.getTable().addListener(SWT.Selection, vlistener);
 		mainTable.getTable().addListener(SWT.Resize, vlistener);
 		mainTable.getTable().addListener(SWT.Resize, hlistener);
-		//TODO fix this
-		mainTable.getTable().addListener(SWT.Traverse, hlistener);
-		
+		mainTable.getTable().addListener(SWT.Traverse, hlistener);		
 		mainTable.getTable().addListener(SWT.Resize, new Listener(){
 			@Override
 			public void handleEvent(Event event) {				
@@ -327,8 +325,6 @@ public class SummaryResultTable extends Composite {
 		 */
 		@Override
 		public void dispose() {
-			// TODO Auto-generated method stub
-			
 		}
 
 		/**

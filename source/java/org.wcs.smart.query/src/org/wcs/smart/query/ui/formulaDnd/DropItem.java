@@ -87,7 +87,7 @@ public abstract class DropItem {
 	 * @param newPanel new drop item panel
 	 */
 	public void moveParent(IDropPanel newPanel){
-		//TODO: no necessarily supported on all os's
+		//TODO: not necessarily supported on all os's
 		widget.setParent(newPanel.getComposite());
 		targetPanel = newPanel;
 	}

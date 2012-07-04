@@ -26,11 +26,15 @@ import java.util.List;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Class to convert a query result item to 
@@ -43,6 +47,7 @@ public class QueryResultItemFeature {
 
 	private static GeometryFactory gf = new GeometryFactory();
 	
+	
 	/**
 	 * Converts a query result item to a feature.
 	 * The feature type must have been generated 
@@ -53,7 +58,7 @@ public class QueryResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+	public static SimpleFeature createObservationFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
 		data[0] = it.getPatrolId() + "_" + it.getWaypointId() + "_" + System.nanoTime();
@@ -70,6 +75,52 @@ public class QueryResultItemFeature {
 			data[i + 1] = x;
 		}
 		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		
+	}
+	
+	
+	/**
+	 * Converts a query result item track feature.
+	 * 
+	 * The feature type must have been generated 
+	 * from the same set of query table columns.
+	 * 
+	 * @param it the query result item 
+	 * @param columns the columns that make up the feature type
+	 * @param ftype the feature type 
+	 * @return created feature 
+	 */
+	public static SimpleFeature createTrackFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+		
+		Object[] data = new Object[columns.size() + 2];
+		data[0] = it.getPatrolId() + "_" + System.nanoTime();
+		
+		for (int i = 0; i < columns.size(); i ++){
+			Object x =  columns.get(i).getValue(it);
+			if (x instanceof Boolean){
+				if ((Boolean)x){
+					x = 0;
+				}else{
+					x = 1;
+				}
+			}
+			data[i + 1] = x;
+		}
+
+		if (it.getTrack() == null) {
+			data[data.length - 1] = gf.createLineString((Coordinate[]) null);
+		} else {
+			try {
+				WKBReader reader = new WKBReader();
+				data[data.length - 1] = (LineString)reader.read(it.getTrack());
+			} catch (ParseException e) {
+				data[data.length - 1] = gf.createLineString((Coordinate[]) null);
+				QueryPlugIn.log("Error parsing geometry for patrol " + it.getPatrolId(), e);
+			}
+		}
+
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
 		

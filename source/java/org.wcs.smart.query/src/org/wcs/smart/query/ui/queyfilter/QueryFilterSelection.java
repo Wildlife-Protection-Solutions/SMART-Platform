@@ -27,17 +27,22 @@ import java.util.List;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Represents an item selected in the 
+ * the query filter tree.  Identified which item was selected
+ * and if the item is part of a query filter or a summary item.
+ * 
  * @author egouge
  * @since 1.0.0
  */
 public class QueryFilterSelection implements IStructuredSelection{
 
+	/**
+	 * Types of items. Items are either
+	 * filter items (used to filter results) or summary items (used
+	 * to build summary queries)
+	 * @author Emily
+	 *
+	 */
 	public enum FilterType{
 		SUMMARY, FILTER
 	};
@@ -45,15 +50,24 @@ public class QueryFilterSelection implements IStructuredSelection{
 	private FilterType type;
 	private IStructuredSelection selection;
 	
+	/**
+	 * Creates a new selection
+	 * @param selection the selected item
+	 * @param type the type of item selected
+	 */
 	public QueryFilterSelection(IStructuredSelection selection, FilterType type){
 		this.type = type;
 		this.selection = selection;
 	}
 	
+	/**
+	 * @return the type of item selected
+	 */
 	public FilterType getType(){
 		return this.type;
 	}
-	/* (non-Javadoc)
+	
+	/**
 	 * @see org.eclipse.jface.viewers.ISelection#isEmpty()
 	 */
 	@Override
@@ -61,7 +75,7 @@ public class QueryFilterSelection implements IStructuredSelection{
 		return selection.isEmpty();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.IStructuredSelection#getFirstElement()
 	 */
 	@Override
@@ -69,7 +83,7 @@ public class QueryFilterSelection implements IStructuredSelection{
 		return selection.getFirstElement();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.IStructuredSelection#iterator()
 	 */
 	@Override
@@ -77,7 +91,7 @@ public class QueryFilterSelection implements IStructuredSelection{
 		return selection.iterator();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.IStructuredSelection#size()
 	 */
 	@Override
@@ -85,7 +99,7 @@ public class QueryFilterSelection implements IStructuredSelection{
 		return selection.size();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.IStructuredSelection#toArray()
 	 */
 	@Override
@@ -93,7 +107,7 @@ public class QueryFilterSelection implements IStructuredSelection{
 		return selection.toArray();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.jface.viewers.IStructuredSelection#toList()
 	 */
 	@Override

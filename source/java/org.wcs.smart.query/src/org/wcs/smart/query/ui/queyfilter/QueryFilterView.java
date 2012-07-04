@@ -78,16 +78,18 @@ public class QueryFilterView extends ViewPart {
 
 	public static final String ID ="org.wcs.smart.query.ui.QueryFilter";
 	
-	//TODO: refresh when data model changes
 	private TreeViewer filterTreeViewer;
 	private TreeViewer summaryTreeViewer;
 
-	
 	private Composite filterComp;
 	private Composite summaryComp;
 
 	private Composite main;
 	
+	/**
+	 * Change listenered that updates the filter tree
+	 * when the data model is modified.
+	 */
 	private IDataModelListener dataModelChangeListener = new IDataModelListener() {
 		@Override
 		public void modified() {
@@ -290,9 +292,7 @@ public class QueryFilterView extends ViewPart {
 			}
 			
 			@Override
-			public void sourceChanged(int sourcePriority, Map sourceValuesByName) {
-				// TODO Auto-generated method stub
-				
+			public void sourceChanged(int sourcePriority, Map sourceValuesByName) {				
 			}
 		});
 		

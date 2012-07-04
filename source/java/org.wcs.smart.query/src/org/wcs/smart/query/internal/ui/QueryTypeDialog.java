@@ -34,12 +34,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.model.Query.QueryType;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Dialog for users to select the type of
+ * query they want to create.
+ * 
  * @author egouge
  * @since 1.0.0
  */

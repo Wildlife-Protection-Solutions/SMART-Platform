@@ -77,7 +77,7 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 	 */
 	@Override
 	protected void writeRow(QueryResultItem row) throws Exception {
-		features.add(QueryResultItemFeature.createFeature(row,  queryColumns, shapefile.getSchema()));
+		features.add(QueryResultItemFeature.createObservationFeature(row,  queryColumns, shapefile.getSchema()));
 	}
 
 	/**

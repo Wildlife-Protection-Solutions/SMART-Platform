@@ -49,18 +49,14 @@ import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Tree viewer that displays a tree in a box similar
+ * to a combo box.
+ * 
  * @author Emily
  * @since 1.0.0
  */
 public class TreeDropDownViewer {
 
-	
 	private TreeViewer attributeTreeViewer;
 	private Composite main;
 	private ISelectionListener onSelected;
@@ -68,6 +64,10 @@ public class TreeDropDownViewer {
 	private LocalFilteredTree fTree;
 	
 	
+	/**
+	 * Creates a new tree drop down viewer 
+	 * @param parent outer shell
+	 */
 	public TreeDropDownViewer(Shell parent){
 		
 		main = new Shell(parent, SWT.SINGLE |SWT.BORDER | SWT.RESIZE);
@@ -98,6 +98,12 @@ public class TreeDropDownViewer {
 	}
 	
 	
+	/**
+	 * Sets the current datamodel attribute to display
+	 * in the tree.
+	 * 
+	 * @param att
+	 */
 	public void setAttribute(Attribute att){
 		attributeTreeViewer.setInput(att);
 		attributeTreeViewer.expandToLevel(1);
@@ -155,6 +161,12 @@ public class TreeDropDownViewer {
 		});
 	}
 	
+	/**
+	 * Moves the shell to the required location and displays the tree.
+	 * 
+	 * @param obj the parent object (used for positioning)
+	 * @param onSelected selection listener to fire when item from tree is selected
+	 */
 	public void positionAndShow(Composite obj, ISelectionListener onSelected){
 		fTree.clearText();
 		this.onSelected = onSelected;
@@ -164,14 +176,19 @@ public class TreeDropDownViewer {
 		main.setBounds(pnt.x + 25, pnt.y + r.height, 200, 150);
 		main.setVisible(true);
 		
-//		main.moveAbove(obj.getParent());
 		attributeTreeViewer.getTree().setFocus();
 	}
 	
+	/**
+	 * Fires selection listener
+	 */
 	private void fireSelection(){
 		onSelected.selectionChanged(null, attributeTreeViewer.getSelection());
 	}
 	
+	/**
+	 * Hides the dialog
+	 */
 	public void hide(){
 		main.setVisible(false);
 	}

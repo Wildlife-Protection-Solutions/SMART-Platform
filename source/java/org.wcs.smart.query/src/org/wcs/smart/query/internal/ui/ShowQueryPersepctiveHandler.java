@@ -28,6 +28,7 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 
 /**
@@ -52,7 +53,7 @@ public class ShowQueryPersepctiveHandler extends AbstractHandler {
 			IEditorReference[] ref = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getEditorReferences();
 			boolean found = false;
 			for (int i = 0; i < ref.length; i ++){
-				if (ref[i].getId().equals(QueryResultsEditor.ID)){
+				if (ref[i].getEditorInput() instanceof QueryInput){
 					found = true;
 					break;
 				}
