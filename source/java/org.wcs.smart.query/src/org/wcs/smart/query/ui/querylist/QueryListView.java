@@ -78,7 +78,6 @@ public class QueryListView extends ViewPart {
 		
 		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
-
 		}
 		
 		@Override
@@ -121,38 +120,34 @@ public class QueryListView extends ViewPart {
 		}
 	};
 	
-	
-	private IQueryFolderListener listener = new IQueryFolderListener() {
-		
+	/*
+	 * Listener for changes to the source data provided by
+	 * the SavedQueryTree.
+	 * <p>Note cannot just listener for query events and queryList.refresh() needs
+	 * to be called AFTER the source data is updated.</p>
+	 */
+	private SavedQueryTree.ISourceChangedListener listener = new SavedQueryTree.ISourceChangedListener() {
 		@Override
-		public void folderChanged(int eventType, Object object) {
-//			System.out.println("folder changed");
-//			queryList.setSelection(null);
-//			focusCellManager.getFocusCell();
-//			queryList.setSelection(null);
-			
+		public void sourceChanged(int eventType, Object object) {
 			queryList.refresh();
 			
-			if (eventType == IQueryFolderListener.FOLDER_ADDED || 
+			if (eventType == IQueryFolderListener.FOLDER_ADDED ||
 					eventType == IQueryFolderListener.QUERY_ADDED){
-				//may not be added if added in a different view
 				queryList.expandToLevel(object, 1);
 			}
 			
 			if (eventType == IQueryFolderListener.FOLDER_ADDED){
 				editElement(object);
 			}
-			
 		}
 	};
 	
 	private Job loadQueriesJob = new Job("Load Queries"){
-
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
-			data.put(QueryListViewContentProvider.QUERY_KEY,		SavedQueryTree.getInstance().getQueries());
-			data.put(QueryListViewContentProvider.FOLDER_KEY,		SavedQueryTree.getInstance().getFolders());
+			data.put(QueryListViewContentProvider.QUERY_KEY, SavedQueryTree.getInstance().getQueries());
+			data.put(QueryListViewContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
 			
 			getSite().getShell().getDisplay().asyncExec(new Runnable(){
 
@@ -241,8 +236,8 @@ public class QueryListView extends ViewPart {
 		getSite().setSelectionProvider(queryList);
 		
 		
-		
-		QueryEventManager.getInstance().addQueryFolderListener(listener);
+		SavedQueryTree.getInstance().addListener(listener);
+//		QueryEventManager.getInstance().addQueryFolderListener(listener);
 	}
 	
 	
@@ -254,7 +249,10 @@ public class QueryListView extends ViewPart {
 	public void dispose(){
 		super.dispose();
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(editorListener);
-		QueryEventManager.getInstance().removeQueryFolderListener(listener);
+		//QueryEventManager.getInstance().removeQueryFolderListener(listener);
+		
+		SavedQueryTree.getInstance().removeListener(listener);
+		listener = null;
 	}
 	
 	@Override

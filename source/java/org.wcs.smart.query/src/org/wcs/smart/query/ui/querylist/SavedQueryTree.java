@@ -41,7 +41,7 @@ import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 
 /**
- * A tree that represents the lsit of saved 
+ * A tree that represents the list of saved 
  * queries.
  * 
  * @author egouge
@@ -49,15 +49,17 @@ import org.wcs.smart.query.model.QueryInput;
  */
 public class SavedQueryTree {
 
+	private static SavedQueryTree instance = null;
+	
 	private List<QueryFolder> folders = null;
 	private HashMap<Integer, List<QueryInput>> queries = null;
 	
 	
+	private List<ISourceChangedListener> listeners = new ArrayList<ISourceChangedListener>();
+	
 	private Job loadQueriesJob = new Job("Load Queries"){
-
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
@@ -69,14 +71,18 @@ public class SavedQueryTree {
 			}
 			return Status.OK_STATUS;
 		}
-		
 	};
 	
+	/**
+	 * query folder listener that listens for query change events
+	 * and updates the query tree source as required.  It
+	 * then fires change events.
+	 * 
+	 */
 	private IQueryFolderListener listener = new IQueryFolderListener() {
 		
 		@Override
 		public void folderChanged(int eventType, Object object) {
-			
 			if (eventType == IQueryFolderListener.FOLDER_DELETED){
 				QueryFolder folder = (QueryFolder)object;
 				if (folder.getParentFolder() == null){
@@ -118,17 +124,48 @@ public class SavedQueryTree {
 				object = new QueryInput(query);
 				ins.add((QueryInput)object);
 			}
-			
+			fireListeners(eventType, object);
 			
 		}
 	};
 	
-	private static SavedQueryTree instance = null;
+	/**
+	 * Fires all listeners
+	 * @param eventType
+	 * @param object
+	 */
+	private void fireListeners(int eventType, Object object){
+		for (ISourceChangedListener listener: listeners){
+			listener.sourceChanged(eventType, object);
+		}
+	}
 	
+	/**
+	 * Adds a source changed listener
+	 * @param listener
+	 */
+	public void addListener(ISourceChangedListener listener){
+		this.listeners.add(listener);
+	}
+	
+	/**
+	 * Removes a source changed listener
+	 * @param listener
+	 */
+	public void removeListener(ISourceChangedListener listener){
+		this.listeners.remove(listener);
+	}
+	
+	/**
+	 * Creates a new query tree
+	 */
 	private SavedQueryTree(){
 		QueryEventManager.getInstance().addQueryFolderListener(listener);
 	}
 	
+	/**
+	 * Disposed of the query tree
+	 */
 	public void dispose(){
 		QueryEventManager.getInstance().removeQueryFolderListener(listener);
 	}
@@ -136,7 +173,7 @@ public class SavedQueryTree {
 	/**
 	 * @return the instance of this class
 	 */
-	public static SavedQueryTree getInstance(){
+	public static synchronized SavedQueryTree getInstance(){
 		if (instance == null){
 			instance = new SavedQueryTree();
 		}
@@ -175,4 +212,19 @@ public class SavedQueryTree {
 		return queries;
 	}
 	
+	/**
+	 * Listener fired when the saved query tree source is changed
+	 * 
+	 * @author egouge
+	 * @since 1.0.0
+	 */
+	interface ISourceChangedListener{
+		/**
+		 * 
+		 * @param eventType the type of event that caused the change 
+		 * @see IQueryFolderListener
+		 * @param object the object involved in the change
+		 */
+		void sourceChanged(int eventType, Object object);
+	}
 }
