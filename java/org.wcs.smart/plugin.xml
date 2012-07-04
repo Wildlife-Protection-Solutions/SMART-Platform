@@ -36,7 +36,7 @@
       <perspective
             class="org.wcs.smart.DefaultPerspective"
             id="org.wcs.smart.DefaultPerspective"
-            name="Default Perspective">
+            name="SMART">
       </perspective>
    </extension>
    <extension
@@ -292,6 +292,7 @@
       </command>
       <command
             defaultHandler="org.eclipse.ui.internal.handlers.ResetPerspectiveHandler"
+            description="Reset the Default Window Layout"
             id="org.wcs.smart.ui.internal.ResetPerspective"
             name="Reset Perspective">
       </command>
