@@ -62,8 +62,7 @@ public class DeleteItemHandler extends AbstractHandler {
 		QueryListViewContentProvider contentProvider = ((QueryListView)HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID)).getQueryListContentProvider();
 		
 		for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
-			Object o = (Object) iterator.next();
-			
+			Object o = (Object) iterator.next();			
 			if (o instanceof QueryFolder){
 				deleteFolder((QueryFolder)o, contentProvider);
 			}else if (o instanceof Query){

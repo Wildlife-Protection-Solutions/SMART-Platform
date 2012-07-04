@@ -82,6 +82,10 @@ public class QueryHibernateManager {
 		b.setParameter("ca", SmartDB.getCurrentConservationArea());
 		List<?> datab = b.list();
 		
+		Query c = session.createQuery("select max(id) from PatrolQuery where conservationArea = :ca ");
+		c.setParameter("ca", SmartDB.getCurrentConservationArea());
+		List<?> datac = c.list();
+		
 		int valuea = 1;
 		if( dataa != null && dataa.size() >= 1 && dataa.get(0) != null){
 			valuea = Integer.parseInt( (String)dataa.get(0) );
@@ -90,7 +94,11 @@ public class QueryHibernateManager {
 		if( datab != null && datab.size() >= 1 && datab.get(0) != null){
 			valueb = Integer.parseInt( (String)datab.get(0) );
 		}
-		int x = Math.max(valuea, valueb);
+		int valuec = 1;
+		if( datac != null && datac.size() >= 1 && datac.get(0) != null){
+			valuec = Integer.parseInt( (String)datac.get(0) );
+		}
+		int x = Math.max(Math.max(valuea, valueb), valuec);
 		return QUERY_ID_FORMATTER.format( ++x );
 	}
 	

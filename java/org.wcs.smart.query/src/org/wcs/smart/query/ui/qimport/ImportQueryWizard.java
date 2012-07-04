@@ -52,6 +52,7 @@ import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.qimport.QueryImporter;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 import org.wcs.smart.util.SmartUtils;
 
@@ -160,6 +161,8 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, QueryResultsEditor.ID);
 						}else if (qi.getType() == QueryType.SUMMARY){
 							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, SummaryEditor.ID);
+						}else if (qi.getType() == QueryType.PATROL){
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, PatrolQueryResultsEditor.ID);
 						}
 						
 					}catch (Exception ex){
