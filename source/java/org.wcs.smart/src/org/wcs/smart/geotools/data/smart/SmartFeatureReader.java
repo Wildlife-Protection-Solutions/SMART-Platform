@@ -96,12 +96,14 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
+		//		String spec = "uuid:String,id:String,key:String,geom:MultiPolygon:srid=4326";
 		Area a = (Area)itemCursor.get(0);
 		String fid = SmartUtils.encodeHex(a.getUuid());
-		Object values[] = new Object[3];
+		Object values[] = new Object[4];
 		values[0] = fid;
-		values[1] = a.getGeometry();
-		values[2] = a.getId();
+		values[1] = a.getId();
+		values[2] = a.getKeyId();
+		values[3] = a.getGeometry();
 		
 		return SimpleFeatureBuilder.build(ftype, values, fid);
 	}

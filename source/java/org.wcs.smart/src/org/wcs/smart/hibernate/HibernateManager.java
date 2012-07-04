@@ -232,7 +232,7 @@ public class HibernateManager extends SmartHibernateManager{
 		Transaction tx = x.beginTransaction();
 		try{
 			Criteria employee = x.createCriteria(Employee.class);
-			employee.add( Restrictions.eq("smartUserId", userName));
+			employee.add( Restrictions.eq("smartUserId", userName).ignoreCase());
 			employee.add( Restrictions.eq("smartPassword", password));
 			employee.add( Restrictions.eq("conservationArea", ca));
 			employee.add(Restrictions.isNull("endEmploymentDate"));
@@ -243,7 +243,6 @@ public class HibernateManager extends SmartHibernateManager{
 			if (people.size() == 1){
 				return people.get(0);
 			}else{
-				MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Error", "The username and password does not exist for the selected conservation area.");
 				return null;
 			}
 			

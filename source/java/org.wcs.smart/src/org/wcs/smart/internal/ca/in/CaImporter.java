@@ -40,6 +40,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -49,12 +50,8 @@ import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Responsible for importing and exported conservation area.
+ *  
  * @author egouge
  * @since 1.0.0
  */
@@ -73,7 +70,6 @@ public class CaImporter {
 		importer.importCaFromFile(file, monitor);
 	}
 	
-	
 	/**
 	 * Imports conservation area data from backup file.
 	 * @param f
@@ -85,37 +81,109 @@ public class CaImporter {
 			throw new IOException("The file '" + f.getAbsolutePath() + "' cannot be found.");
 		}
 		
-		monitor.beginTask("Importing Conservation Area", 3);
+		monitor.beginTask("Importing Conservation Area", 4);
+		
+		//TODO: consider doing a disk space check to ensure enough disk space for this operation
+		monitor.subTask("Backuping up current database");
+		HibernateManager.endSessionFactory(true);
+		File dbBackup = backup();
+		monitor.worked(1);
 		
 		monitor.subTask("Unzippping File");
-		
 		File dir = unzipFile(f);
+		
 		/* need to login as admin user to restore */
-		HibernateManager.endSessionFactory(true);
 		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
 		Session session = HibernateManager.openSession();
-		
 		try{
 			monitor.worked(1);
+			
 			monitor.subTask("Validating Conservation Area");
 			byte[] cauuid = validateConservationAreaInfo(dir, session);
-				
 			monitor.worked(1);
-			processDatabaseFiles(dir, session, monitor);
-				
-			monitor.beginTask("Importing Conservation Area", 3);
-			monitor.worked(2);
-				
-			importFileStore(dir, cauuid, monitor);
-			monitor.worked(3);
-				
+			
+			try{
+				processDatabaseFiles(dir, session, monitor);
+			}catch (Exception ex){
+				try{
+					HibernateManager.endSessionFactory(true);
+					restoreBackup(dbBackup);
+				}catch (Exception e){
+					throw new Exception("Error occurred during database import.  Temporary backup could not be restored and system is in an inconsistant state.  It is recomended that you restore a previous system backup.\n\n" + ex.getMessage() + "\n\n" + e.getMessage(), e);
+				}
+				throw new Exception("Error occurred druing import. System restored to previous state. \n\n" + ex.getMessage(), ex);
+			}
+			
+			try{
+				monitor.worked(2);
+				monitor.beginTask("Importing Conservation Area", 4);				
+				importFileStore(dir, cauuid, monitor);
+				monitor.worked(3);
+			}catch (Exception ex){
+				throw new Exception("Conservation area database information imported.  The filestore (images etc.) could NOT be imported.  This must be imported manually or the system backup should be restored.", ex);
+			}
+			
 		}finally{
-			session.close();
+			monitor.subTask("Cleaning up");
+			try{
+				cleanUp(dbBackup);
+			}catch (Exception ex){
+				SmartPlugIn.log("Could not cleanup directory " + dbBackup.toString(), ex);
+			}
+			try{
+				cleanUp(dir);
+			}catch (Exception ex){
+				SmartPlugIn.log("Could not cleanup directory " + dir.toString(), ex);
+			}
+			
+			try{
+				session.close();
+			}catch (Exception ex){
+				SmartPlugIn.log("Could not close session", ex);
+			}
 			/* disconnect from admin user */
 			HibernateManager.endSessionFactory(true);
 		}
 		
+	}
+	
+	/**
+	 * Creates a copy of the existing smart database as a restore point.
+	 * @return the name of the copy of the database
+	 * @throws Exception
+	 */
+	private File backup() throws Exception{
+		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
+		File copyTo = new File(databaseDir.getParentFile(), "smartdb.bak");
+		if (copyTo.exists()){
+			FileUtils.deleteDirectory(copyTo);
+		}
+		
+		FileUtils.copyDirectory(databaseDir, copyTo);
+		
+		return copyTo;
+	}
+	
+	/**
+	 * Deletes a given directory
+	 * @param backup
+	 * @throws Exception
+	 */
+	private void cleanUp(File backup) throws Exception{
+		FileUtils.deleteDirectory(backup);
+	}
+	
+	/**
+	 * Restores the provided database backup.
+	 * @param backup
+	 * @throws Exception
+	 */
+	private void restoreBackup(File backup) throws Exception{
+		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
+		FileUtils.deleteDirectory(databaseDir);
+		FileUtils.copyDirectory(backup, databaseDir);
+		cleanUp(backup);
 	}
 	
 	
@@ -149,7 +217,6 @@ public class CaImporter {
 			session.getTransaction().commit();
 			reader.close();
 		}
-		
 	}
 	
 	/**
@@ -189,8 +256,13 @@ public class CaImporter {
 		}
 		
 		monitor.beginTask("Processing Tables", tablesToProcess.size());
+
+		String last = "";  		//used as a check here so we don't go on forever
 		while(tablesToProcess.size() > 0){
 			String tableName = tablesToProcess.poll();
+			if (last.equals(tableName)){
+				throw new Exception("System could not import database.  Circular dependencies in database.");
+			}
 			monitor.subTask(tableName);
 			List<String> requires = keys.get(tableName);
 			boolean exportTable = false;
@@ -216,11 +288,12 @@ public class CaImporter {
 				importData(session,tableName, info.getColumns(), info.getDataFile() );
 				processed.add(tableName);
 				monitor.worked(1);
+				last = "";
 			}else{
 				tablesToProcess.add(tableName);
+				last = tableName;
 			}
 		}
-		
 	}
 	
 	/**

@@ -34,23 +34,15 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.ca.in.CaImporter;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Handler for importing a conservation area.
+ * 
  * @author egouge
  * @since 1.0.0
  */
 public class ImportCaHandler {
 
 	public void execute(final Shell shell){
-		
-//		if (!DerbyRestoreEngine.validateUserRestore(shell)){
-//			return;
-//		}
-		
+
 		MessageDialog confirm = new MessageDialog(
 				shell,
 				"Confirm Restore",null,
@@ -94,16 +86,16 @@ public class ImportCaHandler {
 					File f = dialog.getSelectedFile();
 					try{
 						CaImporter.importCa(f, monitor);
-						MessageDialog.openInformation(shell, "Restore Complete", "System restore completed");
+						MessageDialog.openInformation(shell, "Import Complete", "Conservation area import completed");
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,"Restore Failed.\n\n" + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(shell,"Import Failed.\n\n" + ex.getMessage(), ex);
 					}
 
 				}
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Restore Failed. " + ex.getMessage(), ex);
+					"Import Failed. " + ex.getMessage(), ex);
 		}
 		return;
 	}

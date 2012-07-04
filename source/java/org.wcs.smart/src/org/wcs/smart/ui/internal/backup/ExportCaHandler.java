@@ -33,6 +33,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
@@ -61,6 +64,17 @@ public class ExportCaHandler extends AbstractHandler {
 	 * @param shell current shell
 	 */
 	public void exportCa(final Shell shell){
+		// prompt to save dirty editors
+		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i = 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages = windows[i].getPages();
+			for (int j = 0; j < pages.length; j++) {
+				if (!pages[j].saveAllEditors(true)) {
+					return;
+				}
+			}
+		}
+				
 		final BackupDialog dialog = new BackupDialog(shell,"Export Conservation Area", "Select the file to export the '" + SmartDB.getCurrentConservationArea().getName() + "' conservation area to.", "Export", CaExporter.getDefaultFileName());
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;

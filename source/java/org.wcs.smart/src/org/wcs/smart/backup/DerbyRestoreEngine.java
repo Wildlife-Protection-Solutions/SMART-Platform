@@ -96,7 +96,7 @@ public class DerbyRestoreEngine {
 
 				cnt = (Long) session
 						.createCriteria(Employee.class)
-						.add(Restrictions.eq("smartUserId", username))
+						.add(Restrictions.eq("smartUserId", username).ignoreCase())
 						.add(Restrictions.eq("smartPassword", password))
 						.add(Restrictions.eq("smartUserLevel",
 								SmartUserLevel.ADMIN))

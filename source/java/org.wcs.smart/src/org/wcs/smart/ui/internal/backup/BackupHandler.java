@@ -33,6 +33,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyBackupEngine;
@@ -62,6 +65,18 @@ public class BackupHandler extends AbstractHandler {
 	 */
 	public void executeBackup(final Shell shell){
 		backupState = false;
+		
+		//prompt to save dirty editors
+		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i = 0; i < windows.length; i ++){
+			IWorkbenchPage[] pages = windows[i].getPages();
+			for (int j = 0; j < pages.length; j ++){
+				if (!pages[j].saveAllEditors(true)){
+					return;
+				}
+			}
+		}
+		
 		final BackupDialog dialog = new BackupDialog(shell,"Backup SMART System", "Select the file to backup the system to.", "Backup",DerbyBackupEngine.getDefaultFileName());
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
