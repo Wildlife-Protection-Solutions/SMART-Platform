@@ -792,6 +792,9 @@
       <Exporter
             class="org.wcs.smart.query.export.SummaryQueryDefinitionExporter">
       </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.ShapePatrolQueryExporter">
+      </Exporter>
    </extension>
 
 </plugin>
