@@ -92,17 +92,12 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @since 1.0.0
  */
 public abstract class SmartMapEditorPart  extends EditorPart implements MapPart {
-	public static final String ID = "org.wcs.smart.patrol.ui.PatrolMapEditor"; //$NON-NLS-1$
-	
+
 	protected MapViewer mapViewer;
 
 	private Label lblCoordinates;
 	private ModalTool activeTool;
 	private ToolContext toolcontext;
-	
-	private IViewportModelListener initListener = null; 
-	
-	
 	
 	 IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {

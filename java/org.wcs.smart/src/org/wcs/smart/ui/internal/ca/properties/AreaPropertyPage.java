@@ -36,6 +36,7 @@ import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.internal.ui.actions.ResetService;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -81,7 +82,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 
 	
 	private static final String CLEAR_TEXT = "Clear...";
-	private static final String MODIFY_TEXT = "Modify...";
+	private static final String UPDATE_TEXT = "Change Labels...";
 	private static final String LOAD_TEXT = "Load...";
 	
 	private final static String MSG_NOT_SET = "Undefined";
@@ -90,8 +91,9 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	
 	// buttons for modifying layers; these are ordered by Area.AreaType.values()
-	private Button[] btnModify;
+	private Button[] btnLoad;
 	private Button[] btnClear;
+	private Button[] btnUpdate;
 	
 	private FileDialog fileDialog;
 	/* map of areatype to status label */
@@ -191,11 +193,12 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		setMessage("Setup various conservation area boundaries.");
 
 		Composite comp = new Composite(parent, SWT.BORDER_DASH);
-		comp.setLayout(new GridLayout(4, false));
+		comp.setLayout(new GridLayout(5, false));
 
 		lblStatus = new HashMap<Area.AreaType, Label>();
-		btnModify = new Button[Area.AreaType.values().length];
+		btnLoad = new Button[Area.AreaType.values().length];
 		btnClear = new Button[Area.AreaType.values().length];
+		btnUpdate = new Button[Area.AreaType.values().length];
 		for (int i = 0; i < Area.AreaType.values().length; i++) {
 			Label lbl = new Label(comp, SWT.NONE);
 			lbl.setText(Area.AreaType.values()[i].getGuiName() + ":");
@@ -206,13 +209,13 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			lblStatus.put(Area.AreaType.values()[i], lbl);
 			
-			btnModify[i] = new Button(comp, SWT.NONE);
+			btnLoad[i] = new Button(comp, SWT.NONE);
 			final Area.AreaType type = Area.AreaType.values()[i];
 			final int index = i;
-			btnModify[i].setText(MODIFY_TEXT);
-			btnModify[i].addSelectionListener(new SelectionAdapter() {
+			btnLoad[i].setText(LOAD_TEXT);
+			btnLoad[i].addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					openFileDialog(getShell(), type, btnModify[index].getText().equals(MODIFY_TEXT));
+					openFileDialog(getShell(), type, btnLoad[index].getText().equals(LOAD_TEXT));
 				}
 			});
 			
@@ -223,11 +226,25 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					deleteAll(type);
 				}
 			});
+			
+			btnUpdate[i] = new Button(comp, SWT.NONE);
+			btnUpdate[i].setText(UPDATE_TEXT);
+			btnUpdate[i].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					updateLabels(type);
+				}
+			});
 
 		}
 		updateLabels();
 		return comp;
 	}
+	
+	private void updateLabels(Area.AreaType type){
+		AreaNameDialogPage dialog = new AreaNameDialogPage(getShell(), type);
+		dialog.open();
+	}
+	
 	
 	/*
 	 * clears areas from database
@@ -240,7 +257,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		getSession().beginTransaction();
 		try{
 			// remove existing areas
-			String query = "delete from Area where ca = :ca and type =:type";
+			String query = "delete from Area where conservationArea = :ca and type =:type";
 			Query q = AreaPropertyPage.this.getSession().createQuery(query);
 			q.setParameter("ca", AreaPropertyPage.this.ca);
 			q.setParameter("type", areatype);
@@ -291,21 +308,9 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		fileDialog = new FileDialog(parent.getShell(), SWT.SINGLE | SWT.OPEN);
 		fileDialog.setText("Load " + areatype.getGuiName());
-
-//		// List<String> fileTypes = factory.getExtensionList();
-		List<String> fileTypes = new ArrayList<String>();
-//		fileTypes.add("*.shp");
-//
-//		StringBuffer all = new StringBuffer();
-//		for (Iterator<String> i = fileTypes.iterator(); i.hasNext();) {
-//			all.append(i.next());
-//			if (i.hasNext())
-//				all.append(";"); //$NON-NLS-1$ //semicolon is magic in eclipse FileDialog
-//		}
-		//only support shapefiles at this time.
-		fileTypes.add(0, "*.shp");
-		fileTypes.add("*.*"); //$NON-NLS-1$
-		fileDialog.setFilterExtensions(fileTypes.toArray(new String[fileTypes.size()]));
+		fileDialog.setFilterExtensions(new String[]{"*.shp", "*,*"});
+		fileDialog.setFilterNames(new String[]{"Shapefiles (*.shp)", "All Files (*.*)"});
+		
 		String result = fileDialog.open();
 		if (result == null) {
 			return false;
@@ -326,8 +331,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			setErrorMessage("Could not load file.");
 			return false;
 		}
-		final URL url2 = url;
-		loadDataSet(areatype, url2);
+		loadDataSet(areatype, url);
 		updateLabels();
 		return true;
 	}
@@ -342,6 +346,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					monitor.beginTask("Loading features", 0);
 
 					SimpleFeatureCollection collection = null;
+					final AreaIdDialog[] idDialog = new AreaIdDialog[1];
 					try{
 						FileDataStore store = FileDataStoreFinder.getDataStore(url2);
 						collection = store.getFeatureSource().getFeatures();
@@ -349,7 +354,6 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						SmartPlugIn.displayLog(ppd.getShell(),"Error reading data source.", ex);
 						return;
 					}
-					
 					if (collection.getSchema().getCoordinateReferenceSystem() == null){
 						//check projection
 						getShell().getDisplay().syncExec(new Runnable(){
@@ -359,6 +363,19 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 							}});
 						return;
 					}
+					final SimpleFeatureCollection collection2 = collection;
+					getShell().getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							idDialog[0] = new AreaIdDialog(getShell(), collection2.getSchema());
+							idDialog[0].open();
+						}});
+					
+					if (idDialog[0].getReturnCode() != IDialogConstants.OK_ID){
+						return;
+					}
+					
+					
 					
 					Session s = getSession();
 					s.beginTransaction();
@@ -377,6 +394,8 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						
 						SimpleFeatureIterator it = collection.features();
 						try {
+							int cnt = 0;
+							List<String> currentKeys = new ArrayList<String>();
 							while (it.hasNext()) {
 								SimpleFeature sf = it.next();
 								if (monitor.isCanceled()) {
@@ -391,6 +410,19 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 								Geometry geom = (Geometry) sf.getDefaultGeometry();
 								geom = JTS.transform(geom, transform);
 								area.setGeom(writer.write(geom));
+								if (idDialog[0].useGenerated()){
+									area.setId(areatype.name() + "_" + cnt++);
+								}else{
+									String id = sf.getAttribute(idDialog[0].getSelectedAttribute().getName()).toString();
+									if (id.length() > Area.ID_MAX_LENGTH){
+										id = id.substring(0, Area.ID_MAX_LENGTH);
+									}
+									area.setId(id);
+								}
+								String key = Area.generateKey(area.getId(), currentKeys);
+								area.setKeyId(key);
+								currentKeys.add(key);
+								
 								//save
 								s.save(area);
 							}
@@ -437,15 +469,16 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						lbl.setText(fmessage);
 						if (fmessage.equals(MSG_ERROR)){
 							btnClear[index].setEnabled(false);
-							btnModify[index].setEnabled(false);
+							btnLoad[index].setEnabled(false);
+							btnUpdate[index].setEnabled(false);
 						}else if (fmessage.equals(MSG_NOT_SET)){
 							btnClear[index].setEnabled(false);
-							btnModify[index].setEnabled(true);
-							btnModify[index].setText(LOAD_TEXT);
+							btnLoad[index].setEnabled(true);
+							btnUpdate[index].setEnabled(false);
 						}else{
 							btnClear[index].setEnabled(true);
-							btnModify[index].setEnabled(true);
-							btnModify[index].setText(MODIFY_TEXT);
+							btnLoad[index].setEnabled(true);
+							btnUpdate[index].setEnabled(true);
 						}
 					
 						

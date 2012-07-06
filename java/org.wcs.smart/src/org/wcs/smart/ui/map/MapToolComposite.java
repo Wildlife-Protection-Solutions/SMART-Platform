@@ -48,7 +48,9 @@ import org.eclipse.swt.widgets.ToolItem;
 public class MapToolComposite {
 
 	
-	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer", "org.wcs.smart.udig.ZoomExtents", "net.refractions.udig.tools.Pan",
+	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer", 
+			"org.wcs.smart.udig.ZoomExtents", 
+			"net.refractions.udig.tools.Pan",
 			"net.refractions.udig.tools.Zoom", InfoTool.ID};
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();

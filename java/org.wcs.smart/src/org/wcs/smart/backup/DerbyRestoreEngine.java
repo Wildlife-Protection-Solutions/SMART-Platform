@@ -172,6 +172,9 @@ public class DerbyRestoreEngine {
 
 		File dbFile = new File(SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
 		File dataFile = new File(SmartProperties.getInstance().getProperty( SmartProperties.FILESTORE_KEY));
+		if (!dataFile.exists()){
+			dataFile.mkdir();
+		}
 		File extractedDb = new File(temp.getAbsolutePath() + File.separator
 				+ dbFile.getName());
 		File extractedFilestore = new File(temp.getAbsolutePath() + File.separator

@@ -290,7 +290,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							dm = null;
 							throw new InvocationTargetException(ex);
 						}
-					}else if (btnClone.getSelection()) {
+					}else if (btnClone != null && btnClone.getSelection()) {
 						//clone from another data model
 						monitor.setTaskName("Cloning data model information ...");
 						ConservationArea caToCloneFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
@@ -300,7 +300,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							dm = null;
 							throw new InvocationTargetException(new IllegalStateException("The conservation area '" + caToCloneFrom.getId() + " - " + caToCloneFrom.getName() + "' does not have a defined data model.  You cannot copy from this conservation area."), "The conservation area '" + caToCloneFrom.getId() + " - " + caToCloneFrom.getName() + "' does not have a defined data model.  You cannot copy from this conservation area");
 						}
-						//TODO: this needs to be tested when we support mulitple languages
+						//TODO: this needs to be tested when we support multiple languages
 						boolean hasLang = false;
 						getSession().refresh(caToCloneFrom);
 						for (Language lang: caToCloneFrom.getLanguages()){
