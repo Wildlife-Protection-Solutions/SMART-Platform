@@ -18,12 +18,6 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.wcs.smart.TempView"
-            id="org.wcs.smart.TempView"
-            name="Temporary Test View"
-            restorable="true">
-      </view>
-      <view
             allowMultiple="true"
             class="org.wcs.smart.ui.map.MapView"
             id="org.wcs.smart.ui.map.MapView"
