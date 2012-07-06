@@ -15,7 +15,7 @@ PARAMETER STYLE JAVA
 NO SQL 
 RETURNS NULL ON NULL INPUT;
 
-CREATE FUNCTION smart.pointInPolyon(x double, y double, wkb byte[]) returns boolean
+CREATE FUNCTION smart.pointInPolyon(x double, y double, wkb blob) returns boolean
 LANGUAGE JAVA
 deterministic
 external name 'org.wcs.smart.util.GeometryUtils.pointInPolygon'
