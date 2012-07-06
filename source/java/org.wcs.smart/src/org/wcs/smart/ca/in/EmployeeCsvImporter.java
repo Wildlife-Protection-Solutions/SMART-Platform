@@ -51,7 +51,14 @@ import com.ibm.icu.text.SimpleDateFormat;
  * @since 1.0.0
  */
 public class EmployeeCsvImporter {
-
+/* to export employees from derby in correct format:
+ * SELECT ID || ',' || givenname ||',' || familyname || ',' || 
+cast( birthdate as varchar(10))  || ',' || gender ||','
+|| 
+cast( startemployementdate as varchar(10)) 
+ ||',' || case when endemployementdate is null then '' else  cast(endemployementdate as varchar(10))  end || ',,'
+FROM SMART.EMPLOYEE;
+ */
 	
 	/**
 	 * FEMALE key for CSV file format 

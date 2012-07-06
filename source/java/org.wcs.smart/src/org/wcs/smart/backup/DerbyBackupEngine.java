@@ -79,6 +79,10 @@ public class DerbyBackupEngine {
 				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY));
 				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
 			
+				if (!filestore.exists()){
+					filestore.mkdir();
+				}
+				
 				File[] dirsToBackup = new File[]{filestore, database};
 			
 				monitor.beginTask("Backing Up Database and Files", 2);

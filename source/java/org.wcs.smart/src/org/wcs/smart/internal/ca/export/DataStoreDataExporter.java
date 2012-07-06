@@ -54,7 +54,9 @@ public class DataStoreDataExporter implements ICaDataExporter {
 		File filestore = new File(exportEngine.getExportLocation() + File.separator + CaExporter.FILESTORE_DIR);
 		SmartUtils.createDirectory(filestore);
 		File filestoreLocation = new File(exportEngine.getConservationArea().getFileDataStoreLocation());
-		FileUtils.copyDirectory(filestoreLocation, filestore);
+		if (filestoreLocation.exists()){
+			FileUtils.copyDirectory(filestoreLocation, filestore);
+		}
 
 	}
 

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ca;
 
+import java.util.Collection;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -56,6 +58,9 @@ import com.vividsolutions.jts.io.WKBReader;
 @Entity
 @Table(name ="smart.area_geometries")
 public class Area {
+	
+	public static final int ID_MAX_LENGTH = 256;
+	public static final int KEY_MAX_LENGTH = 256;
 	
 	public static CoordinateReferenceSystem AREA_CRS;
 	static{
@@ -97,6 +102,7 @@ public class Area {
 	private byte[] uuid;
 	
 	private String id;
+	private String key;
 	private byte[] geom;
 	private ConservationArea ca;
 	private AreaType type;
@@ -129,6 +135,15 @@ public class Area {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+	
+	@Column(name="keyid")
+	public String getKeyId() {
+		return key;
+	}
+
+	public void setKeyId(String key) {
+		this.key = key;
 	}
 
 	@Column(name="geom")
@@ -174,5 +189,39 @@ public class Area {
 			}
 		}
 		return value;
+	}
+	
+	
+	/**
+	 * Generates a key for a area based on the name provided.
+	 * 
+	 * @param value the name 
+	 * @param otherValues list keys this key must be different from
+	 * 
+	 * @return valid key
+	 */
+	public static String generateKey (String value, Collection<String> otherValues){
+		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", "");
+		if (raw.isEmpty()){
+			raw = "object";
+		}
+	
+		int count = 0;
+		String key = raw;
+		if (raw.length() > Area.KEY_MAX_LENGTH){
+			key = raw.substring(0, Area.KEY_MAX_LENGTH);
+		}
+
+		while(otherValues.contains(key)){
+			count ++;
+			String cnt = String.valueOf(count);
+			if (raw.length() + cnt.length() > Area.KEY_MAX_LENGTH){
+				key = raw.substring(0, Area.KEY_MAX_LENGTH- cnt.length() ) + cnt;
+			}else{
+				key = raw + String.valueOf(count);
+			}
+			
+		}
+		return key;
 	}
 }
