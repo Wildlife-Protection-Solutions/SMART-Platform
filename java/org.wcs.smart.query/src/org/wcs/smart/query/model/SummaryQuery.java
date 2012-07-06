@@ -233,7 +233,7 @@ public class SummaryQuery extends Query {
 			return lastResults;
 		}finally{
 			if (session.isOpen()){
-				session.getTransaction().rollback();
+				session.getTransaction().commit();
 				session.close();
 			}
 		}

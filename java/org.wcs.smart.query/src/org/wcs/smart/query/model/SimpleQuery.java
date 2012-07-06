@@ -203,7 +203,7 @@ public abstract class SimpleQuery extends Query {
 		try{
 			lastResults = getQueryResults(session, progressMonitor);
 		}finally{
-			session.getTransaction().rollback();
+			session.getTransaction().commit();
 			session.close();
 		}
 		return lastResults;
