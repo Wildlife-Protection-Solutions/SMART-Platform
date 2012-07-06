@@ -87,7 +87,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
 		
 		try {
-			pmd.run(false, true, new IRunnableWithProgress() {
+			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
@@ -110,7 +110,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 							SmartPatrolPlugIn.displayLog("File " + files[i].toString() + " not imported: " + ex.getMessage(), ex);
 						}
 						
-						while(display.readAndDispatch()){}
+						//while(display.readAndDispatch()){}
 						
 						if (monitor.isCanceled()){
 							display.syncExec(new Runnable() {
@@ -136,7 +136,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display
 				.getCurrent().getActiveShell());
 		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
+			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
@@ -144,27 +144,41 @@ public class ImportPatrolHandler extends AbstractHandler {
 						Patrol p = PatrolImporter.importPatrol(file, monitor);
 						if (p != null) {
 							PatrolEventManager.getInstance().patrolAdded(p);
-
-							try {
-								activeWorkbench.showPerspective(
-										PatrolPerspective.ID, activeWorkbench
-												.getActiveWorkbenchWindow());
-								PatrolEditorInput input = new PatrolEditorInput(
-										p.getUuid(), p.getId(), p
-												.getPatrolType(), p
-												.getStartDate(), p.getEndDate());
-								PlatformUI.getWorkbench()
-										.getActiveWorkbenchWindow()
-										.getActivePage()
-										.openEditor(input, PatrolEditor.ID);
-							} catch (Exception ex) {
-								SmartPatrolPlugIn.log(
-										"Error loading imported patrol.", ex);
-							}
+							final PatrolEditorInput input = new PatrolEditorInput(
+									p.getUuid(), p.getId(), p
+											.getPatrolType(), p
+											.getStartDate(), p.getEndDate());
+							
+							Display.getDefault().asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										activeWorkbench.showPerspective(
+												PatrolPerspective.ID, activeWorkbench
+														.getActiveWorkbenchWindow());
+										
+										PlatformUI
+												.getWorkbench()
+												.getActiveWorkbenchWindow()
+												.getActivePage()
+												.openEditor(input,
+														PatrolEditor.ID);
+									} catch (Exception ex) {
+										SmartPatrolPlugIn
+												.log("Error loading imported patrol.",
+														ex);
+									}
+								}
+							});
+								
+							
 						}
-					} catch (Exception e) {
-						SmartPatrolPlugIn.displayLog("Patrol not imported. "
-								+ e.getMessage(), e);
+					} catch (final Exception e) {
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPatrolPlugIn.displayLog("Patrol not imported. "+ e.getMessage(), e);
+							}});
 					}
 
 				}

@@ -44,6 +44,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.GpxType;
 import org.wcs.smart.patrol.gpx.TrkType;
@@ -342,13 +343,13 @@ public class GPSDataImport {
 			Object o = un.unmarshal(gpxFile);
 			type = (GpxType) ((JAXBElement) o).getValue();
 		} catch (Exception ex) {
-			SmartPatrolPlugIn.displayLog("Could not read data from file "
+			displayLog("Could not read data from file "
 					+ gpxFile.getAbsolutePath() + ": " + ex.getMessage(), ex);
 			return null;
 		}
 		
 		if (type == null){
-			SmartPatrolPlugIn.displayLog("Could not parse file " + gpxFile.getAbsolutePath(), null);
+			displayLog("Could not parse file " + gpxFile.getAbsolutePath(), null);
 			return null;
 		}
 		
@@ -357,6 +358,13 @@ public class GPSDataImport {
 		return waypoints;
 	}
 	
+	private static void displayLog(final String message, final Exception ex){
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				SmartPatrolPlugIn.displayLog(message, ex);
+			}});
+	}
 	
 	/**
 	 * Reads track points from a gpx file.
@@ -376,13 +384,13 @@ public class GPSDataImport {
 			Object o = un.unmarshal(gpxFile);
 			type = (GpxType) ((JAXBElement) o).getValue();
 		} catch (Exception ex) {
-			SmartPatrolPlugIn.displayLog("Could not read data from file "
+			displayLog("Could not read data from file "
 					+ gpxFile.getAbsolutePath() + ": " + ex.getMessage(), ex);
 			return null;
 		}
 		
 		if (type == null){
-			SmartPatrolPlugIn.displayLog("Could not parse file " + gpxFile.getAbsolutePath(), null);
+			displayLog("Could not parse file " + gpxFile.getAbsolutePath(), null);
 			return null;
 		}
 		
