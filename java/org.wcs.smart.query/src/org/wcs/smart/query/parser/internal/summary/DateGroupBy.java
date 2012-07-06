@@ -138,7 +138,8 @@ public class DateGroupBy implements IGroupBy {
 				Date[] d = df.getDates();
 				if (d.length >= 1){
 					startdate = d[0];
-				}else if (d.length >=2){
+				}
+				if (d.length >=2){
 					enddate = d[1];
 				}
 			}

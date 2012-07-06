@@ -97,7 +97,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		tablePrefix.put(AttributeListItem.class, "ali");
 		tablePrefix.put(PatrolLegMember.class, "plm");
 		tablePrefix.put(Track.class, "t");
-		tablePrefix.put(Area.class, "ag");
+		tablePrefix.put(Area.class, "ar");
 	}
 
 	
@@ -513,30 +513,44 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		LinkedList<IFilter> kidsToProcess = new LinkedList<IFilter>();
 		kidsToProcess.add(queryFilter);
 		Set<String> processedAreaFilters = new HashSet<String>();
+		boolean hasGeomFilter = false;
 		while(kidsToProcess.size() > 0){
 			IFilter kid = kidsToProcess.poll();
 			if (kid instanceof AreaFilter){
+//				hasGeomFilter = true;
+//				break;
 				AreaFilter ff = (AreaFilter)kid;
 				String tableName = ff.getType().name() + "_" + ff.getKey();
 				if (!processedAreaFilters.contains(tableName)) {
 					processedAreaFilters.add(tableName);
 					// TODO: escape special characters from the key
-					sql.append(", (select geom from "
-							+ tableNames.get(Area.class)
-							+ " where keyid = '"
-							+ ff.getKey()
-							+ "' and area_type = '"
-							+ ff.getType().name()
-							+ "' and ca_uuid = x'"
-							+ SmartUtils.encodeHex(SmartDB
-									.getCurrentConservationArea().getUuid())
-							+ "') as " + tableName);
+					sql.append(" left join ");
+					sql.append(tableNames.get(Area.class));
+					sql.append(" as ");
+					sql.append( tableName);
+					sql.append(" on ");
+					sql.append( tableName +".ca_uuid = " + tablePrefix.get(Patrol.class) + ".ca_uuid and ");
+					sql.append( tableName +".area_type = '" + ff.getType().name() + "' and ");
+					sql.append(tableName + ".keyid = '" + ff.getKey() + "' ");
+//					sql.append(", (select geom from "
+//							+ tableNames.get(Area.class)
+//							+ " where keyid = '"
+//							+ ff.getKey()
+//							+ "' and area_type = '"
+//							+ ff.getType().name()
+//							+ "' and ca_uuid = x'"
+//							+ SmartUtils.encodeHex(SmartDB
+//									.getCurrentConservationArea().getUuid())
+//							+ "') as " + tableName);
 				}
 			}
 			if (kid.getChildren() != null){
 				kidsToProcess.addAll(kid.getChildren());
 			}
 		}
+//		if (hasGeomFilter){
+//			sql.append(", " + tableNames.get(Area.class) + " " + tablePrefix.get(Area.class));
+//		}
 		
 		
 		// ---- WHERE CLAUSE -----
