@@ -37,6 +37,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -145,7 +146,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 			
 			try {
-				pmd.run(false, false, new IRunnableWithProgress() {
+				pmd.run(true, false, new IRunnableWithProgress() {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
@@ -169,17 +170,23 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 			
 			try {
-				pmd.run(false, false, new IRunnableWithProgress(){
+				pmd.run(true, false, new IRunnableWithProgress(){
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException{
 						try{
-						if (allData){
-							importedData = ( GPSDataImport.importGpsData(deviceType, null, Collections.singleton(type), monitor) ).get(type);
-						}else{
-							importedData = ( GPSDataImport.importGpsData(deviceType, currentDay, Collections.singleton(type), monitor) ).get(type);
-						}
-						}catch(Exception ex){
-							SmartPatrolPlugIn.displayLog("Could not import data from gps device. " + ex.getMessage(), ex);
+							if (allData){
+								importedData = ( GPSDataImport.importGpsData(deviceType, null, Collections.singleton(type), monitor) ).get(type);
+							}else{
+								importedData = ( GPSDataImport.importGpsData(deviceType, currentDay, Collections.singleton(type), monitor) ).get(type);
+							}
+						}catch(final Exception ex){
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									SmartPatrolPlugIn.displayLog("Could not import data from gps device. " + ex.getMessage(), ex);
+								}
+							});
+							
 						}
 					}
 				});
@@ -239,7 +246,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 				final String filename = ((ImportGpxWizardPage)event.getCurrentPage()).getFileName();
 				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 				try{
-				pmd.run(false, false, new IRunnableWithProgress() {
+				pmd.run(true, false, new IRunnableWithProgress() {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
@@ -272,15 +279,28 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							}else if (type == ImportType.TRACK){
 								allWaypoints = GPSDataImport.getTrackPoints(f, monitor);
 							}
-						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
+						}catch (final Exception ex){
+							Display.getDefault().syncExec(new Runnable(){
+								@Override
+								public void run() {
+									SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
+								}});
+							
 						}finally{
 							try{
 								if (f != null){
 									f.delete();
 								}
-							}catch (Exception ex){
-								SmartPatrolPlugIn.log("Error deleting patrol data file.", ex);
+							}catch (final Exception ex){
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										Display.getDefault().syncExec(new Runnable(){
+											@Override
+											public void run() {
+												SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
+											}});
+									}});
 							}
 						}
 					}

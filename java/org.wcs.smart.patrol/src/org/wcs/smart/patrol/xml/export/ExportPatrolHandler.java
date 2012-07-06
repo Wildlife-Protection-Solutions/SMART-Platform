@@ -32,6 +32,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -74,15 +75,27 @@ public class ExportPatrolHandler extends AbstractHandler  {
 			
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 			try {
-				pmd.run(false, false, new IRunnableWithProgress() {				
+				pmd.run(true, false, new IRunnableWithProgress() {				
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 						try {
-							File f = PatrolExporter.exportPatrol(((PatrolEditor) editor).getPatrol(), file, includeAtt, monitor);
-							MessageDialog.openInformation(editor.getSite().getShell(), "Export", "Patrol data exported successfully to " + f.getAbsolutePath());
-						} catch (Exception e) {
-							SmartPatrolPlugIn.displayLog("Could not export the patrol. " + e.getMessage(), e);
+							final File f = PatrolExporter.exportPatrol(((PatrolEditor) editor).getPatrol(), file, includeAtt, monitor);
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									MessageDialog.openInformation(editor.getSite().getShell(), "Export", "Patrol data exported successfully to " + f.getAbsolutePath());
+								}
+							});
+							
+						} catch (final Exception e) {
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									SmartPatrolPlugIn.displayLog("Could not export the patrol. " + e.getMessage(), e);
+								}
+							});
+							
 						}						
 					}
 				});

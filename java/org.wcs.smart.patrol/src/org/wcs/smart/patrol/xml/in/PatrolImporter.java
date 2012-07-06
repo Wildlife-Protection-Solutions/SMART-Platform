@@ -234,14 +234,27 @@ public class PatrolImporter {
 					sb.append(str);
 					sb.append(SmartUtils.LINE_SEPARATOR);
 				}
-				ConfirmInputDialog dialog = new ConfirmInputDialog(
-						Display.getCurrent().getActiveShell(),
-						"Patrol Import",
-						"Some data could not be imported.  The following list identifies the problems the occurred while importing the patrol data.  If you continue the data identified below will not be imported.  Would you like to continue with the import?",
-						sb.toString(), null);
-				if (dialog.open() != ConfirmInputDialog.OK){
+				final String message = sb.toString();
+				final boolean[] cont = new boolean[]{true}; 
+				Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						ConfirmInputDialog dialog = new ConfirmInputDialog(
+								Display.getDefault().getActiveShell(),
+								"Patrol Import",
+								"Some data could not be imported.  The following list identifies the problems the occurred while importing the patrol data.  If you continue the data identified below will not be imported.  Would you like to continue with the import?",
+								message, null);
+						if (dialog.open() != ConfirmInputDialog.OK){
+							cont[0] = false;
+							
+						}	
+					}
+				});
+				if (!cont[0]){
 					return null;
-				}			
+				}
+							
 			}
 			Patrol imported = converter.getImportedPatrol();
 			
