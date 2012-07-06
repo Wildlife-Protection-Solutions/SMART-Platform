@@ -184,7 +184,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 	private void loadData(){
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try{
-		dialog.run(false, true, new IRunnableWithProgress() {
+		dialog.run(true, true, new IRunnableWithProgress() {
 			
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
@@ -192,13 +192,28 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 				Session session = HibernateManager.openSession();
 				try{
 					EmployeeCsvImporter importer = new EmployeeCsvImporter();
-					if(importer.importCsvFile(new File(getFileName()), getSkipHeader(), monitor, session)){
-						MessageDialog.openInformation(getShell(), "Import Employees", "Employee data loaded successfully");
-					}else{
-						MessageDialog.openError(getShell(), "Import Employees", "Empoyee data not imported.");
-					}
-				}catch (Exception ex){
-					SmartPlugIn.displayLog(getShell(), "Failed to load employee data\n\n" + ex.getMessage(), ex);		
+					final boolean ok =importer.importCsvFile(new File(getFileName()), getSkipHeader(), monitor, session);
+					getShell().getDisplay().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							if(ok){
+								MessageDialog.openInformation(getShell(), "Import Employees", "Employee data loaded successfully");
+							}else{
+								MessageDialog.openError(getShell(), "Import Employees", "Empoyee data not imported.");
+							}
+							
+						}
+					});
+					
+				}catch (final Exception ex){
+					getShell().getDisplay().syncExec(new Runnable(){
+
+						@Override
+						public void run() {
+							SmartPlugIn.displayLog(getShell(), "Failed to load employee data\n\n" + ex.getMessage(), ex);
+						}						
+					});
+							
 				}finally{
 					session.close();
 				}

@@ -292,14 +292,22 @@ public class DerbyRestoreEngine {
 
 		/* clean up */
 		monitor.setTaskName("Cleaning up");
-		String cleanUpErr = cleanUp(new File[] { temp, dbFileBack, dataFileBack });
+		final String cleanUpErr = cleanUp(new File[] { temp, dbFileBack, dataFileBack });
 		if (cleanUpErr.length() > 0) {
-			MessageDialog
+			Display.getDefault().syncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					MessageDialog
 					.openWarning(
 							Display.getDefault().getActiveShell(),
 							"Restore Warning",
 							"The following directory created during the restore process could not be removed.  It is recommended you remove these directories manually:\n"
 									+ cleanUpErr);
+				}
+				
+			});
+			
 		}
 
 		monitor.worked(1);

@@ -91,7 +91,7 @@ public class RestoreHandler {
 			return ;
 		}
 		try {
-			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
+			final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
 			pmdDialog.run(false, false, new IRunnableWithProgress() {
 
 				@Override
@@ -99,13 +99,13 @@ public class RestoreHandler {
 						throws InvocationTargetException, InterruptedException {
 					File f = dialog.getSelectedFile();
 					try{
-						DerbyRestoreEngine.restoreSystem(f, monitor);				
+						DerbyRestoreEngine.restoreSystem(f, monitor);	
 						MessageDialog.openInformation(shell, "Restore Complete", "System restore completed");
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(shell,"Restore Failed.\n\n" + ex.getMessage(), ex);
 					}
-
 				}
+				
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,

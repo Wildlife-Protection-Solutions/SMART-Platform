@@ -61,7 +61,9 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		@Override
 		public boolean preShutdown(IWorkbench workbench, boolean forced) {
 			if (workbench.saveAllEditors(true)){
-				workbench.getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
+				if (workbench.getActiveWorkbenchWindow() != null && workbench.getActiveWorkbenchWindow().getActivePage() != null){
+					workbench.getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
+				}
 				return true;
 			}
 			return false;
