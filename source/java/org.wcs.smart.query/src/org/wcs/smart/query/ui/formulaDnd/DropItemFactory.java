@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -31,6 +32,9 @@ import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.formulaDnd.BracketDropItem.BracketType;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
+import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection;
+import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection.FilterType;
+import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
 
 /**
  * 
@@ -311,5 +315,100 @@ public class DropItemFactory {
 	 */
 	public DropItem createAttributeTreeNodeGroupByDropItem(AttributeTreeNode node, Category category){
 		return new AttributeTreeGroupByDropItem(node, category);
+	}
+	
+	/**
+	 * Creates a new drop item for an area item
+	 * @param area
+	 * @return
+	 */
+	public DropItem createAreaDropItem(Area area){
+		return new AreaDropItem(area);
+	}
+	
+	
+	/**
+	 * Creates a drop item or collection of drop items for the
+	 * given object based on the type of the object.
+	 * 
+	 * @param object The object to create drop item for
+	 * @param fType the type of drop item to create (filter, value etc)
+	 * @return null or a array of drop items created
+	 */
+	public DropItem[] createDropItem(Object object, FilterType fType){
+		if (object instanceof Category) {
+			return new DropItem[]{ createCategoryDropItem((Category) object) };
+		} else if (object instanceof CategoryAttribute) {
+			return new DropItem[]{ createAttributeDropItem( (CategoryAttribute) object)};
+		} else if (object instanceof Attribute) {
+			return new DropItem[]{ createAttributeDropItem((Attribute) object)};
+			
+		} else if (object instanceof QueryFilterContentProvider.OtherItems) {
+			return createOtherDropItem(
+							(QueryFilterContentProvider.OtherItems) object);
+		} else if (object instanceof PatrolValueOption) {
+			return new DropItem[]{createPatrolValueDropItem(
+							(PatrolValueOption) object)};
+
+		} else if (object instanceof PatrolQueryOption) {
+			if (fType == QueryFilterSelection.FilterType.FILTER) {
+				return new DropItem[]{createPatrolFilterDropItem(
+								(PatrolQueryOption) object)};
+			} else if (fType == QueryFilterSelection.FilterType.SUMMARY) {
+				return new DropItem[]{createPatrolGroupByDropItem(
+								(PatrolQueryOption) object)};
+			}
+		} else if (object instanceof DateGroupByOption) {
+			return new DropItem[]{createDateGroupByDropItem(
+							(DateGroupByOption) object)};
+		
+		} else if (object instanceof SummaryDmObject) {
+			return new DropItem[]{createSummaryDmDropItem((SummaryDmObject)object)};
+			
+		}else if (object instanceof Area){
+			return new DropItem[]{ createAreaDropItem((Area)object) };
+
+		}
+		return null;
+	}
+	
+	/*
+	 * Creates a drop item from a SummaryDmObject
+	 */
+	private DropItem createSummaryDmDropItem(SummaryDmObject object) {
+		if (object.isValue()) {
+			if (object.getObject() instanceof Attribute) {
+				return createAttributeValueDropItem(
+						(Attribute) object.getObject());
+			} else if (object.getObject() instanceof CategoryAttribute) {
+				return createAttributeValueDropItem(
+						(CategoryAttribute) object.getObject());
+			} else if (object.getObject() instanceof Category) {
+				return createCategoryValueDropItem(
+						(Category) object.getObject());
+			}
+		} else {
+			// category
+			if (object.getObject() instanceof Category) {
+				return createCategoryGroupByDropItem(
+						(Category) object.getObject());
+			} else if (object.getObject() instanceof Attribute) {
+				return createAttributeGroupByDropItem(
+						(Attribute) object.getObject());
+			} else if (object.getObject() instanceof CategoryAttribute) {
+				return createAttributeGroupByDropItem(
+						(CategoryAttribute) object.getObject());
+			} else if (object.getObject() instanceof AttributeTreeNode) {
+				if (object.getObject2() != null) {
+					return createAttributeTreeNodeGroupByDropItem(
+									(AttributeTreeNode) object.getObject(),
+									(Category) object.getObject2());
+				} else {
+					return createAttributeTreeNodeGroupByDropItem(
+									(AttributeTreeNode) object.getObject());
+				}
+			}
+		}
+		return null;
 	}
 }

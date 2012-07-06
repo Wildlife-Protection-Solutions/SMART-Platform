@@ -119,6 +119,7 @@ public class QueryEditorTableContent {
 					showCancelled();
 				}else{
 					lblNumResults.setText(String.valueOf(items.size()));
+					lblNumResults.getParent().getParent().layout();
 					resultsTable.setInput(items);
 					showTable();
 				}

@@ -158,6 +158,17 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String COLUMN_HEADER_ICON = "org.wcs.smart.query.columheader";
 	
+	/**
+	 * Area Filter Icon
+	 */
+	public static final String AREA_FILTER_ICON = "org.wcs.smart.query.areafilter";
+	
+	
+	/**
+	 * Area Polygon Filter Icon
+	 */
+	public static final String AREA_POLYGON_FILTER_ICON = "org.wcs.smart.query.areapolyfilter";
+	
 	/*
 	 * Load images
 	 */
@@ -190,6 +201,9 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		addImage("images/icons/obj16/exclamation.png",EXCLAMATION_ICON);
 		addImage("images/icons/obj16/row_header.png",ROW_HEADER_ICON);
 		addImage("images/icons/obj16/column_header.png",COLUMN_HEADER_ICON);
+		
+		addImage("images/icons/obj16/area_filter.png",AREA_FILTER_ICON);
+		addImage("images/icons/obj16/area_polygon.png",AREA_POLYGON_FILTER_ICON);
 		
 		
 	}

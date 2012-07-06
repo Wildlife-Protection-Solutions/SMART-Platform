@@ -65,8 +65,7 @@ TOKEN :
  | < PATROLLEG_LEADER_KEY : "patrol:leader" >
  | < PATROLLEG_PILOT_KEY : "patrol:pilot" >
  | < PATROLLEG_MEMBER_KEY : "patrol:member" >
-  }
-
+ | < AREA_KEY : "area:" ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) ":" < DM_KEY > >}
 /* Summary Query */
 TOKEN :
 {
@@ -315,6 +314,8 @@ IFilter BooleanPart() :
 		filter = CategoryKey()
 		|
 		filter = AttributeExpression()
+ 		|	 
+		filter = AreaFilter()
 		|
 		(< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
 		{	  		filter = BracketFilter.createFilter(filter);
@@ -496,6 +497,7 @@ IFilter StringExpression():
 		{
   			filter = PatrolFilter.createStringFilter(key, op, value);
 		}
+
 	)
 	{  		return filter;
 	}
@@ -508,6 +510,13 @@ IFilter StringExpression():
 {  return CategoryFilter.createFilter(token.image);
 }
 }
+
+AreaFilter AreaFilter():
+{}
+{
+  < AREA_KEY >
+  {
+    return AreaFilter.createFilter(token.image);  }  }
 
 Operator NumberOp() :
 {}

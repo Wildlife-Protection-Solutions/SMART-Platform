@@ -21,118 +21,73 @@
  */
 package org.wcs.smart.query.parser.internal.filter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.patrol.model.Patrol;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.query.ui.formulaDnd.AreaDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.util.SmartUtils;
 
+
 /**
- * A Conservation Area filter.
- * 
- * @author Emily
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
+ * @author egouge
  * @since 1.0.0
  */
-public class ConservationAreaFilter implements IFilter {
+public class AreaFilter implements IFilter {
 
-	/**
-	 * Parses a conservation area filter from
-	 * the string representation of the filter
-	 * 
-	 * @param caFilterAsString
-	 * @return
-	 */
-	public static ConservationAreaFilter parseFilter(String caFilterAsString) {
-		ConservationAreaFilter filter = new ConservationAreaFilter();
-		try {
-			String[] bits = caFilterAsString.split(",");
-			for (int i = 0; i < bits.length; i++) {
-				filter.addConservationArea(SmartUtils.decodeHex(bits[i]));
-
-			}
-		} catch (Exception ex) {
-			throw new IllegalStateException(
-					"Could not parse conservation area filter.", ex);
-		}
-		return filter;
+	public static AreaFilter createFilter(String key){
+		String[] bits = key.split(":");
+		Area.AreaType type = Area.AreaType.valueOf(bits[1]);
+		return new AreaFilter(type, bits[2]);
 	}
 	
-	private ArrayList<byte[]> filters = new ArrayList<byte[]>();
-
 	
-	/**
-	 * Creates an empty conservation area filter
-	 */
-	public ConservationAreaFilter(){
-		
+	private Area.AreaType type;
+	private String key;
+	
+	
+	public AreaFilter(Area.AreaType type, String key){
+		this.type = type;
+		this.key = key;
 	}
-	
-	/**
-	 * Adds a conservation area to the filter
-	 * @param newCa conservation area
-	 */
-	public void addConservationArea(ConservationArea newCa){
-		filters.add(newCa.getUuid());
-	}
-	
-	/**
-	 * Adds a conservation area uuid to the filter
-	 * @param uuid the conservation area uuid
-	 */
-	public void addConservationArea(byte[] uuid){
-		filters.add(uuid);
-	}
-	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
-		StringBuilder sb = new StringBuilder();
-//		sb.append("(");
-		for (int i = 0; i < filters.size(); i ++){
-			if (i != 0){
-				sb.append(" , ");
-			}
-			sb.append( SmartUtils.encodeHex( filters.get(i) ) );
-		}			
-//		sb.append(")");
-		return sb.toString();
+		return "area:" + type + ":" + key;
 	}
 
+	public String getKey(){
+		return this.key;
+	}
+	public Area.AreaType getType(){
+		return this.type;
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		return asSql(tableMapping.get(Patrol.class));
-	}
-
-	
-	/**
-	 * Creates the sql given the provided conservation
-	 * area class prefix.  Assumes the column name
-	 * is ca_uuid;
-	 * 
-	 * @param caClassPrefix
-	 * @return
-	 */
-	public String asSql(String caClassPrefix) {
-		if (filters.size() == 0){
-			return "";
-		}
 		StringBuilder sb = new StringBuilder();
-		sb.append(caClassPrefix);
-		sb.append(".ca_uuid IN (");
-		for (int i = 0; i < filters.size(); i++) {
-			String uuid = SmartUtils.encodeHex(filters.get(i));
-			sb.append("x'" + uuid + "'");
-		}
+		sb.append("smart.pointinpolygon(" );
+		sb.append(tableMapping.get(Waypoint.class) + ".x, ");
+		sb.append(tableMapping.get(Waypoint.class) + ".y, ");
+		sb.append(  type.name() + "_" + key + ".geom"); 
 		sb.append(")");
 		return sb.toString();
 	}
@@ -160,23 +115,32 @@ public class ConservationAreaFilter implements IFilter {
 	public boolean hasEmployeeFilter() {
 		return false;
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
 	}
-	
+
+	private Area loadArea(Session session){
+		@SuppressWarnings("unchecked")
+		List<Area> areas = session.createCriteria(Area.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("type", this.type)).add(Restrictions.eq("keyId", this.key)).list();
+		if (areas.size() == 0){
+			throw new IllegalStateException("Could not find area filter for type " + this.type.getGuiName() + " and key " +this.key);
+		}else{
+			return areas.get(0);
+		}
+		
+	}
 	/**
-	 * There are no drop items for conservation area filters
-	 * @return null
+	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getDropItems(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem[] getDropItems(Session session) throws Exception{
-		return null;
+	public DropItem[] getDropItems(Session session) throws Exception {		
+		return new DropItem[]{ new AreaDropItem(loadArea(session))};
 	}
-	
+
 	/**
 	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getChildren()
 	 */
@@ -184,4 +148,5 @@ public class ConservationAreaFilter implements IFilter {
 	public List<IFilter> getChildren() {
 		return null;
 	}
+
 }

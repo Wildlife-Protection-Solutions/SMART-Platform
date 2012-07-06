@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -88,7 +89,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 						return;
 					}
 					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter());
+						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter());
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()){
@@ -149,27 +150,38 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
 		try {
+			byte[] lastPlUuid = null;
+			QueryResultItem lastItem = null;
 			while (rs.next()) {
-				QueryResultItem it = new QueryResultItem();
-				it.setPatrolUuid(rs.getBytes(1));
-				it.setPatrolId(rs.getString(2));
-				it.setPatrolStartDate(rs.getDate(3));
-				it.setPatrolEndDate(rs.getDate(4));
-				it.setStation(getStationName(rs.getBytes(5), session));				
-				it.setTeam(getTeamName(rs.getBytes(6), session));				
-				it.setObjective(rs.getString(7));
-				it.setMandate(getMandateName(rs.getBytes(8), session));
-				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(9)));
-				it.setArmed(rs.getBoolean(10));
-				it.setTransportType(getTransportType(rs.getBytes(11), session));
-				it.setPatrolLegId(rs.getString(12));
-				it.setPatrolLegStartDate(rs.getDate(13));
-				it.setPatrolLegEndDate(rs.getDate(14));
-				it.setLeader(getEmployeeName(rs.getBytes(15), session));
-				it.setPilot(getEmployeeName(rs.getBytes(16), session));
-				it.setTrack(rs.getBytes(17));
+				
+				byte[] pluuid = rs.getBytes(18);
+				if (Arrays.equals(pluuid, lastPlUuid)){
+					lastItem.addTrack(rs.getBytes(17));
+				}else{
+					QueryResultItem it = new QueryResultItem();
+					it.setPatrolUuid(rs.getBytes(1));
+					it.setPatrolId(rs.getString(2));
+					it.setPatrolStartDate(rs.getDate(3));
+					it.setPatrolEndDate(rs.getDate(4));
+					it.setStation(getStationName(rs.getBytes(5), session));				
+					it.setTeam(getTeamName(rs.getBytes(6), session));				
+					it.setObjective(rs.getString(7));
+					it.setMandate(getMandateName(rs.getBytes(8), session));
+					it.setPatrolType(PatrolType.Type.valueOf(rs.getString(9)));
+					it.setArmed(rs.getBoolean(10));
+					it.setTransportType(getTransportType(rs.getBytes(11), session));
+					it.setPatrolLegId(rs.getString(12));
+					it.setPatrolLegStartDate(rs.getDate(13));
+					it.setPatrolLegEndDate(rs.getDate(14));
+					it.setLeader(getEmployeeName(rs.getBytes(15), session));
+					it.setPilot(getEmployeeName(rs.getBytes(16), session));
+					it.addTrack(rs.getBytes(17));
+					items.add(it);
+					lastItem = it;
+				}
+				lastPlUuid = pluuid;
 			
-				items.add(it);
+				
 			}
 		} finally {
 			rs.close();
@@ -193,7 +205,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 				"pl_end_date",
 				//"pld_patrol_day", 
 				"plm_leader", 
-				"plm_pilot", "track" };
+				"plm_pilot", "track", "pl_uuid" };
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < results.length; i++) {

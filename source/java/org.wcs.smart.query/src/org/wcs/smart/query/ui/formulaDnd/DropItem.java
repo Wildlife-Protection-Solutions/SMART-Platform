@@ -126,7 +126,8 @@ public abstract class DropItem {
 	 */
 	public abstract boolean isValueItem();
 	/**
-	 * @return <code>true</code> if filter drop item
+	 * @return <code>true</code> if drop item is a filter drop
+	 * item that filters query results 
 	 */
 	public abstract boolean isFilterItem();
 	/**

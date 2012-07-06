@@ -232,7 +232,7 @@ public class QueryFilterView extends ViewPart {
 		filterTreeViewer = fTree.getViewer();
 		filterTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filterTreeViewer.setLabelProvider(new QueryFilterLabelProvider());
-		filterTreeViewer.setContentProvider(new QueryFilterContentProvider());
+		filterTreeViewer.setContentProvider(new QueryFilterContentProvider(filterTreeViewer));
 		filterTreeViewer.addDoubleClickListener(new IDoubleClickListener() {			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -291,6 +291,7 @@ public class QueryFilterView extends ViewPart {
 				}
 			}
 			
+			@SuppressWarnings("rawtypes")
 			@Override
 			public void sourceChanged(int sourcePriority, Map sourceValuesByName) {				
 			}
