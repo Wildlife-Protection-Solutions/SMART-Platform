@@ -148,6 +148,7 @@ CREATE TABLE smart.area_geometries
 	ca_uuid CHAR(16) for bit data NOT NULL,
 	area_type VARCHAR(5) NOT NULL,
 	id VARCHAR(256),
+	keyid VARCHAR(256),
 	geom BLOB NOT NULL,
 	PRIMARY KEY (PID)
 );

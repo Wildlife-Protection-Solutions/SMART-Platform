@@ -155,3 +155,6 @@ ALTER TABLE smart.summary_query
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;
+
+
+create index patrol_leg_day_patrol_day_idx on smart.patrol_leg_day(patrol_day);

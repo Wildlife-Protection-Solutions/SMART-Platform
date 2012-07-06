@@ -188,3 +188,7 @@ ALTER TABLE smart.dm_attribute_tree
 	ON DELETE CASCADE
 ;
 create index dm_category_hkey_idx on smart.dm_category(hkey);
+
+create index dm_attribute_keyid_idx on smart.dm_attribute(keyid);
+create index dm_attribute_list_keyid_idx on smart.dm_attribute_list(keyid);
+create index dm_attribute_tree_hkey_idx on smart.dm_attribute_tree(hkey);
