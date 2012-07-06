@@ -84,11 +84,23 @@ public class AreaFilter implements IFilter {
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
 		StringBuilder sb = new StringBuilder();
+		
 		sb.append("smart.pointinpolygon(" );
 		sb.append(tableMapping.get(Waypoint.class) + ".x, ");
 		sb.append(tableMapping.get(Waypoint.class) + ".y, ");
-		sb.append(  type.name() + "_" + key + ".geom"); 
+		sb.append(  type.name() + "_" + key + ".geom");
+//		sb.append(tableMapping.get(Area.class) + ".geom");
 		sb.append(")");
+//		sb.append(" AND ");
+//		sb.append(tableMapping.get(Area.class) + ".keyid = '");
+//		sb.append(key);
+//		sb.append("' AND ");
+//		sb.append(tableMapping.get(Area.class) + ".area_type = '");
+//		sb.append(type.name());
+//		sb.append("' AND ");
+//		sb.append(tableMapping.get(Area.class) + ".ca_uuid = x'");
+//		sb.append(SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()));
+//		sb.append("')");
 		return sb.toString();
 	}
 
