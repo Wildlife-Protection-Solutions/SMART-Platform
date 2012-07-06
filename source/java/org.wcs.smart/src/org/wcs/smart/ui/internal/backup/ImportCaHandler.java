@@ -86,9 +86,9 @@ public class ImportCaHandler {
 					File f = dialog.getSelectedFile();
 					try{
 						CaImporter.importCa(f, monitor);
-						MessageDialog.openInformation(shell, "Import Complete", "Conservation area import completed");
-					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,"Import Failed.\n\n" + ex.getMessage(), ex);
+						MessageDialog.openInformation(shell, "Import Complete", "Conservation area import completed");		
+					}catch (final Exception ex){
+						SmartPlugIn.displayLog(shell,"Import Failed.\n\n" + ex.getMessage(), ex);		
 					}
 
 				}

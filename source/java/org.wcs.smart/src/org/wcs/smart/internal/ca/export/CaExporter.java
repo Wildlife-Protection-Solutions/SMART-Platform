@@ -94,10 +94,9 @@ public class CaExporter {
 	 * @param destFile output file
 	 * @param monitor progress monitor
 	 * 
-	 * @return true if data exported correctly, false if error occurred
 	 * 
 	 */
-	public boolean export(File destFile, IProgressMonitor monitor){
+	public void export(File destFile, IProgressMonitor monitor) throws Exception{
 		
 		Session session = HibernateManager.openSession();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
@@ -122,11 +121,7 @@ public class CaExporter {
 			}catch(Exception ex){
 				SmartPlugIn.log("Could not delete temporary directory: " + tempDir.getAbsolutePath(), ex);
 			}
-			return true;
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(null,
-					"Conservation area export failed.\n\n" + ex.getMessage(), ex);
-			return false;
+		
 		}finally{
 			session.close();
 		}

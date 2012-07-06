@@ -90,7 +90,7 @@ public class DeleteConservationArea extends AbstractHandler {
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 		try{
-		pmd.run(false, false, new IRunnableWithProgress() {
+		pmd.run(true, false, new IRunnableWithProgress() {
 			
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
@@ -100,8 +100,15 @@ public class DeleteConservationArea extends AbstractHandler {
 				ConservationArea ca = SmartDB.getCurrentConservationArea();
 				try{
 					ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor);
-				}catch (Exception ex){
-					SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), "Error deleting conservation area.", ex);
+				}catch (final Exception ex){
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), "Error deleting conservation area.", ex);
+						}
+						
+					});
+					
 				}
 				
 			}

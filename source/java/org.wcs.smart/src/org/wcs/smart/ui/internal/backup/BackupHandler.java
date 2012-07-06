@@ -83,24 +83,45 @@ public class BackupHandler extends AbstractHandler {
 		}
 		try {
 			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(false, true, new IRunnableWithProgress() {
+			pmdDialog.run(true, true, new IRunnableWithProgress() {
 
 				@Override
-				public void run(IProgressMonitor monitor)
+				public void run(final IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					File f = dialog.getSelectedFile();
-					try{
-						if(DerbyBackupEngine.backupSystem(f, monitor)){					
-							MessageDialog.openInformation(shell, "Backup Complete", "System backed up successfully to file: \n\n" +  f.getAbsolutePath());
-							backupState = true;
-						}else if (monitor.isCanceled()){
-							MessageDialog.openError(shell, "Backup Failed", "Backup process cancelled");
-						}else{
-							MessageDialog.openError(shell, "Backup Failed", "Backup did not complete.  Please try again.");
-						}
-					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,
-								"Backup Failed. " + ex.getMessage(), ex);
+					final File f = dialog.getSelectedFile();
+					try {
+						final boolean ok = DerbyBackupEngine.backupSystem(f,
+								monitor);
+						shell.getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								if (ok) {
+									MessageDialog.openInformation(shell,
+											"Backup Complete",
+											"System backed up successfully to file: \n\n"
+													+ f.getAbsolutePath());
+									backupState = true;
+								} else if (monitor.isCanceled()) {
+									MessageDialog.openError(shell,
+											"Backup Failed",
+											"Backup process cancelled");
+								} else {
+									MessageDialog
+											.openError(shell, "Backup Failed",
+													"Backup did not complete.  Please try again.");
+								}
+
+							}
+						});
+
+					} catch (final Exception ex) {
+						shell.getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(shell, "Backup Failed. "
+										+ ex.getMessage(), ex);
+							}
+						});
 					}
 
 				}

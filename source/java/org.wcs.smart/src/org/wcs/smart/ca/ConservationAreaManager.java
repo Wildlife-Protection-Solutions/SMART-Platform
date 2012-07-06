@@ -92,7 +92,7 @@ public class ConservationAreaManager {
 		
 		session.beginTransaction();
 		try{
-			File fileStore = new File(ca.getFileDataStoreLocation());
+			final File fileStore = new File(ca.getFileDataStoreLocation());
 			
 			runDeleteHandlers(ca, session, monitor);
 			monitor.subTask("Deleting Conservation Area");
@@ -104,21 +104,32 @@ public class ConservationAreaManager {
 				monitor.subTask("Removing File Store");
 				try{
 					FileUtils.forceDelete(fileStore);
-				}catch(Exception ex){
-					SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), "Could not delete the file store associated with this conservation area.  The directory should be deleted manually. " + fileStore.getAbsolutePath(), ex);
+				}catch(final Exception ex){
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Could not delete the file store associated with this conservation area.  The directory should be deleted manually. " + fileStore.getAbsolutePath(), ex);
+						}});
 				}
 			}
 			monitor.worked(1);
 			
 			monitor.subTask("Restarting");
+
 			//logout
-			PlatformUI.getWorkbench().restart();
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					PlatformUI.getWorkbench().restart();
+				}});
+			
 		}catch (Exception ex){
 			session.getTransaction().rollback();
 			throw ex;
 		}finally{
 			session.close();
 		}
+		
 	}
 	
 	/**

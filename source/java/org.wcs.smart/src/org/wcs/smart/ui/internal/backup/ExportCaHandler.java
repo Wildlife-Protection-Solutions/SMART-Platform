@@ -81,7 +81,7 @@ public class ExportCaHandler extends AbstractHandler {
 		}
 		try {
 			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(false, true, new IRunnableWithProgress() {
+			pmdDialog.run(true, true, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
@@ -89,8 +89,21 @@ public class ExportCaHandler extends AbstractHandler {
 					File f = dialog.getSelectedFile();
 
 					CaExporter exporter = new CaExporter();
-					if (exporter.export(f, monitor)){
-						MessageDialog.openInformation(shell, "Export Conservation Area", "Conservation area exported successfully.");
+					try{
+						exporter.export(f, monitor);
+						shell.getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								MessageDialog.openInformation(shell, "Export Conservation Area", "Conservation area exported successfully.");
+							}
+						});
+					}catch (final Exception ex){
+						shell.getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(shell, "Error exporting conservation area: " + ex.getMessage(), ex);
+							}
+						});
 					}
 				}
 			});
