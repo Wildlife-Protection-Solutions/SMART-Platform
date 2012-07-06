@@ -28,11 +28,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -40,6 +43,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -56,10 +60,12 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query engine for executing 
@@ -91,6 +97,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		tablePrefix.put(AttributeListItem.class, "ali");
 		tablePrefix.put(PatrolLegMember.class, "plm");
 		tablePrefix.put(Track.class, "t");
+		tablePrefix.put(Area.class, "ag");
 	}
 
 	
@@ -112,6 +119,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		tableNames.put(AttributeListItem.class, "smart.dm_attribute_list");
 		tableNames.put(PatrolLegMember.class, "smart.patrol_leg_members");
 		tableNames.put(Track.class, "smart.track");
+		tableNames.put(Area.class, "smart.area_geometries");
 	}
 	
 	protected String queryTempTable = "";
@@ -164,13 +172,21 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				monitor.beginTask("Running Query.", 4);
 
 				try {
+					
+//					String myquery = "SELECT p.uuid, p.id, p.station_uuid, p.team_uuid, p.objective, p.mandate_uuid, p.patrol_type, p.is_armed, p.start_date, p.end_date, pl.uuid, pl.id, pl.transport_uuid, pld.uuid, pld.patrol_day, wp.uuid, wpo.uuid, plm_leader.employee_uuid, plm_pilot.employee_uuid  FROM smart.patrol p inner join smart.patrol_leg pl on p.uuid = pl.patrol_uuid  inner join smart.patrol_leg_day pld on pl.uuid = pld.patrol_leg_uuid  inner join smart.waypoint wp on pld.uuid = wp.leg_day_uuid  left join smart.wp_observation wpo on wp.uuid = wpo.wp_uuid  left join smart.patrol_leg_members plm_leader  on pl.uuid = plm_leader.patrol_leg_uuid and  plm_leader.is_leader  left join smart.patrol_leg_members plm_pilot  on pl.uuid = plm_pilot.patrol_leg_uuid and  plm_pilot.is_pilot , (select geom from smart.area_geometries where keyid = 'conservationarea' and area_type = 'CA' and ca_uuid = x'd5f41e3ab1e04108aacd4920e85bad94') as CA_conservationarea WHERE  ( pld.patrol_day >= '2012-06-05' )  AND (p.ca_uuid IN (x'd5f41e3ab1e04108aacd4920e85bad94')) AND  ( smart.pointinpolygon(wp.x, wp.y, CA_conservationarea.geom) ) ";
+//					ResultSet rs = c.createStatement().executeQuery(myquery);
+//					while(rs.next()){
+//						System.out.println(rs.getString(1));
+//					}
+//					rs.close();
+					
 					monitor.subTask("Creating observation table");
 					IFilter qFilter = query.getFilter();
 					if (qFilter == null){
 						return;
 					}
 					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter());
+						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter());
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()){
@@ -242,12 +258,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param query the query 
 	 * @throws SQLException
 	 */
-	protected void createObservationTable(Connection c, IFilter filter)
+	protected void createObservationTable(Connection c, IFilter filter, DateFilter dateFilter, ConservationAreaFilter caFilter)
 			throws SQLException {
 		HashSet<AttributeInfo> keys = new HashSet<AttributeInfo>();
 		filter.getAttributeFilters(keys);
 
 		// -- build temporary table
+		StringBuilder inlist = new StringBuilder();
 		StringBuilder sql = new StringBuilder();
 //		sql.append("CREATE TABLE " + QUERY_TEMP_SCHEMA + "." + observationTempTable + " (observation_uuid char(16) for bit data");
 		sql.append("CREATE TABLE " + observationTempTable + " (observation_uuid char(16) for bit data");
@@ -268,41 +285,62 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			sql.append(", max(" + key.getKey() + ") as " + key.getKey() + " ");
 		}
 		sql.append("FROM (");
-		sql.append("SELECT a.observation_uuid ");
+		sql.append("SELECT " + tablePrefix.get(WaypointObservationAttribute.class) + ".observation_uuid ");
 		boolean list = false;
 		boolean tree = false;
 		for (AttributeInfo key : keys) {
 			if (key.getType() == AttributeType.LIST) {
 				list = true;
-				sql.append(", case when c.keyid = '" + key.getKey() + "'");
+				sql.append(", case when " + tablePrefix.get(Attribute.class) + ".keyid = '" + key.getKey() + "'");
 				sql.append(" then l.keyid else null end as " + key.getKey() + " ");
 			} else if (key.getType() == AttributeType.TREE) {
 				tree = true;
-				sql.append(", case when c.keyid = '" + key.getKey() + "'");
+				sql.append(", case when " + tablePrefix.get(Attribute.class) + ".keyid = '" + key.getKey() + "'");
 				sql.append(" then t.hkey else null end as ");
 				sql.append(key.getKey() + " ");
 				
 			} else {
-				sql.append(", case when c.keyid = '" + key.getKey()
+				sql.append(", case when " + tablePrefix.get(Attribute.class) + ".keyid = '" + key.getKey()
 						+ "' then a." + key.getColumn() + " else null end as "
 						+ key.getKey() + " ");
 			}
+			inlist.append("'" + key.getKey() + "',");
 		}
 		sql.append("FROM ");
-		sql.append(tableNames.get(WaypointObservationAttribute.class));
-		sql.append(" as a join ");
-		sql.append(tableNames.get(Attribute.class));
-		sql.append(" c on a.attribute_uuid = c.uuid");
+		sql.append(tableNames.get(PatrolLegDay.class) + " as " + tablePrefix.get(PatrolLegDay.class));
+		sql.append(" join ");
+		sql.append(tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class));
+		sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = " + tablePrefix.get(Waypoint.class) + ".leg_day_uuid ");
+		
+		sql.append(" join ");
+		sql.append(tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
+		sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = " + tablePrefix.get(WaypointObservation.class) + ".wp_uuid ");
+		
+		sql.append(" join ");
+		sql.append(tableNames.get(WaypointObservationAttribute.class) + " as " + tablePrefix.get(WaypointObservationAttribute.class));
+		sql.append(" on " + tablePrefix.get(WaypointObservation.class) + ".uuid = " + tablePrefix.get(WaypointObservationAttribute.class) + ".observation_uuid ");
+		sql.append(" join ");
+		sql.append(tableNames.get(Attribute.class) + " as " + tablePrefix.get(Attribute.class));
+		sql.append(" on " + tablePrefix.get(Attribute.class) + ".uuid = " + tablePrefix.get(WaypointObservationAttribute.class) + ".attribute_uuid ");
+	
 		if (list) {
 			sql.append(" LEFT JOIN ");
 			sql.append(tableNames.get(AttributeListItem.class));
-			sql.append(" l on l.uuid = a.list_element_uuid ");
+			sql.append(" l on l.uuid = " + tablePrefix.get(WaypointObservationAttribute.class) + ".list_element_uuid ");
 		}
 		if (tree){
 			sql.append(" LEFT JOIN ");
 			sql.append(tableNames.get(AttributeTreeNode.class));
-			sql.append(" t on t.uuid = a.tree_node_uuid ");
+			sql.append(" t on t.uuid = " + tablePrefix.get(WaypointObservationAttribute.class) + ".tree_node_uuid ");
 		}
+		sql.append("WHERE (");
+		sql.append(dateFilter.asSql(tablePrefix));
+		sql.append(") AND (");
+		sql.append(caFilter.asSql(tablePrefix.get(Attribute.class)));
+		sql.append(") AND (");
+		sql.append(" " + tablePrefix.get(Attribute.class) + ".keyid in (");
+		sql.append(inlist.substring(0, inlist.length() - 1));
+		sql.append("))");
 		sql.append(") foo GROUP BY observation_uuid ");
 
 		QueryPlugIn.logSql(sql.toString());
@@ -471,6 +509,36 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			}
 		}
 		
+		// area filters
+		LinkedList<IFilter> kidsToProcess = new LinkedList<IFilter>();
+		kidsToProcess.add(queryFilter);
+		Set<String> processedAreaFilters = new HashSet<String>();
+		while(kidsToProcess.size() > 0){
+			IFilter kid = kidsToProcess.poll();
+			if (kid instanceof AreaFilter){
+				AreaFilter ff = (AreaFilter)kid;
+				String tableName = ff.getType().name() + "_" + ff.getKey();
+				if (!processedAreaFilters.contains(tableName)) {
+					processedAreaFilters.add(tableName);
+					// TODO: escape special characters from the key
+					sql.append(", (select geom from "
+							+ tableNames.get(Area.class)
+							+ " where keyid = '"
+							+ ff.getKey()
+							+ "' and area_type = '"
+							+ ff.getType().name()
+							+ "' and ca_uuid = x'"
+							+ SmartUtils.encodeHex(SmartDB
+									.getCurrentConservationArea().getUuid())
+							+ "') as " + tableName);
+				}
+			}
+			if (kid.getChildren() != null){
+				kidsToProcess.addAll(kid.getChildren());
+			}
+		}
+		
+		
 		// ---- WHERE CLAUSE -----
 		sql.append(" WHERE ");
 		boolean and = false;
@@ -493,7 +561,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		}
 		if (queryFilter != IFilter.EMPTY_FILTER) {
 			String filter = queryFilter.asSql(tablePrefix);
-			if (filter.length() > 0) {
+			if (filter != null && filter.length() > 0) {
 				if (and) {
 					sql.append(" AND ");
 				}

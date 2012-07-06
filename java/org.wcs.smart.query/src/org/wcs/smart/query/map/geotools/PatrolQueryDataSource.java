@@ -144,7 +144,7 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 			sb.append(":");
 			sb.append(columns.get(i).getType().geotoolsType);
 		}
-		sb.append(",geom:LineString:srid=4326");
+		sb.append(",geom:MultiLineString:srid=4326");
 		
 		return sb.toString();
 		

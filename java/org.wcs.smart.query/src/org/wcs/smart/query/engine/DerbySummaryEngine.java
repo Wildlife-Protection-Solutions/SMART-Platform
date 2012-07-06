@@ -141,7 +141,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 						qFilter = IFilter.EMPTY_FILTER;
 					}
 					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getQueryDefinition().getQueryFilter());
+						createObservationTable(c, query.getQueryDefinition().getQueryFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter());
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()){
@@ -420,13 +420,16 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		
 		StringBuilder fromSql = new StringBuilder();
 		
-		fromSql.append(queryTempTable + " a ");
+		fromSql.append(queryTempTable + " tmp ");
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
 		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
 		
-		String valueSql = "a.ob_uuid";
+		String valueSql = "tmp.ob_uuid";
+		if (attributeItem.getCategoryKey() != null){
+			valueSql = valueSql + ",tmp.cat_hkey";
+		}
 		StringBuilder valueAggSql = new StringBuilder();
 		valueAggSql.append(attributeItem.getAggregation().getName());
 		valueAggSql.append("(");
@@ -476,10 +479,10 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		sql.append(".keyid = '");
 		sql.append(attributeItem.getAttributeKey() + "'");
 		if (attributeItem.getCategoryKey() != null){
-			sql.append("a.cat_hkey >= '");
+			sql.append("AND ( foo.cat_hkey >= '");
 			sql.append(attributeItem.getCategoryKey());
 			sql.append("' and ");
-			sql.append("a.cat_hkey < '");
+			sql.append("foo.cat_hkey < '");
 			sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
 			sql.append("/') ");
 		}

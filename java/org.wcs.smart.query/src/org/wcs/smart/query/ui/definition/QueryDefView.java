@@ -38,24 +38,15 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection;
-import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
@@ -235,129 +226,17 @@ public class QueryDefView extends ViewPart {
 				if (sourceName == SourceProvider.SELECTED_FILTERS) {
 					QueryFilterSelection selection = (QueryFilterSelection) sourceValue;
 					boolean fireEvent = false;
-					for (Iterator iterator = selection.iterator(); iterator
-							.hasNext();) {
-						Object type = (Object) iterator.next();
-						if (type instanceof Category) {
-							DropItem it = getDropItemFactory()
-									.createCategoryDropItem((Category) type);
-							currentPanel.addItem(it);
-							fireEvent = true;
-						} else if (type instanceof CategoryAttribute) {
-							DropItem it = getDropItemFactory()
-									.createAttributeDropItem(
-											(CategoryAttribute) type);
-							if (it != null) {
-								currentPanel.addItem(it);
-								fireEvent = true;
-							}
-						} else if (type instanceof Attribute) {
-							DropItem it = getDropItemFactory()
-									.createAttributeDropItem((Attribute) type);
-							if (it != null) {
-								currentPanel.addItem(it);
-								fireEvent = true;
-							}
-						} else if (type instanceof QueryFilterContentProvider.OtherItems) {
-							DropItem[] its = getDropItemFactory()
-									.createOtherDropItem(
-											(QueryFilterContentProvider.OtherItems) type);
-							if (its != null) {
-								for (int i = 0; i < its.length; i++) {
-									currentPanel.addItem(its[i]);
-									fireEvent = true;
-								}
-							}
-						} else if (type instanceof PatrolValueOption) {
-							DropItem it = getDropItemFactory()
-									.createPatrolValueDropItem(
-											(PatrolValueOption) type);
-							if (it != null) {
-								currentPanel.addItem(it);
-								fireEvent = true;
-							}
-						} else if (type instanceof PatrolQueryOption) {
-							DropItem it = null;
-							if (selection.getType() == QueryFilterSelection.FilterType.FILTER) {
-								it = getDropItemFactory()
-										.createPatrolFilterDropItem(
-												(PatrolQueryOption) type);
-							} else if (selection.getType() == QueryFilterSelection.FilterType.SUMMARY) {
-								it = getDropItemFactory()
-										.createPatrolGroupByDropItem(
-												(PatrolQueryOption) type);
-							}
-							if (it != null) {
-								currentPanel.addItem(it);
-								fireEvent = true;
-							}
-						} else if (type instanceof DateGroupByOption) {
-							DropItem it = getDropItemFactory()
-									.createDateGroupByDropItem(
-											(DateGroupByOption) type);
-							if (it != null) {
-								currentPanel.addItem(it);
-								fireEvent = true;
-							}
-						} else if (type instanceof SummaryDmObject) {
-							SummaryDmObject object = (SummaryDmObject) type;
-							DropItem it = null;
-							if (object.isValue()) {
-								if (object.getObject() instanceof Attribute) {
-									it = getDropItemFactory()
-											.createAttributeValueDropItem(
-													(Attribute) object
-															.getObject());
-								} else if (object.getObject() instanceof CategoryAttribute) {
-									it = getDropItemFactory()
-											.createAttributeValueDropItem(
-													(CategoryAttribute) object
-															.getObject());
-								} else if (object.getObject() instanceof Category) {
-									it = getDropItemFactory()
-											.createCategoryValueDropItem(
-													(Category) object
-															.getObject());
-								}
-							} else {
-								// category
-								if (object.getObject() instanceof Category) {
-									it = getDropItemFactory()
-											.createCategoryGroupByDropItem(
-													(Category) object
-															.getObject());
-								} else if (object.getObject() instanceof Attribute) {
-									it = getDropItemFactory()
-											.createAttributeGroupByDropItem(
-													(Attribute) object
-															.getObject());
-								} else if (object.getObject() instanceof CategoryAttribute) {
-									it = getDropItemFactory()
-											.createAttributeGroupByDropItem(
-													(CategoryAttribute) object
-															.getObject());
-								} else if (object.getObject() instanceof AttributeTreeNode) {
-									if (object.getObject2() != null) {
-										it = getDropItemFactory()
-												.createAttributeTreeNodeGroupByDropItem(
-														(AttributeTreeNode) object
-																.getObject(),
-														(Category) object
-																.getObject2());
-									} else {
-										it = getDropItemFactory()
-												.createAttributeTreeNodeGroupByDropItem(
-														(AttributeTreeNode) object
-																.getObject());
-									}
-								}
-							}
-							if (it != null) {
-								currentPanel.addItem(it);
+					
+					for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+						Object object = (Object) iterator.next();
+						DropItem[] items = getDropItemFactory().createDropItem(object, selection.getType());
+						if (items == null ) continue;
+						for (int i = 0; i < items.length; i ++){
+							if (items[i] != null){
+								currentPanel.addItem(items[i]);
 								fireEvent = true;
 							}
 						}
-
 					}
 					if (fireEvent) {
 						fireQueryModifiedListeners();
@@ -373,6 +252,10 @@ public class QueryDefView extends ViewPart {
 			}
 		});
 	}
+
+	
+	
+	
 	/**
 	 * @return the drop item factory for dropping items into the query
 	 */

@@ -24,6 +24,8 @@ package org.wcs.smart.query.ui.queyfilter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.Area;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
@@ -57,7 +59,8 @@ public class QueryFilterLabelProvider extends LabelProvider {
 			//TODO: insert patrol image here
 		}else if (element instanceof QueryFilterContentProvider.RootNode){
 			return ((QueryFilterContentProvider.RootNode)element).getImage();
-		//}else if (element instanceof AREAFILTER)
+		}else if (element instanceof Area.AreaType || element instanceof Area){
+			return JFaceResources.getImageRegistry().get(QueryPlugIn.AREA_POLYGON_FILTER_ICON);
 		}else if (element instanceof QueryFilterContentProvider.DataModelItem){
 			if (element == DataModelItem.CATEGORIES){
 				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.CATEGORY_ICON);
@@ -83,6 +86,12 @@ public class QueryFilterLabelProvider extends LabelProvider {
 			return ((QueryFilterContentProvider.RootNode)element).getName();
 //			return getStyledText(element).getString();
 		//}else if (area FILTER);
+		}else if (element instanceof String){
+			return (String) element;
+		}else if (element instanceof Area.AreaType){
+			return ((Area.AreaType) element).getGuiName();
+		}else if (element instanceof Area){
+			return ((Area) element).getId();
 		}else if (element instanceof QueryFilterContentProvider.OtherItems){
 			return ((QueryFilterContentProvider.OtherItems) element).guiName;
 		}else if (element instanceof QueryFilterContentProvider.DataModelItem){

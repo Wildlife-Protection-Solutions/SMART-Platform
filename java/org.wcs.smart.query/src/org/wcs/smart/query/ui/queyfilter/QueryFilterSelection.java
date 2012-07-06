@@ -87,7 +87,7 @@ public class QueryFilterSelection implements IStructuredSelection{
 	 * @see org.eclipse.jface.viewers.IStructuredSelection#iterator()
 	 */
 	@Override
-	public Iterator iterator() {
+	public Iterator<?> iterator() {
 		return selection.iterator();
 	}
 
@@ -111,7 +111,7 @@ public class QueryFilterSelection implements IStructuredSelection{
 	 * @see org.eclipse.jface.viewers.IStructuredSelection#toList()
 	 */
 	@Override
-	public List toList() {
+	public List<?> toList() {
 		return selection.toList();
 	}
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -72,7 +73,7 @@ public class QueryResultItem {
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
 	private byte[] observationUuid;
-	private byte[] track;
+	private List<byte[]> tracks = null;
 	
 	
 	/**
@@ -446,10 +447,16 @@ public class QueryResultItem {
 		return this.plEndDate;
 	}
 
-	public byte[] getTrack(){
-		return this.track;
+	public List<byte[]> getTrack(){
+		return this.tracks;
 	}
-	public void setTrack(byte[] track){
-		this.track = track;
+	public void addTrack(byte[] track){
+		if (track == null || track.length == 0){
+			return;
+		}
+		if (this.tracks == null){
+			this.tracks = new ArrayList<byte[]>();
+		}
+		this.tracks.add(track);
 	}
 }

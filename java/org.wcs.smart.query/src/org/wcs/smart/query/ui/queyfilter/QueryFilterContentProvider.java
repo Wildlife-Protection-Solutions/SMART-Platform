@@ -24,14 +24,27 @@ package org.wcs.smart.query.ui.queyfilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
@@ -50,11 +63,15 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	private DataModelContentProvider provider;
 	
 	//root nodes
-	private Object[] roots = new Object[]{new RootNode(RootNodeType.PATROL_FILTERS), 
-			new RootNode(RootNodeType.DATA_MODEL_FILTERS), 
-			new RootNode(RootNodeType.OTHER_ITEMS)};
+	private RootNode patrolFiltersRoot = new RootNode(RootNodeType.PATROL_FILTERS);
+	private RootNode dataModelFiltersRoot =new RootNode(RootNodeType.DATA_MODEL_FILTERS);
+	private RootNode areaFilterRoot = new RootNode(RootNodeType.AREA_FILTERS);
+	private RootNode otherItemRoot = new RootNode(RootNodeType.OTHER_ITEMS);
+	private Object[] roots = new Object[]{patrolFiltersRoot, dataModelFiltersRoot, areaFilterRoot, otherItemRoot};
 	
 	private PatrolQueryOption[] patrolOptions = null;
+	
+	private HashMap<Area.AreaType, Area[]> areas = new HashMap<Area.AreaType, Area[]>();
 	
 	/**
 	 * Data model children items
@@ -97,12 +114,13 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 		}
 	}
 	
+	private TreeViewer viewer;
 	/**
 	 * Creates a new content provider 
 	 */
-	public QueryFilterContentProvider(){
+	public QueryFilterContentProvider(TreeViewer viewer){
 		provider = new DataModelContentProvider(false, true, true);
-		
+		this.viewer = viewer;
 	}
 
 	/**
@@ -136,7 +154,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
 			patrolOptions = (PatrolQueryOption[]) in.get(RootNodeType.PATROL_FILTERS);		
-			provider.inputChanged(viewer, oldInput, this.dataModel);	
+			provider.inputChanged(viewer, oldInput, this.dataModel);
+			areas.clear();
 		}
 	}
 
@@ -160,7 +179,14 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			return ((RootNode)parentElement).getChildren();
 		}else if (parentElement instanceof PatrolQueryOption){
 			return null;
-		//}else if (parentElement instanceof AREA FITLER){
+		}else if (parentElement instanceof Area.AreaType){
+			final Area.AreaType at = (Area.AreaType) parentElement;
+			if (areas.get(at) != null) {
+				return areas.get(at);
+			} else {
+				loadAreas(at);
+				return new String[] { "Loading..." };
+			}
 		}else if (parentElement instanceof DataModelItem){
 			if (parentElement == DataModelItem.CATEGORIES){
 					return provider.getChildren(provider.getElements(null)[0]);	
@@ -182,6 +208,41 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * Loads the areas for a given area type
+	 * @param at
+	 */
+	private void loadAreas(final Area.AreaType at) {
+		Job j = new Job("Loading " + at.getGuiName() + " items") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session session = HibernateManager.openSession();
+				try {
+					session.beginTransaction();
+					@SuppressWarnings("unchecked")
+					List<Area> items = session
+							.createCriteria(Area.class)
+							.add(Restrictions.eq(
+									"conservationArea",
+									SmartDB.getCurrentConservationArea()))
+							.add(Restrictions.eq("type", at)).list();
+					areas.put(at, items.toArray(new Area[items.size()]));
+					session.getTransaction().commit();
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							viewer.refresh(at);
+						}
+					});
+				} finally {
+					session.close();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
+	}
+
+	/**
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
 	 */
 	@Override
@@ -189,12 +250,13 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 		if (element instanceof RootNode){
 			return null;
 		}else if (element instanceof PatrolQueryOption){
-			return roots[0];
-		//}else if (parentElement instanceof AREA FITLER){
+			return patrolFiltersRoot;
 		}else if (element instanceof OtherItems){
-			return roots[2];
+			return otherItemRoot;
 		}else if (element instanceof DataModelItem){
-			return roots[1];
+			return dataModelFiltersRoot;
+		}else if (element instanceof Area.AreaType){
+			return areaFilterRoot;
 		}else{
 			//assume data model
 			return provider.getParent(element);	
@@ -214,7 +276,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			return true;
 		}else if (element instanceof OtherItems){
 			return false;
-		//}else if (parentElement instanceof AREA FITLER){
+		}else if (element instanceof Area.AreaType){
+			return true;
 		}else{
 			//assume data model
 			return provider.hasChildren(element);
@@ -244,7 +307,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			if (type == RootNodeType.PATROL_FILTERS){
 				return QueryFilterContentProvider.this.patrolOptions;
 			}else if (type == RootNodeType.AREA_FILTERS){
-				return null;
+				return Area.AreaType.values();
 			}else if (type == RootNodeType.DATA_MODEL_FILTERS){				
 				return DataModelItem.values();
 			}else if (type == RootNodeType.OTHER_ITEMS){
@@ -268,6 +331,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 			}else if (type == RootNodeType.DATA_MODEL_FILTERS){
 				 return JFaceResources.getImageRegistry().get(DataModelLabelProvider.DATA_MODEL_ICON);
+			}else if (type == RootNodeType.AREA_FILTERS){
+				return JFaceResources.getImageRegistry().get(QueryPlugIn.AREA_FILTER_ICON);
 			}
 			return null;
 		}

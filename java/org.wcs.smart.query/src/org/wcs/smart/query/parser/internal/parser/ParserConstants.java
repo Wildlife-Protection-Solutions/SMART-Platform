@@ -135,33 +135,35 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int PATROLLEG_MEMBER_KEY = 66;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 67;
+  int AREA_KEY = 67;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 68;
+  int PATROL_VALUE_ITEM = 68;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 69;
+  int PATROL_VALUE_KEY = 69;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 70;
+  int SUM_CAT_VALUE_KEY = 70;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 71;
+  int SUM_ATTRIBUTE_VALUE_KEY = 71;
   /** RegularExpression Id. */
-  int AGG = 72;
+  int SUM_CAT_ATT_VALUE_KEY = 72;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 73;
+  int AGG = 73;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 74;
+  int DATE_GROUPBY_ITEM = 74;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 75;
+  int QUERY_SPLITTER = 75;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 76;
+  int PATROL_UUID_GROUPBY_OPTION = 76;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 77;
+  int PATROL_STRING_GROUPBY_OPTION = 77;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 78;
+  int CATEGORY_GROUPBY_ITEM = 78;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 79;
+  int ATTRIBUTE_GROUPBY_ITEM = 79;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 80;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 80;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 81;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -235,6 +237,7 @@ public interface ParserConstants {
     "\"patrol:leader\"",
     "\"patrol:pilot\"",
     "\"patrol:member\"",
+    "<AREA_KEY>",
     "<PATROL_VALUE_ITEM>",
     "<PATROL_VALUE_KEY>",
     "<SUM_CAT_VALUE_KEY>",

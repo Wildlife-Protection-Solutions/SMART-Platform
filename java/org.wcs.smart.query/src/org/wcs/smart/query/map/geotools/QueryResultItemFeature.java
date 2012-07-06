@@ -109,12 +109,17 @@ public class QueryResultItemFeature {
 			data[i + 1] = x;
 		}
 
-		if (it.getTrack() == null) {
+		if (it.getTrack() == null || it.getTrack().size() == 0) {
 			data[data.length - 1] = gf.createLineString((Coordinate[]) null);
 		} else {
 			try {
 				WKBReader reader = new WKBReader();
-				data[data.length - 1] = (LineString)reader.read(it.getTrack());
+				List<byte[]> tracks = it.getTrack();
+				LineString[] lss = new LineString[tracks.size()];
+				for (int i = 0; i < lss.length; i ++){
+					lss[i] = (LineString)reader.read(tracks.get(i));
+				}
+				data[data.length - 1] = gf.createMultiLineString(lss);
 			} catch (ParseException e) {
 				data[data.length - 1] = gf.createLineString((Coordinate[]) null);
 				QueryPlugIn.log("Error parsing geometry for patrol " + it.getPatrolId(), e);
