@@ -23,6 +23,8 @@ package org.wcs.smart.patrol.xml.in;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -92,15 +94,28 @@ public class ImportPatrolHandler extends AbstractHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					File[] files = directory.listFiles();
+					
+					Arrays.sort(files, new Comparator<File>() {
+
+						@Override
+						public int compare(File o1, File o2) {
+							if (o1.getName().length() < o2.getName().length()){
+								return -1;
+							}else if (o1.getName().length() > o2.getName().length()){
+								return 1;
+							}
+							return o1.getName().compareTo(o2.getName());
+						}
+					});
+					
+					
 					monitor.beginTask("Loading Patrols", files.length);
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
 					for (int i = 0; i < files.length; i ++){
 						monitor.subTask("Processing " + files[i].toString());
 						monitor.worked(1);
-						
 						if (files[i].isDirectory()) continue;
-						
 						try{
 							Patrol p = PatrolImporter.importPatrol(files[i], nullPm);
 							if (p != null) {
@@ -109,9 +124,6 @@ public class ImportPatrolHandler extends AbstractHandler {
 						}catch (Exception ex){
 							SmartPatrolPlugIn.displayLog("File " + files[i].toString() + " not imported: " + ex.getMessage(), ex);
 						}
-						
-						//while(display.readAndDispatch()){}
-						
 						if (monitor.isCanceled()){
 							display.syncExec(new Runnable() {
 								@Override
