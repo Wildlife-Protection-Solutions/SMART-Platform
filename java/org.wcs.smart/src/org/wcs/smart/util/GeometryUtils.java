@@ -48,18 +48,16 @@ public class GeometryUtils {
 	}
 	
 	public static boolean pointInPolygon(Double x, Double y, Blob wkb){
-//		try {
-//			return pointInPolygon(x,y,wkb.getBytes(1, (int)wkb.length()));
-//		} catch (SQLException e) {
-//			throw new RuntimeException( e );
-//		}
-		return true;
+		try {
+			return pointInPolygon(x,y,wkb.getBytes(1, (int)wkb.length()));
+		} catch (SQLException e) {
+			throw new RuntimeException( e );
+		}
 	}
 	public static boolean pointInPolygon(Double x, Double y, byte[] wkb){
-//		if (wkb == null || x == null || y == null) return false;
-//		Geometry geom = gFromWKB(wkb);
-//		return geom.intersects(geomFactory.createPoint(new Coordinate(x,y)));
-		return true;
+		if (wkb == null || x == null || y == null) return false;
+		Geometry geom = gFromWKB(wkb);
+		return geom.intersects(geomFactory.createPoint(new Coordinate(x,y)));
 	}
 	
 	public static Geometry gFromWKB( byte[] wkb ) {

@@ -29,6 +29,11 @@ import org.hibernate.Session;
  * plugins to advise if certain actions
  * can occur to the datamodel. 
  * 
+ * <p>
+ * Plugins that make use of data model items should
+ * implements their own data model advisor and register it
+ * with the DataModelManager.
+ * </p>
  * 
  * @author egouge
  * @since 1.0.0

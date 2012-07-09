@@ -63,13 +63,13 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 		DataModelProgressMonitorDialog ppd = new DataModelProgressMonitorDialog(Display.getCurrent().getActiveShell(), dialog.getSession());
 		try {
 			ppd.run();
-		} catch (InvocationTargetException e) {
-			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), "Could not load data model", e); 
-		} catch (InterruptedException e) {
-			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), "Could not load data model", e);
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), "Could not load data model", ex);
+			return null;
 		}
+		
 		DataModel dataModel = ppd.dm;
-		if ( dataModel.getCategories().size() == 0 ){
+		if ( dataModel == null || dataModel.getCategories() == null || dataModel.getCategories().size() == 0 ){
 			InitCaDataModelDialog dd = new InitCaDataModelDialog();
 			if (dd.open() == Window.CANCEL){
 				return null;
