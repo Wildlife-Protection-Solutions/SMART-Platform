@@ -266,10 +266,11 @@ public class QueryHibernateManager {
 	 * @param attributeKey attribute key
 	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
 	 */
-	public static AttributeListItem getAttributeListItem(Session session, String attributeKey){
-		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key");
+	public static AttributeListItem getAttributeListItem(Session session, String attributeKey, String attributeListItem){
+		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey");
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", attributeKey);
+		q.setParameter("key", attributeListItem);
+		q.setParameter("attributeKey", attributeKey);
 		@SuppressWarnings("unchecked")
 		List<AttributeListItem> results = q.list();
 		if (results.size() != 1 ){
@@ -287,10 +288,11 @@ public class QueryHibernateManager {
 	 * @param attributeHKey attribute tree node hkey
 	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
 	 */
-	public static AttributeTreeNode getAttributeTreeNode(Session session, String attributeHKey){
-		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key");
+	public static AttributeTreeNode getAttributeTreeNode(Session session, String attributeKey, String attributeTreeHKey){
+		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute");
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", attributeHKey);
+		q.setParameter("key", attributeTreeHKey);
+		q.setParameter("attribute", attributeKey);
 		@SuppressWarnings("unchecked")
 		List<AttributeTreeNode> results = q.list();
 		if (results.size() != 1 ){

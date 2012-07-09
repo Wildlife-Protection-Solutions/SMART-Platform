@@ -43,7 +43,6 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -59,7 +58,6 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
@@ -312,6 +310,14 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class));
 		sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = " + tablePrefix.get(Waypoint.class) + ".leg_day_uuid ");
 		
+		if (dateFilter != null){
+			String dfilter = dateFilter.asSql(tablePrefix);
+			if (dfilter.length() > 0) {
+				sql.append(" and ");
+				sql.append(dfilter);
+			}
+		}
+		
 		sql.append(" join ");
 		sql.append(tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
 		sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = " + tablePrefix.get(WaypointObservation.class) + ".wp_uuid ");
@@ -322,7 +328,14 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(" join ");
 		sql.append(tableNames.get(Attribute.class) + " as " + tablePrefix.get(Attribute.class));
 		sql.append(" on " + tablePrefix.get(Attribute.class) + ".uuid = " + tablePrefix.get(WaypointObservationAttribute.class) + ".attribute_uuid ");
-	
+		if (caFilter != null){
+			String cfilter = caFilter.asSql(tablePrefix.get(Attribute.class));
+			if (cfilter.length() > 0){
+				sql.append(" and ");
+				sql.append(cfilter);
+			}
+		}
+		
 		if (list) {
 			sql.append(" LEFT JOIN ");
 			sql.append(tableNames.get(AttributeListItem.class));
@@ -334,10 +347,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			sql.append(" t on t.uuid = " + tablePrefix.get(WaypointObservationAttribute.class) + ".tree_node_uuid ");
 		}
 		sql.append("WHERE (");
-		sql.append(dateFilter.asSql(tablePrefix));
-		sql.append(") AND (");
-		sql.append(caFilter.asSql(tablePrefix.get(Attribute.class)));
-		sql.append(") AND (");
 		sql.append(" " + tablePrefix.get(Attribute.class) + ".keyid in (");
 		sql.append(inlist.substring(0, inlist.length() - 1));
 		sql.append("))");
@@ -448,12 +457,31 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(" " + tablePrefix.get(PatrolLeg.class));
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = "
 				+ tablePrefix.get(PatrolLeg.class) + ".patrol_uuid ");
+		
+		if (caFilter != null) {
+			String filter = caFilter.asSql(tablePrefix);
+			if (filter.length() > 0) {
+				sql.append(" AND ");
+				sql.append("(" + filter + ")");
+			}
+		}
+		
+		
 		sql.append(" inner join ");
 		sql.append(tableNames.get(PatrolLegDay.class));
 		sql.append(" ");
 		sql.append(tablePrefix.get(PatrolLegDay.class));
 		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = "
 				+ tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid ");
+		
+		if (dateFilter != null) {
+			String filter = dateFilter.asSql(tablePrefix);
+			if (filter.length() > 0) {
+				sql.append(" and ");
+				sql.append(filter);
+			}
+		}
+		
 		if (onlyObservations){
 			sql.append(" inner join ");
 		}else{
@@ -554,34 +582,11 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		
 		
 		// ---- WHERE CLAUSE -----
-		sql.append(" WHERE ");
-		boolean and = false;
-		if (dateFilter != null) {
-			String filter = dateFilter.asSql(tablePrefix);
-			if (filter.length() > 0) {
-				sql.append(filter);
-				and = true;
-			}
-		}
-		if (caFilter != null) {
-			String filter = caFilter.asSql(tablePrefix);
-			if (filter.length() > 0) {
-				if (and) {
-					sql.append(" AND ");
-				}
-				sql.append("(" + filter + ")");
-				and = true;
-			}
-		}
 		if (queryFilter != IFilter.EMPTY_FILTER) {
 			String filter = queryFilter.asSql(tablePrefix);
 			if (filter != null && filter.length() > 0) {
-				if (and) {
-					sql.append(" AND ");
-				}
-
-				sql.append(" ( " + filter + " ) ");
-				and = true;
+				sql.append(" WHERE ");
+			    sql.append(filter);
 			}
 
 		}

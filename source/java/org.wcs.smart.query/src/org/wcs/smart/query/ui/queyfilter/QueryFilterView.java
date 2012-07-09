@@ -50,6 +50,9 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -96,6 +99,22 @@ public class QueryFilterView extends ViewPart {
 			filterTreeViewer.setInput("Loading");
 			summaryTreeViewer.setInput("Loading");
 			initialize();
+		}
+	};
+	
+	/*
+	 * listener for refreshing areas
+	 */
+	private IAreaModifiedListener areaListener = new IAreaModifiedListener() {
+		@Override
+		public void areasUpdated(AreaType type) {
+			//clear areas from content provider & refresh tree
+			((QueryFilterContentProvider)filterTreeViewer.getContentProvider()).clearAreas();
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					filterTreeViewer.refresh();
+				}});
 		}
 	};
 	
@@ -298,12 +317,14 @@ public class QueryFilterView extends ViewPart {
 		});
 		
 		DataModelManager.getInstance().addChangeListener(dataModelChangeListener);
+		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 	}
 
 	@Override
 	public void dispose(){
 		super.dispose();
 		DataModelManager.getInstance().removeChangeListener(dataModelChangeListener);
+		ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
 	}
 	
 	@Override

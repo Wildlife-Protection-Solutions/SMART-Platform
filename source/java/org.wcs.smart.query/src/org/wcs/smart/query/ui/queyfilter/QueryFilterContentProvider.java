@@ -132,6 +132,13 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * Clears the areas loaded into the content provider
+	 */
+	public void clearAreas(){
+		this.areas.clear();
+	}
+	
+	/**
 	 * 
 	 * @param newInput must be a map that contains the keys
 	 * RootNodeType.DATA_MODEL_FILTERS whose value is the current data model
@@ -155,7 +162,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
 			patrolOptions = (PatrolQueryOption[]) in.get(RootNodeType.PATROL_FILTERS);		
 			provider.inputChanged(viewer, oldInput, this.dataModel);
-			areas.clear();
+			clearAreas();
 		}
 	}
 
