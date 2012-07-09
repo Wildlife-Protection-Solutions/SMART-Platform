@@ -145,7 +145,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append(buildSelectClause());
 		sql.append(" FROM ");
 		sql.append(buildFromClause());
-		sql.append(" ORDER BY p_id ");
+		sql.append(" ORDER BY p_id, pl_uuid ");
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
@@ -335,13 +335,28 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append(" " + tablePrefix.get(PatrolLeg.class));
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = "
 				+ tablePrefix.get(PatrolLeg.class) + ".patrol_uuid ");
+		
+		if (caFilter != null) {
+			String filter = caFilter.asSql(tablePrefix);
+			if (filter.length() > 0) {
+				sql.append(" AND ");
+				sql.append("(" + filter + ")");
+			}
+		}
+		
 		sql.append(" inner join ");
 		sql.append(tableNames.get(PatrolLegDay.class));
 		sql.append(" ");
 		sql.append(tablePrefix.get(PatrolLegDay.class));
 		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = "
 				+ tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid ");
-		
+		if (dateFilter != null) {
+			String filter = dateFilter.asSql(tablePrefix);
+			if (filter.length() > 0) {
+				sql.append(" AND ");
+				sql.append(filter);
+			}
+		}
 		sql.append(" left join ");
 		sql.append(tableNames.get(Track.class));
 		sql.append(" ");
@@ -404,36 +419,12 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 			}
 		}
 		// ---- WHERE CLAUSE -----
-		sql.append(" WHERE ");
-		boolean and = false;
-		if (dateFilter != null) {
-			String filter = dateFilter.asSql(tablePrefix);
-			if (filter.length() > 0) {
-				sql.append(filter);
-				and = true;
-			}
-		}
-		if (caFilter != null) {
-			String filter = caFilter.asSql(tablePrefix);
-			if (filter.length() > 0) {
-				if (and) {
-					sql.append(" AND ");
-				}
-				sql.append("(" + filter + ")");
-				and = true;
-			}
-		}
 		if (queryFilter != IFilter.EMPTY_FILTER) {
 			String filter = queryFilter.asSql(tablePrefix);
 			if (filter.length() > 0) {
-				if (and) {
-					sql.append(" AND ");
-				}
-
-				sql.append(" ( " + filter + " ) ");
-				and = true;
+				sql.append(" WHERE ");
+				sql.append(filter);
 			}
-
 		}
 
 		QueryPlugIn.logSql(sql.toString());

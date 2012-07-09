@@ -269,6 +269,7 @@ public class AttributeFilter implements IFilter {
 	 * Initializes the drop item with the 
 	 * values from this filter
 	 * 
+	 * 
 	 * @param it the drop item to initialize
 	 * @param session database session
 	 */
@@ -277,11 +278,11 @@ public class AttributeFilter implements IFilter {
 			it.initializeData(new String[]{op.getGuiValue(), String.valueOf(value1)});
 			
 		}else if (attributeType == AttributeType.LIST){
-			AttributeListItem ali = QueryHibernateManager.getAttributeListItem(session, (String)value1);
+			AttributeListItem ali = QueryHibernateManager.getAttributeListItem(session, attributeKey, (String)value1);
 			ListItem li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
 			it.initializeData(li);
 		}else if (attributeType == AttributeType.TREE){
-			AttributeTreeNode ali = QueryHibernateManager.getAttributeTreeNode(session, (String)value1);
+			AttributeTreeNode ali = QueryHibernateManager.getAttributeTreeNode(session, attributeKey, (String)value1);
 			it.initializeData(ali);
 		}
 		
