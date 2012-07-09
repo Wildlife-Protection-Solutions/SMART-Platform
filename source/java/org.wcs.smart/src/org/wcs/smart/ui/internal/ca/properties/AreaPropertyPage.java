@@ -62,6 +62,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResourceInfo;
 import org.wcs.smart.udig.catalog.smart.SmartService;
@@ -245,6 +247,14 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		dialog.open();
 	}
 	
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create Close button only
+		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CLOSE_LABEL, false);
+		getButton(IDialogConstants.CLOSE_ID).setFocus();
+		super.setReturnCode(IDialogConstants.CLOSE_ID);
+	}
 	
 	/*
 	 * clears areas from database
@@ -445,6 +455,8 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					if (monitor.isCanceled()) {
 						return;
 					}
+					
+					ConservationAreaManager.getInstance().fireAreaChanged(areatype);
 					initLayers(true, monitor);
 					monitor.done();
 				}

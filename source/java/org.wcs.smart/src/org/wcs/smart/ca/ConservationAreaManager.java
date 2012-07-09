@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,6 +55,10 @@ public class ConservationAreaManager {
 	 * Map of delete listeners
 	 */
 	private HashMap<Integer, ArrayList<ICaDeleteHandler>> deleteListeners = new HashMap<Integer, ArrayList<ICaDeleteHandler>>();
+	/*
+	 * List of area listeners
+	 */
+	public List<IAreaModifiedListener> areaListeners = new ArrayList<IAreaModifiedListener>();
 	
 	private static ConservationAreaManager instance = null;
 	
@@ -169,5 +174,37 @@ public class ConservationAreaManager {
 			deleteListeners.put(deleteOrder, listeners);
 		}
 		listeners.add(listener);
+	}
+	
+	
+	
+	/**
+	 * Adds an listener that is fired when areas
+	 * are modified.
+	 * 
+	 * @param listener
+	 */
+	public void addAreaChangeListener(IAreaModifiedListener listener){
+		areaListeners.add(listener);
+	}
+	
+	/**
+	 * Removes an area change listener
+	 * 
+	 * @param listener
+	 */
+	public void removeAreaChangeListener(IAreaModifiedListener listener){
+		areaListeners.remove(listener);
+	}
+	
+	/**
+	 * Fires all area changes listeners 
+	 * 
+	 * @param type the type of area modified.
+	 */
+	public void fireAreaChanged(Area.AreaType type){
+		for(IAreaModifiedListener listener : areaListeners){
+			listener.areasUpdated(type);
+		}
 	}
 }

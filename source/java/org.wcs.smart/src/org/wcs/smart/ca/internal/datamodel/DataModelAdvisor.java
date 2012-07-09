@@ -35,7 +35,8 @@ import org.wcs.smart.ca.datamodel.IDataModelAdvisor;
 
 /**
  * A data model advisor the ensure the data model will remain
- * valid after the data.
+ * valid after modifications.
+ *
  * @author egouge
  * @since 1.0.0
  */

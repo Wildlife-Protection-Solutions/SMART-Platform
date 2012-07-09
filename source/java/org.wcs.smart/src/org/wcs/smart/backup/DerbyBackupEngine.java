@@ -31,6 +31,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -67,6 +68,14 @@ public class DerbyBackupEngine {
 		if (outputFile.exists()){
 			if (!outputFile.delete()){
 				throw new IllegalStateException("Output file '" + outputFile.getAbsolutePath() + "' could not be deleted.");
+			}
+		}
+		if (!outputFile.getParentFile().exists()){
+			//try to create backup directory
+			try{
+				SmartUtils.createDirectory(outputFile.getParentFile());
+			}catch (Exception ex){
+				throw new IllegalStateException("Output directory : " + outputFile.getParentFile().toString() + " could not be created. \n\n" + ex.getMessage(), ex);
 			}
 		}
 		
