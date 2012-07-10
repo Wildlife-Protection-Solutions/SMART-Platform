@@ -22,3 +22,12 @@ external name 'org.wcs.smart.util.GeometryUtils.pointInPolygon'
 PARAMETER STYLE JAVA
 NO SQL
 RETURNS NULL ON NULL INPUT;
+
+
+CREATE FUNCTION smart.intersects(wkb1 blob, wkb2 blob) returns boolean
+LANGUAGE JAVA
+deterministic
+external name 'org.wcs.smart.util.GeometryUtils.intersects'
+PARAMETER STYLE JAVA
+NO SQL
+RETURNS NULL ON NULL INPUT;
