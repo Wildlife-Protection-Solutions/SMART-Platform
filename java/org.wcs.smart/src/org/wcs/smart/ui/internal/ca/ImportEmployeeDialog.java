@@ -133,8 +133,8 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		Text txtinfo = new Text(main, SWT.NONE | SWT.READ_ONLY);
 		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		txtinfo.setText("The CSV file must have the following format:\n "
-				+ "ID,GIVEN NAME,FAMILY NAME,BIRTHDATE(yyyy-mm-dd),GENDER(M/F),START EMPLOYMENT(yyyy-mm-dd),END EMPLOYMENT(yyyy-mm-dd),RANK,AGENCY\n\n"
-				+ "The following fields are optional: ID, END EMPLOYEMENT, RANK, AGANCY");
+				+ "ID,GIVEN NAME,FAMILY NAME,BIRTHDATE(yyyy-mm-dd),GENDER(M/F),START EMPLOYMENT(yyyy-mm-dd),END EMPLOYMENT(yyyy-mm-dd),AGENCY,RANK\n\n"
+				+ "The following fields are optional: ID, END EMPLOYEMENT, AGANCY, RANK");
 		
 		getShell().setText("Import Employees");
 		setMessage("Import employee data from csv file.");

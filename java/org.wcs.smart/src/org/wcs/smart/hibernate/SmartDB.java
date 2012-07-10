@@ -24,6 +24,7 @@ package org.wcs.smart.hibernate;
 import java.io.File;
 
 import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -109,7 +110,11 @@ public class SmartDB {
 	public static boolean dbExists(){
 		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY);
 		File db = new File(embeddedDb); 
-		return db.exists();
+		boolean exists = db.exists();
+		if (!exists){
+			SmartPlugIn.log("Smart database does not exist. " + db.getAbsolutePath().toString(), null);
+		}
+		return exists;
 	}
 	
 	/**
