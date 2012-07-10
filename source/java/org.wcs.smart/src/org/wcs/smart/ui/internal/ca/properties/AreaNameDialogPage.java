@@ -43,9 +43,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SmartUtils.RegExLevel;
 
 
 /**
@@ -82,6 +85,9 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		return session;
 	}
 	
+	/**
+	 * Loads all the areas for the given area type
+	 */
 	private void loadAreaTypes(){
 		Session session = getSession();
 		session.beginTransaction();
@@ -89,13 +95,19 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		
 		tableViewer.setInput(areas.toArray());
 		tableViewer.refresh();
-		
 	}
 	
 	
+	/**
+	 * Saves all changes
+	 */
 	private void saveAreaTypes(){
-		getSession().getTransaction().commit();
-		getSession().beginTransaction();
+		try{
+			getSession().getTransaction().commit();
+			getSession().beginTransaction();
+		}catch (Exception ex){
+			SmartPlugIn.log("Could not save changes.\n\n" + ex.getMessage(), ex);
+		}
 	}
 	
 	@Override
@@ -108,8 +120,6 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		
 		tableViewer = new TableViewer(main, SWT.BORDER | SWT.MULTI
 				| SWT.FULL_SELECTION);
-		//tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
 
 		TableViewerColumn colName = new TableViewerColumn(tableViewer,SWT.NONE);
 		TableColumn column = colName.getColumn();
@@ -117,7 +127,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		column.setResizable(true);
 		column.setMoveable(false);
 		TableColumnLayout layout = (TableColumnLayout) tableViewer.getTable().getParent().getLayout();
-		layout.setColumnData(column, new ColumnWeightData(80, ColumnWeightData.MINIMUM_WIDTH, true));
+		layout.setColumnData(column, new ColumnWeightData(60, ColumnWeightData.MINIMUM_WIDTH, true));
 		
 		colName.setLabelProvider(new ColumnLabelProvider(){
 			@Override
@@ -131,8 +141,15 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		colName.setEditingSupport(new EditingSupport(colName.getViewer()) {
 			@Override
 			protected void setValue(Object element, Object value) {
+				setErrorMessage(null);
 				if (!( ((String)value).equals(((Area)element).getId()))){
-					((Area)element).setId((String)value);
+					String newId = (String)value;
+					if (newId.length() > Area.ID_MAX_LENGTH){
+						setErrorMessage("Name has been truncated to " + Area.ID_MAX_LENGTH + " characters.");
+						newId = newId.substring(0, Area.ID_MAX_LENGTH);
+					}
+					
+					((Area)element).setId(newId);
 					tableViewer.refresh();
 					setDirty();
 				}
@@ -161,7 +178,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		column.setText("Key");
 		column.setResizable(true);
 		column.setMoveable(false);
-		layout.setColumnData(column, new ColumnWeightData(20, ColumnWeightData.MINIMUM_WIDTH, true));
+		layout.setColumnData(column, new ColumnWeightData(40, ColumnWeightData.MINIMUM_WIDTH, true));
 		
 		colKey.setLabelProvider(new ColumnLabelProvider(){
 			@Override
@@ -175,8 +192,26 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		colKey.setEditingSupport(new EditingSupport(colKey.getViewer()) {
 			@Override
 			protected void setValue(Object element, Object value) {
+				setErrorMessage(null);
 				if (!( ((String)value).equals(((Area)element).getKeyId()))){
-					((Area)element).setKeyId((String)value);
+					String newKey = ((String)value).toLowerCase();
+					//validate that the key is different from all the others
+					//and does not contain weird characters
+					if (!SmartUtils.isSimpleString(newKey, RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Area.KEY_MAX_LENGTH)){
+						setErrorMessage("Invalid key.  Key mush only contain " + RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc +" and be less than " + Area.KEY_MAX_LENGTH + " characters.");
+						return;
+					}else{
+						Object[] data = (Object[]) tableViewer.getInput();
+						for (int i = 0; i < data.length; i ++){
+							if (((Area)data[i]) == element) continue;
+							if (((Area)data[i]).getKeyId().equals(newKey)){
+								setErrorMessage("Keys cannot be duplicated.");
+								return;
+							}
+						}				
+					}
+					
+					((Area)element).setKeyId(newKey);
 					tableViewer.refresh();
 					setDirty();
 				}
@@ -208,7 +243,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		
 		getShell().setText("Modify Area Labels");
 		setTitle("Modify " + type.getGuiName());
-		setMessage("Update area names here.  Modifying keys is not recommended as it will affect other parts of the system");
+		setMessage("Update area names here.  Modifying keys is not recommended as it will affect other parts of the system.");
 		
 		return composite; 
 	}
