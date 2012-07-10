@@ -28,52 +28,89 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.query.ui.formulaDnd.AreaDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
-import org.wcs.smart.util.SmartUtils;
 
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Area filter for waypoint queries.
+ * 
  * @author egouge
  * @since 1.0.0
  */
 public class AreaFilter implements IFilter {
 
+	/**
+	 * Type of geometry the area filter
+	 * should be applied to. 
+	 */
+	public enum AreaFilterGeometryType{
+		WAYPOINT("wp"), TRACK("t");
+		
+		String key;
+		AreaFilterGeometryType(String key){
+			this.key = key;
+		}
+		public String getKey(){
+			return this.key;
+		}
+	}
+	
+	/**
+	 * Creates a new area filter.
+	 * 
+	 * @param key the filter key in the form area:<geomtype{wp | t}>:<type>:key
+	 * where type is from Area.AreaType
+	 * @return
+	 */
 	public static AreaFilter createFilter(String key){
 		String[] bits = key.split(":");
-		Area.AreaType type = Area.AreaType.valueOf(bits[1]);
-		return new AreaFilter(type, bits[2]);
+		AreaFilterGeometryType geomType = null;
+		if (bits[1].equalsIgnoreCase(AreaFilterGeometryType.WAYPOINT.key)){
+			geomType = AreaFilterGeometryType.WAYPOINT;
+		}else if (bits[1].equalsIgnoreCase(AreaFilterGeometryType.TRACK.key)){
+			geomType = AreaFilterGeometryType.TRACK;
+		}
+		Area.AreaType type = Area.AreaType.valueOf(bits[2]);
+		return new AreaFilter(type, bits[3], geomType);
 	}
 	
 	
 	private Area.AreaType type;
 	private String key;
+	private AreaFilterGeometryType geomType;
 	
-	
-	public AreaFilter(Area.AreaType type, String key){
+	/**
+	 * Creates a new area filter
+	 * @param type the area type
+	 * @param key the key id
+	 */
+	public AreaFilter(Area.AreaType type, String key, AreaFilterGeometryType geomType){
 		this.type = type;
 		this.key = key;
+		this.geomType = geomType;
 	}
 	/**
 	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
-		return "area:" + type + ":" + key;
+		return "area:" +geomType.key + ":" + type + ":" + key;
 	}
 
+	/**
+	 * @return the area filter key
+	 */
 	public String getKey(){
 		return this.key;
 	}
+	
+	/**
+	 * @return the area filter type
+	 */
 	public Area.AreaType getType(){
 		return this.type;
 	}
@@ -84,23 +121,18 @@ public class AreaFilter implements IFilter {
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
 		StringBuilder sb = new StringBuilder();
-		
-		sb.append("smart.pointinpolygon(" );
-		sb.append(tableMapping.get(Waypoint.class) + ".x, ");
-		sb.append(tableMapping.get(Waypoint.class) + ".y, ");
-		sb.append(  type.name() + "_" + key + ".geom");
-//		sb.append(tableMapping.get(Area.class) + ".geom");
-		sb.append(")");
-//		sb.append(" AND ");
-//		sb.append(tableMapping.get(Area.class) + ".keyid = '");
-//		sb.append(key);
-//		sb.append("' AND ");
-//		sb.append(tableMapping.get(Area.class) + ".area_type = '");
-//		sb.append(type.name());
-//		sb.append("' AND ");
-//		sb.append(tableMapping.get(Area.class) + ".ca_uuid = x'");
-//		sb.append(SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()));
-//		sb.append("')");
+		if (geomType == AreaFilterGeometryType.WAYPOINT){
+			sb.append("smart.pointinpolygon(" );
+			sb.append(tableMapping.get(Waypoint.class) + ".x, ");
+			sb.append(tableMapping.get(Waypoint.class) + ".y, ");
+			sb.append(  type.name() + "_" + key + ".geom");
+			sb.append(")");
+		}else if (geomType == AreaFilterGeometryType.TRACK){
+			sb.append("smart.intersects(");
+			sb.append(tableMapping.get(Track.class) + ".geometry, ");
+			sb.append(type.name() + "_" + key + ".geom");
+			sb.append(")");
+		}
 		return sb.toString();
 	}
 
@@ -135,6 +167,9 @@ public class AreaFilter implements IFilter {
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
 	}
 
+	/*
+	 * Loads the area for the given type/key.
+	 */
 	private Area loadArea(Session session){
 		@SuppressWarnings("unchecked")
 		List<Area> areas = session.createCriteria(Area.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("type", this.type)).add(Restrictions.eq("keyId", this.key)).list();
@@ -150,7 +185,7 @@ public class AreaFilter implements IFilter {
 	 */
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {		
-		return new DropItem[]{ new AreaDropItem(loadArea(session))};
+		return new DropItem[]{ new AreaDropItem(loadArea(session), geomType)};
 	}
 
 	/**

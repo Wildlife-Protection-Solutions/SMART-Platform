@@ -264,7 +264,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		// -- build temporary table
 		StringBuilder inlist = new StringBuilder();
 		StringBuilder sql = new StringBuilder();
-//		sql.append("CREATE TABLE " + QUERY_TEMP_SCHEMA + "." + observationTempTable + " (observation_uuid char(16) for bit data");
 		sql.append("CREATE TABLE " + observationTempTable + " (observation_uuid char(16) for bit data");
 		for (AttributeInfo key : keys) {
 			sql.append(", " + key.getKey() + " "
@@ -277,7 +276,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		// -- populate table
 		sql = new StringBuilder();
-//		sql.append("INSERT INTO " + QUERY_TEMP_SCHEMA + "." + observationTempTable + " SELECT observation_uuid ");
 		sql.append("INSERT INTO " + observationTempTable + " SELECT observation_uuid ");
 		for (AttributeInfo key : keys) {
 			sql.append(", max(" + key.getKey() + ") as " + key.getKey() + " ");
@@ -422,7 +420,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			throws SQLException {
 
 		StringBuilder sql = new StringBuilder();
-//		sql.append("INSERT INTO " + QUERY_TEMP_SCHEMA + "." + queryTempTable );
 		sql.append("INSERT INTO " + queryTempTable );
 		// ---- SELECT CLAUSE -----
 		sql.append(" SELECT ");
@@ -430,7 +427,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(tablePrefix.get(Patrol.class) + ".id, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".station_uuid, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".team_uuid, ");
-//		sql.append(tablePrefix.get(Patrol.class) + ".objective_rating, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".objective, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".mandate_uuid, ");
 		sql.append(tablePrefix.get(Patrol.class) + ".patrol_type, ");
@@ -528,7 +524,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 				if (queryFilter.hasAttributeFilter()) {
 					sql.append(" left join ");
-//					sql.append(QUERY_TEMP_SCHEMA + "." + observationTempTable + " qa on qa.observation_uuid = ");
 					sql.append(observationTempTable + " qa on qa.observation_uuid = ");
 					sql.append(tablePrefix.get(WaypointObservation.class)
 							+ ".uuid");
@@ -541,12 +536,9 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		LinkedList<IFilter> kidsToProcess = new LinkedList<IFilter>();
 		kidsToProcess.add(queryFilter);
 		Set<String> processedAreaFilters = new HashSet<String>();
-		boolean hasGeomFilter = false;
 		while(kidsToProcess.size() > 0){
 			IFilter kid = kidsToProcess.poll();
 			if (kid instanceof AreaFilter){
-//				hasGeomFilter = true;
-//				break;
 				AreaFilter ff = (AreaFilter)kid;
 				String tableName = ff.getType().name() + "_" + ff.getKey();
 				if (!processedAreaFilters.contains(tableName)) {
@@ -559,27 +551,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 					sql.append(" on ");
 					sql.append( tableName +".ca_uuid = " + tablePrefix.get(Patrol.class) + ".ca_uuid and ");
 					sql.append( tableName +".area_type = '" + ff.getType().name() + "' and ");
-					sql.append(tableName + ".keyid = '" + ff.getKey() + "' ");
-//					sql.append(", (select geom from "
-//							+ tableNames.get(Area.class)
-//							+ " where keyid = '"
-//							+ ff.getKey()
-//							+ "' and area_type = '"
-//							+ ff.getType().name()
-//							+ "' and ca_uuid = x'"
-//							+ SmartUtils.encodeHex(SmartDB
-//									.getCurrentConservationArea().getUuid())
-//							+ "') as " + tableName);
-				}
+					sql.append(tableName + ".keyid = '" + ff.getKey() + "' ");				}
 			}
 			if (kid.getChildren() != null){
 				kidsToProcess.addAll(kid.getChildren());
 			}
 		}
-//		if (hasGeomFilter){
-//			sql.append(", " + tableNames.get(Area.class) + " " + tablePrefix.get(Area.class));
-//		}
-		
+
 		
 		// ---- WHERE CLAUSE -----
 		if (queryFilter != IFilter.EMPTY_FILTER) {

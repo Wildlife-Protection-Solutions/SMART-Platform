@@ -25,24 +25,28 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * An area drop item for area filters.
+ * 
  * @author egouge
  * @since 1.0.0
  */
 public class AreaDropItem extends DropItem {
 
 	private Area area = null;
+	private AreaFilter.AreaFilterGeometryType geomType;
 	
-	public AreaDropItem(Area area){
+	/**
+	 * Creates a new are drop item.
+	 * 
+	 * @param area the represented area
+	 * @param geomType the type of geometry to apply the filter to
+	 */
+	public AreaDropItem(Area area, AreaFilter.AreaFilterGeometryType geomType){
 		this.area = area;
+		this.geomType = geomType;
 	}
 	
 	/**
@@ -58,7 +62,7 @@ public class AreaDropItem extends DropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		return "area:" + area.getType().name() + ":" + area.getKeyId();
+		return "area:" + geomType.getKey() + ":" + area.getType().name() + ":" + area.getKeyId();
 	}
 
 	/**
@@ -67,8 +71,6 @@ public class AreaDropItem extends DropItem {
 	 */
 	@Override
 	public void initializeData(Object data) {
-		//TODO: implement me
-
 	}
 
 	/**
@@ -77,7 +79,6 @@ public class AreaDropItem extends DropItem {
 	 */
 	@Override
 	public boolean isValueItem() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

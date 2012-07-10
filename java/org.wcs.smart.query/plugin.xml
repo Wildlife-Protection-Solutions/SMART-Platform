@@ -33,14 +33,14 @@
       <editor
             class="org.wcs.smart.query.ui.observation.QueryResultsEditor"
             default="false"
-            icon="images/icons/view16/querypatrol.gif"
+            icon="images/icons/view16/waypoint_query.png"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
             name="Query Editor">
       </editor>
       <editor
             class="org.wcs.smart.query.ui.summary.SummaryEditor"
             default="false"
-            icon="images/icons/obj16/summary_table.png"
+            icon="images/icons/view16/summary_query.png"
             id="org.wcs.smart.query.ui.SummaryEditor"
             name="Summary Editor">
       </editor>
