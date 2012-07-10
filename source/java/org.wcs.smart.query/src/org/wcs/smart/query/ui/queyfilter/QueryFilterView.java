@@ -339,9 +339,9 @@ public class QueryFilterView extends ViewPart {
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.SELECTED_FILTERS);
 		IStructuredSelection selection =  null;
 		if (filterTreeViewer.getTree().isVisible()){
-			selection = new QueryFilterSelection((IStructuredSelection)filterTreeViewer.getSelection(), QueryFilterSelection.FilterType.FILTER);
+			selection = (IStructuredSelection) filterTreeViewer.getSelection();
 		}else{
-			selection = new QueryFilterSelection((IStructuredSelection)summaryTreeViewer.getSelection(), QueryFilterSelection.FilterType.SUMMARY);
+			selection = (IStructuredSelection) summaryTreeViewer.getSelection();
 		}
 		provider.setFilterSelection(selection);
 	}

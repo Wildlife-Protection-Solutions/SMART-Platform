@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
@@ -46,7 +47,6 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
@@ -224,12 +224,12 @@ public class QueryDefView extends ViewPart {
 				if (currentPanel == null)
 					return;
 				if (sourceName == SourceProvider.SELECTED_FILTERS) {
-					QueryFilterSelection selection = (QueryFilterSelection) sourceValue;
+					IStructuredSelection selection = (IStructuredSelection) sourceValue;
 					boolean fireEvent = false;
 					
 					for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
 						Object object = (Object) iterator.next();
-						DropItem[] items = getDropItemFactory().createDropItem(object, selection.getType());
+						DropItem[] items = getDropItemFactory().createDropItem(object, current.getType());
 						if (items == null ) continue;
 						for (int i = 0; i < items.length; i ++){
 							if (items[i] != null){

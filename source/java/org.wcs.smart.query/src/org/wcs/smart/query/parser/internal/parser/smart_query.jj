@@ -65,7 +65,7 @@ TOKEN :
  | < PATROLLEG_LEADER_KEY : "patrol:leader" >
  | < PATROLLEG_PILOT_KEY : "patrol:pilot" >
  | < PATROLLEG_MEMBER_KEY : "patrol:member" >
- | < AREA_KEY : "area:" ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) ":" < DM_KEY > >}
+ | < AREA_KEY : "area:" ("wp" | "t") ":" ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) ":" < DM_KEY > >}
 /* Summary Query */
 TOKEN :
 {

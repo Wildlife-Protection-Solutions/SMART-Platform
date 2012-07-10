@@ -26,11 +26,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -43,6 +47,7 @@ import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
+import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
@@ -418,6 +423,36 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 				}
 			}
 		}
+		
+		// area filters
+		LinkedList<IFilter> kidsToProcess = new LinkedList<IFilter>();
+		kidsToProcess.add(queryFilter);
+		Set<String> processedAreaFilters = new HashSet<String>();
+		while (kidsToProcess.size() > 0) {
+			IFilter kid = kidsToProcess.poll();
+			if (kid instanceof AreaFilter) {
+				AreaFilter ff = (AreaFilter) kid;
+				String tableName = ff.getType().name() + "_" + ff.getKey();
+				if (!processedAreaFilters.contains(tableName)) {
+					processedAreaFilters.add(tableName);
+					// TODO: escape special characters from the key
+					sql.append(" left join ");
+					sql.append(tableNames.get(Area.class));
+					sql.append(" as ");
+					sql.append(tableName);
+					sql.append(" on ");
+					sql.append(tableName + ".ca_uuid = "
+							+ tablePrefix.get(Patrol.class) + ".ca_uuid and ");
+					sql.append(tableName + ".area_type = '"
+							+ ff.getType().name() + "' and ");
+					sql.append(tableName + ".keyid = '" + ff.getKey() + "' ");
+				}
+			}
+			if (kid.getChildren() != null) {
+				kidsToProcess.addAll(kid.getChildren());
+			}
+		}
+				
 		// ---- WHERE CLAUSE -----
 		if (queryFilter != IFilter.EMPTY_FILTER) {
 			String filter = queryFilter.asSql(tablePrefix);

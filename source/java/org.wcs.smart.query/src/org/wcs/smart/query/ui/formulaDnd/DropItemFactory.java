@@ -27,13 +27,14 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 import org.wcs.smart.query.ui.formulaDnd.BracketDropItem.BracketType;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterSelection.FilterType;
 import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
 
 /**
@@ -322,8 +323,8 @@ public class DropItemFactory {
 	 * @param area
 	 * @return
 	 */
-	public DropItem createAreaDropItem(Area area){
-		return new AreaDropItem(area);
+	public DropItem createAreaDropItem(Area area, AreaFilter.AreaFilterGeometryType geomType){
+		return new AreaDropItem(area, geomType);
 	}
 	
 	
@@ -332,10 +333,12 @@ public class DropItemFactory {
 	 * given object based on the type of the object.
 	 * 
 	 * @param object The object to create drop item for
-	 * @param fType the type of drop item to create (filter, value etc)
+	 * @param queryType the query type (the same drop item
+	 * may create different objects based on the query type)
+	 * 
 	 * @return null or a array of drop items created
 	 */
-	public DropItem[] createDropItem(Object object, FilterType fType){
+	public DropItem[] createDropItem(Object object, Query.QueryType queryType){
 		if (object instanceof Category) {
 			return new DropItem[]{ createCategoryDropItem((Category) object) };
 		} else if (object instanceof CategoryAttribute) {
@@ -351,12 +354,12 @@ public class DropItemFactory {
 							(PatrolValueOption) object)};
 
 		} else if (object instanceof PatrolQueryOption) {
-			if (fType == QueryFilterSelection.FilterType.FILTER) {
-				return new DropItem[]{createPatrolFilterDropItem(
-								(PatrolQueryOption) object)};
-			} else if (fType == QueryFilterSelection.FilterType.SUMMARY) {
+			if (queryType == QueryType.SUMMARY){
 				return new DropItem[]{createPatrolGroupByDropItem(
-								(PatrolQueryOption) object)};
+						(PatrolQueryOption) object)};
+			}else{
+				return new DropItem[]{createPatrolFilterDropItem(
+						(PatrolQueryOption) object)};
 			}
 		} else if (object instanceof DateGroupByOption) {
 			return new DropItem[]{createDateGroupByDropItem(
@@ -366,7 +369,12 @@ public class DropItemFactory {
 			return new DropItem[]{createSummaryDmDropItem((SummaryDmObject)object)};
 			
 		}else if (object instanceof Area){
-			return new DropItem[]{ createAreaDropItem((Area)object) };
+			if (queryType == QueryType.OBSERVATION){
+				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
+			}else if (queryType == QueryType.PATROL){
+				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
+			}
+			return null;
 
 		}
 		return null;

@@ -95,6 +95,9 @@ public class AttributeListDropItem extends DropItem{
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
+					if (listViewer == null || listViewer.getCombo().isDisposed()){
+						return;
+					}
 					listViewer.setInput(items.toArray(new ListItem[items.size()]));
 					if (currentSelection != null){
 						listViewer.setSelection(new StructuredSelection(currentSelection));
@@ -145,6 +148,7 @@ public class AttributeListDropItem extends DropItem{
 	@Override
 	public void dispose(){
 		super.dispose();
+		loadItemsJobs.cancel();
 		if (smallerFont != null){
 			smallerFont.dispose();
 		}
