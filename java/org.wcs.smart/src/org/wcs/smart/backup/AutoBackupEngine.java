@@ -39,6 +39,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Engine responsible for checking if the auto-backup is supposed to run, then doing it.
@@ -54,6 +55,8 @@ public class AutoBackupEngine {
 		p = getAutoBackupProperties();
 		if(p.getProperty("backup_timer") == null) return false; //no file exists
 		
+		deleteOldFiles();
+		
 		if(timerIsExpired()){
 			try {
 				ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
@@ -64,7 +67,11 @@ public class AutoBackupEngine {
 							throws InvocationTargetException, InterruptedException {
 						DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 						Date date = new Date();
-						File f = new File(p.getProperty("backup_location") + "\\" + dateFormat.format(date) + ".zip");
+						File tmp = new File(p.getProperty("backup_location"));
+						if(!tmp.exists()){
+							SmartUtils.createDirectory(tmp);
+						}
+						File f = new File(p.getProperty("backup_location") + "\\" + "SMART-DB_BACKUP_" + dateFormat.format(date) + ".zip");
 						try{
 							if(DerbyBackupEngine.backupSystem(f, monitor)){					
 								//do nothing if success
@@ -93,6 +100,23 @@ public class AutoBackupEngine {
 	}
 	
 	
+	private static void deleteOldFiles() {
+		Date cutoffDate = new Date();
+		cutoffDate.setTime(cutoffDate.getTime() - (Long.valueOf(p.getProperty("delete_timer")) * 86400 * 1000)); //1 day in milliseconds 86k*1000
+
+		File dir = new File(p.getProperty("backup_location"));
+		  for (File child : dir.listFiles()) {
+		    if (".".equals(child.getName()) || "..".equals(child.getName())) {
+		      continue;  // Ignore the self and parent aliases.
+		    }
+		    if(child.lastModified() < cutoffDate.getTime() && child.getName().contains("SMART-DB_BACKUP_")){
+		    	child.delete();
+		    }
+		  }
+
+	}
+
+
 	public static boolean timerIsExpired(){
 		//implement edge cases of  0 = always backup; and  -1 = off
 		int days = Integer.valueOf(p.getProperty("backup_timer"));
@@ -104,8 +128,6 @@ public class AutoBackupEngine {
 	}
 	
 	public static long daysSinceBackup(Properties p){
-	
-		
 		
 		long last = Long.valueOf(p.getProperty("last_backup"));
 		
@@ -152,4 +174,5 @@ public class AutoBackupEngine {
 		
 	}
 
+	
 }
