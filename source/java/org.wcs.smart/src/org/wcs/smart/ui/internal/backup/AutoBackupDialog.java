@@ -56,6 +56,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	private String buttonText;
 	private Properties prop;
 	private Text days;
+	private Text deletedays;
 	private Text txtBackupFile;
 	private File selectedFile;
 
@@ -106,7 +107,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 
 		days = new Text(main, SWT.BORDER);
 		String timer = "-1";
-		if(prop.contains("backup_timer")){
+		if(prop.containsKey("backup_timer")){
 			timer = prop.getProperty("backup_timer");
 		}
 		days.setText(timer);
@@ -120,8 +121,27 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		dayslbl.setText(" days");
 		
 		Label lbl2 = new Label(main, SWT.NONE);
-		lbl2.setText("(Enter -1 to turn off auto-backup. Enter 0 to back-up every time you shut-down)   Location of the backups:");
+		lbl2.setText("(Enter -1 to turn off auto-backup. Enter 0 to back-up every time you shut-down)"); 
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
+		
+		Label dlbl = new Label(main, SWT.NONE);
+		dlbl.setText("Delete all automatic backup files older than ");
+		dlbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+		deletedays = new Text(main, SWT.BORDER);
+		String deletetimer = "30";
+		if(prop.containsKey("delete_timer")){
+			deletetimer = prop.getProperty("delete_timer");
+		}
+		deletedays.setText(deletetimer);
+		deletedays.setTextLimit(3);
+		GridData ddata = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		ddata.horizontalIndent = 0;
+		ddata.widthHint = 18;
+		deletedays.setLayoutData(ddata);
+		
+		Label ddayslbl = new Label(main, SWT.NONE);
+		ddayslbl.setText(" days");
 
 		
 //		Label lblb = new Label(main, SWT.NONE);
@@ -129,8 +149,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 //		lblb.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtBackupFile = new Text(main, SWT.DEFAULT);
-		
-		String loc = new String((new File("")).getAbsolutePath());
+		File temp = new File(System.getProperty("user.dir"));
+		String loc = temp.getParent() + File.separatorChar + "SMART_Backups"; 
 		if(prop.contains("backup_location")){
 			loc = prop.getProperty("backup_location");
 		}
@@ -190,6 +210,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			prop.setProperty("backup_timer", days.getText());
+			prop.setProperty("delete_timer", deletedays.getText());
 			prop.setProperty("backup_location", txtBackupFile.getText());
 			if(!prop.containsKey("last_backup")){
 				prop.setProperty("last_backup", "0");
