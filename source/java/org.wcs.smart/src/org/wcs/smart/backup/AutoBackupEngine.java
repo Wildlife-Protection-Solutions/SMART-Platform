@@ -60,7 +60,7 @@ public class AutoBackupEngine {
 		if(timerIsExpired()){
 			try {
 				ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-				pmdDialog.run(false, true, new IRunnableWithProgress() {
+				pmdDialog.run(true, true, new IRunnableWithProgress() {
 
 					@Override
 					public void run(IProgressMonitor monitor)
@@ -76,9 +76,21 @@ public class AutoBackupEngine {
 							if(DerbyBackupEngine.backupSystem(f, monitor)){					
 								//do nothing if success
 							}else if (monitor.isCanceled()){
-								MessageDialog.openError(shell, "Auto Backup Failed", "Backup process cancelled");
+								shell.getDisplay().syncExec(new Runnable(){
+								    public void run (){    
+								        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process cancelled");
+								}
+
+								});
+
 							}else{
-								MessageDialog.openError(shell, "Auto Backup Failed", "Backup did not complete.");
+								shell.getDisplay().syncExec(new Runnable(){
+								    public void run (){    
+								        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process did not complete");
+								}
+
+								});
+
 							}
 						}catch (Exception ex){
 							SmartPlugIn.displayLog(shell,
