@@ -167,6 +167,12 @@ public class ConservationArea {
 		return filestore;
 	}
 	
+	@Transient
+	public String getRootFileDataStoreLocation(){
+		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
+		return filestore;
+	}
+
 	/**
 	 * Two conservation areas are the same if they
 	 * share the same uuid.

@@ -40,6 +40,7 @@ import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.wcs.smart.backup.AutoBackupEngine;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -64,6 +65,9 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 				if (workbench.getActiveWorkbenchWindow() != null && workbench.getActiveWorkbenchWindow().getActivePage() != null){
 					workbench.getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
 				}
+				
+				AutoBackupEngine.AutoBackup(workbench.getActiveWorkbenchWindow().getShell());
+				
 				return true;
 			}
 			return false;

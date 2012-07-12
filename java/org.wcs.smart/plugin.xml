@@ -65,6 +65,14 @@
                   tooltip="Backup the smart database and files.">
             </command>
             <command
+                  commandId="org.wcs.smart.auto_backup"
+                  icon="images/icons/etool16/backup.png"
+                  label="Configure Automatic Backup..."
+                  mnemonic="Au"
+                  style="push"
+                  tooltip="Configure the automatic backup options.">
+            </command>
+            <command
                   commandId="org.wcs.smart.changeUserPassword"
                   icon="images/icons/etool16/changepass.png"
                   id="org.wcs.menu.file.changeuserpassword"
@@ -306,6 +314,10 @@
             id="org.wcs.smart.exportCa"
             name="Export Conservation Area ...">
       </command>
+      <command
+            id="org.wcs.smart.auto_backup"
+            name="Configure Automatic Backup System">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -360,6 +372,10 @@
       <handler
             class="org.wcs.smart.ui.internal.backup.ExportCaHandler"
             commandId="org.wcs.smart.exportCa">
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.backup.AutoBackupConfigHandler"
+            commandId="org.wcs.smart.auto_backup">
       </handler>
    </extension>
    <extension

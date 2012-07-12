@@ -1,0 +1,155 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package org.wcs.smart.backup;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Properties;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.SmartDB;
+
+/**
+ * Engine responsible for checking if the auto-backup is supposed to run, then doing it.
+ * 
+ * 
+ * @author jeffloun
+ * @since 1.0.0
+ */
+public class AutoBackupEngine {
+	public static Properties p; 
+	
+	public static boolean AutoBackup(final Shell shell){
+		p = getAutoBackupProperties();
+		if(p.getProperty("backup_timer") == null) return false; //no file exists
+		
+		if(timerIsExpired()){
+			try {
+				ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
+				pmdDialog.run(false, true, new IRunnableWithProgress() {
+
+					@Override
+					public void run(IProgressMonitor monitor)
+							throws InvocationTargetException, InterruptedException {
+						DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+						Date date = new Date();
+						File f = new File(p.getProperty("backup_location") + "\\" + dateFormat.format(date) + ".zip");
+						try{
+							if(DerbyBackupEngine.backupSystem(f, monitor)){					
+								//do nothing if success
+							}else if (monitor.isCanceled()){
+								MessageDialog.openError(shell, "Auto Backup Failed", "Backup process cancelled");
+							}else{
+								MessageDialog.openError(shell, "Auto Backup Failed", "Backup did not complete.");
+							}
+						}catch (Exception ex){
+							SmartPlugIn.displayLog(shell,
+									"Backup Failed. " + ex.getMessage(), ex);
+						}
+
+					}
+				});
+			} catch (Exception ex) {
+				SmartPlugIn.displayLog(shell,
+						"Automatic Backup Failed. " + ex.getMessage(), ex);
+				return false;
+			}
+			p.setProperty("last_backup",String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
+			setAutoBackupProperties(p);
+			return true;
+		}
+		return false;
+	}
+	
+	
+	public static boolean timerIsExpired(){
+		//implement edge cases of  0 = always backup; and  -1 = off
+		int days = Integer.valueOf(p.getProperty("backup_timer"));
+		if (days < 0) return false;
+		if (daysSinceBackup(p) >= days || days == 0){
+			return true;
+		}
+		return false;
+	}
+	
+	public static long daysSinceBackup(Properties p){
+	
+		
+		
+		long last = Long.valueOf(p.getProperty("last_backup"));
+		
+		java.util.Date time = new java.util.Date();
+		long now = time.getTime() / 1000;  //use seconds
+		
+		long sec_dif = now - last;
+		return sec_dif / 86400; //convert seconds to days
+	}
+	
+	/**
+	 * Reads the properties file for auto-backup config
+	 * 
+	 * @return a Properties object 
+	 */
+	public static Properties getAutoBackupProperties(){
+			
+		Properties properties = new Properties();
+		try {
+			String location = SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties";
+		    properties.load(new FileInputStream(location));
+		} catch (IOException e) {
+//			System.out.println("Unable to load backup properties file: " + SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties");
+		}
+	
+		return properties;
+	}
+
+	/**
+	 * Reads the properties file for auto-backup config
+	 * 
+	 * @return true if successful false if the save failed 
+	 */
+	public static boolean setAutoBackupProperties(Properties prop){
+			
+		try {
+			String location = SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties";
+			prop.store(new FileOutputStream(location), null);
+			return true;
+		} catch (IOException e) {
+			System.out.println("Unable to save backup properties file: " + SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties");
+			return false;
+		}
+		
+	}
+
+}
