@@ -74,7 +74,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.auto_backup"
-                  icon="images/icons/etool16/backup.png"
+                  icon="images/icons/obj16/cog_go.png"
                   label="Configure Automatic Backup..."
                   mnemonic="Au"
                   style="push"

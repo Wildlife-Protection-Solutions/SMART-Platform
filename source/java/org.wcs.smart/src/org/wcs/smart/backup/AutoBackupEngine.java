@@ -65,60 +65,56 @@ public class AutoBackupEngine {
 		final Properties properties = getAutoBackupProperties();
 		if(properties == null || properties.getProperty("backup_timer") == null) return false; //no file exists
 		
-		deleteOldFiles(properties);
-		
-		if(timerIsExpired(properties)){
-			try {
-				ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-				pmdDialog.run(true, true, new IRunnableWithProgress() {
 
-					@Override
-					public void run(IProgressMonitor monitor)
-							throws InvocationTargetException, InterruptedException {
-						DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-						Date date = new Date();
-						File tmp = new File(properties.getProperty("backup_location"));
-						if(!tmp.exists()){
-							SmartUtils.createDirectory(tmp);
-						}
-						File f = new File(properties.getProperty("backup_location") + "\\" + "SMART-DB_BACKUP_" + dateFormat.format(date) + ".zip");
-						try{
-							if(DerbyBackupEngine.backupSystem(f, monitor)){					
-								//do nothing if success
-							}else if (monitor.isCanceled()){
-								shell.getDisplay().syncExec(new Runnable(){
-								    public void run (){    
-								        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process cancelled");
-								}
+		try {
+			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
+			pmdDialog.run(true, true, new IRunnableWithProgress() {
 
-								});
-
-							}else{
-								shell.getDisplay().syncExec(new Runnable(){
-								    public void run (){    
-								        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process did not complete");
-								}
-
-								});
-
-							}
-						}catch (Exception ex){
-							SmartPlugIn.displayLog(shell,
-									"Backup Failed. " + ex.getMessage(), ex);
-						}
-
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				if(timerIsExpired(properties)){
+					deleteOldFiles(properties);
+						
+					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+					Date date = new Date();
+					File tmp = new File(properties.getProperty("backup_location"));
+					if(!tmp.exists()){
+						SmartUtils.createDirectory(tmp);
 					}
-				});
-			} catch (Exception ex) {
-				SmartPlugIn.displayLog(shell,
-						"Automatic Backup Failed. " + ex.getMessage(), ex);
-				return false;
+					File f = new File(properties.getProperty("backup_location") + "\\" + "SMART-DB_BACKUP_" + dateFormat.format(date) + ".zip");
+					try{
+						if(DerbyBackupEngine.backupSystem(f, monitor)){					
+							//do nothing if success
+						}else if (monitor.isCanceled()){
+							shell.getDisplay().syncExec(new Runnable(){
+							    public void run (){    
+							        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process cancelled");
+							}
+								});
+						}else{
+							shell.getDisplay().syncExec(new Runnable(){
+							    public void run (){    
+							        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process did not complete");
+							}
+								});
+
+						}
+					}catch (Exception ex){
+						SmartPlugIn.displayLog(shell,
+								"Backup Failed. " + ex.getMessage(), ex);
+					}
+				}
 			}
-			properties.setProperty("last_backup",String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
-			setAutoBackupProperties(properties);
-			return true;
+
+		});
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(shell,
+					"Automatic Backup Failed. " + ex.getMessage(), ex);
+			return false;
 		}
-		return false;
+		properties.setProperty("last_backup",String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
+		setAutoBackupProperties(properties);
+		return true;
 	}
 	
 	/**
