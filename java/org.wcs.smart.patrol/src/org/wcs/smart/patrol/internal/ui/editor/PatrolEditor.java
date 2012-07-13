@@ -103,7 +103,11 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		public void eventFired(int attributeChanged, Object source) {
 			if ( ((Patrol)source ).equals(PatrolEditor.this.patrol)  ){
 				//close this editor
-				PatrolEditor.this.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(PatrolEditor.this, false);
+				PatrolEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						PatrolEditor.this.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(PatrolEditor.this, false);					
+					}});
 			}
 		}
 	};
