@@ -38,26 +38,36 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.SmartProperties;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Engine responsible for checking if the auto-backup is supposed to run, then doing it.
+ * Engine responsible for checking if the auto-backup is supposed to run,
+ * then doing it.
  * 
  * 
  * @author jeffloun
  * @since 1.0.0
  */
 public class AutoBackupEngine {
-	public static Properties p; 
+	/**
+	 * backup properties file
+	 */
+	private static final String SMART_BACKUP_PROPERTIES_FILE = "smart_backup.properties";
 	
-	public static boolean AutoBackup(final Shell shell){
-		p = getAutoBackupProperties();
-		if(p.getProperty("backup_timer") == null) return false; //no file exists
+
+	/**
+	 * Performs the auto backup
+	 * @param shell shell for progress monitor
+	 * @return <code>true</code> if backup ok, <code>false</code> if failed
+	 */
+	public static boolean autoBackup(final Shell shell){
+		final Properties properties = getAutoBackupProperties();
+		if(properties == null || properties.getProperty("backup_timer") == null) return false; //no file exists
 		
-		deleteOldFiles();
+		deleteOldFiles(properties);
 		
-		if(timerIsExpired()){
+		if(timerIsExpired(properties)){
 			try {
 				ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
 				pmdDialog.run(true, true, new IRunnableWithProgress() {
@@ -67,11 +77,11 @@ public class AutoBackupEngine {
 							throws InvocationTargetException, InterruptedException {
 						DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 						Date date = new Date();
-						File tmp = new File(p.getProperty("backup_location"));
+						File tmp = new File(properties.getProperty("backup_location"));
 						if(!tmp.exists()){
 							SmartUtils.createDirectory(tmp);
 						}
-						File f = new File(p.getProperty("backup_location") + "\\" + "SMART-DB_BACKUP_" + dateFormat.format(date) + ".zip");
+						File f = new File(properties.getProperty("backup_location") + "\\" + "SMART-DB_BACKUP_" + dateFormat.format(date) + ".zip");
 						try{
 							if(DerbyBackupEngine.backupSystem(f, monitor)){					
 								//do nothing if success
@@ -104,19 +114,23 @@ public class AutoBackupEngine {
 						"Automatic Backup Failed. " + ex.getMessage(), ex);
 				return false;
 			}
-			p.setProperty("last_backup",String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
-			setAutoBackupProperties(p);
+			properties.setProperty("last_backup",String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
+			setAutoBackupProperties(properties);
 			return true;
 		}
 		return false;
 	}
 	
-	
-	private static void deleteOldFiles() {
+	/**
+	 * Removes old backup files that are no longer required.
+	 * 
+	 * @param properties backup properties file
+	 */
+	private static void deleteOldFiles(Properties properties) {
 		Date cutoffDate = new Date();
-		cutoffDate.setTime(cutoffDate.getTime() - (Long.valueOf(p.getProperty("delete_timer")) * 86400 * 1000)); //1 day in milliseconds 86k*1000
+		cutoffDate.setTime(cutoffDate.getTime() - (Long.valueOf(properties.getProperty("delete_timer")) * 86400 * 1000)); //1 day in milliseconds 86k*1000
 
-		File dir = new File(p.getProperty("backup_location"));
+		File dir = new File(properties.getProperty("backup_location"));
 		  for (File child : dir.listFiles()) {
 		    if (".".equals(child.getName()) || "..".equals(child.getName())) {
 		      continue;  // Ignore the self and parent aliases.
@@ -128,24 +142,32 @@ public class AutoBackupEngine {
 
 	}
 
-
-	public static boolean timerIsExpired(){
+	/**
+	 * Determines if the backup needs to run.
+	 * <p>Checkes the backup_timer properties
+	 * against the current time.</p>
+	 * @param properties current backup properties
+	 * @return <code>true</code> if backup should run, <code>false</code> if not
+	 */
+	private static boolean timerIsExpired(Properties properties){
 		//implement edge cases of  0 = always backup; and  -1 = off
-		int days = Integer.valueOf(p.getProperty("backup_timer"));
+		int days = Integer.valueOf(properties.getProperty("backup_timer"));
 		if (days < 0) return false;
-		if (daysSinceBackup(p) >= days || days == 0){
+		if (daysSinceBackup(properties) >= days || days == 0){
 			return true;
 		}
 		return false;
 	}
 	
-	public static long daysSinceBackup(Properties p){
-		
-		long last = Long.valueOf(p.getProperty("last_backup"));
-		
-		java.util.Date time = new java.util.Date();
+	/**
+	 * Compute the number of days since the last backup.
+	 * @param properties current backup properties
+	 * @return the number of days since backup was last run
+	 */
+	private static long daysSinceBackup(Properties properties){
+		long last = Long.valueOf(properties.getProperty("last_backup"));
+		Date time = new Date();
 		long now = time.getTime() / 1000;  //use seconds
-		
 		long sec_dif = now - last;
 		return sec_dif / 86400; //convert seconds to days
 	}
@@ -156,31 +178,29 @@ public class AutoBackupEngine {
 	 * @return a Properties object 
 	 */
 	public static Properties getAutoBackupProperties(){
-			
 		Properties properties = new Properties();
 		try {
-			String location = SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties";
+			String location = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY) + SMART_BACKUP_PROPERTIES_FILE;
 		    properties.load(new FileInputStream(location));
 		} catch (IOException e) {
-//			System.out.println("Unable to load backup properties file: " + SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties");
+			SmartPlugIn.log("Error reading backup properties file. \n\n" + e.getMessage(), e);
 		}
-	
 		return properties;
 	}
 
 	/**
-	 * Reads the properties file for auto-backup config
+	 * Saves the properties file for auto-backup config
 	 * 
 	 * @return true if successful false if the save failed 
 	 */
 	public static boolean setAutoBackupProperties(Properties prop){
 			
 		try {
-			String location = SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties";
+			String location = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY) + SMART_BACKUP_PROPERTIES_FILE;
 			prop.store(new FileOutputStream(location), null);
 			return true;
 		} catch (IOException e) {
-			System.out.println("Unable to save backup properties file: " + SmartDB.getCurrentConservationArea().getRootFileDataStoreLocation() + "smart_backup.properties");
+			SmartPlugIn.displayLog(null, "Error setting backup properties file. \n\n" + e.getMessage(), e);
 			return false;
 		}
 		

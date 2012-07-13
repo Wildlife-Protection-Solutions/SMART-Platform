@@ -22,8 +22,6 @@
 package org.wcs.smart.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.Arrays;
@@ -32,7 +30,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +40,6 @@ import org.eclipse.swt.widgets.DateTime;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * General utility functions.

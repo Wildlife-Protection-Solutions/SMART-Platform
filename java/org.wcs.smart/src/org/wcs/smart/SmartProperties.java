@@ -24,6 +24,8 @@ package org.wcs.smart;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.persistence.Transient;
+
 /**
  * Reads the smart properties file
  * 
@@ -88,6 +90,5 @@ public class SmartProperties {
 			readProperties();
 		}
 		return prop.getProperty(key);
-		
 	}
 }

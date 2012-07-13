@@ -121,7 +121,7 @@ public class CaImporter {
 				importFileStore(dir, cauuid, monitor);
 				monitor.worked(3);
 			}catch (Exception ex){
-				throw new Exception("Conservation area database information imported.  The filestore (images etc.) could NOT be imported.  This must be imported manually or the system backup should be restored.", ex);
+				throw new Exception("Filestore data not imported.\n\nConservation area database information imported.  The filestore (images etc.) could NOT be imported.  This must be imported manually or the system backup should be restored.", ex);
 			}
 			
 		}finally{
@@ -308,13 +308,16 @@ public class CaImporter {
 		monitor.setTaskName("Importing filestore");
 		File sourceFile = new File(dir, CaExporter.FILESTORE_DIR);
 		
+		
 		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
 		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(cauuid);
 		File destLocation = new File(filestore);
 		if (!destLocation.exists()){
 			destLocation.mkdir();
 		}
-		FileUtils.copyDirectory(sourceFile, destLocation);	
+		if (sourceFile.isDirectory()){
+			FileUtils.copyDirectory(sourceFile, destLocation);
+		}
 	}
 
 	

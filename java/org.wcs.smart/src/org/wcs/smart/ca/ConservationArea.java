@@ -160,18 +160,16 @@ public class ConservationArea {
 	
 	
 
+	/**
+	 * @return the filestore location for the given conservation area
+	 */
 	@Transient
 	public String getFileDataStoreLocation(){
 		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
 		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(uuid);
 		return filestore;
 	}
-	
-	@Transient
-	public String getRootFileDataStoreLocation(){
-		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
-		return filestore;
-	}
+
 
 	/**
 	 * Two conservation areas are the same if they
