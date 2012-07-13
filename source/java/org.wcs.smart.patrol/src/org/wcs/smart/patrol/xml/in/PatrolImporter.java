@@ -213,14 +213,29 @@ public class PatrolImporter {
 				Criteria c = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("id", xmlPatrol.getId())).setProjection(Projections.rowCount());
 				Long cnt = (Long)c.uniqueResult();
 				if (cnt > 0){
-					MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Import Patrol", 
-							null, "The database already contains a patrol with the id '" + xmlPatrol.getId() + "' provided in the file.  If you continue a new patrol with a new " +
-									"id will be generated, potentially duplicating data.\n\nDo you want to continue with the import?", MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-					int ret = dialog.open();
-					if (ret == 1){
-						//do not import
+					final boolean[] cont = new boolean[]{true};
+					final String pid = xmlPatrol.getId();
+					Display.getDefault().syncExec(new Runnable(){
+
+						@Override
+						public void run() {
+							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Import Patrol", 
+									null, "The database already contains a patrol with the id '" + pid + "' provided in the file.  If you continue a new patrol with a new " +
+											"id will be generated, potentially duplicating data.\n\nDo you want to continue with the import?", MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+							int ret = dialog.open();
+							if (ret == 1){
+								//do not import
+								cont[0] = false;
+								return ;
+							}		
+						}
+						
+					});
+					if(!cont[0]){
 						return null;
 					}
+					
+					
 				}
 			}		
 			monitor.subTask("Converting");
