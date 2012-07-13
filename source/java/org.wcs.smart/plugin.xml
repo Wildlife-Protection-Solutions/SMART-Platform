@@ -50,10 +50,18 @@
                   tooltip="Exports all data associated with the current conservation area">
                <visibleWhen
                      checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
                </visibleWhen>
             </command>
             <command
@@ -71,6 +79,21 @@
                   mnemonic="Au"
                   style="push"
                   tooltip="Configure the automatic backup options.">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.changeUserPassword"
