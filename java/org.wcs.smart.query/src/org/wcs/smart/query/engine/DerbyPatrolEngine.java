@@ -385,7 +385,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.is_pilot ");
 		
 		if (queryFilter.hasCategoryFilter() || queryFilter.hasAttributeFilter()) {
-
+			sql.append(" left join ");
 			sql.append(tableNames.get(Waypoint.class));
 			sql.append(" ");
 			sql.append(tablePrefix.get(Waypoint.class));

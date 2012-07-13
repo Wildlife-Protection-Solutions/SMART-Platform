@@ -47,8 +47,8 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 	public static final int FOLDER_KEY = 1;
 	public static final int QUERY_KEY = 2;
 	
-	public List<QueryFolder> folders = null;
-	public HashMap<Integer, List<QueryInput>> queries = null;
+	private List<QueryFolder> folders = null;
+	private HashMap<Integer, List<QueryInput>> queries = null;
 	
 	private boolean includeQueries = false;
 	
@@ -71,9 +71,11 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 		if (newInput == null){
 			return;
 		}
-		HashMap<Integer, Object> data = (HashMap<Integer, Object>)newInput;
-		folders = (List<QueryFolder>) data.get(FOLDER_KEY);
-		queries = (HashMap<Integer, List<QueryInput>>) data.get(QUERY_KEY);
+		if (newInput instanceof HashMap){
+			HashMap<Integer, Object> data = (HashMap<Integer, Object>)newInput;
+			folders = (List<QueryFolder>) data.get(FOLDER_KEY);
+			queries = (HashMap<Integer, List<QueryInput>>) data.get(QUERY_KEY);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -81,6 +83,9 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
+		if (folders == null){
+			return new String[]{"Loading..."};
+		}
 		return folders.toArray();
 	}
 
