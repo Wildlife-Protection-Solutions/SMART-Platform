@@ -63,7 +63,6 @@ import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query engine for executing 

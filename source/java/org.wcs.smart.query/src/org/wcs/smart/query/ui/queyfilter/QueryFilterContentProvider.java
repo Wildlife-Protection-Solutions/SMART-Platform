@@ -22,6 +22,8 @@
 package org.wcs.smart.query.ui.queyfilter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -203,6 +205,12 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 					//TODO: check categories and only include attributes with at least one active category
 					atts.add(a);
 				}
+				Collections.sort(atts, new Comparator<Attribute>() {
+					@Override
+					public int compare(Attribute o1, Attribute o2) {
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
 				return atts.toArray(new Attribute[atts.size()]);
 				
 			}
