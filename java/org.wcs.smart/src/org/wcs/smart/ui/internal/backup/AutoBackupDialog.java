@@ -22,11 +22,18 @@
 package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -40,6 +47,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.backup.AutoBackupEngine;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for displaying system
@@ -52,9 +61,12 @@ public class AutoBackupDialog extends TitleAreaDialog {
 
 	private Properties prop;
 	private Text days;
-	private Text deletedays;
-	private Text txtBackupFile;
+	private Text deleteDays;
+	private Text txtBackupDir;
 
+	private ControlDecoration cdTimer;
+	private ControlDecoration cdDeleteTimer;
+	private ControlDecoration cdLoc;
 	
 	/**
 	 * @param parentShell
@@ -83,7 +95,12 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent){
-		
+		KeyListener validate = new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				validate();
+			}
+		};
 		
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite main = new Composite(composite, SWT.NONE);
@@ -129,6 +146,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		data.widthHint = 18;
 		days.setLayoutData(data);
 		
+		days.addKeyListener(validate);
+		
 		lbl = new Label(backup, SWT.NONE);
 		lbl.setText(" days*");
 		
@@ -155,16 +174,18 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		dlbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)dlbl.getLayoutData()).horizontalIndent = indent;
 
-		deletedays = new Text(backup, SWT.BORDER);
+		deleteDays = new Text(backup, SWT.BORDER);
 		String deletetimer = "30";
 		if(prop.containsKey("delete_timer")){
 			deletetimer = prop.getProperty("delete_timer");
 		}
-		deletedays.setText(deletetimer);
-		deletedays.setTextLimit(3);
+		deleteDays.setText(deletetimer);
+		deleteDays.setTextLimit(3);
 		GridData ddata = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		ddata.widthHint = 18;
-		deletedays.setLayoutData(ddata);
+		deleteDays.setLayoutData(ddata);
+		
+		deleteDays.addKeyListener(validate);
 		
 		Label ddayslbl = new Label(backup, SWT.NONE);
 		ddayslbl.setText(" days");
@@ -184,18 +205,20 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		backup.setLayout(new GridLayout(2, false));
 		
 		
-		txtBackupFile = new Text(backup, SWT.DEFAULT);
+		txtBackupDir = new Text(backup, SWT.DEFAULT);
 		File temp = new File(System.getProperty("user.dir"));
 		String loc = temp.getParent() + File.separatorChar + "SMART_Backups"; 
 		if(prop.contains("backup_location")){
 			loc = prop.getProperty("backup_location");
 		}
-		txtBackupFile.setText(loc);
+		txtBackupDir.setText(loc);
 		
-		txtBackupFile.setEditable(true);
-		txtBackupFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridData)txtBackupFile.getLayoutData()).horizontalIndent = indent;
-		txtBackupFile.setSelection(txtBackupFile.getText().length());
+		txtBackupDir.setEditable(true);
+		txtBackupDir.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)txtBackupDir.getLayoutData()).horizontalIndent = indent;
+		txtBackupDir.setSelection(txtBackupDir.getText().length());
+		
+		txtBackupDir.addKeyListener(validate);
 		
 		Button btnBrowse = new Button(backup, SWT.NONE);
 		btnBrowse.setText("Browse...");
@@ -203,22 +226,30 @@ public class AutoBackupDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog fd = new DirectoryDialog(getShell(), SWT.SAVE);
-				File f = new File(txtBackupFile.getText());
+				File f = new File(txtBackupDir.getText());
 				fd.setFilterPath(f.getParent());
 				
 				String file = fd.open();
 				if (file == null){
 					return;
 				}else{
-					txtBackupFile.setText(file);
+					txtBackupDir.setText(file);
 				}
 			}
 		});
-		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));		
+		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		
+		cdTimer = createDecoration(days);
+		cdDeleteTimer = createDecoration(deleteDays);
+		cdLoc = createDecoration(txtBackupDir);
+		
 
 		setTitle("Auto-Backup Configuration");
-		setMessage("The automatic backup system checks each time the application is closed if the specified time has passed to warrant a backup. This means that no backups will occur if the application is left running indefinietly."); 
+		setMessage("The automatic backup system checks each time the application is closed if the specified time has passed to warrant a backup."); 
 		super.getShell().setText("SMART System Automitic Backup Settings");
+		
+		validate();
 		
 		return composite;
 	}
@@ -243,8 +274,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			prop.setProperty("backup_timer", days.getText());
-			prop.setProperty("delete_timer", deletedays.getText());
-			prop.setProperty("backup_location", txtBackupFile.getText());
+			prop.setProperty("delete_timer", deleteDays.getText());
+			prop.setProperty("backup_location", txtBackupDir.getText());
 			if(!prop.containsKey("last_backup")){
 				prop.setProperty("last_backup", "0");
 			}
@@ -259,6 +290,60 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	@Override
 	protected boolean isResizable() {
 		return true;
+	}
+
+	protected ControlDecoration createDecoration(Control control){
+		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
+	}
+
+	/**
+	 * Validate the input fields
+	 * 
+	 * @return <code>false</code> if not complete, <code>true</code> otherwise
+	 */
+	public boolean validate() {
+
+		ControlDecoration cds[] = { cdTimer, cdDeleteTimer, cdLoc};
+		for (int i = 0; i < cds.length; i++) {
+			cds[i].hide();
+		}
+		
+		boolean isComplete = true;
+		if ( ! isNumeric(days.getText()) ){
+			cdTimer.show();
+			cdTimer.setDescriptionText("Invalid value, you must specify a valid number of days.");
+			isComplete = false;
+		}
+		
+		if ( ! isNumeric(deleteDays.getText()) ){
+			cdDeleteTimer.show();
+			cdDeleteTimer.setDescriptionText("Invalid value, you must specify a valid number of days.");
+			isComplete = false;
+		}
+		File f = new File(txtBackupDir.getText());
+		if (!f.exists()){
+			cdLoc.show();
+			cdLoc.setDescriptionText("Invalid Directory, you must select a valid directory.");
+			isComplete = false;
+		}
+		Button x = getButton(OK);
+		if (x != null){
+			x.setEnabled(isComplete);
+		}
+		return isComplete;
+	}
+	public static boolean isNumeric(String str) {  
+	  try{  
+	    double d = Double.parseDouble(str);  
+	  }  
+	  catch(NumberFormatException nfe){  
+	    return false;  
+	  }
+	  return true;  
 	}
 
 }
