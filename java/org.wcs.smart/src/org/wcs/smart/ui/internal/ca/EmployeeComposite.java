@@ -43,6 +43,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -130,6 +131,7 @@ public class EmployeeComposite extends Composite {
 				Employee.MAX_ID_LENGTH, validate);
 		lbl.setToolTipText("If set to '" + EmployeeDialog.AUTO_GENERATE + "' the id will be automatically assigned by the system");		
 		txtStaffId.setText(EmployeeDialog.AUTO_GENERATE);
+		txtStaffId.addKeyListener(validate);
 		
 		createLabelField(this, Employee.GIVEN_NAME + ":");
 		txtGivenName = createTextField(this, SWT.NONE,
@@ -157,6 +159,7 @@ public class EmployeeComposite extends Composite {
 				public void widgetSelected(SelectionEvent e) {
 					dtEmploymentEnd.setEnabled(chNotActive.getSelection());
 					enableFields(!chNotActive.getSelection());
+					validate();
 				}
 			});
 			
@@ -189,9 +192,23 @@ public class EmployeeComposite extends Composite {
 		opMale = new Button(composite, SWT.RADIO);
 		opMale.setSelection(true);
 		opMale.setText("Male");
-
+		
+		SelectionListener changedGender = new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				validate();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent event){
+				validate();
+			}
+		};
+		opMale.addSelectionListener(changedGender);
+		
 		opFemale = new Button(composite, SWT.RADIO);
 		opFemale.setText("Female");
+		opFemale.addSelectionListener(changedGender);
 
 		if (includeAgencyRank){
 			createLabelField(this, Employee.AGENCY + ":");
@@ -208,7 +225,7 @@ public class EmployeeComposite extends Composite {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					updateRanks();
-					
+					validate();
 				}
 			});
 			List<Agency> temp = new ArrayList<Agency>();
@@ -229,6 +246,13 @@ public class EmployeeComposite extends Composite {
 				@Override
 				public String getText(Object element){
 					return ((Rank)element).getName();
+				}
+			});
+			cmbViewerRank.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					validate();
 				}
 			});
 			cmbViewerRank.setContentProvider(ArrayContentProvider.getInstance());
@@ -284,6 +308,14 @@ public class EmployeeComposite extends Composite {
 			cmbSmartUserLevel.setContentProvider(ArrayContentProvider.getInstance());
 			cmbSmartUserLevel.setInput(new Employee.SmartUserLevel[]{Employee.SmartUserLevel.DATA_ENTRY, Employee.SmartUserLevel.ANALYST, Employee.SmartUserLevel.MANAGER, Employee.SmartUserLevel.ADMIN});
 			cmbSmartUserLevel.getCombo().select(0);
+			cmbSmartUserLevel.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					validate();
+				}
+			});
+			
 		}
 		enableSmartUser(false);
 		chSmartUser.setSelection(false);
@@ -541,9 +573,8 @@ public class EmployeeComposite extends Composite {
 				cmbSmartUserLevel.setSelection(new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
 			}
 		}
-		
-		validate();
 		enableFields(!chNotActive.getSelection());
+		validate();
 	}
 	private void enableFields(boolean enable){
 		Control[] controls = new Control[]{
