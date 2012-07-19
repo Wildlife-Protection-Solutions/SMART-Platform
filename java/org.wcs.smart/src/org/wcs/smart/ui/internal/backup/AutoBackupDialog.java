@@ -50,6 +50,8 @@ import org.wcs.smart.backup.AutoBackupEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.util.SmartUtils;
 
+import au.com.objectix.jgridshift.Util;
+
 /**
  * Dialog for displaying system
  * automatic backup options to the user.
@@ -131,7 +133,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		backup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		backup.setLayout(new GridLayout(3, false));
 		lbl = new Label(backup, SWT.NONE);
-		lbl.setText("Every");
+		lbl.setText("Every ");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)lbl.getLayoutData()).horizontalIndent = indent;
 
@@ -207,8 +209,12 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		
 		txtBackupDir = new Text(backup, SWT.DEFAULT);
 		File temp = new File(System.getProperty("user.dir"));
-		String loc = temp.getParent() + File.separatorChar + "SMART_Backups"; 
-		if(prop.contains("backup_location")){
+		String loc = temp.getParent() + File.separatorChar + "SMART_Backups";
+		File b = new File(loc);
+		if(!b.exists()){
+			SmartUtils.createDirectory(b);
+		}
+		if(prop.containsKey("backup_location")){
 			loc = prop.getProperty("backup_location");
 		}
 		txtBackupDir.setText(loc);
