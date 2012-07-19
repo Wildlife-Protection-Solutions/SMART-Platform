@@ -22,8 +22,6 @@
 package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -47,10 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.backup.AutoBackupEngine;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.util.SmartUtils;
-
-import au.com.objectix.jgridshift.Util;
 
 /**
  * Dialog for displaying system
