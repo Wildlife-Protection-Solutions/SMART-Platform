@@ -126,7 +126,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		
 		int indent = 20;
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("How often would you like the system to automatically backup? ");
+		lbl.setText("How often would you like the system to perform an automatic backup? ");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 				
 		Composite backup = new Composite(main, SWT.NONE);
@@ -156,7 +156,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		
 		
 		Label lbl2 = new Label(main, SWT.NONE);
-		lbl2.setText("*Enter -1 to turn off auto-backup. Enter 0 to back-up every time you shut-down"); 
+		lbl2.setText("* Enter -1 to turn off auto-backup. Enter 0 to perform an auto-backup every time the application is closed."); 
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
 		((GridData)lbl2.getLayoutData()).horizontalIndent = indent;
 		
@@ -164,7 +164,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("When should automatick backup files be deleted? ");
+		lbl.setText("When should automatic backup files be deleted? ");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		backup = new Composite(main, SWT.NONE);
@@ -199,7 +199,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 //		lblb.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("Where should automatick backup files be placed? ");
+		lbl.setText("Where should automatic backup files be placed? ");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		backup = new Composite(main, SWT.NONE);
@@ -252,8 +252,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		
 
 		setTitle("Auto-Backup Configuration");
-		setMessage("The automatic backup system checks each time the application is closed if the specified time has passed to warrant a backup."); 
-		super.getShell().setText("SMART System Automitic Backup Settings");
+		setMessage("Each time the application is closed, the automatic backup system checks to see whether the specified time has passed and a backup is warranted. If so, the system will perform a backup."); 
+		super.getShell().setText("SMART System Automatic Backup Settings");
 		
 		validate();
 		
