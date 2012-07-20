@@ -24,6 +24,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -63,6 +64,8 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	private Session session;
 	private Area.AreaType type;
 	private TableViewer tableViewer;
+	
+	private boolean dirty = false;
 	
 	public AreaNameDialogPage(Shell parentShell, Area.AreaType type) {
 		super(parentShell);
@@ -104,6 +107,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	private void saveAreaTypes(){
 		try{
 			getSession().getTransaction().commit();
+			dirty = false;
 			getSession().beginTransaction();
 		}catch (Exception ex){
 			SmartPlugIn.log("Could not save changes.\n\n" + ex.getMessage(), ex);
@@ -250,7 +254,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	
 	private void setDirty(){
 		getButton(IDialogConstants.OK_ID).setEnabled(true);
-	
+		dirty = true;
 	}
 
 	@Override
@@ -258,12 +262,17 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		// create OK and Cancel buttons by default
 		Button btn = createButton(parent, IDialogConstants.OK_ID, "Save", true);
 		btn.setEnabled(false);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		createButton(parent, IDialogConstants.CANCEL_ID, "Close", false);
 	}
 	
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.CANCEL_ID){
+			if (dirty){
+				if (!MessageDialog.openConfirm(getShell(), "Confirm Close", "All unsaved changes will be lost.  Are you sure you want to close?")){
+					return;
+				}
+			}
 			close();
 		}else if (buttonId == IDialogConstants.OK_ID){
 			saveAreaTypes();
