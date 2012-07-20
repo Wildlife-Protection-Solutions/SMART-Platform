@@ -1,0 +1,195 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.report.internal.ui.viewer;
+
+
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+
+import org.eclipse.birt.report.engine.api.HTMLRenderOption;
+import org.eclipse.birt.report.engine.api.IRenderOption;
+import org.eclipse.birt.report.engine.api.IReportEngine;
+import org.eclipse.birt.report.engine.api.IReportRunnable;
+import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.OpenWindowListener;
+import org.eclipse.swt.browser.WindowEvent;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.part.ViewPart;
+import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
+import org.wcs.smart.report.manger.ReportManager;
+import org.wcs.smart.report.model.Report;
+
+
+/**
+ * View to display the results of a report
+ * @author egouge
+ * @since 1.0.0
+ */
+public class ReportView extends ViewPart {
+
+	/**
+	 * Report view id
+	 */
+	public static final String ID = "org.wcs.smart.birt.ReportView"; //$NON-NLS-1$
+	
+	/**
+	 * Report output format in browser
+	 */
+	private static final String HTML_REPORT = "html";
+	
+	private Browser browser;
+
+	private Report report;
+	private HashMap<String, Object> selectedParams;
+
+	Job reportRunner = new Job("Preview Report"){
+		
+		protected IStatus run(IProgressMonitor monitor) {
+			try{
+				IReportEngine engine = ReportManager.getReportEngine();
+				final IReportRunnable design = engine.openReportDesign(report.getFullReportFilename().getAbsolutePath());
+				
+				String reportTitle = design.getProperty("title").toString();
+				updateName(reportTitle);
+				
+				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+				IRenderOption options = new HTMLRenderOption();;
+				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				options = new HTMLRenderOption( );
+				options.setOutputStream(bos);
+				options.setOutputFormat(HTML_REPORT);
+				task.setRenderOption(options);
+				task.setParameterValues(selectedParams);
+				task.run();
+				task.close();
+				browser.getDisplay().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						browser.setText(bos.toString());
+
+					}});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}			
+		return Status.OK_STATUS;
+	}};
+	
+
+	@Override
+	public void createPartControl(Composite parent) {
+		
+		parent.setLayout(new GridLayout());
+	
+		browser = new Browser( parent, SWT.NONE );
+		
+		GridData gd = new GridData( GridData.FILL_BOTH );
+		gd.horizontalSpan = 2;
+		browser.setLayoutData( gd );
+		
+		browser.addOpenWindowListener( new OpenWindowListener( ) {
+			public void open( final WindowEvent event )
+			{
+				final Shell shell = new Shell( SWT.SHELL_TRIM | Window.getDefaultOrientation( ) );
+				shell.setLayout( new FillLayout( ) );
+				Browser browser = new Browser( shell, SWT.NONE );
+				//initialize( Display.getCurrent( ), browser );
+				event.browser = browser;
+				shell.open( );
+			}
+		} );
+	}
+
+	@Override
+	public void setFocus() {
+		
+	}
+
+	/**
+	 * Re-runs the report
+	 */
+	public void refreshReport(){
+		try{
+			previewReport(); //$NON-NLS-1$
+		}catch (Exception ex){
+			ReportPlugIn.log("Could not run report: " + ex.getMessage(), ex);
+		}
+	}
+		
+	/**
+	 * Sets the report to display in the review and runs the report.
+	 * @param report
+	 */
+	public void setReport(Report report){
+		this.report = report;
+		refreshReport();
+	}
+	
+	/**
+	 * Updates the report view name
+	 * 
+	 * @param reportTitle
+	 */
+	private void updateName(final String reportTitle) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				setPartName("Report View" + " - " + reportTitle);
+			}
+		});
+	}
+	
+	private void previewReport() throws Exception {
+		if (report == null){
+			ReportPlugIn.displayLog("Report not set.", null);
+			return; 
+		}
+		browser.setText("Running Report....");
+		selectedParams  = getParameters();
+		if (selectedParams != null){
+			reportRunner.schedule();
+		}
+	}
+	
+	private HashMap<String, Object> getParameters() throws Exception{
+		//TODO: perhaps we can save the parameters and re-use them if report refreshed
+		//or at least provide as defaults
+		ParameterCollecter paramCollector = new ParameterCollecter();
+		
+		HashMap<String, Object> selectedParams = paramCollector.getParameters(new Report[]{report});
+		return selectedParams;
+	}
+
+}
+

@@ -1,0 +1,177 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.report;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.eclipse.birt.report.designer.ui.ReportPlugin;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.report.library.SmartBirtLibrary;
+import org.wcs.smart.report.manger.ReportManager;
+
+/**
+ * SMART BIRT Reporting plugin
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class ReportPlugIn extends AbstractUIPlugin {
+
+	// The plug-in ID
+	public static final String PLUGIN_ID = "org.wcs.smart.report"; //$NON-NLS-1$
+
+	public static final String REPORT_DIR = "reports";
+
+	/**
+	 * The main query icon
+	 */
+	public static final String REPORT_ICON = "org.wcs.smart.query.reporticon";
+
+	static {
+		addImage("images/icons/obj16/report.png", REPORT_ICON);
+	}
+
+	private static void addImage(String path, String icon) {
+		ImageDescriptor descriptor = AbstractUIPlugin
+				.imageDescriptorFromPlugin(PLUGIN_ID, path);
+		if (descriptor != null) {
+			JFaceResources.getImageRegistry().put(icon, descriptor);
+		}
+	}
+
+	// The shared instance
+	private static ReportPlugIn plugin;
+
+	/**
+	 * The constructor
+	 */
+	public ReportPlugIn() {
+	}
+
+	/**
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+	 */
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		plugin = this;
+	}
+
+	public static void initReports() {
+
+		try {
+			ReportPlugin
+					.getDefault()
+					.getPreferenceStore()
+					.setValue(
+							ReportPlugin.RESOURCE_PREFERENCE,
+							SmartBirtLibrary.getInstance().getLibraryLocation()
+									.getCanonicalPath());
+		} catch (IOException e) {
+			displayLog(
+					"Could not initialize BIRT parameters. Reporting error will occur. "
+							+ e.getMessage(), e);
+		}
+	}
+
+	public static File getReportDirectory() {
+		return new File(SmartDB.getCurrentConservationArea()
+				.getFileDataStoreLocation()
+				+ File.separator
+				+ ReportPlugIn.REPORT_DIR + File.separator);
+	}
+
+	/**
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+	 */
+	public void stop(BundleContext context) throws Exception {
+		ReportManager.endReportEngine();
+		plugin = null;
+		super.stop(context);
+	}
+
+	/**
+	 * Returns the shared instance
+	 * 
+	 * @return the shared instance
+	 */
+	public static ReportPlugIn getDefault() {
+		return plugin;
+	}
+
+	/**
+	 * Logs the given error to the error log.
+	 * 
+	 * @param message
+	 *            message
+	 * @param t
+	 *            error
+	 */
+	public static void log(String message, Throwable t) {
+		int status = t instanceof Exception || message != null ? IStatus.ERROR
+				: IStatus.WARNING;
+		getDefault().getLog().log(
+				new Status(status, PLUGIN_ID, IStatus.OK, message, t));
+	}
+
+	/**
+	 * Logs the given error to the error log.
+	 * 
+	 * @param message
+	 *            message
+	 * @param t
+	 *            error
+	 */
+	public static void logSql(String sql) {
+		int status = IStatus.INFO;
+		getDefault().getLog().log(
+				new Status(status, PLUGIN_ID, IStatus.OK, sql, null));
+	}
+
+	/**
+	 * Displays an error message to the user and logs the message.
+	 * 
+	 * @param message
+	 *            Error message to display
+	 * @param t
+	 *            exception to log
+	 */
+	public static void displayLog(final String message, Throwable t) {
+		log(message, t);
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(),
+						"Error", message);
+			}
+		});
+
+	}
+}
