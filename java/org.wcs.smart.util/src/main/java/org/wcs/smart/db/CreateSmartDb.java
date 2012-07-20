@@ -43,6 +43,7 @@ public class CreateSmartDb {
 		"org/wcs/smart/db/smart-tables-dm.sql",
 		"org/wcs/smart/db/smart-tables-patrol.sql",
 		"org/wcs/smart/db/smart-tables-query.sql",
+		"org/wcs/smart/db/smart-tables-report.sql",
 		"org/wcs/smart/db/smart-permissions.sql",
 		"org/wcs/smart/db/smart-functions.sql"
 	};
