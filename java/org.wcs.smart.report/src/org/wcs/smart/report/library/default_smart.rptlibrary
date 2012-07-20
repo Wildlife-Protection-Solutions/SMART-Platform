@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="comments">Copyright (C) 2012 Wildlife Conservation Society</property>
+    <property name="createdBy">Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408></property>
+    <property name="units">in</property>
+    <property name="theme">defaultTheme</property>
+	<parameters>
+        <parameter-group name="Report Dates" id="8">
+            <text-property name="displayName">Report Date Range</text-property>
+            <parameters>
+                <scalar-parameter name="Start Date" id="9">
+                    <text-property name="promptText">Report Start Date</text-property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">date</property>
+                    <property name="distinct">true</property>
+                    <list-property name="selectionList"/>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
+                    <structure name="format">
+                        <property name="category">Long Date</property>
+                        <property name="pattern">Long Date</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="End Date" id="10">
+                    <text-property name="promptText">Report End Date</text-property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">date</property>
+                    <property name="distinct">true</property>
+                    <list-property name="selectionList"/>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
+                    <structure name="format">
+                        <property name="category">Long Date</property>
+                        <property name="pattern">Long Date</property>
+                    </structure>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
+    </parameters>    
+    <data-sources>
+        <oda-data-source extensionID="org.wcs.smart.data.oda.smart" name="Data Source" id="5"/>
+    </data-sources>
+    <themes>
+        <theme name="defaultTheme" id="4"/>
+    </themes>
+    <components>
+        <label name="CA Name Label in Pink" id="6">
+            <property name="backgroundColor">#00FFFF</property>
+            <property name="fontFamily">"Vrinda"</property>
+            <property name="fontSize">18pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#FF0080</property>
+            <text-property name="text">HKK the Very Funny Cool Conservation Area</text-property>
+        </label>
+    </components>
+    <page-setup>
+        <simple-master-page name="NewSimpleMasterPage" id="3">
+            <property name="topMargin">1in</property>
+            <property name="leftMargin">1.25in</property>
+            <property name="bottomMargin">1in</property>
+            <property name="rightMargin">1.25in</property>
+        </simple-master-page>
+    </page-setup>
+</library>

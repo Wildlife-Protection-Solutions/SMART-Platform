@@ -1,0 +1,98 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.report.internal.ui.export;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.HashMap;
+
+import org.eclipse.birt.report.engine.api.EmitterInfo;
+import org.eclipse.birt.report.engine.api.IRenderOption;
+import org.eclipse.birt.report.engine.api.IReportEngine;
+import org.eclipse.birt.report.engine.api.IReportRunnable;
+import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.birt.report.engine.api.RenderOption;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.report.manger.ReportManager;
+import org.wcs.smart.report.model.Report;
+
+/**
+ * Job that runs a report and writes the results to a file.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class RunReportJob extends Job {
+
+	private File reportFile = null;
+	private File outputFile = null;
+	private EmitterInfo info = null;
+	
+	private HashMap<String, Object> reportParameters = null; 
+	
+	public RunReportJob(Report report, File file, EmitterInfo info, HashMap<String, Object> reportParams){
+		super("Run Report Job");
+		
+		reportFile = report.getFullReportFilename();
+		this.outputFile = file;
+		this.info = info;
+		this.reportParameters = reportParams;
+		
+	}
+		
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	@Override
+	protected IStatus run(IProgressMonitor monitor) {
+		try{
+			if (reportFile == null || outputFile == null || info == null){
+				throw new Exception("Cannot run report.");
+			}
+			IReportEngine engine = ReportManager.getReportEngine();
+			
+			final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
+
+			IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+			IRenderOption options = new RenderOption();
+			FileOutputStream fout = new FileOutputStream(outputFile);
+			options.setOutputStream(fout);
+			options.setEmitterID(info.getID());
+			
+			task.setRenderOption(options);
+			task.setParameterValues(reportParameters);
+			task.run();
+			task.close();
+			fout.close();
+			
+	} catch (Exception e) {
+		//TODO: fix me
+		e.printStackTrace();
+	}			
+	return Status.OK_STATUS;
+	}
+
+
+}
