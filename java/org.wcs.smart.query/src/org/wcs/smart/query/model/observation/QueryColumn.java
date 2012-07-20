@@ -51,16 +51,22 @@ public abstract class QueryColumn implements Cloneable{
 	 * Possible column types
 	 */
 	public enum ColumnType{
-		INTEGER("Integer"),
-		NUMBER("Double"),
-		STRING("String"),
-		BOOLEAN("Integer"),
-		DATE("Date"),
-		TIME("Date");
+		INTEGER("Integer", java.sql.Types.INTEGER),
+		NUMBER("Double", java.sql.Types.DOUBLE),
+		STRING("String", java.sql.Types.VARCHAR),
+		BOOLEAN("Integer", java.sql.Types.BOOLEAN),
+		DATE("Date", java.sql.Types.DATE),
+		TIME("Date", java.sql.Types.TIME);
 		
 		public String geotoolsType;
-		ColumnType(String geotoolsType){
+		public int sqlType;
+		ColumnType(String geotoolsType, int sqlType){
 			this.geotoolsType = geotoolsType;
+			this.sqlType = sqlType;
+		}
+		
+		public int getSqlType(){
+			return this.sqlType;
 		}
 	}
 	
