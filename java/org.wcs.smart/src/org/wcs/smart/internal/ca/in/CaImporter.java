@@ -89,7 +89,7 @@ public class CaImporter {
 		File dbBackup = backup();
 		monitor.worked(1);
 		
-		monitor.subTask("Unzippping File");
+		monitor.subTask("Unzipping File");
 		File dir = unzipFile(f);
 		
 		/* need to login as admin user to restore */
