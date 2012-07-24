@@ -45,7 +45,7 @@ import org.eclipse.ui.ISources;
 public class SourceProvider extends AbstractSourceProvider {
 
 	public static enum QueryDropType{
-		FILTER_ITEM, SUMMARY_ITEM
+		FILTER_ITEM, SUMMARY_ITEM, GRIDDED_ITEM
 	}
 	
 	public final static String SELECTED_FILTERS = "org.wcs.smart.query.ui.filteradd";

@@ -56,6 +56,20 @@ CREATE TABLE smart.summary_query
 	PRIMARY KEY (UUID)
 );
 
+CREATE TABLE smart.gridded_query
+(
+	UUID CHAR(16) for bit data NOT NULL,
+	CREATOR_UUID CHAR(16) for bit data NOT NULL,
+	NAME VARCHAR(1024) NOT NULL,
+	CA_FILTER VARCHAR(32672),
+	QUERY_DEF VARCHAR(32672),
+	FOLDER_UUID CHAR(16) for bit data,
+	SHARED BOOLEAN NOT NULL,
+	CA_UUID CHAR(16) for bit data NOT NULL,
+	ID VARCHAR(6) NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
 
 
 
@@ -151,6 +165,29 @@ ALTER TABLE smart.summary_query
 
 ALTER TABLE smart.summary_query
 	ADD constraint summary_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
+	REFERENCES smart.query_folder (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+ALTER TABLE smart.gridded_query
+	ADD constraint gridded_query_creator_uuid_fk FOREIGN KEY (CREATOR_UUID)
+	REFERENCES smart.employee (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+
+ALTER TABLE smart.gridded_query
+	ADD constraint gridded_query_ca_uuid_fk FOREIGN KEY (CA_UUID)
+	REFERENCES smart.conservation_area (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+
+ALTER TABLE smart.gridded_query
+	ADD constraint gridded_query_folder_uuid_fk FOREIGN KEY (FOLDER_UUID)
 	REFERENCES smart.query_folder (uuid)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT

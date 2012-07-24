@@ -51,6 +51,13 @@
             id="org.wcs.smart.query.ui.PatrolQueryResultsEditor"
             name="Patrol Query">
       </editor>
+      <editor
+            class="org.wcs.smart.query.ui.gridded.GriddedEditor"
+            default="false"
+            icon="images/icons/view16/summary_query.png"
+            id="org.wcs.smart.query.ui.GriddedEditor"
+            name="Gridded Summary">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -219,7 +226,7 @@
          </command>
          <command
                commandId="org.wcs.smart.query.runQuery"
-               icon="images/icons/etool16/run_query.png"
+               icon="images/icons/etool16/bullet_go.png"
                label="Run Current Query"
                style="push">
          </command>
@@ -756,6 +763,9 @@
       </class>
       <class
             class="org.wcs.smart.query.model.SimpleQuery">
+      </class>
+      <class
+            class="org.wcs.smart.query.model.GriddedQuery">
       </class>
    </extension>
    <extension
