@@ -31,7 +31,7 @@ import org.wcs.smart.report.model.RootReportFolder;
 /**
  * Property tester for determining if a report item (report or report folder) 
  * has permission to perform a given action.
- * <p>Supported Actions: RENAME, DELETE, EDIT, NEWFOLDER</p>
+ * <p>Supported Actions: RENAME, DELETE, EDIT, NEWFOLDER, EXPORT</p>
  * @author egouge
  * @since 1.0.0
  */
@@ -53,7 +53,10 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 	 * if the selection can have a child folder added to it
 	 */
 	public static final String NEWFOLDER = "newfolder";
-	
+	/**
+	 * if the selection can be modified (editing report; not renaming) 
+	 */
+	public static final String EXPORT = "export";
 	
 	/**
 	 * Creates a new property tester
@@ -69,6 +72,10 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 			return false;
 		}
 		
+		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.DATA_ENTRY){
+			//data entry can't do anything with reports
+			return false;
+		}
 		String operator = (String)args[0];
 		if (receiver instanceof RootReportFolder){
 			if (operator.equals(NEWFOLDER)){
@@ -88,9 +95,10 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 		if (receiver instanceof ReportFolder){
 			ReportFolder folder = (ReportFolder)receiver;
 			
-			if (operator.equals(EDIT)){
+			if (operator.equals(EDIT) || operator.equals(EXPORT)){
 				return false;
 			}
+			
 			
 			//rename/delete/newfolder
 			if (folder.getEmployee() == null){

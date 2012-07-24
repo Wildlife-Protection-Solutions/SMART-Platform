@@ -23,6 +23,7 @@ package org.wcs.smart.report.manger;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
@@ -84,6 +85,7 @@ public class ReportManager {
 	public static void deleteReportFolder(ReportFolder folder) throws Exception{
 		Session session = HibernateManager.openSession();
 		try{
+			session.load(folder, folder.getUuid());
 			//report folders can only be removed if they don't have any children
 			session.beginTransaction();
 			Query q = session.createQuery("SELECT count(*) FROM ReportFolder WHERE parentFolder = :parent");
@@ -121,7 +123,7 @@ public class ReportManager {
 	 * @param report the report to delete
 	 * @throws Exception if report cannot be deleted
 	 */
-	public static void deleteReport(Report report) throws Exception{
+	public static void deleteReport(final Report report) throws Exception{
 		
 		Session session = HibernateManager.openSession();
 		try{
@@ -134,6 +136,26 @@ public class ReportManager {
 		}finally{
 			session.close();
 		}	
+
+		//close any editor and view open that reference this report
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				try{
+					SmartUtils.forceClose(IReportEditorContants.DESIGN_EDITOR_ID, new ReportEditorInput(new File(report.getFilename())));
+				}catch (Exception ex){
+					ReportPlugIn.log("Error closing editor on report delete.", ex);
+				}
+				try{
+					SmartUtils.forceCloseView(ReportView.ID, SmartUtils.encodeHex(report.getUuid()));
+				}catch (Exception ex){
+					ReportPlugIn.log("Error closing view on report delete.", ex);
+				}
+			}});
+
+
+		
 		
 		if (!report.getFullReportFilename().exists()){
 			throw new Exception("Report deleted from database but report file could not be found to remove.\n\n" + report.getFullReportFilename().toString());
@@ -145,6 +167,10 @@ public class ReportManager {
 		}catch (Exception ex){
 			throw new Exception("Report deleted from database but report file could not be deleted.  This file should be removed manually.\n\n" + ex.getMessage(), ex);
 		}	
+		
+		
+		
+
 	}
 	
 	/**
@@ -228,7 +254,7 @@ public class ReportManager {
 	}
 	
 	/**
-	 * Opens the given report the view perspective and run the report.
+	 * Opens the given report the view perspective and runs the report.
 	 * @param report
 	 */
 	public static void viewReport(final Report report){
@@ -238,6 +264,24 @@ public class ReportManager {
 				try {
 					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
 					((ReportView)view).setReport(report);
+				} catch (PartInitException e) {
+					ReportPlugIn.displayLog("Could not open report " + report.getName() + ".\n\n" + e.getMessage(), e);
+				}				
+			}});
+	}
+	
+	/**
+	 * Opens the given report the view perspective and run the report using
+	 * the parameters provided.
+	 * @param report
+	 */
+	public static void viewReport(final Report report, final HashMap<String, Object> reportParameters){
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				try {
+					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
+					((ReportView)view).setReport(report, reportParameters);
 				} catch (PartInitException e) {
 					ReportPlugIn.displayLog("Could not open report " + report.getName() + ".\n\n" + e.getMessage(), e);
 				}				

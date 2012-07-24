@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.report.internal.ui;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -59,36 +63,34 @@ public class DeleteReportItemHandler extends AbstractHandler implements IHandler
 			return null;
 		}
 		
-		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
-		final Object o = obj;
 		
-		if (o instanceof RootReportFolder){
-			return null;
-		}
-		
-		if (o instanceof Report) {
-			if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete Report", "Are you sure you want to delete the report " + ((Report)o).getName() + ".  This action cannot be undone.")){
-				return null; 
-			}
-			
-		}
-		Job job = new Job("Delete Item Job") {
+		final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
+		Collections.reverse(selection);
+				
+		Job job = new Job("Delete Items Job") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					if (o instanceof ReportFolder) {
-						ReportFolder parent = (ReportFolder) o;
-						ReportManager.deleteReportFolder(parent);
-						ReportEventManager.getInstance()
+				for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+					Object o = (Object) iterator.next();
+					
+					String name = "";
+					try {
+						if (o instanceof ReportFolder) {
+							ReportFolder parent = (ReportFolder) o;
+							name = "folder '" + parent.getName() + "'";
+							ReportManager.deleteReportFolder(parent);
+							ReportEventManager.getInstance()
 								.fireReportFolderDeleted(parent);
-					} else if (o instanceof Report) {
-						ReportManager.deleteReport((Report) o);
-						ReportEventManager.getInstance().fireReportDeleted(
+						} else if (o instanceof Report) {
+							name = " report '" + ((Report) o).getName() + "'";
+							ReportManager.deleteReport((Report) o);
+							ReportEventManager.getInstance().fireReportDeleted(
 								(Report) o);
+						}
+					} catch (Exception ex) {
+						ReportPlugIn.displayLog(
+								"Error deleting " + name + ".\n\n" + ex.getMessage(), ex);
 					}
-				} catch (Exception ex) {
-					ReportPlugIn.displayLog(
-							"Error deleting item : " + ex.getMessage(), ex);
 				}
 
 				return Status.OK_STATUS;

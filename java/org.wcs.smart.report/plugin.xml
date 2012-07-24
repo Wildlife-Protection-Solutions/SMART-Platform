@@ -103,7 +103,7 @@
             <with
                   variable="selection">
                <iterate
-                     ifEmpty="true"
+                     ifEmpty="false"
                      operator="or">
                   <instanceof
                         value="org.wcs.smart.report.model.Report">
@@ -119,7 +119,7 @@
             <with
                   variable="selection">
                <iterate
-                     ifEmpty="true"
+                     ifEmpty="false"
                      operator="or">
                   <instanceof
                         value="org.wcs.smart.report.model.Report">
@@ -175,6 +175,30 @@
          </command>
          <separator
                name="org.wcs.smart.query.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.report.runReport"
+               icon="images/icons/etool16/report_run.png"
+               label="Run Report"
+               mnemonic="R"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <instanceof
+                           value="org.wcs.smart.report.model.Report">
+                     </instanceof>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator2"
                visible="true">
          </separator>
          <command
@@ -238,7 +262,7 @@
             </visibleWhen>
          </command>
          <separator
-               name="org.wcs.smart.query.separator2"
+               name="org.wcs.smart.query.separator3"
                visible="true">
          </separator>
          <command
@@ -275,13 +299,12 @@
                tooltip="Delete the selected item">
          </command>
          <command
-               commandId="org.wcs.smart.report.runReport"
-               disabledIcon="images/icons/etool16/report_run.png"
-               icon="images/icons/etool16/report_run.png"
-               label="Run Report"
-               mnemonic="R"
+               commandId="org.wcs.smart.report.newReport"
+               icon="images/icons/etool16/report_new.png"
+               label="New Report"
+               mnemonic="N"
                style="push"
-               tooltip="Run the selected report">
+               tooltip="Creates a new report">
          </command>
          <command
                commandId="org.wcs.smart.report.editReport"
@@ -292,12 +315,12 @@
                tooltip="edit the selected report">
          </command>
          <command
-               commandId="org.wcs.smart.report.newReport"
-               icon="images/icons/etool16/report_new.png"
-               label="New Report"
-               mnemonic="N"
+               commandId="org.wcs.smart.report.runReport"
+               icon="images/icons/etool16/report_run.png"
+               label="Run Report"
+               mnemonic="R"
                style="push"
-               tooltip="Creates a new report">
+               tooltip="Run the selected report">
          </command>
       </menuContribution>
    </extension>

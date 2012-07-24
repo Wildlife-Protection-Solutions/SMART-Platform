@@ -26,65 +26,21 @@ import java.util.HashMap;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * Abstract class for ui component for displaying report parameters.
- * <p>Each report parameter types needs a distinct implementation.<p>
- * 
+ * Interface all components that collect birt parameters must implement
  * @author egouge
  * @since 1.0.0
  */
-public abstract class AbstractBirtParameter implements IBirtParameterComponent {
+public interface IBirtParameterComponent {
 
-	private String paramName = null;
-	private String displayText = null;
-	
 	/**
-	 * Creates anew parameter element
-	 * @param name the parameter name
-	 * @param displayText the parameter display text
+	 * @return a map of the parameter names to the parameter values
 	 */
-	public AbstractBirtParameter(String name, String displayText){
-		this.paramName = name;
-		this.displayText = displayText;
-	}
+	public HashMap<String, Object> getParameters();
 	
 	/**
-	 * Creates the ui component for collecting the parameter information
+	 * creates the ui composite for displaying to the user
 	 * @param parent
 	 * @return
 	 */
-	public abstract Composite createComposite(Composite parent);
-	
-	/**
-	 * 
-	 * @return the parameter name
-	 */
-	public String getParameterName(){
-		return this.paramName;
-	}
-	
-	/**
-	 * 
-	 * @return the display text
-	 */
-	protected String getDisplayText(){
-		if (this.displayText != null){
-			return this.displayText;
-		}else{
-			return this.paramName;
-		}
-	}
-	
-	public abstract Object getParameterValue();
-	/**
-	 * 
-	 * @return the parameter value selected by the user
-	 */
-	@Override
-	public HashMap<String, Object> getParameters(){
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put(getParameterName(), getParameterValue());
-		return params;
-		
-	}
-	
+	public Composite createComposite(Composite parent);
 }
