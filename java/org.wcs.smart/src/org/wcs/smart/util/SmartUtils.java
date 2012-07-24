@@ -24,6 +24,7 @@ package org.wcs.smart.util;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -37,6 +38,12 @@ import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -479,6 +486,57 @@ public class SmartUtils {
 		}
 		throw new IllegalStateException("Failed to create temporary directory");
 		
+	}
+	
+	/**
+	 * Closes all editor of the given id and input.  Users are not given
+	 * the option to save changes.
+	 * 
+	 * @param editorId
+	 * @param input
+	 */
+
+	public static void forceClose(String editorId, IEditorInput input) throws Exception{		
+		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i = 0; i < windows.length; i ++){
+			for (int j = 0; j < windows[i].getPages().length; j ++){
+				IEditorReference[] ref = windows[i].getPages()[j].getEditorReferences();
+				ArrayList<IEditorReference> toClose = new ArrayList<IEditorReference>();
+				for (int k = 0; k < ref.length; k ++){
+					if (ref[k].getId().equals(editorId) && ref[k].getEditorInput().equals(input)){
+						toClose.add(ref[k]);
+						
+					}
+				}
+				if (toClose.size() > 0){
+					windows[i].getPages()[j].closeEditors(toClose.toArray(new IEditorReference[toClose.size()]), false);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Closes all views of the given id.
+	 * 
+	 * @param viewId primary view id
+	 * @param secondaryId secondary view id
+	 * 
+	 */
+	public static void forceCloseView(String viewId, String secondaryId) throws Exception{
+		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i = 0; i < windows.length; i ++){
+			for (int j = 0; j < windows[i].getPages().length; j ++){
+				IViewReference[] ref = windows[i].getPages()[j].getViewReferences();
+				ArrayList<IViewReference> toClose = new ArrayList<IViewReference>();
+				for (int k = 0; k < ref.length; k ++){
+					if (ref[k].getId().equals(viewId) && ref[k].getSecondaryId().equals(secondaryId)){
+						toClose.add(ref[k]);
+						windows[i].getPages()[j].hideView(ref[k].getView(false));
+						
+					}
+				}
+			}
+		}
 	}
 	
 }
