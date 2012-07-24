@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.parser.internal.filter;
+package org.wcs.smart.query.parser.filter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +29,8 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.util.SmartUtils;
 

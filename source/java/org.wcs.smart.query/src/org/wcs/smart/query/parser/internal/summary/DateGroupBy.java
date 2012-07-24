@@ -33,10 +33,9 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.ListItem;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
-import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FILTER_OP;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.xml.model.UuidItemType;
@@ -126,7 +125,7 @@ public class DateGroupBy implements IGroupBy {
 		if (df == null){
 			throw new IllegalStateException("Invalid date filter.");
 		}else{
-			if (df.getDateFilterOption() == DATE_FILTER_OP.ALL){
+			if (df.getDateFilterOption() == PatrolQueryOptions.DATE_FILTER_OP.ALL){
 				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca";
 				Query q = session.createQuery(hql);
 				q.setParameter("ca", SmartDB.getCurrentConservationArea());

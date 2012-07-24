@@ -47,9 +47,9 @@ import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -57,7 +57,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  * Content provider for gridded query options.  Includes
  * value and group by options.
  * 
- * @author egouge
+ * @author jeff
  * @since 1.0.0
  */
 public class GriddedQueryContentProvider  implements ITreeContentProvider {

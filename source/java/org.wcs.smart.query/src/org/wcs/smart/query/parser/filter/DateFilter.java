@@ -19,10 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.parser.internal.filter;
+package org.wcs.smart.query.parser.filter;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +28,10 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
+import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
@@ -68,42 +70,20 @@ public class DateFilter implements IFilter {
 		}
 	}
 	
-	/**
-	 * Possible date filters 
-	 * 
-	 * @author Emily
-	 * @since 1.0.0
-	 */
-	public static enum DATE_FILTER_OP{
-		LAST_30_DAYS("Last 30 Days", "last30days"),
-		LAST_60_DAYS("Last 60 Days", "last60days"),
-		MONTH_TO_DATE("Month to Date", "monthtodate"),
-		LAST_MONTH("Last Month", "lastmonth"),
-		YEAR_TO_DATE("Year to Date", "yeartodate"),
-		ALL("All Dates", "alldates"),
-		CUSTOM("Custom ...", "custom");
-		
-		public String guiName;
-		public String key;
-		
-		private DATE_FILTER_OP(String name, String key){
-			this.guiName = name;
-			this.key = key;
-		}
-	}
+	
 	
 	private DATE_FIELD_OP dateField;
-	private DATE_FILTER_OP dateFilter;
+	private PatrolQueryOptions.DATE_FILTER_OP dateFilter;
 	
 	private java.sql.Date startDate;
 	private java.sql.Date endDate;
 	
-	public DateFilter(DATE_FIELD_OP dateField, DATE_FILTER_OP dateFilter){
+	public DateFilter(DATE_FIELD_OP dateField, PatrolQueryOptions.DATE_FILTER_OP dateFilter){
 		this.dateField  = dateField;
 		this.dateFilter = dateFilter;
 	}
 	
-	public DateFilter(DATE_FIELD_OP dateField, DATE_FILTER_OP dateFilter, java.sql.Date startDate, java.sql.Date endDate){
+	public DateFilter(DATE_FIELD_OP dateField, PatrolQueryOptions.DATE_FILTER_OP dateFilter, java.sql.Date startDate, java.sql.Date endDate){
 		this.dateField  = dateField;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -145,54 +125,10 @@ public class DateFilter implements IFilter {
 	/**
 	 * @return the date filter option represented by this date filter
 	 */
-	public DATE_FILTER_OP getDateFilterOption(){
+	public PatrolQueryOptions.DATE_FILTER_OP getDateFilterOption(){
 		return this.dateFilter;
 	}
 	
-	public static java.sql.Date[] findDates(DATE_FILTER_OP filter){
-		GregorianCalendar cal = new GregorianCalendar();
-
-		if (filter == DATE_FILTER_OP.LAST_30_DAYS) {
-			cal.setTimeInMillis((long) (cal.getTime().getTime() - (30 * 24 * 60 * 60 * 1000.0)));
-			java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-			return new java.sql.Date[] { d };
-		} else if (filter == DATE_FILTER_OP.LAST_60_DAYS) {
-			cal.setTimeInMillis((long) (cal.getTime().getTime() - (60 * 24 * 60 * 60 * 1000.0)));
-			java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-			return new java.sql.Date[] { d };
-
-		} else if (filter == DATE_FILTER_OP.MONTH_TO_DATE) {
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-			return new java.sql.Date[] { d };
-
-		} else if (filter == DATE_FILTER_OP.YEAR_TO_DATE) {
-			cal.set(Calendar.MONTH, 0);
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-			return new java.sql.Date[] { d };
-		} else if (filter == DATE_FILTER_OP.LAST_MONTH){
-			int year = cal.get(Calendar.YEAR);
-			int month = cal.get(Calendar.MONTH);
-			
-			int lastyear = year;
-			int lastmonth = month;
-			lastmonth --;
-			if (lastmonth < 0){
-				lastmonth = 11;
-				lastyear --;
-			}
-			
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
-			
-			cal.set(Calendar.MONTH, lastmonth);
-			cal.set(Calendar.YEAR, lastyear);
-			java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
-			return new java.sql.Date[]{d2, d1};
-		}
-		return null;
-	}
 	
 	/**
 	 * Determine start and end date of date filter  
@@ -201,9 +137,9 @@ public class DateFilter implements IFilter {
 	 * @return the dates associated with the date filter
 	 */
 	public java.sql.Date[] getDates() {
-		java.sql.Date[] dates = findDates(dateFilter);
+		java.sql.Date[] dates = dateFilter.getDates();
 		if (dates == null){
-			if (dateFilter == DATE_FILTER_OP.CUSTOM){
+			if (dateFilter == PatrolQueryOptions.DATE_FILTER_OP.CUSTOM){
 				return new java.sql.Date[]{startDate, endDate};
 			}
 		}
@@ -214,15 +150,14 @@ public class DateFilter implements IFilter {
 	private String asSql(String field){
 		java.sql.Date[] bits = getDates(); 
 		String f = "";
-		if (dateFilter == DATE_FILTER_OP.LAST_30_DAYS ||
-				dateFilter == DATE_FILTER_OP.LAST_60_DAYS ||
-						dateFilter == DATE_FILTER_OP.MONTH_TO_DATE ||
-								dateFilter == DATE_FILTER_OP.YEAR_TO_DATE
-				){
+		if (dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_30_DAYS ||
+				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_60_DAYS ||
+				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.MONTH_TO_DATE ||
+				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.YEAR_TO_DATE){
 			f =  " ( " + field + " >= '" + bits[0].toString() + "' ) ";
-		}else if (dateFilter == DATE_FILTER_OP.LAST_MONTH){
+		}else if (dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_MONTH){
 			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) ";
-		}else if (dateFilter == DATE_FILTER_OP.CUSTOM){
+		}else if (dateFilter == PatrolQueryOptions.DATE_FILTER_OP.CUSTOM){
 			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) ";
 			
 		}

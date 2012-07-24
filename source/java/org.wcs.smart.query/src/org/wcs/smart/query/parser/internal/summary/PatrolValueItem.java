@@ -22,8 +22,8 @@
 package org.wcs.smart.query.parser.internal.summary;
 
 import org.hibernate.Session;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 

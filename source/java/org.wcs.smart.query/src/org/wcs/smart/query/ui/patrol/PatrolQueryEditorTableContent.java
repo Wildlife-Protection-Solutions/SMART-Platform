@@ -44,7 +44,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;

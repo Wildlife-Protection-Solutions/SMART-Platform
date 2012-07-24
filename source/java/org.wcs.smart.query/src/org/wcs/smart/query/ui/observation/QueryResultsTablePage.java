@@ -31,7 +31,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**

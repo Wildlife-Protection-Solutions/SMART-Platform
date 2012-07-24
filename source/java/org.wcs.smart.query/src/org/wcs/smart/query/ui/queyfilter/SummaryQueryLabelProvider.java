@@ -5,10 +5,10 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 
 public class SummaryQueryLabelProvider extends QueryFilterLabelProvider {
 

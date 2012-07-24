@@ -47,9 +47,9 @@ import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
+import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
-import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 
 /**

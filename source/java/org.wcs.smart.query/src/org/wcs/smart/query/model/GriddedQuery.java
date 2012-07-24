@@ -36,8 +36,8 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.engine.DerbyGridEngine;
-import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
+import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
