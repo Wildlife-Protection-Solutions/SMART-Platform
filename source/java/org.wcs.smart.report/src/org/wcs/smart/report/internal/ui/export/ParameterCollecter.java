@@ -21,18 +21,28 @@
  */
 package org.wcs.smart.report.internal.ui.export;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import org.eclipse.birt.report.engine.api.IGetParameterDefinitionTask;
 import org.eclipse.birt.report.engine.api.IParameterDefn;
+import org.eclipse.birt.report.engine.api.IParameterDefnBase;
+import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
+import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.report.internal.ui.viewer.parameter.DateParameter;
+import org.wcs.smart.report.internal.ui.viewer.parameter.BooleanParameterComponent;
+import org.wcs.smart.report.internal.ui.viewer.parameter.DateParameterComponent;
+import org.wcs.smart.report.internal.ui.viewer.parameter.GroupedReportParameters;
+import org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameterComponent;
+import org.wcs.smart.report.internal.ui.viewer.parameter.NumberParameterComponent;
 import org.wcs.smart.report.internal.ui.viewer.parameter.ReportParameterDialog;
+import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
+import org.wcs.smart.report.internal.ui.viewer.parameter.StringParameterComponent;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
@@ -50,7 +60,7 @@ import org.wcs.smart.report.model.Report;
  */
 public class ParameterCollecter {
 
-	private HashMap<String, IParameterDefn> allParameters = null;
+	private HashMap<String, IParameterDefnBase> allParameters = null;
 	private HashMap<String, Object> paramValues = null;
 	
 	/**
@@ -60,7 +70,7 @@ public class ParameterCollecter {
 	 * @throws Exception
 	 */
 	public  HashMap<String, Object> getParameters(Report[] reports) throws Exception{
-		allParameters = new HashMap<String, IParameterDefn>();
+		allParameters = new HashMap<String, IParameterDefnBase>();
 		for (int i = 0; i < reports.length; i++){
 			getParameters(reports[i]);
 		}
@@ -78,38 +88,97 @@ public class ParameterCollecter {
 		
 		final IReportRunnable design = engine.openReportDesign(r.getFullReportFilename().getAbsolutePath());
 		
+	
+		
 		final IGetParameterDefinitionTask paramDefnTask = engine.createGetParameterDefinitionTask( design );
-		Collection<?> parameters = paramDefnTask.getParameterDefns(false);
+		Collection<?> parameters = paramDefnTask.getParameterDefns(true);
+		
 		for (Iterator<?> iterator = parameters.iterator(); iterator.hasNext();) {
-			final IParameterDefn param = (IParameterDefn) iterator.next();
-			IParameterDefn def = allParameters.get(param.getName());
+			IParameterDefnBase param = (IParameterDefnBase)iterator.next();
+			IParameterDefnBase def = allParameters.get(param.getName());
 			if (def == null){
 				allParameters.put(param.getName(), param);	
 			}else{
-				if (def.getDataType() != param.getDataType()){
-					throw new Exception("Reports contain parameters with the same name (" + param.getName() + ") but require different datatypes.  These reports cannot be run at the same time.");
+				if (def.getParameterType() != param.getParameterType()){
+					throw new Exception("Reports contain parameters with the same name (" + param.getName() + ") but require different parameter types.  These reports cannot be run at the same time.");
 				}
+				//TODO: implement more here to make sure they are the same
 			}
+			
 		}
 		
 	}
 	
+	private IBirtParameterComponent getComponentForParameter(IParameterDefn ptype) throws Exception{
+		Object defaultValue = null;
+		if (ptype instanceof ScalarParameterDefn){
+			defaultValue = ((ScalarParameterDefn)ptype).getDefaultValue(); 
+		}
+		
+		if (ptype.getDataType() == IParameterDefn.TYPE_DATE || 
+				ptype.getDataType() == IParameterDefn.TYPE_TIME ||
+				ptype.getDataType() == IParameterDefn.TYPE_DATE_TIME) {
+			boolean date = ptype.getDataType() == IParameterDefn.TYPE_DATE  || ptype.getDataType() == IParameterDefn.TYPE_DATE_TIME;
+			boolean time = ptype.getDataType() == IParameterDefn.TYPE_TIME  || ptype.getDataType() == IParameterDefn.TYPE_DATE_TIME;
+			return new DateParameterComponent(ptype.getName(), ptype.getPromptText(), date, time, defaultValue);
+		}else if (ptype.getDataType() == IParameterDefn.TYPE_DECIMAL){
+			return new NumberParameterComponent(ptype.getName(), ptype.getPromptText(), NumberParameterComponent.DOUBLE_VALIDATOR, defaultValue);
+		}else if (ptype.getDataType() == IParameterDefn.TYPE_INTEGER){
+			return new NumberParameterComponent(ptype.getName(), ptype.getPromptText(), NumberParameterComponent.INTEGER_VALIDATOR, defaultValue);
+		}else if (ptype.getDataType() == IParameterDefn.TYPE_FLOAT){
+			return new NumberParameterComponent(ptype.getName(), ptype.getPromptText(), NumberParameterComponent.FLOAT_VALIDATOR, defaultValue);
+		}else if (ptype.getDataType() == IParameterDefn.TYPE_STRING){
+			return new StringParameterComponent(ptype.getName(), ptype.getPromptText(), defaultValue);
+		}else if (ptype.getDataType() == IParameterDefn.TYPE_BOOLEAN){
+			return new BooleanParameterComponent(ptype.getName(), ptype.getPromptText(), defaultValue);
+		}else{
+			throw new Exception("Parameter type " + ptype.getDataType() + " is not supported.");
+		}		
+	}
 	/*
 	 * Displays a parameter dialog to the user where the user can enter
 	 * values.
 	 */
-	private void displayParameters() {
-		final ReportParameterDialog dialog = new ReportParameterDialog(Display
-				.getDefault().getActiveShell());
-
-		for (Iterator<IParameterDefn> iterator = allParameters.values()
-				.iterator(); iterator.hasNext();) {
-			IParameterDefn type = (IParameterDefn) iterator.next();
+	private void displayParameters( ) throws Exception{
+		if (allParameters.size() == 0){
+			//no parameters to get for this report
+			paramValues = new HashMap<String, Object>();
+			return;
+		}
+		final ReportParameterDialog dialog = new ReportParameterDialog(Display.getDefault().getActiveShell());
+		for (Iterator<IParameterDefnBase> iterator = allParameters.values().iterator(); iterator.hasNext();) {
+			IParameterDefnBase paramPart = (IParameterDefnBase)iterator.next();
 			
-			if (type.getDataType() == IParameterDefn.TYPE_DATE) {
-				dialog.addComponent(new DateParameter(type.getName(), type.getDisplayName()));
+			if (paramPart instanceof IParameterDefn){
+				IBirtParameterComponent part = getComponentForParameter((IParameterDefn) paramPart);
+				if (part != null){
+					dialog.addComponent(part);
+				}
+			}else if(paramPart instanceof IParameterGroupDefn){
+				IParameterGroupDefn def = (IParameterGroupDefn)paramPart;
+				GroupedReportParameters groupedComponent = new GroupedReportParameters(def);
+				
+				if (def.getName().equals(SmartDateParameterComponent.GROUP_PARAMETER_NAME)){
+					SmartDateParameterComponent part = new SmartDateParameterComponent(def);
+					groupedComponent.addComponent(part);
+				}else{
+					ArrayList<?> parts = def.getContents();
+					for (Object object : parts) {
+						if (object instanceof IParameterDefn){
+							IBirtParameterComponent part = getComponentForParameter((IParameterDefn) object);
+							if (part != null){
+								groupedComponent.addComponent(part);
+							}
+						}else{
+							throw new Exception("Parameter of class " + paramPart.getClass().getName() + " is not supported.");		
+						}
+					}
+				}
+				dialog.addComponent(groupedComponent);
+				
+			}else{
+				throw new Exception("Parameter of class " + paramPart.getClass().getName() + " is not supported.");
 			}
-			//TODO: add support for other types
 		}
 
 		Display.getDefault().syncExec(new Runnable() {

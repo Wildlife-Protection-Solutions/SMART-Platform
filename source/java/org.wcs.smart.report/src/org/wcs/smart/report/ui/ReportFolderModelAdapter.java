@@ -106,6 +106,7 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 		ReportFolder parent = ((ReportFolder)object);
 		Session s = HibernateManager.openSession();
 		try {
+			s.beginTransaction();
 			List<Object> kids = new ArrayList<Object>();
 
 			// get kid folders
@@ -118,6 +119,7 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 			kids.addAll(kidQueries);
 			// }
 			collector.add(kids.toArray(), monitor);
+			s.getTransaction().commit();
 		}finally{
 			s.close();
 		}

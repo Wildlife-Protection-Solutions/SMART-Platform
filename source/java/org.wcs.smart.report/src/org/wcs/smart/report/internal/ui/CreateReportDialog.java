@@ -185,8 +185,8 @@ public class CreateReportDialog extends TitleAreaDialog {
 			setErrorMessage("Report name must not be blank.");
 			ok = false;
 		}
-		if (!SmartUtils.isSimpleString(reportName, SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Report.MAX_NAME_LENGTH)){
-			setErrorMessage("Report names must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc + " characters and be less than " + Report.MAX_NAME_LENGTH + " character is length.");
+		if (!SmartUtils.isSimpleString(reportName, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Report.MAX_NAME_LENGTH)){
+			setErrorMessage("Report names must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + " characters and be less than " + Report.MAX_NAME_LENGTH + " character is length.");
 			ok = false;
 		}
 		if (selectedItem == null) {

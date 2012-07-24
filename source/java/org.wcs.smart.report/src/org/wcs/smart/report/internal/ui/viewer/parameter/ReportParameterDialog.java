@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class ReportParameterDialog extends TitleAreaDialog {
 	
-	private List<AbstractBirtParameter> params = new ArrayList<AbstractBirtParameter>();
+	private List<IBirtParameterComponent> params = new ArrayList<IBirtParameterComponent>();
 	private HashMap<String, Object> values = null;
 	
 	/**
@@ -61,7 +61,7 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Run Report",
+		createButton(parent, IDialogConstants.OK_ID, "Continue",
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
@@ -78,10 +78,13 @@ public class ReportParameterDialog extends TitleAreaDialog {
 		comp.setLayout(new GridLayout(1, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		for(AbstractBirtParameter param: params){
-			Composite c = param.createComponent(comp);
+		for(IBirtParameterComponent param: params){
+			Composite c = param.createComposite(comp);
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
+		
+		super.getShell().setText("Report Parameters");
+		setMessage("Enter the required report parameters.");
 		
 		return comp;
 	}
@@ -96,7 +99,7 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	 * Adds birt parameter component
 	 * @param parameter
 	 */
-	public void addComponent(AbstractBirtParameter parameter){
+	public void addComponent(IBirtParameterComponent parameter){
 		params.add(parameter);
 	}
 	
@@ -111,8 +114,8 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	private HashMap<String, Object> updateValues(){
 		values = new HashMap<String, Object>();
 		
-		for(AbstractBirtParameter param: params){
-			values.put(param.getParameterName(), param.getParameterValue());
+		for(IBirtParameterComponent param: params){
+			values.putAll(param.getParameters());
 		}
 		return values;
 	}

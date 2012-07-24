@@ -81,9 +81,6 @@ public class ReportView extends ViewPart {
 				IReportEngine engine = ReportManager.getReportEngine();
 				final IReportRunnable design = engine.openReportDesign(report.getFullReportFilename().getAbsolutePath());
 				
-				String reportTitle = design.getProperty("title").toString();
-				updateName(reportTitle);
-				
 				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
 				IRenderOption options = new HTMLRenderOption();;
 				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -135,13 +132,21 @@ public class ReportView extends ViewPart {
 	public void setFocus() {
 		
 	}
+	
+	/**
+	 * 
+	 * @return the report associated with this view
+	 */
+	public Report getReport(){
+		return this.report;
+	}
 
 	/**
 	 * Re-runs the report
 	 */
-	public void refreshReport(){
+	public void refreshReport(boolean refreshParameters){
 		try{
-			previewReport(); //$NON-NLS-1$
+			previewReport(refreshParameters); //$NON-NLS-1$
 		}catch (Exception ex){
 			ReportPlugIn.log("Could not run report: " + ex.getMessage(), ex);
 		}
@@ -153,33 +158,50 @@ public class ReportView extends ViewPart {
 	 */
 	public void setReport(Report report){
 		this.report = report;
-		refreshReport();
+		updateName();
+		refreshReport(true);
 	}
 	
 	/**
-	 * Updates the report view name
-	 * 
-	 * @param reportTitle
+	 * Sets the report to display in the review and runs the report.
+	 * @param report
 	 */
-	private void updateName(final String reportTitle) {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				setPartName("Report View" + " - " + reportTitle);
-			}
-		});
+	public void setReport(Report report, HashMap<String, Object> reportParamseters){
+		this.report = report;
+		updateName();
+		this.selectedParams = reportParamseters;
+		refreshReport(false);
 	}
 	
-	private void previewReport() throws Exception {
+	/**
+	 * Updates the report view tab name
+	 * 
+	 */
+	private void updateName() {
+		setPartName(report.getName());
+	}
+	
+	private void previewReport(boolean refreshParameters) throws Exception {
 		if (report == null){
 			ReportPlugIn.displayLog("Report not set.", null);
 			return; 
 		}
 		browser.setText("Running Report....");
-		selectedParams  = getParameters();
-		if (selectedParams != null){
-			reportRunner.schedule();
+		if (refreshParameters){
+			try{
+				selectedParams  = getParameters();
+				if (selectedParams == null){
+					browser.setText("Report cancelled.  Re-run report to view report.");
+					return;
+				}
+			}catch (Exception ex){
+				browser.setText("Error gathering parameters. " + ex.getMessage());
+				ReportPlugIn.log("Error gathering parameters. ", ex);
+				return;
+			}
 		}
+		reportRunner.schedule();
+		
 	}
 	
 	private HashMap<String, Object> getParameters() throws Exception{

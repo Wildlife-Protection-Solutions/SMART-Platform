@@ -63,7 +63,7 @@ public class ExportReportEngine {
 		}
 		
 		for (int i = 0; i < reports.size(); i ++){
-			RunReportJob rr = new RunReportJob(reports.get(0), getOutputFileName(reports.get(i), directory,outputFormat),outputFormat, params);
+			RunReportJob rr = new RunReportJob(reports.get(i), getOutputFileName(reports.get(i), directory,outputFormat),outputFormat, params);
 			rr.schedule();
 		}
 	}

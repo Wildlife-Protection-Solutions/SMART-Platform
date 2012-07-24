@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
@@ -44,12 +45,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
+import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -104,15 +108,19 @@ public class ReportListView extends ViewPart {
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			//TODO: link the current view to the report selection
-//			if (partRef.getId().equals(QueryResultsEditor.ID) || partRef.getId().equals(SummaryEditor.ID) ){
-//				IWorkbenchPart part = partRef.getPart(false);
-//				if (part instanceof EditorPart){				
-//					IStructuredSelection selection = new StructuredSelection(((EditorPart)part).getEditorInput());
-//					queryList.setSelection(selection);
-////					QueryListView.this.getSite().getSelectionProvider().setSelection(selection); 
+			if (partRef.getId().equals(ReportView.ID)){
+				
+				IWorkbenchPart part = partRef.getPart(false);
+				if (part != null && part instanceof ReportView){
+					if (((ReportView)part).getReport() != null){
+						IStructuredSelection selection = new StructuredSelection(((ReportView)part).getReport());
+						reportList.setSelection(selection);
+					}
 //					focusCellManager.getFocusCell();
-//				}	
-//			}
+				}
+				
+				
+			}
 		}
 	};
 	
@@ -219,9 +227,10 @@ public class ReportListView extends ViewPart {
 		reportList.setCellModifier(new ReportItemNameCellEditor());
 		
 		//TODO: add support for multi-selection
-		//TreeViewerFocusCellManager focusCellManager 
+		//TreeViewerFocusCellManager focusCellManager
+		
 		new TreeViewerFocusCellManager
-				(reportList, new FocusCellOwnerDrawHighlighter(reportList));
+				(reportList, new MultiFocusCellOwnerDrawHighlighter(reportList));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
 				reportList) {
 			
@@ -231,6 +240,8 @@ public class ReportListView extends ViewPart {
 			}
 		};		
 		TreeViewerEditor.create(reportList, actSupport, ColumnViewerEditor.DEFAULT);
+		
+		//on double click open report
 		reportList.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override

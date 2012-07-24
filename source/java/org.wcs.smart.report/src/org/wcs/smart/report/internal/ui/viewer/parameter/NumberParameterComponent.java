@@ -1,0 +1,140 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.report.internal.ui.viewer.parameter;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.report.ReportPlugIn;
+
+/**
+ * Numeric parameter component.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class NumberParameterComponent extends AbstractBirtParameter{
+
+	/**
+	 * a validator that validates input is integer
+	 */
+	public final static INumberValidator INTEGER_VALIDATOR = new INumberValidator() {
+		@Override
+		public Object validate(String text) throws Exception {
+			return Integer.parseInt(text);
+		}
+	};
+
+	/**
+	 * a validator that validates input is float
+	 */
+	public final static INumberValidator FLOAT_VALIDATOR = new INumberValidator() {
+
+		@Override
+		public Object validate(String text) throws Exception {
+			return  Float.parseFloat(text);
+		}
+	};
+
+	/**
+	 * a validator that validates input is double
+	 */
+	public final static INumberValidator DOUBLE_VALIDATOR = new INumberValidator() {
+
+		@Override
+		public Object validate(String text) throws Exception {
+			return Double.parseDouble(text);
+	}};
+				
+	private Text inputValue = null;
+	private INumberValidator validator;
+	private Object defaultValue;
+	
+	/**
+	 * @param name parameter name
+	 * @param displayText display text
+	 * @param validator validator
+	 */
+	public NumberParameterComponent(String name, String displayText, INumberValidator validator, Object defaultValue) {
+		super(name, displayText);
+		this.validator = validator;
+		this.defaultValue = defaultValue;
+	}
+
+	@Override
+	public Composite createComposite(Composite parent) {
+		
+		Composite param = new Composite(parent, SWT.NONE);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginWidth = gl.marginHeight = gl.horizontalSpacing = gl.verticalSpacing = 0;
+		param.setLayout(gl);
+		
+		Label lbl = new Label(param, SWT.NONE);
+		lbl.setText(getDisplayText() + ": ");
+		
+		inputValue = new Text(param, SWT.SINGLE | SWT.BORDER);
+		inputValue.addVerifyListener(new VerifyListener(){
+			@Override
+			public void verifyText(VerifyEvent e) {
+				 String oldS = ((Text) e.getSource()).getText();
+				 String newS = oldS.substring(0, e.start) + e.text + oldS.substring(e.end);
+				 try{
+					 validator.validate(newS);
+				 }catch(Exception ex){
+					 e.doit = false;
+				 }
+	
+			}});
+		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		inputValue.setText(defaultValue.toString());
+		
+		return param;
+	}
+
+	@Override
+	public Object getParameterValue() {
+		try{
+			return validator.validate(inputValue.getText());
+		}catch (Exception ex){
+			ReportPlugIn.log("Error converting parameter value." + ex.getMessage(), ex);
+			return null;
+		}
+	}
+
+}
+
+interface INumberValidator{
+	
+	/**
+	 * Validates the string returning the converted object 
+	 * @param text
+	 * @return
+	 * @throws Exception if string validation fails
+	 */
+	public Object validate(String text) throws Exception;
+	
+}
