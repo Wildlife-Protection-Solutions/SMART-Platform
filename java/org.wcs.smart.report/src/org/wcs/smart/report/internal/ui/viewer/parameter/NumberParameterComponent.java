@@ -110,7 +110,9 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	
 			}});
 		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		inputValue.setText(defaultValue.toString());
+		if (defaultValue != null){
+			inputValue.setText(defaultValue.toString());
+		}
 		
 		return param;
 	}
