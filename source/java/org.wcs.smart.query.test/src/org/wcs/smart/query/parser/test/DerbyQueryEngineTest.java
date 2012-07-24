@@ -28,7 +28,7 @@ import java.util.List;
 import org.junit.Test;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.parser.internal.filter.ConservationAreaFilter;
+import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 

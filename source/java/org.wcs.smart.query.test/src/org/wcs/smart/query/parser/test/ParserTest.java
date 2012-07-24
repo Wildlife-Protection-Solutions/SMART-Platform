@@ -81,6 +81,52 @@ public class ParserTest {
 		Assert.assertEquals(test.asString(), "attribute:n:age != 0.0");
 	}
 	
+	@Test
+	public void testAreaFilters() throws Exception{
+		String query = "area:wp:CA:key";
+		IFilter test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "area:t:MNGT:key";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "area:t:ADMIN:key";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "area:wp:PATRL:key";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		query = "area:t:BA:key";
+		test = parseQuery(query);
+		Assert.assertEquals(test.asString(), query);
+		
+		try{
+			query = "area:p:BA:key";
+			test = parseQuery(query);
+			Assert.assertTrue(false);
+		}catch (Exception ex){
+			Assert.assertTrue(true);
+		}
+		
+		try{
+			query = "area:BA:key";
+			test = parseQuery(query);
+			Assert.assertTrue(false);
+		}catch (Exception ex){
+			Assert.assertTrue(true);
+		}
+		
+		try{
+			query = "area:t:ABC:key";
+			test = parseQuery(query);
+			Assert.assertTrue(false);
+		}catch (Exception ex){
+			Assert.assertTrue(true);
+		}
+	}
 	
 	@Test
 	public void testBooleanAttribute() throws Exception{
