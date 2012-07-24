@@ -64,7 +64,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider;
-import org.wcs.smart.query.ui.SourceProvider.QueryDefinitionType;
+import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 
 /**
  * A view that display the query filter options.
@@ -290,16 +290,16 @@ public class QueryFilterView extends ViewPart {
 		
 		
 		ISourceProviderService service = (ISourceProviderService)getSite().getService(ISourceProviderService.class);
-		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DEFINITION_TYPE);
+		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
 		provider.addSourceProviderListener(new ISourceProviderListener() {
 			
 			@Override
 			public void sourceChanged(int sourcePriority, String sourceName,
 					Object sourceValue) {
-				if (sourceName.equals(SourceProvider.QUERY_DEFINITION_TYPE)){
-					if (sourceValue == QueryDefinitionType.QUERY_FILTER){
+				if (sourceName.equals(SourceProvider.QUERY_DROP_TYPE)){
+					if (sourceValue == QueryDropType.FILTER_ITEM){
 						((StackLayout)main.getLayout()).topControl = filterComp;
-					}else if (sourceValue == QueryDefinitionType.QUERY_SUMMARY){
+					}else if (sourceValue == QueryDropType.SUMMARY_ITEM){
 						((StackLayout)main.getLayout()).topControl = summaryComp;
 					}else{
 						//default filter

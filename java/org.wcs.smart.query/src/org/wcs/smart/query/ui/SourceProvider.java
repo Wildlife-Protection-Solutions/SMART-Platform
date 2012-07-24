@@ -44,21 +44,21 @@ import org.eclipse.ui.ISources;
  */
 public class SourceProvider extends AbstractSourceProvider {
 
-	public static enum QueryDefinitionType{
-		QUERY_FILTER, QUERY_SUMMARY
+	public static enum QueryDropType{
+		FILTER_ITEM, SUMMARY_ITEM
 	}
 	
 	public final static String SELECTED_FILTERS = "org.wcs.smart.query.ui.filteradd";
 	public final static String QUERY_VALID = "org.wcs.smart.query.ui.queryvalid";
 	public final static String QUERY_ERROR_MESSAGE = "org.wcs.smart.query.ui.queryerrormessage";
-	public final static String QUERY_DEFINITION_TYPE = "org.wcs.smart.query.ui.querybuildertype";
+	public final static String QUERY_DROP_TYPE = "org.wcs.smart.query.ui.querybuildertype";
 
 	HashMap<String, Object> data = new HashMap<String, Object>();
 	
 	public SourceProvider(){
 		data.put(SELECTED_FILTERS, IEvaluationContext.UNDEFINED_VARIABLE);
 		data.put(QUERY_VALID, IEvaluationContext.UNDEFINED_VARIABLE);
-		data.put(QUERY_DEFINITION_TYPE, IEvaluationContext.UNDEFINED_VARIABLE);
+		data.put(QUERY_DROP_TYPE, IEvaluationContext.UNDEFINED_VARIABLE);
 	}
 	/**
 	 * @see org.eclipse.ui.ISourceProvider#dispose()
@@ -77,9 +77,9 @@ public class SourceProvider extends AbstractSourceProvider {
 		fireSourceChanged(ISources.ACTIVE_PART_ID, SELECTED_FILTERS, selection);
 	}
 	
-	public void setQueryDefinitionType(QueryDefinitionType type){
-		data.put(QUERY_DEFINITION_TYPE, type);
-		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_DEFINITION_TYPE, type);
+	public void setQueryDefinitionType(QueryDropType type){
+		data.put(QUERY_DROP_TYPE, type);
+		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_DROP_TYPE, type);
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class SourceProvider extends AbstractSourceProvider {
 	 */
 	@Override
 	public String[] getProvidedSourceNames() {
-		return new String[]{SELECTED_FILTERS, QUERY_VALID, QUERY_DEFINITION_TYPE};
+		return new String[]{SELECTED_FILTERS, QUERY_VALID, QUERY_DROP_TYPE};
 	}
 
 }

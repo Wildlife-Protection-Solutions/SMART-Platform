@@ -33,6 +33,7 @@ import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
+import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.BracketDropItem.BracketType;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
 import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
@@ -46,6 +47,7 @@ import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
 public class DropItemFactory {
 
 	public static final DropItemFactory INSTANCE = new DropItemFactory();
+
 	/**
 	 * Creates a new factory
 	 * 
@@ -333,28 +335,32 @@ public class DropItemFactory {
 	 * given object based on the type of the object.
 	 * 
 	 * @param object The object to create drop item for
-	 * @param queryType the query type (the same drop item
-	 * may create different objects based on the query type)
+	 * @param queryType the query type (summary,query, folder) 
+	 * @param dropType the type of drop object to create (filter or summary item) 
 	 * 
 	 * @return null or a array of drop items created
 	 */
-	public DropItem[] createDropItem(Object object, Query.QueryType queryType){
+	public DropItem[] createDropItem(Object object, QueryType queryType, QueryDropType dropType){
 		if (object instanceof Category) {
 			return new DropItem[]{ createCategoryDropItem((Category) object) };
+		
 		} else if (object instanceof CategoryAttribute) {
 			return new DropItem[]{ createAttributeDropItem( (CategoryAttribute) object)};
+		
 		} else if (object instanceof Attribute) {
 			return new DropItem[]{ createAttributeDropItem((Attribute) object)};
 			
 		} else if (object instanceof QueryFilterContentProvider.OtherItems) {
 			return createOtherDropItem(
 							(QueryFilterContentProvider.OtherItems) object);
+		
 		} else if (object instanceof PatrolValueOption) {
 			return new DropItem[]{createPatrolValueDropItem(
 							(PatrolValueOption) object)};
 
 		} else if (object instanceof PatrolQueryOption) {
-			if (queryType == QueryType.SUMMARY){
+			
+			if (dropType == QueryDropType.SUMMARY_ITEM){
 				return new DropItem[]{createPatrolGroupByDropItem(
 						(PatrolQueryOption) object)};
 			}else{
@@ -372,6 +378,8 @@ public class DropItemFactory {
 			if (queryType == QueryType.OBSERVATION){
 				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 			}else if (queryType == QueryType.PATROL){
+				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
+			}else if (queryType == QueryType.SUMMARY){
 				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}
 			return null;

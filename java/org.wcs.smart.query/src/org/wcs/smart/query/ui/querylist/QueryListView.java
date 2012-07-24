@@ -111,9 +111,6 @@ public class QueryListView extends ViewPart {
 				if (part instanceof EditorPart){				
 					IStructuredSelection selection = new StructuredSelection(((EditorPart)part).getEditorInput());
 					queryList.setSelection(selection);
-//					QueryListView.this.getSite().getSelectionProvider().setSelection(selection);
-					//TODO: this needs to be fixed to work
-					//see 
 					focusCellManager.getFocusCell();
 				}	
 			}

@@ -43,6 +43,7 @@ import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.ui.SourceProvider;
+import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
@@ -213,8 +214,10 @@ public class QueryDefView extends ViewPart {
 		// add a listener for when items are added to the query
 		ISourceProviderService service = (ISourceProviderService) getSite()
 				.getService(ISourceProviderService.class);
-		SourceProvider provider = (SourceProvider) service
+		final SourceProvider provider = (SourceProvider) service
 				.getSourceProvider(SourceProvider.SELECTED_FILTERS);
+		
+		
 		provider.addSourceProviderListener(new ISourceProviderListener() {
 
 			@SuppressWarnings("rawtypes")
@@ -223,13 +226,17 @@ public class QueryDefView extends ViewPart {
 					Object sourceValue) {
 				if (currentPanel == null)
 					return;
+				
+				
 				if (sourceName == SourceProvider.SELECTED_FILTERS) {
+					QueryDropType dropType = (QueryDropType)provider.getCurrentState().get(SourceProvider.QUERY_DROP_TYPE);
 					IStructuredSelection selection = (IStructuredSelection) sourceValue;
 					boolean fireEvent = false;
 					
 					for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
 						Object object = (Object) iterator.next();
-						DropItem[] items = getDropItemFactory().createDropItem(object, current.getType());
+						System.out.println("DROP TYPE: " + dropType);
+						DropItem[] items = getDropItemFactory().createDropItem(object, current.getType(), dropType);
 						if (items == null ) continue;
 						for (int i = 0; i < items.length; i ++){
 							if (items[i] != null){
