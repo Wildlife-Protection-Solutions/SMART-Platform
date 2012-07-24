@@ -74,4 +74,5 @@ public abstract class QueryDefinitionComposite extends Composite{
 	 * Called when the panel is made visible. 
 	 */
 	protected abstract void visible();
+
 }

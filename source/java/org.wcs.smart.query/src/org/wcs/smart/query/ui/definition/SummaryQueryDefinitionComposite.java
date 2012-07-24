@@ -39,7 +39,7 @@ import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
-import org.wcs.smart.query.ui.SourceProvider.QueryDefinitionType;
+import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
 
@@ -104,11 +104,11 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ISourceProviderService service = (ISourceProviderService)parentView.getSite().getService(ISourceProviderService.class);
-				SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DEFINITION_TYPE);
+				SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
 				if (tabs.getSelectionIndex() == 0){
-					provider.setQueryDefinitionType(QueryDefinitionType.QUERY_SUMMARY);
+					provider.setQueryDefinitionType(QueryDropType.SUMMARY_ITEM);
 				}else{
-					provider.setQueryDefinitionType(QueryDefinitionType.QUERY_FILTER);
+					provider.setQueryDefinitionType(QueryDropType.FILTER_ITEM);
 				}
 			}
 		});
@@ -210,7 +210,8 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	public void visible(){
 		tabs.setSelection(0);
 		ISourceProviderService service = (ISourceProviderService)parentView.getSite().getService(ISourceProviderService.class);
-		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DEFINITION_TYPE);
-		provider.setQueryDefinitionType(QueryDefinitionType.QUERY_SUMMARY);
+		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
+		provider.setQueryDefinitionType(QueryDropType.SUMMARY_ITEM);
 	}
+
 }
