@@ -27,7 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.model.ListItem;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.DateGroupByOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 
 /**
  * Date group by drop item

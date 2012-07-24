@@ -24,7 +24,7 @@ package org.wcs.smart.query.ui.formulaDnd;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 
 /**
  * Patrol value drop item

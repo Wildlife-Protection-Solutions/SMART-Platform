@@ -26,9 +26,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider.DataModelItem;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 

@@ -42,8 +42,8 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.ListItem;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.util.SmartUtils;
 
 /**

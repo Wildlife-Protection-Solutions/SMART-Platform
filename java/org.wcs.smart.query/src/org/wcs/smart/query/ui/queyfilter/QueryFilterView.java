@@ -61,8 +61,8 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions;
-import org.wcs.smart.query.parser.internal.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 

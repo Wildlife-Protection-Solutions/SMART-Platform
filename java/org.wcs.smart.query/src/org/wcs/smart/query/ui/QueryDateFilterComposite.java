@@ -39,9 +39,10 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
-import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FIELD_OP;
-import org.wcs.smart.query.parser.internal.filter.DateFilter.DATE_FILTER_OP;
+import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
+import org.wcs.smart.query.parser.filter.DateFilter;
+import org.wcs.smart.query.parser.filter.DateFilter.DATE_FIELD_OP;
+
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -155,13 +156,13 @@ public class QueryDateFilterComposite extends Composite {
 		cmbFilterOptions.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element) {
-				if (element instanceof DateFilter.DATE_FILTER_OP){
-					return ((DateFilter.DATE_FILTER_OP)element).guiName;
+				if (element instanceof DATE_FILTER_OP){
+					return ((DATE_FILTER_OP)element).guiName;
 				}
 				return super.getText(element);
 			}
 		});
-		cmbFilterOptions.setInput(DateFilter.DATE_FILTER_OP.values());
+		cmbFilterOptions.setInput(DATE_FILTER_OP.values());
 	
 		cmbFilterOptions.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -172,7 +173,7 @@ public class QueryDateFilterComposite extends Composite {
 				
 				DATE_FILTER_OP filter = (DATE_FILTER_OP) ((IStructuredSelection)cmbFilterOptions.getSelection()).getFirstElement();
 				setCustom(filter == DATE_FILTER_OP.CUSTOM);
-				java.sql.Date bits[] = DateFilter.findDates(filter);
+				java.sql.Date bits[] = filter.getDates();
 				if (bits != null){
 					if (filter == DATE_FILTER_OP.LAST_30_DAYS ||
 							filter == DATE_FILTER_OP.LAST_60_DAYS 

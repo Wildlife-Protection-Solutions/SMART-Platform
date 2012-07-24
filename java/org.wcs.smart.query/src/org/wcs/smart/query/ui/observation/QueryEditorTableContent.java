@@ -42,7 +42,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
