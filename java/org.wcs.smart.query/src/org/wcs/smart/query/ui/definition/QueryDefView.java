@@ -235,7 +235,6 @@ public class QueryDefView extends ViewPart {
 					
 					for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
 						Object object = (Object) iterator.next();
-						System.out.println("DROP TYPE: " + dropType);
 						DropItem[] items = getDropItemFactory().createDropItem(object, current.getType(), dropType);
 						if (items == null ) continue;
 						for (int i = 0; i < items.length; i ++){
