@@ -57,7 +57,9 @@ public class StringParameterComponent extends AbstractBirtParameter{
 		
 		inputValue = new Text(param, SWT.SINGLE | SWT.BORDER);
 		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		inputValue.setText(this.defaultValue.toString());
+		if (this.defaultValue != null){
+			inputValue.setText(this.defaultValue.toString());
+		}
 		return param;
 	}
 

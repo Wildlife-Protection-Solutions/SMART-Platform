@@ -65,7 +65,7 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 		btnFalse = new Button(param, SWT.RADIO);
 		btnFalse.setText("False");
 		
-		if (defaultValue instanceof Boolean){
+		if (defaultValue != null && defaultValue instanceof Boolean){
 			btnTrue.setSelection(  (Boolean)defaultValue );
 			btnFalse.setSelection(  !(Boolean)defaultValue );
 		}else{

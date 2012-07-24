@@ -33,6 +33,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
@@ -67,6 +68,8 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		}
 	}
 
+	private ReportCaDeleteHandler deleteHandler = new ReportCaDeleteHandler();
+	
 	// The shared instance
 	private static ReportPlugIn plugin;
 
@@ -82,6 +85,8 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, ReportCaDeleteHandler.EXECUTE_ORDER);
 	}
 
 	public static void initReports() {
@@ -113,6 +118,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		ReportManager.endReportEngine();
+		
 		plugin = null;
 		super.stop(context);
 	}

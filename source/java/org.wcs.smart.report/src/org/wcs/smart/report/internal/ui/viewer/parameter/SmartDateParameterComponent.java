@@ -157,18 +157,18 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		java.sql.Date dates[] = op.getDates();
 		if (dates == null){
 			if (op == DATE_FILTER_OP.CUSTOM){
-				params.put(START_DATE_NAME, SmartUtils.getDate(startPicker));
-				params.put(END_DATE_NAME, SmartUtils.getDate(endPicker));	
+				params.put(START_DATE_NAME, new java.sql.Date(SmartUtils.getDate(startPicker).getTime()));
+				params.put(END_DATE_NAME, new java.sql.Date(SmartUtils.getDate(endPicker).getTime()));	
 			}else if (op == DATE_FILTER_OP.ALL){				
-				params.put(START_DATE_NAME, new Date(-2208998272375l));	//JAN 01 1900  
-				params.put(END_DATE_NAME, new Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
+				params.put(START_DATE_NAME, new java.sql.Date(-2208998272375l));	//JAN 01 1900  
+				params.put(END_DATE_NAME, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
 			}else{
 				throw new UnsupportedOperationException("CDate file " + op.guiName + " not supported for reports.");
 			}
 			
 		}else if (dates.length == 1){
 			params.put(START_DATE_NAME, dates[0]);
-			params.put(END_DATE_NAME, new Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything
+			params.put(END_DATE_NAME, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything
 		}else if (dates.length == 2){
 			params.put(START_DATE_NAME, dates[0]);
 			params.put(END_DATE_NAME, dates[1]);
