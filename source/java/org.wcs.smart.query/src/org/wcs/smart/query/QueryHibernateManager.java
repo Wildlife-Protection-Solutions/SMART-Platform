@@ -86,6 +86,10 @@ public class QueryHibernateManager {
 		c.setParameter("ca", SmartDB.getCurrentConservationArea());
 		List<?> datac = c.list();
 		
+		Query d = session.createQuery("select max(id) from GriddedQuery where conservationArea = :ca ");
+		d.setParameter("ca", SmartDB.getCurrentConservationArea());
+		List<?> datad = d.list();
+
 		int valuea = 1;
 		if( dataa != null && dataa.size() >= 1 && dataa.get(0) != null){
 			valuea = Integer.parseInt( (String)dataa.get(0) );
@@ -98,7 +102,11 @@ public class QueryHibernateManager {
 		if( datac != null && datac.size() >= 1 && datac.get(0) != null){
 			valuec = Integer.parseInt( (String)datac.get(0) );
 		}
-		int x = Math.max(Math.max(valuea, valueb), valuec);
+		int valued = 1;
+		if( datad != null && datad.size() >= 1 && datad.get(0) != null){
+			valued = Integer.parseInt( (String)datad.get(0) );
+		}
+		int x = Math.max(Math.max(Math.max(valuea, valueb), valuec), valued);
 		return QUERY_ID_FORMATTER.format( ++x );
 	}
 	

@@ -38,6 +38,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
@@ -59,6 +60,7 @@ public abstract class Query {
 	public enum QueryType{
 		OBSERVATION("ObservationQuery", QueryResultsEditor.ID),
 		SUMMARY("SummaryQuery", SummaryEditor.ID),
+		GRIDDED("GriddedQuery", GriddedEditor.ID),
 		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID);
 		
 		private String objectName;

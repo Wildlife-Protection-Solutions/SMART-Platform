@@ -46,6 +46,7 @@ public class QueryTypeDialog extends TitleAreaDialog {
 	
 	private Button btnObservation;
 	private Button btnPatrol;
+	private Button btnGridded;
 	
 	/**
 	 * @param parentShell
@@ -88,6 +89,10 @@ public class QueryTypeDialog extends TitleAreaDialog {
 		btnPatrol.setText("Patrol Query");
 		btnPatrol.setSelection(false);
 		
+		btnGridded = new Button(option, SWT.RADIO);
+		btnGridded.setText("Gridded Summary");
+		btnGridded.setSelection(false);
+		
 		setTitle("Query Type");
 		setMessage("Select the type of query you want to create.");
 		return composite;
@@ -116,6 +121,8 @@ public class QueryTypeDialog extends TitleAreaDialog {
 				selectedQueryType = QueryType.OBSERVATION;
 			}else if (btnPatrol.getSelection()){
 				selectedQueryType = QueryType.PATROL;
+			}else if (btnGridded.getSelection()){
+				selectedQueryType = QueryType.GRIDDED;
 			}
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}

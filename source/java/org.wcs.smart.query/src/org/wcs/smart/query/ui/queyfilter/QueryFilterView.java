@@ -83,9 +83,11 @@ public class QueryFilterView extends ViewPart {
 	
 	private TreeViewer filterTreeViewer;
 	private TreeViewer summaryTreeViewer;
+	private TreeViewer griddedTreeViewer;
 
 	private Composite filterComp;
 	private Composite summaryComp;
+	private Composite griddedComp;
 
 	private Composite main;
 	
@@ -98,6 +100,7 @@ public class QueryFilterView extends ViewPart {
 		public void modified() {
 			filterTreeViewer.setInput("Loading");
 			summaryTreeViewer.setInput("Loading");
+			griddedTreeViewer.setInput("Loading");
 			initialize();
 		}
 	};
@@ -160,11 +163,15 @@ public class QueryFilterView extends ViewPart {
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS, PatrolQueryOptions.DateGroupByOption.values());
 				summaryInput.put(SummaryQueryContentProvider.NodeType.GROUP_BY_NODE, dm);
 				
+				final HashMap<GriddedQueryContentProvider.NodeType, Object> griddedInput = new HashMap<GriddedQueryContentProvider.NodeType, Object> ();
+				griddedInput.put(GriddedQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
+
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						filterTreeViewer.setInput(input);
 						summaryTreeViewer.setInput(summaryInput);
+						griddedTreeViewer.setInput(griddedInput);
 					}});
 					
 
@@ -245,6 +252,10 @@ public class QueryFilterView extends ViewPart {
 		gl.marginHeight = gl.marginWidth = 0;
 		summaryComp.setLayout(gl);
 		
+		griddedComp = new Composite(main, SWT.NONE);
+		gl = new GridLayout(1, false);
+		griddedComp.setLayout(gl);
+
 		
 		FilteredTree fTree = new FilteredTree(filterComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
 		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
@@ -276,6 +287,22 @@ public class QueryFilterView extends ViewPart {
 		summaryTreeViewer.setAutoExpandLevel(2);
 		summaryTreeViewer.setInput("Loading...");
 		
+		fTree = new FilteredTree(griddedComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
+		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		griddedTreeViewer = fTree.getViewer();
+		griddedTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
+		griddedTreeViewer.setLabelProvider(new GriddedQueryLabelProvider());
+		griddedTreeViewer.setContentProvider(new GriddedQueryContentProvider());
+		griddedTreeViewer.addDoubleClickListener(new IDoubleClickListener() {			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				addItem();
+			}
+		});
+		griddedTreeViewer.setAutoExpandLevel(2);
+		griddedTreeViewer.setInput("Loading...");
+		
+
 		
 		Button btnAdd = new Button(outer, SWT.PUSH);
 		btnAdd.setText("Add to Query");
@@ -301,6 +328,8 @@ public class QueryFilterView extends ViewPart {
 						((StackLayout)main.getLayout()).topControl = filterComp;
 					}else if (sourceValue == QueryDropType.SUMMARY_ITEM){
 						((StackLayout)main.getLayout()).topControl = summaryComp;
+					}else if (sourceValue == QueryDropType.GRIDDED_ITEM){
+						((StackLayout)main.getLayout()).topControl = griddedComp;
 					}else{
 						//default filter
 						((StackLayout)main.getLayout()).topControl = filterComp;
@@ -340,8 +369,10 @@ public class QueryFilterView extends ViewPart {
 		IStructuredSelection selection =  null;
 		if (filterTreeViewer.getTree().isVisible()){
 			selection = (IStructuredSelection) filterTreeViewer.getSelection();
-		}else{
+		}else if(summaryTreeViewer.getTree().isVisible()){
 			selection = (IStructuredSelection) summaryTreeViewer.getSelection();
+		}else{
+			selection = (IStructuredSelection) griddedTreeViewer.getSelection();
 		}
 		provider.setFilterSelection(selection);
 	}

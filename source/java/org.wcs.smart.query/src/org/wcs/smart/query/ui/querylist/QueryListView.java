@@ -157,7 +157,6 @@ public class QueryListView extends ViewPart {
 			
 			return Status.OK_STATUS;
 		}
-		
 	};
 
 	private TreeViewerFocusCellManager focusCellManager;

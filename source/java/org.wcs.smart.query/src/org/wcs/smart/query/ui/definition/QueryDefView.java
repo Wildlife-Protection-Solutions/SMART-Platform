@@ -46,6 +46,7 @@ import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
+import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
@@ -111,7 +112,8 @@ public class QueryDefView extends ViewPart {
 		public void partActivated(IWorkbenchPartReference partRef) {
 			
 			if (partRef.getId().equals(QueryResultsEditor.ID) ||
-					partRef.getId().equals(SummaryEditor.ID) || partRef.getId().equals(PatrolQueryResultsEditor.ID)){
+					partRef.getId().equals(SummaryEditor.ID) || 
+					 partRef.getId().equals(GriddedEditor.ID)){
 				IWorkbenchPart part = partRef.getPart(false);
 				
 				if (part instanceof QueryResultsEditor){
@@ -121,6 +123,11 @@ public class QueryDefView extends ViewPart {
 					}
 				}else if (part instanceof SummaryEditor){
 					Query q =((SummaryEditor)part).getQuery();
+					if (q != current){
+						setQuery(q);
+					}
+				}else if (part instanceof GriddedEditor){
+					Query q =((GriddedEditor)part).getQuery();
 					if (q != current){
 						setQuery(q);
 					}
@@ -203,6 +210,8 @@ public class QueryDefView extends ViewPart {
 		definitionComposites.put(QueryType.PATROL, wp);	//patrols are the same
 		SummaryQueryDefinitionComposite sum = new SummaryQueryDefinitionComposite(stackComp, this);
 		definitionComposites.put(QueryType.SUMMARY, sum);
+		GriddedQueryDefinitionComposite grid = new GriddedQueryDefinitionComposite(stackComp, this);
+		definitionComposites.put(QueryType.GRIDDED, grid);
 		
 		
 		((StackLayout)stackComp.getLayout()).topControl = emptyComp;
