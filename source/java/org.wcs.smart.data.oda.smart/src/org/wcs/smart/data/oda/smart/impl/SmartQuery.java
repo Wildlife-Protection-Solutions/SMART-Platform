@@ -30,7 +30,8 @@ import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
-import org.wcs.smart.query.parser.internal.filter.DateFilter;
+import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -177,8 +178,10 @@ public class SmartQuery implements IQuery
          */
 		IResultSet resultSet = null;
 		
-		//TODO implement different date field options
-		DateFilter dateFilter = new DateFilter(DateFilter.DATE_FIELD_OP.WAYPOINT, DateFilter.DATE_FILTER_OP.CUSTOM, (Date)parameters.get(ParameterMetaData.Parameter.STARTDATE), (Date)parameters.get(ParameterMetaData.Parameter.ENDDATE));
+		DateFilter dateFilter = new DateFilter(DateFilter.DATE_FIELD_OP.WAYPOINT, 
+				DATE_FILTER_OP.CUSTOM, 
+				(Date)parameters.get(ParameterMetaData.Parameter.STARTDATE), 
+				(Date)parameters.get(ParameterMetaData.Parameter.ENDDATE));
 		
 		if (smartQuery.getType() == QueryType.OBSERVATION || 
 				smartQuery.getType() == QueryType.PATROL){
