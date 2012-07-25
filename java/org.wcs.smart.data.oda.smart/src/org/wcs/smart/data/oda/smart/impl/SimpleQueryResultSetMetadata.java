@@ -31,7 +31,7 @@ import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
  * Resultset Metadata object for 
- * an observation query;
+ * an simple query
  * 
  * @author egouge
  * @since 1.0.0
@@ -40,6 +40,10 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 
 	private QueryColumn[] queryColumns;
 	
+	/**
+	 * Creates a new metadata object
+	 * @param query the query to gather metadata for
+	 */
 	public SimpleQueryResultSetMetadata(SimpleQuery query){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		for (QueryColumn col : query.getQueryColumns()){
@@ -50,11 +54,15 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
 	}
 	
+	/**
+	 * @param index column index
+	 * @return the query column at a given index
+	 */
 	public QueryColumn getQueryColumn(int index){
 		return queryColumns[index];
 	}
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnCount()
 	 */
 	@Override
@@ -62,15 +70,16 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		return queryColumns.length;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnDisplayLength(int)
+	 * @return -1
 	 */
 	@Override
 	public int getColumnDisplayLength(int index) throws OdaException {
 		return -1;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnLabel(int)
 	 */
 	@Override
@@ -78,7 +87,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		return queryColumns[index-1].getName();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnName(int)
 	 */
 	@Override
@@ -86,7 +95,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		return queryColumns[index-1].getName();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnType(int)
 	 */
 	@Override
@@ -94,7 +103,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		return queryColumns[index-1].getType().getSqlType();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnTypeName(int)
 	 */
 	@Override
@@ -103,15 +112,16 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	     return SmartDriver.getNativeDataTypeName( nativeTypeCode );
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getPrecision(int)
+	 * @return -1;
 	 */
 	@Override
 	public int getPrecision(int index) throws OdaException {
 		return -1;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getScale(int)
 	 */
 	@Override
@@ -119,7 +129,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		return -1;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#isNullable(int)
 	 */
 	@Override

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.data.oda.smart.impl;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -13,13 +34,22 @@ import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.model.SummaryQueryResult;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
+/**
+ * Resultset Metadata object for 
+ * an summary query
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
 public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 
 	private SummaryQueryResult results;
 	
+	/**
+	 * creates a new metadata object for a given query
+	 * @param query
+	 */
 	public SummaryQueryResultSetMetadata(final SummaryQuery query){
-		
-		
 		results =  new SummaryQueryResult();
 		Job parseQuery = new Job("Parsing Query") {
 			
@@ -45,7 +75,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	}
 	
 	
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnCount()
 	 */
 	@Override
@@ -53,15 +83,16 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		return results.getNumDataColumns() + results.getRowHeaders().size();
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnDisplayLength(int)
+	 * @return -1
 	 */
 	@Override
 	public int getColumnDisplayLength(int index) throws OdaException {
 		return -1;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnLabel(int)
 	 */
 	@Override
@@ -79,7 +110,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		}
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnName(int)
 	 */
 	@Override
@@ -91,7 +122,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		return getColumnLabel(index);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnType(int)
 	 */
 	@Override
@@ -104,7 +135,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		}
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnTypeName(int)
 	 */
 	@Override
@@ -113,23 +144,25 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	     return SmartDriver.getNativeDataTypeName( nativeTypeCode );
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getPrecision(int)
+	 * @return -1
 	 */
 	@Override
 	public int getPrecision(int index) throws OdaException {
 		return -1;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getScale(int)
+	 * @return -1
 	 */
 	@Override
 	public int getScale(int index) throws OdaException {
 		return -1;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#isNullable(int)
 	 */
 	@Override
