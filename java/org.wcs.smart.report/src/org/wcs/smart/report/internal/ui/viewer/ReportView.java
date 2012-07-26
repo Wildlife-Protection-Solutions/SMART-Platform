@@ -45,7 +45,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
+import org.wcs.smart.report.IReportListener;
+import org.wcs.smart.report.ReportEventManager;
+import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.manger.ReportManager;
@@ -57,7 +62,7 @@ import org.wcs.smart.report.model.Report;
  * @author egouge
  * @since 1.0.0
  */
-public class ReportView extends ViewPart {
+public class ReportView extends ViewPart implements IReportListener{
 
 	/**
 	 * Report view id
@@ -103,6 +108,12 @@ public class ReportView extends ViewPart {
 		return Status.OK_STATUS;
 	}};
 	
+	@Override
+	public void dispose(){
+		super.dispose();
+		ReportEventManager.getInstance().removeReportListener(this);
+	}
+	
 
 	@Override
 	public void createPartControl(Composite parent) {
@@ -131,6 +142,12 @@ public class ReportView extends ViewPart {
 	@Override
 	public void setFocus() {
 		
+	}
+	
+	@Override
+	public void init(IViewSite site) throws PartInitException {
+		super.init(site);
+		ReportEventManager.getInstance().addReportListener(this);
 	}
 	
 	/**
@@ -211,6 +228,25 @@ public class ReportView extends ViewPart {
 		
 		HashMap<String, Object> selectedParams = paramCollector.getParameters(new Report[]{report});
 		return selectedParams;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.report.IReportListener#reportEvent(java.lang.Object, org.wcs.smart.report.ReportEventManager.EventType)
+	 */
+	@Override
+	public void reportEvent(Object o, EventType eventType) {
+		if (eventType == EventType.REPORT_DELETED){
+			if (this.report.equals(o)){
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						ReportView.this.getSite().getPage().hideView(ReportView.this);
+					}
+					
+				});
+				
+			}
+		}
 	}
 
 }

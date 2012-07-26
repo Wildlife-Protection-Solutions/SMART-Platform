@@ -157,7 +157,7 @@
                icon="images/icons/etool16/folder_add.png"
                label="New Folder..."
                style="push"
-               tooltip="adds a sub folder ">
+               tooltip="Adds a sub folder">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -179,10 +179,10 @@
          </separator>
          <command
                commandId="org.wcs.smart.report.runReport"
-               icon="images/icons/etool16/report_run.png"
                label="Run Report"
                mnemonic="R"
-               style="push">
+               style="push"
+               tooltip="Run the selected reports">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -203,10 +203,10 @@
          </separator>
          <command
                commandId="org.wcs.smart.report.editReport"
-               icon="images/icons/etool16/report_edit.png"
                label="Edit Report"
                mnemonic="e"
-               style="push">
+               style="push"
+               tooltip="Edit the selected report">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -225,7 +225,8 @@
          <command
                commandId="org.wcs.smart.report.exportReport"
                label="Export Report"
-               style="push">
+               style="push"
+               tooltip="Run and export the selected reports">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -245,7 +246,7 @@
                commandId="org.wcs.smart.report.renameReportItem"
                label="Rename..."
                style="push"
-               tooltip="rename the folder">
+               tooltip="Rename the folder/report">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -267,10 +268,9 @@
          </separator>
          <command
                commandId="org.wcs.smart.report.deleteReportItem"
-               icon="images/icons/etool16/delete.png"
                label="Delete"
                style="push"
-               tooltip="Delete the selected item">
+               tooltip="Delete the selected items">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -292,15 +292,13 @@
             locationURI="toolbar:org.wcs.smart.report.ReportListView">
          <command
                commandId="org.wcs.smart.report.deleteReportItem"
-               icon="images/icons/etool16/delete.png"
                label="Delete"
                mnemonic="D"
                style="push"
-               tooltip="Delete the selected item">
+               tooltip="Delete the selected items">
          </command>
          <command
                commandId="org.wcs.smart.report.newReport"
-               icon="images/icons/etool16/report_new.png"
                label="New Report"
                mnemonic="N"
                style="push"
@@ -308,20 +306,63 @@
          </command>
          <command
                commandId="org.wcs.smart.report.editReport"
-               icon="images/icons/etool16/report_edit.png"
                label="Edit Report"
                mnemonic="E"
                style="push"
-               tooltip="edit the selected report">
+               tooltip="Edit the selected report">
+         </command>
+         <command
+               commandId="org.wcs.smart.report.exportReport"
+               label="Export Report"
+               style="push"
+               tooltip="Run and export the selected reports">
          </command>
          <command
                commandId="org.wcs.smart.report.runReport"
-               icon="images/icons/etool16/report_run.png"
                label="Run Report"
                mnemonic="R"
                style="push"
-               tooltip="Run the selected report">
+               tooltip="Run the selected reports">
          </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.report.edit.toolbar">
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  label="Save"
+                  mnemonic="S"
+                  style="push"
+                  tooltip="Save ">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.report.ReportPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.eclipse.ui.file.saveAs"
+                  label="Save"
+                  mnemonic="S"
+                  style="push"
+                  tooltip="Save ">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.report.ReportPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
       </menuContribution>
    </extension>
    <extension
@@ -419,6 +460,29 @@
                type="org.eclipse.ui.model.IWorkbenchAdapter">
          </adapter>
       </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.report.runReport"
+            icon="images/icons/etool16/report_run.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.report.exportReport"
+            icon="images/icons/etool16/report_export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.report.deleteReportItem"
+            icon="images/icons/etool16/delete.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.report.newReport"
+            icon="images/icons/etool16/report_new.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.report.editReport"
+            icon="images/icons/etool16/report_edit.png">
+      </image>
    </extension>
 
 </plugin>

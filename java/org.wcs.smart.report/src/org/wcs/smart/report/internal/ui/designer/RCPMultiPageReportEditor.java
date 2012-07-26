@@ -11,23 +11,41 @@
 
 package org.wcs.smart.report.internal.ui.designer;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.birt.report.designer.internal.ui.editors.IRelatedFileChangeResolve;
+import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor;
+import org.eclipse.birt.report.designer.ui.views.ElementAdapterManager;
 import org.eclipse.birt.report.model.api.ModuleHandle;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbenchPartConstants;
 import org.eclipse.ui.PartInitException;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.report.IReportListener;
+import org.wcs.smart.report.ReportEventManager;
+import org.wcs.smart.report.ReportEventManager.EventType;
+import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.ui.CreateReportDialog;
+import org.wcs.smart.report.manger.ReportManager;
+import org.wcs.smart.report.model.Report;
+import org.wcs.smart.report.model.ReportFolder;
+import org.wcs.smart.report.model.RootReportFolder;
+
 
 /**
- * Use this class to activate RCP plug-in.
+ * RCPMultiPageReportEditor - from BIRT example.
  */
-
-/**
- * RCPMultiPageReportEditor
- */
-public class RCPMultiPageReportEditor extends MultiPageReportEditor
-{
+public class RCPMultiPageReportEditor extends MultiPageReportEditor implements IReportListener{
 
 	/**
 	 * The ID of the Report Editor
@@ -41,55 +59,199 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor
 	 * The ID of the Library Editor
 	 */
 	public static final String LIBRARY_EDITOR_ID = "org.eclipse.birt.report.designer.ui.editors.LibraryEditor"; //$NON-NLS-1$
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor#init(org.eclipse.ui.IEditorSite,
-	 *      org.eclipse.ui.IEditorInput)
+	 * @see
+	 * org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor#init
+	 * (org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
 	 */
-	public void init( IEditorSite site, IEditorInput input )
-			throws PartInitException
-	{
-		super.init( site, input );
-		getSite( ).getWorkbenchWindow( )
-				.getPartService( )
-				.addPartListener( this );
+	public void init(IEditorSite site, IEditorInput input)
+			throws PartInitException {
+		super.init(site, input);
+		getSite().getWorkbenchWindow().getPartService().addPartListener(this);
+		ReportEventManager.getInstance().addReportListener(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor#dispose()
+	 * @see
+	 * org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor#dispose
+	 * ()
 	 */
-	public void dispose( )
-	{
-		super.dispose( );
-		getSite( ).getWorkbenchWindow( )
-				.getPartService( )
-				.removePartListener( this );
+	public void dispose() {
+		super.dispose();
+		getSite().getWorkbenchWindow().getPartService()
+				.removePartListener(this);
+		ReportEventManager.getInstance().removeReportListener(this);
 	}
-	
-	public void doSave( IProgressMonitor monitor )
-	{
-		super.doSave( monitor );
-		try
-		{
-			refreshMarkers( getEditorInput( ) );
-		}
-		catch ( CoreException e )
-		{
+
+	public void doSave(IProgressMonitor monitor) {
+		super.doSave(monitor);
+		try {
+			refreshMarkers(getEditorInput());
+		} catch (CoreException e) {
 		}
 	}
 
 	@Override
-	public void refreshMarkers( IEditorInput input ) throws CoreException
-	{
-		ModuleHandle reportDesignHandle = getModel( );
-		if ( reportDesignHandle != null )
-		{
-			reportDesignHandle.checkReport( );
+	public void refreshMarkers(IEditorInput input) throws CoreException {
+		ModuleHandle reportDesignHandle = getModel();
+		if (reportDesignHandle != null) {
+			reportDesignHandle.checkReport();
 		}
 	}
+
+	@Override
+	/**
+	 * Overrides the default save method to save a copy of the report to the 
+	 * database and create a new file.
+	 */
+	public void doSaveAs() {
+		
+		//get save name/location
+		final Report report = ((SmartReportEditorInput) super.getEditorInput())
+				.getReport();
+		final CreateReportDialog dialog = new CreateReportDialog(getSite()
+				.getShell(), report.getFolder(), "Copy of " + report.getName());
+		if (dialog.open() != IDialogConstants.OK_ID) {
+			return;
+		}
+
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite()
+				.getShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+
+				@Override
+				public void run(final IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+
+					final Report copy = new Report();
+					copy.setConservationArea(report.getConservationArea());
+
+					Object x = dialog.getReportFolder();
+					ReportFolder parentFolder = null;
+					boolean isShared = false;
+					if (x instanceof ReportFolder) {
+						parentFolder = (ReportFolder) x;
+						isShared = parentFolder.getEmployee() == null;
+					} else if (x instanceof RootReportFolder) {
+						isShared = ((RootReportFolder) x).isShared();
+					}
+
+					copy.setFolder(parentFolder);
+					copy.setShared(isShared);
+					copy.setName(dialog.getReportName());
+					copy.setOwner(SmartDB.getCurrentEmployee());
+					copy.setShared(isShared);
+
+					try {
+						copy.setId(ReportManager.generateReportId());
+						copy.setFilename(ReportManager.generateFilename(copy));
+					} catch (Exception ex) {
+						ReportPlugIn.displayLog("Error Saving as - a report id or filename could not be generated." + ex.getMessage(), ex);
+						return;
+					}
+					Session s = HibernateManager.openSession();
+					try {
+						s.beginTransaction();
+						s.save(copy);
+						s.getTransaction().commit();
+					} catch (Exception ex) {
+						s.getTransaction().rollback();
+						ReportPlugIn.displayLog("Error Saving copy of report to the database." + ex.getMessage(), ex);
+						return;
+					} finally {
+						if (s != null) {
+							s.close();
+						}
+					}
+
+					//update editor input
+					final SmartReportEditorInput input = new SmartReportEditorInput(copy);
+					RCPMultiPageReportEditor.this.setInput(input);
+					
+					try{
+						
+					getSite().getShell().getDisplay().syncExec(new Runnable() {
+						@Override
+						public void run() {
+								//save report file and fire update listeners
+								IReportProvider provider = getProvider();
+								provider.saveReport(getModel(), input, monitor);
+								fireSaveAsUpdate(copy);
+						
+						}
+					});
+					}catch (Exception ex){
+						ReportPlugIn.displayLog("Error creating report file. " + ex.getMessage(), ex);
+						return;
+					}
+				}
+			});
+		} catch (Exception ex) {
+			ReportPlugIn.displayLog("Error Saving copy of report." + ex.getMessage(), ex);
+		}
+	}
+
+	private void fireSaveAsUpdate(Report report) {
+		IReportProvider provider = getProvider();
+		if (provider != null) {
+			setPartName(provider.getInputPath(getEditorInput()).lastSegment());
+			firePropertyChange(IWorkbenchPartConstants.PROP_PART_NAME);
+			getProvider().getReportModuleHandle(getEditorInput()).setFileName(
+					getProvider().getInputPath(getEditorInput()).toOSString());
+		}
+		updateRelatedViews();
+		doFinishSave();
+		ReportEventManager.getInstance().fireReportAdded(report);
+	}
+
+	/*
+	 * Fires the required notifications.  This is copied from
+	 *  org.eclipse.birt.report.designer.internal.ui.util.UIUtil.doFinishSave
+	 * 
+	 */
+	private void doFinishSave() {
+		ModuleHandle model = getModel();
+		Object[] resolves = ElementAdapterManager.getAdapters(model,
+				IRelatedFileChangeResolve.class);
+		if (resolves == null) {
+			return;
+		}
+
+		for (int i = 0; i < resolves.length; i++) {
+			IRelatedFileChangeResolve find = (IRelatedFileChangeResolve) resolves[i];
+			find.notifySaveFile(model);
+		}
+	}
+
+	private SmartReportEditorInput getEditorInputLocal(){
+		return (SmartReportEditorInput) super.getEditorInput();
+	}
 	
+	
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.report.IReportListener#reportEvent(java.lang.Object, org.wcs.smart.report.ReportEventManager.EventType)
+	 */
+	@Override
+	public void reportEvent(Object o, EventType eventType) {
+		if (eventType == EventType.REPORT_DELETED){
+			if (getEditorInputLocal().getReport().equals(o)){
+				//close me; I have been deleted
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						//TODO figure out how to remove this from the perspective editor tracker
+						getSite().getPage().closeEditor(RCPMultiPageReportEditor.this, false);
+					}
+				});
+				
+			}
+		}
+		
+	}
 }

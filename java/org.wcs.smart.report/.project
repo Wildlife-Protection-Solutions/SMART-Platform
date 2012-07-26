@@ -25,11 +25,4 @@
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>lib-org.eclipse.birt.report.viewer_3.7.2.v20120213</name>
-			<type>2</type>
-			<location>D:/SMART/DE/Eclipse/plugins/org.eclipse.birt.report.viewer_3.7.2.v20120213</location>
-		</link>
-	</linkedResources>
 </projectDescription>

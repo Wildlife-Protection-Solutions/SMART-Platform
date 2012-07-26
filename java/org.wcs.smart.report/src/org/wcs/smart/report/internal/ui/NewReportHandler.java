@@ -22,16 +22,15 @@
 package org.wcs.smart.report.internal.ui;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
-import org.eclipse.birt.report.designer.data.ui.dataset.DataSetUIUtil;
-import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.DesignElementHandle;
+import org.eclipse.birt.report.model.api.LibraryHandle;
+import org.eclipse.birt.report.model.api.ParameterGroupHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
-import org.eclipse.birt.report.model.api.SlotHandle;
-import org.eclipse.birt.report.model.core.DesignElement;
-import org.eclipse.birt.report.model.elements.OdaDataSet;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -50,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
@@ -77,7 +77,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 			}
 		}
 		
-		File smartLibrary = SmartBirtLibrary.getInstance().getLibraryFile();
+		final File smartLibrary = SmartBirtLibrary.getInstance().getLibraryFile();
 		if (!smartLibrary.exists()) {
 			// TODO: I don't think we need to throw ane xception here - perhaps
 			// just
@@ -116,62 +116,92 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				File reportFile = null;
-				try {
+				Session hsession = null;
+				try{
 					//save report object o database
 					report.setId(ReportManager.generateReportId());
 					report.setFilename(ReportManager.generateFilename(report));
 
-					Session hsession = HibernateManager.openSession();
-					try{
-						hsession.beginTransaction();
-						hsession.save(report);
-						hsession.getTransaction().commit();
-					}catch (Exception ex){
+					hsession = HibernateManager.openSession();
+					
+					hsession.beginTransaction();
+					hsession.save(report);
+					hsession.getTransaction().commit();
+				}catch (Exception ex){
+					if (hsession != null){
 						hsession.getTransaction().rollback();
-						throw ex;
-					}finally{
+					}
+					ReportPlugIn.displayLog("Could not create report. " + ex.getMessage(), ex);
+					return Status.OK_STATUS;
+				}finally{
+					if (hsession != null){
 						hsession.close();
 					}
+				}
 
+				boolean canEdit = true;
+				try{
 					//create report file with default library
-					reportFile = new File(ReportPlugIn.getReportDirectory(),
-							report.getFilename());
+					reportFile = new File(ReportPlugIn.getReportDirectory(), report.getFilename());
 
+					SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
+
+					//open the library so we can copy stuff from the library to the report
+					LibraryHandle library = session.openLibrary(smartLibrary.getPath());
+					DesignElementHandle param = null;
 					
-					SessionHandle session = SessionHandleAdapter.getInstance()
-							.getSessionHandle();
-					ReportDesignHandle rdh = session.createDesign(reportFile
-							.getAbsolutePath());
-					rdh.setTitle(report.getName());
-					SlotHandle datasets = rdh.getDataSets();
-					List<DesignElement> elements = datasets.getSlot()
-							.getContents();
-					for (DesignElement ds : elements) {
-						OdaDataSet dataset = (OdaDataSet) ds;
-						// TODO: figure out how to automatically update dataset
-						DataSetHandle handle = (DataSetHandle) dataset
-								.getHandle(rdh.getModule());
-						DataSetUIUtil.updateColumnCache(handle);
+					List<?> paramGroups = library.getParametersAndParameterGroups();
+					for (Iterator<?> iterator = paramGroups.iterator(); iterator.hasNext();) {
+						Object type = (Object) iterator.next();
+						if (type instanceof ParameterGroupHandle){
+							if (((ParameterGroupHandle) type).getName().equals(SmartDateParameterComponent.GROUP_PARAMETER_NAME)){
+								param = (ParameterGroupHandle)type;
+								break;
+							}
+						}
+						
 					}
-
+					
+					//open the report
+					ReportDesignHandle rdh = session.createDesign(reportFile.getAbsolutePath());
+					rdh.setTitle(report.getName());
+					
+					//add default library
+					rdh.includeLibrary(smartLibrary.getPath(), library.getNamespace());
+					
+					//add date parameter automatically
+					if (param != null){
+						rdh.getParameters().add(rdh.getElementFactory().newElementFrom(param, param.getName()));
+					}
+					
+					try{
+						library.close();
+					}catch (Exception ex){
+						ReportPlugIn.displayLog(
+								"Could not close library file: " + ex.getMessage(), ex);
+					}
+					
 					rdh.save();
 					rdh.close();
 				} catch (Exception ex) {
 					ReportPlugIn.displayLog(
-							"Could not create report: " + ex.getMessage(), ex);
-					return Status.OK_STATUS;
+							"Error creating report file: " + ex.getMessage(), ex);
+					canEdit = false;
 				}
 
 				
 				//edit report perspective
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						ReportManager.editReport(report);
+				if (canEdit){
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							ReportManager.editReport(report);
 
-					}
-				});
+						}
+					});
+				}
 				ReportEventManager.getInstance().fireReportAdded(report);
+				
 				
 				return Status.OK_STATUS;
 			}

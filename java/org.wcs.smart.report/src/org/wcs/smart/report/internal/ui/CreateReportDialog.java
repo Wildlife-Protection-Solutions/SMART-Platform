@@ -64,13 +64,31 @@ public class CreateReportDialog extends TitleAreaDialog {
 	 * @param parent
 	 *            the parent shell
 	 * @param rootFolder the default selected folder
+	 * @param defaultName the initial name of the report; can be null
 	 */
 	//TODO: rootFolder is not selected correctly
-	public CreateReportDialog(Shell parent, Object rootFolder) {
+	public CreateReportDialog(Shell parent, 
+			Object rootFolder,
+			String defaultName) {
 		super(parent);
 		this.selectedItem = rootFolder;
+		if (defaultName != null){
+			this.reportName = defaultName;
+		}else{
+			this.reportName = "New Report";
+		}
 	}
 
+	/**
+	 * Creates a new report dialog.
+	 * @param parent
+	 * @param rootFolder
+	 */
+	public CreateReportDialog(Shell parent, 
+			Object rootFolder) {
+		this(parent, rootFolder, null);
+	}
+	
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
@@ -115,7 +133,6 @@ public class CreateReportDialog extends TitleAreaDialog {
 
 		txtName = new Text(main, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		reportName = "New Report";
 		txtName.setText(reportName);
 		txtName.addModifyListener(new ModifyListener() {
 			@Override

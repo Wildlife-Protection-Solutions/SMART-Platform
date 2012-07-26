@@ -132,7 +132,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 			
 			@Override
 			public String getText(Object object){
-				return ((EmitterInfo)object).getFormat() + " (." + ((EmitterInfo)object).getFileExtension() + ")";
+				return ((EmitterInfo)object).getFormat() + " (." + ((EmitterInfo)object).getFormat() + ")";
 			}
 		});
 		cmbEmitters.setInput(ReportManager.getReportEngine().getEmitterInfo());
