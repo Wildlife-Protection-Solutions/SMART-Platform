@@ -65,7 +65,7 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 		ArrayList<IEditorReference> editorRefs = tracker.getEditorForPerspective(perspectiveDescriptor.getId());
 		if (editorRefs != null) {
 			for (Iterator<IEditorReference> it = editorRefs.iterator(); it.hasNext();) {
-				IEditorReference editorInput = it.next();
+				IEditorReference editorInput = it.next();				
 				page.showEditor(editorInput);
 			}
 
