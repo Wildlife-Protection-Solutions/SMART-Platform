@@ -17,11 +17,11 @@
    </license>
 
    <includes
-         id="net.refractions.udig_base-feature"
+         id="org.wms.smart.udig-feature"
          version="0.0.0"/>
 
    <includes
-         id="org.wms.smart.udig-feature"
+         id="org.wcs.smart.birtfeature"
          version="0.0.0"/>
 
    <plugin
