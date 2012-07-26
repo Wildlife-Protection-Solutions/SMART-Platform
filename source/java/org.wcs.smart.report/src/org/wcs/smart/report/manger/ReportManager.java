@@ -24,13 +24,21 @@ package org.wcs.smart.report.manger;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.birt.core.framework.Platform;
+import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
+import org.eclipse.birt.report.designer.data.ui.dataset.DataSetUIUtil;
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -41,6 +49,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.ui.designer.SmartReportEditorInput;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.model.Report;
@@ -56,6 +65,7 @@ import org.wcs.smart.util.SmartUtils;
 public class ReportManager {
 
 	private static IReportEngine reportEngine = null;
+	public static final String SMART_DATASOURCE_ID = "org.wcs.smart.data.oda.smart";
 	
 	/**
 	 * 
@@ -74,7 +84,10 @@ public class ReportManager {
 	 * Shuts down the BIRT report engine
 	 */
 	public static void endReportEngine(){
-		reportEngine.destroy();
+		if (reportEngine != null){
+			reportEngine.destroy();
+			reportEngine = null;
+		}
 	}
 	
 	/**
@@ -136,24 +149,24 @@ public class ReportManager {
 		}finally{
 			session.close();
 		}	
-
-		//close any editor and view open that reference this report
-		Display.getDefault().syncExec(new Runnable(){
-
-			@Override
-			public void run() {
-				try{
-					SmartUtils.forceClose(IReportEditorContants.DESIGN_EDITOR_ID, new ReportEditorInput(new File(report.getFilename())));
-				}catch (Exception ex){
-					ReportPlugIn.log("Error closing editor on report delete.", ex);
-				}
-				try{
-					SmartUtils.forceCloseView(ReportView.ID, SmartUtils.encodeHex(report.getUuid()));
-				}catch (Exception ex){
-					ReportPlugIn.log("Error closing view on report delete.", ex);
-				}
-			}});
-
+//
+//		//close any editor and view open that reference this report
+//		Display.getDefault().syncExec(new Runnable(){
+//
+//			@Override
+//			public void run() {
+//				try{
+//					SmartUtils.forceClose(IReportEditorContants.DESIGN_EDITOR_ID, new ReportEditorInput(new File(report.getFilename())));
+//				}catch (Exception ex){
+//					ReportPlugIn.log("Error closing editor on report delete.", ex);
+//				}
+//				try{
+//					SmartUtils.forceCloseView(ReportView.ID, SmartUtils.encodeHex(report.getUuid()));
+//				}catch (Exception ex){
+//					ReportPlugIn.log("Error closing view on report delete.", ex);
+//				}
+//			}});
+//
 
 		
 		
@@ -167,10 +180,6 @@ public class ReportManager {
 		}catch (Exception ex){
 			throw new Exception("Report deleted from database but report file could not be deleted.  This file should be removed manually.\n\n" + ex.getMessage(), ex);
 		}	
-		
-		
-		
-
 	}
 	
 	/**
@@ -191,7 +200,7 @@ public class ReportManager {
 				if (x > 999999){
 					x = 1;
 				}
-				DecimalFormat df = new DecimalFormat("######");
+				DecimalFormat df = new DecimalFormat("000000");
 				newId = df.format(x);
 				
 			}
@@ -236,12 +245,11 @@ public class ReportManager {
 	 */
 	public static void editReport(Report r){
 		try {
-			File reportFile = new File(ReportPlugIn.getReportDirectory(), r.getFilename()); 
-			reportFile = reportFile.getCanonicalFile();
+			refreshReport(r);
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
-			if (reportFile != null) {
-				ReportEditorInput ri = new ReportEditorInput(reportFile);
+			if (r != null) {
+				ReportEditorInput ri = new SmartReportEditorInput(r);
 				window.getActivePage().openEditor(
 								ri,
 								IReportEditorContants.DESIGN_EDITOR_ID);
@@ -251,6 +259,31 @@ public class ReportManager {
 					"Report created.  Error opening report: "
 							+ ex.getMessage(), ex);
 		}
+	}
+	
+	
+	public static void refreshReport(Report report) throws Exception{
+		//create report file with default library
+		File reportFile = new File(ReportPlugIn.getReportDirectory(), report.getFilename());
+
+		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
+
+		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
+		
+		List<?> datasets = rdh.getAllDataSets();
+		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+			DataSetHandle dataset = (DataSetHandle) iterator.next();
+			if (((OdaDataSourceHandle)dataset.getDataSource()).getExtensionID().equals(SMART_DATASOURCE_ID)){
+				//refresh the columns in the query
+				DataSetUIUtil.updateColumnCacheAfterCleanRs(dataset);
+			
+				//for now we are not updating any references to the query columns
+				
+			}
+			
+		}
+		rdh.save();
+		rdh.close();
 	}
 	
 	/**
@@ -287,4 +320,6 @@ public class ReportManager {
 				}				
 			}});
 	}
+	
+
 }

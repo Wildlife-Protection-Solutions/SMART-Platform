@@ -22,6 +22,7 @@
 package org.wcs.smart.report;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.wcs.smart.report.model.Report;
@@ -89,7 +90,9 @@ public class ReportEventManager {
 	 * Fires all listeners of a given event type
 	 */
 	private void fireEvents(Object o, EventType type){
-		for (IReportListener listener : listeners){
+		List<IReportListener> values = new ArrayList<IReportListener>();
+		values.addAll(listeners);
+		for (IReportListener listener : values){
 			listener.reportEvent(o, type);
 		}
 	}

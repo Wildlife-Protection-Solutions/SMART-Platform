@@ -30,7 +30,6 @@ import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -267,7 +266,7 @@ public class ReportListView extends ViewPart {
 		getSite().registerContextMenu(menuManager,  reportList);
 		getSite().setSelectionProvider(reportList);
 		
-		
+		reportList.expandToLevel(2);
 		ReportEventManager.getInstance().addReportListener(listener);
 	}
 	

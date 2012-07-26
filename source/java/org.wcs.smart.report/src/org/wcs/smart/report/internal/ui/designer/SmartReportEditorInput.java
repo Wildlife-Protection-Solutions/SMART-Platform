@@ -19,43 +19,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.report.internal.ui.designer;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.manger.ReportManager;
+import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 import org.wcs.smart.report.model.Report;
 
 /**
- * Handler for editing a report.
- * 
+ * Wrapper around report editor input to include report object
  * @author egouge
  * @since 1.0.0
  */
-public class EditReportHandler extends AbstractHandler implements IHandler {
+public class SmartReportEditorInput extends ReportEditorInput {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
-		}
-		
-		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();		
-		if (obj instanceof Report) {
-			try{
-			ReportManager.refreshReport((Report)obj);
-			}catch (Exception ex){
-			//TODO:
-				ex.printStackTrace();
-			}
-			ReportManager.editReport((Report) obj);	
-		}
-		return null;
+	private Report report;
+	
+	/**
+	 * @param report the report object
+	 */
+	public SmartReportEditorInput(Report report) {
+		super(report.getFullReportFilename());
+		this.report = report;
 	}
+	
+	/**
+	 * @return the report object
+	 */
+	public Report getReport(){
+		return this.report;
+	}
+	
+	/**
+	 * Based on the report object
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj != null && obj.getClass() == getClass())
+			return this.report.equals(((SmartReportEditorInput) obj).report);
+		return false;
+	}
+	
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return report.hashCode();
+	}
+
 }
