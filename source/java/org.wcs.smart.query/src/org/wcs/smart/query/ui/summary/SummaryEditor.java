@@ -173,7 +173,7 @@ public class SummaryEditor extends EditorPart {
 	}
 	
 	private void initQuery(){
-		compQueryName.setText(this.query.getName(), query.getId());
+		compQueryName.setText(getQuery().getName(), getQuery().getId());
 	}
 
 	/**
@@ -191,7 +191,7 @@ public class SummaryEditor extends EditorPart {
 	}
 
 	public void updatePartName() {
-		super.setPartName(query.getName());
+		super.setPartName(getQuery().getName());
 	}
 
 	public void setDirty(boolean isDirty) {
@@ -225,7 +225,7 @@ public class SummaryEditor extends EditorPart {
 		// run query
 		final IProgressMonitor mymonitor = resultsArea.createProgressMonitor();
 
-		Job runQueryJob = new Job("Running query: " + this.query.getName()) {
+		Job runQueryJob = new Job("Running query: " + getQuery().getName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -266,7 +266,7 @@ public class SummaryEditor extends EditorPart {
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// validate if user can save the current query
-		if (query.getIsShared()
+		if (getQuery().getIsShared()
 				&& SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ADMIN
 				&& SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.MANAGER) {
 			boolean ret = MessageDialog
@@ -281,7 +281,7 @@ public class SummaryEditor extends EditorPart {
 		}
 
 		// ensure query is valid
-		if (!query.isValid()) {
+		if (!getQuery().isValid()) {
 			MessageDialog
 					.openError(
 							getSite().getShell(),
@@ -289,7 +289,7 @@ public class SummaryEditor extends EditorPart {
 							"You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
 			monitor.setCanceled(true);
 			return;
-		}else if (query.getName().trim().length() == 0){
+		}else if (getQuery().getName().trim().length() == 0){
 			MessageDialog.openError(getSite().getShell(), "Save", "Query name must not be blank.");
 			monitor.setCanceled(true);
 			return;
@@ -300,7 +300,7 @@ public class SummaryEditor extends EditorPart {
 		updateQuery();
 
 		boolean newQuery = false;
-		if (query.getUuid() == null) {
+		if (getQuery().getUuid() == null) {
 			newQuery = true;
 			// new query; we need to get folder location
 			SaveQueryDialog dialog = new SaveQueryDialog(
@@ -586,7 +586,7 @@ public class SummaryEditor extends EditorPart {
 
 			@Override
 			public void handleEvent(Event event) {
-				query.setName(event.text);
+				getQuery().setName(event.text);
 				setDirty(true);
 				
 			}});

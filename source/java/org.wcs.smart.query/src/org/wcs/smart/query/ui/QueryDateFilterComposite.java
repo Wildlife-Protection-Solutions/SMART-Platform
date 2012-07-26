@@ -175,19 +175,20 @@ public class QueryDateFilterComposite extends Composite {
 				setCustom(filter == DATE_FILTER_OP.CUSTOM);
 				java.sql.Date bits[] = filter.getDates();
 				if (bits != null){
-					if (filter == DATE_FILTER_OP.LAST_30_DAYS ||
-							filter == DATE_FILTER_OP.LAST_60_DAYS 
-							){
-						DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
-						lbl1.setText( "[" + formatter.format( bits[0] ) + " - today]");
-					}else if (filter == DATE_FILTER_OP.MONTH_TO_DATE || 
+					if (filter == DATE_FILTER_OP.MONTH_TO_DATE || 
 							filter == DATE_FILTER_OP.LAST_MONTH){ 
-							
 						DateFormat formatter = new SimpleDateFormat("MMM yyyy");
 						lbl1.setText( "[" + formatter.format( bits[0] ) + "]");
-					}else if (filter == DATE_FILTER_OP.YEAR_TO_DATE){
+					}else if (filter == DATE_FILTER_OP.YEAR_TO_DATE ||
+							filter == DATE_FILTER_OP.LAST_YEAR){
 						DateFormat formatter = new SimpleDateFormat("yyyy");
 						lbl1.setText( "[" + formatter.format( bits[0] ) + "]");
+					}else if (bits.length == 1){
+						DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
+						lbl1.setText( "[" + formatter.format( bits[0] ) + " - today]");
+					}else if (bits.length == 2){
+						DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
+						lbl1.setText( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]");
 					}
 				}
 				main.layout();

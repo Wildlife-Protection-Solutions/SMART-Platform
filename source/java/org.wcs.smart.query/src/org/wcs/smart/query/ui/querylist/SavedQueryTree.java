@@ -65,6 +65,8 @@ public class SavedQueryTree {
 			try{
 				folders = QueryHibernateManager.getQueryFolders(s, true);
 				queries = QueryHibernateManager.getQueryProxies(s);
+			}catch (Exception ex){
+				QueryPlugIn.displayLog("Error loading saved queries. " + ex.getMessage(), ex);
 			}finally{
 				s.getTransaction().rollback();
 				s.close();

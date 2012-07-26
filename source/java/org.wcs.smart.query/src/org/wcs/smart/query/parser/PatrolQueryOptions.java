@@ -78,7 +78,10 @@ public class PatrolQueryOptions {
 		LAST_60_DAYS("Last 60 Days", "last60days"),
 		MONTH_TO_DATE("Month to Date", "monthtodate"),
 		LAST_MONTH("Last Month", "lastmonth"),
+		CURRENT_QUARTER("Current Quarter", "currentquarter"),
+		LAST_QUARTER("Last Quarter", "lastquarter"),
 		YEAR_TO_DATE("Year to Date", "yeartodate"),
+		LAST_YEAR("Last Year", "lastyear"),
 		ALL("All Dates", "alldates"),
 		CUSTOM("Custom ...", "custom");
 		
@@ -139,6 +142,46 @@ public class PatrolQueryOptions {
 				cal.set(Calendar.YEAR, lastyear);
 				java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
 				return new java.sql.Date[]{d2, d1};
+			} else if (this == CURRENT_QUARTER){
+				int month = ((cal.get(Calendar.MONTH)) / 3) * 3;
+				cal.set(Calendar.MONTH, month);
+				cal.set(Calendar.DAY_OF_MONTH, 1);
+				return new java.sql.Date[]{new java.sql.Date(cal.getTimeInMillis())};
+			} else if (this == LAST_QUARTER){
+				int thisQuarter = ((cal.get(Calendar.MONTH)) / 3);
+				int lastQuarter = thisQuarter;
+				int yearOffset = 0;
+				lastQuarter = lastQuarter -1;
+				if (lastQuarter < 0){
+					lastQuarter = 3;
+					yearOffset = -1;
+				}
+				int year = cal.get(Calendar.YEAR);
+				cal.set(Calendar.MONTH, lastQuarter * 3);
+				cal.set(Calendar.DAY_OF_MONTH,1);
+				cal.set(Calendar.YEAR, year + yearOffset );
+				
+				java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
+				
+				int month = thisQuarter * 3 - 1;
+				cal.set(Calendar.YEAR, year);
+				cal.set(Calendar.MONTH, month);
+				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+				java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
+				return new java.sql.Date[]{d1, d2};
+			}else if (this == LAST_YEAR){
+				int year = cal.get(Calendar.YEAR);
+				year --;
+				cal.set(Calendar.YEAR, year);
+				cal.set(Calendar.MONTH, cal.getActualMinimum(Calendar.MONTH));
+				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+				java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
+				
+				cal.set(Calendar.YEAR, year);
+				cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
+				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+				java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
+				return new java.sql.Date[]{d1, d2};
 			}
 			return null;
 		}
