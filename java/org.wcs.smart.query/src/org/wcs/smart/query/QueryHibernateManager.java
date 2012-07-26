@@ -155,29 +155,23 @@ public class QueryHibernateManager {
 		
 		folders.add(userRootFolder);
 		
-		try{
-			if (includeCaFolder){
-				@SuppressWarnings("unchecked")
-				List<QueryFolder> rootFolders = session.createCriteria(QueryFolder.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-						.add(Restrictions.isNull("employee"))
-						.add(Restrictions.isNull("parentFolder")).list();
 		
-				caRootFolder.setChildren(rootFolders);
-			}
-
+		if (includeCaFolder){
 			@SuppressWarnings("unchecked")
-			List<QueryFolder> userFolders = session.createCriteria(QueryFolder.class)
+			List<QueryFolder> rootFolders = session.createCriteria(QueryFolder.class)
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.add(Restrictions.eq("employee", SmartDB.getCurrentEmployee()))
+					.add(Restrictions.isNull("employee"))
 					.add(Restrictions.isNull("parentFolder")).list();
-				
-			userRootFolder.setChildren(userFolders);
-
-		}catch (Exception ex){
-			QueryPlugIn.log("Error loading query list." + ex.getMessage(), ex);
-			session.close();
+						caRootFolder.setChildren(rootFolders);
 		}
+			@SuppressWarnings("unchecked")
+		List<QueryFolder> userFolders = session.createCriteria(QueryFolder.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("employee", SmartDB.getCurrentEmployee()))
+				.add(Restrictions.isNull("parentFolder")).list();
+			
+		userRootFolder.setChildren(userFolders);
+
 		
 		return folders;
 	}
@@ -191,54 +185,46 @@ public class QueryHibernateManager {
 	public static HashMap<Integer, List<QueryInput>> getQueryProxies(Session session){
 		
 		HashMap<Integer, List<QueryInput>> queries = new HashMap<Integer, List<QueryInput>>();
-		
-		try{
-			for (int i = 0; i < QueryType.values().length; i++) {
+	
+		for (int i = 0; i < QueryType.values().length; i++) {
 
-				Query hquery = session
-						.createQuery("SELECT a.uuid, a.name, a.folder.uuid, a.isShared, a.id "
-								+ "FROM "
-								+ QueryType.values()[i].getObjectName()
-								+ " a "
-								+ "WHERE a.conservationArea = :ca "
-								+ "and (a.isShared ='true' or a.owner= :user)");
-				hquery.setParameter("ca", SmartDB.getCurrentConservationArea());
-				hquery.setParameter("user", SmartDB.getCurrentEmployee());
+			Query hquery = session
+					.createQuery("SELECT a.uuid, a.name, a.folder.uuid, a.isShared, a.id "
+							+ "FROM "
+							+ QueryType.values()[i].getObjectName()
+							+ " a "
+							+ "WHERE a.conservationArea = :ca "
+							+ "and (a.isShared ='true' or a.owner= :user)");
+			hquery.setParameter("ca", SmartDB.getCurrentConservationArea());
+			hquery.setParameter("user", SmartDB.getCurrentEmployee());
 
-				List<?> results = hquery.list();
-				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-					Object[] object = (Object[]) iterator.next();
-					QueryInput proxy = new QueryInput((byte[]) object[0],
-							(String) object[1], (String) object[4],
-							(Boolean) object[3], QueryType.values()[i]);
-
-					byte[] key = null;
-					if (object[2] == null) {
-						if (((Boolean) object[3]).booleanValue()) {
-							// root conservation area queries
-							key = CA_QUERY_KEY;
-						} else {
-							key = USER_QUERY_KEY;
-						}
+			List<?> results = hquery.list();
+			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+				Object[] object = (Object[]) iterator.next();
+				QueryInput proxy = new QueryInput((byte[]) object[0],
+						(String) object[1], (String) object[4],
+						(Boolean) object[3], QueryType.values()[i]);
+				byte[] key = null;
+				if (object[2] == null) {
+					if (((Boolean) object[3]).booleanValue()) {
+						// root conservation area queries
+						key = CA_QUERY_KEY;
 					} else {
-						key = (byte[]) object[2];
+						key = USER_QUERY_KEY;
 					}
-					if (key != null) {
-						List<QueryInput> proxies = queries.get(Arrays
-								.hashCode(key));
-						if (proxies == null) {
-							proxies = new ArrayList<QueryInput>();
-							queries.put(Arrays.hashCode(key), proxies);
-						}
-						proxies.add(proxy);
+				} else {
+					key = (byte[]) object[2];
+				}
+				if (key != null) {
+					List<QueryInput> proxies = queries.get(Arrays
+							.hashCode(key));
+					if (proxies == null) {
+						proxies = new ArrayList<QueryInput>();
+						queries.put(Arrays.hashCode(key), proxies);
 					}
+					proxies.add(proxy);
 				}
 			}
-			
-			
-		}catch (Exception ex){
-			QueryPlugIn.displayLog("Could not load queries for query list." + ex.getMessage(),ex);
-			session.close();
 		}
 		return queries;
 	}
