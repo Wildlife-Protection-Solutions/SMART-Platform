@@ -29,6 +29,7 @@ import net.refractions.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.project.ui.tool.ModalTool;
 import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
@@ -43,6 +44,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.ca.Area;
@@ -68,6 +71,37 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
     private ToolContext toolcontext;
     
     
+    IPartListener2 partlistener = new IPartListener2(){
+        public void partActivated( IWorkbenchPartReference partRef ) {
+        	if (partRef.getPart(false) == MapView.this){
+                IToolManager tools = ApplicationGIS.getToolManager();
+                tools.setCurrentEditor(MapView.this );
+            }
+        }
+
+        public void partBroughtToTop( IWorkbenchPartReference partRef ) {
+        }
+
+        public void partClosed( IWorkbenchPartReference partRef ) {
+        }
+
+        public void partDeactivated( IWorkbenchPartReference partRef ) {
+        }
+
+        public void partOpened( IWorkbenchPartReference partRef ) {
+        }
+
+        public void partHidden( IWorkbenchPartReference partRef ) {
+        }
+
+        public void partVisible( IWorkbenchPartReference partRef ) {
+        }
+
+        public void partInputChanged( IWorkbenchPartReference partRef ) {
+        }
+
+    };
+    
 	private Label lblCoordinates;
     public MapView() {
         super();
@@ -75,7 +109,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 
     @Override
     public void createPartControl( Composite parent ) {
-    	GridLayout layout = new GridLayout(1,false);
+    	GridLayout layout = new GridLayout(2,false);
     	layout.marginBottom=0;
     	layout.marginHeight = 0;
     	layout.marginLeft = 0;
@@ -88,6 +122,11 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         mapviewer = new MapViewer(parent, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
         mapviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
+        
+        MapToolComposite tools = new MapToolComposite();
+		tools.createComposite(parent);
+		
+		
         // create a new empty map
         // if you are going to add layers do so now
         // prior to adding to the mapviewer
@@ -166,6 +205,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 			public void mouseDragged(MapMouseEvent event) {
 			}
 		});        
+        getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
     }
 
     public void setModalTool( String toolId ) {
@@ -216,13 +256,20 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 
     @Override
     public void dispose() {
-    	super.dispose();
-        if (mapviewer != null && mapviewer.getViewport() != null && getMap() != null) {
-            mapviewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
-        }
-       if (mapviewer != null){
-    	   mapviewer.dispose();
-       }
+		super.dispose();
+		
+		getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
+		
+		if (mapviewer != null && mapviewer.getViewport() != null
+				&& getMap() != null) {
+			mapviewer.getViewport().removePaneListener(
+					getMap().getViewportModelInternal());
+		}
+		if (mapviewer != null) {
+			mapviewer.dispose();
+		}
+		
+		
         
     }
 

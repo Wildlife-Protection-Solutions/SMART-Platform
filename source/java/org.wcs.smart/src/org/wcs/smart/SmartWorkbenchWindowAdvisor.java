@@ -21,6 +21,8 @@
  */
 package org.wcs.smart;
 
+import java.util.Collection;
+
 import net.refractions.udig.project.ui.internal.LayersView;
 import net.refractions.udig.project.ui.internal.MapPart;
 
@@ -29,6 +31,7 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbench;
@@ -211,9 +214,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     			pm.remove(node.getId());
     		}
     	}    	
-    }
-    
-    
+    }    
     
 //    /**
 //     * Look up configuration object, using UDIGWorkbenchConfiguration as a default.

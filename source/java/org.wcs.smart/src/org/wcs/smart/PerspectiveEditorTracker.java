@@ -34,6 +34,7 @@ import org.eclipse.ui.part.EditorPart;
 
 /**
  * A Editor/Perspective tracker.
+ * 
  * <p>This maps editors to perspectives.<p>
  * <p>Editors are mapped to the active perspective
  * when the editor is opened.</p>
@@ -82,13 +83,9 @@ public class PerspectiveEditorTracker implements IPartListener {
 
 	public void partClosed(IWorkbenchPart part) {
 		if (part instanceof EditorPart) {
-			EditorPart editor = (EditorPart) part;
 			IWorkbenchPage page = part.getSite().getPage();
-			IEditorInput editorInput = editor.getEditorInput();
 			IPerspectiveDescriptor activePerspective = page.getPerspective();
-
 			ArrayList<IEditorReference> editors = perspectiveEditors.get(activePerspective.getId());
-			
 			if (editors != null) {
 				for (IEditorReference ref : editors){
 					if (ref.getPart(false) == part){
