@@ -68,6 +68,7 @@ public class SmartQuery implements IQuery {
 
 			Session session = HibernateManager.openSession();
 			try {
+				session.beginTransaction();
 				if (queryType == null) {
 					smartQuery = (org.wcs.smart.query.model.Query) session
 							.get(org.wcs.smart.query.model.observation.ObservationQuery.class,
@@ -93,7 +94,11 @@ public class SmartQuery implements IQuery {
 								.get(SummaryQuery.class, uuid);
 					}
 				}
+				session.getTransaction().commit();
 			} finally {
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
+				}
 				session.close();
 			}
 			return Status.OK_STATUS;

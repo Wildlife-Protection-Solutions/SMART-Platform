@@ -67,7 +67,7 @@ public class SummaryQueryResultSet implements IResultSet {
 			results = query.getLastResults();
 			if (results == null) {
 				results = query.getQueryResults(new NullProgressMonitor());
-				m_maxRows = results.getNumDataRows() + results.getColumnHeaders().size();
+				m_maxRows = results.getNumDataRows();
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
