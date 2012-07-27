@@ -105,7 +105,6 @@ public class SmartGeoResource extends IGeoResource {
 	  public <T> boolean canResolve( Class<T> adaptee ) {
 	        if (adaptee == null)
 	            return false;
-	        System.out.println(adaptee);
 	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
 	                || adaptee.isAssignableFrom(IService.class)
 	                || adaptee.isAssignableFrom(FeatureSource.class)
