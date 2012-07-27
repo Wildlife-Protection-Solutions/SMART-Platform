@@ -34,6 +34,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
+import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.data.simple.SimpleFeatureStore;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.QueryPlugIn;
@@ -121,6 +123,8 @@ public class QueryGeoResource extends IGeoResource {
 				|| adaptee.isAssignableFrom(IService.class)
 				|| adaptee.isAssignableFrom(FeatureSource.class)
 				|| adaptee.isAssignableFrom(FeatureStore.class)
+				|| adaptee.isAssignableFrom(SimpleFeatureStore.class)
+	            || adaptee.isAssignableFrom(SimpleFeatureSource.class)
 				|| super.canResolve(adaptee);
 	}
 
