@@ -34,6 +34,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
+import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.data.simple.SimpleFeatureStore;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.Area;
@@ -103,11 +105,13 @@ public class SmartGeoResource extends IGeoResource {
 	  public <T> boolean canResolve( Class<T> adaptee ) {
 	        if (adaptee == null)
 	            return false;
-
+	        System.out.println(adaptee);
 	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
 	                || adaptee.isAssignableFrom(IService.class)
 	                || adaptee.isAssignableFrom(FeatureSource.class)
 	                || adaptee.isAssignableFrom(FeatureStore.class)
+	                || adaptee.isAssignableFrom(SimpleFeatureStore.class)
+	                || adaptee.isAssignableFrom(SimpleFeatureSource.class)
 	                || super.canResolve(adaptee);
 	    }
 	  
