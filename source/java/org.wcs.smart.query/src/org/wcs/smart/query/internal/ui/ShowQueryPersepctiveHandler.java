@@ -29,7 +29,6 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 
 /**
  * Handler for displaying query perspective
