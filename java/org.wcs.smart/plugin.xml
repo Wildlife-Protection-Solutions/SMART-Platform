@@ -452,6 +452,22 @@
                toolbarPath="layertools"
                tooltip="Add a layer to the map">
          </action>
+         <action
+               class="org.wcs.smart.ui.map.SaveMapAction"
+               icon="images/icons/elcl16/save.png"
+               id="org.wcs.smart.action.SaveMapAction"
+               label="Save"
+               style="push"
+               toolbarPath="maptools"
+               tooltip="Save the map">
+         </action>
+         <action
+               class="org.wcs.smart.ui.map.LoadMapAction"
+               id="org.wcs.smart.ui.map.LoadMapAction"
+               label="Load"
+               style="push"
+               toolbarPath="maptools">
+         </action>
       </viewContribution>
    </extension>
    <extension

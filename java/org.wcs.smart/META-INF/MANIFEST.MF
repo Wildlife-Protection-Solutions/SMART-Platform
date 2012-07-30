@@ -24,7 +24,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/commons-compress-1.4.1.jar,
- lib/opencsv-2.3.jar
+ lib/opencsv-2.3.jar,
+ lib/gson-2.2.2.jar
 Export-Package: au.com.bytecode.opencsv,
  au.com.bytecode.opencsv.bean,
  org.eclipse.wb.swt,
@@ -35,6 +36,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.wcs.smart.hibernate,
  org.wcs.smart.internal.ca.datamodel.xml,
  org.wcs.smart.internal.ca.datamodel.xml.generate,
+ org.wcs.smart.map.internal.settings;x-friends:="org.wcs.smart.test",
  org.wcs.smart.splashHandlers,
  org.wcs.smart.startup,
  org.wcs.smart.udig,
