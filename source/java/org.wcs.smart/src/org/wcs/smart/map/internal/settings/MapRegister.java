@@ -24,6 +24,8 @@ package org.wcs.smart.map.internal.settings;
 import java.net.URI;
 import java.util.List;
 
+import net.refractions.udig.ui.palette.ColourScheme;
+
 import org.geotools.brewer.color.BrewerPalette;
 
 /**
@@ -38,17 +40,18 @@ final class MapRegister {
 	private final List<LayerRegister> layerList;
 	private final URI id;
 	private final String name;
-	private final String envelop;
+	private final ColourScheme colourScheme;
 
 	public MapRegister(
-			final URI id, final String sName, final BrewerPalette colorPalette,
-			final String envelop,
+			final URI id, final String sName, 
+			final BrewerPalette colorPalette,
+			final ColourScheme colourScheme,
 			final List<LayerRegister> layerRegisterList) {
 
 		this.id = id;
 		this.name = sName;
 		this.colorPalette = colorPalette;
-		this.envelop = envelop;
+		this.colourScheme = colourScheme;
 
 		this.layerList = layerRegisterList;
 	}
@@ -74,16 +77,17 @@ final class MapRegister {
 	}
 
 
-	public String getEnvelop() {
-		return envelop;
+	public ColourScheme getColourScheme() {
+		return colourScheme;
 	}
+
 
 
 	@Override
 	public String toString() {
 		return "MapRegister [colorPalette=" + colorPalette + ", layerList="
 				+ layerList + ", id=" + id + ", name=" + name + ", envelop="
-				+ envelop + "]";
+				+ ", colourScheme=" + colourScheme + "]";
 	}
 
 

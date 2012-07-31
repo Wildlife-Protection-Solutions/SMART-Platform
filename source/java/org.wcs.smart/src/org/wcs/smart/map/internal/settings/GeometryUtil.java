@@ -28,7 +28,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 /**
- * This utility class offers convenient method to handle geometries
+ * This utility class offers convenient methods to handle geometries
  * 
  * @author Mauricio Pazos
  *
@@ -42,7 +42,8 @@ final class GeometryUtil {
 	
 
 	/**
-	 * In this application the Envelop is encode has WKT using the Multipoint syntax. 
+	 * In this application the Envelop is encode has WKT using the Multipoint syntax.
+	 *  
 	 * @return envelop as WKT MULTIPOINT ( ( x y), (x y) )
 	 * @throws ParseException 
 	 */
