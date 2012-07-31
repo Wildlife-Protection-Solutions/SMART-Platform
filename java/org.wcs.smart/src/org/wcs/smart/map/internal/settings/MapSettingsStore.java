@@ -30,9 +30,19 @@ import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 
 /**
- * This class is responsible of maintaining the map setting in the store (smart database)
+ * This class is responsible of maintaining the map setting in the store (smart database).
  * 
  * TODO mock implementation 
+ * <p>
+ * Persists the map settings in the following table:
+ * 
+ * CREATE TABLE USER_MAP_SETTINGS ( String USER_ID,  String MAP_SETTINGS)
+ * 
+ * </p>
+ * <p>
+ * The shared map is added as a row with the USER_ID = "ALL"
+ * </p>
+ * 
  * 
  * @author Mauricio Pazos
  *
@@ -40,9 +50,9 @@ import org.osgi.framework.Bundle;
 final class MapSettingsStore {
 
 	
-	private static String CURRENT_USER_MAP = "";
+	private static String CURRENT_USER_MAP = ""; 
 	
-	private static String SHARED_LAYERS = null; // required structure user=ALL map=json
+	private static String SHARED_LAYERS = null; // required structure: user=ALL map=json
 	
 	
 	/**
@@ -57,6 +67,8 @@ final class MapSettingsStore {
 	 * @param jsonMap
 	 */
 	public static void saveShared(String jsonMap ){
+
+		//TODO update the row for the usr="ALL" if it doesn't exist a new one is created
 		
 		SHARED_LAYERS = jsonMap;
 	}
@@ -77,6 +89,7 @@ final class MapSettingsStore {
 	public static void save(String userId, String jsonMap) {
 
 		//TODO save in the  database. The relation could be  CREATE TABLE USER_MAP_SETTINGS ( String USER_ID,  String MAP_SETTINGS)
+		// if it doesn't exist a new one is created for this user
 		
 		logInfo("SAVING Map: "+ jsonMap) ;
 		
