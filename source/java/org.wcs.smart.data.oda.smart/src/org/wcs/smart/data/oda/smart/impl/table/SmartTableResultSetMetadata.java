@@ -19,47 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.data.oda.smart.impl;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.wcs.smart.data.oda.smart.impl.table;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.data.oda.smart.impl.SmartDriver;
 
 /**
- * Resultset Metadata object for 
- * an simple query
- * 
+ * Metadata for a SmartBirtTable 
  * @author egouge
  * @since 1.0.0
  */
-public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
+public class SmartTableResultSetMetadata implements IResultSetMetaData {
 
-	private QueryColumn[] queryColumns;
+	private SmartBirtTable birtTable;
 	
-	/**
-	 * Creates a new metadata object
-	 * @param query the query to gather metadata for
-	 */
-	public SimpleQueryResultSetMetadata(SimpleQuery query){
-		List<QueryColumn> vis = new ArrayList<QueryColumn>();
-		for (QueryColumn col : query.getQueryColumns()){
-			if (col.isVisible()){
-				vis.add(col);
-			}
-		}
-		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
-	}
-	
-	/**
-	 * @param index column index
-	 * @return the query column at a given index
-	 */
-	public QueryColumn getQueryColumn(int index){
-		return queryColumns[index];
+	public SmartTableResultSetMetadata(SmartBirtTable table){
+		this.birtTable = table;
 	}
 	
 	/**
@@ -67,15 +43,14 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return queryColumns.length;
+		return birtTable.getColumnNames().length;
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnDisplayLength(int)
-	 * @return -1
 	 */
 	@Override
-	public int getColumnDisplayLength(int index) throws OdaException {
+	public int getColumnDisplayLength(int arg0) throws OdaException {
 		return -1;
 	}
 
@@ -84,7 +59,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return queryColumns[index-1].getName();
+		return birtTable.getColumnNames()[index-1];
 	}
 
 	/**
@@ -92,7 +67,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		return queryColumns[index-1].getName();
+		return birtTable.getColumnNames()[index-1];
 	}
 
 	/**
@@ -100,7 +75,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		return queryColumns[index-1].getType().getSqlType();
+		return birtTable.getColumnTypes()[index-1];
 	}
 
 	/**
@@ -109,15 +84,14 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return SmartDriver.getNativeDataTypeName( nativeTypeCode );
+	     return SmartDriver.getNativeDataTypeName( nativeTypeCode, SmartTableQuery.SMART_DATASET_TYPE );
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getPrecision(int)
-	 * @return -1;
 	 */
 	@Override
-	public int getPrecision(int index) throws OdaException {
+	public int getPrecision(int arg0) throws OdaException {
 		return -1;
 	}
 
@@ -125,7 +99,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getScale(int)
 	 */
 	@Override
-	public int getScale(int index) throws OdaException {
+	public int getScale(int arg0) throws OdaException {
 		return -1;
 	}
 
@@ -133,7 +107,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#isNullable(int)
 	 */
 	@Override
-	public int isNullable(int index) throws OdaException {
+	public int isNullable(int arg0) throws OdaException {
 		return columnNullableUnknown;
 	}
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.data.ods.smart.table" name="smartbirttable" schema="schema/org.wcs.smart.data.ods.smart.table.exsd"/>
 
    <extension
          id="%oda.data.source.id"
@@ -13,8 +14,57 @@
             id="%oda.data.source.id">
       </dataSource>
       <dataSet
+            defaultDisplayName="Smart Tables"
+            id="org.wcs.smart.data.oda.smart.smartTableDataset">
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
             defaultDisplayName="%data.set.name"
-            id="org.wcs.smart.data.oda.smart.smartDataset">
+            id="org.wcs.smart.data.oda.smart.smartQueryDataset">
          <dataTypeMapping
                nativeDataTypeCode="1"
                odaScalarDataType="String"
@@ -54,6 +104,11 @@
                nativeDataTypeCode="16"
                odaScalarDataType="Boolean"
                nativeDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
          </dataTypeMapping>
       </dataSet>
    </extension>
