@@ -38,7 +38,7 @@
         </parameter-group>
     </parameters>    
     <data-sources>
-        <oda-data-source extensionID="org.wcs.smart.data.oda.smart" name="SMART Summaries and Queries" id="5"/>
+        <oda-data-source extensionID="org.wcs.smart.data.oda.smart" name="SMART Data" id="5"/>
     </data-sources>
     <themes>
         <theme name="defaultTheme" id="4"/>

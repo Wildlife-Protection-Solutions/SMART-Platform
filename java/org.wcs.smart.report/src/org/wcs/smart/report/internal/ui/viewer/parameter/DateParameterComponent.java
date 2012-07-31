@@ -22,8 +22,11 @@
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,7 +48,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	private int dFormat = -1;
 	private int tFormat = -1;
 	
-	private Object defaultValue;
+	private Date defaultValue;
 	
 	/**
 	 * 
@@ -55,7 +58,9 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	public DateParameterComponent(String name, String displayText, boolean includeDate, boolean includeTime, Object defaultValue){
 		super(name, displayText);
 		
-		this.defaultValue = defaultValue;
+		if (defaultValue != null && defaultValue instanceof Date){
+			this.defaultValue = (Date) defaultValue;
+		}
 		//TODO: add support for default value
 		if (includeDate){
 			dFormat = SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE;
@@ -69,7 +74,17 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameter#createComponent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public Composite createComposite(Composite parent) {
+	public Composite createComposite(Composite parent, IDialogSettings settings) {
+		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
+		String x = settings.get(getParameterName());
+		if (x != null){
+			
+			try{
+				this.defaultValue = sdf.parse(x);
+			}catch (Exception ex){
+				//eat me
+			}
+		}
 		Composite param = new Composite(parent, SWT.NONE);
 		int numcolumns = 2;
 		if (dFormat != -1 && tFormat != -1){
@@ -84,10 +99,21 @@ public class DateParameterComponent extends AbstractBirtParameter {
 		if (dFormat != -1){
 			datePicker = new DateTime(param, dFormat);
 			datePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			if (this.defaultValue != null){
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(defaultValue);
+				datePicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+			}
+			
 		}
 		if (tFormat != -1){
 			timePicker = new DateTime(param, tFormat);
 			timePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			if (this.defaultValue != null){
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(defaultValue);
+				datePicker.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+			}
 		}
 		return param;
 	}

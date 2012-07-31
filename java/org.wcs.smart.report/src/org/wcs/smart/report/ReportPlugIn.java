@@ -23,9 +23,14 @@ package org.wcs.smart.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.birt.report.designer.ui.ReportPlugin;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -180,4 +185,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		});
 
 	}
+	
+	
+	
 }

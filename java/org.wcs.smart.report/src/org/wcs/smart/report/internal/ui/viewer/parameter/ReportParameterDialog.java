@@ -21,11 +21,17 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -44,8 +50,12 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class ReportParameterDialog extends TitleAreaDialog {
 	
+	public static String SIMPLE_DATE_FORMAT = "yyyy-MM-dd G hh:mm:ss z"; 
+	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.report.parameters");
+	
 	private List<IBirtParameterComponent> params = new ArrayList<IBirtParameterComponent>();
 	private HashMap<String, Object> values = null;
+	
 	
 	/**
 	 * @param parentShel
@@ -73,13 +83,14 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
+		
 		Composite comp = new Composite(parent, SWT.NONE);
 		
 		comp.setLayout(new GridLayout(1, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		for(IBirtParameterComponent param: params){
-			Composite c = param.createComposite(comp);
+			Composite c = param.createComposite(comp, dialogSettings);
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
 		
@@ -113,9 +124,19 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	
 	private HashMap<String, Object> updateValues(){
 		values = new HashMap<String, Object>();
-		
+		SimpleDateFormat sdf = new SimpleDateFormat(SIMPLE_DATE_FORMAT);
 		for(IBirtParameterComponent param: params){
 			values.putAll(param.getParameters());
+			HashMap<String, Object> values = param.getParameters();
+			for (Iterator<Entry<String, Object>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
+				Entry<String, Object> type = iterator.next();
+				if (Date.class.isAssignableFrom(type.getValue().getClass())){
+					String value = sdf.format((Date)type.getValue());
+					dialogSettings.put(type.getKey(), value);
+				}else{
+					dialogSettings.put(type.getKey(), type.getValue().toString());
+				}
+			}
 		}
 		return values;
 	}

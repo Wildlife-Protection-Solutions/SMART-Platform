@@ -12,12 +12,23 @@
 package org.wcs.smart.report.internal.ui.designer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.IRelatedFileChangeResolve;
 import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor;
 import org.eclipse.birt.report.designer.ui.views.ElementAdapterManager;
+import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.ModuleHandle;
+import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.eclipse.birt.report.model.api.PropertyHandle;
+import org.eclipse.birt.report.model.api.activity.NotificationEvent;
+import org.eclipse.birt.report.model.api.command.ContentEvent;
+import org.eclipse.birt.report.model.api.command.NameEvent;
+import org.eclipse.birt.report.model.api.core.Listener;
+import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
+import org.eclipse.birt.report.model.elements.OdaDataSet;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -36,6 +47,7 @@ import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.ui.CreateReportDialog;
+import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -72,8 +84,64 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 		super.init(site, input);
 		getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 		ReportEventManager.getInstance().addReportListener(this);
+		
 	}
 
+	//TODO: this is a hack to name the
+	//smart query datasources with the query name
+	//I couldn't figure out how to do this any other way.
+	private Listener nameChangeListener = new Listener(){
+		@Override
+		public void elementChanged(DesignElementHandle focus,
+				NotificationEvent ev) {
+			if (ev.getTarget() instanceof OdaDataSet && ev.getEventType() == NotificationEvent.NAME_EVENT){
+
+				NameEvent ne = (NameEvent)ev;
+				OdaDataSet ds = (OdaDataSet)ev.getTarget();
+				OdaDataSetHandle handle = (OdaDataSetHandle)ds.getHandle(ev.getTarget().getRoot());
+				
+				if (handle.getExtensionID().startsWith(ReportManager.SMART_DATASOURCE_ID)
+					 && ne.getOldName() == null 
+					 && ne.getNewName().startsWith("Data Set")
+					&& !ds.getDisplayName().equals(ne.getNewName())){
+				
+					try{
+						handle.setName(((OdaDataSet)ev.getTarget()).getDisplayName());
+					}catch (Exception ex){
+						//eat me - we cant update the name for whatever reason
+					}
+				}
+			}else if (ev.getEventType() == NotificationEvent.CONTENT_EVENT){
+				//auto link start and end data parameters to report parameters
+				ContentEvent ce = (ContentEvent)ev;
+				if (ce.getAction() == ContentEvent.ADD && ce.getContent() instanceof OdaDataSet){
+					OdaDataSet ds = (OdaDataSet)ce.getContent();
+					OdaDataSetHandle handle = (OdaDataSetHandle) (ds).getHandle(ev.getTarget().getRoot());
+					if (ce.getAction() == ContentEvent.ADD && 
+						handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
+						PropertyHandle odaDataSetParameterProp = handle.getPropertyHandle(OdaDataSetHandle.PARAMETERS_PROP);
+						List<?> items = odaDataSetParameterProp.getItems();
+						for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
+							OdaDataSetParameter parameter = (OdaDataSetParameter) iterator.next();
+							if (parameter.getName().equals(SmartDateParameterComponent.START_DATE_NAME) || 
+									parameter.getName().equals(SmartDateParameterComponent.END_DATE_NAME)){
+								parameter.setDefaultValue("");
+								parameter.setParamName(parameter.getName());
+							}
+						}
+					}
+				}				
+			}
+		}
+	};
+	
+	@Override
+	public void addPages(){
+		super.addPages();
+		super.getModel().addListener(nameChangeListener);
+	}
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -82,6 +150,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 	 * ()
 	 */
 	public void dispose() {
+		super.getModel().removeListener(nameChangeListener);
 		super.dispose();
 		getSite().getWorkbenchWindow().getPartService()
 				.removePartListener(this);

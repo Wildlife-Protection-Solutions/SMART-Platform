@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -35,21 +36,29 @@ import org.eclipse.swt.widgets.Label;
 public class BooleanParameterComponent extends AbstractBirtParameter{
 
 				
-	private Object defaultValue;
+	private Boolean defaultValue;
 	/**
 	 * @param name
 	 * @param displayText
 	 */
 	public BooleanParameterComponent(String name, String displayText, Object defaultValue) {
 		super(name, displayText);
-		this.defaultValue = defaultValue;
+		if (defaultValue != null && defaultValue instanceof Boolean){
+			this.defaultValue = (Boolean) defaultValue;	
+		}
+		
 	}
 
 	private Button btnFalse;
 	private Button btnTrue;
 	
 	@Override
-	public Composite createComposite(Composite parent) {
+	public Composite createComposite(Composite parent, IDialogSettings settings) {
+		
+		String x = settings.get(getParameterName());
+		if (x != null){
+			defaultValue = Boolean.valueOf(x); 
+		}
 		
 		Composite param = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(3, false);
@@ -65,7 +74,7 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 		btnFalse = new Button(param, SWT.RADIO);
 		btnFalse.setText("False");
 		
-		if (defaultValue != null && defaultValue instanceof Boolean){
+		if (defaultValue != null ){
 			btnTrue.setSelection(  (Boolean)defaultValue );
 			btnFalse.setSelection(  !(Boolean)defaultValue );
 		}else{

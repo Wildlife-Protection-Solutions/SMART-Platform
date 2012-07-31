@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -78,13 +79,13 @@ public class GroupedReportParameters implements IBirtParameterComponent {
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameterComponent#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public Composite createComposite(Composite parent) {
+	public Composite createComposite(Composite parent, IDialogSettings settings) {
 		Group g = new Group(parent, SWT.NONE);
 		g.setText(base.getDisplayName());
 		g.setLayout(new GridLayout(1, false));
 		
 		for (IBirtParameterComponent p : params){
-			Composite c = p.createComposite(g);
+			Composite c = p.createComposite(g, settings);
 			c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		}
 		return g;

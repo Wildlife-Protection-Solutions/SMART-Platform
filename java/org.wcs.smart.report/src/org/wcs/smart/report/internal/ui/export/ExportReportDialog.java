@@ -24,7 +24,9 @@ package org.wcs.smart.report.internal.ui.export;
 import java.io.File;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -58,6 +60,11 @@ import org.wcs.smart.report.model.Report;
  * @since 1.0.0
  */
 public class ExportReportDialog extends TitleAreaDialog {
+	private static final String FORMAT_SETTING = "Format";
+
+	private static final String DIRECTORY_SETTING = "Directory";
+
+	private static IDialogSettings settings = new DialogSettings("org.wcs.smart.report.exportdialog");
 	
 	private String fileName;
 	private EmitterInfo emitter;
@@ -135,7 +142,8 @@ public class ExportReportDialog extends TitleAreaDialog {
 				return ((EmitterInfo)object).getFormat() + " (." + ((EmitterInfo)object).getFormat() + ")";
 			}
 		});
-		cmbEmitters.setInput(ReportManager.getReportEngine().getEmitterInfo());
+		EmitterInfo[] emitters = ReportManager.getReportEngine().getEmitterInfo();
+		cmbEmitters.setInput(emitters);
 		if (!this.multipleFiles) {
 			cmbEmitters
 					.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -172,14 +180,34 @@ public class ExportReportDialog extends TitleAreaDialog {
 		Button btnBrowse = new Button(comp, SWT.NONE);
 		btnBrowse.setText("Browse...");
 
-		EmitterInfo defaultEmitter = (EmitterInfo) ((Object[])cmbEmitters.getInput() )[0];
+		String x = settings.get(FORMAT_SETTING);
+		EmitterInfo defaultEmitter = emitters[0];
+		if (x != null){
+			for (int i = 0; i < emitters.length; i ++){
+				if (emitters[i].getID().equals(x)){
+					defaultEmitter = emitters[i];
+				}
+			}
+		}
+		
 		cmbEmitters.setSelection(new StructuredSelection(defaultEmitter));
 		
 		if (this.multipleFiles){
 			
+			x = settings.get(DIRECTORY_SETTING);
+			if (x != null){
+				txtFileName.setText(x);	
+			}
 			addDirectoryListener(btnBrowse);
 		}else{
-			txtFileName.setText(report.getName().replaceAll("[^a-zA-Z0-9]", "") + "." +  defaultEmitter.getFormat());
+			x = settings.get(DIRECTORY_SETTING);
+			if (x == null){
+				x = "";
+			}else{
+				x += File.separator;
+			}
+			x += report.getName().replaceAll("[^a-zA-Z0-9]", "") + "." +  defaultEmitter.getFormat(); 
+			txtFileName.setText(x);
 			addFileListner(btnBrowse);
 		}
 		return comp;
@@ -257,6 +285,16 @@ public class ExportReportDialog extends TitleAreaDialog {
 		IStructuredSelection selection = ((IStructuredSelection)cmbEmitters.getSelection());
 		if (selection != null && !selection.isEmpty()){
 			emitter = (EmitterInfo)selection.getFirstElement();
+		}
+		try{
+			if (this.multipleFiles){
+				settings.put(DIRECTORY_SETTING, (new File(fileName)).toString());
+			}else{
+				settings.put(DIRECTORY_SETTING, (new File(fileName)).getParent()  );
+			}
+			settings.put(FORMAT_SETTING, emitter.getID());
+		}catch (Exception ex){
+			//eatme
 		}
 	}
 	

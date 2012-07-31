@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
@@ -72,7 +73,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 				
 	private Text inputValue = null;
 	private INumberValidator validator;
-	private Object defaultValue;
+	private String defaultValue;
 	
 	/**
 	 * @param name parameter name
@@ -82,11 +83,15 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	public NumberParameterComponent(String name, String displayText, INumberValidator validator, Object defaultValue) {
 		super(name, displayText);
 		this.validator = validator;
-		this.defaultValue = defaultValue;
+		this.defaultValue = defaultValue.toString();
 	}
 
 	@Override
-	public Composite createComposite(Composite parent) {
+	public Composite createComposite(Composite parent, IDialogSettings settings) {
+		String x = settings.get(getParameterName());
+		if (x != null){
+			this.defaultValue = x;
+		}
 		
 		Composite param = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
