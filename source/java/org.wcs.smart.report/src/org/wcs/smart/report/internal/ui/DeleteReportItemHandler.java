@@ -33,17 +33,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
-import org.wcs.smart.report.model.RootReportFolder;
 
 /**
  * Handler for deleting a report or a report folder.

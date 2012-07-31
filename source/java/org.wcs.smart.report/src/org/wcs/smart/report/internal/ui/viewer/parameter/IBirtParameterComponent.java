@@ -23,6 +23,7 @@ package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.util.HashMap;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -42,5 +43,5 @@ public interface IBirtParameterComponent {
 	 * @param parent
 	 * @return
 	 */
-	public Composite createComposite(Composite parent);
+	public Composite createComposite(Composite parent, IDialogSettings dialogSettings);
 }

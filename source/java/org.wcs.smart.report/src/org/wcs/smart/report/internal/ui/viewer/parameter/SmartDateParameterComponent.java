@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -76,7 +78,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameter#createComponent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public Composite createComposite(Composite parent) {
+	public Composite createComposite(Composite parent, IDialogSettings settings) {
 		Composite param = new Composite(parent, SWT.NONE);
 		
 		GridLayout gl = new GridLayout(2, false);
@@ -102,9 +104,33 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		lblStart.setText("Start Date:");
 		startPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
 		
+		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
+		String x = settings.get(START_DATE_NAME);
+		if (x != null){
+			try{
+				Date d = sdf.parse(x);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(d);
+				startPicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+			}catch (Exception ex){
+				//eat me
+			}
+		}
+		
 		lblEnd = new Label(param, SWT.NONE);
 		lblEnd.setText("End Date:");
 		endPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
+		x = settings.get(END_DATE_NAME);
+		if (x != null){
+			try{
+				Date d = sdf.parse(x);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(d);
+				endPicker.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+			}catch (Exception ex){
+				//eat me
+			}
+		}
 		
 		cmbDatesOps.getCombo().addListener(SWT.Modify, new Listener(){
 
@@ -137,9 +163,13 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		}});
 		
 		cmbDatesOps.setInput(DATE_FILTER_OP.values());
-		cmbDatesOps.setSelection(new StructuredSelection(DATE_FILTER_OP.values()[0]));
 		
-		
+		x = settings.get("org.wcs.smart.report.parameter.dateOp");
+		if (x != null){
+			cmbDatesOps.setSelection(new StructuredSelection(DATE_FILTER_OP.valueOf(x)));
+		}else{
+			cmbDatesOps.setSelection(new StructuredSelection(DATE_FILTER_OP.values()[0]));
+		}
 		return param;
 	}
 
@@ -173,6 +203,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 			params.put(START_DATE_NAME, dates[0]);
 			params.put(END_DATE_NAME, dates[1]);
 		}
+		params.put("org.wcs.smart.report.parameter.dateOp", op.toString());
 		return params;
 	}
 

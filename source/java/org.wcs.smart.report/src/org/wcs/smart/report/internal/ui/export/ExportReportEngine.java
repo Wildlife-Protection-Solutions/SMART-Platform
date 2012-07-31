@@ -23,9 +23,15 @@ package org.wcs.smart.report.internal.ui.export;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
@@ -40,6 +46,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ExportReportEngine {
 
+	final static HashSet<Job> jobs = new HashSet<Job>();
+	
 	/**
 	 * Exports a collection of reports.
 	 * @param reports reports to export
@@ -62,12 +70,36 @@ public class ExportReportEngine {
 			return;
 		}
 		
+		
 		for (int i = 0; i < reports.size(); i ++){
-			RunReportJob rr = new RunReportJob(reports.get(i), getOutputFileName(reports.get(i), directory,outputFormat),outputFormat, params);
+			final RunReportJob rr = new RunReportJob(reports.get(i), getOutputFileName(reports.get(i), directory,outputFormat),outputFormat, params);
+			jobs.add(rr);
+			rr.addJobChangeListener(new JobChangeAdapter() {
+				@Override
+				public void done(IJobChangeEvent event) {
+					jobs.remove(rr);
+					checkJobs();
+				}
+				
+			});
 			rr.schedule();
 		}
 	}
 	
+	/**
+	 * checks if all jobs are done and if so displays info dialog.
+	 */
+	private static void checkJobs(){
+		if (jobs.size() == 0){
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					if (jobs.size() == 0){  //double check to make sure another export hasn't happened 
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Export Report", "Report export completed.");
+					}
+				}});
+		}
+	}
 	/*
 	 * Ensure the given directory exists
 	 */
@@ -105,8 +137,17 @@ public class ExportReportEngine {
 			ReportPlugIn.displayLog("Error occured while gathering paramter information.  Report could not be run. " + ex.getMessage(), ex);
 			return;
 		}
-		RunReportJob rr = new RunReportJob(report,outputFile, outputFormat, params);
+		final RunReportJob rr = new RunReportJob(report,outputFile, outputFormat, params);
 		rr.schedule();
+		jobs.add(rr);
+		rr.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				jobs.remove(rr);
+				checkJobs();
+			}
+			
+		});
 		
 	}
 }

@@ -66,6 +66,9 @@ public class ReportManager {
 
 	private static IReportEngine reportEngine = null;
 	public static final String SMART_DATASOURCE_ID = "org.wcs.smart.data.oda.smart";
+	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset";
+	public static final String SMART_DATASET_TABLE_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset";
+
 	
 	/**
 	 * 

@@ -23,6 +23,7 @@ package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.util.HashMap;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -52,7 +53,7 @@ public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 	 * @param parent
 	 * @return
 	 */
-	public abstract Composite createComposite(Composite parent);
+	public abstract Composite createComposite(Composite parent, IDialogSettings settings);
 	
 	/**
 	 * 

@@ -364,6 +364,49 @@
             </command>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.changeuserpassword">
+         <separator
+               name="org.wcs.smart.report.file.separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.eclipse.ui.file.save"
+               id="org.wcs.smart.query.save.toolbar"
+               label="Save"
+               mnemonic="S"
+               tooltip="Save the report definition">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.report.ReportPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.ui.file.saveAs"
+               label="Save Report As"
+               mnemonic="A"
+               tooltip="Saves a copy of the report">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.report.ReportPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.report.file.separator1"
+               visible="true">
+         </separator>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -484,5 +527,34 @@
             icon="images/icons/etool16/report_edit.png">
       </image>
    </extension>
-
+   <extension
+         point="org.eclipse.birt.core.ScriptFunctionService">
+      <Category
+            factoryclass="org.wcs.smart.report.birt.function.SmartCategoryFactory"
+            name="SmartFunctions">
+         <Function
+               desc="The current logged in smart user"
+               name="SmartUser">
+            <DataType
+                  value="String">
+            </DataType>
+         </Function>
+         <Function
+               desc="The conservation area name"
+               isConstructor="false"
+               isStatic="true"
+               isVisible="true"
+               name="ConservationAreaName"
+               variableArguments="false">
+         </Function>
+         <Function
+               desc="The conservation area identifier"
+               isConstructor="false"
+               isStatic="true"
+               isVisible="true"
+               name="ConservationAreaId"
+               variableArguments="false">
+         </Function>
+      </Category>
+   </extension>
 </plugin>

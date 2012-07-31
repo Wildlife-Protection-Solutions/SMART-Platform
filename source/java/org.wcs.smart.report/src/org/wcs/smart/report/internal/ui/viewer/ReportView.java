@@ -25,11 +25,16 @@ package org.wcs.smart.report.internal.ui.viewer;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
+import org.eclipse.birt.report.engine.api.CachedImage;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
+import org.eclipse.birt.report.engine.api.IHTMLImageHandler;
+import org.eclipse.birt.report.engine.api.IImage;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.birt.report.engine.api.RenderOption;
+import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -69,10 +74,6 @@ public class ReportView extends ViewPart implements IReportListener{
 	 */
 	public static final String ID = "org.wcs.smart.birt.ReportView"; //$NON-NLS-1$
 	
-	/**
-	 * Report output format in browser
-	 */
-	private static final String HTML_REPORT = "html";
 	
 	private Browser browser;
 
@@ -87,11 +88,12 @@ public class ReportView extends ViewPart implements IReportListener{
 				final IReportRunnable design = engine.openReportDesign(report.getFullReportFilename().getAbsolutePath());
 				
 				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
-				IRenderOption options = new HTMLRenderOption();;
+				HTMLRenderOption options = new HTMLRenderOption();
 				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				options = new HTMLRenderOption( );
 				options.setOutputStream(bos);
-				options.setOutputFormat(HTML_REPORT);
+				options.setSupportedImageFormats("PNG");
+				options.setOutputFormat(HTMLRenderOption.HTML);
 				task.setRenderOption(options);
 				task.setParameterValues(selectedParams);
 				task.run();

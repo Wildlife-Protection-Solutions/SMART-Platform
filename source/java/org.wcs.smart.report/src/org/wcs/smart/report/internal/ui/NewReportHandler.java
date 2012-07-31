@@ -26,8 +26,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
+import org.eclipse.birt.report.model.api.DataSourceHandle;
 import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.LibraryHandle;
+import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ParameterGroupHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
@@ -158,8 +160,22 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 								param = (ParameterGroupHandle)type;
 								break;
 							}
+						}	
+					}
+					
+//					List
+					DataSourceHandle dataSource = null;
+					List<?> dataSources = library.getAllDataSources();
+					for (Iterator<?> iterator = dataSources.iterator(); iterator.hasNext();) {
+						Object type = (Object) iterator.next();
+						if (type instanceof OdaDataSourceHandle){
+							
+							if (((OdaDataSourceHandle)type).getExtensionID().equals(ReportManager.SMART_DATASOURCE_ID)){
+								dataSource = (DataSourceHandle) type;
+								break;
+							}
+							System.out.println("test");
 						}
-						
 					}
 					
 					//open the report
@@ -172,6 +188,9 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 					//add date parameter automatically
 					if (param != null){
 						rdh.getParameters().add(rdh.getElementFactory().newElementFrom(param, param.getName()));
+					}
+					if (dataSource != null){
+						rdh.getDataSources().add(rdh.getElementFactory().newElementFrom(dataSource, dataSource.getName()));
 					}
 					
 					try{

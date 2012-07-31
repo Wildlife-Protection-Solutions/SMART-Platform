@@ -114,6 +114,7 @@ public class ReportListView extends ViewPart {
 					if (((ReportView)part).getReport() != null){
 						IStructuredSelection selection = new StructuredSelection(((ReportView)part).getReport());
 						reportList.setSelection(selection);
+						System.out.println("set selection");
 					}
 //					focusCellManager.getFocusCell();
 				}

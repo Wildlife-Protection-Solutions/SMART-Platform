@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,11 +42,17 @@ public class StringParameterComponent extends AbstractBirtParameter{
 	
 	public StringParameterComponent(String name, String displayText, Object defaultValue) {
 		super(name, displayText);
-		this.defaultValue = defaultValue;
+		if (defaultValue != null){
+			this.defaultValue = defaultValue.toString();
+		}
 	}
 
 	@Override
-	public Composite createComposite(Composite parent) {
+	public Composite createComposite(Composite parent, IDialogSettings settings) {
+		String x = settings.get(getParameterName());
+		if (x != null){
+			this.defaultValue = x;
+		}
 		
 		Composite param = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
