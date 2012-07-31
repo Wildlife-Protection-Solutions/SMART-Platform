@@ -25,7 +25,6 @@ import java.awt.Color;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.StringReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -33,11 +32,11 @@ import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.ICatalog;
+import net.refractions.udig.catalog.ID;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IService;
-import net.refractions.udig.internal.ui.UiPlugin;
-import net.refractions.udig.libs.internal.Activator;
+import net.refractions.udig.core.internal.CorePlugin;
 import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.StyleContent;
 import net.refractions.udig.project.internal.Layer;
@@ -49,9 +48,7 @@ import net.refractions.udig.ui.palette.ColourScheme;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.emf.common.util.URI;
@@ -61,12 +58,15 @@ import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.ReferencingFactoryFinder;
+import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.osgi.framework.Bundle;
-import org.wcs.smart.SmartProperties;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -81,7 +81,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * thus the setting of the new user will be available.
  * </p>
  * <p> 
- * Those external files load to this map, by the administrator user,  will be imported to the ./data/filestore/ directory.
+ * Those external files load to this map, by the administrator user,  will be imported to the ./data/filestore/<CAID>/maps directory.
  * </p>
  * 
  * <pre>
@@ -113,14 +113,13 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class MapSettings {
 	
+	public static final String MAP_DIRECTORY = "maps";
+	
 	/** settings for the current user */
 	private static MapSettings THIS = new MapSettings();  
-	
-	/** the current user */
-	private Employee user = null;
 
-	/** maintains the map shared for all users*/
-	private MapRegister sharedMap = null; 
+	/* the basemap definition being used */
+	private BasemapDefinition baseMap = null;
 	
 	private MapSettings(){
 		// singleton
@@ -136,23 +135,11 @@ public class MapSettings {
 	 * 
 	 * @return {@link MapSettings}
 	 */
-	public static synchronized MapSettings getInstance(final Employee employee){
-		assert employee != null;
-// FIXME commented for testing the load settings action		
-//		if ( (THIS.user != null) && (THIS.user.getId().equals(employee.getId()))) {
-//			
-//			return THIS;
-//			
-//		} else {
-
-			THIS = new MapSettings();
-
-			// restores the saved savedMap settings if they exists
-			THIS.user = employee;
-			THIS.sharedMap  = restoreSharedMap();
-
-			return THIS;
-//		}
+	public static synchronized MapSettings getInstance(final BasemapDefinition baseMap){
+		assert baseMap != null;
+		THIS = new MapSettings();
+		THIS.baseMap = baseMap;
+		return THIS;
 	}
 
 	/**
@@ -184,7 +171,7 @@ public class MapSettings {
 			mapRegister = new MapRegister(uri, name, colorPalette, colourScheme,  layerRegisterList);
 			
 		} catch (Exception e) {
-			log(Status.ERROR, e.getMessage());
+			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
 		}
 		return mapRegister;
 	}
@@ -232,7 +219,7 @@ public class MapSettings {
 				final ColourScheme colourSchema = layer.getColourScheme();
 				final Color defaultColor = layer.getDefaultColor();
 				
-				final String envelop = GeometryUtil.envelopToWKT(layer.getBounds(null, layer.getCRS()) );
+				final String envelop = GeometryUtils.envelopToWKT(layer.getBounds(null, layer.getCRS()) );
 
 				final Double maxScaleDenominator = layer.getMaxScaleDenominator();
 				final Double minScaleDenominator = layer.getMinScaleDenominator();
@@ -293,16 +280,16 @@ public class MapSettings {
 	 * @return true if is a new layer, false in other case
 	 */
 	private boolean isNewLayer(final String layerName) {
-		
-		if(this.sharedMap == null ){
-			return true;
-		} 
-
-		for (LayerRegister sharedLayer : sharedMap.getLayerList()) {
-			if (layerName.equals(sharedLayer.getName())) {
-				return false; // the layer exist
-			}
-		}
+		//TODO: review this
+//		if(this.sharedMap == null ){
+//			return true;
+//		} 
+//
+//		for (LayerRegister sharedLayer : sharedMap.getLayerList()) {
+//			if (layerName.equals(sharedLayer.getName())) {
+//				return false; // the layer exist
+//			}
+//		}
 		return true;
 		
 	}
@@ -317,50 +304,39 @@ public class MapSettings {
 	 * @param currentMap the displayed map
 	 */
 	public synchronized void applyTo(Map currentMap) {
-
-		if(	this.sharedMap == null ) {
-			// there isn't settings saved, so nothing to do.
-			return;
-		}
-		
-		// adds the shared layers which are not present in the currentMap (displayed by smart)
 		List<ILayer> layers = currentMap.getMapLayers();
-		synchronized (layers) {
-			
-			for (LayerRegister sharedLayer : this.sharedMap.getLayerList()) {
-				
-				LayerRegister foundSharedLayer = null;
-				for (ILayer layer : layers) {
-					
-					if(sharedLayer.getName().equals(layer.getName())){
-						
-						foundSharedLayer = sharedLayer;
-						break;
-					}
-				}
-				if(foundSharedLayer == null){
-					// the register layer is not found in the map, then it must be added
-					try {
-						java.net.URI uri = sharedLayer.getURI();
-						
-						addLayer( currentMap, uri.toURL(), sharedLayer.getName());
-						
-					} catch (MalformedURLException e) {
-						log(Status.ERROR, e.getMessage());
-					}
-				}
-			}
-		} // postcondition: the currentMap has got all the shared layer
-		
-		
-		// retrieves the customization done for this user
-		String jsonMap = MapSettingsStore.findById(this.user.getId());
+
+		//get map definition selected
+		String jsonMap = this.baseMap.getMapDef();
 	    
 	    GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
 		Gson gson = gsonBuilder.create();
 	    
 	    MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
 		
+	    List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
+	    synchronized(layers){
+	    	for (LayerRegister sharedLayer : userMap.getLayerList()) {
+				LayerRegister foundSharedLayer = null;
+				for (ILayer layer : layers) {
+					if(sharedLayer.getName().equals(layer.getName())){
+						foundSharedLayer = sharedLayer;
+						break;
+					}
+				}
+				if(foundSharedLayer == null){
+					// the register layer is not found in the map, then it must be added
+					List<IGeoResource> resources = prepareLayers( currentMap, sharedLayer.getURI(), sharedLayer.getName());
+					if (resources != null){
+						toAdd.addAll(resources);
+					}
+				}
+			}
+	    }
+	    
+	    List< ? extends ILayer> addedLayers = ApplicationGIS.addLayersToMap(currentMap, toAdd, -1);
+        assert addedLayers.size() != 0;
+	    
 		// updates the map with the user settings
 		updateMap(currentMap, userMap );
 		
@@ -368,12 +344,9 @@ public class MapSettings {
 		List<Layer> newLayerList = currentMap.getLayersInternal();
 		synchronized (newLayerList) {
 			for (Layer layer : newLayerList) {
-
 				LayerRegister foundSettings = null;
 				for (LayerRegister sharedLayer : userMap.getLayerList()) {
-
 					if (layer.getName().equals(sharedLayer.getName())) {
-
 						foundSettings = sharedLayer;
 						break;
 					}
@@ -420,7 +393,7 @@ public class MapSettings {
 			layer.setCRS(crs);
 
 			// set the envelop
-			Envelope envelope = GeometryUtil.wktToEnvelop(savedLayer.getEnvelope());
+			Envelope envelope = GeometryUtils.wktToEnvelop(savedLayer.getEnvelope());
 			ReferencedEnvelope bounds = new ReferencedEnvelope(envelope, crs);
 			layer.setBounds(bounds);
 			
@@ -449,8 +422,7 @@ public class MapSettings {
 			//layer.refresh(null);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
-			log(IStatus.ERROR, "I cannot create a layer for "+ savedLayer.getURI().toString() +". Cause: "+ e.getMessage() );
+			SmartPlugIn.log(Status.ERROR, "Cannot create layer for " + savedLayer.getURI().toString() + ": " + e.getMessage(), e);
 		}
 		
 		return layer;
@@ -462,7 +434,8 @@ public class MapSettings {
 	 * @param url where the resource is
 	 * @param name layer's name  
 	 */
-    private void addLayer( Map map, URL url, String name ) {
+    //private void addLayer( Map map, URL url, String name ) {
+	private List<IGeoResource> prepareLayers( Map map, java.net.URI uri, String name ) {
 
     	NullProgressMonitor monitor = new NullProgressMonitor();
 
@@ -470,18 +443,19 @@ public class MapSettings {
         
     	try {
     		// removes the fragment from the URL
-        	URL urlWithoutFragment = new URL(url.getProtocol(), url.getHost(), url.getFile() );
+    		URL url  = new URL(null, uri.toString(), CorePlugin.RELAXED_HANDLER);
 
         	List<IGeoResource> geoResources = null;
-			List<IResolve> resolveList = catalog.find(urlWithoutFragment, monitor);
+			List<IResolve> resolveList = catalog.find(url, monitor);
 			// it doesn't exist a service for the url then create one and try again
 			if(resolveList.isEmpty()){
 				// requires url without fragment
+				URL urlWithoutFragment = new URL(url.getProtocol(), url.getHost(),url.getPort(), url.getFile(), CorePlugin.RELAXED_HANDLER );
 				List<IService> newServices = catalog.constructServices(urlWithoutFragment, monitor);
 				for (IService service : newServices) {
 		            catalog.add(service);
 				}
-				resolveList = catalog.find(url, monitor);
+				resolveList = catalog.find(new ID(uri), monitor);
 				assert !resolveList.isEmpty();
 			} 
 			// the service for the url exist then gets the resource
@@ -500,30 +474,14 @@ public class MapSettings {
                     }
                 }
 	        }
-	        List< ? extends ILayer> addedLayers = ApplicationGIS.addLayersToMap(map, geoResources, -1);
-	        assert addedLayers.size() != 0;
+//	        List< ? extends ILayer> addedLayers = ApplicationGIS.addLayersToMap(map, geoResources, -1);
+//	        assert addedLayers.size() != 0;
+	        return geoResources;
     	} catch (Exception e){
-    		log(Status.ERROR, e.getMessage());
+    		SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
+    		return null;
     	}
     }
-	
-	/**
-	 * Restores the shared map. 
-	 * @param savedMap
-	 * @param MapSettings
-	 * @return {@link MapRegister} the map chared for all users
-	 */
-	private static MapRegister restoreSharedMap(){
-	
-		String strMap = MapSettingsStore.findAllSharedLayers();
-	    GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
-		Gson gson = gsonBuilder.create();
-	    
-	    MapRegister map = gson.fromJson(strMap, MapRegister.class);
-		
-		return map;
-	}
-
 
 	/**
 	 * Saves the lastSavedMap setting in the database
@@ -533,22 +491,35 @@ public class MapSettings {
 	public synchronized void save(final Map map) {
 		
 		try{
-			MapRegister mapRegister = createMapRegister(map, this.user.getSmartUserLevel() ); 
+			MapRegister mapRegister = createMapRegister(map, SmartDB.getCurrentEmployee().getSmartUserLevel() ); 
 			
 			 GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
 			 Gson gson = gsonBuilder.create();
 			 String jsonMap = gson.toJson(mapRegister);
-
+			 this.baseMap.setMapDef(jsonMap);
+			 
 			// all users can save theirs settings
-			MapSettingsStore.save(this.user.getId(), jsonMap);
-
-			if(SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
-				
-				MapSettingsStore.saveShared(jsonMap);
+			Session s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				s.saveOrUpdate(this.baseMap);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				if (s.getTransaction().isActive()){
+					s.getTransaction().rollback();
+				}
+				SmartPlugIn.displayLog(null, "Could not save basemap." + ex.getMessage(), ex);
+			}finally{
+				s.close();
 			}
+			 
+//			MapSettingsStore.save(this.user.getId(), jsonMap);
+//			if(SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
+//				MapSettingsStore.saveShared(jsonMap);
+//			}
 			
 		} catch (Exception e) {
-			log(Status.ERROR, e.getMessage());
+			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
 		} 
 	}
 
@@ -565,9 +536,9 @@ public class MapSettings {
 		assert srcUri != null;
 		
 		// creates the "filestore" folder if it is necessary
-		
-		String fileStorePath = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
-		File fileStoreDirectory = new File(fileStorePath);
+
+
+		File fileStoreDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), MAP_DIRECTORY);
 		if(!fileStoreDirectory.exists()){
 			fileStoreDirectory.mkdir();
 		}
@@ -576,7 +547,7 @@ public class MapSettings {
 		try {
 
 			String srcPath = srcUri.getRawPath();
-			if (!containsFileStoreDirectory(srcPath, fileStorePath)) {
+			if (!containsFileStoreDirectory(srcPath, fileStoreDirectory.getAbsolutePath())) {
 
 				// copies the file to filestore directory
 				File[] srcFileList = createSourceFileList(srcPath);
@@ -585,7 +556,7 @@ public class MapSettings {
 					
 					String targetName = srcFileList[i].getName();
 
-					File trgFile = new File(fileStorePath + File.separator + targetName);
+					File trgFile = new File(fileStoreDirectory,targetName);
 					
 					FileUtils.copyFile(srcFileList[i], trgFile);
 				}
@@ -601,7 +572,7 @@ public class MapSettings {
 			trgUri = new java.net.URI(srcUri.getScheme(), srcUri.getHost(), uri.getPath(), srcUri.getFragment() );
 
 		} catch (Exception e) {
-			log(Status.ERROR, e.getMessage());
+			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
 		}
 		return trgUri;
 	}
@@ -650,18 +621,4 @@ public class MapSettings {
 		
 		return filePath.contains(fileStorePathWithoutPoint);
 	}
-
-	/**
-	 * Logging
-	 * @param status valid values: Status.ERROR, Status.INFO, Status.WARNING.
-	 * @param message
-	 */
-	private void log(final int status, final String message) {
-
-		final Bundle bundle = Platform.getBundle(Activator.ID);
-		Platform.getLog(bundle).log(new Status(status, UiPlugin.ID, message));
-	}
-
-
-
 }
