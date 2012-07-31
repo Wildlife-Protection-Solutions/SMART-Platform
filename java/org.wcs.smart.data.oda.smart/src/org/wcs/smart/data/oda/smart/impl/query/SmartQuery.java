@@ -5,7 +5,7 @@
  *************************************************************************
  */
 
-package org.wcs.smart.data.oda.smart.impl;
+package org.wcs.smart.data.oda.smart.impl.query;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -42,7 +42,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartQuery implements IQuery {
 
-	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartDataset";
+	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset";
 
 	private int m_maxRows;
 
@@ -55,7 +55,7 @@ public class SmartQuery implements IQuery {
 
 	//dataset parameters
 	private HashMap<SmartParameterMetaData.Parameter, Object> parameters = null;
-
+	
 	//dataset metadata
 	private SmartParameterMetaData pMetadata = null;
 

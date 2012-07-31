@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.data.oda.smart.impl;
+package org.wcs.smart.data.oda.smart.impl.query;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
+import org.wcs.smart.data.oda.smart.impl.SmartDriver;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.engine.DerbySummaryEngine;
 import org.wcs.smart.query.model.SummaryQuery;
@@ -141,7 +142,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return SmartDriver.getNativeDataTypeName( nativeTypeCode );
+	     return SmartDriver.getNativeDataTypeName( nativeTypeCode , SmartQuery.SMART_DATASET_TYPE);
 	}
 
 	/**

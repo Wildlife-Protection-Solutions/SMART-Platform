@@ -5,10 +5,11 @@
  *************************************************************************
  */
 
-package org.wcs.smart.data.oda.smart.impl;
+package org.wcs.smart.data.oda.smart.impl.query;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.SmartDriver;
 
 /**
  * Implementation class of IParameterMetaData for the SMART ODA runtime driver. <br>
@@ -111,7 +112,7 @@ public class SmartParameterMetaData implements IParameterMetaData {
 	 */
 	public String getParameterTypeName(int param) throws OdaException {
 		int nativeTypeCode = getParameterType(param);
-		return SmartDriver.getNativeDataTypeName(nativeTypeCode);
+		return SmartDriver.getNativeDataTypeName(nativeTypeCode, SmartQuery.SMART_DATASET_TYPE);
 	}
 
 	/**

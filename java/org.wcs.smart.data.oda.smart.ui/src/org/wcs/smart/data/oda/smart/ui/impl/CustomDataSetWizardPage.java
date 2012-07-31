@@ -53,7 +53,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.data.oda.smart.impl.SmartQuery;
+import org.wcs.smart.data.oda.smart.impl.query.SmartQuery;
 import org.wcs.smart.data.oda.smart.ui.Activator;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
@@ -143,7 +143,6 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 		queryTree = new TreeViewer(composite, SWT.BORDER);
 		queryTree.setLabelProvider(new QueryListLabelProvider());
 		queryTree.setContentProvider(new QueryListViewContentProvider(true));
-		queryTree.setLabelProvider(new QueryListLabelProvider());
 
 		queryTree.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -354,6 +353,8 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
+		dataSetDesign.setDisplayName(smartQuery.getName() + " [" + smartQuery.getId() + "]");
+		dataSetDesign.setName(smartQuery.getName());
 	}
 
 	/**
@@ -407,7 +408,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 		dataSetDesign.setParameters(paramDesign);
 		if (paramDesign == null)
 			return; // no parameter definitions; done with update
-
+		
 		paramDesign.setDerivedMetaData(true);
 
 		if (paramDesign.getParameterDefinitions().size() > 0) {

@@ -7,7 +7,9 @@ Bundle-ClassPath: .,
  src
 Bundle-Activator: org.wcs.smart.data.oda.smart.Activator
 Bundle-Localization: plugin
-Export-Package: org.wcs.smart.data.oda.smart.impl;version="1.0.0.qualifier"
+Export-Package: org.wcs.smart.data.oda.smart.impl;version="1.0.0.qualifier",
+ org.wcs.smart.data.oda.smart.impl.query,
+ org.wcs.smart.data.oda.smart.impl.table
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.datatools.connectivity.oda;bundle-version="[3.3.0,4.0.0)",

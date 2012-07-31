@@ -72,9 +72,9 @@ public class SmartDriver implements IDriver {
 	 * @throws OdaException
 	 *             if lookup fails
 	 */
-	static String getNativeDataTypeName(int nativeDataTypeCode)
+	public static String getNativeDataTypeName(int nativeDataTypeCode, String dataSetType)
 			throws OdaException {
-		DataTypeMapping typeMapping = getManifest().getDataSetType(null)
+		DataTypeMapping typeMapping = getManifest().getDataSetType(dataSetType)
 				.getDataTypeMapping(nativeDataTypeCode);
 		if (typeMapping != null)
 			return typeMapping.getNativeType();

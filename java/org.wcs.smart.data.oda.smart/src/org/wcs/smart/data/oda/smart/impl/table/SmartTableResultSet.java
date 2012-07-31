@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.data.oda.smart.impl;
+package org.wcs.smart.data.oda.smart.impl.table;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -27,50 +27,46 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
- * Result set for a simple SMART query.
- * 
+ * ODA Resultset for a SmartBirtTable 
  * @author egouge
  * @since 1.0.0
  */
-public class SimpleQueryResultSet implements IResultSet {
+public class SmartTableResultSet  implements IResultSet {
 	private int m_maxRows = -1;
 	private int m_currentRowId = -1;
 
-	private SimpleQueryResultSetMetadata metadata;
-	private List<QueryResultItem> items = null;
+	private SmartTableResultSetMetadata metadata;
+	private List<Object> data;
 
+	private SmartBirtTable table;
 	private Object lastObject = null;
-
+	
 	/**
-	 * Creates a new results set
+	 * Creates a new summary results set
 	 * 
+	 * @param query
+	 *            the summary query
 	 * @param metadata
-	 *            query metadata
+	 *            the metadata
 	 */
-	public SimpleQueryResultSet(SimpleQuery query,
-			SimpleQueryResultSetMetadata metadata) {
+	public SmartTableResultSet(SmartBirtTable table,
+			SmartTableResultSetMetadata metadata) {
 
 		this.metadata = metadata;
-
-		try {
-			items = query.getLastResults();
-			if (items == null) {
-				items = query.getQueryResults(new NullProgressMonitor());
-				m_maxRows = items.size();
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		table.openQuery();
+		this.data = table.getValues(SmartDB.getCurrentConservationArea());
+		this.table = table;
+		m_maxRows = data.size();
+		
+		
 	}
 
 	/**
@@ -103,8 +99,8 @@ public class SimpleQueryResultSet implements IResultSet {
 	public boolean next() throws OdaException {
 		int maxRows = getMaxRows();
 		if (maxRows <= 0) // no limit is specified
-			maxRows = items.size(); // hard-coded for demo purpose
-
+			maxRows = data.size();
+		
 		if (m_currentRowId < maxRows - 1) {
 			m_currentRowId++;
 			return true;
@@ -118,8 +114,9 @@ public class SimpleQueryResultSet implements IResultSet {
 	 */
 	public void close() throws OdaException {
 		m_currentRowId = 0; // reset row counter
+		data = null;
 		m_maxRows = -1;
-		items = null;
+		table.closeQuery();
 	}
 
 	/**
@@ -128,6 +125,10 @@ public class SimpleQueryResultSet implements IResultSet {
 	public int getRow() throws OdaException {
 		return m_currentRowId;
 	}
+
+	
+	
+	
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getString(int)
@@ -146,8 +147,7 @@ public class SimpleQueryResultSet implements IResultSet {
 	 * @return
 	 */
 	private Object getCurrentItem(int colIndex) {
-		return metadata.getQueryColumn(colIndex - 1).getValue(
-				items.get(m_currentRowId));
+		return table.getValue(data.get(m_currentRowId), colIndex-1);
 	}
 
 	/**
@@ -240,6 +240,8 @@ public class SimpleQueryResultSet implements IResultSet {
 			return new Date(((Time) lastObject).getTime());
 		} else if (lastObject instanceof java.util.Date) {
 			return new Date(((java.util.Date) lastObject).getTime());
+		}else if (lastObject == null){
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -386,7 +388,6 @@ public class SimpleQueryResultSet implements IResultSet {
 			}
 		}
 		return -1;
-
 	}
 
 }
