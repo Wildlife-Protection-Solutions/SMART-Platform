@@ -73,10 +73,39 @@ import com.google.gson.GsonBuilder;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * This class is responsible of maintaining the setting done for a user in the savedMap view.
+ * This class is responsible of maintaining the setting done for a user in the map.
  * <p>
- * This state object offers functions to load and save the map's settings from database. 
+ * This state object offers functions to load and save the map's settings from database.  It is a singleton object, to get the instance
+ * you should send the {@link #getInstance(Employee)} message. The {@link Empolyee} object is the current user (or session user). 
+ * If the user is changed (a new login action) a new singleton object will be created consistently with this user, 
+ * thus the setting of the new user will be available.
  * </p>
+ * <p> 
+ * Those external files load to this map, by the administrator user,  will be imported to the ./data/filestore/ directory.
+ * </p>
+ * 
+ * <pre>
+ * <b>Usage:</b>
+ * The following examples show how to load and save the customization done for the current user.
+ *   
+ *  // loading and applying the custom settings to the map
+ *	Map map = ...
+ *	Employee user = ...
+ *
+ *	MapSettings settings = MapSettings.getInstance(user); 
+ * 	settings.applyTo(map);
+ *  
+ *  ...
+ *  
+ *  // saving the map's custom settingS
+ *    
+ *	Map map = ...
+ *	Employee user ...
+ *
+ *	MapSettings settings = MapSettings.getInstance(user);
+ *	settings.save(map);
+ * 
+ * </pre>
  * 
  * 
  * @author Mauricio Pazos
@@ -84,8 +113,10 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class MapSettings {
 	
+	/** settings for the current user */
 	private static MapSettings THIS = new MapSettings();  
 	
+	/** the current user */
 	private Employee user = null;
 
 	/** maintains the map shared for all users*/
@@ -98,15 +129,16 @@ public class MapSettings {
 	/**
 	 * Returns the instance of Map setting for the user.
 	 * <p>
-	 * It the user change a new instance of {@link MapSettings} is created. In this case you should provide a new savedMap.
+	 * If the user is changed, a new instance of {@link MapSettings} will be created. If the user had saved the map customization in 
+	 * previous session, these settings will be restored.
 	 * </p>
 	 * @param userId	user id should be not Null and not  empty string "";
 	 * 
 	 * @return {@link MapSettings}
 	 */
 	public static synchronized MapSettings getInstance(final Employee employee){
-		assert employee != null; 
-//		TODO UNCOMMENT		
+		assert employee != null;
+// FIXME commented for testing the load settings action		
 //		if ( (THIS.user != null) && (THIS.user.getId().equals(employee.getId()))) {
 //			
 //			return THIS;
@@ -132,6 +164,7 @@ public class MapSettings {
 	 * </p>
 	 * 
 	 * @param map 
+	 * @param userLevel
 	 * 
 	 * @return a {@link MapRegister} instance. Null value when the method find error.
  	 */
@@ -146,11 +179,9 @@ public class MapSettings {
 			java.net.URI uri = new java.net.URI(id.toString());
 			String name = map.getName();
 			BrewerPalette colorPalette = map.getColorPalette();
+			ColourScheme colourScheme = map.getColourScheme();
 			
-			Envelope envelope = map.getBounds(new NullProgressMonitor());
-			String wktEnvelope = GeometryUtil.envelopToWKT(envelope);
-			
-			mapRegister = new MapRegister(uri, name, colorPalette, wktEnvelope , layerRegisterList);
+			mapRegister = new MapRegister(uri, name, colorPalette, colourScheme,  layerRegisterList);
 			
 		} catch (Exception e) {
 			log(Status.ERROR, e.getMessage());
@@ -163,6 +194,7 @@ public class MapSettings {
 	 * 
 	 * @param userlevel
 	 * @param layerList
+	 * 
 	 * @return the list of {@link LayerRegister} 
 	 */
 	private List<LayerRegister> createLayerRegisterList(SmartUserLevel userLevel, List<Layer> layerList) throws Exception{
@@ -361,11 +393,9 @@ public class MapSettings {
 	 * @param savedMap register settings
 	 */
 	private Map updateMap(Map map, MapRegister savedMap) {
-		
-		map.setColorPalette(savedMap.getColorPalette());
 
-		
-	  // TODO map.setColourScheme(savedMap.gettColourScheme());
+		map.setColorPalette(savedMap.getColorPalette());
+		map.setColourScheme(savedMap.getColourScheme());
 		
 		return map;
 	}
@@ -524,7 +554,7 @@ public class MapSettings {
 
 
 	/**
-	 * Import the file associated to the layer inthe ./data/filestore/ directory
+	 * Imports the file associated to the layer inthe ./data/filestore/ directory
 	 *    
 	 * @param srcUri file to import
 	 * @param layerName 
@@ -561,9 +591,13 @@ public class MapSettings {
 				}
 			}	 
 			String fileName = new File(srcPath).getName();
-			String filePath = "file:"+ fileStoreDirectory.getCanonicalPath() +  File.separator +fileName;
+			StringBuilder pathBuilder = new StringBuilder(50);
+			pathBuilder.append("file:")
+						.append(fileStoreDirectory.getCanonicalPath())
+						.append(File.separator )
+						.append(fileName);
 			
-			java.net.URI uri = URIUtil.fromString(filePath);
+			java.net.URI uri = URIUtil.fromString(pathBuilder.toString());
 			trgUri = new java.net.URI(srcUri.getScheme(), srcUri.getHost(), uri.getPath(), srcUri.getFragment() );
 
 		} catch (Exception e) {
@@ -584,11 +618,9 @@ public class MapSettings {
 		File srcFile = new File(srcPath);
 		
 		//creates a pattern like [path]/layerName.*, then retrieves all file that match
-		//String fullFileName= pathFragments[pathFragments.length];
 		String fullFileName= srcFile.getName();
 		
 		String layerName = fullFileName.split("[.]")[0];
-
 		
 		// makes the path
 		int i  = srcPath.indexOf(fullFileName);
@@ -607,18 +639,23 @@ public class MapSettings {
 
 	/**
 	 * checks it the smart fileStore is in the file path
+	 * 
 	 * @param filePath
 	 * @param fileStorePath
-	 * @return true if filestorePath is part of filePath
+	 * @return true if filestore Path is part of filePath
 	 */
 	private boolean containsFileStoreDirectory(final String filePath, final String fileStorePath) {
 
-		String fileStorePathWithoutPoint  = fileStorePath.substring(1);// rempves the point
-		
+		String fileStorePathWithoutPoint  = fileStorePath.substring(1);// removes the point
 		
 		return filePath.contains(fileStorePathWithoutPoint);
 	}
 
+	/**
+	 * Logging
+	 * @param status valid values: Status.ERROR, Status.INFO, Status.WARNING.
+	 * @param message
+	 */
 	private void log(final int status, final String message) {
 
 		final Bundle bundle = Platform.getBundle(Activator.ID);

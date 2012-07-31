@@ -13,10 +13,10 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
 
 /**
- * FIXME WARNING only for test purpose. This class should be removed
+ * FIXME WARNING only for testing purpose. This class should be removed from release version.
  * 
  * <p>
- * This action was added in order to avoid reinit the application (in development environment).
+ * This action was added in order to avoid restart the application (in development environment).
  * It shouldn't be part of the final product.  
  * </p>
  * 

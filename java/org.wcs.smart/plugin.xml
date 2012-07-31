@@ -466,7 +466,8 @@
                id="org.wcs.smart.ui.map.LoadMapAction"
                label="Load"
                style="push"
-               toolbarPath="maptools">
+               toolbarPath="maptools"
+               tooltip="TODO: this action is only available for testing purpose (remove from release)">
          </action>
       </viewContribution>
    </extension>

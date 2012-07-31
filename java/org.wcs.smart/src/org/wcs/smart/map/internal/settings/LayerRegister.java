@@ -73,6 +73,16 @@ final class LayerRegister {
 		this.styleRegisterList = styleList;
 	}
 
+	@Override
+	public String toString() {
+		return "LayerRegister [name=" + name + ", colourScheme=" + colourScheme
+				+ ", URI=" + URI + ", CRS=" + CRS + ", CQL=" + CQL
+				+ ", defaultColor=" + defaultColor + ", styleRegisterList="
+				+ styleRegisterList + ", maxScaleDenominator="
+				+ maxScaleDenominator + ", minScaleDenominator="
+				+ minScaleDenominator + ", envelope=" + envelope + "]";
+	}
+
 	public String getName() {
 		return name;
 	}
