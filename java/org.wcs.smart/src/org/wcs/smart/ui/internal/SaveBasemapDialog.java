@@ -1,0 +1,285 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.ui.internal;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
+
+/**
+ * Dialog for saving basemaps.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class SaveBasemapDialog  extends TitleAreaDialog {
+
+	private Button btnShared;
+	private Button btnOverwrite;
+	private Button btnCreateNew;
+	private Text txtName;
+	private ListViewer lstBasemaps;
+	
+	private Label lblOverwrite;
+	private Label lblCreateNew;
+	
+	private BasemapDefinition baseMap;
+	
+	/**
+	 * @param parent
+	 *            the parent shell
+	 */
+	public SaveBasemapDialog(Shell parent) {
+		super(parent);
+		
+	}
+
+	/**
+	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		createButton(parent, IDialogConstants.CANCEL_ID,
+				IDialogConstants.CANCEL_LABEL, false);
+		validate();
+	}
+
+	/**
+	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected Composite createDialogArea(Composite parent) {
+		getShell().setText("Save Basemap");
+
+		setMessage("Saves the current map as a basemap that can be used as basemap on other maps.");
+
+		Composite main = new Composite(parent, SWT.NONE);
+
+		main.setLayout(new GridLayout(1, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN ||
+				SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER ){
+			btnShared = new Button(main, SWT.CHECK);
+			btnShared.setSelection(true);
+			btnShared.setText("Share this basemap");
+		}
+		
+		SelectionAdapter enableListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				enableElements();
+			}
+		};
+		Listener validateListener = new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				validate();				
+			}
+		};
+		
+		btnCreateNew = new Button(main, SWT.RADIO);
+		btnCreateNew.setSelection(false);
+		btnCreateNew.setText("Create new basemap");
+		btnCreateNew.addSelectionListener(enableListener);
+		
+		Composite compNew = new Composite(main, SWT.NONE);
+		compNew.setLayout(new GridLayout(2, false));
+		lblCreateNew = new Label(compNew, SWT.NONE);
+		lblCreateNew.setText("Basemap Name:");
+		lblCreateNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtName = new Text(compNew, SWT.BORDER);
+		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtName.addListener(SWT.Modify, validateListener);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalIndent = 20;
+		compNew.setLayoutData(gd);
+		
+		
+		btnOverwrite = new Button(main, SWT.RADIO);
+		btnOverwrite.setSelection(false);
+		btnOverwrite.setText("Overwrite existing basemap definition");
+		btnOverwrite.addSelectionListener(enableListener);
+		
+		Composite compList = new Composite(main, SWT.NONE);
+		compList.setLayout(new GridLayout(2, false));
+		lblOverwrite = new Label(compList, SWT.NONE);
+		lblOverwrite.setText("Select Existing Basemap:");
+		lblOverwrite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		lstBasemaps = new ListViewer(compList, SWT.DEFAULT | SWT.BORDER | SWT.SINGLE );
+		lstBasemaps.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof BasemapDefinition){
+					return ((BasemapDefinition)element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
+		lstBasemaps.setInput(new String[]{"Loading"});
+		lstBasemaps.getList().addListener(SWT.Selection, validateListener);
+		
+		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.horizontalIndent = 20;
+		compList.setLayoutData(gd);
+		
+		
+		btnCreateNew.setSelection(true);
+		btnOverwrite.setSelection(false);
+		enableElements();
+		
+		loadData();
+		return main;
+	}
+	
+	private void loadData(){
+		Job loadData = new Job("LoadData"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Object[] data = null;
+				
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					String query = "FROM BasemapDefinition WHERE conservationArea = :ca and (isShared = 'true' or (isShared = 'false' and employee = :em))";
+					Query q = s.createQuery(query);
+					q.setParameter("ca", SmartDB.getCurrentConservationArea());
+					q.setParameter("em", SmartDB.getCurrentEmployee());
+					data = q.list().toArray();
+				}finally{
+					if (s.getTransaction().isActive()){
+						s.getTransaction().commit();		
+					}
+					s.close();
+				}
+				final Object[] data1 = data;
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						lstBasemaps.setInput(data1);
+					}});
+				return Status.OK_STATUS;
+			}};
+			loadData.schedule();
+	}
+	
+	private void enableElements(){
+		boolean enabled = btnCreateNew.getSelection();
+		txtName.setEnabled(enabled);
+		lblCreateNew.setEnabled(enabled);
+		
+		lstBasemaps.getList().setEnabled(!enabled);
+		lblOverwrite.setEnabled(!enabled);
+		
+		validate();
+	}
+
+	/*
+	 * Validate the user input
+	 */
+	private void validate() {
+		boolean ok = true;
+		setErrorMessage(null);
+		if(btnOverwrite.getSelection()){
+			
+			IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
+			if (sel.isEmpty() ){
+				setErrorMessage("Existing basemap must be selected");
+				ok = false;
+			}
+			baseMap = (BasemapDefinition) sel.getFirstElement();
+		}else{
+			String name = txtName.getText();
+			if (name.trim().length() == 0){
+				setErrorMessage("Basemap must have a name.");
+				ok = false;
+			}
+			if (!SmartUtils.isSimpleString(name, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, BasemapDefinition.MAX_NAME_LENGTH)){
+				setErrorMessage("Basemap names must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + " characters and be less than " + BasemapDefinition.MAX_NAME_LENGTH + " character is length.");
+				ok = false;
+			}
+			baseMap = new BasemapDefinition();
+			baseMap.setConservationArea(SmartDB.getCurrentConservationArea());
+			baseMap.setName(name);
+			baseMap.setIsDefault(false);
+		}
+		if (baseMap != null){
+			baseMap.setEmployee(SmartDB.getCurrentEmployee());
+			baseMap.setIsShared(btnShared.getSelection());
+		}else{
+			ok = false;
+		}
+		
+		Button btn = getButton(IDialogConstants.OK_ID);
+		if (btn != null){
+			btn.setEnabled(ok);
+		}
+	}
+	
+	public BasemapDefinition getBasemap(){
+		return this.baseMap;
+	}
+
+	/**
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @return <code>true</code>
+	 */
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
+}
+

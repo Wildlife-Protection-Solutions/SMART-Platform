@@ -116,9 +116,13 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	public static void log(int status, String message, Throwable t){
+        getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
+	}
+	
 	public static void log(String message, Throwable t){
 		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
-        getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
+		log(status, message, t);
 	}
 	
 	public static void logInfo(String message){

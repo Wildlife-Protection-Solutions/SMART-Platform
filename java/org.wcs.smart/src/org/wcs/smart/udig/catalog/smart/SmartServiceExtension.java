@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.wcs.smart.util.SmartUtils;
+
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.ServiceExtension;
 import net.refractions.udig.core.internal.CorePlugin;
@@ -58,10 +60,13 @@ public class SmartServiceExtension implements ServiceExtension {
 		if (scauuid.charAt(0) == '/'){
 			scauuid = scauuid.substring(1);
 		}
-		byte[] buuid = scauuid.getBytes();
-		
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(CA_UUID_KEY, buuid);
+		try{
+			byte[] buuid = SmartUtils.decodeHex(scauuid);
+			params.put(CA_UUID_KEY, buuid);
+		}catch (Exception ex){
+			//TODO: do something here
+		}
 		return params;
 	}
 
@@ -75,7 +80,7 @@ public class SmartServiceExtension implements ServiceExtension {
 		if (params.get(CA_UUID_KEY) == null || !(params.get(CA_UUID_KEY) instanceof byte[])){
 			return null;
 		}
-		String url = "smart://smartdb/" + new String((byte[])params.get(CA_UUID_KEY)) ;
+		String url = "smart://smartdb/" + SmartUtils.encodeHex((byte[])params.get(CA_UUID_KEY)) ;
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

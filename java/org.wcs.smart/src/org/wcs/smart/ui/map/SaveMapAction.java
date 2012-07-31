@@ -24,11 +24,15 @@ package org.wcs.smart.ui.map;
 import net.refractions.udig.project.internal.Map;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
+import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
+import org.wcs.smart.ui.internal.SaveBasemapDialog;
 
 /**
  * Action associated to the Save Map button.
@@ -59,7 +63,12 @@ public final class SaveMapAction implements IViewActionDelegate {
 		Map map = this.view.getMap();
 		if(map == null) return;
 		
-		MapSettings settings = MapSettings.getInstance(SmartDB.getCurrentEmployee());
+		SaveBasemapDialog dialog = new SaveBasemapDialog(Display.getDefault().getActiveShell());
+		if (dialog.open() != IDialogConstants.OK_ID){
+			return;
+		}
+		BasemapDefinition mapDef = dialog.getBasemap();
+		MapSettings settings = MapSettings.getInstance(mapDef);
 		settings.save(map);
 	}
 
