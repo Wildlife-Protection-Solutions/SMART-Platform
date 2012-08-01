@@ -29,6 +29,7 @@ import java.util.List;
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.IMap;
+import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectPlugin;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
@@ -39,18 +40,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Job and intitializes a map with the
+ * default conservation area basemap 
+ * 
  * @author egouge
  * @since 1.0.0
  */
@@ -71,20 +74,29 @@ public class LoadDefaultLayersJob extends Job{
 		SmartService ss = new SmartService(params);
 		CatalogPlugin.getDefault().getLocalCatalog().add(ss);
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+		
+		BasemapDefinition mapDef = getDefaultDefinition();
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     	if (map != null){
     		try {
-    			List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);
-    			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-    			List<IGeoResource> cleanedGeoResources;
-    		    if(ProjectPlugin.getPlugin().getPluginPreferences().getBoolean(PreferenceConstants.P_CHECK_DUPLICATE_LAYERS)){
-    		    	cleanedGeoResources = ProjectUtil.cleanDuplicateGeoResources(layers, map);
-				} else {
-					cleanedGeoResources = layers;
-				}
-    		    AddLayersCommand alCommand = new AddLayersCommand(cleanedGeoResources, 0);
-    		    if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-                map.sendCommandSync(alCommand);
-				if (zoom){
+    			
+    			if (mapDef != null){
+    				MapSettings settings = MapSettings.getInstance(mapDef);
+    				settings.applyTo((Map) map);
+    			}else{
+					List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);
+    				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+    				List<IGeoResource> cleanedGeoResources;
+    				if(ProjectPlugin.getPlugin().getPluginPreferences().getBoolean(PreferenceConstants.P_CHECK_DUPLICATE_LAYERS)){
+    					cleanedGeoResources = ProjectUtil.cleanDuplicateGeoResources(layers, map);
+    				} else {
+    					cleanedGeoResources = layers;
+    				}
+    				AddLayersCommand alCommand = new AddLayersCommand(cleanedGeoResources, 0);
+    				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+    				map.sendCommandSync(alCommand);
+    			}
+    			if (zoom){
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					map.sendCommandASync(new ZoomExtentCommand());
 				}
@@ -93,5 +105,27 @@ public class LoadDefaultLayersJob extends Job{
 			}
     	}
 		return Status.OK_STATUS;
+	}
+	
+	private BasemapDefinition getDefaultDefinition(){
+		BasemapDefinition selection = SmartPlugIn.getDefault().getBasemapSelection();
+		if (selection != null) return selection;
+		
+		Session s = HibernateManager.openSession();
+		
+		try{
+			s.beginTransaction();
+			List<?> defaultmap = s.createCriteria(BasemapDefinition.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDefault", true)).list();
+			if (defaultmap.size() > 0){
+				return (BasemapDefinition) defaultmap.get(0);
+			}
+		}finally{
+			if (s.getTransaction().isActive()){
+				s.getTransaction().commit();
+			}
+			s.close();
+		}
+		return null;
+		
 	}
 }

@@ -19,75 +19,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.map;
+package org.wcs.smart.map.internal;
 
 import net.refractions.udig.project.internal.Map;
 
-import org.eclipse.jface.action.IAction;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.ca.BasemapDefinition;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.ui.internal.SaveBasemapDialog;
+import org.wcs.smart.ui.map.MapView;
+
 
 /**
- * Action associated to the Save Map button.
- * 
- * <p>
- * This action will save the map custom settings
- * </p>
- * 
- * @author Mauricio Pazos
- *
+ * Save basemap handler
+ * @author egouge
+ * @since 1.0.0
  */
-public final class SaveMapAction implements IViewActionDelegate {
-	
+public class SaveMapHandler extends AbstractHandler {
 	public final static String ID = "org.wcs.smart.action.SaveMapAction";
 
-	private MapView view;
 	
-
-	/**
-	 * Saves the map setting done for the current Employee.
-	 */
-	@Override
-	public void run(IAction action) {
-		view.setModalTool(ID);
-		
-		if(this.view == null) return;
-
-		Map map = this.view.getMap();
-		if(map == null) return;
-		
-		SaveBasemapDialog dialog = new SaveBasemapDialog(Display.getDefault().getActiveShell());
-		if (dialog.open() != IDialogConstants.OK_ID){
-			return;
-		}
-		BasemapDefinition mapDef = dialog.getBasemap();
-		MapSettings settings = MapSettings.getInstance(mapDef);
-		settings.save(map);
-	}
-
 	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
+	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
-	public void selectionChanged(IAction action, ISelection selection) {
-		// Null implementation
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IWorkbenchPart part = HandlerUtil.getActivePart(event);
+		if (part instanceof MapView){
+			MapView view = (MapView)part;
+			
+			view.setModalTool(ID);
+			Map map = view.getMap();
+			if(map == null) return null;
+			
+			SaveBasemapDialog dialog = new SaveBasemapDialog(Display.getDefault().getActiveShell());
+			if (dialog.open() != IDialogConstants.OK_ID){
+				return null;
+			}
+			BasemapDefinition mapDef = dialog.getBasemap();
+			MapSettings settings = MapSettings.getInstance(mapDef);
+			settings.save(map);
+			
+		}
+		return null;
 	}
 
-	/**
-	 * Sets the MapView
-	 * @param view  a {@link MapView} instance
-	 */
-	@Override
-	public void init(IViewPart view) {
-		this.view = (MapView)view;
 
-	}
 
 }

@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -42,17 +43,14 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Dialog for selecting basemap
+ * 
  * @author egouge
  * @since 1.0.0
  */
@@ -60,16 +58,26 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 
 	private ListViewer lstBasemaps;
 	private BasemapDefinition baseMap;
+	private Button chUseDefault;
 	
+	private boolean setDefault = false;
 	/**
 	 * @param parent
 	 *            the parent shell
 	 */
 	public LoadBasemapDialog(Shell parent) {
 		super(parent);	
+		
+		
 	}
 	
-
+	@Override
+	protected void okPressed() {
+		super.okPressed();
+		if (setDefault){
+			SmartPlugIn.getDefault().setBasemapSelection(baseMap);
+		}
+	}
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
@@ -108,7 +116,12 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 			@Override
 			public String getText(Object element){
 				if (element instanceof BasemapDefinition){
-					return ((BasemapDefinition)element).getName();
+					BasemapDefinition def=SmartPlugIn.getDefault().getBasemapSelection();
+					if (def != null && def.equals(element)){					
+						return ((BasemapDefinition)element).getName() + "  [Session Default]";
+					}else{
+						return ((BasemapDefinition)element).getName();	
+					}
 				}
 				return super.getText(element);
 			}
@@ -117,7 +130,12 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
 		lstBasemaps.setInput(new String[]{"Loading"});
 		lstBasemaps.getList().addListener(SWT.Selection, validateListener);
-				
+	
+		chUseDefault = new Button(main, SWT.CHECK);
+		chUseDefault.setText("Use as session default");
+		chUseDefault.setSelection(false);
+		
+		
 		loadData();
 		return main;
 	}
@@ -147,7 +165,12 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
+						if (lstBasemaps.getList().isDisposed()) return;
 						lstBasemaps.setInput(data1);
+						if (data1 != null && data1.length > 0){
+							lstBasemaps.setSelection(new StructuredSelection(data1[0]));
+						}
+						validate();
 					}});
 				return Status.OK_STATUS;
 			}};
@@ -173,6 +196,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		if (btn != null){
 			btn.setEnabled(ok);
 		}
+		setDefault = chUseDefault.getSelection();
 	}
 	
 	public BasemapDefinition getBasemap(){

@@ -19,19 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ca.export;
+package org.wcs.smart.map.internal;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.ui.map.MapView;
 
 /**
- * Interface that can be implemented to export
- * conservaton area data.
- * 
+ * Zoom handler
  * @author egouge
  * @since 1.0.0
  */
-public interface ICaDataExporter {
+public class ZoomHandler extends AbstractHandler {
 
-	void exportData(ICaDataExportEngine exportEngine, IProgressMonitor monitor) throws Exception;
+	private static String zoomToolId = "net.refractions.udig.tools.Zoom";
 	
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IWorkbenchPart part = HandlerUtil.getActivePart(event);
+		if (part instanceof MapView){
+			MapView view = (MapView)part;
+			view.setModalTool(zoomToolId);
+		} 
+		return null;
+	}
+
 }

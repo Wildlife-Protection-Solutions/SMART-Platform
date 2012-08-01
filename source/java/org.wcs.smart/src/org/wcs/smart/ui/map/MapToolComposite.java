@@ -39,6 +39,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.wcs.smart.udig.SetBasemapTool;
 
 /**
  * 
@@ -49,6 +50,7 @@ public class MapToolComposite {
 
 	
 	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer", 
+			SetBasemapTool.ID, 
 			"org.wcs.smart.udig.ZoomExtents", 
 			"net.refractions.udig.tools.Pan",
 			"net.refractions.udig.tools.Zoom", InfoTool.ID};

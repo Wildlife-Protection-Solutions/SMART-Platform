@@ -27,6 +27,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.AreaPropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
@@ -62,6 +63,9 @@ public class ShowPropertyPageHandler extends AbstractHandler {
 			dialog.open();
 		}else if (page.equals(AreaPropertyPage.class)){
 			AreaPropertyPage dialog = new AreaPropertyPage();
+			dialog.open();
+		}else if (page.equals(BasemapPropertyPage.class)){
+			BasemapPropertyPage dialog = new BasemapPropertyPage();
 			dialog.open();
 		}
 		

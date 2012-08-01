@@ -27,6 +27,8 @@ import java.io.FileFilter;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,8 +43,11 @@ import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.StyleContent;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.internal.ProjectPackage;
 import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.StyleEntry;
+import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
+import net.refractions.udig.project.internal.impl.LayerImpl;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.ui.palette.ColourScheme;
 
@@ -51,7 +56,10 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.InternalEObject;
+import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.brewer.color.BrewerPalette;
@@ -113,6 +121,11 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class MapSettings {
 	
+	/**
+	 * 
+	 */
+	private static final String BASEMAP_BLACKBOARD_KEY = "org.wcs.smart.basemaplayers";
+
 	public static final String MAP_DIRECTORY = "maps";
 	
 	/** settings for the current user */
@@ -224,26 +237,17 @@ public class MapSettings {
 				final Double maxScaleDenominator = layer.getMaxScaleDenominator();
 				final Double minScaleDenominator = layer.getMinScaleDenominator();
 				
-				if( isNewLayer(name) ){
-
-					// only administrator level can add new layers
-					if(userLevel == SmartUserLevel.ADMIN){
-						if(uri != null){
-							
-							if(URIUtil.isFileURI(uri) ){
-								uri = importFile(uri);
-							}
+				// only administrator level can add new layers
+				if(userLevel == SmartUserLevel.ADMIN){
+					if(uri != null){
+						if(URIUtil.isFileURI(uri) ){
+							uri = importFile(uri);
 						}
-						LayerRegister layerRegister = new LayerRegister (
-																name, colourSchema, uri, crs, cql ,defaultColor, 
-																maxScaleDenominator, minScaleDenominator, envelop, styleRegisterList);
-						
-						layerRegisterList.add(layerRegister);
 					}
-				} else {
 					LayerRegister layerRegister = new LayerRegister (
-															name, colourSchema, uri, crs, cql, defaultColor,
-															maxScaleDenominator, minScaleDenominator, envelop, styleRegisterList);
+									name, colourSchema, uri, crs, cql ,defaultColor, 
+								maxScaleDenominator, minScaleDenominator, envelop, styleRegisterList);
+						
 					layerRegisterList.add(layerRegister);
 				}
 			}
@@ -272,27 +276,7 @@ public class MapSettings {
         return style;
 		
 	}
-	
-	/**
-	 * It is true if the layer is not present in the original map (the map shared by all the users).
-	 *  
-	 * @param layerName
-	 * @return true if is a new layer, false in other case
-	 */
-	private boolean isNewLayer(final String layerName) {
-		//TODO: review this
-//		if(this.sharedMap == null ){
-//			return true;
-//		} 
-//
-//		for (LayerRegister sharedLayer : sharedMap.getLayerList()) {
-//			if (layerName.equals(sharedLayer.getName())) {
-//				return false; // the layer exist
-//			}
-//		}
-		return true;
-		
-	}
+
 
 	/**
 	 * Applies the custom settings to the map.
@@ -304,16 +288,26 @@ public class MapSettings {
 	 * @param currentMap the displayed map
 	 */
 	public synchronized void applyTo(Map currentMap) {
+		
+		//turn off map events
+		currentMap.eSetDeliver(false);
+		
 		List<ILayer> layers = currentMap.getMapLayers();
 
+		//keep track of current basemap layers
+		List<ILayer> layersToRemove = (List<ILayer>) currentMap.getBlackboard().get(BASEMAP_BLACKBOARD_KEY);
+
+		//new basemap layers
+		List<ILayer> basemapLayers = new ArrayList<ILayer>();
+		
 		//get map definition selected
 		String jsonMap = this.baseMap.getMapDef();
-	    
 	    GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
 		Gson gson = gsonBuilder.create();
 	    
 	    MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
 		
+	    //determine which layers need to be added/removed
 	    List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 	    synchronized(layers){
 	    	for (LayerRegister sharedLayer : userMap.getLayerList()) {
@@ -321,6 +315,10 @@ public class MapSettings {
 				for (ILayer layer : layers) {
 					if(sharedLayer.getName().equals(layer.getName())){
 						foundSharedLayer = sharedLayer;
+						if(layersToRemove != null){
+							layersToRemove.remove(layer);
+						}
+						basemapLayers.add(layer);
 						break;
 					}
 				}
@@ -334,29 +332,69 @@ public class MapSettings {
 			}
 	    }
 	    
-	    List< ? extends ILayer> addedLayers = ApplicationGIS.addLayersToMap(currentMap, toAdd, -1);
-        assert addedLayers.size() != 0;
+	    //delete old basemaps layers that are not a part of the new basemap
+	    if (layersToRemove != null && layersToRemove.size() > 0){
+	    	for (Iterator<ILayer> iterator = layersToRemove.iterator(); iterator.hasNext();) {
+	    		ILayer layer = (ILayer) iterator.next();
+	    		if (layer.getMap() == null){
+	    			iterator.remove();
+	    		}
+			}
+	    	if (layersToRemove.size() > 0){
+	    		currentMap.sendCommandSync( new DeleteLayersCommand(layersToRemove.toArray(new ILayer[layersToRemove.size()]) ));
+	    	}
+	    }
 	    
+	    //add new basemap layers
+	    if (toAdd.size() > 0){
+	    	List< ? extends ILayer> addedLayers = ApplicationGIS.addLayersToMap(currentMap, toAdd, 0);
+	    	assert addedLayers.size() != 0;
+	    	basemapLayers.addAll(addedLayers);
+	    }
+
+	    List<Layer> orderedLayers = new ArrayList<Layer>();
+	    for (LayerRegister sharedLayer : userMap.getLayerList()) {
+	    	for (ILayer layer : basemapLayers) {	
+	    		if (layer.getName().equals(sharedLayer.getName())) {
+	    			orderedLayers.add((Layer)layer);
+	    			break;
+	    		}
+	    	}
+	    }
+	    //order layers 
+	    currentMap.getContextModel().eSetDeliver(false);
+	    currentMap.getLayersInternal().removeAll(orderedLayers);
+	    currentMap.getLayersInternal().addAll(0,orderedLayers);
+	    currentMap.getContextModel().eSetDeliver(true);
+	    
+		//update basemap layer settings
+	    ArrayList<ILayer> basemapCopy = new ArrayList<ILayer>(basemapLayers);
+		currentMap.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, basemapCopy);
+		
 		// updates the map with the user settings
 		updateMap(currentMap, userMap );
-		
-		// for each layer sets the user customization
-		List<Layer> newLayerList = currentMap.getLayersInternal();
-		synchronized (newLayerList) {
-			for (Layer layer : newLayerList) {
-				LayerRegister foundSettings = null;
-				for (LayerRegister sharedLayer : userMap.getLayerList()) {
-					if (layer.getName().equals(sharedLayer.getName())) {
-						foundSettings = sharedLayer;
-						break;
-					}
+
+		for (ILayer layer : basemapLayers) {
+			LayerRegister foundSettings = null;
+			for (LayerRegister sharedLayer : userMap.getLayerList()) {
+				if (layer.getName().equals(sharedLayer.getName())) {
+					foundSettings = sharedLayer;
+					break;
 				}
-				if (foundSettings != null) {
-					updateLayer(layer, foundSettings);
-				}
-				
+			}
+			if (foundSettings != null && layer.getMap() != null) {
+				((Layer)layer).eSetDeliver(false);
+				updateLayer(((Layer)layer), foundSettings);
+				((Layer)layer).eSetDeliver(true);
+				((Layer)layer).eNotify(new ENotificationImpl((InternalEObject)layer, Notification.SET, ProjectPackage.LAYER__STYLE_BLACKBOARD,
+		                layer.getStyleBlackboard(), layer.getStyleBlackboard()));
 			}
 		}
+
+		//turn back on events
+		
+		currentMap.eSetDeliver(true);
+		currentMap.getRenderManager().refresh(null);
 	}
 
 	/**
