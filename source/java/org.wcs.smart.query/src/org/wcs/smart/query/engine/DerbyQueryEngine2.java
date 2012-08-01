@@ -296,7 +296,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				
 			} else {
 				sql.append(", case when " + tablePrefix.get(Attribute.class) + ".keyid = '" + key.getKey()
-						+ "' then a." + key.getColumn() + " else null end as "
+						+ "' then " + tablePrefix.get(WaypointObservationAttribute.class) + "." + key.getColumn() + " else null end as "
 						+ key.getKey() + " ");
 			}
 			inlist.append("'" + key.getKey() + "',");
