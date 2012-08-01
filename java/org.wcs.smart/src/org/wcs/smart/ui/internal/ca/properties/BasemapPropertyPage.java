@@ -81,10 +81,9 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	private void loadData() {
 		getSession().beginTransaction();
-		String query = "FROM BasemapDefinition WHERE conservationArea = :ca and (isShared = 'true' or (isShared = 'false' and employee = :em))";
+		String query = "FROM BasemapDefinition WHERE conservationArea = :ca";
 		Query q = getSession().createQuery(query);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("em", SmartDB.getCurrentEmployee());
 		List<?> data = q.list();
 		basemaps = data.toArray(new BasemapDefinition[data.size()]);
 		lstBasemaps.setInput(basemaps);
