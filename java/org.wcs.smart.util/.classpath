@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
-  <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
-  <classpathentry kind="output" path="target/classes"/>
-  <classpathentry kind="var" path="M2_REPO/org/apache/derby/derby/10.8.2.2/derby-10.8.2.2.jar"/>
-  <classpathentry kind="var" path="M2_REPO/net/sourceforge/hatbox/hatbox/1.0.b9/hatbox-1.0.b9.jar"/>
-  <classpathentry kind="var" path="M2_REPO/com/vividsolutions/jts/1.12-SNAPSHOT/jts-1.12-SNAPSHOT.jar"/>
-  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
+	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/derby/derby/10.8.2.2/derby-10.8.2.2.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/vividsolutions/jts/1.12-SNAPSHOT/jts-1.12-SNAPSHOT.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/org.wcs.smart.hibernate.libs/lib/hatbox-emily.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

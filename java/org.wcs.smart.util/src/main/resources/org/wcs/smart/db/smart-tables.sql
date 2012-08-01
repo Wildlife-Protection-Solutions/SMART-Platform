@@ -162,3 +162,28 @@ ALTER TABLE smart.area_geometries
 
 CREATE SEQUENCE smart.smart_user_id_seq START WITH 0 MAXVALUE 99999 CYCLE;
 
+
+CREATE TABLE smart.saved_maps
+(
+	UUID CHAR(16) for bit data NOT NULL,
+	EMPLOYEE_UUID CHAR(16) for bit data NOT NULL,
+	CA_UUID CHAR(16) for bit data,
+	IS_DEFAULT BOOLEAN NOT NULL,
+	NAME VARCHAR(256) NOT NULL,
+	MAP_DEF long VARCHAR not null,
+	PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.saved_maps
+	ADD CONSTRAINT saved_maps_ca_uuid_fk FOREIGN KEY (ca_uuid)
+	REFERENCES smart.conservation_area(UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
+
+ALTER TABLE smart.saved_maps
+	ADD CONSTRAINT saved_maps_employee_uuid_fk FOREIGN KEY (employee_uuid)
+	REFERENCES smart.employee(UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;

@@ -35,6 +35,10 @@ GRANT SELECT ON smart.station TO manager;
 GRANT SELECT ON smart.station TO analyst;
 GRANT SELECT ON smart.station TO data_entry;
 
+GRANT SELECT ON smart.saved_maps TO manager;
+GRANT SELECT ON smart.saved_maps TO analyst;
+GRANT SELECT ON smart.saved_maps TO data_entry;
+
 --data_entry
 GRANT SELECT ON smart.dm_category TO data_entry;
 GRANT SELECT ON smart.dm_cat_att_map TO data_entry;
