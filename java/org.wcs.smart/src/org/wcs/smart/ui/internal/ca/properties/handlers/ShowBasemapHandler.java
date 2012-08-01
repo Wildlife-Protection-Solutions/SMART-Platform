@@ -19,19 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ca.export;
+package org.wcs.smart.ui.internal.ca.properties.handlers;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
 
 /**
- * Interface that can be implemented to export
- * conservaton area data.
- * 
+ * Handler for displaying basemap property page.
  * @author egouge
  * @since 1.0.0
  */
-public interface ICaDataExporter {
+public class ShowBasemapHandler extends ShowPropertyPageHandler {
 
-	void exportData(ICaDataExportEngine exportEngine, IProgressMonitor monitor) throws Exception;
-	
+	/**
+	 * @param page
+	 */
+	public ShowBasemapHandler() {
+		super(BasemapPropertyPage.class);
+	}
+
 }

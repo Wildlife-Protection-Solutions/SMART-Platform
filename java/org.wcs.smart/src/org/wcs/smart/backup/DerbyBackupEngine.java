@@ -107,8 +107,10 @@ public class DerbyBackupEngine {
 		}
 	}
 
-	public static String getDefaultAutoBackupLocation() {
-		// TODO FILL OUT CODE TO setup a default auto-backup location different from the regular backup, or maybe it's the same? 
+	/**
+	 * @return the default auto backup location
+	 */
+	public static String getDefaultAutoBackupLocation() { 
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
 		try{
 			return new File(backupDir).getCanonicalPath();

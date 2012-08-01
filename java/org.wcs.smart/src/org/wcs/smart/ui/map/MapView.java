@@ -109,7 +109,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 
     @Override
     public void createPartControl( Composite parent ) {
-    	GridLayout layout = new GridLayout(2,false);
+    	GridLayout layout = new GridLayout(1,false);
     	layout.marginBottom=0;
     	layout.marginHeight = 0;
     	layout.marginLeft = 0;
@@ -123,8 +123,8 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         mapviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
         
-        MapToolComposite tools = new MapToolComposite();
-		tools.createComposite(parent);
+//        MapToolComposite tools = new MapToolComposite();
+//		tools.createComposite(parent);
 		
 		
         // create a new empty map
@@ -290,6 +290,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 		return getViewSite().getActionBars().getStatusLineManager();
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object getAdapter(Class adaptee) {
 		if (adaptee.isAssignableFrom(Map.class)) {
 			return getMap();

@@ -165,6 +165,13 @@
                   style="push">
             </command>
             <command
+                  commandId="org.wcs.smart.showBasemaps"
+                  icon="images/icons/etool16/map.png"
+                  label="Manage Basemaps ..."
+                  mnemonic="m"
+                  style="push">
+            </command>
+            <command
                   commandId="org.wcs.smart.ca.showDataModel"
                   icon="images/icons/etool16/data_model.png"
                   label="Data Model ..."
@@ -236,6 +243,65 @@
                   class="org.wcs.smart.UserNameControlContribution">
             </control>
          </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.ui.map.MapView">
+         <command
+               commandId="org.wcs.smart.map.saveMap"
+               icon="images/icons/elcl16/save_map.png"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.map.loadBasemap"
+               icon="images/icons/elcl16/load_map.png"
+               label="Set Basemap"
+               style="push"
+               tooltip="Select the basemap to use on the map">
+         </command>
+         <separator
+               name="org.wcs.smart.map.separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.map.pan"
+               icon="images/icons/elcl16/pan_tool.png"
+               label="Pan"
+               style="push">
+         </command>
+         <command
+               commandId="org.wcs.smart.map.zoom"
+               icon="images/icons/elcl16/zoom_tool.png"
+               label="Zoom "
+               style="push"
+               tooltip="zoom to various locations on map">
+         </command>
+         <command
+               commandId="org.wcs.smart.map.zoomExtents"
+               icon="images/icons/elcl16/zoom_layers.png"
+               label="Zoom to map extents"
+               style="push"
+               tooltip="Zoom to full extents of all layers">
+         </command>
+         <separator
+               name="org.wcs.smart.map.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.map.addLayer"
+               icon="images/icons/elcl16/layer_add.png"
+               label="Add Layer "
+               style="push"
+               tooltip="Add a layer to the map">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -341,6 +407,34 @@
             id="org.wcs.smart.auto_backup"
             name="Configure Automatic Backup System">
       </command>
+      <command
+            id="org.wcs.smart.showBasemaps"
+            name="Show Basemaps">
+      </command>
+      <command
+            id="org.wcs.smart.map.saveMap"
+            name="Saves as Basemap">
+      </command>
+      <command
+            id="org.wcs.smart.map.pan"
+            name="Pan Map">
+      </command>
+      <command
+            id="org.wcs.smart.map.zoom"
+            name="Zoom Tool">
+      </command>
+      <command
+            id="org.wcs.smart.map.zoomExtents"
+            name="Zoom Extents Tool">
+      </command>
+      <command
+            id="org.wcs.smart.map.addLayer"
+            name="Add Layer">
+      </command>
+      <command
+            id="org.wcs.smart.map.loadBasemap"
+            name="Load Basemap">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -400,6 +494,34 @@
             class="org.wcs.smart.ui.internal.backup.AutoBackupConfigHandler"
             commandId="org.wcs.smart.auto_backup">
       </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowBasemapHandler"
+            commandId="org.wcs.smart.showBasemaps">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.SaveMapHandler"
+            commandId="org.wcs.smart.map.saveMap">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.PanMapHandler"
+            commandId="org.wcs.smart.map.pan">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.ZoomHandler"
+            commandId="org.wcs.smart.map.zoom">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.AddLayerHandler"
+            commandId="org.wcs.smart.map.addLayer">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.ZoomExtentsHandler"
+            commandId="org.wcs.smart.map.zoomExtents">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.LoadBasemapHandler"
+            commandId="org.wcs.smart.map.loadBasemap">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
@@ -410,66 +532,6 @@
             properties="smartAdminUser"
             type="java.lang.Object">
       </propertyTester>
-   </extension>
-   <extension
-         point="org.eclipse.ui.viewActions">
-      <viewContribution
-            id="org.wcs.smart.mapview"
-            targetID="org.wcs.smart.ui.map.MapView">
-         <action
-               class="org.wcs.smart.ui.map.PanAction"
-               icon="images/icons/elcl16/pan_tool.png"
-               id="org.wcs.smart.ui.map.pan"
-               label="Pan"
-               style="radio"
-               toolbarPath="maptools"
-               tooltip="pans the map">
-         </action>
-         <action
-               class="org.wcs.smart.ui.map.ZoomAction"
-               icon="images/icons/elcl16/zoom_tool.png"
-               id="org.wcs.smart.action4"
-               label="Zoom "
-               style="radio"
-               toolbarPath="maptools"
-               tooltip="zoom to various locations on map">
-         </action>
-         <action
-               class="org.wcs.smart.ui.map.ZoomExtentAction"
-               icon="images/icons/elcl16/zoom_layers.png"
-               id="org.wcs.smart.ui.map.zoomextent"
-               label="Zoom to map extents"
-               style="push"
-               toolbarPath="maptools"
-               tooltip="Zoom to full extents of all layers">
-         </action>
-         <action
-               class="org.wcs.smart.ui.map.AddLayerAction"
-               icon="images/icons/elcl16/layer_add.png"
-               id="org.wcs.smart.ui.map.addlayer"
-               label="Add Layer "
-               style="push"
-               toolbarPath="layertools"
-               tooltip="Add a layer to the map">
-         </action>
-         <action
-               class="org.wcs.smart.ui.map.SaveMapAction"
-               icon="images/icons/elcl16/save.png"
-               id="org.wcs.smart.action.SaveMapAction"
-               label="Save"
-               style="push"
-               toolbarPath="maptools"
-               tooltip="Save the map">
-         </action>
-         <action
-               class="org.wcs.smart.ui.map.LoadMapAction"
-               id="org.wcs.smart.ui.map.LoadMapAction"
-               label="Load"
-               style="push"
-               toolbarPath="maptools"
-               tooltip="TODO: this action is only available for testing purpose (remove from release)">
-         </action>
-      </viewContribution>
    </extension>
    <extension
          point="net.refractions.udig.catalog.ServiceExtension">
@@ -556,28 +618,40 @@
       <class
             class="org.wcs.smart.ca.DescriptionLabel">
       </class>
+      <class
+            class="org.wcs.smart.ca.BasemapDefinition">
+      </class>
    </extension>
    <extension
          point="net.refractions.udig.project.ui.tool">
+      <category
+            id="org.wcs.smart.udig.maptools">
+      </category>
       <actionTool
-            categoryId="org.wcs.smart.udig.addlayer"
+            categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.udig.AddLayerTool"
             icon="images/icons/elcl16/layer_add.png"
             id="org.wcs.smart.udig.AddLayer"
             name="Add Layer"
             tooltip="Add Layer To Map">
       </actionTool>
-      <category
-            id="org.wcs.smart.udig.addlayer">
-      </category>
       <actionTool
-            categoryId="org.wcs.smart.udig.addlayer"
+            categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.udig.ZoomLayersTool"
             icon="images/icons/elcl16/zoom_layers.png"
             id="org.wcs.smart.udig.ZoomExtents"
             name="Zoom to map extents"
             onToolbar="false"
             tooltip="Zoom to map extents">
+      </actionTool>
+      <actionTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.udig.SetBasemapTool"
+            icon="images/icons/elcl16/load_map.png"
+            id="org.wcs.smart.map.setBasemap"
+            name="Set Basemap"
+            onToolbar="false"
+            tooltip="Sets the map basemaps">
       </actionTool>
    </extension>
    <extension

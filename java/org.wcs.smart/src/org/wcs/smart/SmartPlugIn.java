@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.internal.datamodel.DataModelAdvisor;
@@ -66,11 +67,21 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String STATION_ICON = "org.wsc.smart.STATION_ICON"; //$NON-NLS-1$
 	
+	
+	public BasemapDefinition defaultDefinition = null;
+	
 	/**
 	 * The constructor
 	 */
 	public SmartPlugIn() {
 
+	}
+	
+	public BasemapDefinition getBasemapSelection(){
+		return this.defaultDefinition;
+	}
+	public void setBasemapSelection(BasemapDefinition definition){
+		this.defaultDefinition = definition;
 	}
 
 	/*

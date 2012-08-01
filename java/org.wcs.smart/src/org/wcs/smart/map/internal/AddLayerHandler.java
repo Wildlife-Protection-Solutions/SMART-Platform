@@ -19,29 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.map;
+package org.wcs.smart.map.internal;
 
 import net.refractions.udig.project.ui.internal.MapImport;
 
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 
-public class AddLayerAction implements IViewActionDelegate {
+/**
+ * Add layer handler
+ * @author egouge
+ * @since 1.0.0
+ */
+public class AddLayerHandler extends AbstractHandler {
 
 	@Override
-	public void run(IAction action) {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		MapImport mapImport = new MapImport();
 		mapImport.getDialog().open();
-	}
-
-	@Override
-	public void selectionChanged(IAction action, ISelection selection) {
-	}
-
-	@Override
-	public void init(IViewPart view) {
+		return null;
 	}
 
 }

@@ -27,12 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Engine for exporting conservation area data
  * @author egouge
  * @since 1.0.0
  */
