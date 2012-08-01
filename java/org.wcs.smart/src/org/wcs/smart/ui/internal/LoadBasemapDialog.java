@@ -150,10 +150,9 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					String query = "FROM BasemapDefinition WHERE conservationArea = :ca and (isShared = 'true' or (isShared = 'false' and employee = :em))";
+					String query = "FROM BasemapDefinition WHERE conservationArea = :ca";
 					Query q = s.createQuery(query);
 					q.setParameter("ca", SmartDB.getCurrentConservationArea());
-					q.setParameter("em", SmartDB.getCurrentEmployee());
 					data = q.list().toArray();
 				}finally{
 					if (s.getTransaction().isActive()){
