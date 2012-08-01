@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.BasemapDefinition;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
@@ -60,7 +59,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SaveBasemapDialog  extends TitleAreaDialog {
 
-	private Button btnShared;
 	private Button btnOverwrite;
 	private Button btnCreateNew;
 	private Text txtName;
@@ -105,13 +103,6 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN ||
-				SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER ){
-			btnShared = new Button(main, SWT.CHECK);
-			btnShared.setSelection(true);
-			btnShared.setText("Share this basemap");
-		}
-		
 		SelectionAdapter enableListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -194,10 +185,9 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					String query = "FROM BasemapDefinition WHERE conservationArea = :ca and (isShared = 'true' or (isShared = 'false' and employee = :em))";
+					String query = "FROM BasemapDefinition WHERE conservationArea = :ca ";
 					Query q = s.createQuery(query);
 					q.setParameter("ca", SmartDB.getCurrentConservationArea());
-					q.setParameter("em", SmartDB.getCurrentEmployee());
 					data = q.list().toArray();
 				}finally{
 					if (s.getTransaction().isActive()){
@@ -258,7 +248,6 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		}
 		if (baseMap != null){
 			baseMap.setEmployee(SmartDB.getCurrentEmployee());
-			baseMap.setIsShared(btnShared.getSelection());
 		}else{
 			ok = false;
 		}

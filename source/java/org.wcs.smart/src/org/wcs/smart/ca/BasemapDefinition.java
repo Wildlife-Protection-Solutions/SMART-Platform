@@ -49,7 +49,6 @@ public class BasemapDefinition {
 	private byte[] uuid;
 	private Employee employee;
 	private ConservationArea conservationArea;
-	private boolean isShared;
 	private String name;
 	private String mapDef;
 	private boolean isDefault;
@@ -104,21 +103,6 @@ public class BasemapDefinition {
 	 */
 	public void setConservationArea(ConservationArea conservationArea) {
 		this.conservationArea = conservationArea;
-	}
-
-	/**
-	 * @return the isShared
-	 */
-	@Column(name="is_shared")
-	public boolean getIsShared() {
-		return isShared;
-	}
-
-	/**
-	 * @param isShared the isShared to set
-	 */
-	public void setIsShared(boolean isShared) {
-		this.isShared = isShared;
 	}
 
 	/**
