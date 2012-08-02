@@ -25,6 +25,13 @@ CREATE TABLE smart.REPORT_FOLDER
 );
 
 
+CREATE TABLE smart.REPORT_QUERY(
+	REPORT_UUID CHAR(16) FOR BIT DATA NOT NULL,
+	QUERY_UUID CHAR(16) FOR BIT DATA NOT NULL,
+	PRIMARY KEY (REPORT_UUID, QUERY_UUID)
+);
+
+
 
 /* Create Foreign Keys */
 
@@ -56,6 +63,14 @@ ALTER TABLE smart.report_folder
 	ON DELETE RESTRICT
 ;
 
+
+
+ALTER TABLE smart.report_query
+	ADD CONSTRAINT report_query_report_uuid_fk FOREIGN KEY (report_uuid)
+	REFERENCES smart.report (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
 ALTER TABLE smart.report_folder
 	ADD CONSTRAINT report_folder_ca_uuid_fk FOREIGN KEY (ca_uuid)
 	REFERENCES smart.conservation_area(uuid)
