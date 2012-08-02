@@ -23,6 +23,7 @@ import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.ModuleHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.PropertyHandle;
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.activity.NotificationEvent;
 import org.eclipse.birt.report.model.api.command.ContentEvent;
 import org.eclipse.birt.report.model.api.command.NameEvent;
@@ -158,10 +159,22 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 	}
 
 	public void doSave(IProgressMonitor monitor) {
-		super.doSave(monitor);
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			ReportManager.updateReportQueries(s, (ReportDesignHandle)getModel(), getEditorInputLocal().getReport()); 
+			super.doSave(monitor);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			ReportPlugIn.displayLog("Could not save report: " + ex.getMessage(), ex);
+		}finally{
+			s.close();
+		}
 		try {
 			refreshMarkers(getEditorInput());
 		} catch (CoreException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -228,6 +241,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 					try {
 						s.beginTransaction();
 						s.save(copy);
+						ReportManager.updateReportQueries(s, (ReportDesignHandle)getModel(), copy);
 						s.getTransaction().commit();
 					} catch (Exception ex) {
 						s.getTransaction().rollback();
