@@ -23,14 +23,9 @@ package org.wcs.smart.report;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.eclipse.birt.report.designer.ui.ReportPlugin;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -40,6 +35,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
 
@@ -61,6 +57,8 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String REPORT_ICON = "org.wcs.smart.query.reporticon";
 
+	private ReportQuerySaveListener queryListener = new ReportQuerySaveListener();
+	
 	static {
 		addImage("images/icons/obj16/report.png", REPORT_ICON);
 	}
@@ -92,6 +90,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, ReportCaDeleteHandler.EXECUTE_ORDER);
+		QueryEventManager.getInstance().addQuerySaveListener(queryListener);
 	}
 
 	public static void initReports() {
@@ -123,7 +122,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		ReportManager.endReportEngine();
-		
+		QueryEventManager.getInstance().removeQuerySaveListener(queryListener);
 		plugin = null;
 		super.stop(context);
 	}

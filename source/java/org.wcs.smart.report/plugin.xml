@@ -452,6 +452,10 @@
       <class
             class="org.wcs.smart.report.model.Report">
       </class>
+      <class
+            ca_property=".id.report.conservationArea"
+            class="org.wcs.smart.report.model.ReportQuery">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -556,5 +560,12 @@
                variableArguments="false">
          </Function>
       </Category>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.property">
+      <queryproperty
+            propertyName="Reports"
+            propertyProvider="org.wcs.smart.report.QueryReportPropertyProvider">
+      </queryproperty>
    </extension>
 </plugin>

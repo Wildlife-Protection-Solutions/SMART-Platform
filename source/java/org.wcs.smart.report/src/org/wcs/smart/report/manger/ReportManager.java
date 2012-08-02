@@ -23,6 +23,7 @@ package org.wcs.smart.report.manger;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,10 +37,12 @@ import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -49,11 +52,13 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor;
 import org.wcs.smart.report.internal.ui.designer.SmartReportEditorInput;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
+import org.wcs.smart.report.model.ReportQuery;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -253,9 +258,14 @@ public class ReportManager {
 			window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
 			if (r != null) {
 				ReportEditorInput ri = new SmartReportEditorInput(r);
-				window.getActivePage().openEditor(
+				IEditorPart editor = window.getActivePage().openEditor(
 								ri,
 								IReportEditorContants.DESIGN_EDITOR_ID);
+				if (editor instanceof RCPMultiPageReportEditor){
+					//TODO: test this
+					((RCPMultiPageReportEditor) editor).refreshMarkers(editor.getEditorInput());
+				}
+				
 			}
 		} catch (Exception ex) {
 			ReportPlugIn.displayLog(
@@ -324,5 +334,37 @@ public class ReportManager {
 			}});
 	}
 	
+	
+	/**
+	 * Updates the database report query table for the given
+	 * report.  Determines all the smart queries used in the 
+	 * report and updates the smart.report_query table.
+	 * 
+	 * @param s open database session with active transaction
+	 * @param rdh report design handler
+	 * @param r report associated with design handler
+	 * @throws Exception
+	 */
+	public static void updateReportQueries(Session s, ReportDesignHandle rdh, Report r) throws Exception{
+		List<?> datasets = rdh.getAllDataSets();
+		List<ReportQuery> reportQueries = new ArrayList<ReportQuery>();
+		
+		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+			DataSetHandle dataset = (DataSetHandle) iterator.next();
+			if (dataset instanceof OdaDataSetHandle){
+				OdaDataSetHandle h = (OdaDataSetHandle)dataset;
+				if (h.getExtensionID().equals(SMART_DATASET_TYPE)){
+					reportQueries.add(new ReportQuery(r, SmartUtils.decodeHex(h.getQueryText())));
+				}
+			}
+		}
+		Query q = s.createQuery("delete ReportQuery where id.report=:report");
+		q.setParameter("report", r);
+		q.executeUpdate();
+		
+		for (ReportQuery rq: reportQueries){
+			s.saveOrUpdate(rq);
+		}
+	}
 
 }
