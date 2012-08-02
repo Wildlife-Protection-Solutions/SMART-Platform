@@ -19,32 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query;
-
-import org.wcs.smart.query.model.Query;
+package org.wcs.smart.query.ui;
 
 /**
- * Listener for query changes
- * 
- * @author Emily
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
+ * @author egouge
  * @since 1.0.0
  */
-public interface IQueryListener {
+public class QueryEditor {
 
-	/**
-	 * Fired when the given query has changed.  A change in query:
-	 * occurs when the query filter has changed. 
-	 * 
-	 * @param query the query being changed.
-	 */
-	public void queryChanged(Query query);
-	
-	
-	/**
-	 * Fired when the given query should be run 
-	 * 
-	 * @param query the query to run
-	 */
-	public void queryRun(Query query);
-	
 }

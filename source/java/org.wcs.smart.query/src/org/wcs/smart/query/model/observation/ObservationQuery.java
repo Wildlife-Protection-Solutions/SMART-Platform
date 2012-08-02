@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -49,10 +48,8 @@ import org.wcs.smart.query.model.SimpleQuery;
 @Entity
 @Table(name="smart.waypoint_query")
 public class ObservationQuery extends SimpleQuery{
-	
-	private String visibleTableColumnKeys = null;
+
 	private List<QueryColumn> queryColumns = null;
-	
 	
 	/**
 	 * Creates a new observation query with the default
@@ -62,24 +59,6 @@ public class ObservationQuery extends SimpleQuery{
 		super();
 	}
 	
-	
-	/**
-	 * Returns a list of columns that are visible in the output table.
-	 * @return a list of visible column
-	 */
-	@Column(name = "column_filter")
-	public String getVisibleColumns(){
-		return this.visibleTableColumnKeys;
-	}
-	
-	/**
-	 * Sets the columns that are visible in the output table.
-	 * 
-	 * @param columns
-	 */
-	public void setVisibleColumns(String columns){
-		this.visibleTableColumnKeys = columns;
-	}
 	
 	
 	/**

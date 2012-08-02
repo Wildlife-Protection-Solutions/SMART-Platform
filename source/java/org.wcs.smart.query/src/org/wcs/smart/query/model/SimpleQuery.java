@@ -70,7 +70,7 @@ public abstract class SimpleQuery extends Query {
 	private DateFilter dateFilter;
 		
 	private List<QueryResultItem> lastResults  = null;
-	
+	protected String visibleTableColumnKeys = null;
 	
 	/**
 	 * Creates a new waypoint query with the default
@@ -237,6 +237,7 @@ public abstract class SimpleQuery extends Query {
 	 * @throws Exception
 	 */
 	@Transient
+	@Override
 	public void generateDropItems(Session session) throws Exception{
 		//parses the query into a collection of drop items
 		IFilter query = parseQueryFilter();
@@ -288,4 +289,23 @@ public abstract class SimpleQuery extends Query {
 		return myQuery;
 	}
 	
+
+	
+	/**
+	 * Returns a list of columns that are visible in the output table.
+	 * @return a list of visible column
+	 */
+	@Column(name = "column_filter")
+	public String getVisibleColumns(){
+		return this.visibleTableColumnKeys;
+	}
+	
+	/**
+	 * Sets the columns that are visible in the output table.
+	 * 
+	 * @param columns
+	 */
+	public void setVisibleColumns(String columns){
+		this.visibleTableColumnKeys = columns;
+	}
 }

@@ -61,7 +61,6 @@ import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
 import org.wcs.smart.query.ui.QueryPropertiesDialog;
@@ -338,55 +337,20 @@ public class GriddedEditor extends EditorPart {
 
 		}
 
-		if (!saveQuery(false)){
+		if (!QueryHibernateManager.saveQuery(query, false)){
 			monitor.setCanceled(true);
 			return;
 		}
-
+		updatePartName();
+		initQuery();
+		
 		if (newQuery) {
-			QueryEventManager.getInstance().fireFolderChangedListeners(
-					IQueryFolderListener.QUERY_ADDED, query);
 			((QueryInput) super.getEditorInput()).setUuid(query.getUuid());
 			((QueryInput) super.getEditorInput()).setId(query.getId());
-		} else {
-			QueryEventManager.getInstance().fireFolderChangedListeners(
-					IQueryFolderListener.QUERY_SAVED, query);
 		}
 
 		setDirty(false);
 
-	}
-
-	private boolean saveQuery(boolean generateDropItems) {
-		boolean isNew = query.getId() == null;
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		
-		try {
-			if (isNew) {
-				query.setId(QueryHibernateManager.generateQueryId(s));
-			}
-			if (generateDropItems) {
-				query.generateDropItems(s);
-			}
-			s.saveOrUpdate(query);
-			s.getTransaction().commit();
-			
-			
-		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			if (isNew){
-				query.setUuid(null);
-				query.setId(null);
-			}
-			return false;
-		} finally {
-			s.close();
-		}
-		updatePartName();
-		initQuery();
-		return true;
 	}
 
 	@Override
@@ -449,14 +413,14 @@ public class GriddedEditor extends EditorPart {
 					monitor.worked(1);
 
 					monitor.subTask("Saving query...");
-					if (!saveQuery(true)){
+					if (!QueryHibernateManager.saveQuery(query,true)){
 						GriddedEditor.this.query = oldQuery;
 						return;
 					}
+					updatePartName();
+					initQuery();
 					monitor.worked(1);
 
-					QueryEventManager.getInstance().fireFolderChangedListeners(
-							IQueryFolderListener.QUERY_ADDED, query);
 					GriddedEditor.this.setInput(new QueryInput(newQuery));
 
 					setDirty(false);

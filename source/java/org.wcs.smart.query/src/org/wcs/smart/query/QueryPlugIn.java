@@ -21,7 +21,12 @@
  */
 package org.wcs.smart.query;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -168,7 +173,12 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * Area Polygon Filter Icon
 	 */
 	public static final String AREA_POLYGON_FILTER_ICON = "org.wcs.smart.query.areapolyfilter";
+
 	
+	/**
+	 * Query property extension id
+	 */
+	private static final String QUERY_PROPERTY_EXTENSION_ID = "org.wcs.smart.query.property";
 	/*
 	 * Load images
 	 */
@@ -203,10 +213,10 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		addImage("images/icons/obj16/column_header.png",COLUMN_HEADER_ICON);
 		
 		addImage("images/icons/obj16/area_filter.png",AREA_FILTER_ICON);
-		addImage("images/icons/obj16/area_polygon.png",AREA_POLYGON_FILTER_ICON);
-		
-		
+		addImage("images/icons/obj16/area_polygon.png",AREA_POLYGON_FILTER_ICON);	
 	}
+	
+	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
 	
 	private static void addImage(String path, String icon){
 		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID, path); 
@@ -288,6 +298,30 @@ public class QueryPlugIn extends AbstractUIPlugin {
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
 			}});
+	}
+	
+	
+	
+	/**
+	 * This list is only loaded once
+	 * @return list of query property providers
+	 */
+	public synchronized static List<AbstractQueryPropertyProvider> getPropertyProviders(){
+		if (propertyProviders == null){
+			propertyProviders = new ArrayList<AbstractQueryPropertyProvider>();
+			if (Platform.getExtensionRegistry() == null) return propertyProviders;
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(QUERY_PROPERTY_EXTENSION_ID);
+			try {
+				for (IConfigurationElement e : config) {
+					AbstractQueryPropertyProvider prop = (AbstractQueryPropertyProvider) e.createExecutableExtension("propertyProvider");
+					prop.setName(e.getAttribute("propertyName"));
+					propertyProviders.add( prop);
+				}
+			}catch (Exception ex){
+				ex.printStackTrace();
+			}
+		}
+		return propertyProviders;
 		
 	}
 }

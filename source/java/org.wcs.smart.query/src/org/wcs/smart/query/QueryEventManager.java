@@ -35,6 +35,7 @@ public class QueryEventManager {
 
 	private static QueryEventManager instance = null;
 	
+	private ArrayList<IQuerySaveListener> saveListeners = new ArrayList<IQuerySaveListener>();
 	private ArrayList<IQueryListener> listeners = new ArrayList<IQueryListener>();
 	private ArrayList<IQueryFolderListener> folderListeners = new ArrayList<IQueryFolderListener>();
 	
@@ -123,5 +124,35 @@ public class QueryEventManager {
 	 */
 	public void removeQueryFolderListener(IQueryFolderListener listener){
 		folderListeners.remove(listener);
+	}
+	
+	/**
+	 * Add a query save listener
+	 * @param listener
+	 */
+	public void addQuerySaveListener(IQuerySaveListener listener){
+		this.saveListeners.add(listener);
+	}
+	
+	/**
+	 * Remove a query save listener
+	 * @param listener
+	 */
+	public void removeQuerySaveListener(IQuerySaveListener listener){
+		this.saveListeners.remove(listener);
+	}
+	/**
+	 * Fires before save event
+	 * @param query the query
+	 * @return <code>true</code> if save can continue, <code>false</code>
+	 * otherwise
+	 */
+	public boolean fireBeforeSaveListeners(Query query){
+		for(IQuerySaveListener listener: saveListeners){
+			if (!listener.beforeSave(query)){
+				return false;
+			}
+		}
+		return true;
 	}
 }

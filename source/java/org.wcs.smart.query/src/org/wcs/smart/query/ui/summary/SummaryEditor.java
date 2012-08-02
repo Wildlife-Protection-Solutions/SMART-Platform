@@ -330,56 +330,19 @@ public class SummaryEditor extends EditorPart {
 
 		}
 
-		if (!saveQuery(false)){
+		if (!QueryHibernateManager.saveQuery(query, false)){
 			monitor.setCanceled(true);
 			return;
 		}
-
-		if (newQuery) {
-			QueryEventManager.getInstance().fireFolderChangedListeners(
-					IQueryFolderListener.QUERY_ADDED, query);
-			((QueryInput) super.getEditorInput()).setUuid(query.getUuid());
-			((QueryInput) super.getEditorInput()).setId(query.getId());
-		} else {
-			QueryEventManager.getInstance().fireFolderChangedListeners(
-					IQueryFolderListener.QUERY_SAVED, query);
-		}
-
-		setDirty(false);
-
-	}
-
-	private boolean saveQuery(boolean generateDropItems) {
-		boolean isNew = query.getId() == null;
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		
-		try {
-			if (isNew) {
-				query.setId(QueryHibernateManager.generateQueryId(s));
-			}
-			if (generateDropItems) {
-				query.generateDropItems(s);
-			}
-			s.saveOrUpdate(query);
-			s.getTransaction().commit();
-			
-			
-		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			if (isNew){
-				query.setUuid(null);
-				query.setId(null);
-			}
-			return false;
-		} finally {
-			s.close();
-		}
 		updatePartName();
 		initQuery();
-		return true;
+		if (newQuery) {
+			((QueryInput) super.getEditorInput()).setUuid(query.getUuid());
+			((QueryInput) super.getEditorInput()).setId(query.getId());
+		}
+		setDirty(false);
 	}
+
 
 	@Override
 	public void doSaveAs() {
@@ -441,14 +404,14 @@ public class SummaryEditor extends EditorPart {
 					monitor.worked(1);
 
 					monitor.subTask("Saving query...");
-					if (!saveQuery(true)){
+					if (!QueryHibernateManager.saveQuery(query, true)){
 						SummaryEditor.this.query = oldQuery;
 						return;
 					}
+					updatePartName();
+					initQuery();
+					
 					monitor.worked(1);
-
-					QueryEventManager.getInstance().fireFolderChangedListeners(
-							IQueryFolderListener.QUERY_ADDED, query);
 					SummaryEditor.this.setInput(new QueryInput(newQuery));
 
 					setDirty(false);

@@ -113,7 +113,8 @@ public class QueryDefView extends ViewPart {
 			
 			if (partRef.getId().equals(QueryResultsEditor.ID) ||
 					partRef.getId().equals(SummaryEditor.ID) || 
-					 partRef.getId().equals(GriddedEditor.ID)){
+					 partRef.getId().equals(GriddedEditor.ID) ||
+					 partRef.getId().equals(PatrolQueryResultsEditor.ID)){
 				IWorkbenchPart part = partRef.getPart(false);
 				
 				if (part instanceof QueryResultsEditor){

@@ -24,27 +24,20 @@ package org.wcs.smart.query;
 import org.wcs.smart.query.model.Query;
 
 /**
- * Listener for query changes
+ * Query save listener for before save events.
  * 
- * @author Emily
+ * @author egouge
  * @since 1.0.0
  */
-public interface IQueryListener {
+public interface IQuerySaveListener {
 
 	/**
-	 * Fired when the given query has changed.  A change in query:
-	 * occurs when the query filter has changed. 
-	 * 
-	 * @param query the query being changed.
+	 * Event fired before the query is saved
+	 * to the database.
+	 * @param query The query to save to the database
+	 * @return <code>true</code> if the save should
+	 * proceed <code>false</code> if save should
+	 * be cancelled.
 	 */
-	public void queryChanged(Query query);
-	
-	
-	/**
-	 * Fired when the given query should be run 
-	 * 
-	 * @param query the query to run
-	 */
-	public void queryRun(Query query);
-	
+	public boolean beforeSave(Query query);
 }
