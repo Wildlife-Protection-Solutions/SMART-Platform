@@ -34,6 +34,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -276,4 +277,13 @@ public abstract class Query {
 	 */
 	@Transient
 	public abstract QueryType getType();
+	
+	/**
+	 * Generates ui drop items for the given query
+	 * @param session
+	 * @throws Exception
+	 */
+	@Transient
+	public abstract void generateDropItems(Session session) throws Exception;
+
 }

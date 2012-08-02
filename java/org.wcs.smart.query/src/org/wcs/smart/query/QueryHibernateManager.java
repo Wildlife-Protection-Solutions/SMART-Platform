@@ -38,6 +38,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.Query.QueryType;
@@ -541,5 +542,56 @@ public class QueryHibernateManager {
 		}else{
 			return (SimpleListItem)results.get(0);
 		}
+	}
+	
+	
+	/**
+	 * Saves the given query to the database.
+	 * 
+	 * @param query query to save
+	 * @param generateDropItems if query should generate drop items.
+	 * @return
+	 */
+	public static boolean saveQuery(org.wcs.smart.query.model.Query query, boolean generateDropItems){
+		//fire before save events
+		if (!QueryEventManager.getInstance().fireBeforeSaveListeners(query)){
+			return false;
+		}
+
+		boolean newQuery = query.getId() == null;
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			if (newQuery){
+				query.setId(QueryHibernateManager.generateQueryId(s));
+				//page1.setQuery();
+			}
+			if (generateDropItems){
+				query.generateDropItems(s);
+			}
+			s.saveOrUpdate(query);
+			s.getTransaction().commit();
+			//updatePartName();
+			
+		}catch (Exception ex){
+			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			if (newQuery){
+				query.setUuid(null);
+				query.setId(null);
+			}
+			return false;
+		}finally{
+			s.close();
+		}
+
+		if (newQuery) {
+			QueryEventManager.getInstance().fireFolderChangedListeners(
+					IQueryFolderListener.QUERY_ADDED, query);
+		} else {
+			QueryEventManager.getInstance().fireFolderChangedListeners(
+					IQueryFolderListener.QUERY_SAVED, query);
+		}
+		return true;
 	}
 }

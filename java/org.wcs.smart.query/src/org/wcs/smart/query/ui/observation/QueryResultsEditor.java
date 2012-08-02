@@ -347,52 +347,21 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			
 		}
 		
-		if (!saveQuery(false)){
+		if (!QueryHibernateManager.saveQuery(query,false)){
 			monitor.setCanceled(true);
 			return;
 		}
+		updatePartName();
 		
 		if (newQuery){
-			QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, query);
+			page1.setQuery();
 			((QueryInput)super.getEditorInput()).setUuid(query.getUuid());
 			((QueryInput)super.getEditorInput()).setId(query.getId()); 
-		}else{
-			QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_SAVED, query);
 		}
 	
 		setDirty(false);
 	}
 
-	private boolean saveQuery(boolean generateDropItems){
-		boolean newQuery = query.getId() == null;
-		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			if (newQuery){
-				query.setId(QueryHibernateManager.generateQueryId(s));
-				page1.setQuery();
-			}
-			if (generateDropItems){
-				query.generateDropItems(s);
-			}
-			s.saveOrUpdate(query);
-			s.getTransaction().commit();
-			updatePartName();
-			return true;
-		}catch (Exception ex){
-			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			if (newQuery){
-				query.setUuid(null);
-				query.setId(null);
-			}
-			return false;
-		}finally{
-			s.close();
-		}
-
-	}
 	
 	@Override
 	public void doSaveAs() {
@@ -447,16 +416,18 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 					
 					QueryResultsEditor.this.query = newQuery;
 					monitor.subTask("Saving query...");
-					if (!saveQuery(true)){
+					if (!QueryHibernateManager.saveQuery(newQuery, true)){
 						QueryResultsEditor.this.query = oldQuery;
 						return ;
 					}
+					updatePartName();
+					page1.setQuery();
+					
 					monitor.worked(1);
 					
 					page1.setQuery();
 					monitor.worked(1);
 					
-					QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, query);
 					QueryResultsEditor.this.setInput(new QueryInput(newQuery));
 					
 					setDirty(false);

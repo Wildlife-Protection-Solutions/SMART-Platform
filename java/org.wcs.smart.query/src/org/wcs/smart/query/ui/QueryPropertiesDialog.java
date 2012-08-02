@@ -33,12 +33,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -47,6 +49,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.query.AbstractQueryPropertyProvider;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
@@ -88,6 +92,21 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		}
 	}
 	
+	@Override 
+	protected Point getInitialSize() {
+		Point p = super.getInitialSize();
+		
+		if (p.y > 650){
+			p.y = 650;
+		}else if (p.y < 400){
+			p.y = 400;
+		}
+		if (p.x > 500){
+			p.x = 500;
+		}
+		
+		return p;
+	}
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -115,7 +134,12 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		getShell().setText("Query Properties");
 		setMessage("Select the query properties.");
 		
-		Composite main = new Composite(parent, SWT.NONE);
+		ScrolledComposite scroll = new ScrolledComposite(parent,  SWT.V_SCROLL);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		Composite main = new Composite(scroll, SWT.NONE);
+		
+		
 		GridLayout gl = new GridLayout(2, false);
 		gl.marginTop = 10;
 		main.setLayout(gl);
@@ -140,10 +164,28 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(query.getOwner().getLabel());
 		
+		List<AbstractQueryPropertyProvider> props = QueryPlugIn.getPropertyProviders();
+		for(AbstractQueryPropertyProvider prop: props){
+			if (prop.isValid(query.getType())){
+				Label lblProp = new Label(main, SWT.NONE);
+				lblProp.setText(prop.getName()+": ");
+				lblProp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+				
+				Label lblText = new Label(main, SWT.WRAP);
+				lblText.setText(prop.getValue(query));
+				lblText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			}
+		}
+		
 		if (query instanceof SimpleQuery){
 			createObservationQueryOptions(main);
 		}
 		
+		scroll.setMinSize(150,main.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		scroll.setContent(main);
+
+		
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return main;
 	}
 
@@ -154,8 +196,8 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		createColumnTable(main);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
-		gd.heightHint = 200;
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+		gd.heightHint = 40;
 		columnViewer.getTable().setLayoutData(gd);
 		
 		Composite hyperlinkComposite = new Composite(main, SWT.NONE);

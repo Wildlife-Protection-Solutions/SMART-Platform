@@ -22,29 +22,44 @@
 package org.wcs.smart.query;
 
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.Query.QueryType;
 
 /**
- * Listener for query changes
- * 
- * @author Emily
+ * Query property provider.  To display additiona
+ * query properties in the query properties window
+ * @author egouge
  * @since 1.0.0
  */
-public interface IQueryListener {
+public abstract class AbstractQueryPropertyProvider {
 
+	private String name;
+	
+	public AbstractQueryPropertyProvider(){
+		
+	}
 	/**
-	 * Fired when the given query has changed.  A change in query:
-	 * occurs when the query filter has changed. 
-	 * 
-	 * @param query the query being changed.
+	 * @param name set the property name
 	 */
-	public void queryChanged(Query query);
-	
+	public void setName(String name){
+		this.name = name;
+	}
+	/**
+	 * @return the property name
+	 */
+	public String getName(){
+		return this.name;
+	}
 	
 	/**
-	 * Fired when the given query should be run 
-	 * 
-	 * @param query the query to run
+	 * @param query
+	 * @return <code>true</code> if property is valid 
+	 * for given query type
 	 */
-	public void queryRun(Query query);
+	public abstract boolean isValid(QueryType query);
 	
+	/**
+	 * @param query
+	 * @return the query property for the given query
+	 */
+	public abstract String getValue(Query query);
 }

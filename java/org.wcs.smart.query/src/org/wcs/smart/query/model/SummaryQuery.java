@@ -327,13 +327,11 @@ public class SummaryQuery extends Query {
 	}
 	
 	/**
-	 * Generates ui drop items for the given query
-	 * @param session
-	 * @throws Exception
+	 * @see org.wcs.smart.query.model.Query#generateDropItems(org.hibernate.Session)
 	 */
+	@Override
 	@Transient
 	public void generateDropItems(Session session) throws Exception{
-
 		clearDropItemList(rowGroupByDropItems);
 		clearDropItemList(colGroupByDropItems);
 		clearDropItemList(valueDropItems);
