@@ -124,7 +124,7 @@ public class MapSettings {
 	/**
 	 * 
 	 */
-	private static final String BASEMAP_BLACKBOARD_KEY = "org.wcs.smart.basemaplayers";
+	public static final String BASEMAP_BLACKBOARD_KEY = "org.wcs.smart.basemaplayers";
 
 	public static final String MAP_DIRECTORY = "maps";
 	

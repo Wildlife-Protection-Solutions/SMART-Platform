@@ -87,14 +87,12 @@ public class LoadDefaultLayersJob extends Job{
 					List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);
     				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     				List<IGeoResource> cleanedGeoResources;
-    				if(ProjectPlugin.getPlugin().getPluginPreferences().getBoolean(PreferenceConstants.P_CHECK_DUPLICATE_LAYERS)){
-    					cleanedGeoResources = ProjectUtil.cleanDuplicateGeoResources(layers, map);
-    				} else {
-    					cleanedGeoResources = layers;
-    				}
+    				cleanedGeoResources = ProjectUtil.cleanDuplicateGeoResources(layers, map);
     				AddLayersCommand alCommand = new AddLayersCommand(cleanedGeoResources, 0);
     				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     				map.sendCommandSync(alCommand);
+    				map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY,alCommand.getLayers());
+    				
     			}
     			if (zoom){
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
