@@ -12,6 +12,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,6 +34,9 @@ import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.query.parser.filter.DateFilter;
+import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
+import org.wcs.smart.query.parser.internal.summary.GroupByPart;
+import org.wcs.smart.query.parser.internal.summary.IGroupBy;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -149,7 +153,16 @@ public class SmartQuery implements IQuery {
 				if (smartQuery instanceof SimpleQuery) {
 					((SimpleQuery) smartQuery).getFilter();
 				} else if (smartQuery instanceof SummaryQuery) {
-					// ((SummaryQuery)smartQuery).getQueryDefinition().getQueryFilter();
+					SummaryQuery sumQuery = (SummaryQuery)smartQuery;
+					
+					//date group by problem with reports 
+					GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
+					List<IGroupBy> headers = part.getGroupBys();
+					for (IGroupBy h : headers){
+						if (h instanceof DateGroupBy){
+							throw new OdaException("You cannot add summary queries that have date group by column headers to reports.  Modify the query to put date group by's in the row headers.");
+						}
+					}
 				}
 
 			} catch (InterruptedException e) {

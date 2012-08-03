@@ -206,7 +206,9 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 			return design; // no editing was done
 		if (!hasValidData())
 			return null; // to trigger a design session error status
-		savePage(design);
+		if (!savePage(design)){
+			return null;
+		}
 		return design;
 	}
 
@@ -273,7 +275,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 	 * Saves the user-defined value in this page, and updates the specified
 	 * dataSetDesign with the latest design definition.
 	 */
-	private void savePage(DataSetDesign dataSetDesign) {
+	private boolean savePage(DataSetDesign dataSetDesign) {
 		// save user-defined query text
 		QueryInput query = getQuery();
 		dataSetDesign.setQueryText(query.getId());
@@ -305,12 +307,13 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 				// dataSetDesign.setDisplayNameKey(query.getName() +
 				// " Data Set");
 			}
+			return true;
 		} catch (OdaException e) {
 			// not able to get current metadata, reset previous derived metadata
 			dataSetDesign.setResultSets(null);
 			dataSetDesign.setParameters(null);
-
-			e.printStackTrace();
+			Activator.displayLog(e.getMessage(), e);
+			return false;
 		} finally {
 			closeConnection(customConn);
 		}
