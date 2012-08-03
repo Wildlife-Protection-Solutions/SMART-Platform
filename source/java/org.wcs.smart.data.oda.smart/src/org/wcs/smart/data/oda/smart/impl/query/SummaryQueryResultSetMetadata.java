@@ -34,6 +34,8 @@ import org.wcs.smart.query.engine.DerbySummaryEngine;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.model.SummaryQueryResult;
 import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.filter.DateFilter;
 
 /**
  * Resultset Metadata object for 
@@ -58,6 +60,10 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 			protected IStatus run(IProgressMonitor monitor) {
 				Session session = HibernateManager.openSession();
 				try{
+					//set a default date filter for parsing
+					if (query.getDateFilter() == null){
+						query.setDateFilter(new DateFilter(DateFilter.DATE_FIELD_OP.WAYPOINT, PatrolQueryOptions.DATE_FILTER_OP.LAST_30_DAYS));
+					}
 					DerbySummaryEngine.getHeaderInfo(query, results, session);
 				}finally{
 					session.close();

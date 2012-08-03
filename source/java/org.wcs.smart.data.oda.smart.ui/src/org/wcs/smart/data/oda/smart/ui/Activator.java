@@ -23,7 +23,9 @@ package org.wcs.smart.data.oda.smart.ui;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -95,5 +97,26 @@ public class Activator extends AbstractUIPlugin {
 				: IStatus.WARNING;
 		getDefault().getLog().log(
 				new Status(status, PLUGIN_ID, IStatus.OK, message, t));
+	}
+	
+
+	/**
+	 * Displays an error message to the user and logs the message.
+	 * 
+	 * @param message
+	 *            Error message to display
+	 * @param t
+	 *            exception to log
+	 */
+	public static void displayLog(final String message, Throwable t) {
+		log(message, t);
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(),
+						"Error", message);
+			}
+		});
+
 	}
 }
