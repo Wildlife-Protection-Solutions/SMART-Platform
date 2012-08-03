@@ -159,10 +159,9 @@ public class DateGroupBy implements IGroupBy {
 		}else if (op == DateGroupByOption.MONTH){
 			//each month between start and end of 
 			//form "m/yyyy"
+			cals.set(Calendar.DAY_OF_MONTH, 1);
+			cale.set(Calendar.DAY_OF_MONTH, cale.getActualMaximum(Calendar.DAY_OF_MONTH));
 			while(cals.before(cale)){
-				cals.set(Calendar.DAY_OF_MONTH, 1);
-				cale.set(Calendar.DAY_OF_MONTH, 1);
-				//cale.set(Calendar.MONTH, cals.get(Calendar.MONTH));
 				String key = (cals.get(Calendar.MONTH)+1) + "/" +cals.get(Calendar.YEAR);
 				items.add(new ListItem(null, key,key));
 				cals.add(Calendar.MONTH, 1);

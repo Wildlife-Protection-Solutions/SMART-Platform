@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -42,7 +43,12 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
+import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -189,8 +195,31 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 			if (op == DATE_FILTER_OP.CUSTOM){
 				params.put(START_DATE_NAME, new java.sql.Date(SmartUtils.getDate(startPicker).getTime()));
 				params.put(END_DATE_NAME, new java.sql.Date(SmartUtils.getDate(endPicker).getTime()));	
-			}else if (op == DATE_FILTER_OP.ALL){				
+			}else if (op == DATE_FILTER_OP.ALL){
 				params.put(START_DATE_NAME, new java.sql.Date(-2208998272375l));	//JAN 01 1900  
+				
+				Session session = HibernateManager.openSession();
+				try{
+					session.beginTransaction();
+				
+					String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca";
+					Query q = session.createQuery(hql);
+					q.setParameter("ca", SmartDB.getCurrentConservationArea());
+					List<?> data = q.list();
+					Date startdate = null;
+					if (data != null && data.size() >= 1 && data.get(0) != null){
+						startdate = (java.sql.Timestamp)data.get(0);
+					}
+					params.put(START_DATE_NAME, new java.sql.Date(startdate.getTime()));	//JAN 01 1900  
+				}catch (Exception ex){					
+					ReportPlugIn.log("Error retriving earliest data date for report paraemeters", ex);
+				}finally{
+					if (session.getTransaction().isActive()){
+						session.getTransaction().commit();
+					}
+					session.close();
+				}
+				//today + one day
 				params.put(END_DATE_NAME, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
 			}else{
 				throw new UnsupportedOperationException("CDate file " + op.guiName + " not supported for reports.");

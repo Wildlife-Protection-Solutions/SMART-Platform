@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
+import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
@@ -80,6 +81,8 @@ public class RunReportJob extends Job {
 			FileOutputStream fout = new FileOutputStream(outputFile);
 			options.setOutputStream(fout);
 			options.setEmitterID(info.getID());
+			options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+			options.setSupportedImageFormats("PNG");
 			
 			task.setRenderOption(options);
 			task.setParameterValues(reportParameters);
