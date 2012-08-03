@@ -21,18 +21,41 @@
  */
 package org.wcs.smart.report.internal.ui.export;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.SheetCollate;
+
 import org.eclipse.birt.report.engine.api.EmitterInfo;
+import org.eclipse.birt.report.engine.api.IPostscriptRenderOption;
+import org.eclipse.birt.report.engine.api.IRenderOption;
+import org.eclipse.birt.report.engine.api.IReportEngine;
+import org.eclipse.birt.report.engine.api.IReportRunnable;
+import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.printing.PrintDialog;
+import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
 
@@ -148,6 +171,74 @@ public class ExportReportEngine {
 			}
 			
 		});
+		
+	}
+	
+	public static void printReport(Report report) throws Exception{
+		
+		
+		ParameterCollecter paramCollector = new ParameterCollecter();
+		HashMap<String, Object> reportParameters = paramCollector.getParameters(new Report[]{report});
+		
+		PrintDialog pd = new PrintDialog(Display.getDefault().getActiveShell());
+		PrinterData data = pd.open();
+		if (data == null){
+			return;
+		}
+		
+		PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
+		PrintService service = null;
+		for (int i = 0; i < services.length; i++) {
+			if (services[i].getName().equals(data.name)) {
+				service  = services[i];
+				break;
+			}
+		}
+		if (service == null){
+			
+			//ERROR
+			return;
+		}
+		
+		File reportFile = 	report.getFullReportFilename();;
+	
+		if (reportFile == null ){
+			throw new Exception("Cannot run report.");
+		}
+		IReportEngine engine = ReportManager.getReportEngine();
+		
+		final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
+
+		IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+		IRenderOption options = new RenderOption();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		
+		options.setOutputStream(out);
+		options.setEmitterID("org.eclipse.birt.report.engine.emitter.postscript");
+		
+		task.setRenderOption(options);
+		task.setParameterValues(reportParameters);
+		task.run();
+		task.close();
+		
+		PrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
+		pras.add(new Copies(data.copyCount));
+		pras.add(data.collate ? SheetCollate.COLLATED : SheetCollate.UNCOLLATED);
+		
+		
+		DocPrintJob job = service.createPrintJob();
+	
+		InputStream pin = new ByteArrayInputStream(out.toByteArray());
+		out.close();
+		Doc doc = new SimpleDoc(pin, DocFlavor.INPUT_STREAM.POSTSCRIPT, null);
+		job.print(doc, pras);
+		pin.close();
+		
+		doc.getStreamForBytes().close();
+		
+//		Doc doc = new SimpleDoc(arg0, arg1, arg2)
+		
+		
 		
 	}
 }

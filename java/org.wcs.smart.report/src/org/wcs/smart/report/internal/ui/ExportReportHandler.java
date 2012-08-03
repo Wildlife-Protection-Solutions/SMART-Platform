@@ -37,6 +37,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.internal.ui.export.ExportReportDialog;
 import org.wcs.smart.report.internal.ui.export.ExportReportEngine;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 /**
  * Handler for exporting reports.
@@ -68,12 +69,22 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 			//nothing to export
 			return null;
 		}
-			
+//		if (true){
+//			Report r = selectedReports.get(0);
+//			try{
+//			ExportReportEngine.printReport(r);
+//			}catch (Exception ex){
+//				ex.printStackTrace();
+//			}
+//			return null;
+//		}
+		
 		//get export location information
 		ExportReportDialog dia = new ExportReportDialog(HandlerUtil.getActiveShell(event), selectedReports.size() == 1 ? selectedReports.get(0) : null);
 		if (dia.open() != Window.OK){
 			return null;
 		}
+		
 		EmitterInfo outputFormat = dia.getOutputFormat();
 		File outputDir = new File(dia.getOutputDir());
 		
