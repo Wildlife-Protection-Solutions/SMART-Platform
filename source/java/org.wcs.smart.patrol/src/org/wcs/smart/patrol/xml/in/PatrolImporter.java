@@ -72,7 +72,7 @@ public class PatrolImporter {
 	 */
 	public static Patrol importPatrol(File file, IProgressMonitor monitor) throws Exception{
 		
-		if (isZip(file)){
+		if (SmartUtils.isZip(file)){
 			//process as zip file
 			monitor.beginTask("Importing Patrol", 4);
 			return importXmlToPatrol(file, monitor);
@@ -80,25 +80,6 @@ public class PatrolImporter {
 			monitor.beginTask("Importing Patrol", 3);
 			return importPatrolFromFile(file, monitor);
 		}
-	}
-	
-	/**
-	 * Determine if the given file is a zip file or not.
-	 * 
-	 * @param file the file to check
-	 * @return <code>true</code> if file is zip file, <code>false</code> otherwise
-	 */
-	private static boolean isZip(File file){
-		try{
-			ZipFile zout = new ZipFile(file);
-			zout.entries();
-			zout.close();
-			return true;
-		}catch (Exception ex){
-			
-		}
-		return false;
-		
 	}
 	
 	/**
