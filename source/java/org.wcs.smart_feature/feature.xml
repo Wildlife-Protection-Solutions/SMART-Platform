@@ -56,6 +56,7 @@ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRES
          version="0.0.0"
          unpack="false"/>
 
+
    <plugin
          id="org.wcs.smart.reporttable"
          download-size="0"
