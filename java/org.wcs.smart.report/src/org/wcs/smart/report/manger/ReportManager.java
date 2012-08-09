@@ -53,12 +53,12 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor;
-import org.wcs.smart.report.internal.ui.designer.SmartReportEditorInput;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
+import org.wcs.smart.report.ui.SmartReportEditorInput;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -157,27 +157,6 @@ public class ReportManager {
 		}finally{
 			session.close();
 		}	
-//
-//		//close any editor and view open that reference this report
-//		Display.getDefault().syncExec(new Runnable(){
-//
-//			@Override
-//			public void run() {
-//				try{
-//					SmartUtils.forceClose(IReportEditorContants.DESIGN_EDITOR_ID, new ReportEditorInput(new File(report.getFilename())));
-//				}catch (Exception ex){
-//					ReportPlugIn.log("Error closing editor on report delete.", ex);
-//				}
-//				try{
-//					SmartUtils.forceCloseView(ReportView.ID, SmartUtils.encodeHex(report.getUuid()));
-//				}catch (Exception ex){
-//					ReportPlugIn.log("Error closing view on report delete.", ex);
-//				}
-//			}});
-//
-
-		
-		
 		if (!report.getFullReportFilename().exists()){
 			throw new Exception("Report deleted from database but report file could not be found to remove.\n\n" + report.getFullReportFilename().toString());
 		}
@@ -192,29 +171,22 @@ public class ReportManager {
 	
 	/**
 	 * Computes the next report id.
+	 * @param session current hibernate session
 	 * @return the next report id
 	 * @throws Exception
 	 */
-	public static String generateReportId() throws Exception{
+	public static String generateReportId(Session session) throws Exception{
 		String newId = "000001";
-		Session session = HibernateManager.openSession();
-		try{
-			session.beginTransaction();
-			Query q = session.createQuery("SELECT max(id) FROM Report");
-			Object maxid = q.list().get(0);
-			if (maxid != null){
-				int x = Integer.parseInt(maxid.toString());
-				x++;
-				if (x > 999999){
-					x = 1;
-				}
-				DecimalFormat df = new DecimalFormat("000000");
-				newId = df.format(x);
-				
+		Query q = session.createQuery("SELECT max(id) FROM Report");
+		Object maxid = q.list().get(0);
+		if (maxid != null){
+			int x = Integer.parseInt(maxid.toString());
+			x++;
+			if (x > 999999){
+				x = 1;
 			}
-			session.getTransaction().commit();
-		}finally{
-			session.close();
+			DecimalFormat df = new DecimalFormat("000000");
+			newId = df.format(x);
 		}
 		return newId;
 	}
@@ -240,9 +212,6 @@ public class ReportManager {
 				throw new Exception("Could not generate a report file.");
 			}
 			f = new File(dir, fname + "_" + cnt + suffix);
-		}
-		if (!f.createNewFile()){
-			throw new Exception("Could not generate a report file.");
 		}
 		return f.getName();
 	}
@@ -277,11 +246,9 @@ public class ReportManager {
 	
 	public static void refreshReport(Report report) throws Exception{
 		//create report file with default library
-		File reportFile = new File(ReportPlugIn.getReportDirectory(), report.getFilename());
-
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
-		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(report.getFullReportFilename().getAbsolutePath());
 		
 		List<?> datasets = rdh.getAllDataSets();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {

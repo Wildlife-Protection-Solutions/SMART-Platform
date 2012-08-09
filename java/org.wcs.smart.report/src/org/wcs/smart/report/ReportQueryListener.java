@@ -28,13 +28,11 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.IQuerySaveListener;
+import org.wcs.smart.query.IQueryEventListener;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.SummaryQuery;
-import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.report.model.ReportQuery;
 
 /**
@@ -46,29 +44,29 @@ import org.wcs.smart.report.model.ReportQuery;
  * @author egouge
  * @since 1.0.0
  */
-public class ReportQuerySaveListener implements IQuerySaveListener {
+public class ReportQueryListener implements IQueryEventListener {
 
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.IQuerySaveListener#beforeSave(org.wcs.smart.query.model.Query)
 	 */
 	@Override
-	public boolean beforeSave(Query query) {
+	public boolean beforeSave(Query query, Session session) {
 		if (query.getUuid() == null) return true;
-	
-		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
 			@SuppressWarnings("unchecked")
-			List<ReportQuery> queries = s.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list();
+			List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list();
 			if (queries.size() == 0) {
 				return true;
 			}else{
-				Query savedQuery = (Query) s.load(  Hibernate.getClass(query), query.getUuid());
+				Query savedQuery = (Query) session.load(  Hibernate.getClass(query), query.getUuid());
 				boolean confirmSave = true;
 				if (savedQuery != null && savedQuery instanceof SimpleQuery){
 					//simple queries only cause problems with visible columns change
 					confirmSave = false;
-					if (!((SimpleQuery) savedQuery).getVisibleColumns().equals( ((ObservationQuery)query).getVisibleColumns() )){
+					String savedVisible = ((SimpleQuery)savedQuery).getVisibleColumns();
+					String origVisible = ((SimpleQuery)query).getVisibleColumns();
+					
+					if (!( (savedVisible == null && origVisible == null) || (savedVisible != null && savedVisible.equals(origVisible)))){					
 						confirmSave = true;
 					}
 				}else if (savedQuery != null && savedQuery instanceof SummaryQuery){
@@ -84,7 +82,7 @@ public class ReportQuerySaveListener implements IQuerySaveListener {
 					//	if the column definition 
 					StringBuilder sb = new StringBuilder();
 					for (ReportQuery rp : queries){
-						sb.append("   * " + rp.getReport().getName());
+						sb.append("   * " + rp.getReport().getName() + " ["+ rp.getReport().getId() + "] {" + rp.getReport().getOwner().getLabel() + "}");
 						sb.append("\n");
 					}
 					if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
@@ -98,12 +96,32 @@ public class ReportQuerySaveListener implements IQuerySaveListener {
 		}catch (Exception ex){
 			ReportPlugIn.displayLog("Error saving query : " + ex.getMessage(), ex);
 			return false;
-		}finally{
-			if (s.getTransaction().isActive()){
-				s.getTransaction().commit();
-			}
-			s.close();
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.IQueryEventListener#beforeDelete(org.wcs.smart.query.model.Query, org.hibernate.Session)
+	 */
+	@Override
+	public boolean beforeDelete(Query query, Session session) {
+		if (query.getUuid() == null) return true;
+		@SuppressWarnings("unchecked")
+		List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list();
+		if (queries.size() == 0) {
+			return true;
+		}else{
+			
+			StringBuilder sb = new StringBuilder();
+			for (ReportQuery rp : queries){
+				sb.append("   * " + rp.getReport().getName() + " ["+ rp.getReport().getId() + "] {" + rp.getReport().getOwner().getLabel() + "}");
+				sb.append("\n");
+			}
+			if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
+					"Warning", "This query is referenced by the following reports.  By deleting the queries the reports will no longer run.\n"  + sb.toString() + "\n Are you sure you want to continue?")){
+				return false;
+			}
+			return true;
+		}				
 	}
 
 }

@@ -137,7 +137,7 @@ public class Report {
 	 * @return the isShared
 	 */
 	@Column(name="shared")
-	public boolean isShared() {
+	public boolean getShared() {
 		return isShared;
 	}
 	/**

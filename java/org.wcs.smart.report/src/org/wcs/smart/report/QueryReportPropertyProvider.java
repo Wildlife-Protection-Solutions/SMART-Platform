@@ -57,11 +57,11 @@ public class QueryReportPropertyProvider extends AbstractQueryPropertyProvider {
 			}else{
 				StringBuilder sb = new StringBuilder();
 				for (ReportQuery rq : reports){
-					sb.append("* " + rq.getReport().getName());
+					sb.append("* " + rq.getReport().getName() + " [" + rq.getReport().getId() + "] {Owner: " + rq.getReport().getOwner().getLabel() + "}");
 					sb.append("\n");
 				}
 				if (sb.length() > 1){
-					sb.delete(sb.length() - 2, sb.length()-1);
+					sb.delete(sb.length() - 1, sb.length());
 				}
 				return sb.toString();
 			}

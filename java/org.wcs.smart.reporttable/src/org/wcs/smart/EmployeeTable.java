@@ -91,8 +91,14 @@ public class EmployeeTable extends SmartBirtTable {
 				}
 				return "";
 			case AGENCY:
+				if (e.getAgency() == null){
+					return "";
+				}
 				return e.getAgency().getName();
 			case RANK:
+				if (e.getRank() == null){
+					return "";
+				}
 				return e.getRank().getName();
 			}
 			return null;

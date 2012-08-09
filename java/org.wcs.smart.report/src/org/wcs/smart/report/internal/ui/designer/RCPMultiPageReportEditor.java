@@ -53,6 +53,7 @@ import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
+import org.wcs.smart.report.ui.SmartReportEditorInput;
 
 
 /**
@@ -197,7 +198,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 		final Report report = ((SmartReportEditorInput) super.getEditorInput())
 				.getReport();
 		final CreateReportDialog dialog = new CreateReportDialog(getSite()
-				.getShell(), report.getFolder(), "Copy of " + report.getName());
+				.getShell(), report.getFolder(), "Copy of " + report.getName(), true);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return;
 		}
@@ -230,17 +231,13 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 					copy.setOwner(SmartDB.getCurrentEmployee());
 					copy.setShared(isShared);
 
-					try {
-						copy.setId(ReportManager.generateReportId());
-						copy.setFilename(ReportManager.generateFilename(copy));
-					} catch (Exception ex) {
-						ReportPlugIn.displayLog("Error Saving as - a report id or filename could not be generated." + ex.getMessage(), ex);
-						return;
-					}
 					Session s = HibernateManager.openSession();
 					try {
 						s.beginTransaction();
+						copy.setId(ReportManager.generateReportId(s));
+						copy.setFilename(ReportManager.generateFilename(copy));
 						s.save(copy);
+						
 						ReportManager.updateReportQueries(s, (ReportDesignHandle)getModel(), copy);
 						s.getTransaction().commit();
 					} catch (Exception ex) {

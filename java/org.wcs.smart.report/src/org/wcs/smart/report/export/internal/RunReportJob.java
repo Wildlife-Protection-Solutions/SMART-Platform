@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui.export;
+package org.wcs.smart.report.export.internal;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
@@ -53,8 +54,16 @@ public class RunReportJob extends Job {
 	
 	private HashMap<String, Object> reportParameters = null; 
 	
+	/**
+	 * Creates a new job
+	 * 
+	 * @param report report to export
+	 * @param file file to export to; will overwrite if file exists
+	 * @param info output format info
+	 * @param reportParams report parameters
+	 */
 	public RunReportJob(Report report, File file, EmitterInfo info, HashMap<String, Object> reportParams){
-		super("Run Report Job");
+		super("Run Report: " + report.getName());
 		
 		reportFile = report.getFullReportFilename();
 		this.outputFile = file;
@@ -63,38 +72,40 @@ public class RunReportJob extends Job {
 		
 	}
 		
-	/* (non-Javadoc)
+	/**
 	 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		try{
-			if (reportFile == null || outputFile == null || info == null){
+		try {
+			if (reportFile == null || outputFile == null || info == null) {
 				throw new Exception("Cannot run report.");
 			}
 			IReportEngine engine = ReportManager.getReportEngine();
-			
-			final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
+
+			final IReportRunnable design = engine.openReportDesign(reportFile
+					.getAbsolutePath());
 
 			IRunAndRenderTask task = engine.createRunAndRenderTask(design);
 			IRenderOption options = new RenderOption();
 			FileOutputStream fout = new FileOutputStream(outputFile);
 			options.setOutputStream(fout);
 			options.setEmitterID(info.getID());
-			options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+			options.setOption(HTMLRenderOption.IMAGE_DIRECTROY,
+					outputFile.getParent());
 			options.setSupportedImageFormats("PNG");
-			
+
 			task.setRenderOption(options);
 			task.setParameterValues(reportParameters);
 			task.run();
 			task.close();
 			fout.close();
-			
-	} catch (Exception e) {
-		//TODO: fix me
-		e.printStackTrace();
-	}			
-	return Status.OK_STATUS;
+
+		} catch (Exception e) {
+			ReportPlugIn.log("Error exporting report", e);
+			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, "Error exporting report. " + e.getMessage() );
+		}
+		return Status.OK_STATUS;
 	}
 
 

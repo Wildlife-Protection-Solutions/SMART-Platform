@@ -120,13 +120,13 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 				File reportFile = null;
 				Session hsession = null;
 				try{
-					//save report object o database
-					report.setId(ReportManager.generateReportId());
-					report.setFilename(ReportManager.generateFilename(report));
-
 					hsession = HibernateManager.openSession();
-					
 					hsession.beginTransaction();
+					
+					//save report object o database
+					report.setId(ReportManager.generateReportId(hsession));
+					report.setFilename(ReportManager.generateFilename(report));
+					
 					hsession.save(report);
 					hsession.getTransaction().commit();
 				}catch (Exception ex){

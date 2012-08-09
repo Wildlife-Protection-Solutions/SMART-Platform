@@ -114,9 +114,7 @@ public class ReportListView extends ViewPart {
 					if (((ReportView)part).getReport() != null){
 						IStructuredSelection selection = new StructuredSelection(((ReportView)part).getReport());
 						reportList.setSelection(selection);
-						System.out.println("set selection");
 					}
-//					focusCellManager.getFocusCell();
 				}
 				
 				
@@ -159,7 +157,7 @@ public class ReportListView extends ViewPart {
 					ReportFolder rf = ((Report)o).getFolder();
 					if (rf != null){
 						reportList.refresh(rf);
-					}else if (((Report)o).isShared()){
+					}else if (((Report)o).getShared()){
 						reportList.refresh(RootReportFolder.CA_ROOT_FOLDER);
 					}else{
 						reportList.refresh(RootReportFolder.USER_ROOT_FOLDER);
