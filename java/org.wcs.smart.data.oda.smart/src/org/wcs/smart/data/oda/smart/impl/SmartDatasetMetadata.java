@@ -149,7 +149,6 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * org.eclipse.datatools.connectivity.oda.IDataSetMetaData#getSortMode()
 	 */
 	public int getSortMode() {
-		// TODO Auto-generated method stub
 		return IDataSetMetaData.sortModeNone;
 	}
 

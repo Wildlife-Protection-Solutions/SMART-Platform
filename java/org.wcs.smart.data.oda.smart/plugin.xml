@@ -14,6 +14,55 @@
             id="%oda.data.source.id">
       </dataSource>
       <dataSet
+            defaultDisplayName="%data.set.name"
+            id="org.wcs.smart.data.oda.smart.smartQueryDataset">
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
             defaultDisplayName="Smart Tables"
             id="org.wcs.smart.data.oda.smart.smartTableDataset">
          <dataTypeMapping
@@ -55,55 +104,6 @@
                nativeDataType="String"
                nativeDataTypeCode="1"
                odaScalarDataType="String">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataType="String"
-               nativeDataTypeCode="12"
-               odaScalarDataType="String">
-         </dataTypeMapping>
-      </dataSet>
-      <dataSet
-            defaultDisplayName="%data.set.name"
-            id="org.wcs.smart.data.oda.smart.smartQueryDataset">
-         <dataTypeMapping
-               nativeDataTypeCode="1"
-               odaScalarDataType="String"
-               nativeDataType="String">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataTypeCode="4"
-               odaScalarDataType="Integer"
-               nativeDataType="Integer">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataTypeCode="8"
-               odaScalarDataType="Double"
-               nativeDataType="Double">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataTypeCode="3"
-               odaScalarDataType="Decimal"
-               nativeDataType="BigDecimal">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataTypeCode="91"
-               odaScalarDataType="Date"
-               nativeDataType="Date">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataTypeCode="92"
-               odaScalarDataType="Time"
-               nativeDataType="Time">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataTypeCode="93"
-               odaScalarDataType="Timestamp"
-               nativeDataType="Timestamp">
-         </dataTypeMapping>
-         <dataTypeMapping
-               nativeDataTypeCode="16"
-               odaScalarDataType="Boolean"
-               nativeDataType="Boolean">
          </dataTypeMapping>
          <dataTypeMapping
                nativeDataType="String"

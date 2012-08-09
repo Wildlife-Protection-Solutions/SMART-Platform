@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.data.oda.smart.ui.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -53,12 +56,17 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.data.oda.smart.impl.query.SmartQuery;
 import org.wcs.smart.data.oda.smart.ui.Activator;
+import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.query.ui.querylist.QueryListViewContentProvider;
 import org.wcs.smart.query.ui.querylist.SavedQueryTree;
+import org.wcs.smart.report.model.Report;
+import org.wcs.smart.report.ui.SmartReportEditorInput;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -72,7 +80,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 	public static final String DEFAULT_MESSAGE = "Pick the query to create data source from. ";
 
 	private TreeViewer queryTree;
-
+	private boolean hideUserQueries = false;
 	private Job loadQueriesJob = new Job("Load Queries") {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -82,6 +90,26 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 			data.put(QueryListViewContentProvider.FOLDER_KEY, SavedQueryTree
 					.getInstance().getFolders());
 
+			
+			if (hideUserQueries){
+				//shared report should only have shared queries
+				List<QueryFolder> folders = (List<QueryFolder>) data.get(QueryListViewContentProvider.FOLDER_KEY);
+				List<QueryFolder> folders2 = new ArrayList<QueryFolder>();
+				folders2.addAll(folders);
+				for (Iterator<QueryFolder> iterator = folders2.iterator(); iterator.hasNext();) {
+					QueryFolder type = (QueryFolder) iterator.next();
+					if (type.isRootFolder() && type.getEmployee() != null){
+						//remove user folder
+						iterator.remove();
+					}
+					
+				}
+				data.put(QueryListViewContentProvider.FOLDER_KEY, folders2);
+			}
+			
+			
+			
+			
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -103,6 +131,8 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 		super(pageName);
 		setTitle(pageName);
 		setMessage(DEFAULT_MESSAGE);
+		
+		
 	}
 
 	/**
@@ -130,6 +160,12 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 	 * Creates custom control for user-defined query text.
 	 */
 	private Control createPageControl(Composite parent) {
+		IEditorPart activePart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		if (activePart != null && activePart.getEditorInput() instanceof SmartReportEditorInput){
+			Report r = ((SmartReportEditorInput)activePart.getEditorInput()).getReport();
+			hideUserQueries = r.getShared();
+		}
+		
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL

@@ -1,10 +1,24 @@
 /*
- *************************************************************************
- * Copyright (c) 2012 <<Your Company Name here>>
- *  
- *************************************************************************
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
-
 package org.wcs.smart.data.oda.smart.impl.query;
 
 import java.math.BigDecimal;
@@ -27,11 +41,11 @@ import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.SummaryQuery;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
@@ -73,31 +87,7 @@ public class SmartQuery implements IQuery {
 			Session session = HibernateManager.openSession();
 			try {
 				session.beginTransaction();
-				if (queryType == null) {
-					smartQuery = (org.wcs.smart.query.model.Query) session
-							.get(org.wcs.smart.query.model.observation.ObservationQuery.class,
-									uuid);
-					if (smartQuery == null) {
-						smartQuery = (org.wcs.smart.query.model.Query) session
-								.get(PatrolQuery.class, uuid);
-					}
-					if (smartQuery == null) {
-						smartQuery = (org.wcs.smart.query.model.Query) session
-								.get(SummaryQuery.class, uuid);
-					}
-				} else {
-					if (queryType == QueryType.OBSERVATION) {
-						smartQuery = (org.wcs.smart.query.model.Query) session
-								.get(org.wcs.smart.query.model.observation.ObservationQuery.class,
-										uuid);
-					} else if (queryType == QueryType.PATROL) {
-						smartQuery = (org.wcs.smart.query.model.Query) session
-								.get(PatrolQuery.class, uuid);
-					} else if (queryType == QueryType.SUMMARY) {
-						smartQuery = (org.wcs.smart.query.model.Query) session
-								.get(SummaryQuery.class, uuid);
-					}
-				}
+				smartQuery = QueryHibernateManager.findQuery(session,  uuid, queryType);
 				session.getTransaction().commit();
 			} finally {
 				if (session.getTransaction().isActive()){

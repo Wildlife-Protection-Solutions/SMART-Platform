@@ -338,6 +338,8 @@ public class SimpleQueryResultSet implements IResultSet {
 			return ((Integer) lastObject) <= 0;
 		} else if (lastObject instanceof Double) {
 			return ((Double) lastObject) <= 0.5;
+		} else if (lastObject == null){
+			return false;
 		}
 		throw new UnsupportedOperationException();
 	}
