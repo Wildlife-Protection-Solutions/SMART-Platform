@@ -241,7 +241,7 @@ public abstract class QueryColumn implements Cloneable{
 					queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				
 				} finally {
-					session.getTransaction().rollback();
+					session.getTransaction().commit();
 					session.close();
 				}
 				return Status.OK_STATUS;

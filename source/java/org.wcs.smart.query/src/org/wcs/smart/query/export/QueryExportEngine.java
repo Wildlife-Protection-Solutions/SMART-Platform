@@ -21,56 +21,37 @@
  */
 package org.wcs.smart.query.export;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.query.model.Query;
 
 /**
- * Query exporter interface. 
- * <p>
- * To add an additional query exporter, create
- * a new query exporter extension point that
- * extends this class.
- * </p>
- * 
+ * Support functions for exporting queries
  * @author egouge
  * @since 1.0.0
  */
-public interface IQueryExporter {
-
-	/**
-	 * 
-	 * @return unique exporter identifier 
-	 */
-	public String getId();
+public class QueryExportEngine {
+	public static final String MAPPING_ID = "org.wcs.smart.query.export.format";
 	
-	/**
-	 * @return the exporter name
-	 */
-	public String getName();
-
-	/**
-	 * @return the default file extension for the exporter
-	 */
-	String getDefaultExtension();
-	
-	
-	/**
-	 * @param query the query to export
-	 * @return <code>true</code> if this class can export the
-	 * given query.
-	 */
-	boolean canExport(Query query);
-	
-	/**
-	 * Export the given query.
-	 * 
-	 * @param query the query to export
-	 * @param file the file to write results to
-	 * @param monitor the progress monitor
-	 * @throws Exception an exception if an error occurs
-	 * while exporting
-	 */
-	void export (Query query, File file, IProgressMonitor monitor) throws Exception;
+	public static final List<IQueryExporter>  getQueryExports(Query query){
+		List<IQueryExporter> items = new ArrayList<IQueryExporter>();
+		if (Platform.getExtensionRegistry() == null) return Collections.EMPTY_LIST;
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				
+				IQueryExporter exporter = (IQueryExporter) e.createExecutableExtension("class");
+				if (exporter.canExport(query)) {
+					items.add(exporter);
+				}
+	}
+		}catch (Exception ex){
+			ex.printStackTrace();
+		}
+		return items;
+	}
 }

@@ -28,8 +28,11 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
+import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;
 import org.wcs.smart.query.parser.internal.summary.IGroupBy;
 import org.wcs.smart.query.parser.internal.summary.PatrolGroupBy;
@@ -61,9 +64,13 @@ public class SummaryQueryDefinitionExporter extends DefinitionQueryExporter {
 	 */
 	@Override
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery) throws Exception {
+		SummaryQuery summary = (SummaryQuery) query;
+		if (summary.getDateFilter() == null){
+			summary.setDateFilter(new DateFilter(DateFilter.DATE_FIELD_OP.WAYPOINT, PatrolQueryOptions.DATE_FILTER_OP.LAST_30_DAYS));
+		}
+		
 		QueryPart defPart = new QueryPart();
 		defPart.setKey("definition");
-		SummaryQuery summary = (SummaryQuery) query;
 		defPart.setValue( summary.getQuery() );
 		
 		xmlQuery.getQueryPart().add(defPart);
@@ -89,6 +96,7 @@ public class SummaryQueryDefinitionExporter extends DefinitionQueryExporter {
 	private void processGroupBy(GroupByPart values, QueryType qt, Session session) throws Exception{
 		if (values == null) return;
 		for (IGroupBy item: values.getGroupBys()){
+			if (item instanceof DateGroupBy) continue;
 			List<ListItem> bits = item.getItems(session);
 			for (ListItem it : bits){
 				if (item instanceof PatrolGroupBy){

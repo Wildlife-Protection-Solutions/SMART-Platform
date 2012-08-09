@@ -123,6 +123,11 @@ public class CsvSummaryExporter implements IQueryExporter {
 		writer.close();
 
 	}
+	
+	@Override
+	public String getId(){
+		return "org.wcs.smart.query.export.summary.csv";
+	}
 
 	/**
 	 * @see org.wcs.smart.query.export.IQueryExporter#getName()

@@ -23,6 +23,7 @@ package org.wcs.smart.query;
 
 import java.util.ArrayList;
 
+import org.hibernate.Session;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -35,7 +36,7 @@ public class QueryEventManager {
 
 	private static QueryEventManager instance = null;
 	
-	private ArrayList<IQuerySaveListener> saveListeners = new ArrayList<IQuerySaveListener>();
+	private ArrayList<IQueryEventListener> saveListeners = new ArrayList<IQueryEventListener>();
 	private ArrayList<IQueryListener> listeners = new ArrayList<IQueryListener>();
 	private ArrayList<IQueryFolderListener> folderListeners = new ArrayList<IQueryFolderListener>();
 	
@@ -130,7 +131,7 @@ public class QueryEventManager {
 	 * Add a query save listener
 	 * @param listener
 	 */
-	public void addQuerySaveListener(IQuerySaveListener listener){
+	public void addQuerySaveListener(IQueryEventListener listener){
 		this.saveListeners.add(listener);
 	}
 	
@@ -138,18 +139,35 @@ public class QueryEventManager {
 	 * Remove a query save listener
 	 * @param listener
 	 */
-	public void removeQuerySaveListener(IQuerySaveListener listener){
+	public void removeQuerySaveListener(IQueryEventListener listener){
 		this.saveListeners.remove(listener);
 	}
 	/**
 	 * Fires before save event
 	 * @param query the query
+	 * @param session current hibernate session (with active transaction)
 	 * @return <code>true</code> if save can continue, <code>false</code>
 	 * otherwise
 	 */
-	public boolean fireBeforeSaveListeners(Query query){
-		for(IQuerySaveListener listener: saveListeners){
-			if (!listener.beforeSave(query)){
+	public boolean fireBeforeSaveListeners(Query query, Session session){
+		for(IQueryEventListener listener: saveListeners){
+			if (!listener.beforeSave(query, session)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Fires before delete event
+	 * @param query the query
+	 * @param session current hibernate session (with active transaction)
+	 * @return <code>true</code> if delete can continue, <code>false</code>
+	 * otherwise
+	 */
+	public boolean fireBeforeDeleteListeners(Query query, Session session){
+		for(IQueryEventListener listener: saveListeners){
+			if (!listener.beforeDelete(query, session)){
 				return false;
 			}
 		}

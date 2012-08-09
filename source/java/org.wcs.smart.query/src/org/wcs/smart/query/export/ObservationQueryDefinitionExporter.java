@@ -62,7 +62,12 @@ public class ObservationQueryDefinitionExporter extends DefinitionQueryExporter 
 		QueryPart defPart = new QueryPart();
 		defPart.setKey("definition");
 		defPart.setValue( ((SimpleQuery)query).getQueryFilter() );
+		xmlQuery.getQueryPart().add(defPart);
 		
+		
+		defPart = new QueryPart();
+		defPart.setKey("columns");
+		defPart.setValue( ((SimpleQuery)query).getVisibleColumns() );
 		xmlQuery.getQueryPart().add(defPart);
 				
 		IFilter queryFilter = ((SimpleQuery)query).getFilter();

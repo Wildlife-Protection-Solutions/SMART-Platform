@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
@@ -87,6 +88,13 @@ public class DeleteItemHandler extends AbstractHandler {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
+			Query query = QueryHibernateManager.findQuery(s, o.getUuid(), null);
+			if (query == null) throw new Exception("Query not found.");
+			
+			if (!QueryEventManager.getInstance().fireBeforeDeleteListeners(query, s)){
+				return;
+			}
+			
 			org.hibernate.Query q = s.createQuery("DELETE from " + o.getType().getObjectName() + " WHERE uuid = :uuid");
 			q.setParameter("uuid", o.getUuid());
 			int deleted = q.executeUpdate();

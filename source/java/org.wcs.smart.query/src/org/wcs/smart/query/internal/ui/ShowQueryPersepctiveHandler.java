@@ -24,6 +24,10 @@ package org.wcs.smart.query.internal.ui;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -57,11 +61,21 @@ public class ShowQueryPersepctiveHandler extends AbstractHandler {
 					break;
 				}
 			}
+			
 			if (!found){
-				//open a new editor 
-				CreateQueryHandler h = new CreateQueryHandler(false);
-				h.execute(event);
+				HandlerUtil.getActiveShell(event).getDisplay().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						try{
+							CreateQueryHandler h = new CreateQueryHandler(false); 
+							h.execute(event);
+						}catch (Exception ex){
+							QueryPlugIn.log("error opening new query", ex);
+						}
+					}
+				});
 			}
+			
 		} catch (WorkbenchException e) {
 			QueryPlugIn.displayLog("Error loading Query perspective.", e);
 		}

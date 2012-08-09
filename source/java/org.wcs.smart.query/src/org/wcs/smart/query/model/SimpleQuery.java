@@ -308,4 +308,32 @@ public abstract class SimpleQuery extends Query {
 	public void setVisibleColumns(String columns){
 		this.visibleTableColumnKeys = columns;
 	}
+	
+	/**
+	 * <p>Compares the query filter and output columns.</p>
+	 * @see org.wcs.smart.query.model.Query#isDefinitionEqual(org.wcs.smart.query.model.Query)
+	 */
+	public boolean isDefinitionEqual(Query other){
+		if (other == null || !(other instanceof SimpleQuery)){
+			return false;
+		}
+		
+		SimpleQuery query = (SimpleQuery)other;
+		return (query.getVisibleColumns() == null && 
+				this.getVisibleColumns() == null) || 
+				(query.getVisibleColumns() != null && query.getVisibleColumns().equals(this.getVisibleColumns()) &&
+				query.getQueryFilter().equalsIgnoreCase(this.getQueryFilter()));
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.Query#copyFrom(org.wcs.smart.query.model.Query)
+	 */
+	public void copyFrom(Query copy){
+		assert copy instanceof SimpleQuery;
+		
+		SimpleQuery q = (SimpleQuery)copy;
+		setQueryFilter(q.getQueryFilter());
+		setVisibleColumns(q.getVisibleColumns());
+	}
+	
 }

@@ -96,6 +96,7 @@ public class SimpleQueryDefinitionImporter {
 		}
 		
 		String strQueryFilter = "";
+		String strColumnFilter = "";
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("definition")) {
 				if (part.getValue() != null && part.getValue().length() > 0) {
@@ -116,10 +117,13 @@ public class SimpleQueryDefinitionImporter {
 					}
 					strQueryFilter = queryFilter.asString();
 				}
+			}else if (part.getKey().equals("columns")){
+				strColumnFilter = part.getValue();
 			}
 		}
 		
 		wq.setQueryFilter(strQueryFilter);
+		wq.setVisibleColumns(strColumnFilter);
 		wq.setConservationArea(SmartDB.getCurrentConservationArea());
 		wq.setOwner(SmartDB.getCurrentEmployee());
 		

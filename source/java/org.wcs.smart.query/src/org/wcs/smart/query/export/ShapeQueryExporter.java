@@ -91,6 +91,12 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 		shapefile.dispose();
 		
 	}
+	
+	@Override
+	public String getId(){
+		return "org.wcs.smart.query.export.observation.shp";
+	}
+	
 	@Override
 	public String getName() {
 		return "Shapefile";

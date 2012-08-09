@@ -48,9 +48,13 @@ import org.wcs.smart.util.SmartUtils;
  */
 public abstract class DefinitionQueryExporter implements IQueryExporter {
 
+	public static final String QUERY_DEFINTION_EXPORTER_ID = "org.wcs.smart.query.export.definition";
 
-
-
+	@Override
+	public String getId(){
+		return  QUERY_DEFINTION_EXPORTER_ID;
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.export.SimpleQueryExporter#getName()
 	 */
@@ -93,10 +97,9 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		
 		writeQuerySpecifics(query, xmlQuery);
 		
-		
 		OutputStream fout = new BufferedOutputStream(new FileOutputStream(file));
 		try{
-			QueryXmlManager.writeDataModel(wpquery, fout);
+			QueryXmlManager.writeQuery(wpquery, fout);
 		}finally{
 			fout.close();
 		}		
