@@ -19,54 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui.designer;
+package org.wcs.smart.report.export;
 
-import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
+import java.io.File;
+import java.util.HashMap;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.report.model.Report;
 
 /**
- * Wrapper around report editor input to include report object
+ * Report exporter interface.
+ * 
  * @author egouge
  * @since 1.0.0
  */
-public class SmartReportEditorInput extends ReportEditorInput {
+public interface IReportExporter {
 
-	private Report report;
+	/**
+	 * Exports the list of files to the provided location
+	 * <p>The user can assume they can overwrite the file provided or any files
+	 * in the directory if a directory is provider.
+	 * </p>
+	 * @param file a file if only one report provided, a directory if multiple reports
+	 * @param reports the reports to export
+	 * @param reportParams report parameters
+	 * @param monitor
+	 * @throws Exception if error occurs during the export
+	 */
+	public void exportReport(File file, Report report, HashMap<String, Object> reportParams, IProgressMonitor monitor) throws Exception ;
 	
 	/**
-	 * @param report the report object
+	 * @return the exporter name
 	 */
-	public SmartReportEditorInput(Report report) {
-		super(report.getFullReportFilename());
-		this.report = report;
-	}
+	public String getName();
 	
 	/**
-	 * @return the report object
+	 * @return the export output format
 	 */
-	public Report getReport(){
-		return this.report;
-	}
+	public String getExportFormat();
 	
 	/**
-	 * Based on the report object
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * 
+	 * @return <code>true</code> if the exporter needs report parameters populated, <code>false</code> otherwise
 	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj != null && obj.getClass() == getClass())
-			return this.report.equals(((SmartReportEditorInput) obj).report);
-		return false;
-	}
-	
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return report.hashCode();
-	}
-
+	public boolean requiresParameters();
 }

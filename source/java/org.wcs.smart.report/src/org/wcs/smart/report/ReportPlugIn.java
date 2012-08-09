@@ -57,7 +57,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String REPORT_ICON = "org.wcs.smart.query.reporticon";
 
-	private ReportQuerySaveListener queryListener = new ReportQuerySaveListener();
+	private ReportQueryListener queryListener = new ReportQueryListener();
 	
 	static {
 		addImage("images/icons/obj16/report.png", REPORT_ICON);

@@ -17,4 +17,5 @@ Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.report.ReportPlugIn
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: .
-Export-Package: org.wcs.smart.report.model
+Export-Package: org.wcs.smart.report.model,
+ org.wcs.smart.report.ui

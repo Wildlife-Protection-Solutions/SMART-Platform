@@ -19,12 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui.export;
+package org.wcs.smart.report.export.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,12 +42,13 @@ import javax.print.attribute.standard.Copies;
 import javax.print.attribute.standard.SheetCollate;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
-import org.eclipse.birt.report.engine.api.IPostscriptRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.RenderOption;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -55,6 +57,9 @@ import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.export.IExportFormat;
+import org.wcs.smart.report.export.IReportExporter;
+import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
@@ -69,33 +74,38 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ExportReportEngine {
 
-	final static HashSet<Job> jobs = new HashSet<Job>();
+	/**
+	 * Export options extention
+	 */
+	public static final String REPORT_EXPORT_EXTENSION_ID = "org.wcs.smart.report.exporter";
+		
+	/**
+	 * Export jobs
+	 */
+	private final static HashSet<Job> jobs = new HashSet<Job>();
 	
 	/**
-	 * Exports a collection of reports.
+	 * Exports a collection of reports using a BIRT emitter.
+	 * 
 	 * @param reports reports to export
-	 * @param directory output directory
+	 * @param directory output directory or file if reports.size() == 1
 	 * @param outputFormat output format
 	 */
 	public static void exportReports(List<Report> reports, File directory, EmitterInfo outputFormat){
-		
-		validateDirectory(directory);
-		HashMap<String, Object> params  = null;
-		try{
-			ParameterCollecter paramCollector = new ParameterCollecter();
-			params = paramCollector.getParameters(reports.toArray(new Report[reports.size()]));
-			if (params == null){
-				//cancel pressed
-				return;
-			}
-		}catch (Exception ex){
-			ReportPlugIn.displayLog("Error occured while gathering paramter information.  Reports could not be run. " + ex.getMessage(), ex);
-			return;
-		}
+		HashMap<String, Object> params  = collectParameters(reports);
+		if (params == null) return;
 		
 		
 		for (int i = 0; i < reports.size(); i ++){
-			final RunReportJob rr = new RunReportJob(reports.get(i), getOutputFileName(reports.get(i), directory,outputFormat),outputFormat, params);
+			File outputFile = directory;
+			if (reports.size() > 1){
+				outputFile = getOutputFileName(reports.get(i), directory,outputFormat.getFormat()); 
+			}
+			final RunReportJob rr = new RunReportJob(
+					reports.get(i), 
+					outputFile,
+					outputFormat, params);
+			
 			jobs.add(rr);
 			rr.addJobChangeListener(new JobChangeAdapter() {
 				@Override
@@ -107,6 +117,58 @@ public class ExportReportEngine {
 			});
 			rr.schedule();
 		}
+	}
+	
+	/**
+	 * Exports a collection of reports using an IReportExporter
+	 * 
+	 * @param reports reports to export
+	 * @param directory output directory or file is reports.size() == 1
+	 * @param outputFormat output format
+	 */
+	public static void exportReports(List<Report> reports, File directory, IReportExporter exporter){
+		HashMap<String, Object> params = null;
+		if (exporter.requiresParameters()){
+			params = collectParameters(reports);
+			if (params == null) return;
+		}
+		
+		for (int i = 0; i < reports.size(); i ++){
+			File outputFile = directory;
+			if (reports.size() > 1){
+				outputFile = getOutputFileName(reports.get(i), directory,exporter.getExportFormat()); 
+			}
+			final ExportReportJob rr = new ExportReportJob(reports.get(i), 
+					outputFile,
+					exporter, params);
+
+			jobs.add(rr);
+			rr.addJobChangeListener(new JobChangeAdapter() {
+				@Override
+				public void done(IJobChangeEvent event) {
+					jobs.remove(rr);
+					checkJobs();
+				}
+				
+			});
+			rr.schedule();
+		}
+	}
+	
+	public static HashMap<String, Object> collectParameters(List<Report> reports){
+		HashMap<String, Object> params  = null;
+		try{
+			ParameterCollecter paramCollector = new ParameterCollecter();
+			params = paramCollector.getParameters(reports.toArray(new Report[reports.size()]));
+			if (params == null){
+				//cancel pressed
+				return  null;
+			}
+		}catch (Exception ex){
+			ReportPlugIn.displayLog("Error occured while gathering paramter information.  Reports could not be run. " + ex.getMessage(), ex);
+			return null;
+		}
+		return params;
 	}
 	
 	/**
@@ -126,7 +188,7 @@ public class ExportReportEngine {
 	/*
 	 * Ensure the given directory exists
 	 */
-	private static void validateDirectory(File directory){
+	public static void validateDirectory(File directory){
 		if (!directory.exists()){
 			SmartUtils.createDirectory(directory);
 		}
@@ -135,45 +197,12 @@ public class ExportReportEngine {
 	/*
 	 * Converts a report name to a output file name
 	 */
-	private static File getOutputFileName(Report report, File directory, EmitterInfo outputFormat){
-		return new File(directory, report.getName().replaceAll("[^a-zA-z0-9]", "") + "." + outputFormat.getFormat());
+	private static File getOutputFileName(Report report, File directory, String extension){
+		return new File(directory, report.getName().replaceAll("[^a-zA-z0-9]", "") + "." + extension);
 	}
 	
-	/**
-	 * Exports a single report.
-	 * @param report report to export
-	 * @param outputFile output file
-	 * @param outputFormat output format
-	 */
-	public static void exportReport(Report report, File outputFile, EmitterInfo outputFormat){
-		validateDirectory(outputFile.getParentFile());
-		
-		HashMap<String, Object> params  = null;
-		try{
-			ParameterCollecter paramCollector = new ParameterCollecter();
-			params = paramCollector.getParameters(new Report[]{report});
-			if (params == null){
-				//cancel pressed
-				return;
-			}
-		}catch (Exception ex){
-			ReportPlugIn.displayLog("Error occured while gathering paramter information.  Report could not be run. " + ex.getMessage(), ex);
-			return;
-		}
-		final RunReportJob rr = new RunReportJob(report,outputFile, outputFormat, params);
-		rr.schedule();
-		jobs.add(rr);
-		rr.addJobChangeListener(new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				jobs.remove(rr);
-				checkJobs();
-			}
-			
-		});
-		
-	}
-	
+	// test for printing directly to printer - does not currently work export
+	//for postscript printers
 	public static void printReport(Report report) throws Exception{
 		
 		
@@ -240,5 +269,31 @@ public class ExportReportEngine {
 		
 		
 		
+	}
+	
+	/**
+	 * Supported formats include all BIRT emitters
+	 * and any REPORT_EXPORT_EXTENSION_ID extensions.
+	 * 
+	 * @return an array of support export formats
+	 */
+	public static IExportFormat[] getSupportedExportFormats(){
+		EmitterInfo[] info = ReportManager.getReportEngine().getEmitterInfo();
+		List<IExportFormat> formats = new ArrayList<IExportFormat>();
+		for (int i = 0; i < info.length; i ++){
+			formats.add(new BirtEmitterExportFormat(info[i]));
+		}
+		if (Platform.getExtensionRegistry() != null){
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_EXPORT_EXTENSION_ID);
+			try {
+				for (IConfigurationElement e : config) {
+					IReportExporter prop = (IReportExporter) e.createExecutableExtension("class");
+					formats.add(new ReportExporterFormat(prop));
+				}
+			}catch (Exception ex){
+				ex.printStackTrace();
+			}
+		}
+		return formats.toArray(new IExportFormat[formats.size()]);
 	}
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.report.exporter" name="Report Exporter" schema="schema/org.wcs.smart.report.exporter.exsd"/>
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -38,6 +39,10 @@
       <command
             id="org.wcs.smart.report.exportReport"
             name="Export Report">
+      </command>
+      <command
+            id="org.wcs.smart.report.importReport"
+            name="Import Report">
       </command>
    </extension>
    <extension
@@ -128,6 +133,10 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.ImportReportHandler"
+            commandId="org.wcs.smart.report.importReport">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -147,6 +156,26 @@
                label="Show Reports"
                mnemonic="R"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -407,6 +436,60 @@
                visible="true">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.patrol">
+         <menu
+               id="org.wcs.smart.report"
+               label="Report"
+               mnemonic="R">
+            <command
+                  commandId="org.wcs.smart.report.newReport"
+                  mnemonic="N"
+                  style="push"
+                  tooltip="Creates a new report">
+            </command>
+            <command
+                  commandId="org.wcs.smart.report.importReport"
+                  mnemonic="m"
+                  style="push"
+                  tooltip="Import a report">
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <and>
+                     <or>
+                        <equals
+                              value="org.wcs.smart.report.ReportViewerPerspective">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.report.ReportPerspective">
+                        </equals>
+                     </or>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                     </or>
+                  </and>
+               </with>
+            </visibleWhen>
+         </menu>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -460,6 +543,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
+            allowMultiple="false"
             class="org.wcs.smart.report.internal.ui.ReportListView"
             icon="images/icons/obj16/report.png"
             id="org.wcs.smart.report.ReportListView"
@@ -530,6 +614,10 @@
             commandId="org.wcs.smart.report.editReport"
             icon="images/icons/etool16/report_edit.png">
       </image>
+      <image
+            commandId="org.wcs.smart.report.importReport"
+            icon="images/icons/etool16/report_import.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.birt.core.ScriptFunctionService">
@@ -567,5 +655,11 @@
             propertyName="Reports"
             propertyProvider="org.wcs.smart.report.QueryReportPropertyProvider">
       </queryproperty>
+   </extension>
+   <extension
+         point="org.wcs.smart.report.exporter">
+      <exporter
+            class="org.wcs.smart.report.export.internal.ReportDefintionExporter">
+      </exporter>
    </extension>
 </plugin>

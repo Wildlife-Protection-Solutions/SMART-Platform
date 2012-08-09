@@ -35,9 +35,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.export.IExportFormat;
+import org.wcs.smart.report.export.IReportExporter;
+import org.wcs.smart.report.export.internal.ExportReportEngine;
 import org.wcs.smart.report.internal.ui.export.ExportReportDialog;
-import org.wcs.smart.report.internal.ui.export.ExportReportEngine;
-import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 /**
  * Handler for exporting reports.
@@ -79,20 +81,36 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 //			return null;
 //		}
 		
+		
 		//get export location information
 		ExportReportDialog dia = new ExportReportDialog(HandlerUtil.getActiveShell(event), selectedReports.size() == 1 ? selectedReports.get(0) : null);
 		if (dia.open() != Window.OK){
 			return null;
 		}
 		
-		EmitterInfo outputFormat = dia.getOutputFormat();
+		IExportFormat format = dia.getOutputFormat();
 		File outputDir = new File(dia.getOutputDir());
 		
-		//export reports
+		
 		if (selectedReports.size() > 1){
-			ExportReportEngine.exportReports(selectedReports, outputDir, outputFormat);
-		}else{
-			ExportReportEngine.exportReport(selectedReports.get(0), outputDir, outputFormat);
+			//dir provided			
+			ExportReportEngine.validateDirectory(outputDir);
+		}
+		if (format.getExporter() instanceof EmitterInfo){
+			EmitterInfo outputFormat = (EmitterInfo) format.getExporter();
+			//export reports
+			try {
+				ExportReportEngine.exportReports(selectedReports, outputDir, outputFormat);
+			} catch (Exception e) {
+				ReportPlugIn.displayLog("Error exporting reports." + e.getMessage(), e);
+			}
+		}else if (format.getExporter() instanceof IReportExporter){
+			IReportExporter exporter = (IReportExporter) format.getExporter();
+			try {
+				ExportReportEngine.exportReports(selectedReports, outputDir, exporter);
+			} catch (Exception e) {
+				ReportPlugIn.displayLog("Error exporting reports." + e.getMessage(), e);
+			}
 		}
 		
 		

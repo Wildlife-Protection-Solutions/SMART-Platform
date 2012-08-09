@@ -23,7 +23,6 @@ package org.wcs.smart.report.internal.ui.export;
 
 import java.io.File;
 
-import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -48,7 +47,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.report.manger.ReportManager;
+import org.wcs.smart.report.export.IExportFormat;
+import org.wcs.smart.report.export.internal.ExportReportEngine;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -67,7 +67,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 	private static IDialogSettings settings = new DialogSettings("org.wcs.smart.report.exportdialog");
 	
 	private String fileName;
-	private EmitterInfo emitter;
+	private IExportFormat emitter;
 	
 	private Text txtFileName;
 	private ComboViewer cmbEmitters;
@@ -96,7 +96,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 	/**
 	 * @return the output format selected by the user
 	 */
-	public EmitterInfo getOutputFormat(){
+	public IExportFormat getOutputFormat(){
 		return this.emitter;
 	}
 	
@@ -136,14 +136,14 @@ public class ExportReportDialog extends TitleAreaDialog {
 		cmbEmitters.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		cmbEmitters.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEmitters.setLabelProvider(new LabelProvider(){
-			
 			@Override
 			public String getText(Object object){
-				return ((EmitterInfo)object).getFormat() + " (." + ((EmitterInfo)object).getFormat() + ")";
+				return ((IExportFormat)object).getName() + " (." + ((IExportFormat)object).getFileExtension() + ")";
 			}
 		});
-		EmitterInfo[] emitters = ReportManager.getReportEngine().getEmitterInfo();
-		cmbEmitters.setInput(emitters);
+		IExportFormat[] formats= ExportReportEngine.getSupportedExportFormats();
+		cmbEmitters.setInput(formats);
+		
 		if (!this.multipleFiles) {
 			cmbEmitters
 					.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -160,9 +160,9 @@ public class ExportReportDialog extends TitleAreaDialog {
 							txtFileName.setText(filename.substring(0,
 									filename.lastIndexOf('.'))
 									+ "."
-									+ ((EmitterInfo) selection
+									+ ((IExportFormat) selection
 											.getFirstElement())
-											.getFormat());
+											.getFileExtension());
 
 						}
 					});
@@ -181,16 +181,16 @@ public class ExportReportDialog extends TitleAreaDialog {
 		btnBrowse.setText("Browse...");
 
 		String x = settings.get(FORMAT_SETTING);
-		EmitterInfo defaultEmitter = emitters[0];
+		IExportFormat defaultExport = formats[0];
 		if (x != null){
-			for (int i = 0; i < emitters.length; i ++){
-				if (emitters[i].getID().equals(x)){
-					defaultEmitter = emitters[i];
+			for (int i = 0; i < formats.length; i ++){
+				if (formats[i].getName().equals(x)){
+					defaultExport = formats[i];
 				}
 			}
 		}
 		
-		cmbEmitters.setSelection(new StructuredSelection(defaultEmitter));
+		cmbEmitters.setSelection(new StructuredSelection(defaultExport));
 		
 		if (this.multipleFiles){
 			
@@ -206,7 +206,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 			}else{
 				x += File.separator;
 			}
-			x += report.getName().replaceAll("[^a-zA-Z0-9]", "") + "." +  defaultEmitter.getFormat(); 
+			x += report.getName().replaceAll("[^a-zA-Z0-9]", "") + "." +  defaultExport.getFileExtension(); 
 			txtFileName.setText(x);
 			addFileListner(btnBrowse);
 		}
@@ -241,9 +241,9 @@ public class ExportReportDialog extends TitleAreaDialog {
 				FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
 				fd.setFileName(txtFileName.getText());
 				
-				EmitterInfo info = (EmitterInfo) ((IStructuredSelection)cmbEmitters.getSelection()).getFirstElement();
-				fd.setFilterExtensions(new String[]{"*." + info.getFormat(), "*.*"});
-				fd.setFilterNames(new String[]{info.getFormat() + " (*." + info.getFormat() + ")", "All Files (*.*)"});
+				IExportFormat info = (IExportFormat) ((IStructuredSelection)cmbEmitters.getSelection()).getFirstElement();
+				fd.setFilterExtensions(new String[]{"*." + info.getFileExtension(), "*.*"});
+				fd.setFilterNames(new String[]{info.getName() + " (*." + info.getFileExtension() + ")", "All Files (*.*)"});
 				
 				String dir = fd.open();
 				if (dir != null){
@@ -267,6 +267,10 @@ public class ExportReportDialog extends TitleAreaDialog {
 				if (!MessageDialog.openConfirm(getShell(), "Export", "The directory " + txtFileName.getText() + " does not exist and will be created.  Are you sure you want to continue?")){
 					return;
 				}
+			}else{
+				if (!MessageDialog.openConfirm(getShell(), "Export", "The files in the directory " + txtFileName.getText() + " may be overwritten.  Are you sure you want to continue?")){
+					return;
+				}
 			}
 		}else {
 			if (dir.exists()){
@@ -284,7 +288,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 		fileName = txtFileName.getText();
 		IStructuredSelection selection = ((IStructuredSelection)cmbEmitters.getSelection());
 		if (selection != null && !selection.isEmpty()){
-			emitter = (EmitterInfo)selection.getFirstElement();
+			emitter = (IExportFormat)selection.getFirstElement();
 		}
 		try{
 			if (this.multipleFiles){
@@ -292,7 +296,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 			}else{
 				settings.put(DIRECTORY_SETTING, (new File(fileName)).getParent()  );
 			}
-			settings.put(FORMAT_SETTING, emitter.getID());
+			settings.put(FORMAT_SETTING, emitter.getName());
 		}catch (Exception ex){
 			//eatme
 		}

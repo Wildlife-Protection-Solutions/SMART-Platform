@@ -59,19 +59,23 @@ public class CreateReportDialog extends TitleAreaDialog {
 	private Object selectedItem = null;
 	private String reportName = null;
 	private TreeViewer reportList;
+	private boolean includeName;
 	
 	/**
 	 * @param parent
 	 *            the parent shell
 	 * @param rootFolder the default selected folder
 	 * @param defaultName the initial name of the report; can be null
+	 * @param includeName <code>true</code> if name should be included in dialog box
 	 */
 	//TODO: rootFolder is not selected correctly
 	public CreateReportDialog(Shell parent, 
 			Object rootFolder,
-			String defaultName) {
+			String defaultName, boolean includeName) {
+		
 		super(parent);
 		this.selectedItem = rootFolder;
+		this.includeName = includeName;
 		if (defaultName != null){
 			this.reportName = defaultName;
 		}else{
@@ -86,7 +90,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 	 */
 	public CreateReportDialog(Shell parent, 
 			Object rootFolder) {
-		this(parent, rootFolder, null);
+		this(parent, rootFolder, null, false);
 	}
 	
 	/**
@@ -128,21 +132,23 @@ public class CreateReportDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		if (includeName){
+			Label lbl = new Label(main, SWT.NONE);
+			lbl.setText("Report Name:");
+
+			txtName = new Text(main, SWT.BORDER);
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtName.setText(reportName);
+			txtName.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					reportName = txtName.getText();
+					validate();
+				}
+			});
+		}
+
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Report Name:");
-
-		txtName = new Text(main, SWT.BORDER);
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtName.setText(reportName);
-		txtName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				reportName = txtName.getText();
-				validate();
-			}
-		});
-
-		lbl = new Label(main, SWT.NONE);
 		lbl.setText("Save Location:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 
@@ -198,13 +204,15 @@ public class CreateReportDialog extends TitleAreaDialog {
 	private void validate() {
 		boolean ok = true;
 		setErrorMessage(null);
-		if (reportName.trim().length() == 0) {
-			setErrorMessage("Report name must not be blank.");
-			ok = false;
-		}
-		if (!SmartUtils.isSimpleString(reportName, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Report.MAX_NAME_LENGTH)){
-			setErrorMessage("Report names must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + " characters and be less than " + Report.MAX_NAME_LENGTH + " character is length.");
-			ok = false;
+		if (includeName){
+			if (reportName.trim().length() == 0) {
+				setErrorMessage("Report name must not be blank.");
+				ok = false;
+			}
+			if (!SmartUtils.isSimpleString(reportName, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Report.MAX_NAME_LENGTH)){
+				setErrorMessage("Report names must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + " characters and be less than " + Report.MAX_NAME_LENGTH + " character is length.");
+				ok = false;
+			}
 		}
 		if (selectedItem == null) {
 			ok = false;
