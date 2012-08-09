@@ -17,6 +17,7 @@ Spatial Monitoring and Reporting Tool
    <launcherArgs>
       <vmArgs>-Xmx500M -Dosgi.parentClassloader=ext -XX:MaxPermSize=250M</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true</vmArgsMac>
+      <vmArgsWin>-XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass</vmArgsWin>
    </launcherArgs>
 
    <windowImages i16="/org.wcs.smart/images/icons/smart16.gif" i32="/org.wcs.smart/images/icons/smart32.gif" i48="/org.wcs.smart/images/icons/smart48.gif" i64="/org.wcs.smart/images/icons/smart64.gif" i128="/org.wcs.smart/images/icons/smart128.gif"/>
