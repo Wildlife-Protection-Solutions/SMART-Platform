@@ -37,13 +37,17 @@ import org.wcs.smart.query.model.Query;
 public class QueryExportEngine {
 	public static final String MAPPING_ID = "org.wcs.smart.query.export.format";
 	
+	/**
+	 * Returns all valid query exporters for the given query.
+	 * @param query
+	 * @return
+	 */
 	public static final List<IQueryExporter>  getQueryExports(Query query){
 		List<IQueryExporter> items = new ArrayList<IQueryExporter>();
 		if (Platform.getExtensionRegistry() == null) return Collections.EMPTY_LIST;
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
 		try {
 			for (IConfigurationElement e : config) {
-				
 				IQueryExporter exporter = (IQueryExporter) e.createExecutableExtension("class");
 				if (exporter.canExport(query)) {
 					items.add(exporter);
