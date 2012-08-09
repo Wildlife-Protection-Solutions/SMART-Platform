@@ -20,6 +20,7 @@
       <view
             allowMultiple="true"
             class="org.wcs.smart.ui.map.MapView"
+            icon="images/icons/etool16/map.png"
             id="org.wcs.smart.ui.map.MapView"
             name="SMART Map View"
             restorable="true">
