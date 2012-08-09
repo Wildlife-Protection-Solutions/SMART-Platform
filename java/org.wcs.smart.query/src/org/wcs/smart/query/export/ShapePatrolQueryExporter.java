@@ -91,6 +91,12 @@ public class ShapePatrolQueryExporter extends SimpleQueryExporter implements IQu
 		shapefile.dispose();
 		
 	}
+	
+	@Override
+	public String getId(){
+		return "org.wcs.smart.query.export.patrol.shp";
+	}
+	
 	@Override
 	public String getName() {
 		return "Shapefile";

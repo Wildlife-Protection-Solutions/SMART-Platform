@@ -40,10 +40,14 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -53,6 +57,15 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class QueryHibernateManager {
 
+	/**
+	 * 
+	 */
+	public static final String MY_QUERIES_NAME = "My Queries";
+	/**
+	 * 
+	 */
+	public static final String CONSERVATION_AREA_QUERIES_NAME = "Conservation Area Queries";
+	
 	public static final byte[] CA_QUERY_KEY = new byte[]{1};
 	public static final byte[] USER_QUERY_KEY = new byte[]{2};
 	
@@ -139,7 +152,7 @@ public class QueryHibernateManager {
 		QueryFolder caRootFolder = new QueryFolder();
 		if(includeCaFolder){
 			
-			caRootFolder.setName("Conservation Area Queries");
+			caRootFolder.setName(CONSERVATION_AREA_QUERIES_NAME);
 			caRootFolder.setUuid(CA_QUERY_KEY);
 			caRootFolder.setConservationArea(SmartDB.getCurrentConservationArea());
 			caRootFolder.setRootFolder(true);
@@ -147,7 +160,7 @@ public class QueryHibernateManager {
 		}
 		
 		QueryFolder userRootFolder = new QueryFolder();
-		userRootFolder.setName("My Queries");
+		userRootFolder.setName(MY_QUERIES_NAME);
 		userRootFolder.setUuid(USER_QUERY_KEY);
 		userRootFolder.setConservationArea(SmartDB.getCurrentConservationArea());
 		userRootFolder.setEmployee(SmartDB.getCurrentEmployee());
@@ -552,16 +565,20 @@ public class QueryHibernateManager {
 	 * @param generateDropItems if query should generate drop items.
 	 * @return
 	 */
-	public static boolean saveQuery(org.wcs.smart.query.model.Query query, boolean generateDropItems){
-		//fire before save events
-		if (!QueryEventManager.getInstance().fireBeforeSaveListeners(query)){
-			return false;
-		}
+	public static boolean saveQuery(org.wcs.smart.query.model.Query query, 
+			boolean generateDropItems){
 
 		boolean newQuery = query.getId() == null;
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
+			//fire before save events
+			
+			if (!QueryEventManager.getInstance().fireBeforeSaveListeners(query, s)){
+				return false;
+			}
+
+			
 			if (newQuery){
 				query.setId(QueryHibernateManager.generateQueryId(s));
 				//page1.setQuery();
@@ -569,6 +586,7 @@ public class QueryHibernateManager {
 			if (generateDropItems){
 				query.generateDropItems(s);
 			}
+			query = (org.wcs.smart.query.model.Query) s.merge(query);
 			s.saveOrUpdate(query);
 			s.getTransaction().commit();
 			//updatePartName();
@@ -593,5 +611,66 @@ public class QueryHibernateManager {
 					IQueryFolderListener.QUERY_SAVED, query);
 		}
 		return true;
+	}
+	
+	/**
+	 * Searches all the queries for the given
+	 * query uuid.
+	 * 
+	 * @param session
+	 * @param queryUuid
+	 * @param queryType the type of query or null if query type not known
+	 * @return
+	 */
+	public static org.wcs.smart.query.model.Query findQuery(Session session, 
+			byte[] queryUuid, QueryType queryType) {
+		org.wcs.smart.query.model.Query smartQuery = null;
+		
+		QueryType[] types = new QueryType[]{QueryType.OBSERVATION, QueryType.PATROL, QueryType.SUMMARY, QueryType.GRIDDED};
+		Class<?>[] queryClasses = new Class[]{ObservationQuery.class, PatrolQuery.class, SummaryQuery.class, GriddedQuery.class};
+		for (int i = 0; i < types.length; i ++){
+			if (queryType == null || queryType.equals(types[i])){
+				smartQuery = (org.wcs.smart.query.model.Query) session.get(queryClasses[i], queryUuid);
+				if (smartQuery != null){
+					return smartQuery;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	
+	/**
+	 * Searches the queries for the current conservation area
+	 * that the current user has access to for a query
+	 * with the name provided.
+	 * 
+	 * @param session
+	 * @param queryUuid
+	 * @param queryType the type of query or null if query type not known
+	 * @return
+	 */
+	public static List<org.wcs.smart.query.model.Query> findQuery(Session session, 
+			String queryName, QueryType queryType) {
+		org.wcs.smart.query.model.Query smartQuery = null;
+		
+		QueryType[] types = new QueryType[]{QueryType.OBSERVATION, QueryType.PATROL, QueryType.SUMMARY, QueryType.GRIDDED};
+		Class<?>[] queryClasses = new Class[]{ObservationQuery.class, PatrolQuery.class, SummaryQuery.class, GriddedQuery.class};
+		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
+		for (int i = 0; i < types.length; i ++){
+			if (queryType == null || queryType.equals(types[i])){
+				
+				String hsql = "FROM " + queryClasses[i].getSimpleName() + " WHERE conservationArea = :ca and name=:name and (isShared = 'true' or (isShared = 'false' and owner = :employee))";
+				Query query = session.createQuery(hsql);
+				query.setParameter("ca", SmartDB.getCurrentConservationArea());
+				query.setParameter("employee", SmartDB.getCurrentEmployee());
+				query.setParameter("name", queryName);
+
+				queries.addAll(query.list());
+			}
+		}		
+		return queries;
 	}
 }

@@ -68,7 +68,9 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput == null){
+		if (newInput == null || !(newInput instanceof HashMap)){
+			folders = null;
+			queries = null;
 			return;
 		}
 		if (newInput instanceof HashMap){
@@ -76,6 +78,7 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 			folders = (List<QueryFolder>) data.get(FOLDER_KEY);
 			queries = (HashMap<Integer, List<QueryInput>>) data.get(QUERY_KEY);
 		}
+	
 	}
 
 	/* (non-Javadoc)

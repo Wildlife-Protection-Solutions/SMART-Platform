@@ -93,6 +93,11 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 		writer.writeNext(data);
 	}
 
+	@Override
+	public String getId(){
+		return "org.wcs.smart.query.export.simple.csv";
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.export.SimpleQueryExporter#getName()
 	 */

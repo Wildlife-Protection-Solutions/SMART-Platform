@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query;
 
+import org.hibernate.Session;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -29,15 +30,30 @@ import org.wcs.smart.query.model.Query;
  * @author egouge
  * @since 1.0.0
  */
-public interface IQuerySaveListener {
+public interface IQueryEventListener {
 
 	/**
 	 * Event fired before the query is saved
 	 * to the database.
 	 * @param query The query to save to the database
+	 * @param session the current hiberante database session
 	 * @return <code>true</code> if the save should
 	 * proceed <code>false</code> if save should
 	 * be cancelled.
 	 */
-	public boolean beforeSave(Query query);
+	public boolean beforeSave(Query query, Session session);
+	
+	/**
+	 * Event fired before the query is deleted
+	 * from the database.
+	 * 
+	 * @param query The query to delete to the database; NOT attached
+	 * to the hiberante session
+	 * @param session the current hiberante database session in transaction
+	 * 
+	 * @return <code>true</code> if the delete should
+	 * proceed <code>false</code> if delete should
+	 * be cancelled.
+	 */
+	public boolean beforeDelete(Query query, Session session);
 }

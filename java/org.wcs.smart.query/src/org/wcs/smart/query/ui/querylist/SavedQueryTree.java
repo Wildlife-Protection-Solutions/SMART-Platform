@@ -57,7 +57,7 @@ public class SavedQueryTree {
 	
 	private List<ISourceChangedListener> listeners = new ArrayList<ISourceChangedListener>();
 	
-	private Job loadQueriesJob = new Job("Load Queries"){
+	private Job loadQueriesJob = new Job("Load Queries and Folders"){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
@@ -195,12 +195,14 @@ public class SavedQueryTree {
 	/**
 	 * loads the folders and queries from the database
 	 */
-	private void loadData(){
-		loadQueriesJob.schedule();
-		try{
-			loadQueriesJob.join();
-		}catch (Exception ex){
-			QueryPlugIn.displayLog("Could not load queries and folders", ex);
+	private synchronized void loadData(){
+		if (folders == null || queries == null){
+			loadQueriesJob.schedule();
+			try{
+				loadQueriesJob.join();
+			}catch (Exception ex){
+				QueryPlugIn.displayLog("Could not load queries and folders", ex);
+			}
 		}
 	}
 	

@@ -52,7 +52,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
@@ -179,7 +178,7 @@ public class QueryListView extends ViewPart {
 		gl.marginWidth = 0;
 		main.setLayout(gl);
 		
-		queryList = new TreeViewer(main, SWT.MULTI);
+		queryList = new TreeViewer(main, SWT.MULTI );
 		queryList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryList.setContentProvider(new QueryListViewContentProvider(true));
 		queryList.setLabelProvider(new QueryListLabelProvider());
@@ -206,7 +205,6 @@ public class QueryListView extends ViewPart {
 		queryList.setCellEditors(new CellEditor[] { new TextCellEditor(queryList.getTree()) });
 		queryList.setColumnProperties(new String[] { "col1" });
 		queryList.setCellModifier(new FolderNameCellEditor(queryList));
-		
 		focusCellManager = new TreeViewerFocusCellManager(queryList, new MultiFocusCellOwnerDrawHighlighter(queryList));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
 				queryList) {
@@ -220,9 +218,9 @@ public class QueryListView extends ViewPart {
 			}
 		};		
 		TreeViewerEditor.create(queryList, actSupport, ColumnViewerEditor.DEFAULT);
-		
 
-		loadQueriesJob.schedule();
+		queryList.setInput("Loading...");
+
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
@@ -233,7 +231,8 @@ public class QueryListView extends ViewPart {
 		
 		
 		SavedQueryTree.getInstance().addListener(listener);
-//		QueryEventManager.getInstance().addQueryFolderListener(listener);
+		
+		loadQueriesJob.schedule();
 	}
 	
 	

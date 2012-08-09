@@ -21,12 +21,6 @@
  */
 package org.wcs.smart.query.ui.export;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -42,7 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.export.IQueryExporter;
-import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.export.QueryExportEngine;
 
 /**
  * Query page for the query export wizard
@@ -86,7 +80,7 @@ public class ExportQueryTypePage extends WizardPage {
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
 		});
-		outputOptions.setInput(getMappings( ((ExportQueryWizard)getWizard()).getQuery() ));
+		outputOptions.setInput(QueryExportEngine.getQueryExports(((ExportQueryWizard)getWizard()).getQuery() ));
 		outputOptions.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -117,23 +111,5 @@ public class ExportQueryTypePage extends WizardPage {
 		 return   (IQueryExporter) ((IStructuredSelection)outputOptions.getSelection()).getFirstElement();
 	}
 	
-	private static final String MAPPING_ID = "org.wcs.smart.query.export.format";
-	
-	private static final List<IQueryExporter>  getMappings(Query query){
-		List<IQueryExporter> items = new ArrayList<IQueryExporter>();
-		if (Platform.getExtensionRegistry() == null) return Collections.EMPTY_LIST;
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				
-				IQueryExporter exporter = (IQueryExporter) e.createExecutableExtension("class");
-				if (exporter.canExport(query)) {
-					items.add(exporter);
-				}
-	}
-		}catch (Exception ex){
-			ex.printStackTrace();
-		}
-		return items;
-	}
+
 }

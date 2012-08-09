@@ -44,7 +44,7 @@ public class QueryXmlManager {
 	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.query.xml.model";
 		
 	/**
-	 * Reads patrol data from an xml file.
+	 * Reads query data from an xml file.
 	 * <p>
 	 * User is required to close input stream.
 	 * </p>
@@ -53,7 +53,7 @@ public class QueryXmlManager {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public static Query readDataModel(InputStream file) throws JAXBException{
+	public static Query readQueryFile(InputStream file) throws JAXBException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	
 		JAXBElement<Query> o = (JAXBElement<Query>) un.unmarshal(file);
@@ -62,7 +62,7 @@ public class QueryXmlManager {
 	}
 	
 	/**
-	 * Writes a xml patrol object to a file.
+	 * Writes a query object to an xml file.
 	 * <p>
 	 * User is required to close output stream.
 	 * </p>
@@ -71,7 +71,7 @@ public class QueryXmlManager {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	public static void writeDataModel(Query query, OutputStream file) throws JAXBException, IOException{
+	public static void writeQuery(Query query, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));

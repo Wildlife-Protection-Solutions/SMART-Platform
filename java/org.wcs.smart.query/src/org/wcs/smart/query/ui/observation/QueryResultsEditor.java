@@ -49,7 +49,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;

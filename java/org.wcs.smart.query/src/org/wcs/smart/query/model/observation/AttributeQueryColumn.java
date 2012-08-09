@@ -39,11 +39,11 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * Creates a new attribute column.
 	 * 
 	 * @param name the column name as it appears to the user
-	 * @param key the attribute key
+	 * @param key the attribute id key
 	 * @param type the type of the attribute column
 	 */
-	public AttributeQueryColumn(String name, String key, AttributeType type){
-		super(name, key, null);
+	public AttributeQueryColumn(String name, String attributeId, AttributeType type){
+		super(name, "attribute:" + attributeId, null);
 		ColumnType ctype = ColumnType.STRING;
 		if (type == AttributeType.NUMERIC ){
 			ctype = ColumnType.NUMBER;
@@ -58,7 +58,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	/**
 	 * Creates a new column with the given column type.
 	 * @param name
-	 * @param key
+	 * @param key the query column full key of the form "attribute:<ATTRIBUTEID>"
 	 * @param type
 	 */
 	public AttributeQueryColumn(String name, String key, ColumnType type){

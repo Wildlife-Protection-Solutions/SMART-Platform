@@ -316,4 +316,29 @@ public class GriddedQuery extends Query {
 		
 		return null;
 	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.Query#isDefinitionEqual(org.wcs.smart.query.model.Query)
+	 */
+	public boolean isDefinitionEqual(Query other){
+		if (other == null || !(other instanceof SummaryQuery)){
+			return false;
+		}
+		SummaryQuery query = (SummaryQuery)other;
+		return (query.getQuery().equals(this.getQuery()));
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.Query#copyFrom(org.wcs.smart.query.model.Query)
+	 */
+	public void copyFrom(Query copy){
+		//TODO: ensure this is correct
+		assert copy instanceof SummaryQuery;
+		
+		SummaryQuery q = (SummaryQuery)copy;
+		setQuery(q.getQuery());
+		
+	}
 }
+
+

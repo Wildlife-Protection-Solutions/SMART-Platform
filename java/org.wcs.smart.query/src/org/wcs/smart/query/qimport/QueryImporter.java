@@ -68,7 +68,7 @@ public class QueryImporter {
 		warnings.clear();
 		
 		InputStream fin = new BufferedInputStream(new FileInputStream(file));
-		Query q = QueryXmlManager.readDataModel(fin);
+		Query q = QueryXmlManager.readQueryFile(fin);
 		fin.close();
 		
 		QueryType qt = q.getQuery();

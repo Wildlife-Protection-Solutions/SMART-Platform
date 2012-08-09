@@ -285,5 +285,25 @@ public abstract class Query {
 	 */
 	@Transient
 	public abstract void generateDropItems(Session session) throws Exception;
+	
+	/**
+	 * 
+	 * Compares query definitions.
+	 * 
+	 * @param other
+	 * @return <code>true</code> if the query definitions are the same.
+	 */
+	@Transient
+	public abstract boolean isDefinitionEqual(Query other);
+	
+	/**
+	 * 
+	 * Copies the query definition from the
+	 * provided query into the current query.
+	 * 
+	 * @param copy the query to copy from 
+	 */
+	@Transient
+	public abstract void copyFrom(Query copy);
 
 }
