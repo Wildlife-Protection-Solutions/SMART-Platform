@@ -201,11 +201,12 @@
             </visibleWhen>
          </menu>
          <menu
-               id="Help"
+               id="org.wcs.smart.menu.help"
                label="Help"
                mnemonic="H">
             <command
                   commandId="org.eclipse.ui.help.aboutAction"
+                  icon="images/icons/smart16.gif"
                   label="About Smart"
                   mnemonic="A"
                   style="push">
