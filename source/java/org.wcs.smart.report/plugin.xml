@@ -6,7 +6,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.report.ShowReportDesigner"
-            name="Show report designer">
+            name="Show Report Designer">
       </command>
       <command
             id="org.wcs.smart.report.ShowReportViewer"
@@ -43,6 +43,18 @@
       <command
             id="org.wcs.smart.report.importReport"
             name="Import Report">
+      </command>
+      <command
+            id="org.wcs.smart.report.exportLibrary"
+            name="Export Library">
+      </command>
+      <command
+            id="org.wcs.smart.report.importLibrary"
+            name="Import Library">
+      </command>
+      <command
+            id="org.wcs.smart.report.editLibrary"
+            name="Edit Library">
       </command>
    </extension>
    <extension
@@ -137,19 +149,24 @@
             class="org.wcs.smart.report.internal.ui.ImportReportHandler"
             commandId="org.wcs.smart.report.importReport">
       </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.ImportLibraryHandler"
+            commandId="org.wcs.smart.report.importLibrary">
+      </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.ExportLibraryHandler"
+            commandId="org.wcs.smart.report.exportLibrary">
+      </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.EditLibraryHandler"
+            commandId="org.wcs.smart.report.editLibrary">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.resetSeparator">
-         <command
-               commandId="org.wcs.smart.report.ShowReportDesigner"
-               icon="images/icons/etool16/cogA.png"
-               label="Show Report Designer"
-               mnemonic="D"
-               style="push">
-         </command>
          <command
                commandId="org.wcs.smart.report.ShowReportViewer"
                icon="images/icons/etool16/report_view.png"
@@ -488,6 +505,59 @@
                   </and>
                </with>
             </visibleWhen>
+            <separator
+                  name="org.wcs.smart.report.separator3"
+                  visible="true">
+            </separator>
+            <menu
+                  id="org.wcs.smart.report.library"
+                  label="Library"
+                  mnemonic="L">
+               <command
+                     commandId="org.wcs.smart.report.editLibrary"
+                     style="push"
+                     tooltip="Edit the report library">
+               </command>
+               <separator
+                     name="org.wcs.smart.report.separator4"
+                     visible="true">
+               </separator>
+               <command
+                     commandId="org.wcs.smart.report.exportLibrary"
+                     mnemonic="x"
+                     style="push"
+                     tooltip="Export report library and shared resources">
+               </command>
+               <command
+                     commandId="org.wcs.smart.report.importLibrary"
+                     mnemonic="i"
+                     style="push"
+                     tooltip="Import report library and shared resources">
+               </command>
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.report.ReportPerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </menu>
          </menu>
       </menuContribution>
    </extension>
