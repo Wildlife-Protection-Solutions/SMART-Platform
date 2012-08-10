@@ -46,6 +46,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
@@ -108,6 +109,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		try{
 			getSession().getTransaction().commit();
 			dirty = false;
+			ConservationAreaManager.getInstance().fireAreaChanged(type);
 			getSession().beginTransaction();
 		}catch (Exception ex){
 			SmartPlugIn.log("Could not save changes.\n\n" + ex.getMessage(), ex);

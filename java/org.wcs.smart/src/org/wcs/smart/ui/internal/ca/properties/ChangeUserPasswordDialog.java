@@ -43,9 +43,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -79,6 +81,13 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		toUpdate = SmartDB.getCurrentEmployee();
 	}
 
+	@Override
+	public Session getSession(){
+		if (session == null || !session.isOpen()){
+			session = HibernateManager.openSession();
+		}
+		return session;
+	}
 	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */

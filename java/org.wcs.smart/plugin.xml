@@ -161,6 +161,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.ca.showArea"
+                  icon="images/icons/etool16/area_polygon.png"
                   label="Define Area Boundaries ..."
                   mnemonic="B"
                   style="push">
