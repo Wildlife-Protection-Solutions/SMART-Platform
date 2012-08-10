@@ -33,6 +33,7 @@ import org.eclipse.birt.report.model.elements.OdaDataSet;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
@@ -135,6 +136,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 				}				
 			}
 		}
+		
 	};
 	
 	@Override
@@ -163,7 +165,9 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			ReportManager.updateReportQueries(s, (ReportDesignHandle)getModel(), getEditorInputLocal().getReport()); 
+			if (getModel() instanceof ReportDesignHandle){
+				ReportManager.updateReportQueries(s, (ReportDesignHandle)getModel(), getEditorInputLocal().getReport());
+			}
 			super.doSave(monitor);
 			s.getTransaction().commit();
 		}catch (Exception ex){
@@ -194,6 +198,10 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 	 */
 	public void doSaveAs() {
 		
+		if (!(super.getEditorInput() instanceof SmartReportEditorInput)){
+			MessageDialog.openError(getSite().getShell(), "Error", "Cannot perform save-as on non Smart Reports");
+			return;
+		}
 		//get save name/location
 		final Report report = ((SmartReportEditorInput) super.getEditorInput())
 				.getReport();
