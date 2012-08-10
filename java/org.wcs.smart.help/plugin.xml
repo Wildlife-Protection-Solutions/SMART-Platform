@@ -30,6 +30,29 @@
             file="context.xml"
             plugin="org.wcs.smart.help">
     </contexts>
-</extension> 
+</extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.help?before=org.eclipse.ui.help.aboutAction">
+         <separator
+               name="org.wcs.smart.help.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.eclipse.ui.help.helpContents"
+               style="push">
+         </command>
+         <command
+               commandId="org.eclipse.ui.help.helpSearch"
+               style="push">
+         </command>
+         <separator
+               name="org.wcs.smart.help.separator2"
+               visible="true">
+         </separator>
+      </menuContribution>
+   </extension> 
 
 </plugin>
