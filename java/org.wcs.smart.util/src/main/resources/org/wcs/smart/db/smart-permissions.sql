@@ -23,6 +23,10 @@ GRANT SELECT ON smart.employee TO manager;
 GRANT SELECT ON smart.employee TO analyst;
 GRANT SELECT ON smart.employee TO data_entry;
 
+GRANT UPDATE ON smart.employee TO manager;
+GRANT UPDATE ON smart.employee TO analyst;
+GRANT UPDATE ON smart.employee TO data_entry;
+
 GRANT SELECT ON smart.language TO manager;
 GRANT SELECT ON smart.language TO analyst;
 GRANT SELECT ON smart.language TO data_entry;
