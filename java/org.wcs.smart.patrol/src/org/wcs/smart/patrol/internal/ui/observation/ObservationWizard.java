@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -275,6 +276,11 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
      * @see org.eclipse.jface.wizard.Wizard#performCancel()
      */
     public boolean performCancel() {
+    	if (observations.size() > 0){
+    		if (!MessageDialog.openQuestion(getShell(), "Confirmation", "All observations you have entered/modified will be lost.  Are you sure you want to cancel?")){
+    			return false;
+    		}
+    	}
         return true;
     }
 }

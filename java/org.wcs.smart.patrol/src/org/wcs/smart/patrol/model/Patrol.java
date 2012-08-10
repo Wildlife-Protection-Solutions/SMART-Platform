@@ -65,6 +65,14 @@ public class Patrol {
 	public static final String AUTO_GENERATE_TEXT = "system-generated";
 
 	/**
+	 * Absolute maximum length of patrol in days
+	 */
+	public static final int MAX_PATROL_LENGTH_DAYS = 60;
+	/**
+	 * User warning patrol length
+	 */
+	public static final int WARN_PATROL_LENGTH_DAYS = 30;
+	/**
 	 * Maximum patrol id length
 	 */
 	public static final Integer MAX_ID_LENGTH = 32;

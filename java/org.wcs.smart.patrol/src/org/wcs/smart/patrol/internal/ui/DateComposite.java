@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -32,6 +33,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -48,6 +51,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	private DateTime dtStartDate;
 	private DateTime dtEndDate;
 
+	private ControlDecoration cdEndDate;
 	
 	/**
 	 * Creates a new composite
@@ -70,6 +74,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		
 		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
 		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
 		
 		lbl = new Label(center, SWT.NONE);
 		lbl.setText("Patrol End Date:");
@@ -77,6 +82,10 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		
 		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
 		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)dtEndDate.getLayoutData()).horizontalIndent = 10;
+		cdEndDate = new ControlDecoration(lbl, SWT.RIGHT);
+		cdEndDate.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
+		cdEndDate.hide();
 		
 		dtEndDate.addSelectionListener(this);
 		dtStartDate.addSelectionListener(this);
@@ -161,11 +170,23 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	@Override
 	public void widgetSelected(SelectionEvent e) {
+		String error = null;
+		cdEndDate.hide();
 		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
-			setErrorMessage("End date must be after the start date.");
+			error = "End date must be after the start date.";
 		}else{
-			setErrorMessage(null);
+			long startD = SmartUtils.getDate(dtStartDate).getTime();
+			long endD = SmartUtils.getDate(dtEndDate).getTime();
+			
+			if (startD + Patrol.MAX_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+				error = "Patrol cannot be longer that " + Patrol.MAX_PATROL_LENGTH_DAYS + " days in length.";
+			}else if(startD + Patrol.WARN_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+				cdEndDate.setDescriptionText("Patrol is longer than 30 days");
+				cdEndDate.show();
+			}
 		}
+		
+		setErrorMessage(error);
 		fireChangeListeners();
 	}
 
