@@ -155,7 +155,11 @@ public class PatrolLegTable {
 		patrolLegViewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER );
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		try{
-			gd.widthHint = (int) (Display.getCurrent().getActiveShell().getBounds().width * 0.8);
+			int hint = (int) (Display.getDefault().getActiveShell().getBounds().width * 0.4);
+			if (hint < 350){
+				hint = 350;
+			}
+			gd.widthHint = hint;
 		}catch (Exception ex){}
 		
 		patrolLegViewer.getTable().setLayoutData(gd);

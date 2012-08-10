@@ -63,7 +63,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, true));
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText("Patrol ID:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
