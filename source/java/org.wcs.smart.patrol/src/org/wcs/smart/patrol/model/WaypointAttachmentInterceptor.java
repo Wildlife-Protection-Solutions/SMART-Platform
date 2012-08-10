@@ -86,7 +86,13 @@ public class WaypointAttachmentInterceptor extends EmptyInterceptor{
     			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
     				throw new RuntimeException("Patrol modifications could not be saved because attachment could not be copied.  Ensure write permissions to directory or remove attachment.");
     			}else{
+    				//state is what is written to db and should be updated
     				attachment.setFilename(to.getName());
+    				for (int i = 0; i < propertyNames.length;i++){
+    					if (propertyNames[i].equals("filename")){
+    						state[i] = to.getName();
+    					}
+    				}
     				attachment.setCopyFromLocation(null);
     			}
     		}

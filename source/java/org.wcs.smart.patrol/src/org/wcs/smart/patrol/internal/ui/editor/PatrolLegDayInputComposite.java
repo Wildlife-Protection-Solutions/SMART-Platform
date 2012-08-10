@@ -1016,7 +1016,7 @@ public class PatrolLegDayInputComposite {
 			Waypoint e = (Waypoint) iterator.next();
 			Time t = (Time)getWaypointValue(e, OtColumn.TIME);
 			
-			if(last == null || t.after(last)){
+			if(last == null || t.after(last) || t.equals(last)  ){
 				y = (Double) getWaypointValue(e, OtColumn.NORTH);
 				x = (Double) getWaypointValue(e, OtColumn.EAST);
 				last = t;
