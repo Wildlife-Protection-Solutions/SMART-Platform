@@ -84,7 +84,7 @@ public class CaImporter {
 		monitor.beginTask("Importing Conservation Area", 4);
 		
 		//TODO: consider doing a disk space check to ensure enough disk space for this operation
-		monitor.subTask("Backuping up current database");
+		monitor.subTask("Backing up current database");
 		HibernateManager.endSessionFactory(true);
 		File dbBackup = backup();
 		monitor.worked(1);
