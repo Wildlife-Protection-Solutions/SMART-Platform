@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
@@ -91,6 +92,30 @@ public class QueryResultsTable {
 		
 		job.schedule();
 	}
+	
+	public void initQuery(final GriddedQuery query){
+		if (tableViewerColumns != null){
+			//columns already created
+			return;
+		}
+		Job job = new Job("Initialize query results table."){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				// in display thread update table
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
+						table.setContentProvider(ArrayContentProvider.getInstance());
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		
+		job.schedule();
+	}
+
 	
 	/**
 	 * Updates the items in the table with the new list
