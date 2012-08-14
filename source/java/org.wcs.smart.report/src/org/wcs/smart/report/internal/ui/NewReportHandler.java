@@ -67,7 +67,6 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-
 		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
 		Object selection = null;
 		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
@@ -169,12 +168,10 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 					for (Iterator<?> iterator = dataSources.iterator(); iterator.hasNext();) {
 						Object type = (Object) iterator.next();
 						if (type instanceof OdaDataSourceHandle){
-							
 							if (((OdaDataSourceHandle)type).getExtensionID().equals(ReportManager.SMART_DATASOURCE_ID)){
 								dataSource = (DataSourceHandle) type;
 								break;
 							}
-							System.out.println("test");
 						}
 					}
 					

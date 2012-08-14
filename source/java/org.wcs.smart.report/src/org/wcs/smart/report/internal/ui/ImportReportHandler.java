@@ -13,6 +13,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.in.internal.ImportReportEngine;
@@ -21,7 +22,22 @@ public class ImportReportHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		try {
+			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
+			if (!activeId.equals(ReportViewerPerspective.ID)){
+				//show report perspective 
+				HandlerUtil
+				.getActiveWorkbenchWindow(event)
+				.getWorkbench()
+				.showPerspective(ReportViewerPerspective.ID,
+						HandlerUtil.getActiveWorkbenchWindow(event));	
+			}
+			
+		} catch (WorkbenchException e) {
+			ReportPlugIn
+					.displayLog("Error loading query perspective.", e);
+		}
+		
 		final Shell parent = HandlerUtil.getActiveShell(event);
 		
 		FileDialog fd = new FileDialog(parent);

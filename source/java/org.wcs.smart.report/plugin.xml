@@ -152,14 +152,80 @@
       <handler
             class="org.wcs.smart.report.internal.ui.ImportLibraryHandler"
             commandId="org.wcs.smart.report.importLibrary">
+         <enabledWhen>
+            <and>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.report.ReportPerspective">
+                  </equals>
+               </with>
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.report.internal.ui.ExportLibraryHandler"
             commandId="org.wcs.smart.report.exportLibrary">
+         <enabledWhen>
+            <and>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.report.ReportPerspective">
+                  </equals>
+               </with>
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.report.internal.ui.EditLibraryHandler"
             commandId="org.wcs.smart.report.editLibrary">
+         <enabledWhen>
+            <and>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.report.ReportPerspective">
+                  </equals>
+               </with>
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </and>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -455,7 +521,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.patrol">
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.query">
          <menu
                id="org.wcs.smart.report"
                label="Report"
@@ -472,39 +538,6 @@
                   style="push"
                   tooltip="Import a report">
             </command>
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <and>
-                     <or>
-                        <equals
-                              value="org.wcs.smart.report.ReportViewerPerspective">
-                        </equals>
-                        <equals
-                              value="org.wcs.smart.report.ReportPerspective">
-                        </equals>
-                     </or>
-                     <or>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.wcs.smart.smartAdminUser"
-                              value="admin">
-                        </test>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.wcs.smart.smartAdminUser"
-                              value="manager">
-                        </test>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.wcs.smart.smartAdminUser"
-                              value="analyst">
-                        </test>
-                     </or>
-                  </and>
-               </with>
-            </visibleWhen>
             <separator
                   name="org.wcs.smart.report.separator3"
                   visible="true">

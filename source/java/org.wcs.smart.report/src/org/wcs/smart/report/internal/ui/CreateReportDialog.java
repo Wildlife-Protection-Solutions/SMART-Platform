@@ -90,7 +90,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 	 */
 	public CreateReportDialog(Shell parent, 
 			Object rootFolder) {
-		this(parent, rootFolder, null, false);
+		this(parent, rootFolder, null, true);
 	}
 	
 	/**
