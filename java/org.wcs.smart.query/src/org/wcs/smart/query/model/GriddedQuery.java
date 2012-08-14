@@ -33,6 +33,7 @@ import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyGridEngine;
@@ -55,7 +56,7 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
  */
 @Entity
 @Table(name="smart.gridded_query")
-public class GriddedQuery extends SimpleQuery {
+public class GriddedQuery extends Query {
 
 	private GridQueryDefinition query;
 	
@@ -64,6 +65,7 @@ public class GriddedQuery extends SimpleQuery {
 
 	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
+	public IFilter queryFilter;	//cached copy of the parsed query
 	
 	private List<QueryColumn> queryColumns = null;
 	
@@ -77,6 +79,8 @@ public class GriddedQuery extends SimpleQuery {
 	
 	private double gridSize;
 	IValueItem valueItem;
+	
+	private List<DropItem> items;
 	
 	/**
 	 * Creates a new gridded query with the default
@@ -179,7 +183,7 @@ public class GriddedQuery extends SimpleQuery {
 		this.strQuery = queryStr;
 		this.query = queryDef;
 		if(query != null){
-			super.queryFilter = query.getQueryFilter();
+			queryFilter = query.getQueryFilter();
 		}
 	}
 	
@@ -208,10 +212,10 @@ public class GriddedQuery extends SimpleQuery {
 	 * @throws Exception
 	 */
 	@Transient
-	public List<QueryResultItem> getQueryResults(Session session, IProgressMonitor monitor) throws Exception{
+	public List<QueryResultItem> getQueryResults(IProgressMonitor monitor) throws Exception{
 		lastResults = null;
-//		Session session = HibernateManager.openSession();
-//		session.beginTransaction();
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
 		try{
 			DerbyGridEngine engine = new DerbyGridEngine();
 			lastResults = engine.executeQuery(this, session, monitor);
@@ -223,6 +227,7 @@ public class GriddedQuery extends SimpleQuery {
 			}
 		}
 	}
+	
 	
 	/**
 	 * Creates a copy of the summary query
@@ -238,7 +243,7 @@ public class GriddedQuery extends SimpleQuery {
 		q.setId( null );
 		q.setName(getName());
 		q.setConservationArea(getConservationArea());
-		q.setConservationAreaFilter(getConservationAreaFilter());
+		q.setConservationAreaFilter(caFilter);
 		q.setDateFilter(getDateFilter());
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQuery(getQuery());
@@ -340,7 +345,7 @@ public class GriddedQuery extends SimpleQuery {
 	}
 
 
-	@Override
+	
 	@Transient
 	public List<QueryColumn> getQueryColumns() {
 		if (this.queryColumns == null){
@@ -350,11 +355,6 @@ public class GriddedQuery extends SimpleQuery {
 	}
 
 
-	@Override
-	public void updateVisibleColumns() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	/**
 	 * Loads the query columns
@@ -428,7 +428,6 @@ public class GriddedQuery extends SimpleQuery {
 	 * attempt to parse the query if it has not been parsed
 	 */
 	@Transient
-	@Override
 	public IFilter getFilter(){
 		if (queryFilter == null){
 			try{
@@ -449,5 +448,48 @@ public class GriddedQuery extends SimpleQuery {
 	public IValueItem getValueItem() {
 		return valueItem; 
 		
+	}
+
+
+	@Override
+	public boolean isDefinitionEqual(Query other) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public void copyFrom(Query copy) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * @param filter a conservation area filter
+	 */
+	public void setConservationAreaFilter(ConservationAreaFilter filter){
+		this.caFilter = filter;
+	}
+	
+	/**
+	 * @return the conservation area filter
+	 */
+	@Transient
+	public ConservationAreaFilter getConservationAreaFilter(){
+		return this.caFilter;
+	}
+	/**
+	 * @return the drop items generated for the query
+	 */
+	@Transient
+	public List<DropItem> getDropItems(){
+		return items;
+	}
+	/**
+	 * @param items the drop items associated with the query
+	 */
+	@Transient
+	public void setDropItems(List<DropItem> items){
+		this.items = items;
 	}
 }
