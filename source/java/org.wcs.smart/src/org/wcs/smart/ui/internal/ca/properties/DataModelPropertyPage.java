@@ -433,6 +433,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						InterruptedException {
 					try {
 						currentTransaction.commit();
+						DataModelManager.getInstance().fireChangeListeners();
 						currentTransaction = session.beginTransaction();
 						setChangesMade(false);
 					}catch (Exception ex){

@@ -56,7 +56,7 @@ public class ImportCaHandler {
 		if (ret == 0){
 			//perform backup
 			BackupHandler handler = new BackupHandler();
-			handler.executeBackup(shell);
+			handler.executeBackup(shell, false);
 			if (!handler.backupOk()){
 				MessageDialog.openError(shell, "Error", "Error occurred during backup process.  Restore will not proceed.");
 			}
