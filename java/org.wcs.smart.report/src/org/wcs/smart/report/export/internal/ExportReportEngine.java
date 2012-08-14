@@ -64,6 +64,9 @@ import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
 
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfStamper;
+
 /**
  * Engine for exporting reports.
  * <p>This engine if responsible for gathering parameter information
@@ -215,7 +218,7 @@ public class ExportReportEngine {
 			return;
 		}
 		
-		PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
+		PrintService[] services = PrintServiceLookup.lookupPrintServices(DocFlavor.INPUT_STREAM.PDF, null);
 		PrintService service = null;
 		for (int i = 0; i < services.length; i++) {
 			if (services[i].getName().equals(data.name)) {
@@ -224,7 +227,7 @@ public class ExportReportEngine {
 			}
 		}
 		if (service == null){
-			
+			System.out.println("NOT SUPPORTED");
 			//ERROR
 			return;
 		}
@@ -243,7 +246,7 @@ public class ExportReportEngine {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		options.setOutputStream(out);
-		options.setEmitterID("org.eclipse.birt.report.engine.emitter.postscript");
+		options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf");
 		
 		task.setRenderOption(options);
 		task.setParameterValues(reportParameters);
@@ -255,16 +258,31 @@ public class ExportReportEngine {
 		pras.add(data.collate ? SheetCollate.COLLATED : SheetCollate.UNCOLLATED);
 		
 		
-		DocPrintJob job = service.createPrintJob();
-	
+		
 		InputStream pin = new ByteArrayInputStream(out.toByteArray());
 		out.close();
-		Doc doc = new SimpleDoc(pin, DocFlavor.INPUT_STREAM.POSTSCRIPT, null);
+		
+		DocPrintJob job = service.createPrintJob();
+		DocFlavor[] supported = service.getSupportedDocFlavors();
+		System.out.println("SUPPORTED---------------");
+		for(int i = 0; i < supported.length; i ++){
+			System.out.println(supported[i]);
+		}
+		System.out.println("SUPPORTED---------------");
+		
+		Doc doc = new SimpleDoc(pin, DocFlavor.INPUT_STREAM.PDF, null);
 		job.print(doc, pras);
 		pin.close();
 		
 		doc.getStreamForBytes().close();
-		
+//		
+//		PdfReader pdfReader = new PdfReader(pin);
+//
+//		PdfStamper pdfStamper = new PdfStamper(pdfReader,out);
+//		pdfStamper.addJavaScript("this.print({bUI: true, bSilent:false});\r");
+//		pdfStamper.close();
+//
+//		pin.close();
 //		Doc doc = new SimpleDoc(arg0, arg1, arg2)
 		
 		
