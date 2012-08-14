@@ -575,6 +575,9 @@
                   <equals
                         value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
                   </equals>
+                  <equals
+                        value="org.wcs.smart.query.ui.GriddedEditor">
+                  </equals>
                </or>
             </with>
          </enabledWhen>
@@ -601,6 +604,9 @@
                      </equals>
                      <equals
                            value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.GriddedEditor">
                      </equals>
                   </or>
                </with>
@@ -677,6 +683,9 @@
                   <equals
                         value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
                   </equals>
+                  <equals
+                        value="org.wcs.smart.query.ui.GriddedEditor">
+                  </equals>
                </or>
             </with>
          </enabledWhen>
@@ -696,6 +705,9 @@
                   </equals>
                   <equals
                         value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
+                  </equals>
+                  <equals
+                        value="org.wcs.smart.query.ui.GriddedEditor">
                   </equals>
                </or>
             </with>

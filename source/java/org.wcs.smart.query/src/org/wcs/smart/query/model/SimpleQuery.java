@@ -63,8 +63,8 @@ public abstract class SimpleQuery extends Query {
 	@Transient
 	private List<DropItem> items;
 	
-	private String strQueryFilter;
-	private IFilter queryFilter;	//cached copy of the parsed query
+	public String strQueryFilter;
+	public IFilter queryFilter;	//cached copy of the parsed query
 	
 	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
@@ -203,8 +203,10 @@ public abstract class SimpleQuery extends Query {
 		try{
 			lastResults = getQueryResults(session, progressMonitor);
 		}finally{
-			session.getTransaction().commit();
-			session.close();
+			if (session.isOpen()){
+				session.getTransaction().commit();
+				session.close();
+			}
 		}
 		return lastResults;
 	}
@@ -282,10 +284,14 @@ public abstract class SimpleQuery extends Query {
 		if (strQueryFilter == null || strQueryFilter.length() == 0){
 			return IFilter.EMPTY_FILTER;
 		}
+		if(queryFilter != null){
+			return queryFilter;
+		}
 		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
 		Parser parser = new Parser(is);
 		IFilter myQuery = parser.QueryFilter();
 		is.close();
+		queryFilter = myQuery;
 		return myQuery;
 	}
 	

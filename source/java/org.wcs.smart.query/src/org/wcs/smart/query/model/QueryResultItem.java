@@ -40,7 +40,7 @@ import org.wcs.smart.patrol.model.PatrolType;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryResultItem {
+public class QueryResultItem extends ResultItem{
 
 	private String patrolId;
 	private Date patrolStartDate;
@@ -75,7 +75,7 @@ public class QueryResultItem {
 	private byte[] observationUuid;
 	private List<byte[]> tracks = null;
 	
-	
+
 	/**
 	 * @return the patrol id
 	 */
@@ -244,19 +244,6 @@ public class QueryResultItem {
 	public void setObjective(String objective) {
 		this.objective = objective;
 	}
-	
-//	/**
-//	 * @return patrol objective rating
-//	 */
-//	public int getObjectiveRating() {
-//		return objectiveRating;
-//	}
-//	/**
-//	 * @param objectiveRating patrol objective rating
-//	 */
-//	public void setObjectiveRating(int objectiveRating) {
-//		this.objectiveRating = objectiveRating;
-//	}
 	
 	/**
 	 * @return patrol mandate
@@ -459,4 +446,49 @@ public class QueryResultItem {
 		}
 		this.tracks.add(track);
 	}
+	
+	
+	//GRID additions, probably could be refactored out into another class eventually
+	private double value;
+	private double denominator;
+	private double tileX;
+	private double tileY;
+	
+	
+	public void setValue(double value) {
+		this.value = value;
+	}
+
+	public void setDenominator(double z) {
+		this.denominator = z;
+		
+	}
+
+	public void setTileX(double x) {
+		this.tileX = x;
+		
+	}
+	public void setTileY(double y) {
+		this.tileY = y;
+		
+	}
+	
+	public double getValue() {
+		return value;
+	}
+
+	public double getDenominator() {
+		return denominator;
+		
+	}
+
+	public double getTileX() {
+		return tileX;
+		
+	}
+	public double getTileY() {
+		return tileY;
+		
+	}
+		
 }

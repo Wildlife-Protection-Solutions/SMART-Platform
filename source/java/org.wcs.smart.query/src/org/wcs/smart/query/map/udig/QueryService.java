@@ -43,6 +43,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
+import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.observation.ObservationQuery;
@@ -105,7 +106,20 @@ public class QueryService extends IService {
 		this.url = QueryServiceExtension.createURL(this.params);
 		
 	}
-	
+
+	/**
+	 * Creates a new query service using the given waypoint query.
+	 * 
+	 * @param query gridded query
+	 */
+	public QueryService(GriddedQuery query){
+		this.query = query;
+		this.params = new HashMap<String, Serializable>();
+		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
+		this.url = QueryServiceExtension.createURL(this.params);
+		
+	}
+
 	/**
 	 * @return the query 
 	 */

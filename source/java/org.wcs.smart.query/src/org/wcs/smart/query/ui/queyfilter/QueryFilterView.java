@@ -65,6 +65,7 @@ import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
+import org.wcs.smart.query.ui.queyfilter.GriddedQueryContentProvider.NodeType;
 
 /**
  * A view that display the query filter options.
@@ -164,8 +165,9 @@ public class QueryFilterView extends ViewPart {
 				summaryInput.put(SummaryQueryContentProvider.NodeType.GROUP_BY_NODE, dm);
 				
 				final HashMap<GriddedQueryContentProvider.NodeType, Object> griddedInput = new HashMap<GriddedQueryContentProvider.NodeType, Object> ();
-				griddedInput.put(GriddedQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
-
+				griddedInput.put(GriddedQueryContentProvider.NodeType.PATROL_VALUES, PatrolQueryOptions.GRID_RATIO_OPTIONS);
+				griddedInput.put(GriddedQueryContentProvider.NodeType.DATAMODEL_VALUES, dm);
+				
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {

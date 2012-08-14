@@ -348,4 +348,19 @@ public abstract class QueryColumn implements Cloneable{
 		}
 		return maxDepth + 1;
 	}
+	
+	public static QueryColumn[] getGridColumns() {
+		
+		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+	
+		
+		for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
+			GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
+			cols.add(new GridQueryColumn(item));
+		}
+		
+		queryColumns = cols.toArray(new QueryColumn[cols.size()]);
+
+		return cloneColumns(queryColumns);
+	}
 }

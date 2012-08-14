@@ -28,6 +28,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -340,51 +341,63 @@ public class DropItemFactory {
 	 * @return null or a array of drop items created
 	 */
 	public DropItem[] createDropItem(Object object, QueryType queryType, QueryDropType dropType){
+		DropItem[] items = null; 
 		if (object instanceof Category) {
-			return new DropItem[]{ createCategoryDropItem((Category) object) };
+			items = new DropItem[]{ createCategoryDropItem((Category) object) };
 		
 		} else if (object instanceof CategoryAttribute) {
-			return new DropItem[]{ createAttributeDropItem( (CategoryAttribute) object)};
+			items = new DropItem[]{ createAttributeDropItem( (CategoryAttribute) object)};
 		
 		} else if (object instanceof Attribute) {
-			return new DropItem[]{ createAttributeDropItem((Attribute) object)};
+			items = new DropItem[]{ createAttributeDropItem((Attribute) object)};
 			
 		} else if (object instanceof QueryFilterContentProvider.OtherItems) {
-			return createOtherDropItem(
+			items = createOtherDropItem(
 							(QueryFilterContentProvider.OtherItems) object);
 		
 		} else if (object instanceof PatrolValueOption) {
-			return new DropItem[]{createPatrolValueDropItem(
+			items = new DropItem[]{createPatrolValueDropItem(
 							(PatrolValueOption) object)};
 
 		} else if (object instanceof PatrolQueryOption) {
 			
 			if (dropType == QueryDropType.SUMMARY_ITEM){
-				return new DropItem[]{createPatrolGroupByDropItem(
+				items = new DropItem[]{createPatrolGroupByDropItem(
 						(PatrolQueryOption) object)};
 			}else{
-				return new DropItem[]{createPatrolFilterDropItem(
+				items = new DropItem[]{createPatrolFilterDropItem(
 						(PatrolQueryOption) object)};
 			}
 		} else if (object instanceof DateGroupByOption) {
-			return new DropItem[]{createDateGroupByDropItem(
+			items = new DropItem[]{createDateGroupByDropItem(
 							(DateGroupByOption) object)};
 		
 		} else if (object instanceof SummaryDmObject) {
-			return new DropItem[]{createSummaryDmDropItem((SummaryDmObject)object)};
+			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)object)};
 			
 		}else if (object instanceof Area){
 			if (queryType == QueryType.OBSERVATION){
-				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
+				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 			}else if (queryType == QueryType.PATROL){
-				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
+				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}else if (queryType == QueryType.SUMMARY){
-				return new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
+				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}
 			return null;
 
 		}
-		return null;
+		if (items != null){
+			for (int i = 0; i < items.length; i ++){
+				if (items[i] instanceof AbstractValueDropItem){
+					if(queryType == QueryType.GRIDDED){
+						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.GRID_RATIO_OPTIONS);
+					}else{
+						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.PATROL_ENCOUNTER_RATE_OPTIONS);
+					}
+				}
+			}
+	    }
+		return items;
 	}
 	
 	/*

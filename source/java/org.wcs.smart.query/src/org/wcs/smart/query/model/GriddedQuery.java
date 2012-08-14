@@ -33,12 +33,18 @@ import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyGridEngine;
+import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
+import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
+import org.wcs.smart.query.parser.internal.summary.IValueItem;
+import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
@@ -49,13 +55,17 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
  */
 @Entity
 @Table(name="smart.gridded_query")
-public class GriddedQuery extends Query {
+public class GriddedQuery extends SimpleQuery {
 
+	private GridQueryDefinition query;
+	
 	private String strQuery;	
 	@Transient
 
 	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
+	
+	private List<QueryColumn> queryColumns = null;
 	
 	/* transient fields for tracking ui items */
 	@Transient
@@ -63,10 +73,10 @@ public class GriddedQuery extends Query {
 	@Transient
 	private List<DropItem> filterDropItems;
 	@Transient
-	private GriddedQueryResult lastResults;
+	private List<QueryResultItem> lastResults;
 	
-	private int gridSize;
-	
+	private double gridSize;
+	IValueItem valueItem;
 	
 	/**
 	 * Creates a new gridded query with the default
@@ -90,40 +100,37 @@ public class GriddedQuery extends Query {
 	 * @return 
 	 */
 	@Transient
-	public  void parseQuery() throws Exception {
+	public  GridQueryDefinition parseQuery() throws Exception {
 		
-		if (getQuery() == null || getQuery().length() == 0){
-			return;
+		if (strQuery == null || strQuery.length() == 0){
+			return null;
 		}
-		InputStream is = new ByteArrayInputStream(getQuery().getBytes());
+		InputStream is = new ByteArrayInputStream(strQuery.getBytes());
 		Parser parser = new Parser(is);
-//TODO: parse the string of the query into variables/lists 
-		
-//		SumQueryDefinition myQuery = parser.SumQuery();
-//		is.close();
-		return;
+	
+		GridQueryDefinition myQuery = parser.GridQuery();
+		queryFilter = myQuery.getQueryFilter();
+		gridSize = myQuery.getGridSize();
+		valueItem = myQuery.getValuePart();
+		is.close();
+		return myQuery;
 	}
 	
 	/**
 	 * @return the conservation area filter
 	 */
-	@Transient
-	public ConservationAreaFilter getConservationAreaFilterAsFilter(){
-		return this.caFilter;
+	
+	@Column(name="ca_filter")
+	public String getConservationAreaFilterAsFilter(){
+		return this.caFilter.asString();
 	}
 	/**
 	 * @param filter a conservation area filter
 	 */
-	public void setConservationAreaFilter(ConservationAreaFilter filter){
-		this.caFilter = filter;
+	public void setConservationAreaFilterAsFilter(String filter){
+		this.caFilter = ConservationAreaFilter.parseFilter(filter);
 	}
-	@Column(name="ca_filter")
-	public String getConservationAreaFilter(){
-		return this.caFilter.asString();
-	}
-	public void setConservationAreaFilter(String caFilterString){
-		this.caFilter = ConservationAreaFilter.parseFilter(caFilterString);
-	}
+
 
 
 	/**
@@ -161,6 +168,21 @@ public class GriddedQuery extends Query {
 		this.strQuery = query;
 	}
 	
+	/**
+	 * Sets the query string.  At this point the
+	 * filter is not parsed.
+	 * 
+	 * @param filter
+	 * @return
+	 */
+	public void setQuery(String queryStr, GridQueryDefinition queryDef){
+		this.strQuery = queryStr;
+		this.query = queryDef;
+		if(query != null){
+			super.queryFilter = query.getQueryFilter();
+		}
+	}
+	
 	
 	/**
 	 * @return the query filter as string
@@ -175,7 +197,7 @@ public class GriddedQuery extends Query {
 	 * @return Results from last query run
 	 */
 	@Transient
-	public GriddedQueryResult getLastResults(){
+	public List<QueryResultItem> getLastResults(){
 		return this.lastResults;
 	}
 	
@@ -186,10 +208,10 @@ public class GriddedQuery extends Query {
 	 * @throws Exception
 	 */
 	@Transient
-	public GriddedQueryResult getQueryResults(IProgressMonitor monitor) throws Exception{
+	public List<QueryResultItem> getQueryResults(Session session, IProgressMonitor monitor) throws Exception{
 		lastResults = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
+//		Session session = HibernateManager.openSession();
+//		session.beginTransaction();
 		try{
 			DerbyGridEngine engine = new DerbyGridEngine();
 			lastResults = engine.executeQuery(this, session, monitor);
@@ -311,34 +333,121 @@ public class GriddedQuery extends Query {
 
 	 */
 	public static String validate(){
-//TODO: validation on the query string and/or definition
+		//TODO: validation on the query string and/or definition
 		//return the error if there is on, null if it's ok.
 		
 		return null;
 	}
+
+
+	@Override
+	@Transient
+	public List<QueryColumn> getQueryColumns() {
+		if (this.queryColumns == null){
+			initQueryColumns();
+		}
+		return this.queryColumns;
+	}
+
+
+	@Override
+	public void updateVisibleColumns() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Loads the query columns
+	 */
+	private void initQueryColumns(){
+		QueryColumn[] cols = QueryColumn.getGridColumns();
+		
+		queryColumns = new ArrayList<QueryColumn>();
+		for (int i = 0; i < cols.length; i ++){
+			queryColumns.add(cols[i]);
+		}
+	}
+	
 	
 	/**
-	 * @see org.wcs.smart.query.model.Query#isDefinitionEqual(org.wcs.smart.query.model.Query)
+	 * Sets the query string.  At this point the
+	 * filter is not parsed.
+	 * 
+	 * @param filter
+	 * @return
 	 */
-	public boolean isDefinitionEqual(Query other){
-		if (other == null || !(other instanceof SummaryQuery)){
-			return false;
-		}
-		SummaryQuery query = (SummaryQuery)other;
-		return (query.getQuery().equals(this.getQuery()));
+	//@Override
+	//public void setQueryFilter(String filter){
+		//I think this function is not used anymore
+		
+		//		String[] temp = filter.split("[|]");
+//		if(temp.length < 1){
+//			this.valueFilter = "";
+//		}else{
+//			this.valueFilter = temp[0];
+//		}
+//		if(temp.length < 2){
+//			this.strQueryFilter = "";
+//		}else{
+//			this.strQueryFilter = temp[1];
+//		}
+//		this.queryFilter = null;
+		
+ 
+	//}
+	
+
+	/**
+	 * Sets the grid size.  
+	 * 
+	 * @param size, the size of the grid squares
+	 * @return
+	 */
+	public void setGridSize(int size){
+		this.gridSize = size;
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.model.Query#copyFrom(org.wcs.smart.query.model.Query)
+	 * Gets the grid size.
+	 * 
+	 * @return the grid size as an int
 	 */
-	public void copyFrom(Query copy){
-		//TODO: ensure this is correct
-		assert copy instanceof SummaryQuery;
-		
-		SummaryQuery q = (SummaryQuery)copy;
-		setQuery(q.getQuery());
+	public double getGridSize(){
+		return this.gridSize;
+	}
+	
+
+	@Transient
+	public GridQueryDefinition getQueryDefinition(){
+		return query;
+	}
+	
+	/**
+	 * 
+	 * @return the query filter in the filter format.  Will
+	 * attempt to parse the query if it has not been parsed
+	 */
+	@Transient
+	@Override
+	public IFilter getFilter(){
+		if (queryFilter == null){
+			try{
+				GridQueryDefinition def = parseQuery();
+				queryFilter = def.getQueryFilter();
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog("Could not parse query.", ex);
+			}
+		}
+		if(queryFilter == null){
+			return IFilter.EMPTY_FILTER;
+		}else{
+			return queryFilter;
+		}
+	}
+
+	@Transient
+	public IValueItem getValueItem() {
+		return valueItem; 
 		
 	}
 }
-
-

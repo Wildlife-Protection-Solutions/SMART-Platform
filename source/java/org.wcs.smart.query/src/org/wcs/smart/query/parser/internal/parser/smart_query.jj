@@ -127,6 +127,26 @@ SumQueryDefinition SumQuery() :
 	}
 }
 
+GridQueryDefinition GridQuery() :
+{
+	IValueItem value = null;
+	IFilter filter = null;
+	Double gridSize = null;
+}
+{
+	value = ValueItem()
+	< QUERY_SPLITTER >
+	< NUMBER > { gridSize = Double.parseDouble(token.image);}
+	< QUERY_SPLITTER > 
+	(
+	  filter = ExpressionPart()
+	)?
+	< EOF >
+	{
+    	return GridQueryDefinition.createQuery(value, gridSize, filter);
+	}
+}
+
 
 IFilter QueryFilter() :
 {

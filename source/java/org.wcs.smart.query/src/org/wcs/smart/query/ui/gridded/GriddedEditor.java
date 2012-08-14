@@ -22,11 +22,19 @@
 package org.wcs.smart.query.ui.gridded;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -36,6 +44,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -48,6 +57,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -61,11 +71,18 @@ import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
 import org.wcs.smart.query.ui.QueryPropertiesDialog;
+import org.wcs.smart.query.ui.definition.GriddedQueryDefinitionComposite;
 import org.wcs.smart.query.ui.definition.QueryDefView;
+import org.wcs.smart.query.ui.observation.QueryMapPageEditor;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.observation.QueryResultsTablePage;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
+import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
 /**
  * Editor for displaying query results. The editor includes two pages a tabular
@@ -74,79 +91,75 @@ import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
  * @author Emily
  * @since 1.0.0
  */
-public class GriddedEditor extends EditorPart {
+public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdaptable {
 
 	public static final String ID = "org.wcs.smart.query.ui.GriddedEditor";
 
 	private GriddedQuery query;
 
 	private boolean isDirty = false;
+	public GriddedTableResults page1;
+	public GriddedResults page2;
 
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
-	private QueryDateFilterComposite dateFilterComposite;
-	private Form frmSummaryArea;
-	private GriddedResultsArea resultsArea;
-
-	private QueryHeaderComposite compQueryName;
-
-	
 	private IQueryListener qListener = new IQueryListener() {
 		@Override
 		public void queryChanged(Query query) {
-			if (query != null && query.equals(GriddedEditor.this.query)) {
+			if (query != null && query.equals(GriddedEditor.this.query)){
 				isDirty = true;
-				firePropertyChange(PROP_DIRTY);
+				firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 			}
 		}
 
 		@Override
 		public void queryRun(Query query) {
-			if (query != null && query.equals(GriddedEditor.this.query)) {
+			if (query != null && query.equals(GriddedEditor.this.query)){
 				refreshQuery();
 			}
 		}
 	};
-
-	private Job loadQueryLoad = new Job("Load Query Job") {
+	
+	
+	private Job loadQueryLoad = new Job("Load Query Job"){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			 QueryInput input = (QueryInput)GriddedEditor.this.getEditorInput();
-			 Session session = HibernateManager.openSession();
-			 session.beginTransaction();
-			 try{
-				 query = (GriddedQuery) session.load(GriddedQuery.class, input.getUuid());
+			QueryInput input = (QueryInput) GriddedEditor.this.getEditorInput();
 			
-				 query.getFilterDropItems();
-				 query.getValueDropItems();
-				 query.generateDropItems(session);
-				 
-				getSite().getShell().getDisplay().asyncExec(new Runnable() {
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try{
+				query = (GriddedQuery) session.load(GriddedQuery.class, input.getUuid());
+				
+				query.getDropItems();
+				query.generateDropItems(session);
+			}catch (Exception ex){
+				QueryPlugIn.displayLog("Could not parse query: " + input.getName()+ ".\n\n" + ex.getMessage(), ex);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
+			}
+			
+			
+			if (page1 != null){
+				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						initQuery();
-						updatePartName();
+						page1.setQuery();
+						setDirty(false);
 					}
 				});
-				 
-			 }catch (Exception ex){
-				 QueryPlugIn.log("Could not load query " + input.getName(), ex);
-			 }finally{
-				 session.getTransaction().rollback();
-				 session.close();
-			 }
-
+			}
+			
 			return Status.OK_STATUS;
-		}
-	};
-
+		}};
 	/**
 	 * Creates a new editor
 	 */
 	public GriddedEditor() {
-		super();
+		super();		
 	}
 
+	
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()
 	 */
@@ -155,100 +168,130 @@ public class GriddedEditor extends EditorPart {
 		super.dispose();
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
 	}
-
+	
 	/**
-	 * @see org.eclipse.ui.part.MultiPageEditorPart#init(org.eclipse.ui.IEditorSite,
-	 *      org.eclipse.ui.IEditorInput)
+	 * @see org.eclipse.ui.part.MultiPageEditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
 	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		super.setSite(site);
 		super.setInput(input);
-
-		if (input instanceof QueryInput) {
-			QueryInput input2 = ((QueryInput) input);
-			if (input2.getUuid() == null) {
-				// create a new query
+		
+		if (input instanceof QueryInput){
+			QueryInput input2 = ((QueryInput)input);
+			if (input2.getUuid() == null){
+				//create a new query
 				this.query = new GriddedQuery();
 				setDirty(false);
-			} else {
+			}else{
 				loadQueryLoad.schedule();
 			}
 		}
 		QueryEventManager.getInstance().addQueryChangedEvent(qListener);
 	}
-	
-	private void initQuery(){
-		compQueryName.setText(this.query.getName(), query.getId());
-	}
 
+	/**
+	 * @return the query results display table
+	 */
+	public QueryResultsTable getQueryResultsTable(){
+		return this.page1.getQueryResultsTable();
+	}
+	
 	/**
 	 * @return the query
 	 */
-	public GriddedQuery getQuery() {
+	public GriddedQuery getQuery(){
 		try {
-			loadQueryLoad.join(); // wait for the query loading job if
-									// applicable
+			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
 			QueryPlugIn.displayLog("Could not load query." + e.getMessage(), e);
 		}
-
+		
 		return this.query;
 	}
 
-	public void updatePartName() {
+	/**
+	 * Updates the editor name with the query name
+	 */
+	public void updatePartName(){
 		super.setPartName(query.getName());
 	}
-
-	public void setDirty(boolean isDirty) {
+ 
+	/**
+	 * Sets the dirty state of the editor
+	 * @param isDirty
+	 */
+	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
-		firePropertyChange(PROP_DIRTY);
+		firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 	}
-
-	private void updateQuery() {
-		// update date filter
-		getQuery().setDateFilter(dateFilterComposite.getDateFilter());
-		// getQuery().setDateFilter(page1.getDateFilter());
+	/**
+	 * This editor has two pages:
+	 * <ol><li>Tabular Results - the query results shown in a tabular form</li>
+	 * <li>Map Results - the query results displayed in a map</li>
+	 * </ol>
+	 * 
+	 * @see org.eclipse.ui.part.MultiPageEditorPart#createPages()
+	 */
+	@Override
+	protected void createPages() {
+		QueryInput input = ((QueryInput) getEditorInput());
+		super.setPartName(input.getName());
+		showBusy(true);
+		try {
+			page1 = new GriddedTableResults(this);
+			addPage(0, page1, input);
+			setPageText(0, "Tabular Results");
+			if (this.query != null && this.query.getUuid() == null){
+				page1.setQuery();
+			}
+			
+			page2 = new GriddedResults(this);
+			addPage(1, page2, input);
+			setPageText(1, "Mapped Results");
+			
+		} catch (final Throwable t) {
+			QueryPlugIn.log("Could not open query editor", t);
+		}finally{
+			showBusy(false);
+		}
+	}
+		
+	private void updateQuery(){
+		//update date filter
+		getQuery().setDateFilter(page1.getDateFilter());
 	}
 
 	/**
 	 * Re-run the query and refresh the results.
 	 */
-	public void refreshQuery() {
-		// update date filter
+	public void refreshQuery(){
+		//update date filter
 		updateQuery();
-
-		if (!getQuery().isValid()) {
-			MessageDialog
-					.openError(getSite().getShell(), "Error",
-							"Query invalid.  Please fix query definition and try again.");
+		
+		if (!getQuery().isValid()){
+			MessageDialog.openError(getSite().getShell(), "Error", "Query invalid.  Please fix query definition and try again.");
 			return;
 		}
-
-		// show progress area
-		resultsArea.showProgressArea();
-
-		// run query
-		final IProgressMonitor mymonitor = resultsArea.createProgressMonitor();
-
+		
+		//show progress area
+		page1.showProgressArea();
+		
+		//run query
+		final IProgressMonitor mymonitor = page1.createProgressMonitor();
 		Job runQueryJob = new Job("Running query: " + this.query.getName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					// List<QueryResultItem> results =
-					// query.getQueryResults(mymonitor);
-					// resultsArea.updateAndShowTable(results);
-
-					resultsArea.updateAndShow(query
-							.getQueryResults(mymonitor));
-
+					List<QueryResultItem> results = query.getQueryResults(mymonitor);
+					page1.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					QueryPlugIn.displayLog("Could not execute query.", ex);
-					// resultsArea.updateAndShowTable(new
-					// ArrayList<QueryResultItem>());
+					page1.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
 				}
+				page2.refresh();
 				return Status.OK_STATUS;
 			}
 		};
@@ -260,40 +303,33 @@ public class GriddedEditor extends EditorPart {
 		return true;
 	}
 
+	
 	@Override
-	public boolean isDirty() {
+	public boolean isDirty(){
 		return this.isDirty;
 	}
-
+	
+	
 	/**
 	 * Saves the current query
-	 * 
 	 * @see org.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// validate if user can save the current query
-		if (query.getIsShared()
-				&& SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ADMIN
-				&& SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.MANAGER) {
-			boolean ret = MessageDialog
-					.openQuestion(
-							getSite().getShell(),
-							"Save",
-							"You do not have permission to overwrite this query.  Would you like to save it as a new query?");
-			if (ret) {
+		//validate if user can save the current query
+		if (query.getIsShared() && 
+				SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ADMIN && 
+				SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.MANAGER ){			
+			boolean ret = MessageDialog.openQuestion(getContainer().getShell(), "Save", "You do not have permission to overwrite this query.  Would you like to save it as a new query?");
+			if (ret){
 				doSaveAs();
 			}
 			return;
 		}
-
-		// ensure query is valid
-		if (!query.isValid()) {
-			MessageDialog
-					.openError(
-							getSite().getShell(),
-							"Save",
-							"You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
+		
+		//ensure query is valid
+		if (!query.isValid()){
+			MessageDialog.openError(getSite().getShell(), "Save", "You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
 			monitor.setCanceled(true);
 			return;
 		}else if (query.getName().trim().length() == 0){
@@ -301,93 +337,85 @@ public class GriddedEditor extends EditorPart {
 			monitor.setCanceled(true);
 			return;
 		}
-
-		
-		// update the query definition
+				
+		//update the query definition 
 		updateQuery();
-
+		
 		boolean newQuery = false;
-		if (query.getUuid() == null) {
+		if (query.getUuid() == null){
 			newQuery = true;
-			// new query; we need to get folder location
-			SaveQueryDialog dialog = new SaveQueryDialog(
-					getSite().getShell(), query, false);
-			if (dialog.open() != IDialogConstants.OK_ID) {
+			//new query; we need to get folder location
+			SaveQueryDialog dialog = new SaveQueryDialog(getContainer().getShell(), query, false);
+			if (dialog.open() != IDialogConstants.OK_ID){
 				monitor.setCanceled(true);
 				return;
 			}
-
-			QueryFolder qf = dialog.getQueryFolder();
-			if (qf == null) {
-				QueryPlugIn.displayLog(
-						"Query not saved.  Could not determine folder.", null);
+			
+			QueryFolder qf = dialog.getQueryFolder() ; 
+			if (qf == null){
+				QueryPlugIn.displayLog("Query not saved.  Could not determine folder.", null);
 				monitor.setCanceled(true);
 				return;
 			}
-
-			if (!qf.isRootFolder()) {
+			
+			if (!qf.isRootFolder()){
 				query.setFolder(qf);
 				query.setIsShared(qf.getEmployee() == null);
-
-			} else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)) {
+			
+			}else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)){
 				query.setIsShared(true);
 			}
 			query.setOwner(SmartDB.getCurrentEmployee());
 			query.setConservationArea(SmartDB.getCurrentConservationArea());
-
+			
 		}
-
-		if (!QueryHibernateManager.saveQuery(query, false)){
+		
+		if (!QueryHibernateManager.saveQuery(query,false)){
 			monitor.setCanceled(true);
 			return;
 		}
 		updatePartName();
-		initQuery();
 		
-		if (newQuery) {
-			((QueryInput) super.getEditorInput()).setUuid(query.getUuid());
-			((QueryInput) super.getEditorInput()).setId(query.getId());
+		if (newQuery){
+			page1.setQuery();
+			((QueryInput)super.getEditorInput()).setUuid(query.getUuid());
+			((QueryInput)super.getEditorInput()).setId(query.getId()); 
 		}
-
+	
 		setDirty(false);
-
 	}
 
+	
 	@Override
 	public void doSaveAs() {
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite()
-				.getShell());
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getContainer().getShell());
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
-
+				
 				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-
-					// ensure query is valid
-					if (!getQuery().isValid()) {
-						MessageDialog
-								.openError(
-										getSite().getShell(),
-										"Save",
-										"You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					
+					//ensure query is valid
+					if (!getQuery().isValid()){
+						MessageDialog.openError(getSite().getShell(), "Save", "You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
 						return;
 					}
-
+					
 					monitor.beginTask("Save As...", 3);
 					monitor.subTask("Cloning query...");
 					updateQuery();
 					GriddedQuery newQuery = getQuery().clone();
-
+					
 					monitor.worked(1);
-
+					
 					monitor.subTask("Getting save location...");
-					SaveQueryDialog dialog = new SaveQueryDialog(
-							getSite().getShell(), query, true);
-					if (dialog.open() != IDialogConstants.OK_ID) {
+					SaveQueryDialog dialog = new SaveQueryDialog(getContainer().getShell(), query, true);
+					if (dialog.open() != IDialogConstants.OK_ID){
 						return;
 					}
-
+					
 					newQuery.setName(dialog.getQueryName());
 					if (newQuery.getName().trim().length() == 0){
 						MessageDialog.openError(getSite().getShell(), "Save", "Query name must not be blank.");
@@ -396,165 +424,121 @@ public class GriddedEditor extends EditorPart {
 					}
 					
 					QueryFolder qf = dialog.getQueryFolder();
-					if (!qf.isRootFolder()) {
+					if (!qf.isRootFolder()){
 						newQuery.setFolder(qf);
 						newQuery.setIsShared(qf.getEmployee() == null);
-
-					} else if (qf.getUuid().equals(
-							QueryHibernateManager.CA_QUERY_KEY)) {
+					
+					}else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)){
 						newQuery.setIsShared(true);
 					}
 					newQuery.setOwner(SmartDB.getCurrentEmployee());
-					newQuery.setConservationArea(SmartDB
-							.getCurrentConservationArea());
-
+					newQuery.setConservationArea(SmartDB.getCurrentConservationArea());
+					
+					
 					GriddedQuery oldQuery = GriddedEditor.this.query;
+					
 					GriddedEditor.this.query = newQuery;
-					monitor.worked(1);
-
 					monitor.subTask("Saving query...");
-					if (!QueryHibernateManager.saveQuery(query,true)){
+					if (!QueryHibernateManager.saveQuery(newQuery, true)){
 						GriddedEditor.this.query = oldQuery;
-						return;
+						return ;
 					}
 					updatePartName();
-					initQuery();
+					page1.setQuery();
+					
 					monitor.worked(1);
-
+					
+					page1.setQuery();
+					monitor.worked(1);
+					
 					GriddedEditor.this.setInput(new QueryInput(newQuery));
-
+					
 					setDirty(false);
 					monitor.worked(1);
-
-					// TODO: update the Query Def View; see if there is a better
-					// way to do this
-					QueryDefView view = (QueryDefView) getSite()
-							.getWorkbenchWindow().getActivePage()
-							.findView(QueryDefView.ID);
-					if (view != null) {
-						if (view.getQuery().equals(oldQuery)) {
+					
+					//TODO: update the Query Def View; see if there is a better way to do this
+					QueryDefView view = (QueryDefView)getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
+					if(view != null){
+						if (view.getQuery().equals(oldQuery)){
 							view.setQuery(newQuery);
 						}
 					}
-
-					// TODO: this is a bit of a hack to get the querylistview to
-					// be updated
-					// correctly
-					getSite().getWorkbenchWindow().getActivePage()
-							.activate(view);
-					getSite().getWorkbenchWindow().getActivePage()
-							.activate(getSite().getPart());
-
+					
+					//TODO: this is a bit of a hack to get the querylistview to be updated
+					//correctly
+					getSite().getWorkbenchWindow().getActivePage().activate(view);
+					getSite().getWorkbenchWindow().getActivePage().activate(getSite().getPart());
+										
 				}
 			});
 		} catch (Exception ex) {
-			QueryPlugIn
-					.displayLog("Error saving query: " + ex.getMessage(), ex);
+			QueryPlugIn.displayLog("Error saving query: " + ex.getMessage(), ex);
 		}
 	}
 
-	@Override
-	public void setFocus() {
-
-	}
-
-
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets
-	 * .Composite)
+	/**
+	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
 	 */
 	@Override
-	public void createPartControl(Composite parent) {
-
-		Composite container = toolkit.createComposite(parent, SWT.NONE);
-
-		toolkit.paintBordersFor(container);
-		GridLayout layout = new GridLayout(1, false);
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		container.setLayout(layout);
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		frmSummaryArea = toolkit.createForm(container);
-		frmSummaryArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-				true, 1, 1));
-
-		layout = new GridLayout(1, false);
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		frmSummaryArea.getBody().setLayout(layout);
-		//frmSummaryArea.setText("Summary");
-		
-
-		Composite main = toolkit.createComposite(frmSummaryArea.getBody());
-		
-		// Composite main = new Composite(frmSummaryArea.getBody(), SWT.BORDER);
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridLayout gl = new GridLayout(1, false);
-		gl.marginWidth = gl.marginHeight = gl.verticalSpacing = gl.horizontalSpacing = 0;
-		main.setLayout(gl);
-		
-		createNameHeader(main);
-
-		Composite queryProp = toolkit.createComposite(main, SWT.NONE);
-		layout = new GridLayout(2, false);
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginRight = 5;
-		layout.marginLeft = 5;
-		queryProp.setLayout(layout);
-		queryProp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		dateFilterComposite = new QueryDateFilterComposite(queryProp);
-		dateFilterComposite.adapt(toolkit);
-		dateFilterComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, "summary properties...",SWT.NONE);
-		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		editQueryProp.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				QueryPropertiesDialog dialog = new QueryPropertiesDialog(
-						getSite().getShell(), 
-						getQuery());
-				if (dialog.open() == Window.OK){
-					initQuery();
-					setDirty(true);
-				}
-			}
-		});
-		
-		resultsArea = new GriddedResultsArea(main, toolkit, this);
-		resultsArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		
-		initQuery();
-		updatePartName();
+	public Map getMap() {
+		if (page2 == null){
+			return null;
+		}
+		return 	page2.getMap();
 	}
 
-	private void createNameHeader(Composite main) {
-		compQueryName = new QueryHeaderComposite(main, "Summary:", 
-				toolkit, frmSummaryArea.getFont(), 
-				frmSummaryArea.getForeground());
-		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		compQueryName.addListener(SWT.Selection, new Listener(){
+	/**
+	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 */
+	@Override
+	public void openContextMenu() {
+		page2.openContextMenu();
+		
+	}
 
-			@Override
-			public void handleEvent(Event event) {
-				query.setName(event.text);
-				setDirty(true);
-				
-			}});
+	/**
+	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 */
+	@Override
+	public void setFont(Control textArea) {
+		page2.setFont(textArea);
+		
+	}
+
+	/**
+	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 */
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		page2.setSelectionProvider(selectionProvider);
+		
+	}
+
+	/**
+	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 */
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return page2.getStatusLineManager();
+	}
+
+	/**
+	 * @see org.eclipse.ui.part.MultiPageEditorPart#getAdapter(java.lang.Class)
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getAdapter(Class adaptee) {
+		if (adaptee.isAssignableFrom(Map.class)) {
+			return getMap();
+		}
+		return super.getAdapter(adaptee);
 	}
 	
+	@Override
+	public void setFocus() {
+		
+	}
+
 }
+
+	

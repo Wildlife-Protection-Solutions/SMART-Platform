@@ -88,7 +88,7 @@ public class GriddedValuePanel {
 		lblValues.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON));
 		
 		lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setText("Values");
+		lblValues.setText("Grid Value");
 		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		lblValues.setToolTipText("Add values to compute here from the 'Value Options' section of the Query Filters tree.");
 		
@@ -99,6 +99,8 @@ public class GriddedValuePanel {
 		return main;
 	}
 
-
+	protected double getGridSize(){
+		return Double.parseDouble( txtGridSize.getText() );
+	}
 	
 }

@@ -49,12 +49,15 @@ public class EncounterRateDialog extends TitleAreaDialog{
 	
 	private PatrolValueOption selectedRate;
 	
+	private PatrolValueOption[] encounterRateOptions;
+	
 	/**
 	 * Creates new dialog
 	 * @param parent
 	 */
-	public EncounterRateDialog(Shell parent) {
+	public EncounterRateDialog(Shell parent, PatrolValueOption[] encounterRateOptions) {
 		super(parent);
+		this.encounterRateOptions  = encounterRateOptions;
 	}
 
 	
@@ -108,7 +111,7 @@ public class EncounterRateDialog extends TitleAreaDialog{
 			}
 		});
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		viewer.setInput(PatrolQueryOptions.PATROL_ENCOUNTER_RATE_OPTIONS);
+		viewer.setInput(encounterRateOptions);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		viewer.getCombo().select(0);
 		

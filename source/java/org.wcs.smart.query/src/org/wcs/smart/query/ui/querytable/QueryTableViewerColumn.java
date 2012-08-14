@@ -30,6 +30,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.wcs.smart.query.model.observation.AttributeQueryColumn;
 import org.wcs.smart.query.model.observation.CategoryQueryColumn;
 import org.wcs.smart.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.query.model.observation.GridQueryColumn;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
@@ -50,6 +51,8 @@ public class QueryTableViewerColumn {
 			return new AttributeColumnLabelProvider(column);
 		}else if (column instanceof CategoryQueryColumn){
 			return new CategoryColumnLabelProvider(column);
+		}else if (column instanceof GridQueryColumn){
+			return new GridColumnLabelProvider(column);
 		}
 		return null;
 	}

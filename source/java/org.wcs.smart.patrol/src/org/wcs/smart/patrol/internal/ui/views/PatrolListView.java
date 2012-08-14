@@ -160,7 +160,6 @@ public class PatrolListView extends ViewPart {
 		}
 	};
 
-	
 		
 	/**
 	 * Creates a new vies
