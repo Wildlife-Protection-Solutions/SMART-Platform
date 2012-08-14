@@ -57,6 +57,8 @@ public class QueryListLabelProvider extends LabelProvider {
 				return JFaceResources.getImage(QueryPlugIn.SUMMARY_QUERY_ICON);
 			}else if (((QueryInput) element).getType() == QueryType.PATROL){
 				return JFaceResources.getImage(QueryPlugIn.PATROL_QUERY_ICON);
+			}else if (((QueryInput) element).getType() == QueryType.GRIDDED){
+				return JFaceResources.getImage(QueryPlugIn.GRIDDED_SUMMARY_QUERY_ICON);
 			}
 		}
 		return null;

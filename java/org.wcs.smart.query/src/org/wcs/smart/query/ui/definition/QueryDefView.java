@@ -43,6 +43,8 @@ import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -112,32 +114,15 @@ public class QueryDefView extends ViewPart {
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			
-			if (partRef.getId().equals(QueryResultsEditor.ID) ||
-					partRef.getId().equals(SummaryEditor.ID) || 
-					 partRef.getId().equals(GriddedEditor.ID) ||
-					 partRef.getId().equals(PatrolQueryResultsEditor.ID)){
-				IWorkbenchPart part = partRef.getPart(false);
-				
-				if (part instanceof QueryResultsEditor){
-					Query q =((QueryResultsEditor)part).getQuery();
-					if (q != current){
-						setQuery(q);
-					}
-				}else if (part instanceof SummaryEditor){
-					Query q =((SummaryEditor)part).getQuery();
-					if (q != current){
-						setQuery(q);
-					}
-				}else if (part instanceof GriddedEditor){
-					Query q =((GriddedEditor)part).getQuery();
-					if (q != current){
-						setQuery(q);
-					}
-				}else if (part instanceof PatrolQueryResultsEditor){
-					Query q =((PatrolQueryResultsEditor)part).getQuery();
-					if (q != current){
-						setQuery(q);
-					}
+//			if (partRef.getId().equals(QueryResultsEditor.ID) ||
+//					partRef.getId().equals(SummaryEditor.ID) || 
+//					 partRef.getId().equals(GriddedEditor.ID) ||
+//					 partRef.getId().equals(PatrolQueryResultsEditor.ID)){
+			IWorkbenchPart part = partRef.getPart(false);
+			if (part instanceof IQueryEditor){
+				Query q =((IQueryEditor)part).getQuery();
+				if (q != current){
+					setQuery(q);
 				}
 				if (currentPanel != null){
 					currentPanel.validate();
@@ -190,6 +175,7 @@ public class QueryDefView extends ViewPart {
 	public void runQuery(){
 		currentPanel.validate();
 		QueryEventManager.getInstance().fireQueryRunListeners(current);
+		
 	}
 	
 	/**

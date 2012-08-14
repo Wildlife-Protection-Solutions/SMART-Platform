@@ -563,7 +563,7 @@ public class QueryHibernateManager {
 	 * 
 	 * @param query query to save
 	 * @param generateDropItems if query should generate drop items.
-	 * @return
+	 * @return <code>true</code> if saved correctly
 	 */
 	public static boolean saveQuery(org.wcs.smart.query.model.Query query, 
 			boolean generateDropItems){
@@ -572,13 +572,10 @@ public class QueryHibernateManager {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			//fire before save events
-			
+			//fire before save events; this may load the query
 			if (!QueryEventManager.getInstance().fireBeforeSaveListeners(query, s)){
 				return false;
 			}
-
-			
 			if (newQuery){
 				query.setId(QueryHibernateManager.generateQueryId(s));
 				//page1.setQuery();
@@ -586,11 +583,13 @@ public class QueryHibernateManager {
 			if (generateDropItems){
 				query.generateDropItems(s);
 			}
-			query = (org.wcs.smart.query.model.Query) s.merge(query);
+			//ensure query is NOT in current session
+			if (!newQuery){
+				s.evict(query);
+			}
 			s.saveOrUpdate(query);
 			s.getTransaction().commit();
-			//updatePartName();
-			
+
 		}catch (Exception ex){
 			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
 			s.getTransaction().rollback();

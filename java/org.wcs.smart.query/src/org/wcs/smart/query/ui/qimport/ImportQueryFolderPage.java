@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.QueryFolderTreeComposite;
 
@@ -70,7 +71,7 @@ public class ImportQueryFolderPage extends WizardPage {
 		lbl.setText("Destination Folder:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		folderTree= new QueryFolderTreeComposite(main);
+		folderTree= new QueryFolderTreeComposite(main,QueryHibernateManager.canModifyCaQueries());
 		folderTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		folderTree.addSelectionListener(new ISelectionChangedListener() {
 			@Override

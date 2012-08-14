@@ -19,35 +19,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui;
+package org.wcs.smart.query.internal.ui;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.summary.SummaryEditor;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.QueryInput;
 
 /**
- * Save as handler
+ * Generic handler for creating new queries.
  * @author egouge
- * @since 1.0.0
+ *
  */
-public class SaveAsHandler extends AbstractHandler {
+public class CreateHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IEditorPart editor = HandlerUtil.getActiveEditor(event);
-		if (editor instanceof QueryResultsEditor){
-			editor.doSaveAs();
-		}else if (editor instanceof SummaryEditor){
-			editor.doSaveAs();
-		}else if (editor instanceof PatrolQueryResultsEditor){
-			editor.doSaveAs();
+		try {
+			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
+			if (!activeId.equals(QueryPerspective.ID)){
+				//show query persepective
+				HandlerUtil
+				.getActiveWorkbenchWindow(event)
+				.getWorkbench()
+				.showPerspective(QueryPerspective.ID,
+						HandlerUtil.getActiveWorkbenchWindow(event));	
+			}
+			
+		} catch (WorkbenchException e) {
+			QueryPlugIn
+					.displayLog("Error loading query perspective.", e);
 		}
 		return null;
+	}
+	
+	
+	
+	protected void createQuery(QueryType type){
+		QueryInput input = new QueryInput(type);
+		
+		try {
+			IWorkbenchPage page = null;
+			try {
+				page =  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				page.openEditor(input, input.getType().getEditorId());						
+			} catch (Throwable t) {
+				QueryPlugIn.displayLog(t.getMessage(), t);
+			}
+		} catch (Exception e) {
+			QueryPlugIn.displayLog("Error loading query editor.", e);
+		}
 	}
 
 }

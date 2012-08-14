@@ -19,25 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.internal.ui;
+package org.wcs.smart.query.ui;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.Query;
 
 /**
- * Handler for creating a new summary query.
- * 
+ * All query editor should implement this interface.
+ *
  * @author egouge
- * @since 1.0.0
+ *
  */
-public class CreateSummaryHandler extends CreateHandler implements IHandler {
+public interface IQueryEditor {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		super.execute(event);
-		super.createQuery(QueryType.SUMMARY);
-		return null;
-	}
+	/**
+	 * @return the query being edited
+	 */
+	public Query getQuery();
 }

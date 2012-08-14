@@ -49,10 +49,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -61,6 +59,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
 import org.wcs.smart.query.ui.QueryPropertiesDialog;
@@ -74,7 +73,7 @@ import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
  * @author Emily
  * @since 1.0.0
  */
-public class SummaryEditor extends EditorPart {
+public class SummaryEditor extends EditorPart implements IQueryEditor {
 
 	public static final String ID = "org.wcs.smart.query.ui.SummaryEditor";
 
@@ -177,9 +176,16 @@ public class SummaryEditor extends EditorPart {
 	}
 
 	/**
+	 * 
 	 * @return the query
 	 */
-	public SummaryQuery getQuery() {
+	public SummaryQuery getQueryInternal() {
+		return (SummaryQuery)getQuery();
+	}
+	/**
+	 * @return the query
+	 */
+	public Query getQuery() {
 		try {
 			loadQueryLoad.join(); // wait for the query loading job if
 									// applicable
@@ -201,7 +207,7 @@ public class SummaryEditor extends EditorPart {
 
 	private void updateQuery() {
 		// update date filter
-		getQuery().setDateFilter(dateFilterComposite.getDateFilter());
+		getQueryInternal().setDateFilter(dateFilterComposite.getDateFilter());
 		// getQuery().setDateFilter(page1.getDateFilter());
 	}
 
@@ -266,9 +272,7 @@ public class SummaryEditor extends EditorPart {
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// validate if user can save the current query
-		if (getQuery().getIsShared()
-				&& SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ADMIN
-				&& SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.MANAGER) {
+		if (query.getIsShared() && !QueryHibernateManager.canModifyCaQueries()){
 			boolean ret = MessageDialog
 					.openQuestion(
 							getSite().getShell(),
@@ -332,8 +336,9 @@ public class SummaryEditor extends EditorPart {
 
 		if (!QueryHibernateManager.saveQuery(query, false)){
 			monitor.setCanceled(true);
-			return;
+			return ;
 		}
+		
 		updatePartName();
 		initQuery();
 		if (newQuery) {
@@ -368,7 +373,7 @@ public class SummaryEditor extends EditorPart {
 					monitor.beginTask("Save As...", 3);
 					monitor.subTask("Cloning query...");
 					updateQuery();
-					SummaryQuery newQuery = getQuery().clone();
+					SummaryQuery newQuery = getQueryInternal().clone();
 
 					monitor.worked(1);
 
@@ -404,6 +409,7 @@ public class SummaryEditor extends EditorPart {
 					monitor.worked(1);
 
 					monitor.subTask("Saving query...");
+					
 					if (!QueryHibernateManager.saveQuery(query, true)){
 						SummaryEditor.this.query = oldQuery;
 						return;
@@ -423,7 +429,7 @@ public class SummaryEditor extends EditorPart {
 							.getWorkbenchWindow().getActivePage()
 							.findView(QueryDefView.ID);
 					if (view != null) {
-						if (view.getQuery().equals(oldQuery)) {
+						if (!view.getQuery().equals(oldQuery)) {
 							view.setQuery(newQuery);
 						}
 					}

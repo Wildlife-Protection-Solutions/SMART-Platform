@@ -237,7 +237,7 @@ public class PatrolQueryEditorTableContent {
 			public void linkActivated(HyperlinkEvent e) {
 				QueryPropertiesDialog dialog = new QueryPropertiesDialog(editor.getSite().getShell(), editor.getQuery());
 				if (dialog.open() == Window.OK){
-					initValues(editor.getQuery());
+					initValues(editor.getQueryInternal());
 					editor.setDirty(true);
 				}
 			}

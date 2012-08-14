@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,11 +65,13 @@ public class QueryFolderTreeComposite extends Composite{
 
 	private Button btnAddFolder;
 	private TreeViewer tblViewer;
+	private boolean includeSharedFolders;
 	/**
 	 * 
 	 */
-	public QueryFolderTreeComposite(Composite parent) {
+	public QueryFolderTreeComposite(Composite parent, boolean inculdeSharedFolders) {
 		super(parent, SWT.NONE);
+		this.includeSharedFolders = inculdeSharedFolders;
 		createComposite();
 	}
 	
@@ -90,7 +93,7 @@ public class QueryFolderTreeComposite extends Composite{
 	private void createComposite(){
 		setLayout(new GridLayout(1, false));
 		
-		 tblViewer = new TreeViewer(this, SWT.BORDER);
+		tblViewer = new TreeViewer(this, SWT.BORDER);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		gd.heightHint = 300;
 		tblViewer.getTree().setLayoutData(gd);
@@ -144,7 +147,18 @@ public class QueryFolderTreeComposite extends Composite{
 		});
 		
 		HashMap<Integer, List<QueryFolder>> data = new HashMap<Integer, List<QueryFolder>> ();
-		data.put(QueryListViewContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
+		if (includeSharedFolders){
+			data.put(QueryListViewContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
+		}else{
+			//remove shared folders
+			List<QueryFolder> folders = new ArrayList<QueryFolder>();
+			for (QueryFolder folder : SavedQueryTree.getInstance().getFolders()){
+				if (folder.getEmployee() != null){
+					folders.add(folder);
+				}
+			}
+			data.put(QueryListViewContentProvider.FOLDER_KEY, folders);
+		}
 		tblViewer.setInput(data);
 		
 		tblViewer.refresh();

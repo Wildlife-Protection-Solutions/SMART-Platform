@@ -19,15 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui;
+package org.wcs.smart.query.internal.ui;
 
-import org.eclipse.ui.internal.handlers.SaveHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.query.model.Query.QueryType;
 
 /**
- * Save query handler
+ * Query handler that prompt the user for the type of query they
+ * want to create before creating it.
  * @author egouge
- * @since 1.0.0
+ *
  */
-public class SaveQueryHandler extends SaveHandler {
+public class CreateUnknownQueryHandler extends CreateHandler {
+
+	/**
+	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
+	 */
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		super.execute(event);
+ 
+		QueryType type = QueryType.OBSERVATION;
+		
+		QueryTypeDialog dialog = new QueryTypeDialog(HandlerUtil.getActiveShell(event));
+		if (dialog.open() != IDialogConstants.OK_ID){
+			return null;
+		}
+		type = dialog.getSelectedQueryType();
+		
+		super.createQuery(type);
+		
+		return null;
+	}
 
 }
+

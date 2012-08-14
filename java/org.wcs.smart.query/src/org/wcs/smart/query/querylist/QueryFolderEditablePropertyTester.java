@@ -24,6 +24,7 @@ package org.wcs.smart.query.querylist;
 import org.eclipse.core.expressions.PropertyTester;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 
@@ -65,9 +66,7 @@ public class QueryFolderEditablePropertyTester extends PropertyTester {
 					return true;
 				}else if (((QueryFolder) receiver).getEmployee() == null ){
 					//conservation area level folder; only rename or deletable if admin or manager
-					if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-							SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER
-							){
+					if (QueryHibernateManager.canModifyCaQueries()){
 						return true;
 					}
 				}
@@ -77,9 +76,7 @@ public class QueryFolderEditablePropertyTester extends PropertyTester {
 					return true;
 				}else if (((QueryFolder) receiver).getEmployee() == null ){
 					//conservation area level folder; only rename or deletable if admin or manager
-					if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-							SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER
-							){
+					if (QueryHibernateManager.canModifyCaQueries()){
 						return true;
 					}
 				}
@@ -90,9 +87,7 @@ public class QueryFolderEditablePropertyTester extends PropertyTester {
 			
 		}else if (receiver instanceof QueryInput){
 			if (operator.equals("delete")){
-				if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-						SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER
-						){
+				if (QueryHibernateManager.canModifyCaQueries()){
 					return true;
 				}else{
 					if (((QueryInput)receiver).isShared()){
