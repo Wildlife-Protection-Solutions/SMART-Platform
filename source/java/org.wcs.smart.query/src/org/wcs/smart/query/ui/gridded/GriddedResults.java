@@ -39,7 +39,7 @@ public class GriddedResults extends SmartMapEditorPart{
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			queryService = new QueryService(parentEditor.getQuery());
+			queryService = new QueryService(parentEditor.getQueryInternal());
 	    	try {
 	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 	    		AddLayersCommand command = new AddLayersCommand(layers);

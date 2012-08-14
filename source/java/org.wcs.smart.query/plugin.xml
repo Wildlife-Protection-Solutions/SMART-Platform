@@ -55,7 +55,7 @@
       <editor
             class="org.wcs.smart.query.ui.gridded.GriddedEditor"
             default="false"
-            icon="images/icons/view16/summary_query.png"
+            icon="images/icons/obj16/gridded_query.png"
             id="org.wcs.smart.query.ui.GriddedEditor"
             name="Gridded Summary">
       </editor>
@@ -108,12 +108,11 @@
          <toolbar
                id="org.wcs.smart.query.queryToolbar">
             <command
-                  commandId="org.wcs.smart.query.createQuery"
-                  icon="images/icons/etool16/addquery.png"
+                  commandId="org.wcs.smart.query.createUnknownQuery"
                   label="Create Query"
                   mnemonic="Q"
-                  style="push"
-                  tooltip="Create a new database query.">
+                  style="pulldown"
+                  tooltip="Create a new query">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -124,30 +123,8 @@
                   </with>
                </visibleWhen>
             </command>
-            <command
-                  commandId="org.wcs.smart.query.createSummary"
-                  icon="images/icons/etool16/addsummary.png"
-                  label="Create Summary"
-                  mnemonic="S"
-                  style="push"
-                  tooltip="Creates a new summary query">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
-            </command>
-            <separator
-                  name="org.wcs.smart.query.separator3"
-                  visible="true">
-            </separator>
             <command
                   commandId="org.wcs.smart.query.exportQuery"
-                  icon="images/icons/etool16/exportquery.png"
                   label="Export Query"
                   style="push"
                   tooltip="Export the current query/summary">
@@ -166,8 +143,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.query.save"
-                  icon="images/icons/etool16/save.gif"
+                  commandId="org.eclipse.ui.file.save"
                   id="org.wcs.smart.query.save.toolbar"
                   label="Save Query/Summary"
                   mnemonic="S"
@@ -183,8 +159,7 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.query.saveAs"
-                  icon="images/icons/etool16/saveas.gif"
+                  commandId="org.eclipse.ui.file.saveAs"
                   label="Save Query/Summary As"
                   mnemonic="e"
                   tooltip="Save a copy of the query/summary">
@@ -204,8 +179,7 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.query.ui.QueryDefView">
          <command
-               commandId="org.wcs.smart.query.save"
-               icon="images/icons/etool16/save.gif"
+               commandId="org.eclipse.ui.file.save"
                label="Save"
                mnemonic="S"
                tooltip="Save the query">
@@ -313,51 +287,48 @@
                id="org.wcs.smart.menu.query"
                label="Query"
                mnemonic="Q">
-            <command
-                  commandId="org.wcs.smart.query.createQuery"
+            <menu
                   icon="images/icons/etool16/addquery.png"
-                  label="New Query ..."
-                  mnemonic="Q"
-                  style="push"
-                  tooltip="Create a new database query.">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.query.createSummary"
-                  icon="images/icons/etool16/addsummary.png"
-                  label="New Summary ..."
-                  mnemonic="S"
-                  style="push"
-                  tooltip="Creates a new summary.">
-            </command>
+                  label="New Query ...">
+               <command
+                     commandId="org.wcs.smart.query.createQuery"
+                     label="New Observation Query ..."
+                     mnemonic="Q"
+                     style="push"
+                     tooltip="Create a new observation query">
+               </command>
+               <command
+                     commandId="org.wcs.smart.query.createPatrolQuery"
+                     label="New Patrol Query ..."
+                     mnemonic="P"
+                     style="push"
+                     tooltip="Create a new patrol query">
+               </command>
+               <command
+                     commandId="org.wcs.smart.query.createSummary"
+                     label="New Summary Query ..."
+                     mnemonic="S"
+                     style="push"
+                     tooltip="Creates a new summary.">
+               </command>
+               <command
+                     commandId="org.wcs.smart.query.createGriddedSummary"
+                     label="New Grid Summary Query ..."
+                     mnemonic="g"
+                     style="push"
+                     tooltip="Create a new gridded summary query">
+               </command>
+            </menu>
             <separator
                   name="org.wcs.smart.query.separator8"
                   visible="true">
             </separator>
             <command
                   commandId="org.wcs.smart.query.exportQuery"
-                  icon="images/icons/etool16/exportquery.png"
                   label="Export Query/Summary ..."
                   mnemonic="x"
                   style="push"
                   tooltip="Exports the current query or summary">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.query.importQuery"
@@ -366,61 +337,43 @@
                   mnemonic="i"
                   style="push"
                   tooltip="Imports a query or summary definition file">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.query.separator1"
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.query.save"
-                  icon="images/icons/etool16/save.gif"
+                  commandId="org.eclipse.ui.file.save"
                   id="org.wcs.smart.query.save.toolbar"
                   label="Save"
                   mnemonic="S"
                   tooltip="Save the query">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.query.saveAs"
-                  icon="images/icons/etool16/saveas.gif"
+                  commandId="org.eclipse.ui.file.saveAs"
                   label="Save As"
                   mnemonic="e"
                   tooltip="Save as a new query">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
             </command>
             <visibleWhen
                   checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <equals
-                        value="org.wcs.smart.query.SmartQueryPerspective">
-                  </equals>
-               </with>
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
             </visibleWhen>
          </menu>
       </menuContribution>
@@ -432,8 +385,7 @@
                visible="true">
          </separator>
          <command
-               commandId="org.wcs.smart.query.save"
-               icon="images/icons/etool16/save.gif"
+               commandId="org.eclipse.ui.file.save"
                id="org.wcs.smart.query.save.toolbar"
                label="Save Query/Summary"
                mnemonic="S"
@@ -449,8 +401,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.query.saveAs"
-               icon="images/icons/etool16/saveas.gif"
+               commandId="org.eclipse.ui.file.saveAs"
                label="Save Query/Summary As"
                mnemonic="e"
                tooltip="Saves a copy of the query/summary">
@@ -490,6 +441,65 @@
             </control>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.createUnknownQuery">
+         <command
+               commandId="org.wcs.smart.query.createQuery"
+               label="New Observation Query ..."
+               mnemonic="Q"
+               style="pulldown"
+               tooltip="Create a new observation query">
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createPatrolQuery"
+               label="New  Patrol Query ..."
+               mnemonic="P"
+               style="push"
+               tooltip="Create a new patrol query">
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createSummary"
+               label="New Summary Query ..."
+               mnemonic="S"
+               style="push"
+               tooltip="Creates a new summary query">
+         </command>
+         <command
+               commandId="org.wcs.smart.query.createGriddedSummary"
+               label="New Grid Summary ..."
+               mnemonic="g"
+               style="push"
+               tooltip="Create a new gridded summary query">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.query.createPatrolQuery"
+            icon="images/icons/obj16/patrol_query.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.createQuery"
+            icon="images/icons/obj16/waypoint_query.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.createSummary"
+            icon="images/icons/obj16/summary_query.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.exportQuery"
+            icon="images/icons/etool16/exportquery.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.createGriddedSummary"
+            icon="images/icons/obj16/gridded_query.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.createUnknownQuery"
+            icon="images/icons/etool16/addquery.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -522,20 +532,6 @@
             id="org.wcs.smart.query.AddFolder"
             name="Add Sub-Folder">
       </command>
-      <category
-            id="org.wcs.smart.query.category.save"
-            name="name">
-      </category>
-      <command
-            categoryId="org.wcs.smart.query.category.save"
-            id="org.wcs.smart.query.save"
-            name="Save Query">
-      </command>
-      <command
-            categoryId="org.wcs.smart.query.category.save"
-            id="org.wcs.smart.query.saveAs"
-            name="Save As">
-      </command>
       <command
             id="org.wcs.smart.query.renameFolder"
             name="Rename Query Folder">
@@ -547,6 +543,18 @@
       <command
             id="org.wcs.smart.query.createSummary"
             name="Create Summary Query">
+      </command>
+      <command
+            id="org.wcs.smart.query.createPatrolQuery"
+            name="Create Patrol Query">
+      </command>
+      <command
+            id="org.wcs.smart.query.createGriddedSummary"
+            name="Create Gridded Summary Query">
+      </command>
+      <command
+            id="org.wcs.smart.query.createUnknownQuery"
+            name="Create Unknown Query">
       </command>
    </extension>
    <extension
@@ -563,23 +571,31 @@
             class="org.wcs.smart.query.ui.ClearQueryHandler"
             commandId="org.wcs.smart.query.clearQueryDefinition">
          <enabledWhen>
-            <with
-                  variable="activeEditorId">
-               <or>
+            <and>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.ui.QueryResultsEditor">
+                        value="org.wcs.smart.query.SmartQueryPerspective">
                   </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.SummaryEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.GriddedEditor">
-                  </equals>
-               </or>
-            </with>
+               </with>
+               <with
+                     variable="activeEditorId">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.ui.QueryResultsEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.SummaryEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.GriddedEditor">
+                     </equals>
+                  </or>
+               </with>
+            </and>
          </enabledWhen>
       </handler>
       <handler
@@ -610,6 +626,12 @@
                      </equals>
                   </or>
                </with>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.query.SmartQueryPerspective">
+                  </equals>
+               </with>
             </and>
          </enabledWhen>
       </handler>
@@ -617,20 +639,31 @@
             class="org.wcs.smart.query.ui.export.ExportQueryHandler"
             commandId="org.wcs.smart.query.exportQuery">
          <enabledWhen>
-            <with
-                  variable="activeEditorId">
-               <or>
+            <and>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.ui.QueryResultsEditor">
+                        value="org.wcs.smart.query.SmartQueryPerspective">
                   </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.SummaryEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
-                  </equals>
-               </or>
-            </with>
+               </with>
+               <with
+                     variable="activeEditorId">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.ui.QueryResultsEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.SummaryEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.ui.GriddedEditor">
+                     </equals>
+                  </or>
+               </with>
+            </and>
          </enabledWhen>
       </handler>
       <handler
@@ -668,52 +701,6 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.SaveQueryHandler"
-            commandId="org.wcs.smart.query.save">
-         <enabledWhen>
-            <with
-                  variable="activeEditorId">
-               <or>
-                  <equals
-                        value="org.wcs.smart.query.ui.QueryResultsEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.SummaryEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.GriddedEditor">
-                  </equals>
-               </or>
-            </with>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.query.ui.SaveAsHandler"
-            commandId="org.wcs.smart.query.saveAs">
-         <enabledWhen>
-            <with
-                  variable="activeEditorId">
-               <or>
-                  <equals
-                        value="org.wcs.smart.query.ui.QueryResultsEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.SummaryEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.PatrolQueryResultsEditor">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.ui.GriddedEditor">
-                  </equals>
-               </or>
-            </with>
-         </enabledWhen>
-      </handler>
-      <handler
             class="org.wcs.smart.query.ui.querylist.RenameFolderHandler"
             commandId="org.wcs.smart.query.renameFolder">
          <enabledWhen>
@@ -737,6 +724,18 @@
       <handler
             class="org.wcs.smart.query.internal.ui.CreateSummaryHandler"
             commandId="org.wcs.smart.query.createSummary">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreatePatrolQueryHandler"
+            commandId="org.wcs.smart.query.createPatrolQuery">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateGriddedSummaryHandler"
+            commandId="org.wcs.smart.query.createGriddedSummary">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.internal.ui.CreateUnknownQueryHandler"
+            commandId="org.wcs.smart.query.createUnknownQuery">
       </handler>
    </extension>
    <extension

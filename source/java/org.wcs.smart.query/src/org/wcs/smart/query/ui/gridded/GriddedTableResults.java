@@ -80,7 +80,7 @@ public class GriddedTableResults  extends EditorPart  {
 	}
 
 	public void setQuery(){
-		content.initValues(parentEditor.getQuery());
+		content.initValues(parentEditor.getQueryInternal());
 	}
 	
 	

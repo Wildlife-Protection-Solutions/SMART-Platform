@@ -42,16 +42,14 @@ import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
-import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
  * A class to represent a summary query.
  * 
- * @author Emily
+ * @author Jeff
  * @since 1.0.0
  */
 @Entity
@@ -412,6 +410,7 @@ public class GriddedQuery extends Query {
 	 * 
 	 * @return the grid size as an int
 	 */
+	@Transient
 	public double getGridSize(){
 		return this.gridSize;
 	}

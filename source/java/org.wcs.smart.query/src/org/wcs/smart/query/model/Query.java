@@ -59,19 +59,27 @@ public abstract class Query {
 	//if you add another query type you must update
 	//the queryInput constructor
 	public enum QueryType{
-		OBSERVATION("ObservationQuery", QueryResultsEditor.ID),
-		SUMMARY("SummaryQuery", SummaryEditor.ID),
-		GRIDDED("GriddedQuery", GriddedEditor.ID),
-		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID);
+		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, "Observation Query"),
+		SUMMARY("SummaryQuery", SummaryEditor.ID, "Summary Query"),
+		GRIDDED("GriddedQuery", GriddedEditor.ID,  "Gridded Query"),
+		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, "Patorl Query");
 		
 		private String objectName;
 		private String editorId;
+		private String uiName;
 		
-		private QueryType(String objectName, String editorId){
+		private QueryType(String objectName, String editorId, String uiName){
 			this.objectName = objectName;
 			this.editorId = editorId;
+			this.uiName = uiName;
 		}
 		
+		/**
+		 * @return the name displayed on the gui
+		 */
+		public String getUiName(){
+			return this.uiName;
+		}
 		/**
 		 * The name of the java object
 		 * that represents this query type.

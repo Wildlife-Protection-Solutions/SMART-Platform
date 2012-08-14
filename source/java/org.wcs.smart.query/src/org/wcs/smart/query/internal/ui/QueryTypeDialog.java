@@ -44,9 +44,13 @@ public class QueryTypeDialog extends TitleAreaDialog {
 
 	private QueryType selectedQueryType = QueryType.OBSERVATION;
 	
-	private Button btnObservation;
-	private Button btnPatrol;
-	private Button btnGridded;
+	private QueryType[] queryTypes = new QueryType[]{
+			QueryType.OBSERVATION,
+			QueryType.PATROL,
+			QueryType.SUMMARY,
+			QueryType.GRIDDED
+	};
+	private Button[] btns;
 	
 	/**
 	 * @param parentShell
@@ -81,20 +85,18 @@ public class QueryTypeDialog extends TitleAreaDialog {
 		gl.marginLeft = 15;
 		option.setLayout(gl);
 		
-		btnObservation = new Button(option, SWT.RADIO);
-		btnObservation.setText("Observation Query");
-		btnObservation.setSelection(true);
-		
-		btnPatrol = new Button(option, SWT.RADIO);
-		btnPatrol.setText("Patrol Query");
-		btnPatrol.setSelection(false);
-		
-		btnGridded = new Button(option, SWT.RADIO);
-		btnGridded.setText("Gridded Summary");
-		btnGridded.setSelection(false);
+		btns = new Button[queryTypes.length];
+		for (int i = 0; i < queryTypes.length; i ++){
+			btns[i] = new Button(option, SWT.RADIO);
+			btns[i].setText(queryTypes[i].getUiName());
+			if (i == 0){
+				btns[i].setSelection(true);
+			}
+		}
 		
 		setTitle("Query Type");
 		setMessage("Select the type of query you want to create.");
+		getShell().setText("New Query");
 		return composite;
 	}
 	
@@ -117,12 +119,11 @@ public class QueryTypeDialog extends TitleAreaDialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			if (btnObservation.getSelection()){
-				selectedQueryType = QueryType.OBSERVATION;
-			}else if (btnPatrol.getSelection()){
-				selectedQueryType = QueryType.PATROL;
-			}else if (btnGridded.getSelection()){
-				selectedQueryType = QueryType.GRIDDED;
+			for (int i = 0; i < btns.length; i ++){
+				if (btns[i].getSelection()){
+					selectedQueryType = queryTypes[i];
+					break;
+				}
 			}
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}

@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.QueryFolderTreeComposite;
@@ -134,7 +136,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 			 lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
 		
-		treeComp = new QueryFolderTreeComposite(main);
+		treeComp = new QueryFolderTreeComposite(main,QueryHibernateManager.canModifyCaQueries());
 		treeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		treeComp.addSelectionListener(new ISelectionChangedListener() {
 			@Override

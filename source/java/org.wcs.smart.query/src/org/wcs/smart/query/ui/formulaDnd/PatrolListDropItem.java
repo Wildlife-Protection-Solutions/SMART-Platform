@@ -206,9 +206,9 @@ public class PatrolListDropItem extends DropItem{
 				ListItem newSelection =  (ListItem) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
 				if (currentSelection != null && newSelection.equals(currentSelection)){
 					//no change
-				}else{		
-					PatrolListDropItem.this.queryChanged();
+				}else{
 					currentSelection = newSelection;
+					PatrolListDropItem.this.queryChanged();
 				}
 			}
 		});

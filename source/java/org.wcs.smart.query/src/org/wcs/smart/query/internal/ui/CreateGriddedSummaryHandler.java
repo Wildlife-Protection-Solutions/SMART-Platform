@@ -19,50 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.qimport;
+package org.wcs.smart.query.internal.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.internal.ui.QueryPerspective;
+import org.eclipse.core.commands.IHandler;
+import org.wcs.smart.query.model.Query.QueryType;
 
 /**
- * Handler that displays the query import wizard dialog.
- * @author Emily
- * @since 1.0.0
+ * Handler for creating a new gridded summary.
+ * @author egouge
+ *
  */
-public class ImportQueryHandler extends AbstractHandler {
+public class CreateGriddedSummaryHandler extends CreateHandler implements
+		IHandler {
 
-	/**
-	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		try {
-			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
-			if (!activeId.equals(QueryPerspective.ID)){
-				//show query persepective
-				HandlerUtil
-				.getActiveWorkbenchWindow(event)
-				.getWorkbench()
-				.showPerspective(QueryPerspective.ID,
-						HandlerUtil.getActiveWorkbenchWindow(event));	
-			}
-			
-		} catch (WorkbenchException e) {
-			QueryPlugIn
-					.displayLog("Error loading query perspective.", e);
-		}
-		
-		ImportQueryWizard wizard = new ImportQueryWizard();
-		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
-		wd.open();
+		super.execute(event);
+		super.createQuery(QueryType.GRIDDED);
 		return null;
 	}
-
 }

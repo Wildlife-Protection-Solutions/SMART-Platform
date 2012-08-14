@@ -46,10 +46,8 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -59,6 +57,7 @@ import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
+import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
 
@@ -69,7 +68,7 @@ import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolQueryResultsEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
+public class PatrolQueryResultsEditor extends MultiPageEditorPart implements MapPart, IQueryEditor, IAdaptable{
 
 	public static final String ID = "org.wcs.smart.query.ui.PatrolQueryResultsEditor"; 
 
@@ -178,7 +177,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	/**
 	 * @return the query
 	 */
-	public PatrolQuery getQuery(){
+	public Query getQuery(){
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
@@ -188,6 +187,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		return this.query;
 	}
 
+	/**
+	 * @return the query
+	 */
+	public PatrolQuery getQueryInternal(){
+		return (PatrolQuery)getQuery();
+	}
+	
 	public void updatePartName(){
 		super.setPartName(query.getName());
 	}
@@ -230,7 +236,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		
 	private void updateQuery(){
 		//update date filter
-		getQuery().setDateFilter(page1.getDateFilter());
+		getQueryInternal().setDateFilter(page1.getDateFilter());
 	}
 
 	/**
@@ -287,9 +293,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		//validate if user can save the current query
-		if (query.getIsShared() && 
-				SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ADMIN && 
-				SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.MANAGER ){			
+		if (query.getIsShared() && !QueryHibernateManager.canModifyCaQueries()){			
 			boolean ret = MessageDialog.openQuestion(getContainer().getShell(), "Save", "You do not have permission to overwrite this query.  Would you like to save it as a new query?");
 			if (ret){
 				doSaveAs();
@@ -337,12 +341,11 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			}
 			query.setOwner(SmartDB.getCurrentEmployee());
 			query.setConservationArea(SmartDB.getCurrentConservationArea());
-			
 		}
-		
+		 
 		if (!QueryHibernateManager.saveQuery(query, false)){
 			monitor.setCanceled(true);
-			return;
+			return ;
 		}
 		updatePartName();
 		
@@ -375,7 +378,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 					monitor.beginTask("Save As...", 3);
 					monitor.subTask("Cloning query...");
 					updateQuery();
-					PatrolQuery newQuery = getQuery().clone();
+					PatrolQuery newQuery = getQueryInternal().clone();
 					
 					monitor.worked(1);
 					
@@ -408,6 +411,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 					
 					PatrolQueryResultsEditor.this.query = newQuery;
 					monitor.subTask("Saving query...");
+					
 					if (!QueryHibernateManager.saveQuery(query, true)){
 						PatrolQueryResultsEditor.this.query = oldQuery;
 						return ;
@@ -426,7 +430,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 					//TODO: update the Query Def View; see if there is a better way to do this
 					QueryDefView view = (QueryDefView)getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
 					if(view != null){
-						if (view.getQuery().equals(oldQuery)){
+						if (!view.getQuery().equals(oldQuery)){
 							view.setQuery(newQuery);
 						}
 					}

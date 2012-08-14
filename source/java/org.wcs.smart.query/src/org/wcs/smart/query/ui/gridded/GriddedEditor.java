@@ -39,30 +39,16 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Form;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -72,15 +58,8 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.ui.QueryDateFilterComposite;
-import org.wcs.smart.query.ui.QueryHeaderComposite;
-import org.wcs.smart.query.ui.QueryPropertiesDialog;
-import org.wcs.smart.query.ui.definition.GriddedQueryDefinitionComposite;
+import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.definition.QueryDefView;
-import org.wcs.smart.query.ui.observation.QueryMapPageEditor;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.observation.QueryResultsTablePage;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
@@ -91,7 +70,7 @@ import org.wcs.smart.query.ui.querytable.QueryResultsTable;
  * @author Emily
  * @since 1.0.0
  */
-public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdaptable {
+public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdaptable, IQueryEditor {
 
 	public static final String ID = "org.wcs.smart.query.ui.GriddedEditor";
 
@@ -201,7 +180,13 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	/**
 	 * @return the query
 	 */
-	public GriddedQuery getQuery(){
+	public GriddedQuery getQueryInternal(){
+		return  (GriddedQuery) getQuery();
+	}
+	/**
+	 * @return the query
+	 */
+	public Query getQuery(){
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
@@ -260,7 +245,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 	private void updateQuery(){
 		//update date filter
-		getQuery().setDateFilter(page1.getDateFilter());
+		getQueryInternal().setDateFilter(page1.getDateFilter());
 	}
 
 	/**
@@ -406,7 +391,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 					monitor.beginTask("Save As...", 3);
 					monitor.subTask("Cloning query...");
 					updateQuery();
-					GriddedQuery newQuery = getQuery().clone();
+					GriddedQuery newQuery = getQueryInternal().clone();
 					
 					monitor.worked(1);
 					
@@ -459,7 +444,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 					//TODO: update the Query Def View; see if there is a better way to do this
 					QueryDefView view = (QueryDefView)getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
 					if(view != null){
-						if (view.getQuery().equals(oldQuery)){
+						if (!view.getQuery().equals(oldQuery)){
 							view.setQuery(newQuery);
 						}
 					}
