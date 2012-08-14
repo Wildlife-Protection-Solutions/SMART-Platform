@@ -40,6 +40,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
@@ -49,6 +50,7 @@ import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
+import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 
 public class DerbyGridEngine extends DerbyQueryEngine2{
@@ -188,40 +190,69 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		List<QueryResultItem> items = new ArrayList<QueryResultItem>();
 		
 		String strAgg ="";
+		ResultSet rs;
 		if(value instanceof AttributeValueItem){
 			AttributeValueItem tmp = (AttributeValueItem)value;
 			strAgg = tmp.getAggregation().getName(); 
-		}else{
-			throw new SQLException("Not an Attribute Selected");
-		}
-		double minX = mins[0];
-		double minY = mins[1];
-//		sql.append(" floor(  (w_x - " + minX + ") /" + size + " ) + 1 as TILE_X , floor(  (w_y - " + minY + ") / " + size + " ) + 1 as TILE_Y ");
-//		sql.append(" group by (floor(  (w_x - " + minX + ") /" + size + " ) + 1), (floor(  (w_y - " + minY + ") / " + size + " ) + 1)");		
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT ");
-		sql.append( strAgg + "(number_value) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
-		sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
-		sql.append(" JOIN " + queryTempTable 
+		
+			double minX = mins[0];
+			double minY = mins[1];
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT ");
+			sql.append( strAgg + "(number_value) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
+			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
+			sql.append(" JOIN " + queryTempTable 
 				+ " on " + tablePrefix.get(WaypointObservation.class)
 				+ ".uuid = "
 				+ queryTempTable
 				+ ".ob_uuid");
-		sql.append(" JOIN " + tableNames.get(WaypointObservationAttribute.class) + " as " + tablePrefix.get(WaypointObservationAttribute.class) 
+			sql.append(" JOIN " + tableNames.get(WaypointObservationAttribute.class) + " as " + tablePrefix.get(WaypointObservationAttribute.class) 
 				+ " on " + tablePrefix.get(WaypointObservation.class)
 				+ ".uuid = "
 				+ tablePrefix.get(WaypointObservationAttribute.class)
 				+ ".observation_uuid");
-		sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class) 
+			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class) 
 				+ " on " + tablePrefix.get(Waypoint.class)
 				+ ".uuid = "
 				+ queryTempTable
 				+ ".wp_uuid");
-		sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
+			sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
 		
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-
+			QueryPlugIn.logSql(sql.toString());
+			rs = c.createStatement().executeQuery(sql.toString());
+		}else if(value instanceof CategoryValueItem){
+			CategoryValueItem tmp = (CategoryValueItem)value;
+			strAgg = "count"; 
+			double minX = mins[0];
+			double minY = mins[1];
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT ");
+			sql.append( strAgg + "(keyid) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
+			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
+			sql.append(" JOIN " + queryTempTable 
+				+ " on " + tablePrefix.get(WaypointObservation.class)
+				+ ".uuid = "
+				+ queryTempTable
+				+ ".ob_uuid");
+			sql.append(" JOIN " + tableNames.get(Category.class) + " as " + tablePrefix.get(Category.class) 
+				+ " on " + tablePrefix.get(WaypointObservation.class)
+				+ ".category_uuid = "
+				+ tablePrefix.get(Category.class)
+				+ ".uuid"
+				+ " AND Hkey = '" + tmp.getCategoryHKey() + "'");
+			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class) 
+				+ " on " + tablePrefix.get(Waypoint.class)
+				+ ".uuid = "
+				+ queryTempTable
+				+ ".wp_uuid");
+			sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
+		
+			QueryPlugIn.logSql(sql.toString());
+			rs = c.createStatement().executeQuery(sql.toString());
+			
+		}else{
+			throw new SQLException("Not an Attribute or Category Selected");	
+		}
 		try {
 
 			while (rs.next()) {
