@@ -6,6 +6,7 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 
 public class SummaryParserTest {
@@ -231,6 +232,14 @@ public class SummaryParserTest {
 		return myQuery;
 	}
 	
+	private GridQueryDefinition parseGridQuery(String query) throws Exception{
+		InputStream is = new ByteArrayInputStream(query.getBytes());
+		Parser parser = new Parser(is);		
+		GridQueryDefinition myQuery = parser.GridQuery();
+		is.close();
+		return myQuery;
+	}
+
 	
 	@Test
 	public void testAttributeValues() throws Exception{
@@ -464,5 +473,37 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
 		Assert.assertNull(test.getQueryFilter());
+	}
+	
+	
+	
+	@Test
+	public void gridTestValues() throws Exception{
+		
+		String valuePart = "attribute:n:sum:age";
+		String queryPart = "";
+		String query = valuePart + "|" + "1" + "|" + queryPart;
+		GridQueryDefinition test = parseGridQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "attribute:n:sum:age";
+		queryPart = "patrol:station equals \"station1\"";
+		query = valuePart + "|" + "1" + "|" + queryPart;
+		test = parseGridQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getQueryFilter().asString(), queryPart);
+		
+		valuePart = "";
+		queryPart = "";
+		query = valuePart + "|" + "1" + "|" + queryPart;
+		boolean error = false;
+		try{
+			test = parseGridQuery(query);
+		}catch (Exception ex){
+			error = true;
+		}
+		Assert.assertTrue(error);
+			
 	}
 }

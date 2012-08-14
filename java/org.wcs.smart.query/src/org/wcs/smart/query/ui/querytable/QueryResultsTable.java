@@ -33,6 +33,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
@@ -68,7 +69,7 @@ public class QueryResultsTable {
 		return table;
 	}
 	
-	public void initQuery(final ObservationQuery query){
+	public void initQuery(final SimpleQuery query){
 		if (tableViewerColumns != null){
 			//columns already created
 			return;

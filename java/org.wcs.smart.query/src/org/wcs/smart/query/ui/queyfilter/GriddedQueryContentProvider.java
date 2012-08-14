@@ -50,6 +50,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.ui.queyfilter.SummaryQueryContentProvider.NodeType;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -68,26 +69,22 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	
 	//root nodes
 	private RootNode valueNode = new RootNode(NodeType.VALUE_NODE);
-	private RootNode groupByNode = new RootNode(NodeType.GROUP_BY_NODE);
+
 	//patrol nodes
 	private RootNode patrolValueNode = new RootNode(NodeType.PATROL_VALUES);
-	private RootNode patrolGroupByNode = new RootNode(NodeType.PATROL_GROUPBYS);
+
 	
-	//date group by node 
-	private RootNode dateGroupByNode = new RootNode(NodeType.PATROL_DATE_GROUPBYS);
 
 	//datamodel nodes
 	private RootNode dataModelValueNode = new RootNode(NodeType.DATAMODEL_VALUES);
-	private RootNode dataModelGroupByNode = new RootNode(NodeType.DATAMODEL_GROUPBYS);
+
 	
 	private RootNode dataModelValueCategory = new RootNode(NodeType.DATAMODEL_VALUE_CATEGORY);
 	private RootNode dataModelValueAttribute = new RootNode(NodeType.DATAMODEL_VALUE_ATTRIBUTES);
 
-	private RootNode dataModelGroupByCategory = new RootNode(NodeType.DATAMODEL_GROUPBY_CATEGORY);
-	private RootNode dataModelGroupByAttribute = new RootNode(NodeType.DATAMODEL_GROUPBY_ATTRIBUTES);
 	
-	private PatrolValueOption[] patrolValueOptions = null;
-	private PatrolQueryOption[] patrolGroupByOption = null;
+	private PatrolValueOption[] gridValueOptions = null;
+	private PatrolValueOption[] patrolRatioOptions = null;
 	private DateGroupByOption[] dateGroupByOptions = null;
 	
 	
@@ -112,16 +109,11 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	 */
 	enum NodeType  {
 		VALUE_NODE("Value Options"),
-		GROUP_BY_NODE("Group By Options"),
 		PATROL_VALUES("Patrol Values"),
-		PATROL_GROUPBYS("Patrol Group Bys"),
 		PATROL_DATE_GROUPBYS("Date"),
 		DATAMODEL_VALUES("Data Model Values"),
-		DATAMODEL_GROUPBYS("Data Model Group Bys"),
-		DATAMODEL_VALUE_CATEGORY("Categories & Attribute"),
-		DATAMODEL_VALUE_ATTRIBUTES("Attributes"),
-		DATAMODEL_GROUPBY_CATEGORY("Categories & Attribute"),
-		DATAMODEL_GROUPBY_ATTRIBUTES("Attributes");		
+		DATAMODEL_VALUE_CATEGORY("Categories"),
+		DATAMODEL_VALUE_ATTRIBUTES("Attributes");		
 		
 		private String name;
 		
@@ -158,12 +150,12 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput == null){
-			patrolValueOptions = null;
-			patrolGroupByOption = null;
+			gridValueOptions = null;
+			patrolRatioOptions = null;
 			provider.inputChanged(viewer, oldInput, null);
 		}else if (newInput instanceof String){
-			patrolValueOptions = null;
-			patrolGroupByOption = null;
+			gridValueOptions = null;
+			patrolRatioOptions = null;
 			dataModel = null;
 			dateGroupByOptions = null;
 		}else{
@@ -171,9 +163,10 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 				throw new IllegalArgumentException("new input must be map");
 			}
 			Map<?, ?> in = (Map<?, ?>)newInput;
-			this.dataModel = (DataModel)in.get(NodeType.GROUP_BY_NODE);
-			patrolValueOptions = (PatrolValueOption[])in.get(NodeType.PATROL_VALUES);
-			patrolGroupByOption = (PatrolQueryOption[])in.get(NodeType.PATROL_GROUPBYS);
+			gridValueOptions = (PatrolValueOption[])in.get(NodeType.PATROL_VALUES);
+			patrolRatioOptions = (PatrolValueOption[])in.get(NodeType.PATROL_VALUES);
+			this.dataModel = (DataModel)in.get(NodeType.DATAMODEL_VALUES);
+			
 			dateGroupByOptions = (DateGroupByOption[]) in.get(GriddedQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS);
 			provider.inputChanged(viewer, oldInput, this.dataModel);	
 		}
@@ -184,14 +177,13 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (patrolValueOptions == null &&
-			patrolGroupByOption == null &&
+		if (gridValueOptions == null &&
+			patrolRatioOptions == null &&
 			dataModel == null &&
 			dateGroupByOptions == null){
 			return new String[]{"Loading"};
 		}
-		
-		return new Object[]{groupByNode, valueNode};
+		return new Object[]{valueNode};
 	}
 
 	/**
@@ -361,32 +353,18 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		if (element instanceof RootNode){
 			switch (((RootNode)element).type){
 				case VALUE_NODE:	
-				case GROUP_BY_NODE:
-					return null;
-					
-				case PATROL_DATE_GROUPBYS:
-					return patrolGroupByNode;
-				case PATROL_GROUPBYS:
-				case DATAMODEL_GROUPBYS:
-					return groupByNode;
 				case DATAMODEL_VALUES:
 				case PATROL_VALUES:
 					return valueNode;
 			}
 			return null;
-		}else if (element instanceof PatrolQueryOption){
-			return patrolGroupByNode;
 		}else if (element instanceof PatrolValueOption){
 			return patrolValueNode;
 		//}else if (parentElement instanceof AREA FITLER){
 		}else if (element instanceof DataModelItem){
 			Object parent = getParent(element);
 			if (parent instanceof RootNode){
-				if (((RootNode)parent).type == NodeType.VALUE_NODE){
-					return dataModelValueNode;
-				}else{
-					return dataModelGroupByNode;
-				}
+				return dataModelValueNode;
 			}
 			return null;
 		}else if (element instanceof SummaryDmObject){
@@ -459,16 +437,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 			if (type == NodeType.VALUE_NODE){
 				return new Object[]{patrolValueNode, dataModelValueNode};
 			}else if (type == NodeType.PATROL_VALUES){
-				return patrolValueOptions;
-			}else if (type == NodeType.PATROL_GROUPBYS){
-				Object[] kids = new Object[patrolGroupByOption.length + 1];
-				for (int i = 0; i < patrolGroupByOption.length; i++){
-					kids[i] = patrolGroupByOption[i];
-				}
-				kids[kids.length-1] = dateGroupByNode;
-				return kids;
-			}else if (type == NodeType.GROUP_BY_NODE){				
-				return new Object[]{patrolGroupByNode, dataModelGroupByNode};
+				return gridValueOptions;
 			}else if (type == NodeType.PATROL_DATE_GROUPBYS){
 				return dateGroupByOptions;
 			}else if (type == NodeType.DATAMODEL_VALUES){
@@ -491,29 +460,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 					}
 				}
 				return Arrays.copyOf(results, cnt);
-				
-			}else if (type == NodeType.DATAMODEL_GROUPBYS){
-				return new Object[]{dataModelGroupByCategory, dataModelGroupByAttribute};
-			}else if (type == NodeType.DATAMODEL_GROUPBY_CATEGORY){
-				Object[] kids = provider.getChildren(provider.getElements(null)[0]);
-				Object[] results = new Object[kids.length];
-				for (int i = 0; i < kids.length; i ++){
-					results[i] = new SummaryDmObject((DmObject)kids[i], false);
-				}
-				//assume data model
-				return results;
-			}else if (type == NodeType.DATAMODEL_GROUPBY_ATTRIBUTES){
-				Collection<Attribute> atts = dataModel.getAttributes();
-				Object[] results = new Object[atts.size()];
-				int cnt = 0;
-				for (Attribute att: atts){
-					if (att.getType() == AttributeType.LIST |
-						att.getType() == AttributeType.TREE){
-						results[cnt++] = new SummaryDmObject(att, false);
-					}
-				}
-				return Arrays.copyOf(results, cnt);
-				
+			
 			}
 			return null;
 		}
@@ -531,23 +478,15 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		public Image getImage(){
 			if (type == NodeType.VALUE_NODE){
 				return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON);
-			}else if (type == NodeType.GROUP_BY_NODE){
-				 return JFaceResources.getImageRegistry().get(QueryPlugIn.GROUPBY_ICON);
 			}else if (type == NodeType.PATROL_DATE_GROUPBYS){
 				return JFaceResources.getImageRegistry().get(QueryPlugIn.CALENDAR_ICON);
-			}else if (type == NodeType.DATAMODEL_VALUES ||
-					type == NodeType.DATAMODEL_GROUPBYS){
+			}else if (type == NodeType.DATAMODEL_VALUES){
 				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.DATA_MODEL_ICON);
-			}else if (type == NodeType.PATROL_GROUPBYS ||
-					type == NodeType.PATROL_VALUES){
+			}else if (type == NodeType.PATROL_VALUES){
 				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
 				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.ATTRIBUTE_NUMBER_ICON);
 			}else if (type == NodeType.DATAMODEL_VALUE_CATEGORY){
-				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.CATEGORY_ICON);
-			}else if (type == NodeType.DATAMODEL_GROUPBY_ATTRIBUTES){
-				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.ATTRIBUTE_LIST_ICON);
-			}else if (type == NodeType.DATAMODEL_GROUPBY_CATEGORY){
 				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.CATEGORY_ICON);
 			}
 			return null;

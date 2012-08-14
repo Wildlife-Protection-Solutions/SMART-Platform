@@ -75,6 +75,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 	protected static final String QUERY_TEMP_TABLE_PREFIX = "query_results_";
 	protected static final String QUERY_OB_TEMP_TABLE_PREFIX = "query_attributes_";
+	protected static final String QUERY_GRID_TEMP_TABLE_PREFIX = "grid_intermediate_";
 	
 	/**
 	 * Maps database tables to a prefix to use in the query.
@@ -161,6 +162,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
 		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
+		
 
 		myResults = null;
 		session.doWork(new Work() {
@@ -230,6 +232,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	protected void dropTemporaryTables(Connection c) throws SQLException {
 		try {
 //			String sql = "DROP TABLE " + QUERY_TEMP_SCHEMA + "." + observationTempTable;
+
 			String sql = "DROP TABLE " + observationTempTable;
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
@@ -582,7 +585,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * 
 	 * @throws SQLException
 	 */
-	private List<QueryResultItem> getResults(Connection c, Session session)
+	protected List<QueryResultItem> getResults(Connection c, Session session)
 			throws SQLException {
 		List<QueryResultItem> items = new ArrayList<QueryResultItem>();
 
@@ -674,7 +677,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @return
 	 * @throws SQLException
 	 */
-	private Object getAttributeValue(Attribute att, ResultSet rs,
+	protected Object getAttributeValue(Attribute att, ResultSet rs,
 			Session session) throws SQLException {
 		Object value = null;
 		switch (att.getType()) {
@@ -715,7 +718,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	private Attribute getAttribute(byte[] uuid, Session session){
+	protected Attribute getAttribute(byte[] uuid, Session session){
 		if (uuid != null){
 			Attribute att = (Attribute) session.load(Attribute.class, uuid);
 			return att;
@@ -730,7 +733,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	private Category getCategory(byte[] uuid, Session session){
+	protected Category getCategory(byte[] uuid, Session session){
 		if (uuid != null){
 			Category x = (Category) session.load(Category.class, uuid);
 			return x;
@@ -836,7 +839,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param includeObservations if observations should be included
 	 * @return select clause
 	 */
-	private String SelectClause(boolean includeObservations) {
+	protected String SelectClause(boolean includeObservations) {
 		String[] results = { "p_uuid", "p_id", "p_start_date", "p_end_date",
 				"p_station_uuid", "p_team_uuid", 
 				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed",
@@ -900,7 +903,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param includeObservations
 	 * @return
 	 */
-	private String WhereClause(boolean includeObservations) {
+	protected String WhereClause(boolean includeObservations) {
 		if (includeObservations) {
 			return "r.ob_uuid is not null";
 		} else {
@@ -913,7 +916,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param includeObservations
 	 * @return
 	 */
-	private String FromClause(boolean includeObservations) {
+	protected String FromClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 
 //		sql.append(QUERY_TEMP_SCHEMA + "." + queryTempTable);
@@ -963,7 +966,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @return the database datatype for the observation
 	 * temporary table
 	 */
-	private String getDataType(AttributeType type) {
+	protected String getDataType(AttributeType type) {
 		switch (type) {
 		case LIST:
 			return "varchar(128)"; //keyid

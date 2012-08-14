@@ -48,6 +48,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 	protected PatrolValueOption encounterRatio;
 	private Font smallerFont;
 	private Composite main;
+	private PatrolValueOption[] encounterRateOptions;
 		
 	/**
 	 * @return the value query part
@@ -73,6 +74,16 @@ public abstract class AbstractValueDropItem extends DropItem {
 	 */
 	public void setEncounterRatio(PatrolValueOption dropItem){
 		this.encounterRatio = dropItem;
+	}
+	
+	/**
+	 * Sets the encounter rate ratio options
+	 * @param options the patrol value options to be used as the 
+	 * encounter rate choices
+	 */
+	void setEncounterRateOptions(PatrolValueOption[] options){
+		
+		encounterRateOptions = options;
 	}
 	
 	/**
@@ -197,7 +208,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 	 * required.
 	 */
 	private void showRateDialog() {
-		EncounterRateDialog dialog = new EncounterRateDialog(main.getShell());
+		EncounterRateDialog dialog = new EncounterRateDialog(main.getShell(), encounterRateOptions);
 		if (dialog.open() == Window.OK){
 			encounterRatio = dialog.getSelectedItems();
 		}

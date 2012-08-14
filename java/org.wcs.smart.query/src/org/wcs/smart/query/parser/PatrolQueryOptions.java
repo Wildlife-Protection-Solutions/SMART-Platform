@@ -229,7 +229,15 @@ public class PatrolQueryOptions {
 		PatrolValueOption.MAN_HOURS,
 		PatrolValueOption.NUM_PATROLS
 	};
-	
+
+	/**
+	 * Options for computing encounter rates
+	 */
+	public final static PatrolValueOption[] GRID_RATIO_OPTIONS = {
+		PatrolValueOption.DISTANCE,
+		PatrolValueOption.NUM_DAYS
+	};
+
 	/**
 	 * Represents the possible patrol values for summary
 	 * queries.
@@ -292,6 +300,9 @@ public class PatrolQueryOptions {
 		}
 	}
 	
+	
+	
+
 	/**
 	 * Finds a particular patrol filter option based
 	 * on the key.

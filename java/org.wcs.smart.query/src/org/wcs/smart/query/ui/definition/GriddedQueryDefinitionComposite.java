@@ -36,7 +36,10 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
@@ -127,9 +130,9 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public String validate() {
-		String query = panel.getQueryString() + "|" + filterPanel.getQueryString();
+		String query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ;
 		boolean isvalid = true;
-		SumQueryDefinition def = null;
+		GridQueryDefinition def = null;
 		String error = null;
 		if (query.length() == 0) {
 			isvalid = false;
@@ -137,7 +140,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			try {
 				InputStream is = new ByteArrayInputStream(query.getBytes());
 				Parser parser = new Parser(is);
-				def = parser.SumQuery();
+				def = parser.GridQuery();
 				is.close();
 			} catch (Throwable ex) {
 				// failed to parse query
@@ -146,7 +149,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			}
 		}
 		
-		if (isvalid && def.getValuePart().getValueItems().size() == 0){
+		if (!isvalid || def.getValuePart() == null){
 			isvalid = false;
 			error = "At least one value must be selected.";
 		}
@@ -161,13 +164,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		provider.setQueryValue(isvalid, error);
 		if (parentView.getQuery() != null){
 			parentView.getQuery().setIsValid(isvalid);
-			try{
-				((GriddedQuery)parentView.getQuery()).parseQuery();
-			} catch (Throwable ex) {
-				// failed to parse query
-				isvalid = false;
-				error = ex.getMessage();
-			}	
+			((GriddedQuery)parentView.getQuery()).setQuery(query, def);
 		}
 		return error;
 	}
@@ -217,4 +214,5 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
 		provider.setQueryDefinitionType(QueryDropType.GRIDDED_ITEM);
 	}
+	
 }

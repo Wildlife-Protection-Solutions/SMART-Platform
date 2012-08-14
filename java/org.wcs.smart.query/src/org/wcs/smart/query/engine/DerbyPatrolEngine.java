@@ -140,7 +140,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 	 * 
 	 * @throws SQLException
 	 */
-	private List<QueryResultItem> getResults(Connection c, Session session)
+	protected List<QueryResultItem> getResults(Connection c, Session session)
 			throws SQLException {
 		List<QueryResultItem> items = new ArrayList<QueryResultItem>();
 
