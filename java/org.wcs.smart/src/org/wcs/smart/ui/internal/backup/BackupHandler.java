@@ -48,23 +48,28 @@ import org.wcs.smart.backup.DerbyBackupEngine;
  */
 public class BackupHandler extends AbstractHandler {
 
-	private boolean backupState = false;
+	private int backupState = 0;
+	private File backupFile = null;
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		executeBackup(HandlerUtil.getActiveShell(event));
+		executeBackup(HandlerUtil.getActiveShell(event), true);
 		return null;
 	}
 
 	/**
 	 * Execute the backup commend; prompting user as required
 	 * @param shell current shell
+	 * @param fork - <code>true</code> if not called from within splash screen thread
 	 */
-	public void executeBackup(final Shell shell){
-		backupState = false;
+	/*
+	 * fork is true and called from within the splash screen thread causes application
+	 * deadlock.
+	 */
+	public void executeBackup(final Shell shell, boolean fork){
+		backupState = 0;
 		
 		//prompt to save dirty editors
 		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
@@ -83,45 +88,23 @@ public class BackupHandler extends AbstractHandler {
 		}
 		try {
 			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(true, true, new IRunnableWithProgress() {
+			pmdDialog.run(fork, true, new IRunnableWithProgress() {
 
 				@Override
 				public void run(final IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					final File f = dialog.getSelectedFile();
+					backupFile = dialog.getSelectedFile();
 					try {
-						final boolean ok = DerbyBackupEngine.backupSystem(f,
-								monitor);
-						shell.getDisplay().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								if (ok) {
-									MessageDialog.openInformation(shell,
-											"Backup Complete",
-											"System backed up successfully to file: \n\n"
-													+ f.getAbsolutePath());
-									backupState = true;
-								} else if (monitor.isCanceled()) {
-									MessageDialog.openError(shell,
-											"Backup Failed",
-											"Backup process cancelled");
-								} else {
-									MessageDialog
-											.openError(shell, "Backup Failed",
-													"Backup did not complete.  Please try again.");
-								}
-
-							}
-						});
+						final boolean ok = DerbyBackupEngine.backupSystem(backupFile,monitor);						
+						if (ok){
+							backupState = 1;
+						}else if (monitor.isCanceled()){
+							backupState = 2;
+						}
 
 					} catch (final Exception ex) {
-						shell.getDisplay().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(shell, "Backup Failed. "
-										+ ex.getMessage(), ex);
-							}
-						});
+						backupState = 0;
+						SmartPlugIn.log("Error running backup.", ex);
 					}
 
 				}
@@ -130,10 +113,26 @@ public class BackupHandler extends AbstractHandler {
 			SmartPlugIn.displayLog(shell,
 					"Backup Failed. " + ex.getMessage(), ex);
 		}
+		
+		if (backupState == 1){
+			MessageDialog.openInformation(shell,
+					"Backup Complete",
+					"System backed up successfully to file: \n\n"
+							+ backupFile.getAbsolutePath());
+		}else if (backupState == 2){
+			MessageDialog.openError(shell,
+					"Backup Failed",
+					"Backup process cancelled");
+		}else{
+			MessageDialog
+			.openError(shell, "Backup Failed",
+					"Backup did not complete.  Please try again.");
+		}
+
 	}
 	
 	
 	public boolean backupOk(){
-		return backupState;
+		return backupState == 1;
 	}
 }

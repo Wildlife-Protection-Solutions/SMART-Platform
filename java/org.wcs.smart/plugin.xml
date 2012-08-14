@@ -669,5 +669,13 @@
             caExporter="org.wcs.smart.internal.ca.export.DataModelExporter">
       </exporter>
    </extension>
+   <extension
+         point="org.eclipse.ui.installationPages">
+      <page
+            class="org.wcs.smart.ui.internal.SmartInstallationInfoPage"
+            id="org.wcs.smart.ui.internal.SmartInstallationInfoPage"
+            name="Smart Info">
+      </page>
+   </extension>
 
 </plugin>
