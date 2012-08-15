@@ -111,6 +111,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 				
 				query.getDropItems();
 				query.generateDropItems(session);
+
 			}catch (Exception ex){
 				QueryPlugIn.displayLog("Could not parse query: " + input.getName()+ ".\n\n" + ex.getMessage(), ex);
 			}finally{

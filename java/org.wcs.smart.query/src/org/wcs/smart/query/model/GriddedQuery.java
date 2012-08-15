@@ -42,6 +42,8 @@ import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
+import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -300,7 +302,6 @@ public class GriddedQuery extends Query {
 		}
 
 		
-		/* not sure we need this, keeping it commented for now. 
 		//---- generate drop items for filter items ----		
 		IFilter query = getQueryDefinition().getQueryFilter();
 		if (query != null){
@@ -311,10 +312,12 @@ public class GriddedQuery extends Query {
 		}
 		
 		//---- generate drop items for value items ----
-		ValuePart part = getQueryDefinition().getValuePart();
-		List<DropItem> valueItems = part.getDropItems(session);
+		List<DropItem> valueItems = new ArrayList<DropItem>();
+		IValueItem part = getQueryDefinition().getValuePart();
+
+		valueItems.add(part.asDropItem(session));
 		valueDropItems.addAll(valueItems);
-		*/
+		
 			
 	}
 	
@@ -418,6 +421,13 @@ public class GriddedQuery extends Query {
 
 	@Transient
 	public GridQueryDefinition getQueryDefinition(){
+		if (query == null){
+			try{
+				query = parseQuery();
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog("Could not parse query.", ex);
+			}
+		}
 		return query;
 	}
 	
