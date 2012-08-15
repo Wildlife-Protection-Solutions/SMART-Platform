@@ -222,7 +222,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			rs = c.createStatement().executeQuery(sql.toString());
 		}else if(value instanceof CategoryValueItem){
 			CategoryValueItem tmp = (CategoryValueItem)value;
-			strAgg = "count"; 
+			strAgg = "count";
+			String hkey = tmp.getCategoryHKey();
+			String hkey_max = hkey.substring(0,(hkey.length()-1)) + "/";
+					
 			double minX = mins[0];
 			double minY = mins[1];
 			StringBuilder sql = new StringBuilder();
@@ -239,7 +242,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				+ ".category_uuid = "
 				+ tablePrefix.get(Category.class)
 				+ ".uuid"
-				+ " AND Hkey = '" + tmp.getCategoryHKey() + "'");
+				+ " AND Hkey >= '" + hkey + "' AND Hkey < '" + hkey_max + "'");
+			
+//			WHERE ( c.hkey >= 'threat.residentialcommercialdevelopment.' and c.hkey < 'threat.residentialcommercialdevelopment/') 
+			
 			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class) 
 				+ " on " + tablePrefix.get(Waypoint.class)
 				+ ".uuid = "

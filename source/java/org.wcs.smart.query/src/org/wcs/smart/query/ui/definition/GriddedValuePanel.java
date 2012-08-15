@@ -33,6 +33,7 @@ public class GriddedValuePanel {
 
 	public void init(GriddedQuery query) {
 		lstValues.addElements(query.getValueDropItems());
+		txtGridSize.setText(Double.toString(query.getGridSize()));
 	}
 
 	public void saveDropItems(GriddedQuery query) {
@@ -62,7 +63,7 @@ public class GriddedValuePanel {
 		
 		txtGridSize = new Text(left, SWT.BORDER);
 		txtGridSize.setTextLimit(6);
-		txtGridSize.setText("100");
+		txtGridSize.setText("1");
 		
 		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
