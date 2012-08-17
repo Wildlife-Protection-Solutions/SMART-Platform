@@ -55,7 +55,7 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 		patrolIdComp = new PatrolIdComposite();
 		
 		patrolIdComp.addChangeListener(this);
-		setMessage("Set the patrol ID, leave the default to use an auto-generated ID:");
+		setMessage("Set the patrol ID below. If you wish, you may use the default value that had been automatically generated.");
 		super.setControl(patrolIdComp.createComponent(parent, SWT.NONE));
 		
 	}
