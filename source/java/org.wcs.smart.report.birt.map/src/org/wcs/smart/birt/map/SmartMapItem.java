@@ -1,0 +1,160 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.birt.map;
+
+import java.util.List;
+
+import org.eclipse.birt.report.model.api.ExtendedItemHandle;
+import org.eclipse.birt.report.model.api.activity.SemanticException;
+import org.eclipse.birt.report.model.api.extension.ReportItem;
+
+/**
+ * A Smart map report item.
+ * @author Emily
+ *
+ */
+public class SmartMapItem extends ReportItem {
+
+	/**
+	 * Smart query dataset ids
+	 */
+	public static final String SMART_QUERY_ID = "org.wcs.smart.data.oda.smart.smartQueryDataset";
+	
+	/**
+	 * Smart map item extension name
+	 */
+	public static final String EXTENSION_NAME = "Smart Map";
+
+	/**
+	 * Basemap option property
+	 */
+	public static final String SMART_BASEMAP_PROP = "org.wcs.smart.birt.map.basemap";
+	
+	/**
+	 * List of layers; layers are represented by
+	 * the hex encoded uuid of the query they represent
+	 */
+	public static final String SMART_LAYER_PROP = "org.wcs.smart.birt.map.layers";
+	/**
+	 * List of layer names
+	 */
+	public static final String SMART_LAYERNAME_PROP = "org.wcs.smart.birt.map.layerNames";
+	/**
+	 * List of layer styles; encoded as SLD xmlstring
+	 */
+	public static final String SMART_LAYERSTYLE_PROP = "org.wcs.smart.birt.map.layerStyles";
+	/**
+	 * Map bounds property
+	 */
+	public static final String SMART_BOUNDS_PROP = "org.wcs.smart.birt.map.bounds";
+	
+	private ExtendedItemHandle handle;
+
+	/**
+	 * Creates a new smart map item
+	 * @param item
+	 */
+	public SmartMapItem(ExtendedItemHandle item) {
+		this.handle = item;
+	}
+
+	/**
+	 * @return the basemap layer name
+	 */
+	public String getBasemapName() {
+		return handle.getStringProperty(SMART_BASEMAP_PROP);
+	}
+
+	/**
+	 * Sets the baemap name
+	 * @param basemapName
+	 * @throws SemanticException
+	 */
+	public void setBasemapName(String basemapName) throws SemanticException {
+		handle.setStringProperty(SMART_BASEMAP_PROP, basemapName);
+	}
+
+	/**
+	 * @return list of layers on map
+	 */
+	public List<String> getLayers(){
+		return handle.getListProperty(SMART_LAYER_PROP);
+	}
+	
+	/**
+	 * Set map layers
+	 * @param layers
+	 * @throws SemanticException
+	 */
+	public void setLayers(List<String> layers) throws SemanticException{
+		handle.setProperty(SMART_LAYER_PROP, layers);
+	}
+	
+	/**
+	 * @return map layer names 
+	 */
+	public List<String> getLayerNames(){
+		return handle.getListProperty(SMART_LAYERNAME_PROP);
+	}
+	
+	/**
+	 * Sets the map layer names
+	 * @param layers
+	 * @throws SemanticException
+	 */
+	public void setLayerNames(List<String> layers) throws SemanticException{
+		handle.setProperty(SMART_LAYERNAME_PROP, layers);
+	}
+	
+	/**
+	 * @return the layer styles
+	 */
+	public List<String> getLayerStyles(){
+		return handle.getListProperty(SMART_LAYERSTYLE_PROP);
+	}
+	
+	/**
+	 * Sets the layer styles
+	 * @param layers
+	 * @throws SemanticException
+	 */
+	public void setLayerStyles(List<String> layers) throws SemanticException{
+		handle.setProperty(SMART_LAYERSTYLE_PROP, layers);
+	}
+	
+	/**
+	 * @return the map bounds
+	 */
+	public String getMapBounds(){
+		return handle.getStringProperty(SMART_BOUNDS_PROP);
+	}
+	
+	/**
+	 * Sets the map bounds
+	 * @param bounds
+	 * @throws SemanticException
+	 */
+	public void setMapBounds(String bounds) throws SemanticException{
+		handle.setStringProperty(SMART_BASEMAP_PROP, bounds);
+	}
+	
+}
