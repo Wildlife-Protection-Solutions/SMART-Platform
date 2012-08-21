@@ -1,0 +1,113 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.birt.map;
+
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import net.refractions.udig.style.sld.SLDContent;
+
+import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.ExtendedItemHandle;
+import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
+
+/**
+ * Utilities to support the BIRT Smart map item generation. 
+ * 
+ * @author Emily
+ *
+ */
+public class BirtMapUtils {
+	
+	
+	/**
+	 * Converts an xml style momento to a Style object. Assumes
+	 * SLD style momento.
+	 * 
+	 * @param xmlMemento
+	 * @return
+	 * @throws WorkbenchException
+	 */
+	public static Object mementoToStyle(String xmlMemento)
+			throws WorkbenchException {
+		try {
+			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(
+					xmlMemento));
+			SLDContent cnt = new SLDContent();
+			return cnt.load(memento);
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+	
+	/**
+	 * @param element
+	 * @return array of smart query dataset handles added to the report
+	 */
+	public static OdaDataSetHandle[] getSmartDataSetHandles(
+			ExtendedItemHandle element) {
+		ReportDesignHandle handle = (ReportDesignHandle) ((ExtendedItemHandle) element)
+				.getRoot();
+		List<?> datasets = handle.getAllDataSets();
+		List<OdaDataSetHandle> sets = new ArrayList<OdaDataSetHandle>();
+		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+			DataSetHandle dataset = (DataSetHandle) iterator.next();
+			if (dataset instanceof OdaDataSetHandle) {
+				OdaDataSetHandle h = (OdaDataSetHandle) dataset;
+				if (h.getExtensionID().equals(SmartMapItem.SMART_QUERY_ID)) {
+					sets.add(h);
+				}
+			}
+		}
+		return sets.toArray(new OdaDataSetHandle[sets.size()]);
+	}
+	
+	/**
+	 * Finds a smart query with the given query text in the 
+	 * provided report handle
+	 * 
+	 * @param handle report handle
+	 * @param queryText query text (Smart query hex encoded uuid)
+	 * @return
+	 */
+	public static OdaDataSetHandle findHandle(ReportDesignHandle handle,
+			String queryText) {
+		List<?> datasets = handle.getAllDataSets();
+		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+			DataSetHandle dataset = (DataSetHandle) iterator.next();
+			if (dataset instanceof OdaDataSetHandle) {
+				OdaDataSetHandle h = (OdaDataSetHandle) dataset;
+				if (h.getExtensionID().equals(SmartMapItem.SMART_QUERY_ID)
+						&& h.getQueryText().equals(queryText)) {
+					return h;
+				}
+			}
+		}
+		return null;
+
+	}
+}
