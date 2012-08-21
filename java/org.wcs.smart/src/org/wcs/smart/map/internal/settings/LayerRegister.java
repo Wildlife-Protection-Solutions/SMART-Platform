@@ -80,7 +80,7 @@ final class LayerRegister {
 				+ ", defaultColor=" + defaultColor + ", styleRegisterList="
 				+ styleRegisterList + ", maxScaleDenominator="
 				+ maxScaleDenominator + ", minScaleDenominator="
-				+ minScaleDenominator + ", envelope=" + envelope + "]";
+				+ minScaleDenominator + ", envelope=" + (envelope ==null ? "" : envelope) + "]";
 	}
 
 	public String getName() {

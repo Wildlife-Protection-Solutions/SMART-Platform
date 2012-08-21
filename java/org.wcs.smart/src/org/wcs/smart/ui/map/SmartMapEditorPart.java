@@ -238,6 +238,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         mapViewer = new MapViewer(composite,  SWT.SINGLE | SWT.DOUBLE_BUFFERED);
         mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         Map map = (Map) ProjectFactory.eINSTANCE.createMap();
+        map.setName(getEditorInput().getName());
         mapViewer.setMap(map);
         //set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);

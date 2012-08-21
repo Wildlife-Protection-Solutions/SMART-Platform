@@ -30,10 +30,10 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.ProjectPlugin;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
-import net.refractions.udig.project.preferences.PreferenceConstants;
+import net.refractions.udig.project.internal.impl.MapImpl;
+import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
 import net.refractions.udig.project.ui.ProjectUtil;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -61,6 +60,7 @@ public class LoadDefaultLayersJob extends Job{
 
 	private IMap map;
 	private boolean zoom;
+	
 	public LoadDefaultLayersJob(IMap map, boolean zoom){
 		super("Load default layers to map");
 		this.map = map;
@@ -90,8 +90,14 @@ public class LoadDefaultLayersJob extends Job{
     				cleanedGeoResources = ProjectUtil.cleanDuplicateGeoResources(layers, map);
     				AddLayersCommand alCommand = new AddLayersCommand(cleanedGeoResources, 0);
     				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+//    				
+    				//TODO fix performance issues with add layer command
+    				((RenderManagerImpl)map.getRenderManager()).disableRendering();
+//    				((MapImpl)map).getContextModel().eSetDeliver(false);
     				map.sendCommandSync(alCommand);
     				map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY,alCommand.getLayers());
+//    				((MapImpl)map).getContextModel().eSetDeliver(true);
+    				((RenderManagerImpl)map.getRenderManager()).enableRendering();
     				
     			}
     			if (zoom){
@@ -110,20 +116,15 @@ public class LoadDefaultLayersJob extends Job{
 		if (selection != null) return selection;
 		
 		Session s = HibernateManager.openSession();
-		
 		try{
 			s.beginTransaction();
-			List<?> defaultmap = s.createCriteria(BasemapDefinition.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDefault", true)).list();
-			if (defaultmap.size() > 0){
-				return (BasemapDefinition) defaultmap.get(0);
-			}
+			return HibernateManager.getDefaultBasemapDefinition(s);	
 		}finally{
 			if (s.getTransaction().isActive()){
 				s.getTransaction().commit();
 			}
 			s.close();
 		}
-		return null;
 		
 	}
 }

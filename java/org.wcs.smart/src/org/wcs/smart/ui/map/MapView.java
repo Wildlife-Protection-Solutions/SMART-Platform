@@ -132,6 +132,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         // prior to adding to the mapviewer
         // 
         map = (Map) ProjectFactory.eINSTANCE.createMap();
+        map.setName("Smart Map");
         mapviewer.setMap(map);
 		
         //set default crs

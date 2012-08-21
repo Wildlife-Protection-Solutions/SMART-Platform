@@ -29,7 +29,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -49,6 +48,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -148,15 +148,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		lblOverwrite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		lstBasemaps = new ListViewer(compList, SWT.DEFAULT | SWT.BORDER | SWT.SINGLE );
-		lstBasemaps.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof BasemapDefinition){
-					return ((BasemapDefinition)element).getName();
-				}
-				return super.getText(element);
-			}
-		});
+		lstBasemaps.setLabelProvider(new BasemapLabelProvider());
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
 		lstBasemaps.setInput(new String[]{"Loading"});

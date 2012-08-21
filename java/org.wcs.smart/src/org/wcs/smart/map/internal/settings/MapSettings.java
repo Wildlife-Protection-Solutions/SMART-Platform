@@ -27,7 +27,6 @@ import java.io.FileFilter;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,9 +45,8 @@ import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectPackage;
 import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.StyleEntry;
+import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
-import net.refractions.udig.project.internal.impl.LayerImpl;
-import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.ui.palette.ColourScheme;
 
 import org.apache.commons.io.FileUtils;
@@ -232,7 +230,11 @@ public class MapSettings {
 				final ColourScheme colourSchema = layer.getColourScheme();
 				final Color defaultColor = layer.getDefaultColor();
 				
-				final String envelop = GeometryUtils.envelopToWKT(layer.getBounds(null, layer.getCRS()) );
+				String envelop = null;
+				if (!layer.getBounds(null, layer.getCRS()).isNull()){
+					envelop = GeometryUtils.envelopToWKT(layer.getBounds(null, layer.getCRS()) );
+				}
+				 
 
 				final Double maxScaleDenominator = layer.getMaxScaleDenominator();
 				final Double minScaleDenominator = layer.getMinScaleDenominator();
@@ -246,7 +248,8 @@ public class MapSettings {
 					}
 					LayerRegister layerRegister = new LayerRegister (
 									name, colourSchema, uri, crs, cql ,defaultColor, 
-								maxScaleDenominator, minScaleDenominator, envelop, styleRegisterList);
+								maxScaleDenominator, minScaleDenominator, 
+								envelop, styleRegisterList);
 						
 					layerRegisterList.add(layerRegister);
 				}
@@ -347,7 +350,10 @@ public class MapSettings {
 	    
 	    //add new basemap layers
 	    if (toAdd.size() > 0){
-	    	List< ? extends ILayer> addedLayers = ApplicationGIS.addLayersToMap(currentMap, toAdd, 0);
+            AddLayersCommand alCommand = new AddLayersCommand(toAdd, 0);
+            currentMap.sendCommandSync(alCommand);
+            List< ? extends ILayer> addedLayers = alCommand.getLayers();
+            
 	    	assert addedLayers.size() != 0;
 	    	basemapLayers.addAll(addedLayers);
 	    }
@@ -392,9 +398,10 @@ public class MapSettings {
 		}
 
 		//turn back on events
-		
 		currentMap.eSetDeliver(true);
-		currentMap.getRenderManager().refresh(null);
+		if (currentMap.getRenderManager() != null){
+			currentMap.getRenderManager().refresh(null);
+		}
 	}
 
 	/**
@@ -431,9 +438,11 @@ public class MapSettings {
 			layer.setCRS(crs);
 
 			// set the envelop
-			Envelope envelope = GeometryUtils.wktToEnvelop(savedLayer.getEnvelope());
-			ReferencedEnvelope bounds = new ReferencedEnvelope(envelope, crs);
-			layer.setBounds(bounds);
+			if (savedLayer.getEnvelope() != null){
+				Envelope envelope = GeometryUtils.wktToEnvelop(savedLayer.getEnvelope());
+				ReferencedEnvelope bounds = new ReferencedEnvelope(envelope, crs);
+				layer.setBounds(bounds);
+			}
 			
 	
 			// create a new style for the layer setting its values with those present in the registry

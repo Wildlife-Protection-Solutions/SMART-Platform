@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -81,10 +82,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	private void loadData() {
 		getSession().beginTransaction();
-		String query = "FROM BasemapDefinition WHERE conservationArea = :ca";
-		Query q = getSession().createQuery(query);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		List<?> data = q.list();
+		List<?> data = HibernateManager.getBasemaps(getSession());
 		basemaps = data.toArray(new BasemapDefinition[data.size()]);
 		lstBasemaps.setInput(basemaps);
 		if (basemaps.length > 0){
