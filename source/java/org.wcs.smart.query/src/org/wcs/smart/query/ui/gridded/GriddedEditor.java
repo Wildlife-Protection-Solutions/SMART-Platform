@@ -201,7 +201,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 * Updates the editor name with the query name
 	 */
 	public void updatePartName(){
-		super.setPartName(query.getName());
+		super.setPartName(getEditorInput().getName());
 	}
  
 	/**
@@ -429,15 +429,15 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 						GriddedEditor.this.query = oldQuery;
 						return ;
 					}
-					updatePartName();
-					page1.setQuery();
-					
-					monitor.worked(1);
-					
-					page1.setQuery();
-					monitor.worked(1);
 					
 					GriddedEditor.this.setInput(new QueryInput(newQuery));
+					
+					updatePartName();
+					page1.setQuery();
+					monitor.worked(1);
+					
+					page1.setQuery();
+					monitor.worked(1);
 					
 					setDirty(false);
 					monitor.worked(1);

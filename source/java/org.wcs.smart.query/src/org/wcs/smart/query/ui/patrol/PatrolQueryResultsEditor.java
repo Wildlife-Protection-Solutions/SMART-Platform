@@ -194,9 +194,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		return (PatrolQuery)getQuery();
 	}
 	
+	/**
+	 * Updates the editor name with the query name
+	 */
 	public void updatePartName(){
-		super.setPartName(query.getName());
+		super.setPartName(getEditorInput().getName());
 	}
+ 
  
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
@@ -416,13 +420,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 						PatrolQueryResultsEditor.this.query = oldQuery;
 						return ;
 					}
+					PatrolQueryResultsEditor.this.setInput(new QueryInput(newQuery));
+					
 					updatePartName();
 					monitor.worked(1);
 					
 					page1.setQuery();
 					monitor.worked(1);
-					
-					PatrolQueryResultsEditor.this.setInput(new QueryInput(newQuery));
 					
 					setDirty(false);
 					monitor.worked(1);
