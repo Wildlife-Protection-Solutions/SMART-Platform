@@ -137,7 +137,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {	
-		return "PatrolEditor_" + id;
+		return "Patrol_" + id;
 	}
 
 	/**
