@@ -196,9 +196,13 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		return this.query;
 	}
 
-	public void updatePartName() {
-		super.setPartName(getQuery().getName());
+	/**
+	 * Updates the editor name with the query name
+	 */
+	public void updatePartName(){
+		super.setPartName(getEditorInput().getName());
 	}
+ 
 
 	public void setDirty(boolean isDirty) {
 		this.isDirty = isDirty;
@@ -414,11 +418,11 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 						SummaryEditor.this.query = oldQuery;
 						return;
 					}
-					updatePartName();
-					initQuery();
-					
 					monitor.worked(1);
 					SummaryEditor.this.setInput(new QueryInput(newQuery));
+					
+					updatePartName();
+					initQuery();
 
 					setDirty(false);
 					monitor.worked(1);

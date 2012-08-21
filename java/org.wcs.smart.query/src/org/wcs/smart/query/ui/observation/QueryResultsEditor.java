@@ -29,6 +29,8 @@ import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 
+import opendap.servlet.GetInfoHandler;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -198,7 +200,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	 * Updates the editor name with the query name
 	 */
 	public void updatePartName(){
-		super.setPartName(query.getName());
+		super.setPartName(getEditorInput().getName());
 	}
  
 	/**

@@ -26,6 +26,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.wcs.smart.util.SmartUtils;
+
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.ServiceExtension;
 import net.refractions.udig.core.internal.CorePlugin;
@@ -105,7 +107,7 @@ public class QueryServiceExtension implements ServiceExtension {
 		if (params.get(QUERY_UUID_KEY) == null || !(params.get(QUERY_UUID_KEY) instanceof byte[])){
 			url += System.nanoTime();
 		}else{
-			url += new String((byte[])params.get(QUERY_UUID_KEY)) ;
+			url += SmartUtils.encodeHex((byte[])params.get(QUERY_UUID_KEY)) ;
 		}
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
