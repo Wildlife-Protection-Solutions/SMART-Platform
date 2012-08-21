@@ -29,7 +29,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -41,12 +40,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.BasemapLabelProvider;
 
 /**
  * Dialog for selecting basemap
@@ -112,20 +110,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		};
 		
 		lstBasemaps = new ListViewer(main, SWT.DEFAULT | SWT.BORDER | SWT.SINGLE );
-		lstBasemaps.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof BasemapDefinition){
-					BasemapDefinition def=SmartPlugIn.getDefault().getBasemapSelection();
-					if (def != null && def.equals(element)){					
-						return ((BasemapDefinition)element).getName() + "  [Session Default]";
-					}else{
-						return ((BasemapDefinition)element).getName();	
-					}
-				}
-				return super.getText(element);
-			}
-		});
+		lstBasemaps.setLabelProvider(new BasemapLabelProvider());
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
 		lstBasemaps.setInput(new String[]{"Loading"});
@@ -150,10 +135,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					String query = "FROM BasemapDefinition WHERE conservationArea = :ca";
-					Query q = s.createQuery(query);
-					q.setParameter("ca", SmartDB.getCurrentConservationArea());
-					data = q.list().toArray();
+					data = HibernateManager.getBasemaps(s).toArray();
 				}finally{
 					if (s.getTransaction().isActive()){
 						s.getTransaction().commit();		

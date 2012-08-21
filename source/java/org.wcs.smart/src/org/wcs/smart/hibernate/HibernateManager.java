@@ -45,6 +45,7 @@ import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
@@ -527,6 +528,43 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 	}
 	
+	/**
+	 * @param session
+	 * @return all basemaps defined for the current conservation area
+	 */
+	public static List<BasemapDefinition> getBasemaps(Session session){
+		String query = "FROM BasemapDefinition WHERE conservationArea = :ca";
+		Query q = session.createQuery(query);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		return q.list();
+	}
 	
+	
+	/**
+	 * @param session
+	 * @return the default basemap defined for the conservation area or null
+	 * if no default specified
+	 */
+	public static BasemapDefinition getDefaultBasemapDefinition(Session session){
+		List<?> defaultmap = session.createCriteria(BasemapDefinition.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDefault", true)).list();
+		if (defaultmap.size() > 0){
+			return (BasemapDefinition) defaultmap.get(0);
+		}
+		return null;
+	}
+	
+	/**
+	 * @param session
+	 * @param uuid the basemap uuid
+	 * @return the default basemap defined for the conservation area or null
+	 * if no default specified
+	 */
+	public static BasemapDefinition getBasemapDefinition(Session session, byte[] uuid){
+		List<?> defaultmap = session.createCriteria(BasemapDefinition.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("uuid", uuid)).list();
+		if (defaultmap.size() > 0){
+			return (BasemapDefinition) defaultmap.get(0);
+		}
+		return null;
+	}
 
 }
