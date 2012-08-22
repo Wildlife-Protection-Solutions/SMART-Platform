@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -119,7 +121,11 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		chUseDefault = new Button(main, SWT.CHECK);
 		chUseDefault.setText("Use as session default");
 		chUseDefault.setSelection(false);
-		
+		chUseDefault.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+		});
 		
 		loadData();
 		return main;

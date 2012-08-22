@@ -38,6 +38,8 @@ public class DefaultPerspective implements IPerspectiveFactory {
 		layout.addView(MapView.ID, IPageLayout.LEFT, 0.8f, IPageLayout.ID_EDITOR_AREA);
 		layout.addView( "net.refractions.udig.project.ui.layerManager", IPageLayout.LEFT, 0.2f, MapView.ID);
 	//	layout.addView(MapView.ID, IPageLayout.RIGHT, 2, TempView.ID);
+		
+		layout.getViewLayout(MapView.ID).setCloseable(false);
 	}
 
 }

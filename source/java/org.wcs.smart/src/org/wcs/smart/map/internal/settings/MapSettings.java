@@ -47,6 +47,7 @@ import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.StyleEntry;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
+import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
 import net.refractions.udig.ui.palette.ColourScheme;
 
 import org.apache.commons.io.FileUtils;
@@ -294,7 +295,10 @@ public class MapSettings {
 		
 		//turn off map events
 		currentMap.eSetDeliver(false);
-		
+		if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
+			((RenderManagerImpl)currentMap.getRenderManager()).disableRendering();
+		}
+		try{
 		List<ILayer> layers = currentMap.getMapLayers();
 
 		//keep track of current basemap layers
@@ -398,10 +402,17 @@ public class MapSettings {
 		}
 
 		//turn back on events
-		currentMap.eSetDeliver(true);
+		}finally{
+			currentMap.eSetDeliver(true);
+			if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
+				((RenderManagerImpl)currentMap.getRenderManager()).enableRendering();
+			}
+		}
+		
 		if (currentMap.getRenderManager() != null){
 			currentMap.getRenderManager().refresh(null);
 		}
+
 	}
 
 	/**
