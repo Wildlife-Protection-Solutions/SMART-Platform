@@ -32,6 +32,9 @@ import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
+import org.eclipse.birt.report.model.api.metadata.DimensionValue;
+import org.eclipse.birt.report.model.api.util.DimensionUtil;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 
@@ -109,5 +112,43 @@ public class BirtMapUtils {
 		}
 		return null;
 
+	}
+	
+	/**
+	 * The width of the extendeditemhandle in pixels
+	 * @param handle
+	 * @param dpi
+	 * @return
+	 */
+	public static int getWidthInPx(ExtendedItemHandle handle, int dpi){
+		return getDimensionInPx((DimensionValue) handle.getWidth().getValue(), dpi);
+	}
+	/**
+	 * The height of the extendeditemhandle in pixels
+	 * @param handle
+	 * @param dpi
+	 * @return
+	 */
+	public static int getHeightInPx(ExtendedItemHandle handle, int dpi){
+		return getDimensionInPx((DimensionValue) handle.getHeight().getValue(), dpi);
+	}
+	/**
+	 * Converts the dimensionvalue to pixels measure
+	 * @param dv
+	 * @param dpi
+	 * @return
+	 */
+	private static int getDimensionInPx(DimensionValue dv, int dpi){
+		int value = 0;
+		if (dv.getUnits().equals(DesignChoiceConstants.UNITS_PX)){
+			value = (int)dv.getMeasure();
+		}else{
+			Double w1 = DimensionUtil.convertTo(dv.getMeasure(),
+				dv.getUnits(), DesignChoiceConstants.UNITS_IN)
+				.getMeasure();
+			value = (int) (w1 * dpi);
+		}
+		return value;
+		
 	}
 }

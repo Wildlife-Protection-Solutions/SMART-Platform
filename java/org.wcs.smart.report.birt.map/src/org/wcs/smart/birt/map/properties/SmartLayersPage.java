@@ -371,15 +371,15 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		basemapCombo.setLabelProvider(new BasemapLabelProvider());
 		basemapCombo.setContentProvider(ArrayContentProvider.getInstance());
 		basemapCombo.setInput(basemapCombo);
-		basemapCombo.getCombo().addFocusListener(new FocusAdapter() {
+		basemapCombo.getControl().addFocusListener(new FocusAdapter() {
 			public void focusLost(org.eclipse.swt.events.FocusEvent e){
 				updateModel(SmartMapItem.SMART_BASEMAP_PROP);
 			}
 		});
 		
 		toolkit.adapt(basemapCombo.getCombo());
-		basemapCombo.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridData)basemapCombo.getCombo().getLayoutData()).widthHint = 200;
+		basemapCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)basemapCombo.getControl().getLayoutData()).widthHint = 200;
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -388,7 +388,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 					.getBasemaps(session);
 			
 			BasemapDefinition defaultdef = new BasemapDefinition();
-			defaultdef.setName("default");
+			defaultdef.setName("(none)");
 			maps.add(defaultdef);
 			basemapCombo.setInput(maps.toArray());
 		} finally {
