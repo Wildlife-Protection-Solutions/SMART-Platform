@@ -26,6 +26,7 @@ Spatial Monitoring and Reporting Tool
       location="org.wcs.smart"
       handlerType="interactive" />
    <launcher name="SMART">
+      <macosx icon="/org.wcs.smart/images/icons/smart.icns"/>
       <solaris/>
       <win useIco="true">
          <ico path="/org.wcs.smart/images/icons/smart.ico"/>
