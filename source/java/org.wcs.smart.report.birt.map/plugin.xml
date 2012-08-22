@@ -49,6 +49,14 @@
                name="org.wcs.smart.birt.map.bounds"
                type="string">
          </property>
+         <overrideProperty
+               allowedUnits="CM,IN,MM,PT,PC,PX"
+               propertyName="width">
+         </overrideProperty>
+         <overrideProperty
+               allowedUnits="CM,IN,MM,PT,PC,PX"
+               propertyName="height">
+         </overrideProperty>
       </reportItem>
    </extension>
    <extension
@@ -57,14 +65,14 @@
             extensionName="Smart Map">
       </model>
       <palette
-            icon="images/smart16.gif"></palette>
+            icon="images/icons/obj16/map.png"></palette>
       <editor
             canResize="true"
             showInDesigner="true"
             showInMasterPage="true">
       </editor>
       <outline
-            icon="images/smart16.gif">
+            icon="images/icons/obj16/map.png">
       </outline>
       <reportItemImageUI
             class="org.wcs.smart.birt.map.SmartMapItemImageUi">

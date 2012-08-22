@@ -23,9 +23,15 @@ package org.wcs.smart.birt.map;
 
 import java.util.List;
 
+import org.eclipse.birt.report.designer.util.DEUtil;
+import org.eclipse.birt.report.model.api.DimensionHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
+import org.eclipse.birt.report.model.api.metadata.DimensionValue;
+import org.eclipse.birt.report.model.api.metadata.IElementPropertyDefn;
+import org.eclipse.birt.report.model.api.metadata.IPropertyType;
+import org.eclipse.birt.report.model.api.util.DimensionUtil;
 
 /**
  * A Smart map report item.
@@ -75,6 +81,20 @@ public class SmartMapItem extends ReportItem {
 	 */
 	public SmartMapItem(ExtendedItemHandle item) {
 		this.handle = item;
+		DimensionValue dm = (DimensionValue)handle.getWidth().getValue();
+		if (dm == null || dm.getMeasure() == 0){
+			try{
+				handle.setWidth("50px");
+			}catch (Exception ex){
+				ex.printStackTrace();
+			}
+		}
+		dm = (DimensionValue)handle.getHeight().getValue();
+		if (dm == null || dm.getMeasure() == 0){
+			try{
+				handle.setHeight("50px");
+			}catch (Exception ex){}
+		}
 	}
 
 	/**

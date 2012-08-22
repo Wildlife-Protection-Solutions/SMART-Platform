@@ -48,11 +48,8 @@ import net.refractions.udig.style.sld.SLDContent;
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.extension.IRowSet;
 import org.eclipse.birt.report.engine.extension.ReportItemPresentationBase;
-import org.eclipse.birt.report.model.api.DimensionHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
-import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
-import org.eclipse.birt.report.model.api.util.DimensionUtil;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
@@ -106,17 +103,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			return null;
 		}
 
-		DimensionHandle width = modelHandle.getWidth();
-		DimensionHandle height = modelHandle.getHeight();
-		Double w1 = DimensionUtil.convertTo(width.getDisplayValue(),
-				width.getDefaultUnit(), DesignChoiceConstants.UNITS_IN)
-				.getMeasure();
-		Double h1 = DimensionUtil.convertTo(height.getDisplayValue(),
-				height.getDefaultUnit(), DesignChoiceConstants.UNITS_IN)
-				.getMeasure();
-		int iwidth = (int) (w1 * dpi);
-		int iheight = (int) (h1 * dpi);
-
+		int iwidth = BirtMapUtils.getWidthInPx(modelHandle, dpi);
+		int iheight = BirtMapUtils.getHeightInPx(modelHandle, dpi);
+		
 		try {
 			// gdavis - ARGB won't output proper background color for non-alpha
 			// supporting
@@ -135,22 +124,30 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try {
-				def = HibernateManager.getBasemapDefinition(session,
-							SmartUtils.decodeHex(basemap));
+				byte[] uuid = null;
+				try{
+					uuid = SmartUtils.decodeHex(basemap);
+				}catch (Exception ex){
+					//eatme
+				}
+				if (uuid != null){
+					def = HibernateManager.getBasemapDefinition(session,uuid);
+				}
 
 				List<String> mapqueries = mapItem.getLayers();
 				List<String> mapnames = mapItem.getLayerNames();
 				List<String> mapstyles = mapItem.getLayerStyles();
 
-				
-				for (int i = 0; i < mapqueries.size(); i++) {
-					Query q = QueryHibernateManager.findQuery(session,
+				if (mapqueries != null){
+					for (int i = 0; i < mapqueries.size(); i++) {
+						Query q = QueryHibernateManager.findQuery(session,
 								SmartUtils.decodeHex(mapqueries.get(i)), null);
-					GeoSmart layer = new GeoSmart();
-					layer.name = mapnames.get(i);
-					layer.dbQuery = q;
-					layer.style = mapstyles.get(i);
-					layers.add(layer);
+						GeoSmart layer = new GeoSmart();
+						layer.name = mapnames.get(i);
+						layer.dbQuery = q;
+						layer.style = mapstyles.get(i);
+						layers.add(layer);
+					}
 				}
 			} finally {
 				session.getTransaction().commit();

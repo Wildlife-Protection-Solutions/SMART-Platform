@@ -33,6 +33,7 @@ import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.Sec
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.TextSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
+import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.ReportItemHandle;
 import org.eclipse.birt.report.model.api.elements.ReportDesignConstants;
 import org.eclipse.swt.SWT;
@@ -41,6 +42,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.birt.map.SmartMapItem;
+
+import com.google.protobuf.GeneratedMessage.ExtendableBuilder;
 
 /**
  * Smart map item general properties page.
@@ -102,7 +106,7 @@ public class SmartMapItemGeneralPage extends AttributesUtil.PageWrapper {
 			// width
 			IDescriptorProvider provider = new UnitPropertyDescriptorProvider(
 					ReportItemHandle.WIDTH_PROP,
-					ReportDesignConstants.EXTENDED_ITEM);
+					SmartMapItem.EXTENSION_NAME);
 			ComplexUnitSection widthPropSelection = new ComplexUnitSection(
 					provider.getDisplayName(), contentpane, true);
 			widthPropSelection.setProvider(provider);
@@ -113,7 +117,8 @@ public class SmartMapItemGeneralPage extends AttributesUtil.PageWrapper {
 			// height
 			provider = new UnitPropertyDescriptorProvider(
 					ReportItemHandle.HEIGHT_PROP,
-					ReportDesignConstants.EXTENDED_ITEM);
+					SmartMapItem.EXTENSION_NAME);
+//					ReportDesignConstants.EXTENDED_ITEM);
 			ComplexUnitSection heightPropSelection = new ComplexUnitSection(
 					provider.getDisplayName(), contentpane, true);
 			heightPropSelection.setProvider(provider);
