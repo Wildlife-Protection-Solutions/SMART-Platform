@@ -24,6 +24,7 @@ package org.wcs.smart.patrol;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -339,32 +340,27 @@ public class PatrolHibernateManager extends HibernateManager{
 	public static String generatePatrolId(Patrol p, Session s){
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
-//		sb.append("_");
-//		Calendar cal = SmartPlugIn.convertDate(p.getStartDate());
-//		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.YEAR)));
-//		sb.append("_");
-//		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.MONTH)+1));
-//		sb.append("_");
-//		sb.append(PATROL_ID_DATE_FIELD_FORMATTER.format(cal.get(Calendar.DAY_OF_MONTH)));
 
-		//Criteria c = s.createCriteria(Patrol.class).add(Restrictions.like("id", sb.toString() + "%")).addOrder(Order.desc("id"));
 		Query q = s.createQuery("SELECT id FROM Patrol WHERE id like :id ORDER BY id desc");
 		q.setParameter("id", sb.toString() + "%");
 
-		List results = q.list();
-		
-		String id = p.getConservationArea().getId() + "_0";
-		if (results.size() > 0){
-			id = (String) q.list().get(0);
+		long idNumber = 0;
+		List<?> results = q.list();
+		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+			String localId = (String) iterator.next();
+			try{
+				idNumber = Integer.parseInt(localId.substring(localId.lastIndexOf('_')+1));
+				break;
+			}catch (Exception ex){
+				//not of the form CAID_# skip this one
+			}
 		}
-		
-		long cnt = Integer.parseInt(id.substring(id.lastIndexOf('_')+1));
-//		long cnt = (Long) c.list().get(0);
-		cnt++;
-		cnt = cnt % 999999;
-
 		sb.append("_");
-		sb.append(PATROL_ID_FORMATTER.format(cnt));
+		idNumber = (idNumber+1) % 1000000;
+		if (idNumber <= 0){
+			idNumber = 1;
+		}
+		sb.append(PATROL_ID_FORMATTER.format(idNumber));
 		s.evict(p.getConservationArea());
 		return sb.toString();
 		
