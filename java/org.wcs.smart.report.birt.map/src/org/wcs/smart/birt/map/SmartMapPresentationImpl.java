@@ -53,6 +53,7 @@ import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.map.internal.settings.MapSettings;
@@ -203,7 +204,13 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				}
 			}
 
-			ReferencedEnvelope bounds = renderedMap.getBounds(new NullProgressMonitor());
+			ReferencedEnvelope bounds = null;
+			if (mapItem.getMapBounds() == null){
+				bounds = renderedMap.getBounds(new NullProgressMonitor());
+			}else{
+				bounds = mapItem.getMapBounds();
+			}
+
 			renderedMap.sendCommandASync(new SetViewportBBoxCommand(bounds));
 			try {
 				DrawMapParameter drawMapParameter = new DrawMapParameter(g,

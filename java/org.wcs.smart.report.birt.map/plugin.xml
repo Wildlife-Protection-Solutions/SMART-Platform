@@ -16,6 +16,7 @@
          </property>
          <property
                canInherit="true"
+               defaultDisplayName="Smart Map Layers"
                hasOwnModel="true"
                isEncryptable="false"
                isList="false"
@@ -25,6 +26,7 @@
          </property>
          <property
                canInherit="true"
+               defaultDisplayName="Smart Map Layer Names"
                hasOwnModel="true"
                isEncryptable="false"
                isList="false"
@@ -34,6 +36,7 @@
          </property>
          <property
                canInherit="true"
+               defaultDisplayName="Smart Map Layer Styles"
                hasOwnModel="true"
                isEncryptable="false"
                isList="false"
@@ -41,14 +44,55 @@
                subType="string"
                type="list">
          </property>
-         <property
-               canInherit="true"
-               hasOwnModel="true"
-               isEncryptable="false"
-               isList="false"
-               name="org.wcs.smart.birt.map.bounds"
-               type="string">
-         </property>
+         <propertyGroup
+               defaultDisplayName="Map Bounds"
+               name="org.wcs.smart.report.birt.map.bounds">
+            <property
+                  canInherit="true"
+                  defaultDisplayName="X Min"
+                  hasOwnModel="true"
+                  isEncryptable="false"
+                  isList="false"
+                  name="org.wcs.smart.report.birt.map.bounds.xmin"
+                  type="float">
+            </property>
+            <property
+                  canInherit="true"
+                  defaultDisplayName="X Max"
+                  hasOwnModel="true"
+                  isEncryptable="false"
+                  isList="false"
+                  name="org.wcs.smart.report.birt.map.bounds.xmax"
+                  type="float">
+            </property>
+            <property
+                  canInherit="true"
+                  defaultDisplayName="Y Min"
+                  hasOwnModel="true"
+                  isEncryptable="false"
+                  isList="false"
+                  name="org.wcs.smart.report.birt.map.bounds.ymin"
+                  type="float">
+            </property>
+            <property
+                  canInherit="true"
+                  defaultDisplayName="Y Max"
+                  hasOwnModel="true"
+                  isEncryptable="false"
+                  isList="false"
+                  name="org.wcs.smart.report.birt.map.bounds.ymax"
+                  type="float">
+            </property>
+            <property
+                  canInherit="true"
+                  defaultDisplayName="CRS"
+                  hasOwnModel="true"
+                  isEncryptable="false"
+                  isList="false"
+                  name="org.wcs.smart.report.birt.map.bounds.srid"
+                  type="string">
+            </property>
+         </propertyGroup>
          <overrideProperty
                allowedUnits="CM,IN,MM,PT,PC,PX"
                propertyName="width">
@@ -103,6 +147,39 @@
             </enablement>
          </adapter>
       </adaptable>
+   </extension>
+   <extension
+         point="net.refractions.udig.project.ui.tool">
+      <category
+            id="org.wcs.smart.udig.maptools">
+      </category>
+      <actionTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.birt.map.tools.ZoomExtentTool"
+            icon="images/icons/elcl16/zoom_layers.png"
+            id="org.wcs.smart.birt.map.tools.ZoomExtents"
+            name="Zoom to map extents"
+            onToolbar="false"
+            tooltip="Zoom to map extents">
+      </actionTool>
+      <modalTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.birt.map.tools.PanTool"
+            icon="images/icons/elcl16/layer_add.png"
+            id="org.wcs.smart.birt.map.tools.Pan"
+            name="Pan Tool"
+            onToolbar="true"
+            toolCursorId="move">
+      </modalTool>
+      <modalTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.birt.map.tools.ZoomTool"
+            icon="images/icons/elcl16/layer_add.png"
+            id="org.wcs.smart.birt.map.tools.Zoom"
+            name="Zoom Tool"
+            onToolbar="true"
+            toolCursorId="zoomCursor">
+      </modalTool>
    </extension>
 
 </plugin>
