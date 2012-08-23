@@ -286,13 +286,7 @@ public abstract class QueryColumn implements Cloneable{
 				
 					for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 						FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
-						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
-						
-							if (patrolOps.getTrackDistanceDirection()){
-								cols.add(new FixedQueryColumn(item));
-							}
-						}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
+						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
 									item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
 									item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
 									item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
