@@ -30,8 +30,10 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.internal.ProjectPackage;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.impl.ContextModelImpl;
 import net.refractions.udig.project.internal.impl.MapImpl;
 import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
 import net.refractions.udig.project.ui.ProjectUtil;
@@ -40,6 +42,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -48,6 +52,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job and intitializes a map with the
@@ -60,11 +65,38 @@ public class LoadDefaultLayersJob extends Job{
 
 	private IMap map;
 	private boolean zoom;
+	private byte[] basemapUuid = null;
 	
+	/**
+	 * Creates a new job that loads the the session
+	 * basemap (if defined), the default basemap (if defined)
+	 * or the smart default basemap.
+	 * 
+	 * @param map
+	 * @param zoom if should zoom to extens after loading basemap
+	 */
 	public LoadDefaultLayersJob(IMap map, boolean zoom){
 		super("Load default layers to map");
 		this.map = map;
 		this.zoom = zoom;
+	}
+	
+	/**
+	 * Creates a new job that loads:<br>
+	 *   the basemap with the given uuid if found; or<br>
+	 *   the session basemap if found; or<br>
+	 *   the ca default basemap if found; or<br>
+	 *   the the smart basemap<br>
+	 *   
+	 * @param map
+	 * @param zoom
+	 * @param basemapUuid
+	 */
+	public LoadDefaultLayersJob(IMap map, boolean zoom, byte[] basemapUuid){
+		super("Load default layers to map");
+		this.map = map;
+		this.zoom = zoom;
+		this.basemapUuid = basemapUuid;
 	}
 	
 	@Override
@@ -75,7 +107,11 @@ public class LoadDefaultLayersJob extends Job{
 		CatalogPlugin.getDefault().getLocalCatalog().add(ss);
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
-		BasemapDefinition mapDef = getDefaultDefinition();
+		BasemapDefinition mapDef = null;
+		mapDef = getDefinition();
+		if (mapDef == null){
+			mapDef = getDefaultDefinition();
+		}
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     	if (map != null){
     		try {
@@ -93,11 +129,15 @@ public class LoadDefaultLayersJob extends Job{
 //    				
     				//TODO fix performance issues with add layer command
     				((RenderManagerImpl)map.getRenderManager()).disableRendering();
-//    				((MapImpl)map).getContextModel().eSetDeliver(false);
+//    				((ContextModelImpl)((MapImpl)map).getContextModel()).setNotification(false);
     				map.sendCommandSync(alCommand);
     				map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY,alCommand.getLayers());
 //    				((MapImpl)map).getContextModel().eSetDeliver(true);
+//    				((ContextModelImpl)((MapImpl)map).getContextModel()).setNotification(true);
+//    				((ContextModelImpl)((MapImpl)map).getContextModel()).eNotify(new ENotificationImpl(((ContextModelImpl)((MapImpl)map).getContextModel()), Notification.SET,
+//    	                    ProjectPackage.CONTEXT_MODEL__MAP, map, map));
     				((RenderManagerImpl)map.getRenderManager()).enableRendering();
+    				((RenderManagerImpl)map.getRenderManager()).refresh(null);
     				
     			}
     			if (zoom){
@@ -111,6 +151,7 @@ public class LoadDefaultLayersJob extends Job{
 		return Status.OK_STATUS;
 	}
 	
+	
 	private BasemapDefinition getDefaultDefinition(){
 		BasemapDefinition selection = SmartPlugIn.getDefault().getBasemapSelection();
 		if (selection != null) return selection;
@@ -119,6 +160,23 @@ public class LoadDefaultLayersJob extends Job{
 		try{
 			s.beginTransaction();
 			return HibernateManager.getDefaultBasemapDefinition(s);	
+		}finally{
+			if (s.getTransaction().isActive()){
+				s.getTransaction().commit();
+			}
+			s.close();
+		}
+		
+	}
+	
+	private BasemapDefinition getDefinition(){
+		if (basemapUuid == null){
+			return null;
+		}
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			return HibernateManager.getBasemapDefinition(s, basemapUuid);	
 		}finally{
 			if (s.getTransaction().isActive()){
 				s.getTransaction().commit();

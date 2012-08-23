@@ -60,6 +60,11 @@ public class MapToolComposite {
 	public MapToolComposite(){
 		
 	}
+	public MapToolComposite(String tools[]){
+		this();
+		this.tools = tools;
+	}
+
 	
 	public void createComposite(Composite parent){
 		items.clear();
@@ -113,6 +118,9 @@ public class MapToolComposite {
 			}
 		}
 		ApplicationGIS.getToolManager().getToolAction(mi.getId(), mi.getCategoryId()).run();
+
 	}
 	
 }
+
+
