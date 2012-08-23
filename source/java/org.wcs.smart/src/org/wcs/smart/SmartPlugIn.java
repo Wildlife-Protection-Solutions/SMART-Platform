@@ -91,6 +91,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString());
 		
 		// add delete handler
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
