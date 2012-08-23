@@ -23,15 +23,13 @@ package org.wcs.smart.birt.map;
 
 import java.util.List;
 
-import org.eclipse.birt.report.designer.util.DEUtil;
-import org.eclipse.birt.report.model.api.DimensionHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
 import org.eclipse.birt.report.model.api.metadata.DimensionValue;
-import org.eclipse.birt.report.model.api.metadata.IElementPropertyDefn;
-import org.eclipse.birt.report.model.api.metadata.IPropertyType;
-import org.eclipse.birt.report.model.api.util.DimensionUtil;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * A Smart map report item.
@@ -68,10 +66,32 @@ public class SmartMapItem extends ReportItem {
 	 * List of layer styles; encoded as SLD xmlstring
 	 */
 	public static final String SMART_LAYERSTYLE_PROP = "org.wcs.smart.birt.map.layerStyles";
+	
 	/**
-	 * Map bounds property
+	 * xmin map bounds property
 	 */
-	public static final String SMART_BOUNDS_PROP = "org.wcs.smart.birt.map.bounds";
+	public static final String SMART_BOUNDS_XMIN_PROP = "org.wcs.smart.report.birt.map.bounds.xmin";
+	
+	/**
+	 * xmax map bounds property
+	 */
+	public static final String SMART_BOUNDS_XMAX_PROP = "org.wcs.smart.report.birt.map.bounds.xmax";
+	/**
+	 * ymin map bounds property
+	 */
+	public static final String SMART_BOUNDS_YMIN_PROP = "org.wcs.smart.report.birt.map.bounds.ymin";
+	/**
+	 * ymax map bounds property
+	 */
+	public static final String SMART_BOUNDS_YMAX_PROP = "org.wcs.smart.report.birt.map.bounds.ymax";
+	/**
+	 * srid map bounds property
+	 */
+	public static final String SMART_BOUNDS_SRID_PROP = "org.wcs.smart.report.birt.map.bounds.srid";
+	/**
+	 * map bounds property group
+	 */
+	public static final String SMART_BOUNDS_GROUP = "org.wcs.smart.report.birt.map.bounds";
 	
 	private ExtendedItemHandle handle;
 
@@ -164,8 +184,25 @@ public class SmartMapItem extends ReportItem {
 	/**
 	 * @return the map bounds
 	 */
-	public String getMapBounds(){
-		return handle.getStringProperty(SMART_BOUNDS_PROP);
+	public ReferencedEnvelope getMapBounds(){
+		String srs = handle.getStringProperty(SMART_BOUNDS_SRID_PROP);
+		if (srs == null){
+			return null;
+		}
+		CoordinateReferenceSystem crs = null;
+		try{
+			crs = CRS.parseWKT(handle.getStringProperty(SMART_BOUNDS_SRID_PROP));
+		}catch (Exception ex){
+			SmartMapItemPlugIn.log("Could not parse crs for report. " + srs, ex);
+			return null;
+		}
+		
+		double x1 = handle.getFloatProperty(SMART_BOUNDS_XMIN_PROP);
+		double x2 = handle.getFloatProperty(SMART_BOUNDS_XMAX_PROP);
+		double y1 = handle.getFloatProperty(SMART_BOUNDS_YMIN_PROP);
+		double y2 = handle.getFloatProperty(SMART_BOUNDS_YMAX_PROP);
+		
+		return new ReferencedEnvelope(x1, x2, y1, y2, crs);
 	}
 	
 	/**
@@ -173,8 +210,21 @@ public class SmartMapItem extends ReportItem {
 	 * @param bounds
 	 * @throws SemanticException
 	 */
-	public void setMapBounds(String bounds) throws SemanticException{
-		handle.setStringProperty(SMART_BASEMAP_PROP, bounds);
+	public void setMapBounds(ReferencedEnvelope e) throws SemanticException{
+		
+		if (e == null){
+			handle.setProperty(SMART_BOUNDS_XMIN_PROP, null);
+			handle.setProperty(SMART_BOUNDS_XMAX_PROP, null);
+			handle.setProperty(SMART_BOUNDS_YMIN_PROP, null);
+			handle.setProperty(SMART_BOUNDS_YMAX_PROP, null);
+			handle.setProperty(SMART_BOUNDS_SRID_PROP, null);
+		}else{
+			handle.setFloatProperty(SMART_BOUNDS_XMIN_PROP, e.getMinX());
+			handle.setFloatProperty(SMART_BOUNDS_XMAX_PROP, e.getMaxX());
+			handle.setFloatProperty(SMART_BOUNDS_YMIN_PROP, e.getMinY());
+			handle.setFloatProperty(SMART_BOUNDS_YMAX_PROP, e.getMaxY());
+			handle.setProperty(SMART_BOUNDS_SRID_PROP, e.getCoordinateReferenceSystem().toWKT());
+		}
 	}
 	
 }

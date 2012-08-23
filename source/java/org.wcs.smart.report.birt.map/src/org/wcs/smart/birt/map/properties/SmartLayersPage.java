@@ -34,6 +34,7 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -46,7 +47,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -55,13 +55,21 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.wcs.smart.birt.map.BirtMapUtils;
 import org.wcs.smart.birt.map.SmartMapItem;
 import org.wcs.smart.birt.map.SmartMapItemPlugIn;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.BasemapLabelProvider;
@@ -89,6 +97,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	private ExtendedItemHandle itemHandle;
 	private SmartMapItem mapItem;
 	private StyleCellEditor cellEditor;
+	private Text txtSrid;
 	
 	@Override
 	public void buildUI(Composite parent) {
@@ -337,7 +346,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	 */
 	private void createBounds(Composite parent){
 		Composite bm = toolkit.createComposite(parent);
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(6, false);
 		layout.horizontalSpacing = 15;
 		
 		bm.setLayout(layout);
@@ -350,11 +359,48 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		txtBounds.setLayoutData(gd);
 		
 		toolkit.createLabel(bm, "SRID:");
-		Text txt = toolkit.createText(bm, "EPSG: 4326 (Long/Lat)");
-		txt.setEditable(false);
+		txtSrid = toolkit.createText(bm, Area.AREA_CRS.getName().getCode());
+		txtSrid.setEditable(false);
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 		gd.widthHint = 200;
-		txt.setLayoutData(gd);
+		txtSrid.setLayoutData(gd);
+		
+
+		Hyperlink btnSetBounds = toolkit.createHyperlink(bm, "Set Bounds", SWT.NONE);
+		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
+		gd.heightHint = 20;
+		btnSetBounds.setLayoutData(gd);
+		btnSetBounds.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				MapDialog md = new MapDialog(Display.getDefault().getActiveShell(), 
+						getSelectedBasemapUuid(), mapItem.getMapBounds());
+				if (md.open() != Window.OK){
+					return;
+				}
+				
+				ReferencedEnvelope re = md.getBounds();
+				
+				if(!CRS.equalsIgnoreMetadata(re.getCoordinateReferenceSystem(), Area.AREA_CRS)){
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Coordinate reference system must be lat/long");
+				}else{
+					txtBounds.setData(re);
+					updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
+				}
+			}
+		});
+		
+		
+		Hyperlink btnClearBounds = toolkit.createHyperlink(bm, "Clear", SWT.NONE);
+		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
+		btnClearBounds.setLayoutData(gd);
+		btnClearBounds.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				txtBounds.setData(null);
+				updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
+			}
+		});
 	}
 	
 	/**
@@ -371,32 +417,36 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		basemapCombo.setLabelProvider(new BasemapLabelProvider());
 		basemapCombo.setContentProvider(ArrayContentProvider.getInstance());
 		basemapCombo.setInput(basemapCombo);
-		basemapCombo.getControl().addFocusListener(new FocusAdapter() {
-			public void focusLost(org.eclipse.swt.events.FocusEvent e){
-				updateModel(SmartMapItem.SMART_BASEMAP_PROP);
-			}
-		});
-		
+	
 		toolkit.adapt(basemapCombo.getCombo());
 		basemapCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)basemapCombo.getControl().getLayoutData()).widthHint = 200;
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
+		List<BasemapDefinition> maps = null;
 		try {
-			List<BasemapDefinition> maps = HibernateManager
-					.getBasemaps(session);
-			
+			maps = HibernateManager.getBasemaps(session);
 			BasemapDefinition defaultdef = new BasemapDefinition();
 			defaultdef.setName("(none)");
 			maps.add(defaultdef);
-			basemapCombo.setInput(maps.toArray());
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().commit();
 			}
+		
 			session.close();
 		}
+		
+		basemapCombo.setInput(maps.toArray());
+		
+		basemapCombo.getControl().addListener(SWT.Modify, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				updateModel(SmartMapItem.SMART_BASEMAP_PROP);		
+			}
+		});
+		
 	}
 	
 	private List<LayerDefinition> getSelectedLayers(){
@@ -430,32 +480,42 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				mapItem.setLayerStyles(styles);
 
 			} else if (prop.equals(SmartMapItem.SMART_BASEMAP_PROP)) {
-
-				IStructuredSelection selection = ((IStructuredSelection) basemapCombo
-						.getSelection());
-				if (selection.isEmpty()) {
+				byte[] uuid = getSelectedBasemapUuid();
+				if (uuid == null){
 					mapItem.setBasemapName(null);
-				} else {
-					byte[] uuid = ((BasemapDefinition) selection
-							.getFirstElement()).getUuid();
-					if (uuid == null) {
-						mapItem.setBasemapName(null);
-					} else {
-						String name = SmartUtils.encodeHex(uuid);
-						mapItem.setBasemapName(name);
-					}
+				}else{
+					String name = SmartUtils.encodeHex(uuid);
+					mapItem.setBasemapName(name);
 				}
-
-			} else if (prop.equals(SmartMapItem.SMART_BOUNDS_PROP)) {
-				mapItem.setMapBounds(txtBounds.getText());
+			} else if (prop.equals(SmartMapItem.SMART_BOUNDS_GROUP)) {
+				if (txtBounds.getData() == null){
+					mapItem.setMapBounds(null);
+				}else{
+					mapItem.setMapBounds((ReferencedEnvelope)txtBounds.getData());
+				}
 			}
 		} catch (Exception ex) {
 			SmartMapItemPlugIn.displayLog(
 					"Could not set property." + ex.getMessage(), ex);
 		}
-
 	}
+	
 
+	/**
+	 * 
+	 * @return the selected basemap uuid or null
+	 */
+	private byte[] getSelectedBasemapUuid(){
+		IStructuredSelection selection = ((IStructuredSelection) basemapCombo.getSelection());
+		if (selection.isEmpty()) {
+			return null;
+		} else {
+			byte[] uuid = ((BasemapDefinition) selection
+					.getFirstElement()).getUuid();
+			return uuid;
+		}
+	}
+	
 	@Override
 	public void setInput(Object input) {
 		Object element = input;
@@ -534,6 +594,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	
 	
 	protected void updateUI() {
+		if (tblLayers == null){
+			return;
+		}
 		tblLayers.setInput(layerItems);
 		
 		String uuid =mapItem.getBasemapName();
@@ -548,10 +611,13 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			}
 		}
 		basemapCombo.setSelection(new StructuredSelection(selection));
+		
 		if (mapItem.getMapBounds() == null){
-			txtBounds.setText("");
+			txtBounds.setText("(map extents)");
 		}else{
-			txtBounds.setText(mapItem.getMapBounds());
+			ReferencedEnvelope env = mapItem.getMapBounds();
+			txtSrid.setText(env.getCoordinateReferenceSystem().getName().getCode());
+			txtBounds.setText("(" + env.getMinX() + "," + env.getMinY() + "),(" + env.getMaxX() + "," + env.getMaxY() + ")");
 		}
 
 	}
