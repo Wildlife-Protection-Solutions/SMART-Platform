@@ -21,11 +21,13 @@
  */
 package org.wcs.smart.birt.map.properties;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.StyleContent;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
@@ -42,6 +44,7 @@ import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.XMLMemento;
 import org.hibernate.Session;
 import org.wcs.smart.birt.map.BirtMapUtils;
 import org.wcs.smart.birt.map.SmartMapItemPlugIn;
@@ -133,15 +136,12 @@ public class StyleCellEditor extends DialogCellEditor {
 			if (action.getSelectedStyle() == null){
 				return null;
 			}
-			
-			List<StyleEntry> entries = layer.getStyleBlackboard().getContent();
-			for (StyleEntry en : entries) {
-				if (en.getID().equals(SLDContent.ID)) {
-					return en;
-				}
-			}
-
-			return null;
+			SLDContent sld = new SLDContent();
+			XMLMemento memento = XMLMemento.createWriteRoot("styleEntry"); //$NON-NLS-1$
+	        sld.save(memento, action.getSelectedStyle());
+	        StringWriter writer = new StringWriter();
+            memento.save(writer);
+	        return writer.toString();
 		} catch (Exception ex) {
 			SmartMapItemPlugIn.displayLog("Could not open style dialog. " + ex.getMessage(), ex);
 		}

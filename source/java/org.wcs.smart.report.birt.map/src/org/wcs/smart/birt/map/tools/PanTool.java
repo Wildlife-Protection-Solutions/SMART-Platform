@@ -5,7 +5,7 @@ import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 public class PanTool extends net.refractions.udig.tools.internal.PanTool {
 
 	public PanTool() {
-		// TODO Auto-generated constructor stub
+		super();
 	}
 
 	
@@ -14,6 +14,6 @@ public class PanTool extends net.refractions.udig.tools.internal.PanTool {
      */
     public void mouseReleased( MapMouseEvent e ) {
      	super.mouseReleased(e);
-     	context.getMap().getRenderManager().refresh(context.getMap().getViewportModel().getBounds());
+     	context.getMap().getRenderManager().refresh(null);
     }
 }

@@ -241,8 +241,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 			@Override
 			protected void setValue(Object element, Object value) {
-				if (element instanceof LayerDefinition && value instanceof StyleEntry){
-					((LayerDefinition)element).style = ((StyleEntry)value).getMemento();
+				if (element instanceof LayerDefinition ){
+					((LayerDefinition)element).style = null;
+					if (value instanceof String){
+						((LayerDefinition)element).style = (String)value;
+					}
 					tblLayers.refresh();
 					updateModel(SmartMapItem.SMART_LAYER_PROP);
 				}

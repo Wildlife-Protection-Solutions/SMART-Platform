@@ -101,7 +101,6 @@ public class SmartOpenStyleEditorAction {
         StyleEditorDialog dialog = StyleEditorDialog.createDialogOn(shell, pageId, selectedLayer, manager);
         if (dialog.open() == Window.OK){
         	selectedStyle = dialog.getStyle();
-        	selectedLayer.getStyleBlackboard().put(SLDContent.ID, selectedStyle);
         }
     }
     
