@@ -35,6 +35,8 @@ import org.wcs.smart.query.model.QueryResultItem;
  */
 public class AttributeQueryColumn extends QueryColumn {
 
+	private String attributeKey = null;
+	
 	/**
 	 * Creates a new attribute column.
 	 * 
@@ -44,6 +46,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	 */
 	public AttributeQueryColumn(String name, String attributeId, AttributeType type){
 		super(name, "attribute:" + attributeId, null);
+		this.attributeKey = attributeId;
 		ColumnType ctype = ColumnType.STRING;
 		if (type == AttributeType.NUMERIC ){
 			ctype = ColumnType.NUMBER;
@@ -63,6 +66,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	 */
 	public AttributeQueryColumn(String name, String key, ColumnType type){
 		super(name, key, type);
+		this.attributeKey = key.split(":")[1];
 	}
 
 
@@ -71,7 +75,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	 */
 	@Override
 	public Object getValue(QueryResultItem item) {
-		return item.getAttributeValue(getKey());
+		return item.getAttributeValue(attributeKey);
 	}
 
 

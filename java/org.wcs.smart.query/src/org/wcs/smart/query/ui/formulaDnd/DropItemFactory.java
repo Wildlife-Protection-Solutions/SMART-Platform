@@ -383,8 +383,6 @@ public class DropItemFactory {
 			}else if (queryType == QueryType.SUMMARY){
 				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}
-			return null;
-
 		}
 		if (items != null){
 			for (int i = 0; i < items.length; i ++){
