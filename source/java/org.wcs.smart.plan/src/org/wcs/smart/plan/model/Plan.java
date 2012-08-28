@@ -1,0 +1,189 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.plan.model;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OrderBy;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Station;
+import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.util.SmartUtils;
+
+/**
+ * Represents a patrol object
+ * 
+ * @author Jeff
+ * @since 1.0.0
+ */
+@Entity
+@Table(name="smart.plan")
+public class Plan {
+
+	private byte[] uuid;
+	private ConservationArea ca;
+	private Station station;
+	private Team team;
+	private String id;
+	private String name;
+	private String description;
+	private Date startDate;
+	private Date endDate;
+
+	private List<Target> targets;
+	
+	
+	public Plan(){
+		
+	}
+
+	@Id
+	@GeneratedValue(generator="uuid")
+	@GenericGenerator(name= "uuid", strategy="uuid2")
+	public byte[] getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(byte[] uuid) {
+		this.uuid = uuid;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return ca;
+	}
+
+	public void setConservationArea(ConservationArea ca) {
+		this.ca = ca;
+	}
+	
+	@Column(name = "id")
+	public String getId(){
+		return this.id;
+	}
+	public void setId(String id){
+		this.id = id;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="station_uuid", referencedColumnName="uuid")
+	public Station getStation() {
+		return station;
+	}
+
+	public void setStation(Station station) {
+		this.station = station;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="team_uuid", referencedColumnName="uuid")
+	public Team getTeam() {
+		return team;
+	}
+
+	public void setTeam(Team team) {
+		this.team = team;
+	}
+
+	@Column(name="start_date")
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	@Column(name="end_date")
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+	
+	
+	
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Plan){
+			Plan s = (Plan)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return s.hashCode() == hashCode();
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * <p>
+	 * To get full file names you must prepend this with the conservation area file store location.
+	 * </p>
+	 * <code>
+	 * ConservationArea.getFileDataStoreLocation() + File.separator + Patrol.getPatrolDatastorePath();
+	 * </code>
+	 * @return the file store location for the patrol relative to the conservation area file store
+	 */
+	@Transient
+	public String getPlanDatastorePath(){
+		return "Plan" + File.separator + SmartUtils.getDirectoryPath(uuid);
+	}
+
+
+	
+}
