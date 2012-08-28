@@ -22,6 +22,7 @@
 package org.wcs.smart.report.library;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
@@ -92,8 +93,10 @@ public class SmartBirtLibrary {
 		if (!libraryFile.exists()){
 			
 			try {
-				URL url = FileLocator.toFileURL(ReportPlugIn.getDefault().getBundle().getResource(DEFAULT_LIBRARY_FILENAME));
-				FileUtils.copyFile(new File(url.toURI()), libraryFile);
+				//URL url = FileLocator.toFileURL(ReportPlugIn.getDefault().getBundle().getResource(DEFAULT_LIBRARY_FILENAME));
+				InputStream library = ReportPlugIn.class.getClassLoader().getResourceAsStream(DEFAULT_LIBRARY_FILENAME);
+//				FileUtils.copyFile(new File(url.toURI()), libraryFile);
+				FileUtils.copyInputStreamToFile(library, libraryFile);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
