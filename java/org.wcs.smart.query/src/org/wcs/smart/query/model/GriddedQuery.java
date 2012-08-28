@@ -42,11 +42,10 @@ import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
-import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.gridded.MockQuery;
 
 /**
  * A class to represent a summary query.
@@ -202,6 +201,11 @@ public class GriddedQuery extends Query {
 	 */
 	@Transient
 	public List<QueryResultItem> getLastResults(){
+
+		// FIXME HACK the result to try the raster result
+		this.lastResults = MockQuery.getQueryResultsExample2(null);
+		//this.lastResults = MockQuery.getQueryResultsExample1(null);
+
 		return this.lastResults;
 	}
 	

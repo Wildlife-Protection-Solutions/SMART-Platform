@@ -58,6 +58,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.gridded.RasterService;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
@@ -77,8 +78,8 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private GriddedQuery query;
 
 	private boolean isDirty = false;
-	public GriddedTableResults page1;
-	public GriddedResults page2;
+	public GriddedTableResultsPage page1;
+	public GriddedResultsMapEditorPage page2;
 
 
 	private IQueryListener qListener = new IQueryListener() {
@@ -115,7 +116,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			}catch (Exception ex){
 				QueryPlugIn.displayLog("Could not parse query: " + input.getName()+ ".\n\n" + ex.getMessage(), ex);
 			}finally{
-				session.getTransaction().rollback();
+				session.getTransaction().rollback(); // FIXME Mauro comment: what is the sense of this rollback?
 				session.close();
 			}
 			
@@ -226,14 +227,14 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		super.setPartName(input.getName());
 		showBusy(true);
 		try {
-			page1 = new GriddedTableResults(this);
+			page1 = new GriddedTableResultsPage(this);
 			addPage(0, page1, input);
 			setPageText(0, "Tabular Results");
 			if (this.query != null && this.query.getUuid() == null){
 				page1.setQuery();
 			}
 			
-			page2 = new GriddedResults(this);
+			page2 = new GriddedResultsMapEditorPage(this);
 			addPage(1, page2, input);
 			setPageText(1, "Mapped Results");
 			
@@ -272,6 +273,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					List<QueryResultItem> results = query.getQueryResults(mymonitor);
+					
 					page1.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					QueryPlugIn.displayLog("Could not execute query.", ex);

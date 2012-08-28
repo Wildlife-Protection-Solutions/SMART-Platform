@@ -19,40 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.hibernate;
+package org.wcs.smart.query.ui.gridded;
 
-import java.sql.DriverManager;
+import org.wcs.smart.query.QueryPlugIn;
 
 /**
- * MapSettingsStore specific extensions for the derby database.
- * 
- * 
- * @author egouge
- * @since 1.0.0
+ * @author Mauricio Pazos
+ *
  */
-public class DerbyHibernateExtensions {
-
+public class RasterBuildException extends Exception {
+	
 	/**
-	 * Correctly shuts down the derby database.
 	 * 
-	 * @param reconnect should be <code>true</code> if there is any change
-	 * the application is going to reconnect to the database.
 	 */
-	public static void shutDown(boolean reconnect){
-		try {
-			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		} catch (Exception e) {
-			//eatme - this will always through an exception
-			//e.printStackTrace();
-		}
-		
-		if (reconnect){
-			try{
-				//without this hibernate will not re-connect to the database propery
-				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
-			}catch (Exception ex){
-			}
-		}
+	private static final long serialVersionUID = -5870132809365289549L;
 
+	public RasterBuildException(String message) {
+		super(message);
 	}
+
+	public RasterBuildException(String message, Exception e) {
+		super(message, e);
+		QueryPlugIn.log(message, e);
+	}
+
 }

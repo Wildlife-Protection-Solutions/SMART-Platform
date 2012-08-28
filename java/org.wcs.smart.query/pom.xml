@@ -8,13 +8,6 @@
 	<name>SMART - Spatial Monitoring and Reporting Tool</name>
 	<packaging>pom</packaging>
 	
-	<repositories>
-
-	</repositories>
-
-
-
-
 	<build>
 		<plugins>
 			<plugin>
@@ -57,4 +50,6 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+
 </project>
