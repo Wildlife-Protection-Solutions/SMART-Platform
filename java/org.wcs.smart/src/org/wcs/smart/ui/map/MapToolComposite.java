@@ -106,7 +106,19 @@ public class MapToolComposite {
 		}
         toolBar.pack();
 	}
-	
+		
+	/**
+	 * Activates the tool with the given id
+	 * @param id
+	 */
+	public void selectTool(String id){
+		for (ToolItem it : items){
+			if (  ((ToolProxy)it.getData()).getId().equals(id) ){
+				select(it);
+				return;
+			}
+		}
+	}
 	
 	private void select(ToolItem item){
 		ToolProxy mi = ((ToolProxy)item.getData());
