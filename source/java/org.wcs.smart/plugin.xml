@@ -278,13 +278,13 @@
                commandId="org.wcs.smart.map.pan"
                icon="images/icons/elcl16/pan_tool.png"
                label="Pan"
-               style="push">
+               style="radio">
          </command>
          <command
                commandId="org.wcs.smart.map.zoom"
                icon="images/icons/elcl16/zoom_tool.png"
                label="Zoom "
-               style="push"
+               style="radio"
                tooltip="zoom to various locations on map">
          </command>
          <command
@@ -419,10 +419,12 @@
             name="Saves as Basemap">
       </command>
       <command
+            category="org.wcs.smart.map.commands"
             id="org.wcs.smart.map.pan"
             name="Pan Map">
       </command>
       <command
+            category="org.wcs.smart.map.commands"
             id="org.wcs.smart.map.zoom"
             name="Zoom Tool">
       </command>
@@ -438,6 +440,10 @@
             id="org.wcs.smart.map.loadBasemap"
             name="Load Basemap">
       </command>
+      <category
+            id="org.wcs.smart.map.commands"
+            name="Map Tools">
+      </category>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">

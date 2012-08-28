@@ -258,7 +258,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		fCompositeLogin = new Composite(getSplash(), SWT.BORDER);
 		GridLayout layout = new GridLayout(F_COLUMN_COUNT, false);
-		layout.marginLeft = 120;
+		layout.marginLeft = 135;
 		layout.marginRight = 5;
 		fCompositeLogin.setLayout(layout);		
 		
