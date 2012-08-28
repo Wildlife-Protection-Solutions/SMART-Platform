@@ -39,7 +39,7 @@ import org.wcs.smart.ca.Language;
 public class SmartDB {
 
 	/**
-	 * Database user accounts
+	 * MapSettingsStore user accounts
 	 * 
 	 * @author Emily
 	 *

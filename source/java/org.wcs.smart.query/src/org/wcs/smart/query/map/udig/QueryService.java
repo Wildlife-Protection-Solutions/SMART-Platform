@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.geotools.data.DataStore;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.map.geotools.GriddedDataSource;
 import org.wcs.smart.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
@@ -181,6 +182,8 @@ public class QueryService extends IService {
 						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
 					}else if (query instanceof PatrolQuery){
 						members.add(new QueryGeoResource(this, PatrolQueryDataSource.PATROL_TYPE));
+					}else if (query instanceof GriddedQuery){
+						members.add(new QueryGeoResource(this, GriddedDataSource.GRIDDED_TYPE));
 					}
 				}
 			}
