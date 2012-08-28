@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.birt.map.properties;
 
 import java.text.DecimalFormat;
@@ -11,6 +32,7 @@ import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.internal.tool.ToolContext;
+import net.refractions.udig.project.ui.internal.tool.display.ToolManager;
 import net.refractions.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
@@ -20,10 +42,16 @@ import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -32,19 +60,28 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.wcs.smart.birt.map.tools.ZoomTool;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * Map dialog for picking map extents
+ * @author Emily
+ *
+ */
 public class MapDialog extends Dialog implements IAdaptable, MapPart, IWorkbenchPart{
 
 	private MapViewer viewer;
@@ -68,11 +105,11 @@ public class MapDialog extends Dialog implements IAdaptable, MapPart, IWorkbench
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		if (p.x < 300){
-			p.x = 300;
+		if (p.x < 400){
+			p.x = 400;
 		}
-		if (p.y < 300){
-			p.y = 300;
+		if (p.y < 400){
+			p.y = 400;
 		}
 		return p;
 	}
@@ -123,7 +160,7 @@ public class MapDialog extends Dialog implements IAdaptable, MapPart, IWorkbench
 		String[] thisTools = new String[]{
 				"org.wcs.smart.birt.map.tools.ZoomExtents", 
 				"org.wcs.smart.birt.map.tools.Pan",
-				"org.wcs.smart.birt.map.tools.Zoom"};
+				ZoomTool.ID};
 		
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(composite);
@@ -138,16 +175,30 @@ public class MapDialog extends Dialog implements IAdaptable, MapPart, IWorkbench
 
 		if (bounds != null){
 			map.getViewportModelInternal().setBounds(bounds);
-		}
-		map.getRenderManager().refresh(null);
+		}		
 		
-		
+		getShell().setText("Set Map Bounds");
+		super.getShell().addListener(SWT.Resize, new Listener(){
+			Job j = new Job("resize"){
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					map.getRenderManager().refresh(null);
+					return Status.OK_STATUS;
+				}
+			};
+			
+			@Override
+			public void handleEvent(Event event) {
+				j.schedule(500);
+			}});
+
+		tools.selectTool("org.wcs.smart.birt.map.tools.Pan");
 		return composite;
 	}
 
 	
 	private void createInfoPanel(Composite parent){
-		 Composite infoArea = new Composite(parent, SWT.BORDER);
+		 Composite infoArea = new Composite(parent, SWT.NONE);
 	        infoArea.setLayout(new GridLayout(3, false));
 	        infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 	        lblCoordinates = new Label(infoArea, SWT.NONE);
