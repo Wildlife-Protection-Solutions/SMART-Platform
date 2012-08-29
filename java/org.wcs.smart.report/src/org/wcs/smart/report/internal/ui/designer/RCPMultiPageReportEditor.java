@@ -38,6 +38,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPartConstants;
 import org.eclipse.ui.PartInitException;
@@ -260,10 +261,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 
 					//update editor input
 					final SmartReportEditorInput input = new SmartReportEditorInput(copy);
-					RCPMultiPageReportEditor.this.setInput(input);
-					
-					try{
-						
+					try{			
 					getSite().getShell().getDisplay().syncExec(new Runnable() {
 						@Override
 						public void run() {
@@ -278,6 +276,17 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 						ReportPlugIn.displayLog("Error creating report file. " + ex.getMessage(), ex);
 						return;
 					}
+					
+					//open new editor and close me
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							ReportManager.editReport(copy);
+							getEditorSite().getPage().closeEditor(RCPMultiPageReportEditor.this, false);
+						}
+						
+					});
+					
 				}
 			});
 		} catch (Exception ex) {

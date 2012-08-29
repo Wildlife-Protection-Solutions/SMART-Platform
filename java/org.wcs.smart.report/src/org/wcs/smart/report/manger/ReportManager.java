@@ -51,6 +51,7 @@ import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
@@ -177,7 +178,8 @@ public class ReportManager {
 	 */
 	public static String generateReportId(Session session) throws Exception{
 		String newId = "000001";
-		Query q = session.createQuery("SELECT max(id) FROM Report");
+		Query q = session.createQuery("SELECT max(id) FROM Report WHERE conservationArea = :ca");
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		Object maxid = q.list().get(0);
 		if (maxid != null){
 			int x = Integer.parseInt(maxid.toString());
@@ -321,7 +323,7 @@ public class ReportManager {
 			if (dataset instanceof OdaDataSetHandle){
 				OdaDataSetHandle h = (OdaDataSetHandle)dataset;
 				if (h.getExtensionID().equals(SMART_DATASET_TYPE)){
-					reportQueries.add(new ReportQuery(r, SmartUtils.decodeHex(h.getQueryText())));
+					reportQueries.add(new ReportQuery(r, SmartUtils.decodeHex(h.getQueryText().split(":")[1])));
 				}
 			}
 		}

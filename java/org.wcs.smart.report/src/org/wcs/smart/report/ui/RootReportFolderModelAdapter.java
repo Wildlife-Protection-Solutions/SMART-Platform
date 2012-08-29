@@ -101,14 +101,36 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 			RootReportFolder root = ((RootReportFolder)object);
 			List<Object> kids = new ArrayList<Object>();
 			if (root.isShared()){
-				List<?> kidFolders = s.createCriteria(ReportFolder.class).add(Restrictions.isNull("parentFolder")).add(Restrictions.isNull("employee")).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				List<?> kidFolders = s
+						.createCriteria(ReportFolder.class)
+						.add(Restrictions.isNull("parentFolder"))
+						.add(Restrictions.isNull("employee"))
+						.add(Restrictions.eq("conservationArea",
+								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidFolders);
-				List<?> kidQueries = s.createCriteria(Report.class).add(Restrictions.isNull("folder")).add(Restrictions.eq("shared", true)).list();
+				List<?> kidQueries = s
+						.createCriteria(Report.class)
+						.add(Restrictions.isNull("folder"))
+						.add(Restrictions.eq("shared", true))
+						.add(Restrictions.eq("conservationArea",
+								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidQueries);
 			}else{
-				List<?> kidFolders = s.createCriteria(ReportFolder.class).add(Restrictions.isNull("parentFolder")).add(Restrictions.eq("employee", SmartDB.getCurrentEmployee())).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				List<?> kidFolders = s
+						.createCriteria(ReportFolder.class)
+						.add(Restrictions.isNull("parentFolder"))
+						.add(Restrictions.eq("employee",
+								SmartDB.getCurrentEmployee()))
+						.add(Restrictions.eq("conservationArea",
+								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidFolders);
-				List<?> kidQueries = s.createCriteria(Report.class).add(Restrictions.isNull("folder")).add(Restrictions.eq("shared", false)).add(Restrictions.eq("owner", SmartDB.getCurrentEmployee())).list();
+				List<?> kidQueries = s
+						.createCriteria(Report.class)
+						.add(Restrictions.isNull("folder"))
+						.add(Restrictions.eq("shared", false))
+						.add(Restrictions.eq("owner",SmartDB.getCurrentEmployee()))
+						.add(Restrictions.eq("conservationArea", 
+								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidQueries);
 			}
 			collector.add(kids.toArray(), monitor);

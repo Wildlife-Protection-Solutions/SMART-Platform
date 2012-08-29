@@ -434,7 +434,7 @@ public class ImportReportEngine {
 				OdaDataSetHandle handle = (OdaDataSetHandle)dataset;
 				if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
 					//smart dataset
-					if (!processQuery(handle.getQueryText(), 
+					if (!processQuery(handle.getQueryText().split(":")[1], 
 							queryDir, handle, sharedReport)){
 						return false;
 					}
