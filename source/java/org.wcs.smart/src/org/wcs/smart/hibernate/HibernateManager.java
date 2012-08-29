@@ -37,6 +37,7 @@ import org.hibernate.EntityMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.SessionFactoryImplementor;
@@ -437,8 +438,13 @@ public class HibernateManager extends SmartHibernateManager{
 	@SuppressWarnings("unchecked")
 	public static DataModel loadDataModel(ConservationArea ca, Session s){
 		try{
-			List<Category> rootCategories = s.createCriteria(Category.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("parent")).list();
-			List<Attribute> attribute = s.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", ca)).list();
+			List<Category> rootCategories = s.createCriteria(Category.class)
+					.add(Restrictions.eq("conservationArea", ca))
+					.add(Restrictions.isNull("parent"))
+					.addOrder(Order.asc("categoryOrder")).list();
+			
+			List<Attribute> attribute = s.createCriteria(Attribute.class)
+					.add(Restrictions.eq("conservationArea", ca)).list();
 			DataModel dm = new DataModel(ca, rootCategories, attribute);
 			return dm;
 		}catch (final Exception ex){

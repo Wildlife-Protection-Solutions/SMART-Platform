@@ -30,11 +30,8 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.ProjectPackage;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
-import net.refractions.udig.project.internal.impl.ContextModelImpl;
-import net.refractions.udig.project.internal.impl.MapImpl;
 import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
 import net.refractions.udig.project.ui.ProjectUtil;
 
@@ -42,8 +39,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -52,7 +47,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job and intitializes a map with the
@@ -126,16 +120,10 @@ public class LoadDefaultLayersJob extends Job{
     				cleanedGeoResources = ProjectUtil.cleanDuplicateGeoResources(layers, map);
     				AddLayersCommand alCommand = new AddLayersCommand(cleanedGeoResources, 0);
     				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-//    				
-    				//TODO fix performance issues with add layer command
+
     				((RenderManagerImpl)map.getRenderManager()).disableRendering();
-//    				((ContextModelImpl)((MapImpl)map).getContextModel()).setNotification(false);
     				map.sendCommandSync(alCommand);
     				map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY,alCommand.getLayers());
-//    				((MapImpl)map).getContextModel().eSetDeliver(true);
-//    				((ContextModelImpl)((MapImpl)map).getContextModel()).setNotification(true);
-//    				((ContextModelImpl)((MapImpl)map).getContextModel()).eNotify(new ENotificationImpl(((ContextModelImpl)((MapImpl)map).getContextModel()), Notification.SET,
-//    	                    ProjectPackage.CONTEXT_MODEL__MAP, map, map));
     				((RenderManagerImpl)map.getRenderManager()).enableRendering();
     				((RenderManagerImpl)map.getRenderManager()).refresh(null);
     				
