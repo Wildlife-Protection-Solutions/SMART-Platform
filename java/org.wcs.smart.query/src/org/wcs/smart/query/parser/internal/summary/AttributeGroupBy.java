@@ -326,11 +326,11 @@ public class AttributeGroupBy implements IGroupBy {
 		QueryHibernateManager.validateAttribute(attributeKey, session);
 		if (attributeType == AttributeType.TREE){
 			for (int i = 0; i < filterHkeys.length; i ++){
-				QueryHibernateManager.validateAttributeTreeNode(filterHkeys[i], session);
+				QueryHibernateManager.validateAttributeTreeNode(filterHkeys[i],attributeKey, session);
 			}
 		}else{
 			for (int i = 0; i < filterHkeys.length; i ++){
-				QueryHibernateManager.validateAttributeListItem(filterHkeys[i], session);
+				QueryHibernateManager.validateAttributeListItem(filterHkeys[i], attributeKey, session);
 			}
 		}
 		return null;

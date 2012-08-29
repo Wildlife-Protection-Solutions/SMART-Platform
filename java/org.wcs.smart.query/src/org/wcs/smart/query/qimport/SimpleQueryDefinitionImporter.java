@@ -158,9 +158,9 @@ public class SimpleQueryDefinitionImporter {
 			AttributeFilter f = (AttributeFilter)filter;
 			QueryHibernateManager.validateAttribute(f.getAttributeKey(), session);
 			if (f.getAttributeType() == AttributeType.LIST){
-				QueryHibernateManager.validateAttributeListItem((String)f.getValue(), session);
+				QueryHibernateManager.validateAttributeListItem((String)f.getValue(), f.getAttributeKey(), session);
 			}else if (f.getAttributeType() == AttributeType.TREE){
-				QueryHibernateManager.validateAttributeTreeNode((String)f.getValue(), session);
+				QueryHibernateManager.validateAttributeTreeNode((String)f.getValue(), f.getAttributeKey(), session);
 			}
 			
 		}else if (filter instanceof CategoryFilter){
