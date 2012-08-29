@@ -494,17 +494,22 @@ public class QueryHibernateManager {
 	
 	/**
 	 * Validates that a given attribute list item exists.  Throws an exception if not found.
-	 * @param key
+	 * @param key the list item key
+	 * @param attributeKey the attribute key (associated with the list item)
 	 * @param session
 	 * @throws Exception
 	 */
-	public static void validateAttributeListItem(String key, Session session) throws Exception{
+	public static void validateAttributeListItem(String key, String attributeKey, Session session) throws Exception{
 		
-		String hql = " FROM AttributeListItem ai join ai.attribute a Where a.conservationArea = :ca and ai.keyId = :key";
-		org.hibernate.Query q = session.createQuery(hql);
+		Query q = session
+				.createQuery(" From AttributeListItem ali join ali.attribute as a "+
+						"where a.conservationArea = :ca and ali.keyId = :key and "+
+						"a.keyId = :attributeKey");
+		
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		q.setParameter("key", key);
-		
+		q.setParameter("attributeKey", attributeKey);
+			
 		if (q.list().size() != 1){
 			throw new Exception ("Could not find Attribute List Item with key '" + key + "' in datamodel. ");
 		}
@@ -513,15 +518,18 @@ public class QueryHibernateManager {
 
 	/**
 	 * Validates that a given attribute tree node item exists.  Throws an exception if not found.
-	 * @param key
+	 * @param key the tree node key
+	 * @param attributeKey the attribute key of the tree
 	 * @param session
 	 * @throws Exception
 	 */
-	public static void validateAttributeTreeNode(String key, Session session) throws Exception{
-		String hql = " FROM AttributeTreeNode ai join ai.attribute a Where a.conservationArea = :ca and ai.hkey = :hkey";
+	public static void validateAttributeTreeNode(String key, String attributeKey, Session session) throws Exception{
+		String hql = " FROM AttributeTreeNode ai join ai.attribute a " +
+				"Where a.conservationArea = :ca and ai.hkey = :hkey and a.keyId = :attributeKey";
 		org.hibernate.Query q = session.createQuery(hql);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		q.setParameter("hkey", key);
+		q.setParameter("attributeKey", attributeKey);
 		
 		if (q.list().size() != 1){
 			throw new Exception ("Could not find Attribute Tree Node with key '" + key + "' in datamodel. ");

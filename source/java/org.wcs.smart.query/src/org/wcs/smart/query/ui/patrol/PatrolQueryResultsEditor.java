@@ -351,13 +351,14 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			monitor.setCanceled(true);
 			return ;
 		}
-		updatePartName();
-		
 		if (newQuery){
 			page1.setQuery();
 			((QueryInput)super.getEditorInput()).setUuid(query.getUuid());
-			((QueryInput)super.getEditorInput()).setId(query.getId()); 
+			((QueryInput)super.getEditorInput()).setId(query.getId());
 		}
+		((QueryInput)super.getEditorInput()).setQueryName(query.getName());
+		
+		updatePartName();
 	
 		setDirty(false);
 	}

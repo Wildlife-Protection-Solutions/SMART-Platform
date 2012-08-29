@@ -29,8 +29,6 @@ import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 
-import opendap.servlet.GetInfoHandler;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -356,15 +354,14 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			monitor.setCanceled(true);
 			return;
 		}
-		
-		updatePartName();
-		
 		if (newQuery){
 			page1.setQuery();
 			((QueryInput)super.getEditorInput()).setUuid(query.getUuid());
-			((QueryInput)super.getEditorInput()).setId(query.getId()); 
+			((QueryInput)super.getEditorInput()).setId(query.getId());
 		}
-	
+		((QueryInput)super.getEditorInput()).setQueryName(query.getName());
+		
+		updatePartName();
 		setDirty(false);
 	}
 

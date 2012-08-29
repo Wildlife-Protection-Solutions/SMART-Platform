@@ -342,13 +342,14 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			monitor.setCanceled(true);
 			return ;
 		}
-		
-		updatePartName();
-		initQuery();
 		if (newQuery) {
 			((QueryInput) super.getEditorInput()).setUuid(query.getUuid());
 			((QueryInput) super.getEditorInput()).setId(query.getId());
 		}
+		
+		((QueryInput)super.getEditorInput()).setQueryName(query.getName());
+		updatePartName();
+		initQuery();
 		setDirty(false);
 	}
 
