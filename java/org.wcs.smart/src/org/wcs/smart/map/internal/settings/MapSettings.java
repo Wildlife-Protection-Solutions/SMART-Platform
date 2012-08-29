@@ -463,7 +463,7 @@ public class MapSettings {
 			// with these values
 			List<StyleRegister> styleRegisterList = savedLayer.getStyleRegisterList();
 			for (StyleRegister styleRegister : styleRegisterList) {
-				
+				boolean found = false;
 				// search the style to set the register value
 				for (StyleEntry newStyleEntry : layer.getStyleBlackboard().getContent()) {
 
@@ -472,7 +472,12 @@ public class MapSettings {
 						// set the register values in the current style
 						Object style = mementoToStyle(styleRegister.getId(), styleRegister.getMemento());
 						updatedStyleBlackboard.put(newStyleEntry.getID(), style);
+						found = true;
 					}
+				}
+				if (!found){
+					Object style = mementoToStyle(styleRegister.getId(), styleRegister.getMemento());
+					updatedStyleBlackboard.put(styleRegister.getId(), style);
 				}
 			}
 			// change the current by the cloned and updated
@@ -616,7 +621,9 @@ public class MapSettings {
 
 					File trgFile = new File(fileStoreDirectory,targetName);
 					
-					FileUtils.copyFile(srcFileList[i], trgFile);
+					if (!srcFileList[i].getCanonicalFile().equals(trgFile.getCanonicalFile())){
+						FileUtils.copyFile(srcFileList[i], trgFile);
+					}
 				}
 			}	 
 			String fileName = new File(srcPath).getName();

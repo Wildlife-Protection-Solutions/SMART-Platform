@@ -161,21 +161,14 @@ public class HibernateManager extends SmartHibernateManager{
 	/**
 	 * Opens a session, loads all conservation areas and
 	 * closes the session.
-	 * 
+	 * @param session hibernate session
 	 * @return a list of conservation areas in the database
 	 */
 	
-	public static List<ConservationArea> getConservationAreas() {
-		Session x = openSession();
-		Transaction tx = x.beginTransaction();
-		try {
-			@SuppressWarnings("unchecked")
-			List<ConservationArea> areas = x.createQuery("from ConservationArea order by id").list();	
-			tx.commit();
-			return areas;
-		} finally {
-			x.close();
-		}
+	public static List<ConservationArea> getConservationAreas(Session session) {
+		@SuppressWarnings("unchecked")
+		List<ConservationArea> areas = session.createQuery("from ConservationArea order by id").list();	
+		return areas;
 	}
 	
 	/**

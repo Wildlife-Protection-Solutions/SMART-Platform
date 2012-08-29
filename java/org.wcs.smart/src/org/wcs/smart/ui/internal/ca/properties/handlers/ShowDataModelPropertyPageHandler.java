@@ -70,7 +70,7 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 		
 		DataModel dataModel = ppd.dm;
 		if ( dataModel == null || dataModel.getCategories() == null || dataModel.getCategories().size() == 0 ){
-			InitCaDataModelDialog dd = new InitCaDataModelDialog();
+			InitCaDataModelDialog dd = new InitCaDataModelDialog(dialog.getSession());
 			if (dd.open() == Window.CANCEL){
 				return null;
 			}

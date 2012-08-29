@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -59,10 +60,15 @@ public class SmartStartUp {
 			SmartPlugIn.displayLogExit("No SMART database exists.  The application needs to be re-installed or the database restored manually.", new IllegalStateException("No SMART database."));
 		}
 		
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
 		try{
-			return HibernateManager.getConservationAreas();
+			return HibernateManager.getConservationAreas(session);
 		}catch (Throwable t){
 			SmartPlugIn.displayLogExit("Could not load conservation areas from database.", t);
+		}finally{
+			session.getTransaction().rollback();
+			session.close();
 		}
 		return null;
 	}
