@@ -75,7 +75,7 @@ public class BirtMapUtils {
 			ExtendedItemHandle element) {
 		ReportDesignHandle handle = (ReportDesignHandle) ((ExtendedItemHandle) element)
 				.getRoot();
-		List<?> datasets = handle.getAllDataSets();
+		List<?> datasets = handle.getDataSets().getContents();
 		List<OdaDataSetHandle> sets = new ArrayList<OdaDataSetHandle>();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
@@ -99,7 +99,7 @@ public class BirtMapUtils {
 	 */
 	public static OdaDataSetHandle findHandle(ReportDesignHandle handle,
 			String queryText) {
-		List<?> datasets = handle.getAllDataSets();
+		List<?> datasets = handle.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle) {
