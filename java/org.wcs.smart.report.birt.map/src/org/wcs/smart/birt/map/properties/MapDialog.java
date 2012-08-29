@@ -32,7 +32,6 @@ import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.internal.tool.ToolContext;
-import net.refractions.udig.project.ui.internal.tool.display.ToolManager;
 import net.refractions.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
@@ -41,19 +40,17 @@ import net.refractions.udig.project.ui.tool.ModalTool;
 import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -64,10 +61,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.birt.map.tools.ZoomTool;
@@ -82,7 +75,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author Emily
  *
  */
-public class MapDialog extends Dialog implements IAdaptable, MapPart, IWorkbenchPart{
+public class MapDialog extends Dialog implements MapPart{
 
 	private MapViewer viewer;
 	private Map map;
@@ -170,12 +163,21 @@ public class MapDialog extends Dialog implements IAdaptable, MapPart, IWorkbench
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		
 		
-		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, false, this.basemapUuid);
+		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, bounds == null, this.basemapUuid);
 		layer.schedule();
-
+		
 		if (bounds != null){
 			map.getViewportModelInternal().setBounds(bounds);
-		}		
+		}else{
+			//we need to do this because this map is in a dialog box and
+			//events does work correctly 
+			layer.addJobChangeListener(new JobChangeAdapter() {
+				@Override
+				public void done(IJobChangeEvent event) {
+					map.getRenderManager().refresh(null);
+				}
+			});
+		}
 		
 		getShell().setText("Set Map Bounds");
 		super.getShell().addListener(SWT.Resize, new Listener(){
@@ -344,60 +346,6 @@ public class MapDialog extends Dialog implements IAdaptable, MapPart, IWorkbench
 	@Override
 	public IStatusLineManager getStatusLineManager() {
 		return null;
-	}
-
-	@Override
-	public void addPropertyListener(IPropertyListener listener) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public IWorkbenchPartSite getSite() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getTitle() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Image getTitleImage() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getTitleToolTip() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void removePropertyListener(IPropertyListener listener) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setFocus() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

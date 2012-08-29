@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.project.internal.StyleEntry;
-
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -72,6 +70,7 @@ import org.wcs.smart.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 /**
@@ -159,7 +158,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof LayerDefinition){
-					return ((LayerDefinition) element).handle.getDisplayName();
+					LayerDefinition ld = (LayerDefinition)element;
+					if (ld.handle != null){
+						return ld.handle.getDisplayName();
+					}else{
+						return "[ERROR] [Query Not Found]" ;
+					}
 				}
 				return super.getText(element);
 			}
@@ -266,11 +270,16 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
+				OdaDataSetHandle[] handles = getHandles(true);
+				if (handles.length == 0){
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Error", "There are no report data sets that can be added to the map. ");
+					return;
+				}
 				DatasetComobInputDialog dialog = new DatasetComobInputDialog(
 					Display.getDefault().getActiveShell(),
 					"Add Layer",
 					"Select the dataset to add to the map",
-					getHandles());
+					handles);
 				
 				if (dialog.open() != Window.OK){
 					return;
@@ -475,7 +484,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				for (Iterator<?> iterator = layerItems.iterator(); iterator.hasNext();) {
 					LayerDefinition type = (LayerDefinition) iterator.next();
 					names.add(type.name);
-					defs.add(type.handle.getQueryText());
+					if (type.handle != null){
+						defs.add(type.handle.getQueryText());
+					}else{
+						defs.add(null);
+					}
 					styles.add(type.style);
 				}
 				mapItem.setLayers(defs);
@@ -547,17 +560,19 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 					def.handle = BirtMapUtils.findHandle(
 							(ReportDesignHandle) this.itemHandle.getRoot(),
 							mapItem.getLayers().get(i));
-					if (def.handle != null) {
-						if (mapItem.getLayerNames() != null){
-							def.name = mapItem.getLayerNames().get(i);
-						}else{
-							def.name = def.handle.getName();
-						}
-						if (mapItem.getLayerStyles() != null){
-							def.style = mapItem.getLayerStyles().get(i);
-						}
-						layerItems.add(def);
+					
+					if (mapItem.getLayerNames() != null){
+						def.name = mapItem.getLayerNames().get(i);
+					}else if (def.handle != null){
+						def.name = def.handle.getName();
+					}else{
+						def.name = "[ERROR]";
 					}
+					if (mapItem.getLayerStyles() != null){
+						def.style = mapItem.getLayerStyles().get(i);
+					}
+					layerItems.add(def);
+					
 				}
 			}
 		}
@@ -587,9 +602,21 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	}
 
 	
-	private OdaDataSetHandle[] getHandles(){
+	private OdaDataSetHandle[] getHandles(boolean onlyGeom){
 		if (itemHandle != null){
-			return BirtMapUtils.getSmartDataSetHandles(itemHandle);
+			OdaDataSetHandle[] handles = BirtMapUtils.getSmartDataSetHandles(itemHandle);
+			if (!onlyGeom){
+				return handles;
+			}else{
+				List<OdaDataSetHandle> thisHandles = new ArrayList<OdaDataSetHandle>();
+				for (int i = 0; i < handles.length; i ++){
+					QueryType qt = QueryType.valueOf(handles[i].getQueryText().split(":")[0]);
+					if (qt != QueryType.GRIDDED && qt != QueryType.SUMMARY){
+						thisHandles.add(handles[i]);
+					}
+				}
+				return thisHandles.toArray(new OdaDataSetHandle[thisHandles.size()]);	
+			}
 		}
 		return new OdaDataSetHandle[0];
 	}
@@ -640,7 +667,13 @@ class LayerDefinition{
 			return false;
 		}
 		LayerDefinition o = (LayerDefinition) other;
-		return o.handle.equals(this.handle) && strEquals(o.name, this.name) && strEquals(o.style, this.style);
+		if (o.handle != null && this.handle != null){
+			return (o.handle.equals(this.handle))
+				&& strEquals(o.name, this.name) 
+				&& strEquals(o.style, this.style);
+		}else{
+			return super.equals(other);
+		}
 	}
 	
 	private boolean strEquals(String x, String y){
