@@ -314,7 +314,6 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 	private boolean savePage(DataSetDesign dataSetDesign) {
 		// save user-defined query text
 		QueryInput query = getQuery();
-		dataSetDesign.setQueryText(query.getId());
 
 		// obtain query's current runtime metadata, and maps it to the
 		// dataSetDesign
@@ -364,8 +363,9 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 
 		//create dataests
 		IQuery query = conn.newQuery(SmartQuery.SMART_DATASET_TYPE);
-		query.prepare(SmartUtils.encodeHex(getQuery().getUuid()));
-		dataSetDesign.setQueryText(SmartUtils.encodeHex(getQuery().getUuid()));
+		String queryText = getQuery().getType().name() + ":" + SmartUtils.encodeHex(getQuery().getUuid());
+		query.prepare(queryText);
+		dataSetDesign.setQueryText(queryText);
 
 		try {
 			IResultSetMetaData md = query.getMetaData();

@@ -107,14 +107,6 @@ public class SmartQuery implements IQuery {
 	}
 
 	/**
-	 * Creates a new query of a given type
-	 * @param queryType
-	 */
-	public SmartQuery(QueryType queryType) {
-		this.queryType = queryType;
-	}
-
-	/**
 	 * @see
 	 * org.eclipse.datatools.connectivity.oda.IQuery#prepare(java.lang.String)
 	 * <p>Here the queryText contains the hex encoded uuid
@@ -126,7 +118,10 @@ public class SmartQuery implements IQuery {
 		
 		parameters = new HashMap<SmartParameterMetaData.Parameter, Object>();
 		try {
-			this.uuid = SmartUtils.decodeHex((String) queryText);
+			String[] bits = queryText.split(":");
+			this.queryType = QueryType.valueOf(bits[0]);
+			this.uuid = SmartUtils.decodeHex(bits[1]);
+			
 		} catch (Exception e1) {
 			throw new OdaException(e1);
 		}
