@@ -135,7 +135,7 @@ public class ReportDefintionExporter implements IReportExporter {
 
 		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
 		
-		List<?> datasets = rdh.getAllDataSets();
+		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){

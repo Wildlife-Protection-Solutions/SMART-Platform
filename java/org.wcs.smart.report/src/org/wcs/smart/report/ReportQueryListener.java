@@ -86,7 +86,7 @@ public class ReportQueryListener implements IQueryEventListener {
 						sb.append("\n");
 					}
 					if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
-						"Warning", "This query is used in the following reports.  By changing the query output columns you my invalidate the report.\n"  + sb.toString() + "  Are you sure you want to continue?")){
+						"Warning", "This query '" + query.getName() + "' is used in the following reports.  By changing the query output columns you my invalidate the report.\n"  + sb.toString() + "  Are you sure you want to continue?")){
 						return false;
 					}
 				}

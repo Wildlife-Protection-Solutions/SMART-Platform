@@ -427,7 +427,7 @@ public class ImportReportEngine {
 
 		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
 		
-		List<?> datasets = rdh.getAllDataSets();
+		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
@@ -471,17 +471,11 @@ public class ImportReportEngine {
 			File queryDir, 
 			OdaDataSetHandle handle,
 			boolean sharedReport) throws Exception{
+		
 		final File queryFile = new File(queryDir, queryUuid + ".query");
 		if (!queryFile.exists()){
 			throw new Exception("Query file not found for query " + queryUuid + ".  Report cannot be imported.");
 		}
-		
-		//lets see if a query with the same uuid exists for the ca
-		org.wcs.smart.query.model.Query smartQuery = QueryHibernateManager.findQuery(session, SmartUtils.decodeHex(queryUuid), null);
-		if (smartQuery != null){
-			return true;
-		}
-		
 		
 		importedQuery = null;
 		final List<String> queryWarnings = new ArrayList<String>();
@@ -506,8 +500,9 @@ public class ImportReportEngine {
 		if (j.getResult().getCode() == IStatus.ERROR){
 			throw (Exception)j.getResult().getException();
 		}
-			
-		smartQuery = findQuery(importedQuery, sharedReport);
+		
+		
+		org.wcs.smart.query.model.Query smartQuery = findQuery(queryUuid, importedQuery, sharedReport);
 		if (smartQuery == null){
 			//cancel selected
 			return false;
@@ -568,7 +563,7 @@ public class ImportReportEngine {
 		}
 		
 		//update report definition to point to correct query
-		handle.setQueryText( SmartUtils.encodeHex(smartQuery.getUuid()));
+		handle.setQueryText( smartQuery.getType().name() + ":" + SmartUtils.encodeHex(smartQuery.getUuid()));
 		
 		return true;
 	}
@@ -591,14 +586,22 @@ public class ImportReportEngine {
 	 * @throws Exception
 	 */
 	private org.wcs.smart.query.model.Query findQuery(
+			String queryUuid,
 			final org.wcs.smart.query.model.Query importedQuery,
 			boolean sharedReport) throws Exception{
 		
-		//search by name
-		final List<org.wcs.smart.query.model.Query> queries = 
-				QueryHibernateManager.findQuery(session, 
+		final List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
+
+		//search by uuid
+		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.findQuery(session, SmartUtils.decodeHex(queryUuid), null);
+		if (uuidQuery != null){
+			queries.add(uuidQuery);
+		}else{
+			//search by name
+			queries.addAll( QueryHibernateManager.findQuery(session, 
 						importedQuery.getName(), 
-						importedQuery.getType());
+						importedQuery.getType()) );
+		}
 		
 		if (sharedReport){
 			//remove any non-shared queries
