@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.birt.map;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -99,7 +101,7 @@ public class SmartMapItem extends ReportItem {
 	 * Creates a new smart map item
 	 * @param item
 	 */
-	public SmartMapItem(ExtendedItemHandle item) {
+	public SmartMapItem(ExtendedItemHandle item) {		
 		this.handle = item;
 		DimensionValue dm = (DimensionValue)handle.getWidth().getValue();
 		if (dm == null || dm.getMeasure() == 0){

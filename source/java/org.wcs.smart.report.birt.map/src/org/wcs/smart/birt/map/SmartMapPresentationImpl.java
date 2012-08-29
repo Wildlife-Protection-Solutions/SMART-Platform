@@ -142,7 +142,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				if (mapqueries != null){
 					for (int i = 0; i < mapqueries.size(); i++) {
 						Query q = QueryHibernateManager.findQuery(session,
-								SmartUtils.decodeHex(mapqueries.get(i)), null);
+								SmartUtils.decodeHex(mapqueries.get(i).split(":")[1]), null);
 						GeoSmart layer = new GeoSmart();
 						layer.name = mapnames.get(i);
 						layer.dbQuery = q;

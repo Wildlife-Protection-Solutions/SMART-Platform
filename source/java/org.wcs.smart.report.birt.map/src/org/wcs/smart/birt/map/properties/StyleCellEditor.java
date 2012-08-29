@@ -97,7 +97,7 @@ public class StyleCellEditor extends DialogCellEditor {
 						Query q = null;
 						try {
 							q = QueryHibernateManager.findQuery(session,
-									SmartUtils.decodeHex(ds.getQueryText()),
+									SmartUtils.decodeHex(ds.getQueryText().split(":")[1]),
 									null);
 						} finally {
 							session.getTransaction().commit();
