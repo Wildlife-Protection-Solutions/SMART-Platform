@@ -250,6 +250,7 @@ public class CaImporter {
 		HashMap<String, TableInfo> tables = scanTables(dir);
 		
 		Set<String> processed = new HashSet<String>();
+		
 		Queue<String> tablesToProcess = new LinkedList<String>();
 		for (String table : tables.keySet()){
 			tablesToProcess.add(table);
