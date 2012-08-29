@@ -23,10 +23,11 @@ package org.wcs.smart.report.manger;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
@@ -252,12 +253,16 @@ public class ReportManager {
 
 		ReportDesignHandle rdh = session.openDesign(report.getFullReportFilename().getAbsolutePath());
 		
-		List<?> datasets = rdh.getAllDataSets();
+		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (((OdaDataSourceHandle)dataset.getDataSource()).getExtensionID().equals(SMART_DATASOURCE_ID)){
 				//refresh the columns in the query
-				DataSetUIUtil.updateColumnCacheAfterCleanRs(dataset);
+				try{
+					DataSetUIUtil.updateColumnCacheAfterCleanRs(dataset);
+				}catch (Exception ex){
+					//eat me - could not update column cache
+				}
 			
 				//for now we are not updating any references to the query columns
 				
@@ -315,9 +320,9 @@ public class ReportManager {
 	 * @throws Exception
 	 */
 	public static void updateReportQueries(Session s, ReportDesignHandle rdh, Report r) throws Exception{
-		List<?> datasets = rdh.getAllDataSets();
-		List<ReportQuery> reportQueries = new ArrayList<ReportQuery>();
+		List<?> datasets = rdh.getDataSets().getContents();
 		
+		Set<ReportQuery> reportQueries = new HashSet<ReportQuery>();		
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
