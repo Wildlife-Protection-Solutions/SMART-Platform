@@ -49,7 +49,6 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	 */
 	private Job addLayerJob = new Job("Add Query Raster Layers") {
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 

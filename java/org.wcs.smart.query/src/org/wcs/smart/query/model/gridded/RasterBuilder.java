@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.gridded;
+package org.wcs.smart.query.model.gridded;
 
 
 import java.awt.image.DataBuffer;
@@ -64,7 +64,7 @@ import org.wcs.smart.query.QueryPlugIn;
  * @author Mauricio Pazos
  *
  */
-public final class RasterBuilder {
+final class RasterBuilder {
 
 	private static final int BAND_0 = 0;
 	
@@ -127,7 +127,7 @@ public final class RasterBuilder {
 	 * 
 	 * @throws NumberFormatException 
 	 */
-	public void build() throws RasterBuildException {
+	public void build() throws RasterServiceException {
 		
 		assert this.table != null;
 		assert this.envelope != null;
@@ -156,9 +156,9 @@ public final class RasterBuilder {
 	 * @param fileName
 	 * @return {@link File}
 	 * 
-	 * @throws RasterBuildException
+	 * @throws RasterServiceException
 	 */
-	private File saveInFile(final GridCoverage2D gc, final String fileName) throws RasterBuildException{
+	private File saveInFile(final GridCoverage2D gc, final String fileName) throws RasterServiceException{
 
 		WorldImageWriter w = null;
 		File rasterFile = new File(fileName);
@@ -173,7 +173,7 @@ public final class RasterBuilder {
 	        
 		} catch (Exception e) {
     		final String message = "Fail saving raster "+ fileName +". " +e.getMessage();
-			throw new RasterBuildException(message, e);
+			throw new RasterServiceException(message, e);
 		} finally {
 			if(w != null) w.dispose();
 		}		
@@ -187,7 +187,7 @@ public final class RasterBuilder {
 	 * @return {@link WritableRaster}
 	 * @throws Exception 
 	 */
-	private WritableRaster createRaster() throws RasterBuildException{
+	private WritableRaster createRaster() throws RasterServiceException{
 
 		try{
 	        WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT, this.width, this.height, 1, null);
@@ -209,7 +209,7 @@ public final class RasterBuilder {
 			
 		} catch (Exception e){
 			String message = "the raster could not be created. " + e.getMessage();
-			throw  new RasterBuildException(message, e);
+			throw  new RasterServiceException(message, e);
 		}
 	}
 

@@ -29,8 +29,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.ui.gridded.RasterBuildException;
-import org.wcs.smart.query.ui.gridded.RasterBuilder;
 
 
 
@@ -57,9 +55,9 @@ public class RasterService {
 	 * 
 	 * @param queryResults
 	 * @throws IOException 
-	 * @throws RasterBuildException 
+	 * @throws RasterServiceException 
 	 */
-	public RasterService(final IMap map, final String rasterFileName, final List<QueryResultItem> queryResults) throws RasterBuildException, IOException {
+	public RasterService(final IMap map, final String rasterFileName, final List<QueryResultItem> queryResults) throws RasterServiceException, IOException {
 		
 		assert map != null;
 		assert rasterFileName != null;
@@ -75,10 +73,10 @@ public class RasterService {
 	 * @param queryResults
 	 * 
 	 * @return {@link File} which contains the generated raster
-	 * @throws RasterBuildException 
+	 * @throws RasterServiceException 
 	 * @throws IOException 
 	 */
-	private File createRaster(final String rasterFileName, final List<QueryResultItem> queryResults) throws RasterBuildException, IOException {
+	private File createRaster(final String rasterFileName, final List<QueryResultItem> queryResults) throws RasterServiceException, IOException {
 
 		RasterBuilder rb = new RasterBuilder();
 
@@ -137,8 +135,9 @@ public class RasterService {
 	/**
 	 * Returns the {@link IGeoResource} list associated to the generated raster. 
 	 * @return list of {@link IGeoResource}  
+	 * @throws RasterServiceException 
 	 */
-	public List<IGeoResource> getGeoResource() {
+	public List<IGeoResource> getGeoResource() throws RasterServiceException {
 
 	    	NullProgressMonitor monitor = new NullProgressMonitor();
 	    	
@@ -182,8 +181,7 @@ public class RasterService {
 		        }
 		        return geoResources;
 	    	} catch (Exception e){
-	    		QueryPlugIn.log(e.getMessage(), e);
-	    		return null;
+	    		throw new RasterServiceException(e.getMessage(), e);
 	    	}
 	}
 

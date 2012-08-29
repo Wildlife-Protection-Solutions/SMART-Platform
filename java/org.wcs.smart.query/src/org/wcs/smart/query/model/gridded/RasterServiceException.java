@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.gridded;
+package org.wcs.smart.query.model.gridded;
 
 import org.wcs.smart.query.QueryPlugIn;
 
@@ -27,18 +27,18 @@ import org.wcs.smart.query.QueryPlugIn;
  * @author Mauricio Pazos
  *
  */
-public class RasterBuildException extends Exception {
+public class RasterServiceException extends Exception {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -5870132809365289549L;
 
-	public RasterBuildException(String message) {
+	public RasterServiceException(String message) {
 		super(message);
 	}
 
-	public RasterBuildException(String message, Exception e) {
+	public RasterServiceException(String message, Exception e) {
 		super(message, e);
 		QueryPlugIn.log(message, e);
 	}
