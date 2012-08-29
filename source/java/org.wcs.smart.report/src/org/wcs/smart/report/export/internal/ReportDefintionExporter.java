@@ -140,7 +140,7 @@ public class ReportDefintionExporter implements IReportExporter {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
 				if (((OdaDataSetHandle)dataset).getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
-					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText();
+					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1];
 					byte[] uuid = SmartUtils.decodeHex(queryUuid);Session hsession = HibernateManager.openSession();
 					Query smartQuery = null;
 					try{

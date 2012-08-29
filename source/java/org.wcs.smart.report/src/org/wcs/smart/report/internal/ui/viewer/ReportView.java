@@ -25,16 +25,10 @@ package org.wcs.smart.report.internal.ui.viewer;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
-import org.eclipse.birt.report.engine.api.CachedImage;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
-import org.eclipse.birt.report.engine.api.IHTMLImageHandler;
-import org.eclipse.birt.report.engine.api.IImage;
-import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
-import org.eclipse.birt.report.engine.api.RenderOption;
-import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -105,7 +99,7 @@ public class ReportView extends ViewPart implements IReportListener{
 
 					}});
 		} catch (Exception e) {
-			e.printStackTrace();
+			ReportPlugIn.displayLog("Error running report: " + e.getMessage(), e);
 		}			
 		return Status.OK_STATUS;
 	}};

@@ -110,12 +110,14 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 			List<Object> kids = new ArrayList<Object>();
 
 			// get kid folders
-			List<?> kidFolders = s.createCriteria(ReportFolder.class).add(Restrictions.eq("parentFolder", parent)).list();
+			List<?> kidFolders = s.createCriteria(ReportFolder.class)
+					.add(Restrictions.eq("parentFolder", parent)).list();
 			kids.addAll(kidFolders);
-			
-			//kid queries
+
+			// kid queries
 			// if (!cprovider.foldersOnly()){
-			List<?> kidQueries = s.createCriteria(Report.class).add(Restrictions.eq("folder", parent)).list();
+			List<?> kidQueries = s.createCriteria(Report.class)
+					.add(Restrictions.eq("folder", parent)).list();
 			kids.addAll(kidQueries);
 			// }
 			collector.add(kids.toArray(), monitor);
