@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry excluding="**/.svn/" kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/derby-10.8.2.2.jar" sourcepath="C:/devel-tools/java/jdk1.7.0_05-i586/src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/derby-10.8.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/dom4j-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-commons-annotations-3.2.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-3.6.8.Final.jar"/>
