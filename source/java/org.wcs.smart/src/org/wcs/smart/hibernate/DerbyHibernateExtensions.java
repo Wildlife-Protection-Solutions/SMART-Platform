@@ -24,7 +24,7 @@ package org.wcs.smart.hibernate;
 import java.sql.DriverManager;
 
 /**
- * MapSettingsStore specific extensions for the derby database.
+ * Database specific extensions for the derby database.
  * 
  * 
  * @author egouge

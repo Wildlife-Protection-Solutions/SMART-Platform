@@ -365,7 +365,7 @@ public class HibernateManager extends SmartHibernateManager{
 	
 	
 	public static void processesError(Throwable exception){
-		SmartPlugIn.log("MapSettingsStore Error", exception);
+		SmartPlugIn.log("Database Error", exception);
 		
 		if (exception.getMessage().contains("ERROR XSDB6")){
 			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", "Another application is currently accessing the database.  Please ensure no other SMART applications are running then restart SMART.");		
