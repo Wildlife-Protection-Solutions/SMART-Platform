@@ -94,7 +94,7 @@ public class DerbyBackupEngine {
 				
 				File[] dirsToBackup = new File[]{filestore, database};
 			
-				monitor.beginTask("Backing Up MapSettingsStore and Files", 2);
+				monitor.beginTask("Backing Up Database and Files", 2);
 			
 				return ZipUtil.createZip(dirsToBackup, outputFile, monitor);
 			}finally{
