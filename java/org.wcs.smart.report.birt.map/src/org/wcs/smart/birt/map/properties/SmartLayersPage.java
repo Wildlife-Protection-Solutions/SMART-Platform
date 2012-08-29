@@ -474,6 +474,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 
 	private void updateModel(String prop) {
+		
+		
 		// update the model
 		try {
 			if (prop.equals(SmartMapItem.SMART_LAYER_PROP)) {
