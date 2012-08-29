@@ -105,13 +105,14 @@ public class SmartGeoResource extends IGeoResource {
 	  public <T> boolean canResolve( Class<T> adaptee ) {
 	        if (adaptee == null)
 	            return false;
-	        return adaptee.isAssignableFrom(IGeoResourceInfo.class)
-	                || adaptee.isAssignableFrom(IService.class)
+	        
+	        return (adaptee.isAssignableFrom(IGeoResourceInfo.class) 
 	                || adaptee.isAssignableFrom(FeatureSource.class)
-	                || adaptee.isAssignableFrom(FeatureStore.class)
-	                || adaptee.isAssignableFrom(SimpleFeatureStore.class)
+	                || adaptee.isAssignableFrom(FeatureStore.class) 
 	                || adaptee.isAssignableFrom(SimpleFeatureSource.class)
-	                || super.canResolve(adaptee);
+	                || adaptee.isAssignableFrom(SimpleFeatureStore.class)
+	                || adaptee.isAssignableFrom(IService.class) 
+	                || super.canResolve(adaptee));
 	    }
 	  
   
@@ -125,7 +126,7 @@ public class SmartGeoResource extends IGeoResource {
             return adaptee.cast( this.service );
         }
       
-        if (adaptee.isAssignableFrom(FeatureSource.class)){
+        if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class)){
         	 DataStore ds = ((SmartService)service).getDataStore(monitor);
              if (ds != null) {
                  FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(areaType.name());
@@ -138,14 +139,16 @@ public class SmartGeoResource extends IGeoResource {
             	 return null;
              }
         }
-        if (adaptee.isAssignableFrom(FeatureStore.class)){
+        if (adaptee.isAssignableFrom(FeatureStore.class) || adaptee.isAssignableFrom(SimpleFeatureStore.class)){
         	 @SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resolve(FeatureSource.class, monitor);
              if (fs != null && fs instanceof FeatureStore) {
                  return adaptee.cast(fs);
              }
         }
+
         return super.resolve(adaptee, monitor);
     }
 
+    
 }

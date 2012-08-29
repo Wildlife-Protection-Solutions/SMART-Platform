@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Cacheable;
@@ -363,22 +364,22 @@ public class Attribute extends DmObject{
 		clone.setRegex(this.getRegex());
 		clone.setType(this.getType());
 		
-		
-		if (this.aggregations != null){
+		if (this.getAggregations() != null){
 			clone.setAggregations(new ArrayList<Aggregation>());
-			for (Aggregation agg: this.aggregations){
+			for (Aggregation agg: this.getAggregations()){
 				clone.aggregations.add(agg);
 			}
 		}
-		if (this.attributeList != null){
+		if (this.getAttributeList() != null){
 			clone.attributeList = new ArrayList<AttributeListItem>();
-			for(AttributeListItem it : this.attributeList){
+			for(AttributeListItem it : this.getAttributeList()){
 				clone.attributeList.add(it.clone(clone, this.ca,defaultLang));
 			}
 		}
-		if (this.rootTreeNodes != null){
+		if (getTree() != null){
 			clone.rootTreeNodes = new ArrayList<AttributeTreeNode>();
-			for (AttributeTreeNode node: this.rootTreeNodes){
+			for (Iterator<AttributeTreeNode> iterator = getTree().iterator(); iterator.hasNext();) {
+				AttributeTreeNode node = (AttributeTreeNode) iterator.next();
 				clone.rootTreeNodes.add(node.clone(newCa, this.ca, null,defaultLang));
 			}
 			

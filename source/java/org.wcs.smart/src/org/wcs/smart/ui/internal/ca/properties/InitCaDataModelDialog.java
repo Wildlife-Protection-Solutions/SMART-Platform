@@ -24,6 +24,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,6 +55,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -82,18 +85,14 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 	/**
 	 * @param parentShell
 	 */
-	public InitCaDataModelDialog() {
+	public InitCaDataModelDialog(Session session) {
 		super(Display.getCurrent().getActiveShell());
 		this.ca = SmartDB.getCurrentConservationArea();
-
-		session = HibernateManager.openSession();
-		session.refresh(ca);
+		this.session = session;
 	}
 
 	private Session getSession() {
-		if (session == null || !session.isOpen()) {
-			session = HibernateManager.openSession();
-		}
+		
 		return session;
 	}
 
@@ -216,7 +215,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		GridLayout layout;
 		Composite imp;
 
-		List<ConservationArea> areas = HibernateManager.getConservationAreas();
+		List<ConservationArea> areas = HibernateManager.getConservationAreas(session);
 		areas.remove(this.ca);
 		if (areas.size() > 0) {
 			btnClone = new Button(comp, SWT.RADIO);
@@ -294,7 +293,13 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						//clone from another data model
 						monitor.setTaskName("Cloning data model information ...");
 						ConservationArea caToCloneFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
-						DataModel dmToClone = HibernateManager.loadDataModel(caToCloneFrom, getSession());
+						DataModel dmToClone = null;
+						getSession().beginTransaction();
+						try{
+							dmToClone = HibernateManager.loadDataModel(caToCloneFrom, getSession());
+						}finally{
+							getSession().getTransaction().commit();
+						}
 						
 						if (dmToClone.getCategories().size() == 0) {
 							dm = null;
@@ -302,7 +307,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						}
 						//TODO: this needs to be tested when we support multiple languages
 						boolean hasLang = false;
-						getSession().refresh(caToCloneFrom);
+
 						for (Language lang: caToCloneFrom.getLanguages()){
 							if (lang.getCode().equals(ca.getDefaultLanguage().getCode())){
 								hasLang = true;
@@ -321,6 +326,15 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							}
 							code = (String)((IStructuredSelection)lsd.getSelection()).getFirstElement();
 						}
+//						for (Iterator iterator = dmToClone.getAttributes().iterator(); iterator.hasNext();) {
+//							Attribute type = (Attribute) iterator.next();
+//							if (type.getTree() != null){
+//								for (AttributeTreeNode node : type.getTree()){
+//									System.out.println(node.getName());
+//								}
+//							}
+//							
+//						}
 						dm = dmToClone.clone(ca, code);
 					}
 					
@@ -350,7 +364,6 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			setReturnCode(CANCEL);
 		}
-		getSession().close();
 
 		close();
 	}
