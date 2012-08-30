@@ -386,28 +386,6 @@ public class Attribute extends DmObject{
 		}
 		
 		return clone;
-		
 	}
-	
-//	@Override
-//	public int hashCode(){
-//		if (uuid != null){
-//			return Arrays.hashCode(uuid);
-//		}else{
-//			return super.hashCode();
-//		}
-//	}
-//	
-//	@Override
-//	public boolean equals(Object other){
-//		if (other != null && other instanceof Attribute){
-//			Attribute s = (Attribute)other;
-//			if (s.getUuid() == null && this.getUuid() == null){
-//				return super.equals(other);
-//			}else if (s.getUuid() != null && this.getUuid() != null){
-//				return Arrays.equals(s.getUuid(), this.getUuid());
-//			}
-//		}
-//		return false;
-//	}
+
 }
