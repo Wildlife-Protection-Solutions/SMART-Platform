@@ -114,7 +114,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			}catch (Exception ex){
 				QueryPlugIn.displayLog("Could not parse query: " + input.getName()+ ".\n\n" + ex.getMessage(), ex);
 			}finally{
-				session.getTransaction().rollback(); // FIXME Mauro comment: what is the sense of this rollback?
+				session.getTransaction().commit(); 
 				session.close();
 			}
 			
