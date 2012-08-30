@@ -141,7 +141,7 @@ public class QueryGeoResource extends IGeoResource {
 			return adaptee.cast(this.service);
 		}
 
-		if (adaptee.isAssignableFrom(FeatureSource.class)) {
+		if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ) {
 			DataStore ds = ((QueryService) service).getDataStore(monitor);
 			if (ds != null) {
 				FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
@@ -153,7 +153,7 @@ public class QueryGeoResource extends IGeoResource {
 				return null;
 			}
 		}
-		if (adaptee.isAssignableFrom(FeatureStore.class)) {
+		if (adaptee.isAssignableFrom(FeatureStore.class) || adaptee.isAssignableFrom(SimpleFeatureStore.class)) {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resolve(
 					FeatureSource.class, monitor);

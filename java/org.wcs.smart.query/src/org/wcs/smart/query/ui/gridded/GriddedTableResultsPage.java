@@ -9,7 +9,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
 
@@ -112,7 +112,7 @@ public class GriddedTableResultsPage  extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(List<QueryResultItem> results, 
+	public void updateAndShowTable(List<GridResultItem> results, 
 			IProgressMonitor monitor){
 		content.setTableData(results, monitor);
 	}

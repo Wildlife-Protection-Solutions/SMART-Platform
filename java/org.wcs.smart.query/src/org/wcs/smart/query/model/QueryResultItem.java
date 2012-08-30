@@ -448,47 +448,4 @@ public class QueryResultItem extends ResultItem{
 	}
 	
 	
-	//GRID additions, probably could be refactored out into another class eventually
-	private double value;
-	private double denominator;
-	private double tileX;
-	private double tileY;
-	
-	
-	public void setValue(double value) {
-		this.value = value;
-	}
-
-	public void setDenominator(double z) {
-		this.denominator = z;
-		
-	}
-
-	public void setTileX(double x) {
-		this.tileX = x;
-		
-	}
-	public void setTileY(double y) {
-		this.tileY = y;
-		
-	}
-	
-	public double getValue() {
-		return value;
-	}
-
-	public double getDenominator() {
-		return denominator;
-		
-	}
-
-	public double getTileX() {
-		return tileX;
-		
-	}
-	public double getTileY() {
-		return tileY;
-		
-	}
-		
 }

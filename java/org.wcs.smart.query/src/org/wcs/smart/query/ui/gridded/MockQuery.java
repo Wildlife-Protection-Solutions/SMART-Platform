@@ -30,6 +30,7 @@ import net.refractions.udig.project.ui.ApplicationGIS;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.QueryResultItem;
 
 /**
@@ -46,30 +47,30 @@ public class MockQuery {
 	 * @param mymonitor
 	 * @return
 	 */
-	public static List<QueryResultItem> getQueryResultsExample1(
+	public static List<GridResultItem> getQueryResultsExample1(
 			IProgressMonitor mymonitor) {
 
-		List<QueryResultItem> list = new LinkedList<QueryResultItem>();
+		List<GridResultItem> list = new LinkedList<GridResultItem>();
 		
-		QueryResultItem r1 = new QueryResultItem();
+		GridResultItem r1 = new GridResultItem();
 		r1.setTileX(1);
 		r1.setTileY(1);
 		r1.setValue(3.0);
 		list.add(r1);
 		
-		QueryResultItem r2 = new QueryResultItem();
+		GridResultItem r2 = new GridResultItem();
 		r2.setTileX(1);
 		r2.setTileY(2);
 		r2.setValue(3.0);
 		list.add(r2);
 		
-		QueryResultItem r3 = new QueryResultItem();
+		GridResultItem r3 = new GridResultItem();
 		r3.setTileX(1);
 		r3.setTileY(3);
 		r3.setValue(2.0);
 		list.add(r3);
 		
-		QueryResultItem r4 = new QueryResultItem();
+		GridResultItem r4 = new GridResultItem();
 		r4.setTileX(3);
 		r4.setTileY(3);
 		r4.setValue(1.0);
@@ -85,15 +86,15 @@ public class MockQuery {
 	 * 
 	 * @return
 	 */
-	public static List<QueryResultItem> getQueryResultsExample2(
+	public static List<GridResultItem> getQueryResultsExample2(
 			IProgressMonitor mymonitor) {
 
-		List<QueryResultItem> list = new LinkedList<QueryResultItem>();
+		List<GridResultItem> list = new LinkedList<GridResultItem>();
 		// minX=-180 maxX= 180 / minY=-90 maxY=83 for WGS84
 		for(int x = -180; x <= 179; x++){
 			for (int y = -90; y <= 83; y++) {
 				
-				QueryResultItem r = new QueryResultItem();
+				GridResultItem r = new GridResultItem();
 				
 				r.setTileX(x);
 				r.setTileY(y);
@@ -110,20 +111,20 @@ public class MockQuery {
 	 * 
 	 * @return
 	 */
-	public static List<QueryResultItem> getQueryResultsExample3(
+	public static List<GridResultItem> getQueryResultsExample3(
 			IProgressMonitor mymonitor) {
 
-		List<QueryResultItem> list = new LinkedList<QueryResultItem>();
+		List<GridResultItem> list = new LinkedList<GridResultItem>();
 		IMap map = ApplicationGIS.getActiveMap();
 		ReferencedEnvelope bounds = map.getBounds(null);
 		
 		for(long x = Math.round(bounds.getMinX()); x <= Math.round(bounds.getMaxX()); x++){
 			for (long y = Math.round(bounds.getMinY()); y <= Math.round(bounds.getMaxY()); y++) {
 				
-				QueryResultItem r = new QueryResultItem();
+				GridResultItem r = new GridResultItem();
 				
-				r.setTileX(x);
-				r.setTileY(y);
+				r.setTileX((int)x);
+				r.setTileY((int)y);
 				double value = Math.abs(Math.random());
 				r.setValue( value );
 				list.add( r);

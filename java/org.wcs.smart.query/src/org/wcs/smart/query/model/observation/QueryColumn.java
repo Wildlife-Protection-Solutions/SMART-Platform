@@ -166,7 +166,7 @@ public abstract class QueryColumn implements Cloneable{
 	 * @return for a given query result item returns
 	 * the object associated with this column
 	 */
-	public abstract Object getValue(QueryResultItem item) ;
+	public abstract Object getValue(Object item) ;
 	
 	/** Clones the object
 	 * @see java.lang.Object#clone()
@@ -176,6 +176,7 @@ public abstract class QueryColumn implements Cloneable{
 	
 	private static QueryColumn[] queryColumns = null;
 	private static QueryColumn[] patrolQueryColumns = null;
+	private static QueryColumn[] gridQueryColumns = null;
 	
 	/**
 	 * 
@@ -344,17 +345,14 @@ public abstract class QueryColumn implements Cloneable{
 	}
 	
 	public static QueryColumn[] getGridColumns() {
-		
-		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
-	
-		
+		if (gridQueryColumns != null){
+			return cloneColumns(gridQueryColumns);
+		}
+		gridQueryColumns = new QueryColumn[GridQueryColumn.GridColumns.values().length];	
 		for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
 			GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
-			cols.add(new GridQueryColumn(item));
+			gridQueryColumns[i] = new GridQueryColumn(item); 
 		}
-		
-		queryColumns = cols.toArray(new QueryColumn[cols.size()]);
-
-		return cloneColumns(queryColumns);
+		return cloneColumns(gridQueryColumns);
 	}
 }

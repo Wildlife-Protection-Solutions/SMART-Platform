@@ -33,9 +33,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
@@ -125,11 +123,11 @@ public class QueryResultsTable {
 	 * @param items items to display in table
 	 * 
 	 */
-	public void setInput(List<QueryResultItem> items){
+	public void setInput(List<?> items){
 		if (!table.getTable().isDisposed()){
 			if (items == null){
 				table.setItemCount(0);
-				table.setInput(new QueryResultItem[]{});
+				table.setInput(new Object[]{});
 			}else{
 				table.setItemCount(items.size());
 				table.setInput(items.toArray());

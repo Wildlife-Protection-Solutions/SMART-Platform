@@ -179,6 +179,10 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String AREA_POLYGON_FILTER_ICON = "org.wcs.smart.query.areapolyfilter";
 
+	/**
+	 * Grid ICon
+	 */
+	public static final String GRID_ICON = "org.wcs.smart.query.grid";
 	
 	/**
 	 * Query property extension id
@@ -196,6 +200,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		addImage("images/icons/obj16/waypoint_query.png",WAYPOINT_QUERY_ICON);	
 		addImage("images/icons/obj16/patrol_query.png",PATROL_QUERY_ICON);
 		addImage("images/icons/obj16/gridded_query.png", GRIDDED_SUMMARY_QUERY_ICON);
+		addImage("images/icons/obj16/grid.png", GRID_ICON);
 		
 		addImage("images/icons/obj16/calendar.png",CALENDAR_ICON);
 		addImage("images/icons/obj16/calendar_day.png",CALENDAR_DAY_ICON);

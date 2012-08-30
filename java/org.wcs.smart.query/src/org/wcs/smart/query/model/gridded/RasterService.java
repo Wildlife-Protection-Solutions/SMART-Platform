@@ -1,6 +1,5 @@
 package org.wcs.smart.query.model.gridded;
 
-import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -28,7 +27,8 @@ import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.model.GriddedQuery;
 
 
 
@@ -40,6 +40,7 @@ import org.wcs.smart.query.model.QueryResultItem;
  * <p>
  * 
  * @author Mauricio Pazos
+ * @author Emily
  *
  */
 public class RasterService {
@@ -58,14 +59,16 @@ public class RasterService {
 	 * @throws IOException 
 	 * @throws RasterServiceException 
 	 */
-	public RasterService(final IMap map, final String rasterFileName, final List<QueryResultItem> queryResults) throws RasterServiceException, IOException {
+	public RasterService(final IMap map, final String rasterFileName,
+			final GriddedQuery query,
+			final List<GridResultItem> queryResults) throws RasterServiceException, IOException {
 		
 		assert map != null;
 		assert rasterFileName != null;
 		assert queryResults != null;
 		
 		this.map = map;
-		this.raster = createRaster(rasterFileName, queryResults);
+		this.raster = createRaster(rasterFileName, queryResults, query.getGridSize());
 	}
 
 	/**
@@ -77,7 +80,8 @@ public class RasterService {
 	 * @throws RasterServiceException 
 	 * @throws IOException 
 	 */
-	private File createRaster(final String rasterFileName, final List<QueryResultItem> queryResults) throws RasterServiceException, IOException {
+	private File createRaster(final String rasterFileName, 
+			final List<GridResultItem> queryResults, double gridCellSize) throws RasterServiceException, IOException {
 
 		RasterBuilder rb = new RasterBuilder();
 
@@ -96,40 +100,49 @@ public class RasterService {
 
 		ReferencedEnvelope bounds = this.map.getBounds(null);
 
-			// gets the raster dimensions from bound's CRS 
-		final int width = (int) Math.round(bounds.getWidth() +1);
-		final int height = (int) Math.round(bounds.getHeight() +1);
+		// gets the raster dimensions from bound's CRS 
+		final int width = (int) Math.floor( bounds.getWidth() / gridCellSize  ) + 1;
+		final int height = (int) Math.floor( bounds.getHeight() / gridCellSize  ) + 1;
+				
+//		Math.round(bounds.getWidth() +1);
+//		final int height = (int) Math.round(bounds.getHeight() +1);
 		rb.setRasterDimensions(width, height);
 			
+		int tileXMin = (int) Math.floor(bounds.getMinX() / gridCellSize);
+		int tileYMin = (int) Math.floor(bounds.getMinY() / gridCellSize);
+		int tileXMax = tileXMin + width;
+		int tileYMax = tileYMin + height;
+		
 			// sets the envelope based in the map bound
 		rb.setEnvelope(
 					new Envelope2D(
 							bounds.getCoordinateReferenceSystem(), 
-							bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight())); 
+							tileXMin * gridCellSize + 0.5*gridCellSize, tileYMin * gridCellSize - 0.5*gridCellSize, width * gridCellSize , height*gridCellSize)); 
 
 			// set the query result in the raster builder
 		List<Map<String, Object>> table = new LinkedList<Map<String, Object>>(); 
-		Point gridSize = new Point(1, 1); // 1 degree TODO should be taken from GriddedValuePanel class or its model
-		for (QueryResultItem item : queryResults) {
+//		Point gridSize = new Point(1, 1); // 1 degree TODO should be taken from GriddedValuePanel class or its model
+		
+		
+		
+		for (GridResultItem item : queryResults) {
 
 			Map<String, Object> row = new HashMap<String, Object>(3);
 
 			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
-			Point rasterCoords = RasterCoordsCalculator.compute((float)item.getTileX(), (float)item.getTileY(), bounds);
-
-			int tileX = rasterCoords.x * gridSize.x;
-			row.put("x", tileX);
-
-			int tileY = rasterCoords.y * gridSize.y;
-			row.put("y", tileY);
-
-			row.put("value", item.getValue());
-			table.add(row);
+			if (item.getTileX() >= tileXMin && item.getTileX() <= tileXMax && item.getTileY() >= tileYMin && item.getTileY() <= tileYMax){
+				int x = item.getTileX() - 1 - tileXMin;
+				int y = height - (item.getTileY() - tileYMin);
+				row.put("x", x);
+				row.put("y", y);
+				row.put("value", item.getValue());
+				table.add(row);
+			}
 		}
 			
 		rb.setTable(table);
 
-		rb.build();
+		rb.build(gridCellSize);
 
 		return rb.getResult();
 

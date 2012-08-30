@@ -45,8 +45,8 @@ import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
@@ -54,7 +54,7 @@ import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 
 public class DerbyGridEngine extends DerbyQueryEngine2{
-	private List<QueryResultItem> myResults;
+	private List<GridResultItem> myResults;
 	
 	protected static final String QUERY_GRID_TEMP_TABLE_PREFIX = "grid_intermediate_";
 	protected String gridTempTable = "";	
@@ -68,7 +68,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<QueryResultItem> executeQuery(
+	public List<GridResultItem> executeQuery(
 			final GriddedQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
@@ -112,7 +112,8 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					}
 					
 					monitor.subTask("Calculating Grid Values");
-					double[] mins = getCoordinateMins(c, qFilter);
+					//double[] mins = getCoordinateMins(c, qFilter);
+					double[] mins = {0,0};
 					
 					double size = query.getGridSize();
 
@@ -185,9 +186,9 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * 
 	 * @throws SQLException
 	 */
-	protected List<QueryResultItem> getGridResults(Connection c, Session session, double[] mins, double size, IValueItem value)
+	protected List<GridResultItem> getGridResults(Connection c, Session session, double[] mins, double size, IValueItem value)
 			throws SQLException {
-		List<QueryResultItem> items = new ArrayList<QueryResultItem>();
+		List<GridResultItem> items = new ArrayList<GridResultItem>();
 		
 		String strAgg ="";
 		ResultSet rs;
@@ -263,10 +264,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 			while (rs.next()) {
 
-				QueryResultItem it = new QueryResultItem();
+				GridResultItem it = new GridResultItem();
 				it.setValue(rs.getDouble("value"));
-				it.setTileX(rs.getDouble("TILE_X"));
-				it.setTileY(rs.getDouble("TILE_Y"));
+				it.setTileX(rs.getInt("TILE_X"));
+				it.setTileY(rs.getInt("TILE_Y"));
 
 				items.add(it);
 			}

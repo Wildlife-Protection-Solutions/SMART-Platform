@@ -22,13 +22,22 @@
 package org.wcs.smart.query.model.gridded;
 
 
+import java.awt.Point;
+import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
+import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.RasterFactory;
+import javax.media.jai.TiledImage;
 
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -39,6 +48,9 @@ import org.geotools.geometry.Envelope2D;
 import org.opengis.coverage.grid.Format;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.util.SmartUtils;
+
 
 /**
  * Builds a raster file for one band.
@@ -66,7 +78,7 @@ import org.opengis.parameter.ParameterValueGroup;
 final class RasterBuilder {
 
 	private static final int BAND_0 = 0;
-	
+	private static final float NO_DATA = -9999;	//no data value
 	
 	/** a table where x,y values are the position in the raster grid. (0,0) is the bottom left tile and (360 180) is the top right tile */
 	private List<Map<String, Object>> table; 
@@ -126,25 +138,65 @@ final class RasterBuilder {
 	 * 
 	 * @throws NumberFormatException 
 	 */
-	public void build() throws RasterServiceException {
+	public void build(double gridSize) throws RasterServiceException {
 		
 		assert this.table != null;
 		assert this.envelope != null;
 
-		GridCoverage2D gc = null;
+//		GridCoverage2D gc = null;
 		try {
-			WritableRaster raster = createRaster();
+			TiledImage raster = createRaster();
 
-			GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-			gc = factory.create("grayscale", raster, this.envelope);
+			File out = new File(fileName);
+			JAI.create("filestore",raster,out.getCanonicalPath(),"TIFF");
 
-			this.file = saveInFile(gc, this.fileName);
-			
+			String baseFile = out.getCanonicalPath().substring(0,  out.getCanonicalPath().lastIndexOf('.'));
+			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());
+			createWorldFile(baseFile, gridSize, envelope.getMinX(), envelope.getMaxY());
+			this.file = out;
+//
+//			this.file = saveInFile(gc, this.fileName);
+//			
+		}catch (Exception ex){
+			//TODO:
+			ex.printStackTrace();
 		} finally {
 			
-			if(gc != null) gc.dispose(true);
+//			if(gc != null) gc.dispose(true);
 		}
-		
+	}
+	
+	private void createWorldFile(final String baseFile,
+			double gridSize, double xmin, double ymax) throws IOException {
+		final File prjFile = new File(new StringBuffer(baseFile).append(".tfw")
+				.toString());
+		BufferedWriter out = new BufferedWriter(new FileWriter(prjFile));
+		out.write(String.valueOf(gridSize));
+		out.write(SmartUtils.LINE_SEPARATOR);
+		out.write("0");
+		out.write(SmartUtils.LINE_SEPARATOR);
+		out.write("0");
+		out.write(SmartUtils.LINE_SEPARATOR);
+		out.write(String.valueOf(-gridSize));
+		out.write(SmartUtils.LINE_SEPARATOR);
+		out.write(String.valueOf(xmin));
+		out.write(SmartUtils.LINE_SEPARATOR);
+		out.write(String.valueOf(ymax));
+		out.write(SmartUtils.LINE_SEPARATOR);
+		out.close();
+
+	}
+	
+	private void createProjectionFile(final String baseFile,
+			final CoordinateReferenceSystem coordinateReferenceSystem)
+	
+			throws IOException {
+		final File prjFile = new File(new StringBuffer(baseFile).append(".prj")
+				.toString());
+		BufferedWriter out = new BufferedWriter(new FileWriter(prjFile));
+		out.write(coordinateReferenceSystem.toWKT());
+		out.close();
+
 	}
 
 
@@ -186,25 +238,32 @@ final class RasterBuilder {
 	 * @return {@link WritableRaster}
 	 * @throws Exception 
 	 */
-	private WritableRaster createRaster() throws RasterServiceException{
+	private TiledImage createRaster() throws RasterServiceException{
 
 		try{
-	        WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT, this.width, this.height, 1, null);
-	        
+			SampleModel sampleModel = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_FLOAT, this.width, this.height, 1);
+			ColorModel colorModel = PlanarImage.createColorModel(sampleModel);			
+	        WritableRaster raster = RasterFactory.createWritableRaster(sampleModel, new Point(0,0));
+	        for (int x = 0; x < raster.getWidth(); x ++){
+	        	for (int y = 0; y < raster.getHeight(); y ++){
+	        		raster.setSample(x, y, BAND_0, NO_DATA);
+	        	}
+	        }
 	        for (Map<String, Object> row: this.table) {
-
-				int x = Math.round( (int) Double.parseDouble(row.get("x").toString()) );
-				assert x >= 0 && x <= this.width ;
-				
-				int y = Math.round( (int) Double.parseDouble(row.get("y").toString()) );
-				assert y >= 0 && y <= this.height;
-				
+	        	int x =(Integer) row.get("x");
+	        	int y = (Integer) row.get("y");
 	        	double value = Double.parseDouble(row.get("value").toString());
 				assert value >= 0;
-
 	        	raster.setSample(x, y, BAND_0, value); 
 			}
-	        return raster;
+	        
+	        TiledImage tiledImage = new TiledImage(0,0,width,height,0,0,sampleModel,colorModel);
+	        tiledImage.setData(raster);
+	        
+	        
+//	        JAI.create("filestore",tiledImage,new File(fileName),"TIFF");
+	        
+	        return tiledImage;
 			
 		} catch (Exception e){
 			String message = "the raster could not be created. " + e.getMessage();

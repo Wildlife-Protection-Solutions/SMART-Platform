@@ -19,45 +19,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.querytable;
-
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.query.model.GridResultItem;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.QueryColumn;
+package org.wcs.smart.query.model;
 
 /**
- * An table column in the results table that represents an attribute.
- * <p>
- * There should be one column for each attribute defined in the data model
- * </p>
+ * A class for tracking grid results.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
+public class GridResultItem {
 
-public class GridColumnLabelProvider extends ColumnLabelProvider {
-
-
-	private QueryColumn column;
-
-	public GridColumnLabelProvider(QueryColumn column) {
-		this.column = column;
+	//GRID additions, probably could be refactored out into another class eventually
+	private double value;
+	private double denominator;
+	private int tileX;
+	private int tileY;
+	
+	
+	public void setValue(double value) {
+		this.value = value;
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-	 */
-	public String getText(Object element) {
-		if (element instanceof GridResultItem) {
-			Object value = column.getValue((GridResultItem) element);
-			if (value == null) {
-				return "";
-			} else {
-				return value.toString();
-			}
-		}
-		return element == null ? "" : element.toString();//$NON-NLS-1$
+	public void setDenominator(double z) {
+		this.denominator = z;
+		
 	}
 
+	public void setTileX(int x) {
+		this.tileX = x;
+		
+	}
+	public void setTileY(int y) {
+		this.tileY = y;
+		
+	}
+	
+	public double getValue() {
+		return value;
+	}
+
+	public double getDenominator() {
+		return denominator;
+		
+	}
+
+	public int getTileX() {
+		return tileX;
+		
+	}
+	public int getTileY() {
+		return tileY;
+		
+	}
+		
 }

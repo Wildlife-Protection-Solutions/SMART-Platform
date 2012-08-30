@@ -36,11 +36,8 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
-import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -151,14 +148,19 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		
 		if (!isvalid || def.getValuePart() == null){
 			isvalid = false;
-			error = "At least one value must be selected.";
+			error = "Exactly one value must be selected.";
 		}
 		if (isvalid){
-			String temp = GriddedQuery.validate();
-			if (temp != null){
+			if (panel.getGridSize() <= 0){
 				isvalid = false;
-				error = temp;
+				error = "Grid size must be greater than 0";
 			}
+			
+//			String temp = GriddedQuery.validate();
+//			if (temp != null){
+//				isvalid = false;
+//				error = temp;
+//			}
 		}
 		
 		provider.setQueryValue(isvalid, error);

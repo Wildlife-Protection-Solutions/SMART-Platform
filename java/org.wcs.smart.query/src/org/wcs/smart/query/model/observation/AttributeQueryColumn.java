@@ -74,8 +74,12 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
-	public Object getValue(QueryResultItem item) {
-		return item.getAttributeValue(attributeKey);
+	public Object getValue(Object queryResultItem) {
+		if (queryResultItem instanceof QueryResultItem) {
+			QueryResultItem item = (QueryResultItem) queryResultItem;
+			return item.getAttributeValue(attributeKey);
+		}
+		return "";
 	}
 
 
