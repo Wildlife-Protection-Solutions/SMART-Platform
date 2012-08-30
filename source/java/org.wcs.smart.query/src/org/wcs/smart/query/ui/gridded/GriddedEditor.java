@@ -58,7 +58,6 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.gridded.RasterService;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
@@ -78,9 +77,8 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private GriddedQuery query;
 
 	private boolean isDirty = false;
-	public GriddedTableResultsPage page1;
-	public GriddedResultsMapEditorPage page2;
-
+	private GriddedTableResultsPage resultPage;
+	private GriddedResultsMapEditorPage mapPage;
 
 	private IQueryListener qListener = new IQueryListener() {
 		@Override
@@ -121,11 +119,11 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			}
 			
 			
-			if (page1 != null){
+			if (resultPage != null){
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						page1.setQuery();
+						resultPage.setQuery();
 						setDirty(false);
 					}
 				});
@@ -176,7 +174,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 * @return the query results display table
 	 */
 	public QueryResultsTable getQueryResultsTable(){
-		return this.page1.getQueryResultsTable();
+		return this.resultPage.getQueryResultsTable();
 	}
 	
 	/**
@@ -227,15 +225,15 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		super.setPartName(input.getName());
 		showBusy(true);
 		try {
-			page1 = new GriddedTableResultsPage(this);
-			addPage(0, page1, input);
+			resultPage = new GriddedTableResultsPage(this);
+			addPage(0, resultPage, input);
 			setPageText(0, "Tabular Results");
 			if (this.query != null && this.query.getUuid() == null){
-				page1.setQuery();
+				resultPage.setQuery();
 			}
 			
-			page2 = new GriddedResultsMapEditorPage(this);
-			addPage(1, page2, input);
+			mapPage = new GriddedResultsMapEditorPage(this);
+			addPage(1, mapPage, input);
 			setPageText(1, "Mapped Results");
 			
 		} catch (final Throwable t) {
@@ -247,7 +245,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 	private void updateQuery(){
 		//update date filter
-		getQueryInternal().setDateFilter(page1.getDateFilter());
+		getQueryInternal().setDateFilter(resultPage.getDateFilter());
 	}
 
 	/**
@@ -263,10 +261,10 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}
 		
 		//show progress area
-		page1.showProgressArea();
+		resultPage.showProgressArea();
 		
 		//run query
-		final IProgressMonitor mymonitor = page1.createProgressMonitor();
+		final IProgressMonitor mymonitor = resultPage.createProgressMonitor();
 		Job runQueryJob = new Job("Running query: " + this.query.getName()) {
 
 			@Override
@@ -274,12 +272,12 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 				try {
 					List<QueryResultItem> results = query.getQueryResults(mymonitor);
 					
-					page1.updateAndShowTable(results, mymonitor);
+					resultPage.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					QueryPlugIn.displayLog("Could not execute query.", ex);
-					page1.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
+					resultPage.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
 				}
-				page2.refresh();
+				mapPage.refresh();
 				return Status.OK_STATUS;
 			}
 		};
@@ -363,7 +361,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			return;
 		}
 		if (newQuery){
-			page1.setQuery();
+			resultPage.setQuery();
 			((QueryInput)super.getEditorInput()).setUuid(query.getUuid());
 			((QueryInput)super.getEditorInput()).setId(query.getId());
 		}
@@ -435,10 +433,10 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 					GriddedEditor.this.setInput(new QueryInput(newQuery));
 					
 					updatePartName();
-					page1.setQuery();
+					resultPage.setQuery();
 					monitor.worked(1);
 					
-					page1.setQuery();
+					resultPage.setQuery();
 					monitor.worked(1);
 					
 					setDirty(false);
@@ -469,10 +467,10 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 */
 	@Override
 	public Map getMap() {
-		if (page2 == null){
+		if (mapPage == null){
 			return null;
 		}
-		return 	page2.getMap();
+		return 	mapPage.getMap();
 	}
 
 	/**
@@ -480,7 +478,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 */
 	@Override
 	public void openContextMenu() {
-		page2.openContextMenu();
+		mapPage.openContextMenu();
 		
 	}
 
@@ -489,7 +487,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 */
 	@Override
 	public void setFont(Control textArea) {
-		page2.setFont(textArea);
+		mapPage.setFont(textArea);
 		
 	}
 
@@ -499,7 +497,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	@Override
 	public void setSelectionProvider(
 			IMapEditorSelectionProvider selectionProvider) {
-		page2.setSelectionProvider(selectionProvider);
+		mapPage.setSelectionProvider(selectionProvider);
 		
 	}
 
@@ -508,7 +506,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {
-		return page2.getStatusLineManager();
+		return mapPage.getStatusLineManager();
 	}
 
 	/**
