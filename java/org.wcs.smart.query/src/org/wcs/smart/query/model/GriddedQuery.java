@@ -203,7 +203,8 @@ public class GriddedQuery extends Query {
 	public List<QueryResultItem> getLastResults(){
 
 		// FIXME HACK the result to try the raster result
-		this.lastResults = MockQuery.getQueryResultsExample2(null);
+		this.lastResults = MockQuery.getQueryResultsExample3(null);
+		//this.lastResults = MockQuery.getQueryResultsExample2(null);
 		//this.lastResults = MockQuery.getQueryResultsExample1(null);
 
 		return this.lastResults;

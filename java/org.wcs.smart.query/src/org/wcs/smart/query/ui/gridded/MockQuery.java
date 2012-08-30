@@ -24,7 +24,12 @@ package org.wcs.smart.query.ui.gridded;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.refractions.udig.project.IMap;
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.ApplicationGIS;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.query.model.QueryResultItem;
 
 /**
@@ -99,5 +104,33 @@ public class MockQuery {
 		}
 		return list;
 	}
+	
+	/**
+	 * Generate a test data set with its coordinates in the current map's bounds.
+	 * 
+	 * @return
+	 */
+	public static List<QueryResultItem> getQueryResultsExample3(
+			IProgressMonitor mymonitor) {
+
+		List<QueryResultItem> list = new LinkedList<QueryResultItem>();
+		IMap map = ApplicationGIS.getActiveMap();
+		ReferencedEnvelope bounds = map.getBounds(null);
+		
+		for(long x = Math.round(bounds.getMinX()); x <= Math.round(bounds.getMaxX()); x++){
+			for (long y = Math.round(bounds.getMinY()); y <= Math.round(bounds.getMaxY()); y++) {
+				
+				QueryResultItem r = new QueryResultItem();
+				
+				r.setTileX(x);
+				r.setTileY(y);
+				double value = Math.abs(Math.random());
+				r.setValue( value );
+				list.add( r);
+			}
+		}
+		return list;
+	}
+	
 
 }

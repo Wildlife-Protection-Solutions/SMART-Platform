@@ -21,17 +21,16 @@
  */
 package org.wcs.smart.query.model.gridded;
 
-import org.wcs.smart.query.QueryPlugIn;
 
 /**
+ * This sort of exception is thrown when some of the RasterService method cannot progress.  
+ * 
+ * 
  * @author Mauricio Pazos
  *
  */
 public class RasterServiceException extends Exception {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -5870132809365289549L;
 
 	public RasterServiceException(String message) {
@@ -40,7 +39,6 @@ public class RasterServiceException extends Exception {
 
 	public RasterServiceException(String message, Exception e) {
 		super(message, e);
-		QueryPlugIn.log(message, e);
 	}
 
 }

@@ -46,6 +46,7 @@ public class RasterService {
 
 	private static final String TMP_DIRECTORY = "tmp";
 	private final File raster;
+	private File tempDirectory;
 	private List<IGeoResource>  geoResources = null;
 	private IMap map;
 	private List<IService> services;
@@ -80,7 +81,7 @@ public class RasterService {
 
 		RasterBuilder rb = new RasterBuilder();
 
-		File tempDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), TMP_DIRECTORY);
+		this.tempDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), TMP_DIRECTORY);
 		if(!tempDirectory.exists()){
 				tempDirectory.mkdir();
 		}
@@ -96,8 +97,8 @@ public class RasterService {
 		ReferencedEnvelope bounds = this.map.getBounds(null);
 
 			// gets the raster dimensions from bound's CRS 
-		final int width = (int) Math.round(bounds.getWidth());
-		final int height = (int) Math.round(bounds.getHeight());
+		final int width = (int) Math.round(bounds.getWidth() +1);
+		final int height = (int) Math.round(bounds.getHeight() +1);
 		rb.setRasterDimensions(width, height);
 			
 			// sets the envelope based in the map bound
@@ -113,11 +114,11 @@ public class RasterService {
 
 			Map<String, Object> row = new HashMap<String, Object>(3);
 
-			// computes the raster x,y based on the maximous X,Y
-			double tileX = (item.getTileX() + 180) * gridSize.getX();
+			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
+			double tileX = Math.abs(bounds.getMinX() - item.getTileX() ) * gridSize.getX();
 			row.put("x", tileX);
 
-			double tileY = (item.getTileY() + 90) * gridSize.getY();
+			double tileY = Math.abs(bounds.getMaxY() - item.getTileY()  ) * gridSize.getY();
 			row.put("y", tileY);
 
 			row.put("value", item.getValue());
@@ -243,8 +244,44 @@ public class RasterService {
 		File tempDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), TMP_DIRECTORY);
 		if(tempDirectory.exists()){
 			if(this.raster != null && this.raster.exists()){
-				this.raster.delete();
+				final String[] fullName = this.raster.getName().split("[.]");
+				
+				final String name = fullName[0];
+				final String path = this.tempDirectory.getPath();
+				
+				// remove the tiff file
+				if( !this.raster.delete()){
+					QueryPlugIn.log("cannot delete the file " + name , null);
+				}
+				
+				// remove the world file
+				deleteTemporalFile(path, name, ".tfw");
+				
+				// remove projection file
+				deleteTemporalFile(path, name, ".prj");
 			}
+		}
+	}
+
+	/**
+	 * Deletes the file
+	 * 
+	 * @param path
+	 * @param fileName
+	 * @param fileExtension
+	 */
+	private void deleteTemporalFile(String path, String fileName, String fileExtension) {
+		
+		StringBuilder fileToDelete = new StringBuilder();
+		fileToDelete
+			.append(path)
+			.append(File.separator)
+			.append(fileName)
+			.append(fileExtension);
+		
+		File file = new File(fileToDelete.toString());
+		if( !file.delete()){
+			QueryPlugIn.log("cannot delete the file " + fileToDelete.toString(), null);
 		}
 	}
 

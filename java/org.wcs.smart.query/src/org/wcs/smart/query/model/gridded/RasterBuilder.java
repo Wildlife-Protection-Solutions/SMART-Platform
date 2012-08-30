@@ -80,9 +80,9 @@ final class RasterBuilder {
 	private int width;
 	private int height;
 
-	public void setFileName(String url) {
+	public void setFileName(String fileName) {
 		
-		this.fileName = url;
+		this.fileName = fileName;
 	}
 	
 	/**
