@@ -38,7 +38,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyGridEngine;
-import org.wcs.smart.query.engine.DerbyPatrolEngine;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -47,7 +46,6 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
-import org.wcs.smart.query.ui.gridded.MockQuery;
 
 /**
  * A class to represent a summary query.
@@ -76,7 +74,7 @@ public class GriddedQuery extends Query {
 	@Transient
 	private List<DropItem> filterDropItems;
 	@Transient
-	private List<QueryResultItem> lastResults;
+	private List<GridResultItem> lastResults;
 	
 	private double gridSize;
 	IValueItem valueItem;
@@ -202,8 +200,7 @@ public class GriddedQuery extends Query {
 	 * @return Results from last query run
 	 */
 	@Transient
-	public List<QueryResultItem> getLastResults(){
-
+	public List<GridResultItem> getLastResults(){
 		return this.lastResults;
 	}
 	
@@ -214,7 +211,7 @@ public class GriddedQuery extends Query {
 	 * @throws Exception
 	 */
 	@Transient
-	public List<QueryResultItem> getQueryResults(IProgressMonitor monitor) throws Exception{
+	public List<GridResultItem> getQueryResults(IProgressMonitor monitor) throws Exception{
 		lastResults = Collections.emptyList();
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -224,7 +221,7 @@ public class GriddedQuery extends Query {
 			lastResults = engine.executeQuery(this, session, monitor);
 			
 			// FIXME HACK the result to try the raster result
-			this.lastResults = MockQuery.getQueryResultsExample3(null);
+			//this.lastResults = MockQuery.getQueryResultsExample3(null);
 
 			return lastResults;
 		}finally{
@@ -345,10 +342,12 @@ public class GriddedQuery extends Query {
 	 * This validates the items in the query.
 
 	 */
-	public static String validate(){
+	public String validate(){
 		//TODO: validation on the query string and/or definition
 		//return the error if there is on, null if it's ok.
-		
+		if (gridSize <= 0){
+			return "Invalid Grid Size";
+		}
 		return null;
 	}
 

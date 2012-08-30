@@ -53,6 +53,7 @@ import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
@@ -270,12 +271,12 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					List<QueryResultItem> results = query.getQueryResults(mymonitor);
+					List<GridResultItem> results = query.getQueryResults(mymonitor);
 					
 					resultPage.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					QueryPlugIn.displayLog("Could not execute query.", ex);
-					resultPage.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
+					resultPage.updateAndShowTable(new ArrayList<GridResultItem>(), mymonitor);
 				}
 				mapPage.refresh();
 				return Status.OK_STATUS;

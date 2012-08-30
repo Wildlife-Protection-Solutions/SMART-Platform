@@ -3,34 +3,15 @@ package org.wcs.smart.query.ui.gridded;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
-import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.ui.ProgressAreaComposite;
-import org.wcs.smart.query.ui.observation.QueryEditorTableContent;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.querytable.QueryResultItemComparator;
 import org.wcs.smart.query.ui.querytable.QueryResultsTable;
-import org.wcs.smart.query.ui.querytable.QueryTableViewerColumn;
 
 public class GriddedTableResults  extends EditorPart  {
 
@@ -131,7 +112,7 @@ public class GriddedTableResults  extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(List<QueryResultItem> results, 
+	public void updateAndShowTable(List<GridResultItem> results, 
 			IProgressMonitor monitor){
 		content.setTableData(results, monitor);
 	}

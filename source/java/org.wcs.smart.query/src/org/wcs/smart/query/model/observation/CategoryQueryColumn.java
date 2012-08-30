@@ -54,8 +54,12 @@ public class CategoryQueryColumn extends QueryColumn{
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
-	public Object getValue(QueryResultItem item) {
-		return getItemValue(item, level);
+	public Object getValue(Object queryResultItem) {
+		if (queryResultItem instanceof QueryResultItem) {
+			QueryResultItem item = (QueryResultItem) queryResultItem;
+			return getItemValue(item, level);
+		}
+		return "";
 	}
 	
 	private static String getItemValue(QueryResultItem item, int level) {

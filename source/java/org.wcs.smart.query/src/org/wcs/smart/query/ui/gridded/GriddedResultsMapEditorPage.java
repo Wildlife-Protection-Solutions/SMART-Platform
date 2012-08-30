@@ -3,17 +3,15 @@ package org.wcs.smart.query.ui.gridded;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.ILayer;
-import net.refractions.udig.project.IMap;
+import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
-import net.refractions.udig.project.ui.ApplicationGIS;
+import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,9 +23,9 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.gridded.RasterService;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -55,16 +53,15 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	    	try {
 	    		// retrieves the last query result
 				GriddedQuery query = (GriddedQuery) parentEditor.getQuery(); 
-				List<QueryResultItem> queryResults = query.getLastResults();
+				List<GridResultItem> queryResults = query.getLastResults();
 	    		if( (queryResults == null) || queryResults.isEmpty() ) return Status.OK_STATUS;
 	    		
-	    		// creates a raster georesource using the query result
-				IMap activeMap = ApplicationGIS.getActiveMap();
-				rasterService = new RasterService(activeMap, query.getId(), queryResults);
+	    		Map map = getMap();
+				rasterService = new RasterService(map, query.getId(), query, queryResults);
 				List<IGeoResource> rasterResourceList = (List<IGeoResource>) rasterService.getGeoResource();
 				assert !rasterResourceList.isEmpty();
 				
-				Map map = getMap();
+				
 	    		if (map == null) return Status.CANCEL_STATUS;
 	    		
 				updateMap(map, rasterResourceList);
@@ -93,13 +90,22 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 			AddLayersCommand command = new AddLayersCommand(layers);
     		map.sendCommandASync(command);
     		initListener = new IViewportModelListener() {
+    			private boolean run = false;
 				@Override
 				public void changed(ViewportModelEvent event) {
+					if (run) return;
+					run = true;
 					map.getViewportModel().removeViewportModelListener(initListener);
 					map.sendCommandASync(new ZoomExtentCommand());
 				}
 			};
     		map.getViewportModel().addViewportModelListener(initListener);
+    		
+    		List<Layer> addedlayers = command.getLayers();
+    		for(Layer l : addedlayers){
+    			String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"> <sld:UserLayer> <sld:LayerFeatureConstraints> <sld:FeatureTypeConstraint/> </sld:LayerFeatureConstraints> <sld:UserStyle> <sld:Name>000051</sld:Name> <sld:Title/> <sld:FeatureTypeStyle> <sld:Name>name</sld:Name> <sld:Rule> <sld:RasterSymbolizer> <sld:Geometry> <ogc:PropertyName>grid</ogc:PropertyName> </sld:Geometry> <sld:ColorMap> <sld:ColorMapEntry color=\"#000000\" opacity=\"0.0\" quantity=\"-9999.0\"/> <sld:ColorMapEntry color=\"#000000\" opacity=\"0.0\" quantity=\"-9999.0\"/> <sld:ColorMapEntry color=\"#FFFFFF\" opacity=\"1.0\" quantity=\"0.0\"/> <sld:ColorMapEntry color=\"#FF0000\" opacity=\"1.0\" quantity=\"10.0\"/> </sld:ColorMap> </sld:RasterSymbolizer> </sld:Rule> </sld:FeatureTypeStyle> </sld:UserStyle> </sld:UserLayer> </sld:StyledLayerDescriptor> ";
+    			l.getStyleBlackboard().put(SLDContent.ID, sld);
+    		}
     		
     		map.getRenderManager().refresh(null);
 		}
@@ -122,7 +128,8 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 					if (layers.size() > 0){
 						IGeoResource rasterLayers = layers.get(0);
 						for( ILayer layer : getMap().getLayersInternal() ) {
-		                	if(layer.getID().equals(rasterLayers.getIdentifier())){
+		                	//if(layer.getID().equals(rasterLayers.getIdentifier() + "@type@geotiff")){
+							if (layer.getID().sameFile(rasterLayers.getIdentifier())){
 		                		found = true;
 		                		break;
 		                	}

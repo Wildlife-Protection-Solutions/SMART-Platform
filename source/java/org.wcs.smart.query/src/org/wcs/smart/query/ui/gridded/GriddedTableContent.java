@@ -40,8 +40,8 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
@@ -106,7 +106,7 @@ public class GriddedTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final List<QueryResultItem> items, final IProgressMonitor monitor) {
+	public void setTableData(final List<GridResultItem> items, final IProgressMonitor monitor) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override

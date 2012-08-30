@@ -21,11 +21,7 @@
  */
 package org.wcs.smart.query.model.observation;
 
-
-
-
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.QueryColumn.ColumnType;
+import org.wcs.smart.query.model.GridResultItem;
 
 /**
  * Class represents one of the fixed table columns that
@@ -77,18 +73,20 @@ public class GridQueryColumn extends QueryColumn{
 	/**
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
-	public Object getValue(QueryResultItem item) {
-		switch (column) {
-		case TILE_X:
-			return item.getTileX();
-		case TILE_Y:
-			return item.getTileY();
-		case VALUE:
-			return item.getValue();
-		case DENOMINATOR:
-			return item.getDenominator();
+	public Object getValue(Object item) {
+		if (item instanceof GridResultItem) {
+
+			switch (column) {
+			case TILE_X:
+				return ((GridResultItem) item).getTileX();
+			case TILE_Y:
+				return ((GridResultItem) item).getTileY();
+			case VALUE:
+				return ((GridResultItem) item).getValue();
+			case DENOMINATOR:
+				return ((GridResultItem) item).getDenominator();
+			}
 		}
-		
 		return "";
 	}
 

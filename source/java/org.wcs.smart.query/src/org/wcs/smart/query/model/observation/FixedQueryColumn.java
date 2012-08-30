@@ -92,64 +92,65 @@ public class FixedQueryColumn extends QueryColumn {
 	/**
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
-	public Object getValue(QueryResultItem item) {
-		switch (column) {
-		case PATROL_ARMED:
-			if (item.isArmed()) {
-				return Boolean.TRUE;
-			} else {
-				return Boolean.FALSE;
+	public Object getValue(Object queryResultItem) {
+		if (queryResultItem instanceof QueryResultItem) {
+			QueryResultItem item = (QueryResultItem) queryResultItem;
+
+			switch (column) {
+			case PATROL_ARMED:
+				if (item.isArmed()) {
+					return Boolean.TRUE;
+				} else {
+					return Boolean.FALSE;
+				}
+			case PATROL_END_DATE:
+				return item.getPatrolEndDate();
+			case PATROL_ID:
+				return item.getPatrolId();
+			case PATROL_LEG_ID:
+				return item.getPatrolLegId();
+			case PATROL_MANDATE:
+				return item.getMandate();
+			case PATROL_OBJETIVE:
+				return item.getObjective();
+			case PATROL_START_DATE:
+				return item.getPatrolStartDate();
+			case PATROL_STATION:
+				return item.getStation();
+			case PATROL_LEG_LEADER:
+				return item.getLeader();
+			case PATROL_LEG_PILOT:
+				return item.getPilot();
+			case PATROL_LEG_START_DATE:
+				return item.getPatrolLegStartDate();
+			case PATROL_LEG_END_DATE:
+				return item.getPatrolLegEndDate();
+			case PATROL_TEAM:
+				return item.getTeam();
+			case PATROL_TYPE:
+				return item.getPatrolType().getGuiName();
+			case WAYPOINT_ID:
+				return item.getWaypointId();
+			case TRANSPORT_TYPE:
+				return item.getTransportType();
+			case WAYPOINT_COMMENT:
+				return item.getWaypointComment();
+			case WAYPOINT_DATE:
+				return item.getWpDateTime();
+			case WAYPOINT_DIRECTION:
+				return item.getWaypointDirection();
+			case WAYPOINT_DISTANCE:
+				return item.getWaypointDistance();
+			case WAYPOINT_TIME:
+				return item.getWaypointTime();
+			case WAYPOINT_X:
+				return item.getWaypointX();
+			case WAYPOINT_Y:
+				return item.getWaypointY();
 			}
-		case PATROL_END_DATE:
-			return item.getPatrolEndDate();
-		case PATROL_ID:
-			return item.getPatrolId();
-		case PATROL_LEG_ID:
-			return item.getPatrolLegId();
-		case PATROL_MANDATE:
-			return item.getMandate();
-		case PATROL_OBJETIVE:
-			return item.getObjective();
-//		case PATROL_RATING:
-//			return item.getObjectiveRating();
-		case PATROL_START_DATE:
-			return item.getPatrolStartDate();
-		case PATROL_STATION:
-			return item.getStation();
-		case PATROL_LEG_LEADER:
-			return item.getLeader();
-		case PATROL_LEG_PILOT:
-			return item.getPilot();
-		case PATROL_LEG_START_DATE:
-			return item.getPatrolLegStartDate();
-		case PATROL_LEG_END_DATE:
-			return item.getPatrolLegEndDate();
-		case PATROL_TEAM:
-			return item.getTeam();
-		case PATROL_TYPE:
-			return item.getPatrolType().getGuiName();
-		case WAYPOINT_ID:
-			return item.getWaypointId();
-		case TRANSPORT_TYPE:
-			return item.getTransportType();
-		case WAYPOINT_COMMENT:
-			return item.getWaypointComment();
-		case WAYPOINT_DATE:
-			return item.getWpDateTime();
-		case WAYPOINT_DIRECTION:
-			return item.getWaypointDirection();
-		case WAYPOINT_DISTANCE:
-			return item.getWaypointDistance();
-		case WAYPOINT_TIME:
-			return item.getWaypointTime();
-		case WAYPOINT_X:
-			return item.getWaypointX();
-		case WAYPOINT_Y:
-			return item.getWaypointY();
 		}
 		return "";
 	}
-
 
 	/**
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#clone()
