@@ -24,6 +24,7 @@ package org.wcs.smart.query.model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -37,6 +38,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyGridEngine;
+import org.wcs.smart.query.engine.DerbyPatrolEngine;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -202,11 +204,6 @@ public class GriddedQuery extends Query {
 	@Transient
 	public List<QueryResultItem> getLastResults(){
 
-		// FIXME HACK the result to try the raster result
-		this.lastResults = MockQuery.getQueryResultsExample3(null);
-		//this.lastResults = MockQuery.getQueryResultsExample2(null);
-		//this.lastResults = MockQuery.getQueryResultsExample1(null);
-
 		return this.lastResults;
 	}
 	
@@ -218,12 +215,17 @@ public class GriddedQuery extends Query {
 	 */
 	@Transient
 	public List<QueryResultItem> getQueryResults(IProgressMonitor monitor) throws Exception{
-		lastResults = null;
+		lastResults = Collections.emptyList();
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
+			
 			DerbyGridEngine engine = new DerbyGridEngine();
 			lastResults = engine.executeQuery(this, session, monitor);
+			
+			// FIXME HACK the result to try the raster result
+			this.lastResults = MockQuery.getQueryResultsExample3(null);
+
 			return lastResults;
 		}finally{
 			if (session.isOpen()){
