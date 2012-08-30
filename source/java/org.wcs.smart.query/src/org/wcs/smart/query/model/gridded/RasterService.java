@@ -115,10 +115,12 @@ public class RasterService {
 			Map<String, Object> row = new HashMap<String, Object>(3);
 
 			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
-			double tileX = Math.abs(bounds.getMinX() - item.getTileX() ) * gridSize.getX();
+			Point rasterCoords = RasterCoordsCalculator.compute((float)item.getTileX(), (float)item.getTileY(), bounds);
+
+			int tileX = rasterCoords.x * gridSize.x;
 			row.put("x", tileX);
 
-			double tileY = Math.abs(bounds.getMaxY() - item.getTileY()  ) * gridSize.getY();
+			int tileY = rasterCoords.y * gridSize.y;
 			row.put("y", tileY);
 
 			row.put("value", item.getValue());
@@ -134,7 +136,8 @@ public class RasterService {
 	}
 
 	/**
-	 * Returns the {@link IGeoResource} list associated to the generated raster. 
+	 * Returns the {@link IGeoResource} list associated to the generated raster.
+	 *  
 	 * @return list of {@link IGeoResource}  
 	 * @throws RasterServiceException 
 	 */

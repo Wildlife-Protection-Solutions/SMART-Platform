@@ -39,20 +39,19 @@ import org.geotools.geometry.Envelope2D;
 import org.opengis.coverage.grid.Format;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
-import org.wcs.smart.query.QueryPlugIn;
 
 /**
  * Builds a raster file for one band.
  * 
  * <pre>
  * Coordinates in pixel values
- * (0,0) ----------- >(0,360)
+ * (0,0) ----------- >(0,Max X)
  *   |
  *   |
  *   |
  *   |
  *   V
- * (0,180) 
+ * (0,Max Y) 
  * </pre>
  * 
  * <pre>
