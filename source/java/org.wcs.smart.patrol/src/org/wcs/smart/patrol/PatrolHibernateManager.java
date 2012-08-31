@@ -53,7 +53,7 @@ import org.wcs.smart.patrol.model.Waypoint;
 public class PatrolHibernateManager extends HibernateManager{
 	
 	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000000");
-	private static NumberFormat PLAN_ID_FORMATTER = new DecimalFormat("000000");
+
 	
 	/**
 	 * Gets all teams (active and in-active) for a given conservation area

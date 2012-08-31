@@ -81,7 +81,7 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage implements SelectionLi
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Start Date:");
+		lbl.setText("Plan Start Date:");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
@@ -89,7 +89,7 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage implements SelectionLi
 		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
 		
 		lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol End Date:");
+		lbl.setText("Plan End Date:");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
