@@ -253,16 +253,11 @@ final class RasterBuilder {
 	        	int x =(Integer) row.get("x");
 	        	int y = (Integer) row.get("y");
 	        	double value = Double.parseDouble(row.get("value").toString());
-				assert value >= 0;
 	        	raster.setSample(x, y, BAND_0, value); 
 			}
 	        
 	        TiledImage tiledImage = new TiledImage(0,0,width,height,0,0,sampleModel,colorModel);
 	        tiledImage.setData(raster);
-	        
-	        
-//	        JAI.create("filestore",tiledImage,new File(fileName),"TIFF");
-	        
 	        return tiledImage;
 			
 		} catch (Exception e){

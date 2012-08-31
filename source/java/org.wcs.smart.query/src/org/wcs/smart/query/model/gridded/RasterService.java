@@ -25,8 +25,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.GridQueryResultMetadata;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 
@@ -92,6 +94,7 @@ public class RasterService {
 		if(!tempDirectory.exists()){
 				tempDirectory.mkdir();
 		}
+
 		StringBuilder pathBuilder = new StringBuilder(50);
 		pathBuilder
 				.append(tempDirectory.getCanonicalPath())
@@ -101,57 +104,40 @@ public class RasterService {
 
 		rb.setFileName(pathBuilder.toString());
 
-		ReferencedEnvelope bounds = this.map.getBounds(null);
-
-		// gets the raster dimensions from bound's CRS 
-		final int width = (int) Math.floor( bounds.getWidth() / gridCellSize  ) + 1;
-		final int height = (int) Math.floor( bounds.getHeight() / gridCellSize  ) + 1;
-				
-//		Math.round(bounds.getWidth() +1);
-//		final int height = (int) Math.round(bounds.getHeight() +1);
-
 		
-				
+		GridQueryResultMetadata metadata = query.getResultMetadata();
+		
+		int width = metadata.getMaxXTile() - metadata.getMinXTile() + 1;
+		int height = metadata.getMaxYTile() - metadata.getMinYTile() + 1;
+		
 		rb.setRasterDimensions(width, height);
 			
-		int tileXMin = (int) Math.floor(bounds.getMinX() / gridCellSize);
-		int tileYMin = (int) Math.floor(bounds.getMinY() / gridCellSize);
-		int tileXMax = tileXMin + width;
-		int tileYMax = tileYMin + height;
-		
-			// sets the envelope based in the map bound
+		// sets the envelope based in the map bound
 		rb.setEnvelope(
-					new Envelope2D(
-							bounds.getCoordinateReferenceSystem(), 
-							tileXMin * gridCellSize + 0.5*gridCellSize, tileYMin * gridCellSize - 0.5*gridCellSize, width * gridCellSize , height*gridCellSize)); 
+				new Envelope2D(
+					Area.AREA_CRS,//TODO: fix this 
+					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
+					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
+					width * gridCellSize , height*gridCellSize)); 
 
 			// set the query result in the raster builder
 		List<Map<String, Object>> table = new LinkedList<Map<String, Object>>(); 
-//		Point gridSize = new Point(1, 1); // 1 degree TODO should be taken from GriddedValuePanel class or its model
-		
-		
 		
 		for (GridResultItem item : queryResults) {
-
 			Map<String, Object> row = new HashMap<String, Object>(3);
-
 			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
-			if (item.getTileX() >= tileXMin && item.getTileX() <= tileXMax && item.getTileY() >= tileYMin && item.getTileY() <= tileYMax){
-				int x = item.getTileX() - 1 - tileXMin;
-				int y = height - (item.getTileY() - tileYMin);
+			if (item.getTileX() >= metadata.getMinXTile() && item.getTileX() <= metadata.getMaxXTile() && item.getTileY() >= metadata.getMinYTile() && item.getTileY() <= metadata.getMaxYTile()){
+				int x = item.getTileX() - metadata.getMinXTile();
+				int y = height - (item.getTileY() - metadata.getMinYTile() +1);
 				row.put("x", x);
 				row.put("y", y);
 				row.put("value", item.getValue());
 				table.add(row);
 			}
-		}
-			
+		}			
 		rb.setTable(table);
-
 		rb.build(gridCellSize);
-
 		return rb.getResult();
-
 	}
 
 	

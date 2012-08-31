@@ -32,7 +32,7 @@ import org.wcs.smart.query.model.observation.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * A comparator for comparining query result items
+ * A comparator for comparing query result items
  * and sorting the results table.
  * 
  * @author Emily
@@ -82,9 +82,9 @@ public class QueryResultItemComparator extends ViewerComparator{
 			return 0;
 		}
 		if (direction == SWT.UP){
-			return -compareValue((QueryResultItem)object1, (QueryResultItem)object2);
+			return -compareValue(object1, object2);
 		}else{
-			return compareValue((QueryResultItem)object1, (QueryResultItem)object2);
+			return compareValue(object1, object2);
 		}
 	}
 		
@@ -95,7 +95,7 @@ public class QueryResultItemComparator extends ViewerComparator{
 	 * @param s2
 	 * @return
 	 */
-	private int compareValue(QueryResultItem s1, QueryResultItem s2){
+	private int compareValue(Object s1, Object s2){
 		if (s1 == null && s2 == null){
 			return 0;
 		}else if (s1== null && s2 != null){
@@ -106,7 +106,6 @@ public class QueryResultItemComparator extends ViewerComparator{
 	
 		Object data1 = column.getColumn().getValue(s1);
 		Object data2 = column.getColumn().getValue(s2);
-		
 		
 		ColumnType type = column.getColumn().getType();
 		Comparator compare = null;
