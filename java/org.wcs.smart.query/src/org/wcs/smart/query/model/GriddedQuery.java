@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -75,9 +76,13 @@ public class GriddedQuery extends Query {
 	private List<DropItem> filterDropItems;
 	@Transient
 	private List<GridResultItem> lastResults;
+
+	@Transient
+	private GridQueryResultMetadata resultMetadata;
+	
 	
 	private double gridSize;
-	IValueItem valueItem;
+	private IValueItem valueItem;
 	
 	private List<DropItem> items;
 	
@@ -213,16 +218,14 @@ public class GriddedQuery extends Query {
 	@Transient
 	public List<GridResultItem> getQueryResults(IProgressMonitor monitor) throws Exception{
 		lastResults = Collections.emptyList();
+		resultMetadata = null;
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
 			
 			DerbyGridEngine engine = new DerbyGridEngine();
 			lastResults = engine.executeQuery(this, session, monitor);
-			
-			// FIXME HACK the result to try the raster result
-			//this.lastResults = MockQuery.getQueryResultsExample3(null);
-
+			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
 			return lastResults;
 		}finally{
 			if (session.isOpen()){
@@ -232,6 +235,15 @@ public class GriddedQuery extends Query {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return the metadata about the last set of results computed
+	 * or null if not yet computed
+	 */
+	@Transient
+	public GridQueryResultMetadata getResultMetadata(){
+		return this.resultMetadata;
+	}
 	
 	/**
 	 * Creates a copy of the summary query
