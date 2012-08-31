@@ -58,7 +58,7 @@ public class GridQueryResultMetadata {
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
 		
-		int[] values = new int[]{Integer.MAX_VALUE,Integer.MAX_VALUE, Integer.MIN_VALUE,Integer.MIN_VALUE};
+		int[] values = new int[]{Integer.MAX_VALUE,Integer.MIN_VALUE, Integer.MAX_VALUE,Integer.MIN_VALUE};
 		
 		for (Iterator<GridResultItem> iterator = items.iterator(); iterator.hasNext();) {
 			GridResultItem type = (GridResultItem) iterator.next();

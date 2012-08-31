@@ -40,8 +40,8 @@ public class GridQueryColumn extends QueryColumn{
 	 * The defined fixed columns.
 	 */
 	public enum GridColumns{
-		TILE_X("Tile X ID", ColumnType.NUMBER,"tile_x"),
-		TILE_Y("Tile Y ID", ColumnType.NUMBER, "tile_y"),
+		TILE_X("Tile X ID", ColumnType.INTEGER,"tile_x"),
+		TILE_Y("Tile Y ID", ColumnType.INTEGER, "tile_y"),
 		VALUE("Value", ColumnType.NUMBER,"value"),
 		DENOMINATOR("Denominator", ColumnType.NUMBER,"denominator");
 		

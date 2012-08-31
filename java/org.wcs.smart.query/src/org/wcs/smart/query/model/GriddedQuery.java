@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
+import java.awt.Point;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -436,6 +437,15 @@ public class GriddedQuery extends Query {
 		return this.gridSize;
 	}
 	
+	/**
+	 * The grid origin - hard coded for now to 0,0
+	 * of whatever crs the data is returned in.
+	 * @return
+	 */
+	@Transient
+	public Point getGridOrigin(){
+		return new Point(0,0);
+	}
 
 	@Transient
 	public GridQueryDefinition getQueryDefinition(){
