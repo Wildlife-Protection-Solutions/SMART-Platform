@@ -46,12 +46,14 @@ import org.wcs.smart.query.model.GriddedQuery;
 public class RasterService {
 
 	private static final String TMP_DIRECTORY = "tmp";
-	private final File raster;
+	private File raster;
 	private File tempDirectory;
 	private List<IGeoResource>  geoResources = null;
+	private GriddedQuery query = null;
 	private IMap map;
 	private List<IService> services;
 
+	private String rasterFileName = null;
 	/**
 	 * New instance of {@link RasterService}
 	 * 
@@ -60,15 +62,16 @@ public class RasterService {
 	 * @throws RasterServiceException 
 	 */
 	public RasterService(final IMap map, final String rasterFileName,
-			final GriddedQuery query,
-			final List<GridResultItem> queryResults) throws RasterServiceException, IOException {
+			final GriddedQuery query) throws RasterServiceException, IOException {
 		
 		assert map != null;
 		assert rasterFileName != null;
-		assert queryResults != null;
 		
+		this.query = query;
 		this.map = map;
-		this.raster = createRaster(rasterFileName, queryResults, query.getGridSize());
+		this.rasterFileName = rasterFileName;
+		
+		this.raster = createRaster(rasterFileName, query.getLastResults(), query.getGridSize());
 	}
 
 	/**
@@ -151,6 +154,7 @@ public class RasterService {
 
 	}
 
+	
 	/**
 	 * Returns the {@link IGeoResource} list associated to the generated raster.
 	 *  
@@ -211,8 +215,18 @@ public class RasterService {
 	 * @param monitor
 	 * @throws IOException
 	 */
-	public void refresh(IProgressMonitor monitor) throws IOException{
+	public void refresh(IProgressMonitor monitor) throws Exception{
 		// TODO implement ??
+		//clean up old files
+		cleanTemporaDirectory();
+		
+		//remove any services
+		ICatalog catalog = CatalogPlugin.getDefault().getLocalCatalog();
+		for (IService service : services) {
+			catalog.remove(service);
+		}
+		
+		this.raster = createRaster(rasterFileName, this.query.getLastResults(), query.getGridSize());
 	}	
 	
 	public List<IGeoResource> resources(IProgressMonitor monitor) {
@@ -235,11 +249,16 @@ public class RasterService {
         if (monitor == null){
         	monitor = new NullProgressMonitor();
         }
-    	IService service = getService();
+    	
+    	ICatalog catalog = CatalogPlugin.getDefault().getLocalCatalog();
+		for (IService service : services) {
+			catalog.remove(service);
+		}
+		IService service = getService();
     	if(service != null){
 			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
     	}
-        
+    	
         int steps = (int) ((double) 99 / (double) geoResources.size());
 
         for( IGeoResource resolve : this.geoResources ) {

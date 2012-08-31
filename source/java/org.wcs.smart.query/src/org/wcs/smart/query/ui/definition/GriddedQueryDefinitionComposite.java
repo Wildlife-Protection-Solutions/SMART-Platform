@@ -127,11 +127,20 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public String validate() {
-		String query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ;
+		String query = "";
 		boolean isvalid = true;
 		GridQueryDefinition def = null;
 		String error = null;
-		if (query.length() == 0) {
+		
+		try{
+			query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ;
+		}catch (Exception ex){
+			isvalid = false;
+			error = ex.getMessage();
+		}
+		
+		
+		if (isvalid && query.length() == 0) {
 			isvalid = false;
 		} else {
 			try {
@@ -146,7 +155,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			}
 		}
 		
-		if (!isvalid || def.getValuePart() == null){
+		if (!isvalid && def != null && def.getValuePart() == null){
 			isvalid = false;
 			error = "Exactly one value must be selected.";
 		}
@@ -155,12 +164,6 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 				isvalid = false;
 				error = "Grid size must be greater than 0";
 			}
-			
-//			String temp = GriddedQuery.validate();
-//			if (temp != null){
-//				isvalid = false;
-//				error = temp;
-//			}
 		}
 		
 		provider.setQueryValue(isvalid, error);

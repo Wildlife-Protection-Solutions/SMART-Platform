@@ -140,10 +140,23 @@ public class GriddedValuePanel {
 
 			@Override
 			public void handleEvent(Event event) {
+				parentView.validate();
 				parentView.fireQueryModifiedListeners();
 			}
 		});
 		
+		lbl = new Label(leftMain, SWT.NONE);
+		lbl.setText("Grid Origin:");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		lbl = new Label(leftMain, SWT.NONE);
+		lbl.setText("(0,0)");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		data.horizontalIndent = 8;
+		data.widthHint = 20;
+		lbl.setLayoutData(data);
 		
 		Composite right = new Composite(main, SWT.BORDER);
 		GridLayout rgl = new GridLayout(2, false);
