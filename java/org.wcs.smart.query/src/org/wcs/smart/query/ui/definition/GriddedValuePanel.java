@@ -72,7 +72,9 @@ public class GriddedValuePanel {
 	 */
 	public void init(GriddedQuery query) {
 		lstValues.addElements(query.getValueDropItems());
-		txtGridSize.setText(Double.toString(query.getGridSize()));
+		if(query.getGridSize() != 0){
+			txtGridSize.setText(Double.toString(query.getGridSize()));
+		}
 	}
 
 	/**
@@ -122,7 +124,7 @@ public class GriddedValuePanel {
 		leftMain.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
 		Label lbl = new Label(leftMain, SWT.NONE);
-		lbl.setText("Grid Size (in meters):");
+		lbl.setText("Grid Size (in decimal degrees):");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		

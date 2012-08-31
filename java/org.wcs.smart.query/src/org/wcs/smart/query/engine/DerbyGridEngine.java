@@ -51,6 +51,7 @@ import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
+import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 
 public class DerbyGridEngine extends DerbyQueryEngine2{
@@ -192,7 +193,13 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		
 		String strAgg ="";
 		ResultSet rs;
-		if(value instanceof AttributeValueItem){
+		if(value instanceof AttributeValueItem || value instanceof CombinedValueItem){
+			
+			//TODO: calculate rations properly, this just uses the numerator as a single value for now.
+			if(value instanceof CombinedValueItem){
+				CombinedValueItem cmbTmp = (CombinedValueItem)value;
+				value = cmbTmp.getPart1();
+			}
 			AttributeValueItem tmp = (AttributeValueItem)value;
 			strAgg = tmp.getAggregation().getName(); 
 		
@@ -257,6 +264,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			QueryPlugIn.logSql(sql.toString());
 			rs = c.createStatement().executeQuery(sql.toString());
 			
+		
 		}else{
 			throw new SQLException("Not an Attribute or Category Selected");	
 		}
