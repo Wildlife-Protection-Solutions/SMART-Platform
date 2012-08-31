@@ -49,6 +49,7 @@ import org.opengis.coverage.grid.Format;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -143,9 +144,9 @@ final class RasterBuilder {
 		assert this.table != null;
 		assert this.envelope != null;
 
-//		GridCoverage2D gc = null;
+		TiledImage raster = null;
 		try {
-			TiledImage raster = createRaster();
+			raster = createRaster();
 
 			File out = new File(fileName);
 			JAI.create("filestore",raster,out.getCanonicalPath(),"TIFF");
@@ -154,15 +155,13 @@ final class RasterBuilder {
 			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());
 			createWorldFile(baseFile, gridSize, envelope.getMinX(), envelope.getMaxY());
 			this.file = out;
-//
-//			this.file = saveInFile(gc, this.fileName);
-//			
-		}catch (Exception ex){
-			//TODO:
-			ex.printStackTrace();
-		} finally {
 			
-//			if(gc != null) gc.dispose(true);
+		}catch (Exception ex){
+			QueryPlugIn.displayLog("Error creating grid: " + ex.getMessage(), ex);
+		} finally {
+			if (raster != null){
+				raster.dispose();
+			}
 		}
 	}
 	
