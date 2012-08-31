@@ -43,6 +43,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Waypoint;
 
+
 /**
  * Extension of the smart hibernate manager for patrol related data.
  * 
@@ -52,6 +53,7 @@ import org.wcs.smart.patrol.model.Waypoint;
 public class PatrolHibernateManager extends HibernateManager{
 	
 	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000000");
+	private static NumberFormat PLAN_ID_FORMATTER = new DecimalFormat("000000");
 	
 	/**
 	 * Gets all teams (active and in-active) for a given conservation area
@@ -440,4 +442,31 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 		return true;
 	}
+	
+	/*
+
+	public static String generatePlanId(Plan p, Session s) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(p.getConservationArea().getId());
+		Query q = s.createQuery("SELECT id FROM Plan WHERE id like :id ORDER BY id desc");
+		q.setParameter("id", sb.toString() + "%");
+
+		List results = q.list();
+		
+		String id = p.getConservationArea().getId() + "_0";
+		if (results.size() > 0){
+			id = (String) q.list().get(0);
+		}
+		
+		long cnt = Integer.parseInt(id.substring(id.lastIndexOf('_')+1));
+		cnt++;
+		cnt = cnt % 999999;
+
+		sb.append("_");
+		sb.append(PLAN_ID_FORMATTER.format(cnt));
+		s.evict(p.getConservationArea());
+		return sb.toString();
+	}
+	
+	*/
 }

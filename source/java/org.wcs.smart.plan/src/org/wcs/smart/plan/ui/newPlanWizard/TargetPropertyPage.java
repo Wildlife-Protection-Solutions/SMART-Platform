@@ -140,7 +140,7 @@ public class TargetPropertyPage extends Dialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		Button btn = createButton(parent, IDialogConstants.OK_ID, "Save", true);
-		btn.setEnabled(false);
+		//btn.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
 		
 	}
@@ -160,6 +160,6 @@ public class TargetPropertyPage extends Dialog {
 	
 	private boolean performSave(){
 
-		return false;
+		return true;
 	}
 }

@@ -41,7 +41,9 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.tree.PlanNode;
+import org.wcs.smart.plan.ui.tree.FakeLabelProvider;
+import org.wcs.smart.plan.ui.tree.MockModel;
+import org.wcs.smart.plan.ui.tree.fakePlanTreeContentProvider;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -111,8 +113,8 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 
 		planTreeViewer = new TreeViewer(center);
 		planTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,4,1));
-		planTreeViewer.setLabelProvider(new LabelProvider());
-		planTreeViewer.setContentProvider(new PlanNode(planTreeViewer));
+		planTreeViewer.setLabelProvider(new FakeLabelProvider());
+		planTreeViewer.setContentProvider(new fakePlanTreeContentProvider());
 		
 		initialize();
 				
@@ -138,11 +140,9 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 			session.close();
 		}
 		final HashMap<String, Object> input = new HashMap<String, Object>();
-			
-		input.put("CA Plan #1", "test");
-		input.put("CA Plan #2", "test");
-			
-		planTreeViewer.setInput(input);
+
+		planTreeViewer.setInput(new MockModel());
+		planTreeViewer.expandAll();
 				
 	}
 	

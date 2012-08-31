@@ -106,6 +106,9 @@ public class RasterService {
 				
 //		Math.round(bounds.getWidth() +1);
 //		final int height = (int) Math.round(bounds.getHeight() +1);
+
+		
+				
 		rb.setRasterDimensions(width, height);
 			
 		int tileXMin = (int) Math.floor(bounds.getMinX() / gridCellSize);

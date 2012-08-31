@@ -66,8 +66,6 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Is this patrol armed?");
 
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
@@ -83,7 +81,7 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 		btnExisting.setText("Use an existing Plan as a template");
 		btnExisting.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
-		setMessage("Select if you would like to use an existing plan as a template or not.");
+		setMessage("When creating a new plan, you can use an existing plan as a template, or simply create a new, blank plan.");
 		super.setControl(main);
 
 	}
