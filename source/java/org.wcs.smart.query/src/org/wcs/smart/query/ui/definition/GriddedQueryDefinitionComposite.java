@@ -97,7 +97,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		TabItem item2 = new TabItem(tabs, SWT.NONE);
 		filterPanel = new FilterDropTargetPanel(parentView);
 		item2.setControl( filterPanel.createComposite(tabs) );
-		item2.setText("Data Filter");
+		item2.setText("Filter");
 	
 		tabs.addSelectionListener(new SelectionAdapter() {			
 			@Override
