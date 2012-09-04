@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
@@ -209,7 +210,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		if(value instanceof AttributeValueItem ){
 			AttributeValueItem tmp = (AttributeValueItem)value;
 			strAgg = tmp.getAggregation().getName(); 
-		
+			String key = tmp.getAttributeKey();
+
+			
+			
 			double minX = mins[0];
 			double minY = mins[1];
 			StringBuilder sql = new StringBuilder();
@@ -226,6 +230,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				+ ".uuid = "
 				+ tablePrefix.get(WaypointObservationAttribute.class)
 				+ ".observation_uuid");
+			sql.append(" JOIN " + tableNames.get(Attribute.class) + " as " + tablePrefix.get(Attribute.class) 
+					+ " on " + tablePrefix.get(WaypointObservationAttribute.class)
+					+ ".attribute_uuid = "
+					+ tablePrefix.get(Attribute.class)
+					+ ".uuid"
+					+ " AND keyid = '" + key + "'");
 			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class) 
 				+ " on " + tablePrefix.get(Waypoint.class)
 				+ ".uuid = "
