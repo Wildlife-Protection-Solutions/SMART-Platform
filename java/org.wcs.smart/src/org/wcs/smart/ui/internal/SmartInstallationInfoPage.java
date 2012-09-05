@@ -2,6 +2,7 @@ package org.wcs.smart.ui.internal;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -11,6 +12,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.about.InstallationPage;
 
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
 public class SmartInstallationInfoPage extends InstallationPage {
@@ -43,7 +45,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		
-		sb.append("Filestore Location:");
+		sb.append("Filestore Location: ");
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
 		db = new File(embeddedDb);
 		try{
@@ -54,7 +56,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		
-		sb.append("GPS Babel Location:");
+		sb.append("GPS Babel Location: ");
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.GPS_BABLE_KEY);
 		db = new File(embeddedDb);
 		try{
@@ -64,6 +66,13 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		}
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		sb.append(SmartUtils.LINE_SEPARATOR);
+		
+		
+		sb.append("System Language: ");
+		sb.append(Platform.getNL());
+		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append("CA Default Language: ");
+		sb.append(SmartDB.getCurrentLanguage().getName() + " [" + SmartDB.getCurrentLanguage().getCode() + "]");
 		
 		txt.setText(sb.toString());
 	}
