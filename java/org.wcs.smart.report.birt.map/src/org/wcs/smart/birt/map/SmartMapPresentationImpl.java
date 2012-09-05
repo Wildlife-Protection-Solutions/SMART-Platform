@@ -53,13 +53,12 @@ import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.map.udig.QueryService;
 import org.wcs.smart.query.map.udig.QueryServiceFactory;
+import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
@@ -168,15 +167,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 					(Date) context.getParameterValue("End Date"));
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 			for (GeoSmart layer : layers) {
-				QueryService qs = QueryServiceFactory.generateQueryService(layer.dbQuery);
+				IService qs = QueryServiceFactory.generateQueryService(layer.dbQuery);
 				if (qs != null) {
 					layer.service = qs;
-					List<? extends IGeoResource> resources = qs.resources(null);
-					if (resources.size() > 0){
-						layer.georesource = resources.get(0);
-						toAdd.add(layer.georesource);
-					}
-					
 					if (layer.dbQuery instanceof ObservationQuery) {
 						((ObservationQuery) layer.dbQuery).setDateFilter(dateFilter);
 						((ObservationQuery) layer.dbQuery)
@@ -185,7 +178,19 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 						((PatrolQuery) layer.dbQuery).setDateFilter(dateFilter);
 						((PatrolQuery) layer.dbQuery)
 								.getQueryResults(new NullProgressMonitor());
-					}	
+					} else if (layer.dbQuery instanceof GriddedQuery ){
+						((GriddedQuery)layer.dbQuery).setDateFilter(dateFilter);
+						((GriddedQuery) layer.dbQuery)
+						.getQueryResults(new NullProgressMonitor());
+					}
+					
+					List<? extends IGeoResource> resources = qs.resources(null);
+					if (resources.size() > 0){
+						layer.georesource = resources.get(0);
+						toAdd.add(layer.georesource);
+					}
+					
+					
 				}
 			}
 			
@@ -222,7 +227,10 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				g.dispose();
 			}
 
+			NullProgressMonitor monitor = new NullProgressMonitor();
 			for (GeoSmart layer: layers) {
+				layer.georesource.dispose(monitor);
+				layer.service.dispose(monitor);
 				CatalogPlugin.getDefault().getLocalCatalog().remove(layer.service);
 			}
 

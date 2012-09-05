@@ -27,17 +27,17 @@ import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.StyleContent;
+import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
-import net.refractions.udig.project.internal.StyleEntry;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.DialogCellEditor;
@@ -45,12 +45,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.XMLMemento;
+import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.wcs.smart.birt.map.BirtMapUtils;
 import org.wcs.smart.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.map.udig.QueryService;
 import org.wcs.smart.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.SmartUtils;
@@ -65,7 +65,7 @@ import org.wcs.smart.util.SmartUtils;
 public class StyleCellEditor extends DialogCellEditor {
 
 	private Layer layer;
-	private QueryService qs;
+	private IService qs;
 
 	private Map map;
 	
@@ -107,14 +107,20 @@ public class StyleCellEditor extends DialogCellEditor {
 						
 						List<? extends IGeoResource> resources = qs.resources(null);
 						IGeoResource iGeoResource = (IGeoResource) resources.get(0);
-						ArrayList<IGeoResource> rsources = new ArrayList<IGeoResource>();
-						rsources.add(iGeoResource);
+						ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();
+						thisresources.add(iGeoResource);
 						AddLayersCommand cmd = new AddLayersCommand(resources);
 						map.executeSyncWithoutUndo(cmd);
 						layer = cmd.getLayers().get(0);
+						
+						Object lstyle = style;
+						if (lstyle == null){
+							//lets see if we can get a style from the georesource
+							lstyle = (Style)iGeoResource.resolve(Style.class, new NullProgressMonitor());
+						}
 						if (style != null) {
 							layer.getStyleBlackboard()
-									.put(SLDContent.ID, style);
+									.put(SLDContent.ID, lstyle);
 						}
 					} catch (Exception ex) {
 						SmartMapItemPlugIn.displayLog("Could not create style editor: " + ex.getMessage(), ex);

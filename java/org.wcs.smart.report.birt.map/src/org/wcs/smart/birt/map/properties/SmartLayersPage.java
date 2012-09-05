@@ -613,7 +613,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				List<OdaDataSetHandle> thisHandles = new ArrayList<OdaDataSetHandle>();
 				for (int i = 0; i < handles.length; i ++){
 					QueryType qt = QueryType.valueOf(handles[i].getQueryText().split(":")[0]);
-					if (qt != QueryType.GRIDDED && qt != QueryType.SUMMARY){
+					if (qt != QueryType.SUMMARY){
 						thisHandles.add(handles[i]);
 					}
 				}
