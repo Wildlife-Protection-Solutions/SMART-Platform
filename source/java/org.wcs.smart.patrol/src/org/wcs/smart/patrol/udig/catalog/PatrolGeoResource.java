@@ -125,7 +125,7 @@ public class PatrolGeoResource extends IGeoResource {
             return adaptee.cast( this.service );
         }
       
-        if (adaptee.isAssignableFrom(FeatureSource.class)){
+        if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ){
         	 DataStore ds = ((PatrolService)service).getDataStore(monitor);
              if (ds != null) {
                  FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(dataType);
@@ -138,7 +138,7 @@ public class PatrolGeoResource extends IGeoResource {
             	 return null;
              }
         }
-        if (adaptee.isAssignableFrom(FeatureStore.class)){
+        if (adaptee.isAssignableFrom(FeatureStore.class) || adaptee.isAssignableFrom(SimpleFeatureStore.class)){
         	 @SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resolve(FeatureSource.class, monitor);
              if (fs != null && fs instanceof FeatureStore) {
