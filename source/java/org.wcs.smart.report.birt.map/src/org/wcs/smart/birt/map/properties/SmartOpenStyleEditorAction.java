@@ -96,6 +96,7 @@ public class SmartOpenStyleEditorAction {
             pageId = "simple"; //$NON-NLS-1$
         }
 
+//        String pageId = null;
         final EditorPageManager manager = EditorPageManager.loadManager(null, selectedLayer);
 
         StyleEditorDialog dialog = StyleEditorDialog.createDialogOn(shell, pageId, selectedLayer, manager);
