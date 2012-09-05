@@ -21,19 +21,23 @@
  */
 package org.wcs.smart.query;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationAreaManager;
 
 /**
@@ -44,6 +48,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.query"; //$NON-NLS-1$
 
+	/**
+	 * Location for raster query files to be placed
+	 */
+	private static final String QUERY_TEMP_FOLDER = "query_temp";
+	
 	/**
 	 * The small 8x8 delete icon
 	 */
@@ -245,6 +254,13 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public QueryPlugIn() {
 	}
 
+	
+	public File getQueryTempDirectory(){
+		return new File(SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY), QUERY_TEMP_FOLDER);
+	}
+	
+	
+	
 	/**
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
@@ -254,6 +270,23 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		
 		//add required listeners
 		ConservationAreaManager.getInstance().addDeleteHandler(new QueryCaDeleteHandler(),QueryCaDeleteHandler.EXECUTE_ORDER);
+	
+
+		//empty query temp directory
+		Job j = new Job("Cleaning queries directory"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				File dir = getQueryTempDirectory();
+				File[] toDel = dir.listFiles();
+				for (int i = 0; i < toDel.length; i ++){
+					toDel[i].delete();
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.schedule();
 	}
 
 	/**

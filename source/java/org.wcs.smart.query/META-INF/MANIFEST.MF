@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.databinding;bundle-version="1.5.0",
  org.eclipse.core.databinding.observable;bundle-version="1.4.0",
  org.eclipse.ui.forms;bundle-version="3.5.100",
- net.refractions.udig.style.sld;bundle-version="1.2.0"
+ net.refractions.udig.style.sld;bundle-version="1.2.0",
+ net.refractions.udig.catalog.rasterings;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: .,
@@ -21,7 +22,6 @@ Export-Package: .,
  org.wcs.smart.query.map.geotools,
  org.wcs.smart.query.map.udig,
  org.wcs.smart.query.model,
- org.wcs.smart.query.model.gridded;x-friends:="org.wcs.smart.query.test",
  org.wcs.smart.query.model.observation,
  org.wcs.smart.query.model.patrol,
  org.wcs.smart.query.parser,

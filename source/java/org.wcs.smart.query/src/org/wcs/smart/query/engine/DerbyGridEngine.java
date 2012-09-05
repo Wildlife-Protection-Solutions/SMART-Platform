@@ -121,7 +121,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					double size = query.getGridSize();
 
 					//select the tile_id, and value that we want to show on the grid
-					myResults = getGridResults(c, session, mins, size, query.getValueItem());
+					myResults = getGridResults(c, session, mins, size, query.getQueryDefinition().getValuePart());
 					
 					monitor.worked(1);
 					
@@ -195,17 +195,17 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		
 		String strAgg ="";
 		ResultSet rs;
-		//TODO: calculate rations properly, this just uses the numerator as a single value for now.
-		if(value instanceof CombinedValueItem){
-			CombinedValueItem cmbTmp = (CombinedValueItem)value;
-			value = cmbTmp.getPart1();
+
+		if (value instanceof CombinedValueItem){
+			//TODO: calculate rations properly, 
+			//this just uses the numerator as a single value for now.
+			value = ((CombinedValueItem)value).getPart1();
 		}
 		
 		//TODO: take this out once we can do patrol items
 		if(value instanceof PatrolValueItem ){
 			throw new SQLException("Cannot process Patrol Values in this software version.");
 		}
-		
 		
 		if(value instanceof AttributeValueItem ){
 			AttributeValueItem tmp = (AttributeValueItem)value;

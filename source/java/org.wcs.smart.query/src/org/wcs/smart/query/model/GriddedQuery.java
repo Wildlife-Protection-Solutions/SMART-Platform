@@ -26,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -62,11 +61,8 @@ public class GriddedQuery extends Query {
 	private GridQueryDefinition query;
 	
 	private String strQuery;	
-	@Transient
-
 	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
-	public IFilter queryFilter;	//cached copy of the parsed query
 	
 	private List<QueryColumn> queryColumns = null;
 	
@@ -75,18 +71,12 @@ public class GriddedQuery extends Query {
 	private List<DropItem> valueDropItems;
 	@Transient
 	private List<DropItem> filterDropItems;
+	
 	@Transient
 	private List<GridResultItem> lastResults;
-
 	@Transient
 	private GridQueryResultMetadata resultMetadata;
-	
-	
-	private double gridSize;
-	private IValueItem valueItem;
-	
-	private List<DropItem> items;
-	
+
 	/**
 	 * Creates a new gridded query with the default
 	 * conservation area filter and no date filter
@@ -110,17 +100,13 @@ public class GriddedQuery extends Query {
 	 */
 	@Transient
 	public  GridQueryDefinition parseQuery() throws Exception {
-		
+
 		if (strQuery == null || strQuery.length() == 0){
 			return null;
 		}
 		InputStream is = new ByteArrayInputStream(strQuery.getBytes());
 		Parser parser = new Parser(is);
-	
 		GridQueryDefinition myQuery = parser.GridQuery();
-		queryFilter = myQuery.getQueryFilter();
-		gridSize = myQuery.getGridSize();
-		valueItem = myQuery.getValuePart();
 		is.close();
 		return myQuery;
 	}
@@ -187,9 +173,6 @@ public class GriddedQuery extends Query {
 	public void setQuery(String queryStr, GridQueryDefinition queryDef){
 		this.strQuery = queryStr;
 		this.query = queryDef;
-		if(query != null){
-			queryFilter = query.getQueryFilter();
-		}
 	}
 	
 	
@@ -358,14 +341,12 @@ public class GriddedQuery extends Query {
 	public String validate(){
 		//TODO: validation on the query string and/or definition
 		//return the error if there is on, null if it's ok.
-		if (gridSize <= 0){
+		if (getQueryDefinition() != null && getQueryDefinition().getGridSize() <= 0){
 			return "Invalid Grid Size";
 		}
 		return null;
 	}
 
-
-	
 	@Transient
 	public List<QueryColumn> getQueryColumns() {
 		if (this.queryColumns == null){
@@ -373,8 +354,6 @@ public class GriddedQuery extends Query {
 		}
 		return this.queryColumns;
 	}
-
-
 
 	/**
 	 * Loads the query columns
@@ -388,45 +367,6 @@ public class GriddedQuery extends Query {
 		}
 	}
 	
-	
-	/**
-	 * Sets the query string.  At this point the
-	 * filter is not parsed.
-	 * 
-	 * @param filter
-	 * @return
-	 */
-	//@Override
-	//public void setQueryFilter(String filter){
-		//I think this function is not used anymore
-		
-		//		String[] temp = filter.split("[|]");
-//		if(temp.length < 1){
-//			this.valueFilter = "";
-//		}else{
-//			this.valueFilter = temp[0];
-//		}
-//		if(temp.length < 2){
-//			this.strQueryFilter = "";
-//		}else{
-//			this.strQueryFilter = temp[1];
-//		}
-//		this.queryFilter = null;
-		
- 
-	//}
-	
-
-	/**
-	 * Sets the grid size.  
-	 * 
-	 * @param size, the size of the grid squares
-	 * @return
-	 */
-	public void setGridSize(int size){
-		this.gridSize = size;
-	}
-	
 	/**
 	 * Gets the grid size.
 	 * 
@@ -434,7 +374,18 @@ public class GriddedQuery extends Query {
 	 */
 	@Transient
 	public double getGridSize(){
-		return this.gridSize;
+		if (query == null){
+			try{
+				query = parseQuery();
+				if (query == null){
+					return 0.01;
+				}
+			}catch (Exception ex){
+				//cannot parse query
+				return 0.01;
+			}
+		}
+		return query.getGridSize();
 	}
 	
 	/**
@@ -466,37 +417,32 @@ public class GriddedQuery extends Query {
 	 */
 	@Transient
 	public IFilter getFilter(){
-		if (queryFilter == null){
-			try{
-				GridQueryDefinition def = parseQuery();
-				queryFilter = def.getQueryFilter();
-			} catch (Exception ex) {
-				QueryPlugIn.displayLog("Could not parse query.", ex);
-			}
-		}
-		if(queryFilter == null){
+		IFilter filter = getQueryDefinition().getQueryFilter();
+		if (filter == null){
 			return IFilter.EMPTY_FILTER;
-		}else{
-			return queryFilter;
 		}
+		return filter;
 	}
-
-	@Transient
-	public IValueItem getValueItem() {
-		return valueItem; 
-		
-	}
-
 
 	@Override
 	public boolean isDefinitionEqual(Query other) {
-		// TODO Auto-generated method stub
+		if (! (other instanceof GriddedQuery)){
+			return false;
+		}
+		GriddedQuery oquery = (GriddedQuery)other;
+		if (oquery.getGridOrigin().equals(getGridOrigin()) && 
+			oquery.getQuery().equals(getQuery())){
+			return true;
+		}
 		return false;
 	}
 
 
 	@Override
 	public void copyFrom(Query copy) {
+		if (copy instanceof GriddedQuery){
+			setQuery(((GriddedQuery) copy).getQuery());
+		}
 		// TODO Auto-generated method stub
 		
 	}
@@ -515,18 +461,5 @@ public class GriddedQuery extends Query {
 	public ConservationAreaFilter getConservationAreaFilter(){
 		return this.caFilter;
 	}
-	/**
-	 * @return the drop items generated for the query
-	 */
-	@Transient
-	public List<DropItem> getDropItems(){
-		return items;
-	}
-	/**
-	 * @param items the drop items associated with the query
-	 */
-	@Transient
-	public void setDropItems(List<DropItem> items){
-		this.items = items;
-	}
+
 }

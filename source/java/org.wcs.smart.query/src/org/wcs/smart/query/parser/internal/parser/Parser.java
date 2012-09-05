@@ -59,7 +59,17 @@ public class Parser implements ParserConstants {
         IValueItem value = null;
         IFilter filter = null;
         Double gridSize = null;
-    value = ValueItem();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case PATROL_VALUE_ITEM:
+    case SUM_CAT_VALUE_KEY:
+    case SUM_ATTRIBUTE_VALUE_KEY:
+    case SUM_CAT_ATT_VALUE_KEY:
+      value = ValueItem();
+      break;
+    default:
+      jj_la1[1] = jj_gen;
+      ;
+    }
     jj_consume_token(QUERY_SPLITTER);
     jj_consume_token(NUMBER);
                      gridSize = Double.parseDouble(token.image);
@@ -92,7 +102,7 @@ public class Parser implements ParserConstants {
       filter = ExpressionPart();
       break;
     default:
-      jj_la1[1] = jj_gen;
+      jj_la1[2] = jj_gen;
       ;
     }
     jj_consume_token(0);
@@ -120,7 +130,7 @@ public class Parser implements ParserConstants {
                         items.add(item);
       break;
     default:
-      jj_la1[2] = jj_gen;
+      jj_la1[3] = jj_gen;
       ;
     }
     label_1:
@@ -130,7 +140,7 @@ public class Parser implements ParserConstants {
         ;
         break;
       default:
-        jj_la1[3] = jj_gen;
+        jj_la1[4] = jj_gen;
         break label_1;
       }
       jj_consume_token(COMMA);
@@ -151,7 +161,7 @@ public class Parser implements ParserConstants {
       item2 = SingleValueItem();
       break;
     default:
-      jj_la1[4] = jj_gen;
+      jj_la1[5] = jj_gen;
       ;
     }
                 if (item2 != null)
@@ -182,7 +192,7 @@ public class Parser implements ParserConstants {
                         item = AttributeValueItem.createCategoryAttributeItem( token.image );
       break;
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[6] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -204,7 +214,7 @@ public class Parser implements ParserConstants {
                         items.add(item);
       break;
     default:
-      jj_la1[6] = jj_gen;
+      jj_la1[7] = jj_gen;
       ;
     }
     label_2:
@@ -214,7 +224,7 @@ public class Parser implements ParserConstants {
         ;
         break;
       default:
-        jj_la1[7] = jj_gen;
+        jj_la1[8] = jj_gen;
         break label_2;
       }
       jj_consume_token(COMMA);
@@ -238,7 +248,7 @@ public class Parser implements ParserConstants {
         jj_consume_token(PATROL_UUID_GROUPBY_OPTION);
         break;
       default:
-        jj_la1[8] = jj_gen;
+        jj_la1[9] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -261,7 +271,7 @@ public class Parser implements ParserConstants {
                         item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
       break;
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[10] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -282,7 +292,7 @@ public class Parser implements ParserConstants {
         ;
         break;
       default:
-        jj_la1[10] = jj_gen;
+        jj_la1[11] = jj_gen;
         break label_3;
       }
       op = BooleanOp();
@@ -302,7 +312,7 @@ public class Parser implements ParserConstants {
                     hasNot = true;
       break;
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[12] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -342,7 +352,7 @@ public class Parser implements ParserConstants {
                         filter = BracketFilter.createFilter(filter);
       break;
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[13] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -369,7 +379,7 @@ public class Parser implements ParserConstants {
                 filter = PatrolFilter.createBooleanFilter(token.image);
       break;
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[14] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -400,7 +410,7 @@ public class Parser implements ParserConstants {
                         filter = CategoryAttributeFilter.createValueFilter(key, op, value);
       break;
     default:
-      jj_la1[14] = jj_gen;
+      jj_la1[15] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -476,7 +486,7 @@ public class Parser implements ParserConstants {
                 filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
       break;
     default:
-      jj_la1[15] = jj_gen;
+      jj_la1[16] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -544,7 +554,7 @@ public class Parser implements ParserConstants {
         jj_consume_token(PATROLLEG_MEMBER_KEY);
         break;
       default:
-        jj_la1[16] = jj_gen;
+        jj_la1[17] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -555,7 +565,7 @@ public class Parser implements ParserConstants {
                         filter = PatrolFilter.createStringFilter(key, op, value);
       break;
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[18] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -599,7 +609,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(LESSEQUAL);
       break;
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -619,7 +629,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(NOT_CONTAINS);
       break;
     default:
-      jj_la1[19] = jj_gen;
+      jj_la1[20] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -636,7 +646,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(K_OR);
       break;
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[21] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -653,7 +663,7 @@ public class Parser implements ParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[21];
+  final private int[] jj_la1 = new int[22];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -663,13 +673,13 @@ public class Parser implements ParserConstants {
       jj_la1_init_2();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x2002000,0x2002000,0x0,0x20000,0x40000000,0x0,0x0,0x20000,0x0,0x0,0x4080,0x2000,0x2000000,0x0,0x0,0x0,0x0,0x0,0x1fc0000,0x0,0x4080,};
+      jj_la1_0 = new int[] {0x2002000,0x0,0x2002000,0x0,0x20000,0x40000000,0x0,0x0,0x20000,0x0,0x0,0x4080,0x2000,0x2000000,0x0,0x0,0x0,0x0,0x0,0x1fc0000,0x0,0x4080,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0xfc7ff800,0xfc7ff800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfc7ff800,0x484000,0x42000,0xfc7ff000,0xfc000000,0xfc021000,0x0,0x1c,0x0,};
+      jj_la1_1 = new int[] {0xfc7ff800,0x0,0xfc7ff800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfc7ff800,0x484000,0x42000,0xfc7ff000,0xfc000000,0xfc021000,0x0,0x1c,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0xf,0xf,0x1d0,0x0,0x0,0x1d0,0x1f400,0x0,0x3000,0x1f400,0x0,0x0,0xf,0x0,0x0,0x7,0x7,0x7,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0xf,0x1d0,0xf,0x1d0,0x0,0x0,0x1d0,0x1f400,0x0,0x3000,0x1f400,0x0,0x0,0xf,0x0,0x0,0x7,0x7,0x7,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -683,7 +693,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 21; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -697,7 +707,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 21; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -707,7 +717,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 21; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -717,7 +727,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 21; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -726,7 +736,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 21; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -735,7 +745,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 21; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -791,7 +801,7 @@ public class Parser implements ParserConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 21; i++) {
+    for (int i = 0; i < 22; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

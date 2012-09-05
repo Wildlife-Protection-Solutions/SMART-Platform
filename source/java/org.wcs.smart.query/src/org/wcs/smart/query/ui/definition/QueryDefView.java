@@ -40,19 +40,14 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.QueryEventManager;
-import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
-import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
  * A view for building query definition.
@@ -113,11 +108,6 @@ public class QueryDefView extends ViewPart {
 		
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
-			
-//			if (partRef.getId().equals(QueryResultsEditor.ID) ||
-//					partRef.getId().equals(SummaryEditor.ID) || 
-//					 partRef.getId().equals(GriddedEditor.ID) ||
-//					 partRef.getId().equals(PatrolQueryResultsEditor.ID)){
 			IWorkbenchPart part = partRef.getPart(false);
 			if (part instanceof IQueryEditor){
 				Query q =((IQueryEditor)part).getQuery();
@@ -274,6 +264,7 @@ public class QueryDefView extends ViewPart {
 	public void setQuery(Query query){
 		if (current != null){
 			currentPanel.saveItems();
+			current = null;	//necessary so that clean doesn't fire events that cause current to get updated
 			currentPanel.clear();
 		}
 		

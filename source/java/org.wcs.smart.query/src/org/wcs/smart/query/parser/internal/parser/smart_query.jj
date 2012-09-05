@@ -134,7 +134,9 @@ GridQueryDefinition GridQuery() :
 	Double gridSize = null;
 }
 {
-	value = ValueItem()
+	(
+		value = ValueItem()
+	)?
 	< QUERY_SPLITTER >
 	< NUMBER > { gridSize = Double.parseDouble(token.image);}
 	< QUERY_SPLITTER > 

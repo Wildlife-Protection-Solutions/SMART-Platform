@@ -135,8 +135,10 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 		}
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)view.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
 		provider.setQueryValue(isvalid, error);
-		view.getQuery().setIsValid(isvalid);
-		((SimpleQuery)view.getQuery()).setQueryFilter(query);
+		if(view.getQuery() != null){
+			view.getQuery().setIsValid(isvalid);
+			((SimpleQuery)view.getQuery()).setQueryFilter(query);
+		}
 		return error;
 	}
 
