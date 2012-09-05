@@ -51,6 +51,7 @@ public class GriddedValuePanel {
 
 	private Text txtGridSize;
 	private ListDropTargetPanel lstValues;
+	private boolean isInitializing = false;
 	
 	/**
 	 * Clears values
@@ -71,10 +72,10 @@ public class GriddedValuePanel {
 	 * @param query
 	 */
 	public void init(GriddedQuery query) {
+		isInitializing = true;
 		lstValues.addElements(query.getValueDropItems());
-		if(query.getGridSize() != 0){
-			txtGridSize.setText(Double.toString(query.getGridSize()));
-		}
+		txtGridSize.setText(Double.toString(query.getGridSize()));
+		isInitializing = false;
 	}
 
 	/**
@@ -84,7 +85,7 @@ public class GriddedValuePanel {
 	public void saveDropItems(GriddedQuery query) {
 		ArrayList<DropItem> items = new ArrayList<DropItem>();
 		items.addAll(lstValues.getItems());
-		query.setValueDropItems(items);		
+		query.setValueDropItems(items);	
 	}
 
 	/**
@@ -137,9 +138,9 @@ public class GriddedValuePanel {
 		data.widthHint = 20;
 		txtGridSize.setLayoutData(data);
 		txtGridSize.addListener(SWT.Modify, new Listener(){
-
 			@Override
 			public void handleEvent(Event event) {
+				if (isInitializing) return;
 				parentView.validate();
 				parentView.fireQueryModifiedListeners();
 			}

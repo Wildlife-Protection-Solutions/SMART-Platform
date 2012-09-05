@@ -57,6 +57,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	private GriddedValuePanel panel;
 	private FilterDropTargetPanel filterPanel;
 	private TabFolder tabs;
+	private boolean isInitializing = false;
 
 	/**
 	 * @param parent parent composite
@@ -127,6 +128,8 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public String validate() {
+		if (isInitializing) return null; //still initializing ; do not validate
+		
 		String query = "";
 		boolean isvalid = true;
 		GridQueryDefinition def = null;
@@ -155,7 +158,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			}
 		}
 		
-		if (!isvalid && def != null && def.getValuePart() == null){
+		if (isvalid && def != null && def.getValuePart() == null){
 			isvalid = false;
 			error = "Exactly one value must be selected.";
 		}
@@ -174,14 +177,18 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		return error;
 	}
 
+	
 	/**
 	 * @see org.wcs.smart.query.ui.QueryDefinitionComposite#init()
 	 */
 	@Override
 	public void init() {
+		isInitializing = true;
 		GriddedQuery query = ((GriddedQuery)parentView.getQuery());
 		filterPanel.addElements(query.getFilterDropItems());
 		panel.init(query);
+		isInitializing = false;
+		validate();
 	}
 
 	/**
@@ -191,8 +198,10 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	public void saveItems() {
 		GriddedQuery query = ((GriddedQuery)parentView.getQuery());
 		
+		//drop items
 		panel.saveDropItems(query);
 		
+		//filter items
 		List<DropItem> items = new ArrayList<DropItem>();
 		items.addAll(filterPanel.getItems());
 		query.setFilterDropItems(items);

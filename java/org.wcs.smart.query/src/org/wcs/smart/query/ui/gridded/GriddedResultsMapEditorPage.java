@@ -22,10 +22,10 @@
 
 package org.wcs.smart.query.ui.gridded;
 
-import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.internal.Layer;
@@ -33,27 +33,23 @@ import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayerCommand;
-import net.refractions.udig.project.render.IViewportModelListener;
-import net.refractions.udig.project.render.ViewportModelEvent;
-import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.MultiPageEditorPart;
-import org.geotools.styling.Style;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.GridQueryResultMetadata;
+import org.wcs.smart.query.map.udig.RasterService;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.gridded.RasterService;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
@@ -65,10 +61,9 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
 public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	
 	private GriddedEditor parentEditor;
-	/// private QueryService queryService = null;  it was replaced by rasterService
 	private RasterService rasterService = null; 
-	private IViewportModelListener initListener = null; 
 	private LoadDefaultLayersJob loadDefaultLayers = null;
+	
 	/*
 	 * Job for adding Raster layer to map
 	 */
@@ -85,13 +80,18 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	    		
 	    		Map map = getMap();
 	    		if (rasterService == null){
-	    			rasterService = new RasterService(map, query.getId(), query);
+	    			String id = query.getId();
+	    			if (id == null){
+	    				id = String.valueOf(System.nanoTime());
+	    			}
+	    			rasterService = new RasterService(query);
 	    		}
-				List<IGeoResource> rasterResourceList = (List<IGeoResource>) rasterService.getGeoResource();
+				List<? extends IGeoResource> rasterResourceList = rasterService.resources(monitor);
 				assert !rasterResourceList.isEmpty();
 				
 	    		if (map == null) return Status.CANCEL_STATUS;
 				updateMap(map, rasterResourceList);
+				
 			} catch (Exception e) {
 				
 				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, "Error loading pages", e);
@@ -105,34 +105,23 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 		 * @param map
 		 * @param rasterResourceList
 		 */
-		private void updateMap(final Map map, final List<IGeoResource> rasterResourceList) {
+		private void updateMap(final Map map, final List<? extends IGeoResource> rasterResourceList) {
 			
     		List<IGeoResource> layers = new LinkedList<IGeoResource>();
 			layers.addAll(rasterResourceList);
 
 			map.getRenderManagerInternal().disableRendering();
-			
 			// add the new layers to the map
 			AddLayersCommand command = new AddLayersCommand(layers);
     		map.sendCommandSync(command);
     		//setup styles
-    		List<Layer> addedlayers = command.getLayers();
-    		
-    		GridQueryResultMetadata resultsMetadata = ((GriddedQuery)parentEditor.getQuery()).getResultMetadata();
-    		for(Layer l : addedlayers){
-    			try{
-    				String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><styleEntry type=\"SLDStyle\" version=\"1.0\">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;sld:StyledLayerDescriptor xmlns=&quot;http://www.opengis.net/sld&quot; xmlns:sld=&quot;http://www.opengis.net/sld&quot; xmlns:ogc=&quot;http://www.opengis.net/ogc&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; version=&quot;1.0.0&quot;&gt; &lt;sld:UserLayer&gt; &lt;sld:LayerFeatureConstraints&gt; &lt;sld:FeatureTypeConstraint/&gt; &lt;/sld:LayerFeatureConstraints&gt; &lt;sld:UserStyle&gt; &lt;sld:Name&gt;000051&lt;/sld:Name&gt; &lt;sld:Title/&gt; &lt;sld:FeatureTypeStyle&gt; &lt;sld:Name&gt;name&lt;/sld:Name&gt; &lt;sld:Rule&gt; &lt;sld:RasterSymbolizer&gt; &lt;sld:Geometry&gt; &lt;ogc:PropertyName&gt;grid&lt;/ogc:PropertyName&gt; &lt;/sld:Geometry&gt; &lt;sld:ColorMap&gt; &lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;0.0&quot; quantity=&quot;-9999&quot;/&gt; &lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;0.0&quot; quantity=&quot;-9999&quot;/&gt; &lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;1.0&quot; quantity=&quot;" + resultsMetadata.getMinResultValue() + "&quot;/&gt; &lt;sld:ColorMapEntry color=&quot;#FF0000&quot; opacity=&quot;1.0&quot; quantity=&quot;" + resultsMetadata.getMaxResultValue() + "&quot;/&gt; &lt;/sld:ColorMap&gt; &lt;/sld:RasterSymbolizer&gt; &lt;/sld:Rule&gt; &lt;/sld:FeatureTypeStyle&gt; &lt;/sld:UserStyle&gt; &lt;/sld:UserLayer&gt;&lt;/sld:StyledLayerDescriptor&gt;</styleEntry>";
-    				XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
-    				SLDContent c = new SLDContent();
-    				Style style = (Style)c.load(memento);
-    				l.getStyleBlackboard().put(SLDContent.ID, style);
-    				l.getStyleBlackboard().setSelected(new String[]{SLDContent.ID});
-    			}catch (Exception ex){
-    				//eat me; there is something wrong with styling
-    			}
-    		}
     		map.getRenderManagerInternal().enableRendering();
     		map.getRenderManager().refresh(null);
+    		
+    		try{
+    			CatalogPlugin.getDefault().getLocalCatalog().remove(rasterService);
+    		}catch (Exception ex){}
+    		
 		}
 	};
 	
@@ -148,7 +137,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 				try {
 					rasterService.refresh(null);
 					
-					List<IGeoResource> layers = (List<IGeoResource>) rasterService.resources(monitor);
+					List<? extends IGeoResource> layers = rasterService.resources(monitor);
 					if (layers.size() > 0){
 						IGeoResource rasterLayers = layers.get(0);
 						for( ILayer layer : getMap().getLayersInternal() ) {
@@ -172,22 +161,6 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 
     };
     
-	private List<ILayer> mapContainsRaster(Map map,	List<IGeoResource> rasterResourceList) {
-
-		String rasterName = rasterResourceList.get(0).getIdentifier().getFile().toString();
-		List<ILayer> toRemove = new LinkedList<ILayer>();
-		
-        List<ILayer> mapLayers = map.getMapLayers();
-        for( int i = 0; i < mapLayers.size(); i++ ) {
-            String layerName = mapLayers.get(i).getName();
-            if (rasterName.equals(layerName)) {
-                // remove it from layer list
-                toRemove.add(mapLayers.get(i));
-            }
-        }
-		return toRemove;
-	}
-  
 	/**
 	 * Creates a new query map editor page
 	 * 
@@ -217,6 +190,20 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 			throw new RuntimeException("Invalid editor input.");
 		}
 		super.init(site, input);
+		
+		
+		final IPageChangedListener initZoom = new IPageChangedListener() {
+			
+			@Override
+			public void pageChanged(PageChangedEvent event) {
+				if (event.getSelectedPage() == GriddedResultsMapEditorPage.this){
+					getMap().sendCommandASync(new ZoomExtentCommand());
+					parentEditor.removePageChangedListener(this);
+				}
+				
+			}
+		};
+		parentEditor.addPageChangedListener(initZoom);
 	}
 
 	
@@ -227,7 +214,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), true);
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
 		loadDefaultLayers.schedule();
 	}
 

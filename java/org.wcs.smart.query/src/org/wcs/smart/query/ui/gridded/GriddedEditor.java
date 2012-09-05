@@ -58,7 +58,6 @@ import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
@@ -68,6 +67,7 @@ import org.wcs.smart.query.ui.querytable.QueryResultsTable;
  * Editor for displaying query results. The editor includes two pages a tabular
  * results page and a map results page.
  * 
+ * @author Jeff
  * @author Emily
  * @since 1.0.0
  */
@@ -78,9 +78,10 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private GriddedQuery query;
 
 	private boolean isDirty = false;
-	private GriddedTableResultsPage resultPage;
-	private GriddedResultsMapEditorPage mapPage;
+	private GriddedTableResultsPage resultPage;	//table result page
+	private GriddedResultsMapEditorPage mapPage;	//map results page
 
+	
 	private IQueryListener qListener = new IQueryListener() {
 		@Override
 		public void queryChanged(Query query) {
@@ -108,8 +109,8 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			session.beginTransaction();
 			try{
 				query = (GriddedQuery) session.load(GriddedQuery.class, input.getUuid());
-				
-				query.getDropItems();
+				query.getFilterDropItems();
+				query.getValueDropItems();
 				query.generateDropItems(session);
 
 			}catch (Exception ex){
@@ -132,6 +133,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			
 			return Status.OK_STATUS;
 		}};
+		
 	/**
 	 * Creates a new editor
 	 */
@@ -184,6 +186,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	public GriddedQuery getQueryInternal(){
 		return  (GriddedQuery) getQuery();
 	}
+	
 	/**
 	 * @return the query
 	 */
@@ -242,6 +245,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}finally{
 			showBusy(false);
 		}
+		
 	}
 		
 	private void updateQuery(){

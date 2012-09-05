@@ -22,6 +22,9 @@
 package org.wcs.smart.query.model.observation;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -35,7 +38,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolOptions;
-import org.wcs.smart.query.model.QueryResultItem;
 
 /**
  * A column available for output 
@@ -233,8 +235,17 @@ public abstract class QueryColumn implements Cloneable{
 					for (int i = 0; i < numCategory; i++) {
 						cols.add(new CategoryQueryColumn("Observation Category  " + i, i));
 					}
-
-					for (Attribute att : dataModel.getAttributes()) {
+					
+					//sort attributes alphabetically
+					List<Attribute> atts = new ArrayList<Attribute>();
+					atts.addAll( dataModel.getAttributes() );
+					Collections.sort(atts, new Comparator<Attribute>(){
+						@Override
+						public int compare(Attribute o1, Attribute o2) {
+							return o1.getName().compareTo(o2.getName());
+						}});
+					
+					for (Attribute att : atts) {
 						String name = att.getName();
 						cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
 					}
@@ -276,13 +287,9 @@ public abstract class QueryColumn implements Cloneable{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
-
-				PatrolOptions patrolOps = null;
 				Session session = HibernateManager.openSession();
 				
 				try {
-					patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-					
 					ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				
 					for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
