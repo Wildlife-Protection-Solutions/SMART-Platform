@@ -33,7 +33,7 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.SimpleQuery;
 
 /**
@@ -47,7 +47,7 @@ public class SimpleQueryResultSet implements IResultSet {
 	private int m_currentRowId = -1;
 
 	private SimpleQueryResultSetMetadata metadata;
-	private List<QueryResultItem> items = null;
+	private List<?> items = null;
 
 	private Object lastObject = null;
 
@@ -73,6 +73,28 @@ public class SimpleQueryResultSet implements IResultSet {
 		}
 	}
 
+	/**
+	 * Creates a new results set
+	 * 
+	 * @param metadata query metadata
+	 * @param query gridded query
+	 */
+	public SimpleQueryResultSet(GriddedQuery query,
+			SimpleQueryResultSetMetadata metadata) {
+
+		this.metadata = metadata;
+
+		try {
+			items = query.getLastResults();
+			if (items == null) {
+				items = query.getQueryResults(new NullProgressMonitor());
+				m_maxRows = items.size();
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getMetaData()
 	 */

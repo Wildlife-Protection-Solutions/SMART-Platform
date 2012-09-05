@@ -42,6 +42,7 @@ import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.SimpleQuery;
@@ -148,6 +149,8 @@ public class SmartQuery implements IQuery {
 							throw new OdaException("You cannot add summary queries that have date group by column headers to reports.  Modify the query to put date group by's in the row headers.");
 						}
 					}
+				} else if (smartQuery instanceof GriddedQuery){
+					((GriddedQuery)smartQuery).getQueryDefinition();
 				}
 
 			} catch (InterruptedException e) {
@@ -180,6 +183,8 @@ public class SmartQuery implements IQuery {
 			return new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery);
 		} else if (smartQuery.getType() == QueryType.SUMMARY) {
 			return new SummaryQueryResultSetMetadata((SummaryQuery) smartQuery);
+		} else if (smartQuery.getType() == QueryType.GRIDDED ){
+			return new SimpleQueryResultSetMetadata( (GriddedQuery) smartQuery);
 		}
 		throw new OdaException("Cannot get metadata for the provided query.");
 	}
@@ -202,7 +207,11 @@ public class SmartQuery implements IQuery {
 				|| smartQuery.getType() == QueryType.PATROL) {
 			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
 			resultSet = new SimpleQueryResultSet((SimpleQuery) smartQuery,
-					new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery));
+					(SimpleQueryResultSetMetadata)getMetaData());
+		}else if (smartQuery.getType() == QueryType.GRIDDED){
+			((GriddedQuery) smartQuery).setDateFilter(dateFilter);
+			resultSet = new SimpleQueryResultSet((GriddedQuery) smartQuery,
+					(SimpleQueryResultSetMetadata)getMetaData());
 		} else if (smartQuery.getType() == QueryType.SUMMARY) {
 			((SummaryQuery) smartQuery).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
