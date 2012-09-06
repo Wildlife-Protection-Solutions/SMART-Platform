@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
@@ -43,6 +42,8 @@ import javax.media.jai.TiledImage;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.GridQueryResultMetadata;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -77,7 +78,8 @@ final class RasterBuilder {
 	private static final float NO_DATA = -9999;	//no data value
 	
 	/** a table where x,y values are the position in the raster grid. (0,0) is the bottom left tile and (360 180) is the top right tile */
-	private List<Map<String, Object>> table; 
+	private List<GridResultItem> table; 
+	private GridQueryResultMetadata metadata;
 	
 	private File file;
 	private String fileName;
@@ -124,10 +126,12 @@ final class RasterBuilder {
 	/**
 	 * Sets the table used to build the raster
 	 * 
-	 * @param table List of < x, y, value >
+	 * @param table query result data
+	 * @param metadata query result metadata
 	 */
-	public void setTable(List<Map<String, Object>> table) {
-		this.table = table;
+	public void setTable(List<GridResultItem> data, GridQueryResultMetadata metadata ) {
+		this.table = data;
+		this.metadata = metadata;
 	}
 	
 	/**
@@ -264,18 +268,24 @@ final class RasterBuilder {
 		ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
 		WritableRaster raster = RasterFactory.createWritableRaster(sampleModel,
 				new Point(0, 0));
+		
+		//initialize data to no data
 		for (int x = 0; x < raster.getWidth(); x++) {
 			for (int y = 0; y < raster.getHeight(); y++) {
 				raster.setSample(x, y, BAND_0, NO_DATA);
 			}
 		}
-		for (Map<String, Object> row : this.table) {
-			int x = (Integer) row.get("x");
-			int y = (Integer) row.get("y");
-			double value = Double.parseDouble(row.get("value").toString());
-			raster.setSample(x, y, BAND_0, value);
-		}
-
+		
+		//add data points
+		for (GridResultItem item : table) {
+			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
+			if (item.getTileX() >= metadata.getMinXTile() && item.getTileX() <= metadata.getMaxXTile() && item.getTileY() >= metadata.getMinYTile() && item.getTileY() <= metadata.getMaxYTile()){
+				int x = item.getTileX() - metadata.getMinXTile();
+				int y = height - (item.getTileY() - metadata.getMinYTile() +1);
+				raster.setSample(x, y,BAND_0, item.getValue());
+			}
+		}			
+		
 		TiledImage tiledImage = new TiledImage(0, 0, width, height, 0, 0,
 				sampleModel, colorModel);
 		tiledImage.setData(raster);

@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,6 @@ import net.refractions.udig.style.sld.SLDContent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
@@ -37,7 +35,6 @@ import org.geotools.styling.Style;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.GridQueryResultMetadata;
-import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.util.SmartUtils;
 
@@ -155,7 +152,6 @@ public class RasterService extends AbstractRasterService {
 		rb.setRasterDimensions(width, height);
 			
 		// sets the envelope based in the map bound
-		
 		double gridCellSize = query.getGridSize();
 		rb.setEnvelope(
 				new Envelope2D(
@@ -163,23 +159,7 @@ public class RasterService extends AbstractRasterService {
 					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
 					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
 					width * gridCellSize , height*gridCellSize)); 
-
-			// set the query result in the raster builder
-		List<Map<String, Object>> table = new LinkedList<Map<String, Object>>(); 
-		
-		for (GridResultItem item : query.getLastResults()) {
-			Map<String, Object> row = new HashMap<String, Object>(3);
-			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
-			if (item.getTileX() >= metadata.getMinXTile() && item.getTileX() <= metadata.getMaxXTile() && item.getTileY() >= metadata.getMinYTile() && item.getTileY() <= metadata.getMaxYTile()){
-				int x = item.getTileX() - metadata.getMinXTile();
-				int y = height - (item.getTileY() - metadata.getMinYTile() +1);
-				row.put("x", x);
-				row.put("y", y);
-				row.put("value", item.getValue());
-				table.add(row);
-			}
-		}			
-		rb.setTable(table);
+		rb.setTable(query.getLastResults(), query.getResultMetadata());
 		rb.setGridCellSize(gridCellSize);
 		rb.build();
 		return rb.getResult();
@@ -193,9 +173,7 @@ public class RasterService extends AbstractRasterService {
 	 * @throws RasterServiceException 
 	 */
 	private List<AbstractRasterGeoResource> getGeoResource() throws Exception {
-
 	
-				
 		final AbstractRasterGeoResource resource = new AbstractRasterGeoResource(
 				this, rasterFile.getCanonicalPath()) {
 			
