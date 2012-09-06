@@ -19,39 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map;
+package org.wcs.smart.report.in;
 
-import org.eclipse.birt.report.model.api.DesignElementHandle;
-import org.eclipse.birt.report.model.api.ExtendedItemHandle;
-import org.eclipse.birt.report.model.api.extension.IMessages;
-import org.eclipse.birt.report.model.api.extension.IReportItem;
-import org.eclipse.birt.report.model.api.extension.ReportItemFactory;
+import java.util.HashMap;
+
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
 
 /**
- * Factory for smart map item.
- * 
- * @author Emily
+ * Report import handler that is
+ * called when a report is imported.  
+ * <p>
+ * Implementations can make changes to the
+ * report as required.  These changes will
+ * be saved after all handlers are
+ * run.
+ * </p>
+ * @author egouge
  *
  */
-public class SmartMapFactory  extends ReportItemFactory{
+public interface IReportImportHandler {
 
 	/**
-	 * @see org.eclipse.birt.report.model.api.extension.IReportItemFactory#newReportItem(org.eclipse.birt.report.model.api.DesignElementHandle)
+	 * Fired when report imported.
+	 * 
+	 * @param handle the report design handler; can be modified
+	 * @param oldToNewQuery a link of old query ids to the new query ids
+	 * @throws Exception
 	 */
-	@Override
-	public IReportItem newReportItem(DesignElementHandle extendedItemHandle) {
-		if ( extendedItemHandle instanceof ExtendedItemHandle &&
-				SmartMapItem.EXTENSION_NAME.equals( ( (ExtendedItemHandle) extendedItemHandle ).getExtensionName( ) ) ){
-			SmartMapItem item = new SmartMapItem( (ExtendedItemHandle) extendedItemHandle );
-			return item;
-		}
-		return null;
-
-	}
-
-	@Override
-	public IMessages getMessages() {
-		return null;
-	}
-
+	public void reportImported(ReportDesignHandle handle, HashMap<String,String> oldToNewQuery) throws Exception;
 }
