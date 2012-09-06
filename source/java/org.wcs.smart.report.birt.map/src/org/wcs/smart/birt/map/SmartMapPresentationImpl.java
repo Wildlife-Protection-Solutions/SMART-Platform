@@ -35,12 +35,14 @@ import javax.imageio.stream.ImageOutputStream;
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IService;
+import net.refractions.udig.mapgraphic.MapGraphic;
 import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.impl.MapImpl;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.ApplicationGIS.DrawMapParameter;
 import net.refractions.udig.style.sld.SLDContent;
@@ -215,7 +217,25 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			}else{
 				bounds = mapItem.getMapBounds();
 			}
-
+			
+			/* reorder layers so mapgraphic layers are at the top */
+			List<Layer> maplayers = ((MapImpl)renderedMap).getLayersInternal();
+			List<Layer> orderedLayers = new ArrayList<Layer>();
+			int cnt = 0;
+			for (Layer l : maplayers){
+				if (l.getGeoResource().canResolve(MapGraphic.class)){
+					orderedLayers.add(l);
+				}else{
+					orderedLayers.add(cnt,l);
+					cnt++;
+				}
+			}
+			((MapImpl) renderedMap).getContextModel().eSetDeliver(false);
+			((MapImpl) renderedMap).getLayersInternal().clear();
+			((MapImpl) renderedMap).getLayersInternal().addAll(0,orderedLayers);
+			((MapImpl) renderedMap).getContextModel().eSetDeliver(true);
+		    
+			
 			renderedMap.sendCommandASync(new SetViewportBBoxCommand(bounds));
 			try {
 				DrawMapParameter drawMapParameter = new DrawMapParameter(g,

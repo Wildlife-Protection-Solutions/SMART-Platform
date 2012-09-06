@@ -63,6 +63,8 @@ public class SmartBirtLibrary {
 	 */
 	public static final String DEFAULT_LIBRARY_FILENAME = "org/wcs/smart/report/library/default_smart.rptlibrary";
 	
+	
+	public static final String DEFAULT_LIBRARY_NAMESPACE = "smart";
 	/**
 	 * @return the current smart library instance
 	 */

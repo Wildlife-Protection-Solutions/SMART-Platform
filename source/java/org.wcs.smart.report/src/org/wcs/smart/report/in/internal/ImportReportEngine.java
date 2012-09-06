@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -75,6 +76,7 @@ import org.wcs.smart.query.qimport.QueryImporter;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.ui.CreateReportDialog;
+import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -191,9 +193,18 @@ public class ImportReportEngine {
 
 			//save report to database
 			session.saveOrUpdate(importReport);
-			//update report/query info
+			
 			ReportDesignHandle rdh = SessionHandleAdapter.getInstance().getSessionHandle().openDesign(reportXmlFile.getAbsolutePath());
+			//remove existing library & make sure it points to the library associated with this ca
+			rdh.dropLibrary(rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE));
+			rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFile().toString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
+			//update report/query info			
 			ReportManager.updateReportQueries(session, rdh, importReport);
+			
+			//fire events
+			ReportEventManager.getInstance().fireReportImportHandlers(rdh, oldToNewQueries);
+
+			rdh.save();
 			rdh.close();
 		
 			//copy report file
@@ -563,11 +574,14 @@ public class ImportReportEngine {
 		}
 		
 		//update report definition to point to correct query
-		handle.setQueryText( smartQuery.getType().name() + ":" + SmartUtils.encodeHex(smartQuery.getUuid()));
+		String newQueryText = smartQuery.getType().name() + ":" + SmartUtils.encodeHex(smartQuery.getUuid()); 
+		oldToNewQueries.put(handle.getQueryText(), newQueryText);
+		handle.setQueryText( newQueryText );
 		
 		return true;
 	}
 	
+	private HashMap<String, String> oldToNewQueries = new HashMap<String, String>();
 	/**
 	 * Finds the database query that matches the imported query
 	 * 

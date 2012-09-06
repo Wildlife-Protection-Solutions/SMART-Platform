@@ -22,9 +22,11 @@
 package org.wcs.smart.report;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.wcs.smart.report.in.IReportImportHandler;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 
@@ -50,7 +52,8 @@ public class ReportEventManager {
 	};
 
 	private  List<IReportListener> listeners = new ArrayList<IReportListener>();
-
+	private List<IReportImportHandler> importHandlers = new ArrayList<IReportImportHandler>();
+	
 	private static ReportEventManager instance = null;
 	
 	/**
@@ -138,5 +141,33 @@ public class ReportEventManager {
 	 */
 	public void fireReportFolderModified(ReportFolder f){
 		fireEvents(f, EventType.FOLDER_UPDATED);
+	}
+	
+	/**
+	 * Adds a report import handler
+	 * @param handler
+	 */
+	public void addImportHandler(IReportImportHandler handler){
+		this.importHandlers.add(handler);
+	}
+	
+	/**
+	 * Removes the report import handler
+	 * @param handler
+	 */
+	public void removeImportHandler(IReportImportHandler handler){
+		this.importHandlers.remove(handler);
+	}
+	
+	/**
+	 * Fires all registered report import handlers
+	 * @param rdh
+	 * @param oldToNewQuery
+	 * @throws Exception
+	 */
+	public void fireReportImportHandlers(ReportDesignHandle rdh, HashMap<String, String> oldToNewQuery) throws Exception{
+		for (IReportImportHandler handler: this.importHandlers){
+			handler.reportImported(rdh, oldToNewQuery);
+		}
 	}
 }
