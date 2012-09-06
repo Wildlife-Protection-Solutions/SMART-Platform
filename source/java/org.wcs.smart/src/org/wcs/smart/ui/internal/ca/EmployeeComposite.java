@@ -457,7 +457,7 @@ public class EmployeeComposite extends Composite {
 			cdEmploymentStart.setDescriptionText("Invalid Start Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years after birthdate.");
 			isComplete = false;
 		}
-		if(dtEmploymentEnd != null){
+		if(dtEmploymentEnd != null && chNotActive.getSelection()){
 			//test for EmploymentEnd being before employment start
 			Calendar start = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay() );
 			Calendar end = new GregorianCalendar(dtEmploymentEnd.getYear(), dtEmploymentEnd.getMonth(), dtEmploymentEnd.getDay() );
