@@ -256,6 +256,7 @@ public class QueryFilterView extends ViewPart {
 		
 		griddedComp = new Composite(main, SWT.NONE);
 		gl = new GridLayout(1, false);
+		gl.marginHeight = gl.marginWidth = 0;
 		griddedComp.setLayout(gl);
 
 		

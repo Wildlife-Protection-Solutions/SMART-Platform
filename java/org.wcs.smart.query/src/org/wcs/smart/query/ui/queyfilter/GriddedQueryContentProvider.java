@@ -50,7 +50,6 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
-import org.wcs.smart.query.ui.queyfilter.SummaryQueryContentProvider.NodeType;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -353,6 +352,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		if (element instanceof RootNode){
 			switch (((RootNode)element).type){
 				case VALUE_NODE:	
+					return null;
 				case DATAMODEL_VALUES:
 				case PATROL_VALUES:
 					return valueNode;
