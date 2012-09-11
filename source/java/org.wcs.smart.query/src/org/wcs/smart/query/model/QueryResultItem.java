@@ -40,7 +40,7 @@ import org.wcs.smart.patrol.model.PatrolType;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryResultItem extends ResultItem{
+public class QueryResultItem implements IResultItem{
 
 	private String patrolId;
 	private Date patrolStartDate;

@@ -19,26 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.engine;
+package org.wcs.smart.query.model;
 
-import java.sql.SQLException;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
 
 /**
- * A query engine for executing
- * queries.
+ * A class to hold the results of a Grid 
+ * query.  
  * 
- * @author Emily
+ * 
+ * @author Jeffloun
  * @since 1.0.0
  */
-public interface QueryEngine {
 
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException ;
+
+
+public interface IResultItem {
+
 }

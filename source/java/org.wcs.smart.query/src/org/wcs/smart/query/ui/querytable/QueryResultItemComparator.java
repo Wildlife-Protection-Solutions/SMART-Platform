@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
@@ -104,8 +105,8 @@ public class QueryResultItemComparator extends ViewerComparator{
 			return -1;
 		}			
 	
-		Object data1 = column.getColumn().getValue(s1);
-		Object data2 = column.getColumn().getValue(s2);
+		Object data1 = column.getColumn().getValue((IResultItem)s1);
+		Object data2 = column.getColumn().getValue((IResultItem)s2);
 		
 		ColumnType type = column.getColumn().getType();
 		Comparator compare = null;

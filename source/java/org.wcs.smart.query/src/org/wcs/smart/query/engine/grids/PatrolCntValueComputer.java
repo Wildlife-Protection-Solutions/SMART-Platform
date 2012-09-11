@@ -19,26 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.engine;
+package org.wcs.smart.query.engine.grids;
 
-import java.sql.SQLException;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
+import com.vividsolutions.jts.geom.LineString;
 
 /**
- * A query engine for executing
- * queries.
+ * A value computer that computes
+ * the number of patrols
+ * in a cell.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
-public interface QueryEngine {
+public class PatrolCntValueComputer<T> implements IValueComputer<T> {
 
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException ;
+	
+	/**
+	 * @see org.wcs.smart.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.wcs.smart.query.engine.grids.Tile, org.wcs.smart.query.engine.grids.Grid, com.vividsolutions.jts.geom.LineString)
+	 * 
+	 * @return a hashset that contains the hashcode patrol_uuid represented by the linestring
+	 * being processed
+	 */
+	@SuppressWarnings("unchecked")
+	public T computeValue(T existingValue, Tile t, 
+			Grid gridDef, LineString ls) {
+		if (existingValue != null){
+			return existingValue;
+		}
+		HashSet<Object> values = new HashSet<Object>();
+		if (ls.getUserData() instanceof byte[]){
+			values.add(Arrays.hashCode( ((byte[])ls.getUserData())));	
+		}else{
+			//this should never happen
+			return null;
+		}
+		return (T) values;
+	}
 }
+

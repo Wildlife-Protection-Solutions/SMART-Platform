@@ -27,49 +27,61 @@ package org.wcs.smart.query.model;
  * @author egouge
  *
  */
-public class GridResultItem {
+public class GridResultItem implements IResultItem{
 
-	//GRID additions, probably could be refactored out into another class eventually
+
 	private double value;
-	private double denominator;
 	private int tileX;
 	private int tileY;
 	
-	
+	/**
+	 * the gird value
+	 * @param value
+	 */
 	public void setValue(double value) {
 		this.value = value;
 	}
 
-	public void setDenominator(double z) {
-		this.denominator = z;
-		
-	}
-
+	/**
+	 * 
+	 * @param x x tile id starting at 1 in the lower left
+	 */
 	public void setTileX(int x) {
 		this.tileX = x;
 		
 	}
+	/**
+	 * 
+	 * @param y y tile id starting at 1 in the lower left
+	 */
 	public void setTileY(int y) {
 		this.tileY = y;
 		
 	}
 	
+	/**
+	 * 
+	 * @return get cell value
+	 */
 	public double getValue() {
 		return value;
 	}
 
-	public double getDenominator() {
-		return denominator;
-		
-	}
 
+	/**
+	 * 
+	 * @return x tile id
+	 */
 	public int getTileX() {
 		return tileX;
-		
 	}
+	
+	/**
+	 * 
+	 * @return y tile id
+	 */
 	public int getTileY() {
 		return tileY;
-		
 	}
 		
 }

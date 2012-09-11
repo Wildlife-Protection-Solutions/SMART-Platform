@@ -1,0 +1,84 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.engine.grids;
+
+import org.wcs.smart.util.GeometryUtils;
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
+
+/**
+ * Value computer that computes
+ * the distance of the linestring
+ * in the given tile.
+ * 
+ * @author egouge
+ *
+ */
+public class DistanceValueComputer<T> implements IValueComputer<T> {
+
+	/**
+	 * Computes the distance of the linestring
+	 * in the tile cell.
+	 * 
+	 * @see org.wcs.smart.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.wcs.smart.query.engine.grids.Tile, org.wcs.smart.query.engine.grids.Grid, com.vividsolutions.jts.geom.LineString)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls) {
+		if (existingValue != null){
+			return existingValue;
+		}
+		
+		Envelope env = t.getBounds(gridDef);
+		
+		GeometryFactory gf = new GeometryFactory();
+		Geometry g = ls.intersection(gf.toGeometry(env));
+		
+		
+		double newlength = processGeometry(g);
+		return (T)(Double)((Double)newlength);
+	}
+	
+	private double processGeometry(Geometry g){
+		if (g instanceof GeometryCollection ){
+			double distance = 0;
+			int cnt = ((GeometryCollection)g).getNumGeometries();
+			for (int i = 0; i < cnt; i++){
+				distance += processGeometry(((GeometryCollection)g).getGeometryN(i));
+			}
+			return distance;
+		}else if (g instanceof LineString){
+			System.out.println(g.toText());
+			return GeometryUtils.distanceInMeters((LineString)g) / 1000.0;
+		}
+		return 0;
+	}
+
+}

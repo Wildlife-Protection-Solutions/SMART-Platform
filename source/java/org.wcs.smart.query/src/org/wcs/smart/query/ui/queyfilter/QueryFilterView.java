@@ -157,7 +157,6 @@ public class QueryFilterView extends ViewPart {
 //				input.put(QueryFilterContentProvider.RootNodeType.AREA_FILTERS,"");
 				
 				
-				//final HashMap<QueryFilterContentProvider.RootNodeType, Object> summaryInput = new HashMap<SummaryContentProvider.RootNodeType, Object>();
 				final HashMap<SummaryQueryContentProvider.NodeType, Object> summaryInput = new HashMap<SummaryQueryContentProvider.NodeType, Object> ();
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
 				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, PatrolQueryOptions.PATROL_GROUBY_OPTIONS);

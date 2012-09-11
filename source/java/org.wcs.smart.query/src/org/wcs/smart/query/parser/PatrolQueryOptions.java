@@ -149,6 +149,10 @@ public class PatrolQueryOptions {
 				return new java.sql.Date[]{new java.sql.Date(cal.getTimeInMillis())};
 			} else if (this == LAST_QUARTER){
 				int thisQuarter = ((cal.get(Calendar.MONTH)) / 3);
+				cal.set(Calendar.MONTH, thisQuarter*3);
+				cal.set(Calendar.DAY_OF_MONTH, 1);
+				java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
+				
 				int lastQuarter = thisQuarter;
 				int yearOffset = 0;
 				lastQuarter = lastQuarter -1;
@@ -163,23 +167,17 @@ public class PatrolQueryOptions {
 				
 				java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
 				
-				int month = thisQuarter * 3 - 1;
-				cal.set(Calendar.YEAR, year);
-				cal.set(Calendar.MONTH, month);
-				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-				java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
 				return new java.sql.Date[]{d1, d2};
 			}else if (this == LAST_YEAR){
 				int year = cal.get(Calendar.YEAR);
-				year --;
-				cal.set(Calendar.YEAR, year);
+				cal.set(Calendar.YEAR, year-1);
 				cal.set(Calendar.MONTH, cal.getActualMinimum(Calendar.MONTH));
 				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
 				java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
 				
 				cal.set(Calendar.YEAR, year);
-				cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
-				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+				cal.set(Calendar.MONTH, cal.getActualMinimum(Calendar.MONTH));
+				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
 				java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
 				return new java.sql.Date[]{d1, d2};
 			}
@@ -235,6 +233,7 @@ public class PatrolQueryOptions {
 	 */
 	public final static PatrolValueOption[] GRID_RATIO_OPTIONS = {
 		PatrolValueOption.DISTANCE,
+		PatrolValueOption.NUM_PATROLS,
 		PatrolValueOption.NUM_DAYS
 	};
 

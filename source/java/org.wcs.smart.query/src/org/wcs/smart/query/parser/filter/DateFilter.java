@@ -149,17 +149,20 @@ public class DateFilter implements IFilter {
 	private String asSql(String field){
 		java.sql.Date[] bits = getDates(); 
 		String f = "";
-		if (dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_30_DAYS ||
-				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_60_DAYS ||
-				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.MONTH_TO_DATE ||
-				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.YEAR_TO_DATE){
-			f =  " ( " + field + " >= '" + bits[0].toString() + "' ) ";
-		}else if (dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_MONTH){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) ";
-		}else if (dateFilter == PatrolQueryOptions.DATE_FILTER_OP.CUSTOM){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) ";
-			
+		if (bits == null){
+			return "";
 		}
+		if (bits.length == 1){
+			f = " ( " +field + " >= '" + bits[0].toString() + "' ) ";
+		}else if (bits.length == 2 && (
+				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_MONTH || 
+				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_YEAR ||
+				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_QUARTER)){
+			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) ";
+		}else if (bits.length == 2){
+			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) ";
+		}
+
 		return f;
 	}
 

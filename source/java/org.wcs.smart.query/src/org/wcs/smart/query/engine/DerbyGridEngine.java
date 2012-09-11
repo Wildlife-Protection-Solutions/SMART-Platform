@@ -34,20 +34,34 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.engine.grids.AddCellMerger;
+import org.wcs.smart.query.engine.grids.DistanceValueComputer;
+import org.wcs.smart.query.engine.grids.Grid;
+import org.wcs.smart.query.engine.grids.GridAnalysisEngine;
+import org.wcs.smart.query.engine.grids.PatrolCntCellMerger;
+import org.wcs.smart.query.engine.grids.PatrolCntValueComputer;
+import org.wcs.smart.query.engine.grids.PatrolDayCntValueComputer;
+import org.wcs.smart.query.engine.grids.Tile;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
@@ -55,6 +69,9 @@ import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
+
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.WKBReader;
 
 public class DerbyGridEngine extends DerbyQueryEngine2{
 	private List<GridResultItem> myResults;
@@ -115,16 +132,15 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					}
 					
 					monitor.subTask("Calculating Grid Values");
-					//double[] mins = getCoordinateMins(c, qFilter);
-					double[] mins = {0,0};
 					
-					double size = query.getGridSize();
-
+					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), Area.AREA_CRS);
+					
 					//select the tile_id, and value that we want to show on the grid
-					myResults = getGridResults(c, session, mins, size, query.getQueryDefinition().getValuePart());
+					myResults = getGridResults(c, session, gridDef, query.getQueryDefinition().getValuePart());
 					
 					monitor.worked(1);
-					
+				}catch (Exception ex){
+					throw new SQLException("Failed to process grid query: " + ex.getMessage(), ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
@@ -189,33 +205,57 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * 
 	 * @throws SQLException
 	 */
-	protected List<GridResultItem> getGridResults(Connection c, Session session, double[] mins, double size, IValueItem value)
-			throws SQLException {
+	protected List<GridResultItem> getGridResults(Connection c, 
+			Session session, Grid gridDef, IValueItem value)
+			throws Exception {
 		List<GridResultItem> items = new ArrayList<GridResultItem>();
 		
 		String strAgg ="";
 		ResultSet rs;
 
 		if (value instanceof CombinedValueItem){
-			//TODO: calculate rations properly, 
-			//this just uses the numerator as a single value for now.
-			value = ((CombinedValueItem)value).getPart1();
+			List<GridResultItem> value1 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart1());
+			List<GridResultItem> value2 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart2());
+			
+			//merge the results based on tile ids
+			HashMap<Tile, Double> values2 = new HashMap<Tile, Double>();
+			for (Iterator iterator = value2.iterator(); iterator.hasNext();) {
+				GridResultItem gridResultItem = (GridResultItem) iterator
+						.next();
+				values2.put(new Tile(gridResultItem.getTileX(), gridResultItem.getTileY()), gridResultItem.getValue());				
+			}
+			
+			
+			for (Iterator iterator = value1.iterator(); iterator.hasNext();) {
+				GridResultItem gridResultItem = (GridResultItem) iterator
+						.next();
+				
+				Double denominator= values2.get(new Tile(gridResultItem.getTileX(), gridResultItem.getTileY()));
+				if (denominator == null){
+					//no data
+					iterator.remove();
+				}else if (denominator == 0){
+					//error - cannot divide by 0
+					gridResultItem.setValue(Double.NaN);
+				}else{
+					gridResultItem.setValue(gridResultItem.getValue() / denominator);
+				}
+			}
+			return value1;
 		}
 		
-		//TODO: take this out once we can do patrol items
 		if(value instanceof PatrolValueItem ){
-			throw new SQLException("Cannot process Patrol Values in this software version.");
+			return computePatrolValue(c, (PatrolValueItem)value, gridDef);
 		}
 		
 		if(value instanceof AttributeValueItem ){
 			AttributeValueItem tmp = (AttributeValueItem)value;
 			strAgg = tmp.getAggregation().getName(); 
 			String key = tmp.getAttributeKey();
-
 			
-			
-			double minX = mins[0];
-			double minY = mins[1];
+			double minX = gridDef.getOriginX();
+			double minY = gridDef.getOriginY();
+			double size = gridDef.getCellSize();
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT ");
 			sql.append( strAgg + "(number_value) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
@@ -251,8 +291,9 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			String hkey = tmp.getCategoryHKey();
 			String hkey_max = hkey.substring(0,(hkey.length()-1)) + "/";
 					
-			double minX = mins[0];
-			double minY = mins[1];
+			double minX = gridDef.getOriginX();
+			double minY = gridDef.getOriginY();
+			double size = gridDef.getCellSize();
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT ");
 			sql.append( strAgg + "(keyid) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
@@ -302,6 +343,103 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		return items;
 	}
 
+	private List<GridResultItem> computePatrolValue(Connection c,
+			PatrolValueItem item, 
+			Grid gridDef) throws Exception{
+
+		GridAnalysisEngine<?> engine = null;
+		String dataField[] = null;
+		
+		
+		if (item.getOption() == PatrolValueOption.DISTANCE){
+			AddCellMerger<Double> cellMerger = new AddCellMerger<Double>();	//adds cell values
+			DistanceValueComputer<Double> valueComputer = new DistanceValueComputer<Double>();
+			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
+		}else if (item.getOption() == PatrolValueOption.NUM_DAYS){	
+			dataField = new String[]{"p_uuid", "pld_patrol_day"};
+			PatrolCntCellMerger<HashSet<String>> cellMerger = new PatrolCntCellMerger<HashSet<String>>();
+			PatrolDayCntValueComputer<HashSet<String>> valueComputer = new PatrolDayCntValueComputer<HashSet<String>>();
+			engine = new GridAnalysisEngine<HashSet<String>>(gridDef, cellMerger, valueComputer);
+		}else if (item.getOption() == PatrolValueOption.NUM_PATROLS){
+			dataField = new String[]{"p_uuid"};
+			PatrolCntCellMerger<HashSet<Object>> cellMerger = new PatrolCntCellMerger<HashSet<Object>>();
+			PatrolCntValueComputer<HashSet<Object>> valueComputer = new PatrolCntValueComputer<HashSet<Object>>();
+			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
+			
+		}else{
+			throw new UnsupportedOperationException("Patrol value option " + item.getOption().getGuiName() + " not supported for grid analysis.");
+		}
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom ");
+		if (dataField != null){
+			for (int i = 0; i < dataField.length; i ++){
+				//additional data required for rasterization
+				sql.append(", tmp." + dataField[i] + " as dataField_" + i);
+			}
+		}
+		sql.append(" FROM ");
+		sql.append(tableNames.get(Track.class) + " " + tablePrefix.get(Track.class));
+		sql.append(", (");
+		sql.append("SELECT distinct pld_uuid ");
+		if (dataField != null){
+			//additional data required for rasterization
+			for (int i = 0; i < dataField.length; i ++){
+				sql.append(", " + dataField[i]);
+			}
+		}
+		sql.append(" from " );
+		sql.append(queryTempTable);
+		sql.append(") tmp ");
+		sql.append("WHERE " );
+		sql.append(tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = ");
+		sql.append("tmp.pld_uuid");
+
+		QueryPlugIn.logSql(sql.toString());
+		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		WKBReader reader = new WKBReader();
+		
+		while(rs.next()){
+			byte[] bytes = rs.getBytes("geom");
+			Object[] data = null;
+			if (dataField != null){
+				data = new Object[dataField.length];
+				for (int i = 0; i < dataField.length; i++){
+					data[i] = rs.getObject("dataField_"+i);
+				}
+			}
+			if (bytes != null){
+				LineString ls = (LineString) reader.read(bytes);
+				if (data != null){
+					if (data.length == 1){
+						ls.setUserData(data[0]);		
+					}else{
+						ls.setUserData(data);
+					}
+				}
+				
+				try{
+					engine.rasterizeLinestring(ls);
+				}catch (Exception ex){
+					QueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex);
+					throw ex;
+				}
+			}
+		}
+		rs.close();
+		
+		List<GridResultItem> items = new ArrayList<GridResultItem>();
+		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
+			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
+			GridResultItem it = new GridResultItem();
+			it.setTileX(object.getKey().getXId()+1);
+			it.setTileY(object.getKey().getYId()+1);
+			it.setValue(object.getValue());
+			items.add(it);
+		}
+		return items;
+		
+	}
 
 
 	/**
@@ -312,8 +450,6 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 */
 	protected void dropTemporaryGridTable(Connection c) throws SQLException {
 		try {
-//			String sql = "DROP TABLE " + QUERY_TEMP_SCHEMA + "." + observationTempTable;
-
 			String sql = "DROP TABLE " + gridTempTable;
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);

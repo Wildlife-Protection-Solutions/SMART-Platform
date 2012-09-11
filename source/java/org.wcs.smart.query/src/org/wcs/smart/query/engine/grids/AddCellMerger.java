@@ -19,26 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.engine;
-
-import java.sql.SQLException;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
+package org.wcs.smart.query.engine.grids;
 
 /**
- * A query engine for executing
- * queries.
+ * CellMerger that assumes the cell values
+ * are double and merges them by adding them together.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
-public interface QueryEngine {
+public class AddCellMerger<T> implements ICellMerger<T> {
 
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException ;
+	/**
+	 * <p>
+	 * Assumes the cell values are double.  Adds the
+	 * results together and returns a new double
+	 * </p>
+	 * @see org.wcs.smart.query.engine.grids.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public T mergeCell(T v1, T v2) {
+		if(v1 == null ){
+			return v2;
+		}
+		if (v2 == null){
+			return v1;
+		}
+		
+		return (T)(Double)((Double)v1 + (Double)v2);
+	}
+
+	/**
+	 * @see org.wcs.smart.query.engine.grids.ICellMerger#getFinalValue(java.lang.Object)
+	 */
+	@Override
+	public Double getFinalValue(T value) {
+		return (Double)value;
+	}
+
 }
