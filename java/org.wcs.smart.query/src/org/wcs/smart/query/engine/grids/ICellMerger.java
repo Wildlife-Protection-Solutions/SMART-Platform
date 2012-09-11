@@ -19,26 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.engine;
-
-import java.sql.SQLException;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
+package org.wcs.smart.query.engine.grids;
 
 /**
- * A query engine for executing
- * queries.
+ * Merges together data from two grid cells from
+ * two different linestrings.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
-public interface QueryEngine {
+public interface ICellMerger<T> {
 
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException ;
+	/**
+	 * Merges data from two cells  
+	 * @param v1 cell 1 value
+	 * @param v2 cell 2 value
+	 * @return new value
+	 */
+	public T mergeCell(T v1, T v2);
+	
+	/**
+	 * Converts the cell object to a double value
+	 * that is used to create the raster image.
+	 * 
+	 * @param value cell object value
+	 * @return double value
+	 */
+	public Double getFinalValue(T value);
 }

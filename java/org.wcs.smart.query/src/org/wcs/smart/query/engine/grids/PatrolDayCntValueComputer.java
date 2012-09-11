@@ -19,26 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.engine;
+package org.wcs.smart.query.engine.grids;
 
-import java.sql.SQLException;
-import java.util.List;
+import java.sql.Date;
+import java.util.HashSet;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.util.SmartUtils;
 
-/**
- * A query engine for executing
- * queries.
- * 
- * @author Emily
- * @since 1.0.0
- */
-public interface QueryEngine {
+import com.vividsolutions.jts.geom.LineString;
 
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException ;
+public class PatrolDayCntValueComputer<T> implements IValueComputer<T> {
+
+	/** 
+	 * <p>This counts the number of patrol days in a given cell.
+	 * Since we guarentee each patrol day is represented by a single 
+	 * line string this always returns one.
+	 * </p>
+	 * 
+	 * @return 1
+	 * @see org.wcs.smart.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.wcs.smart.query.engine.grids.Tile, org.wcs.smart.query.engine.grids.Grid, com.vividsolutions.jts.geom.LineString)
+	 */
+	@SuppressWarnings("unchecked")
+	public T computeValue(T existingValue, Tile t, Grid gridDef,
+			LineString ls) {
+		if (existingValue != null){
+			return existingValue;
+		}
+		HashSet<String> d = new HashSet<String>();
+		
+		Object[] data = (Object[]) ls.getUserData();
+		byte[] pid = (byte[]) data[0];
+		Date day = (Date)data[1];
+		
+		String key = SmartUtils.encodeHex(pid) + "_" + day.getTime();
+		d.add(key);
+		
+		return (T)(d);
+	}
 }

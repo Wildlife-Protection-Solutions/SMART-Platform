@@ -19,26 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.engine;
+package org.wcs.smart.query.engine.grids;
 
-import java.sql.SQLException;
-import java.util.List;
+import com.vividsolutions.jts.geom.LineString;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
 
 /**
- * A query engine for executing
- * queries.
+ * Computes the cell value when rasterizing. 
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
-public interface QueryEngine {
+public interface IValueComputer<T> {
 
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException ;
+	/**
+	 * Computes the cell value with rasterizing a linestring.
+	 * 
+	 * @param existingValue if the linestring has already visited this
+	 * tile then this is the value computed earlier 
+	 * @param t tile 
+	 * @param gridDef grid definition
+	 * @param ls linestring being rasterized
+	 * @return value for cell
+	 */
+	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls);
 }

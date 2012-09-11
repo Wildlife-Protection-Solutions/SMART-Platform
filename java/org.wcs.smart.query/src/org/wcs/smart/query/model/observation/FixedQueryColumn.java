@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.observation;
 
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryResultItem;
 
 /**
@@ -92,7 +93,7 @@ public class FixedQueryColumn extends QueryColumn {
 	/**
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
-	public Object getValue(Object queryResultItem) {
+	public Object getValue(IResultItem queryResultItem) {
 		if (queryResultItem instanceof QueryResultItem) {
 			QueryResultItem item = (QueryResultItem) queryResultItem;
 

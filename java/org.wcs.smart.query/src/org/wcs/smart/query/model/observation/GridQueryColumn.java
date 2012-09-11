@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model.observation;
 
 import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.model.IResultItem;
 
 /**
  * Class represents one of the fixed table columns that
@@ -42,8 +43,7 @@ public class GridQueryColumn extends QueryColumn{
 	public enum GridColumns{
 		TILE_X("Tile X ID", ColumnType.INTEGER,"tile_x"),
 		TILE_Y("Tile Y ID", ColumnType.INTEGER, "tile_y"),
-		VALUE("Value", ColumnType.NUMBER,"value"),
-		DENOMINATOR("Denominator", ColumnType.NUMBER,"denominator");
+		VALUE("Value", ColumnType.NUMBER,"value");
 		
 		private String guiName;
 		private ColumnType type;
@@ -73,9 +73,8 @@ public class GridQueryColumn extends QueryColumn{
 	/**
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
-	public Object getValue(Object item) {
+	public Object getValue(IResultItem item) {
 		if (item instanceof GridResultItem) {
-
 			switch (column) {
 			case TILE_X:
 				return ((GridResultItem) item).getTileX();
@@ -83,8 +82,6 @@ public class GridQueryColumn extends QueryColumn{
 				return ((GridResultItem) item).getTileY();
 			case VALUE:
 				return ((GridResultItem) item).getValue();
-			case DENOMINATOR:
-				return ((GridResultItem) item).getDenominator();
 			}
 		}
 		return "";

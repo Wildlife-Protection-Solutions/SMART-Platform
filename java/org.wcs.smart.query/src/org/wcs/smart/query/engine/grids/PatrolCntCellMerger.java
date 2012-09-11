@@ -19,20 +19,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model;
+package org.wcs.smart.query.engine.grids;
 
+import java.util.HashSet;
 
 /**
- * A class to hold the results of a Grid 
- * query.  
+ * Merges together hashsets of hashcodes
+ * of patrol uuids.
  * 
- * 
- * @author Jeffloun
- * @since 1.0.0
+ * @author egouge
+ *
+ * @param <T> must be hashset
  */
 
+public class PatrolCntCellMerger<T> implements ICellMerger<T> {
 
+	/**
+	 * @see org.wcs.smart.query.engine.grids.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public T mergeCell(T v1, T v2) {
+		if (v1 == null && v2 == null){
+			return null;
+		}
+		if (v1 != null && v2 == null){
+			return v1;
+		}
+		if (v1 == null && v2 != null){
+			return v2;
+		}
+		
+		HashSet<Object> pid1 = (HashSet<Object>) v1;
+		HashSet<Object> pid2 = (HashSet<Object>) v2;
+		pid1.addAll(pid2);
+		
+		return (T)pid1;
+	}
 
-public class ResultItem {
+	/**
+	 * @return the number of patrols in the hashset.
+	 * 
+	 * @see org.wcs.smart.query.engine.grids.ICellMerger#getFinalValue(java.lang.Object)
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public Double getFinalValue(T value) {
+		if (value == null) {
+			return 0.0;
+		} else {
+			return (double) ((HashSet<Object>) value).size();
+		}
+	}
 
 }

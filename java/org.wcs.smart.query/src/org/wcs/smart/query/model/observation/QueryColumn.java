@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.query.model.IResultItem;
 
 /**
  * A column available for output 
@@ -168,7 +169,7 @@ public abstract class QueryColumn implements Cloneable{
 	 * @return for a given query result item returns
 	 * the object associated with this column
 	 */
-	public abstract Object getValue(Object item) ;
+	public abstract Object getValue(IResultItem item) ;
 	
 	/** Clones the object
 	 * @see java.lang.Object#clone()

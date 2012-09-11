@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model.observation;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryResultItem;
 
 
@@ -74,7 +75,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	@Override
-	public Object getValue(Object queryResultItem) {
+	public Object getValue(IResultItem queryResultItem) {
 		if (queryResultItem instanceof QueryResultItem) {
 			QueryResultItem item = (QueryResultItem) queryResultItem;
 			return item.getAttributeValue(attributeKey);
