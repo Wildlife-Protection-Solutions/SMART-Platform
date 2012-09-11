@@ -45,10 +45,14 @@ package org.wcs.smart.util;
 import java.sql.Blob;
 import java.sql.SQLException;
 
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.GeodeticCalculator;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
@@ -181,5 +185,26 @@ public class GeometryUtils {
 		
 		return envelope;
 		
+	}
+	
+	/**
+	 * Computes the distance in meter of the given
+	 * linestring.
+	 * 
+	 * Linestring must be in 4326 projection.
+	 * 
+	 * @param ls
+	 * @return
+	 */
+	public static double distanceInMeters(LineString ls){
+		GeodeticCalculator cal = new GeodeticCalculator();
+		double distance = 0;
+		for (int i = 1; i < ls.getCoordinates().length; i ++){
+			cal.setStartingGeographicPoint(ls.getCoordinateN(i-1).x, ls.getCoordinateN(i-1).y);
+			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y);
+			distance +=cal.getOrthodromicDistance();
+		}
+		return distance;
+	
 	}
 }
