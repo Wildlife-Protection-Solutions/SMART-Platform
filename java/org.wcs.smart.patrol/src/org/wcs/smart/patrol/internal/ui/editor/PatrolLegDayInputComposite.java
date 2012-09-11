@@ -734,6 +734,10 @@ public class PatrolLegDayInputComposite {
 										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, type.getKey());
 										count++;
 									}
+									for (Iterator<PatrolLegDay> iterator = tracks.keySet().iterator(); iterator.hasNext();) {
+										PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
+										editor.getPatrolEditor().save(pldToSave);
+									}
 									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Tracks were imported for " + count + " patrol days.");
 								}else{
 									Track track = null;
@@ -750,8 +754,10 @@ public class PatrolLegDayInputComposite {
 									}else{
 										MessageDialog.openInformation(editor.getSite().getShell(), "Import Error", "Track could not be generated.  At least two points are required to generate tracks.");
 									}
+									
+									editor.getPatrolEditor().save(patrolLegDate);
 								}
-								editor.getPatrolEditor().save(patrolLegDate);
+								
 							}
 						}catch (Exception ex){
 							SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
