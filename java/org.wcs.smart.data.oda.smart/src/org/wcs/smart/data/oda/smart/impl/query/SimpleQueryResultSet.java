@@ -34,6 +34,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
 
 /**
@@ -47,7 +48,7 @@ public class SimpleQueryResultSet implements IResultSet {
 	private int m_currentRowId = -1;
 
 	private SimpleQueryResultSetMetadata metadata;
-	private List<?> items = null;
+	private List<? extends IResultItem> items = null;
 
 	private Object lastObject = null;
 
