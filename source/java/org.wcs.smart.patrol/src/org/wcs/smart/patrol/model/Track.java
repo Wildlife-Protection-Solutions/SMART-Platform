@@ -38,6 +38,7 @@ import javax.persistence.Transient;
 import org.geotools.referencing.GeodeticCalculator;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.ParseException;
@@ -125,14 +126,7 @@ public class Track {
 	 * @param ls new linestring
 	 */
 	public void setLineString(LineString ls){
-		GeodeticCalculator cal = new GeodeticCalculator();
-		double distance = 0;
-		for (int i = 1; i < ls.getCoordinates().length; i ++){
-			cal.setStartingGeographicPoint(ls.getCoordinateN(i-1).x, ls.getCoordinateN(i-1).y);
-			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y);
-			distance +=cal.getOrthodromicDistance();
-		}
-		this.distance = (float)(distance / 1000.0);
+		this.distance = (float)(GeometryUtils.distanceInMeters(ls) / 1000.0);
 		
 		WKBWriter writer = new WKBWriter(3);
 		this.geom = writer.write(ls);
