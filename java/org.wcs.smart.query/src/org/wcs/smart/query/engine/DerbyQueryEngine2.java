@@ -200,7 +200,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 					}
 					
 					monitor.subTask("Populating results table");
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), true, c);
+					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), true, c, true);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;
@@ -354,9 +354,9 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
-
 	}
-
+	
+	
 	/**
 	 * Creates the temporary table that holds the query results.
 	 * 
@@ -366,13 +366,11 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	protected void createTemporaryTable(Connection c) throws SQLException {
 
 		StringBuilder sql = new StringBuilder();
-//		sql.append("CREATE TABLE " + QUERY_TEMP_SCHEMA + "." + queryTempTable + "(");
 		sql.append("CREATE TABLE " + queryTempTable + "(");
 		sql.append("p_uuid char(16) for bit data,");
 		sql.append("p_id varchar(23),");
 		sql.append("p_station_uuid char(16) for bit data,");
 		sql.append("p_team_uuid char(16) for bit data,");
-//		sql.append("p_objective_rating smallint,");
 		sql.append("p_objective varchar(8192),");
 		sql.append("p_mandate_uuid  char(16) for bit data,");
 		sql.append("p_type varchar(6),");
@@ -387,20 +385,20 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append("wp_uuid char(16) for bit data,");
 		sql.append("ob_uuid char(16) for bit data,");
 		sql.append("plm_leader char(16) for bit data,");
-		sql.append("plm_pilot char(16) for bit data)");
+		sql.append("plm_pilot char(16) for bit data");
+
+		sql.append(")");
 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 
 		//-- add indexes 
 		sql = new StringBuilder();
-//		sql.append("CREATE INDEX " + queryTempTable + "_wp_uuid_idx on " + QUERY_TEMP_SCHEMA + "." + queryTempTable + "(wp_uuid)");
 		sql.append("CREATE INDEX " + queryTempTable + "_wp_uuid_idx on " + queryTempTable + "(wp_uuid)");
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 
 		sql = new StringBuilder();
-//		sql.append("CREATE INDEX " + queryTempTable + "_ob_uuid_idx on " + QUERY_TEMP_SCHEMA + "." + queryTempTable + "(ob_uuid)");
 		sql.append("CREATE INDEX " + queryTempTable + "_ob_uuid_idx on " +  queryTempTable + "(ob_uuid)");
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
@@ -409,7 +407,17 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	/**
 	 * Populates the query temporary table.
 	 * 
-	 * @param q the query filter
+	 * @param queryFilter the query filter
+	 * @param dateFilter the date filter
+	 * @param caFilter the conservation area filter
+	 * @param onlyObservations if only observation patrol records with observations
+	 * are to be returned,  false will return all patrol records
+	 * even if they don't have an observation
+	 * @param c database connection
+	 * @param needsObservations if the processing requires the observation
+	 * information attached to the results (otherwise ob_uuid will be populated
+	 * with null)
+	 * 
 	 * @param c the database connection
 	 * 
 	 * @throws SQLException
@@ -418,10 +426,14 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			DateFilter dateFilter, 
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
-			Connection c)
+			Connection c,
+			boolean needsObservations)
 			throws SQLException {
 
 		StringBuilder sql = new StringBuilder();
+		
+		
+		
 		sql.append("INSERT INTO " + queryTempTable );
 		// ---- SELECT CLAUSE -----
 		sql.append(" SELECT ");
@@ -440,8 +452,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(tablePrefix.get(PatrolLeg.class) + ".transport_uuid, ");
 		sql.append(tablePrefix.get(PatrolLegDay.class) + ".uuid, ");
 		sql.append(tablePrefix.get(PatrolLegDay.class) + ".patrol_day, ");
-		sql.append(tablePrefix.get(Waypoint.class) + ".uuid, ");
-		sql.append(tablePrefix.get(WaypointObservation.class) + ".uuid, ");
+		if (needsObservations){
+			sql.append(tablePrefix.get(Waypoint.class) + ".uuid, ");
+			sql.append(tablePrefix.get(WaypointObservation.class) + ".uuid, ");
+		}else{
+			sql.append("cast(null as char for bit data),");	//wp_uuid
+			sql.append("cast(null as char for bit data),");	//wpob_uuid
+		}
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_leader.employee_uuid, ");
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.employee_uuid ");
 
@@ -480,22 +497,25 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			}
 		}
 		
-		if (onlyObservations){
-			sql.append(" inner join ");
-		}else{
-			sql.append(" left join ");
-		}
-		sql.append(tableNames.get(Waypoint.class));
-		sql.append(" ");
-		sql.append(tablePrefix.get(Waypoint.class));
-		sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = "
+		if (needsObservations){
+			if (onlyObservations){
+				sql.append(" inner join ");
+			}else{
+				sql.append(" left join ");
+			}
+			sql.append(tableNames.get(Waypoint.class));
+			sql.append(" ");
+			sql.append(tablePrefix.get(Waypoint.class));
+			sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = "
 				+ tablePrefix.get(Waypoint.class) + ".leg_day_uuid ");
-		sql.append(" left join ");
-		sql.append(tableNames.get(WaypointObservation.class));
-		sql.append(" ");
-		sql.append(tablePrefix.get(WaypointObservation.class));
-		sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = "
+		
+			sql.append(" left join ");
+			sql.append(tableNames.get(WaypointObservation.class));
+			sql.append(" ");
+			sql.append(tablePrefix.get(WaypointObservation.class));
+			sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = "
 				+ tablePrefix.get(WaypointObservation.class) + ".wp_uuid ");
+		}
 		sql.append(" left join ");
 		sql.append(tableNames.get(PatrolLegMember.class));
 		sql.append(" ");
@@ -512,8 +532,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(tablePrefix.get(PatrolLegMember.class) + "_pilot.is_pilot ");
 				
 		if (queryFilter != IFilter.EMPTY_FILTER) {
-			if (queryFilter.hasAttributeFilter()
-					|| queryFilter.hasCategoryFilter()) {
+			if (queryFilter.hasAttributeFilter() || queryFilter.hasCategoryFilter()) {
 				sql.append(" left join ");
 				sql.append(tableNames.get(Category.class));
 				sql.append(" ");

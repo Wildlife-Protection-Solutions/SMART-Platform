@@ -118,13 +118,20 @@ public class CombinedValueItem implements IValueItem {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasCategory()
 	 */
 	@Override
-	public boolean isCategory() {
-		return part1.isCategory() || part2.isCategory();
+	public boolean hasCategory() {
+		return part1.hasCategory() || part2.hasCategory();
 	}
 
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasAttribute()
+	 */
+	public boolean hasAttribute(){
+		return part1.hasAttribute() || part2.hasAttribute();
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)
 	 */

@@ -190,9 +190,16 @@ public class DateGroupBy implements IGroupBy {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#isCategory()
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#hasCategory()
 	 */
-	public boolean isCategory(){
+	public boolean hasCategory(){
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#hasAttribute()
+	 */
+	public boolean hasAttribute(){
 		return false;
 	}
 	

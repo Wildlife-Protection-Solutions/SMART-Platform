@@ -108,12 +108,17 @@ public class CategoryValueItem implements IValueItem {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasCategory()
 	 */
-	public boolean isCategory(){
+	public boolean hasCategory(){
 		return true;
 	}
-	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasAttribute()
+	 */
+	public boolean hasAttribute(){
+		return false;
+	}
 	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#validateDatabase(org.hibernate.Session)

@@ -117,16 +117,24 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 						return;
 					}
 
+					boolean needsObservation = false;
+					if (query.getQueryDefinition().getValuePart().hasCategory() ||
+							query.getQueryDefinition().getValuePart().hasAttribute()){
+						needsObservation = true;
+					}
+					
 					monitor.subTask("Creating temporary table");
 					createTemporaryTable(c);
+
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;
 					}
 					
 					monitor.subTask("Populating results table");
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c);
+					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c, needsObservation);
 					monitor.worked(1);
+
 					if (monitor.isCanceled()){
 						return;
 					}
@@ -219,16 +227,14 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			
 			//merge the results based on tile ids
 			HashMap<Tile, Double> values2 = new HashMap<Tile, Double>();
-			for (Iterator iterator = value2.iterator(); iterator.hasNext();) {
-				GridResultItem gridResultItem = (GridResultItem) iterator
-						.next();
+			for (Iterator<GridResultItem> iterator = value2.iterator(); iterator.hasNext();) {
+				GridResultItem gridResultItem = (GridResultItem) iterator.next();
 				values2.put(new Tile(gridResultItem.getTileX(), gridResultItem.getTileY()), gridResultItem.getValue());				
 			}
 			
 			
-			for (Iterator iterator = value1.iterator(); iterator.hasNext();) {
-				GridResultItem gridResultItem = (GridResultItem) iterator
-						.next();
+			for (Iterator<GridResultItem> iterator = value1.iterator(); iterator.hasNext();) {
+				GridResultItem gridResultItem = (GridResultItem) iterator.next();
 				
 				Double denominator= values2.get(new Tile(gridResultItem.getTileX(), gridResultItem.getTileY()));
 				if (denominator == null){

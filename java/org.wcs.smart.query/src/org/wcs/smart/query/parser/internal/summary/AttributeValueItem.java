@@ -188,10 +188,17 @@ public class AttributeValueItem implements IValueItem {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#isCategory()
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasCategory()
 	 */
-	public boolean isCategory(){
+	public boolean hasCategory(){
 		return categoryKey != null;
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#hasAttribute()
+	 */
+	public boolean hasAttribute(){
+		return true;
 	}
 	
 	/**

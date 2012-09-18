@@ -109,7 +109,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 					}
 					
 					monitor.subTask("Populating results table");
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c);
+					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c, false);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;
@@ -298,7 +298,8 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 			DateFilter dateFilter, 
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
-			Connection c)
+			Connection c,
+			boolean needsObservations)
 			throws SQLException {
 
 		StringBuilder sql = new StringBuilder();
