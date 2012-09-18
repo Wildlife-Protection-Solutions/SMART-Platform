@@ -90,8 +90,12 @@ public interface IGroupBy {
 	/**
 	 * @return <code>true</code> if group by part includes category
 	 */
-	public boolean isCategory();
+	public boolean hasCategory();
 	
+	/**
+	 * @return <code>true</code> if group by part includes attribute
+	 */
+	public boolean hasAttribute();
 	
 	/**
 	 * Validates the current value item against the database.  This includes

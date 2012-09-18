@@ -156,17 +156,39 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					}
 					
 					monitor.subTask("Populating results table");
-					populateTemporaryTable(qFilter, query.getDateFilter(), query.getConservationAreaFilterAsFilter(), false,c);
+					List<IGroupBy> all = new ArrayList<IGroupBy>();
+					all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
+					all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
+					GroupByPart allGroupBy = new GroupByPart(all);
+					
+					//TODO: review this needsObservation
+					//i think you only need the observations if 
+					//computing an observation value; if only computing patrol
+					//values you shouldn't need observations
+					boolean needsObservation = false;
+					for (IValueItem it : query.getQueryDefinition().getValuePart().getValueItems()){
+						if (it.hasAttribute() || it.hasCategory()){
+							needsObservation = true;
+							break;
+						}
+					}
+					if(!needsObservation){
+						for (IGroupBy gp : allGroupBy.getGroupBys()){
+							if (gp.hasCategory() || gp.hasAttribute()){
+								needsObservation = true;
+								break;
+							}
+						}
+					}
+					
+					populateTemporaryTable(qFilter, query.getDateFilter(), query.getConservationAreaFilterAsFilter(), false,c, needsObservation);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;
 					}
 					
 					monitor.subTask("Processing Values");
-					List<IGroupBy> all = new ArrayList<IGroupBy>();
-					all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
-					all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
-					GroupByPart allGroupBy = new GroupByPart(all);
+					
 					
 					addCategoryHkey(allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					
@@ -192,14 +214,14 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	private void addCategoryHkey(GroupByPart groupByPart, ValuePart values, Connection c) throws SQLException{
 		boolean add = false;
 		for (IGroupBy groupBy : groupByPart.getGroupBys()){
-			if (groupBy.isCategory() ){
+			if (groupBy.hasCategory() ){
 				add = true;
 				break;
 			}
 		}
 		if (!add){
 			for (IValueItem item : values.getValueItems()){
-				if (item.isCategory()){
+				if (item.hasCategory()){
 					add = true;
 					break;
 				}

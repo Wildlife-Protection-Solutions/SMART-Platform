@@ -57,9 +57,14 @@ public interface IValueItem {
 	public DropItem asDropItem(Session session);
 	
 	/**
-	 * @return <code>true</code> if valud item includes category
+	 * @return <code>true</code> if value item includes category
 	 */
-	public boolean isCategory();
+	public boolean hasCategory();
+	
+	/**
+	 * @return <code>true</code> if value item includes a datamodel attribute
+	 */
+	public boolean hasAttribute();
 	
 	/**
 	 * Validates the current value item against the database.  This includes
