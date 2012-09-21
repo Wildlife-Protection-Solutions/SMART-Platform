@@ -39,6 +39,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
@@ -59,19 +61,31 @@ public abstract class Query {
 	//if you add another query type you must update
 	//the queryInput constructor
 	public enum QueryType{
-		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, "Observation Query"),
-		SUMMARY("SummaryQuery", SummaryEditor.ID, "Summary Query"),
-		GRIDDED("GriddedQuery", GriddedEditor.ID,  "Gridded Query"),
-		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, "Patorl Query");
+		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, "Observation Query", ObservationQuery.class),
+		SUMMARY("SummaryQuery", SummaryEditor.ID, "Summary Query", SummaryQuery.class),
+		GRIDDED("GriddedQuery", GriddedEditor.ID,  "Gridded Query", GriddedQuery.class),
+		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, "Patorl Query", PatrolQuery.class);
 		
 		private String objectName;
 		private String editorId;
 		private String uiName;
+		private Class<? extends Query> hibrnateClazz;
 		
-		private QueryType(String objectName, String editorId, String uiName){
+		private QueryType(String objectName, String editorId, String uiName, Class<? extends Query> hibrnateClazz){
 			this.objectName = objectName;
 			this.editorId = editorId;
 			this.uiName = uiName;
+			this.hibrnateClazz = hibrnateClazz;
+		}
+		
+		/**
+		 * 
+		 * @return the hibernate class that represents the 
+		 * query object.
+		 * 
+		 */
+		public Class<? extends Query> getHibernateClass(){
+			return this.hibrnateClazz;
 		}
 		
 		/**

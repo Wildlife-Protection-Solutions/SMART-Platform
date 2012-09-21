@@ -78,6 +78,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	private boolean isDirty = false;
 	
 	private IQueryListener qListener = new IQueryListener() {
+		
 		@Override
 		public void queryChanged(Query query) {
 			if (query != null && query.equals(PatrolQueryResultsEditor.this.query)){
@@ -512,6 +513,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	
 	@Override
 	public void setFocus() {
+		super.setFocus();
 		
 	}
 

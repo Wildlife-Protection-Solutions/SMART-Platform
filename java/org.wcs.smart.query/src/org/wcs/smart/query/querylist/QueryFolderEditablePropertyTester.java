@@ -22,8 +22,6 @@
 package org.wcs.smart.query.querylist;
 
 import org.eclipse.core.expressions.PropertyTester;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
@@ -41,6 +39,10 @@ import org.wcs.smart.query.model.QueryInput;
  */
 public class QueryFolderEditablePropertyTester extends PropertyTester {
 
+	public static final String NEWFOLDER_OP = "newfolder";
+	public static final String DELETE_OP = "delete";
+	public static final String RENAME_OP = "rename";
+
 	public QueryFolderEditablePropertyTester() {
 	}
 
@@ -57,50 +59,58 @@ public class QueryFolderEditablePropertyTester extends PropertyTester {
 		
 		String operator = (String)args[0];
 		if (receiver instanceof QueryFolder){
-			if (operator.equals("rename") || operator.equals("delete")){
-				if (((QueryFolder)receiver).isRootFolder()){
-					return false;
-				}
-				//if (((QueryFolder) receiver).getEmployee() != null && ((QueryFolder) receiver).getEmployee().equals(SmartDB.getCurrentEmployee())){
-				if (((QueryFolder)receiver).getEmployee() != null){
-					return true;
-				}else if (((QueryFolder) receiver).getEmployee() == null ){
-					//conservation area level folder; only rename or deletable if admin or manager
-					if (QueryHibernateManager.canModifyCaQueries()){
-						return true;
-					}
-				}
-				
-			}else if (operator.equals("newfolder")){
-				if (((QueryFolder)receiver).getEmployee() != null){
-					return true;
-				}else if (((QueryFolder) receiver).getEmployee() == null ){
-					//conservation area level folder; only rename or deletable if admin or manager
-					if (QueryHibernateManager.canModifyCaQueries()){
-						return true;
-					}
-				}
-				
-			}
-			
-			return false;
-			
+			return canModify((QueryFolder)receiver, operator);
 		}else if (receiver instanceof QueryInput){
-			if (operator.equals("delete")){
-				if (QueryHibernateManager.canModifyCaQueries()){
-					return true;
-				}else{
-					if (((QueryInput)receiver).isShared()){
-						return false;
-					}else{
-						return true;
-					}
-					
-				}
-				
-			}
+			return canModify((QueryInput) receiver, operator);
 		}
 		return false;
 	}
 
+	
+	
+	public static boolean canModify(QueryInput input, String operator){
+		if (operator.equals(DELETE_OP) || operator.equals(RENAME_OP)){
+			if (!input.isShared() ){
+				//always rename or delete your own queries
+				return true;
+			}else if (input.isShared()){
+				//only rename or deletable if admin or manager
+				if (QueryHibernateManager.canModifyCaQueries()){
+					return true;
+				}
+				return false;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean canModify(QueryFolder folder, String operator){
+		if (operator.equals(RENAME_OP) || operator.equals(DELETE_OP)){
+			if (folder.isRootFolder()){
+				return false;
+			}
+			//if (((QueryFolder) receiver).getEmployee() != null && ((QueryFolder) receiver).getEmployee().equals(SmartDB.getCurrentEmployee())){
+			if (folder.getEmployee() != null){
+				return true;
+			}else if (folder.getEmployee() == null ){
+				//conservation area level folder; only rename or deletable if admin or manager
+				if (QueryHibernateManager.canModifyCaQueries()){
+					return true;
+				}
+			}
+			
+		}else if (operator.equals(NEWFOLDER_OP)){
+			if (folder.getEmployee() != null){
+				return true;
+			}else if (folder.getEmployee() == null ){
+				//conservation area level folder; only rename or deletable if admin or manager
+				if (QueryHibernateManager.canModifyCaQueries()){
+					return true;
+				}
+			}
+			
+		}
+		
+		return false;
+	}
 }

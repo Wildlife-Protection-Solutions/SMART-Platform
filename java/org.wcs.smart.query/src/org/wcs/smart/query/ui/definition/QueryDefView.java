@@ -296,6 +296,7 @@ public class QueryDefView extends ViewPart {
 	
 	@Override
 	public void setFocus() {
+		stackComp.setFocus();
 	}
 		
 	public void fireQueryModifiedListeners(){

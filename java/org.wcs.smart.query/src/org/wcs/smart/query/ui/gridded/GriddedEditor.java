@@ -524,12 +524,6 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}
 		return super.getAdapter(adaptee);
 	}
-	
-	@Override
-	public void setFocus() {
-		
-	}
-
 }
 
 	

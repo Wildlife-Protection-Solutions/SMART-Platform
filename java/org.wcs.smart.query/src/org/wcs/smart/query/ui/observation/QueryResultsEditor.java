@@ -510,10 +510,4 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		}
 		return super.getAdapter(adaptee);
 	}
-	
-	@Override
-	public void setFocus() {
-		
-	}
-
 }

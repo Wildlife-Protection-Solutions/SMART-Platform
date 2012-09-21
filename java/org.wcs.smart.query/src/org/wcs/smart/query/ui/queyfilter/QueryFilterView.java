@@ -50,9 +50,9 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
-import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -65,7 +65,6 @@ import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
-import org.wcs.smart.query.ui.queyfilter.GriddedQueryContentProvider.NodeType;
 
 /**
  * A view that display the query filter options.
@@ -360,6 +359,7 @@ public class QueryFilterView extends ViewPart {
 	
 	@Override
 	public void setFocus() {
+		main.setFocus();
 	}
 
 	/**

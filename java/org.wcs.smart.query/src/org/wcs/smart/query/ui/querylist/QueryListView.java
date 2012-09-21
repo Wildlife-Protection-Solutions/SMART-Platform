@@ -52,12 +52,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.query.IQueryFolderListener;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
@@ -188,26 +184,14 @@ public class QueryListView extends ViewPart {
 			public void doubleClick(DoubleClickEvent event) {
 				Object x = ((IStructuredSelection)queryList.getSelection()).getFirstElement();
 				if (x != null && x instanceof QueryInput){
-					try {
-						if (((QueryInput)x).getType() == QueryType.OBSERVATION){
-							getSite().getPage().openEditor((QueryInput)x, QueryResultsEditor.ID);
-						}else if (((QueryInput)x).getType() == QueryType.SUMMARY){
-							getSite().getPage().openEditor((QueryInput)x, SummaryEditor.ID);
-						}else if (((QueryInput)x).getType() == QueryType.PATROL){
-							getSite().getPage().openEditor((QueryInput)x, PatrolQueryResultsEditor.ID);
-						}else if (((QueryInput)x).getType() == QueryType.GRIDDED){
-							getSite().getPage().openEditor((QueryInput)x, GriddedEditor.ID);
-						}	
-					} catch (Throwable t) {
-						QueryPlugIn.displayLog(t.getMessage(), t);
-					}
+					OpenQueryHandler.openQuery((QueryInput)x);
 				}
 			}
 		});
 		
 		queryList.setCellEditors(new CellEditor[] { new TextCellEditor(queryList.getTree()) });
 		queryList.setColumnProperties(new String[] { "col1" });
-		queryList.setCellModifier(new FolderNameCellEditor(queryList));
+		queryList.setCellModifier(new NameCellEditor(queryList));
 		focusCellManager = new TreeViewerFocusCellManager(queryList, new MultiFocusCellOwnerDrawHighlighter(queryList));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
 				queryList) {
@@ -255,6 +239,7 @@ public class QueryListView extends ViewPart {
 	
 	@Override
 	public void setFocus() {
+		queryList.getControl().setFocus();
 	}
 
 }

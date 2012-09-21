@@ -309,5 +309,9 @@ public class PatrolQueryEditorTableContent {
 	public PatrolResultsTable getQueryResultsTable() {
 		return resultsTable;
 	}
+	
+	public void setFocus(){
+		runQueryLink.setFocus();
+	}
 
 }
