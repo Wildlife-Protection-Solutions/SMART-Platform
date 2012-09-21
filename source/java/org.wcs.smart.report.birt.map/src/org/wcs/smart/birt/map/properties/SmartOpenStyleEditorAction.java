@@ -25,7 +25,6 @@ import java.lang.reflect.Field;
 
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.style.sld.SLD;
-import net.refractions.udig.style.sld.SLDContent;
 import net.refractions.udig.style.sld.editor.EditorPageManager;
 import net.refractions.udig.style.sld.editor.StyleEditorDialog;
 
