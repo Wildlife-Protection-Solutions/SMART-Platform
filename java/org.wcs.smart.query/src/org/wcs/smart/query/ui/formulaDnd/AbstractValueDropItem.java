@@ -163,7 +163,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 			initDrag(lbl);
 			
 			Label lbl2 = new Label(main, SWT.NONE);
-			lbl2.setText(encounterRatio.getGuiName());
+			lbl2.setText( formatStringForLabel(encounterRatio.getGuiName()));
 			
 			createRateLink(main, "Change Rate...");
 		}else{
@@ -185,7 +185,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 		
 		link.setUnderlined(true);
 		link.setForeground( main.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText(text);
+		link.setText(formatStringForLabel(text));
 		
 		if (smallerFont != null){
 			FontData fd = (link.getFont().getFontData()[0]);

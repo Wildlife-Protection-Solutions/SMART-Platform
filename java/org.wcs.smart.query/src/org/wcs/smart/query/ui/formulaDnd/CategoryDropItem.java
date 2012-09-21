@@ -79,7 +79,7 @@ public class CategoryDropItem extends DropItem {
 		lbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		initDrag(lbl);
 		
-		lbl.setText(this.text);
+		lbl.setText( formatStringForLabel(this.text));
 	}
 
 	/**

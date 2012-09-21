@@ -156,7 +156,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 			main.setLayout(gl);
 			main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 			Label lblAgg = new Label(main, SWT.NONE);
-			lblAgg.setText(attribute.getAggregations().get(0).getGuiName());
+			lblAgg.setText( formatStringForLabel(attribute.getAggregations().get(0).getGuiName()));
 			selectedAggregation = attribute.getAggregations().get(0);
 			initDrag(lblAgg);
 		}else {
@@ -208,7 +208,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 		if (category != null){
 			sb.append(" (" + category.getName() + ") ");
 		}
-		lblText.setText(sb.toString());
+		lblText.setText( formatStringForLabel(sb.toString()));
 		
 		initDrag(main);
 		initDrag(lblText);

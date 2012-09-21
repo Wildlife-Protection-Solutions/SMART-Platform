@@ -104,7 +104,7 @@ public class AreaDropItem extends DropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(area.getId() + " [" + area.getType().getGuiName() + "]");
+		lbl.setText( formatStringForLabel(area.getId() + " [" + area.getType().getGuiName() + "]"));
 		initDrag(lbl);
 
 	}

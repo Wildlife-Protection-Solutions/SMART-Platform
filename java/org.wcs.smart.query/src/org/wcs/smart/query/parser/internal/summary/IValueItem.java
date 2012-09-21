@@ -50,6 +50,18 @@ public interface IValueItem {
 	public String getName(Session session);
 	
 	/**
+	 * Give a hibernate connection returns the 
+	 * full human readable representation of the name
+	 * for the value item. 
+	 * <p>This may be the same as the name or it may contain
+	 * more information for tooltips</p>
+	 * 
+	 * @param session hibernate session
+	 * @return 
+	 */
+	public String getFullName(Session session);
+	
+	/**
 	 * Converts the value item to a drop item
 	 * @param session
 	 * @return

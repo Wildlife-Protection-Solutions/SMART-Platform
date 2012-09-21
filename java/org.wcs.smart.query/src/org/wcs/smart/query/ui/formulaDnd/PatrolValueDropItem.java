@@ -65,7 +65,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	@Override
 	protected void createValueComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(item.getGuiName());
+		lbl.setText( formatStringForLabel(item.getGuiName()));
 		initDrag(lbl);
 	}
 

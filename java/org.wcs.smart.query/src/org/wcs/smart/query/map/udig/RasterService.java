@@ -196,6 +196,11 @@ public class RasterService extends AbstractRasterService {
 							 return query.getName() + " [" + query.getId() + "]";
 						 }
 						
+//						 @Override
+//						 public Icon getIcon() {
+//							 
+//							 return AWTSWTImageUtils.imageDescriptor2awtIcon(Glyph.grid(null, null, null, null));
+//						 }
 					};
 				}
 				return info;
@@ -264,6 +269,7 @@ public class RasterService extends AbstractRasterService {
         }
         return this.reader;
     }
+	
 	/**
 	 * Refreshes 
 	 * 

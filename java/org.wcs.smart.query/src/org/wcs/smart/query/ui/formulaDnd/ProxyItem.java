@@ -53,7 +53,7 @@ public class ProxyItem extends DropItem {
 	 * @param text
 	 */
 	public void setLabelText(String text){
-		this.lbl.setText(text);
+		this.lbl.setText(formatStringForLabel(text));
 	}
 
 	/* (non-Javadoc)

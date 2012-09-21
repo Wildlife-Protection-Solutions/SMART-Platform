@@ -26,7 +26,7 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
  * Represents an encounter rate value item which currently only supports
- * computing anyvalue divided by a patrolOption value.  
+ * computing any value divided by a patrolOption value.  
  * 
  * 
  * @author egouge
@@ -95,6 +95,17 @@ public class CombinedValueItem implements IValueItem {
 		return sb.toString();
 	}
 
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
+	 */
+	public String getFullName(Session session){
+		StringBuilder sb = new StringBuilder();
+		sb.append(part1.getFullName(session));
+		sb.append(" per ");
+		sb.append(part2.getFullName(session));
+		return sb.toString();
+	}
+	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */

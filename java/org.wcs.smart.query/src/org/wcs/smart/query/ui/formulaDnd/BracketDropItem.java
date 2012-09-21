@@ -88,7 +88,7 @@ public class BracketDropItem extends DropItem {
 		lbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 		initDrag(lbl);
 		
-		lbl.setText(getText());
+		lbl.setText( formatStringForLabel(getText()));
 	}
 
 

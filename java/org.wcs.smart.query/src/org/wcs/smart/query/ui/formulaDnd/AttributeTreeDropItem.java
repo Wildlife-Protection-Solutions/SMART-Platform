@@ -243,7 +243,7 @@ public class AttributeTreeDropItem extends DropItem{
 						}
 						if (!lblitem.isDisposed()){
 							if (currentSelection != null){
-								lblitem.setText(currentSelection.getName());
+								lblitem.setText( formatStringForLabel(currentSelection.getName()));
 							}else{
 								lblitem.setText("");
 							}
@@ -257,12 +257,12 @@ public class AttributeTreeDropItem extends DropItem{
 		});
 		
 		if (currentSelection != null){
-			lblitem.setText(currentSelection.getName());
+			lblitem.setText( formatStringForLabel(currentSelection.getName()));
 		}else{
 			lblitem.setText("");
 		}
 		
-		lblAttribute.setText(this.text + " = ");
+		lblAttribute.setText(formatStringForLabel(this.text + " = "));
 		loadItemsJobs.schedule();
 	}
 	

@@ -40,7 +40,9 @@ package org.wcs.smart.query.model;
  */
 public class SummaryHeader {
 
-	private String name;	//name as diaplyed to user
+	private String name;	//name as displayed to user
+	private String fullName;	//full name
+	
 	private String key;		 //unique column identifier (station, team etc)
 	private String identifier;  //hex encoded uuid, string or other key value
 	private boolean isValue = false;
@@ -48,21 +50,24 @@ public class SummaryHeader {
 	/**
 	 * Creates a new summary header with a null identifier 
 	 * @param name the gui name
+	 * @param name the complete name (includes entire category path)
 	 * @param key the item key
 	 * @param isValue if value item or not
 	 */
-	public SummaryHeader(String name, String key, boolean isValue){
-		this(name, key, null, isValue);
+	public SummaryHeader(String name, String fullName, String key, boolean isValue){
+		this(name, fullName, key, null, isValue);
 	}
 	/**
 	 * Creates a new summary header 
 	 * @param name the gui name
+	 * @param name the complete name (includes entire category path)
 	 * @param key the item key
 	 * @param identifier the identifier
 	 * @param isValue if value item or not
 	 */
-	public SummaryHeader(String name, String key, String identifier, boolean isValue){
+	public SummaryHeader(String name, String fullName, String key, String identifier, boolean isValue){
 		this.name = name;
+		this.fullName = fullName;
 		this.key = key;
 		this.identifier = identifier;
 		this.isValue = isValue;
@@ -80,6 +85,13 @@ public class SummaryHeader {
 	 */
 	public String getName(){
 		return this.name;
+	}
+	
+	/**
+	 * @return the full summary header name
+	 */
+	public String getFullName(){
+		return this.fullName;
 	}
 	
 	/**

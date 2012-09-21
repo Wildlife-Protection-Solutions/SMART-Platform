@@ -147,6 +147,30 @@ public class AttributeValueItem implements IValueItem {
 	}
 
 	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
+	 */
+	public String getFullName(Session session){
+		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		if (att == null){
+			return "";
+		}
+		StringBuilder name = new StringBuilder();
+		name.append(getAggregation().getGuiName());
+		name.append(" ");
+		name.append(att.getName());
+		
+		if (categoryKey != null){
+			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
+			if (cat != null){
+				name.append( " (" + cat.getFullCategoryName() + ")");
+			}else{
+				name.append(" (not found) ");
+			}
+		}
+		return name.toString();
+	}
+	
+	/**
 	 * @return attribute aggregation 
 	 */
 	public Aggregation getAggregation() {

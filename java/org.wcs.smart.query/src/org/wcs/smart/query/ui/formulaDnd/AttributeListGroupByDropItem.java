@@ -207,9 +207,9 @@ public class AttributeListGroupByDropItem extends DropItem implements
 		
 		Label lbl = new Label(comp, SWT.NONE);
 		if (category != null){
-			lbl.setText(attribute.getName() + " (" + category.getFullCategoryName() + ")");
+			lbl.setText(formatStringForLabel(attribute.getName() + " (" + category.getFullCategoryName() + ")"));
 		}else{
-			lbl.setText(attribute.getName());
+			lbl.setText(formatStringForLabel(attribute.getName()));
 		}
 		initDrag(lbl);
 		
