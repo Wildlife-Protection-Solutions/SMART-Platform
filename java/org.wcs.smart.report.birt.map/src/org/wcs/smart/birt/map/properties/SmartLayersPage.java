@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.ui.graphics.Glyph;
+import net.refractions.udig.ui.graphics.SLDs;
+
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -47,6 +50,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -63,6 +67,14 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
+import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.PolygonSymbolizer;
+import org.geotools.styling.RasterSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Style;
+import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
 import org.wcs.smart.birt.map.BirtMapUtils;
 import org.wcs.smart.birt.map.SmartMapItem;
@@ -213,16 +225,35 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		final TableViewerColumn col3 = new TableViewerColumn(tblLayers, SWT.DEFAULT);
 		col3.getColumn().setText("Style");
 		col3.getColumn().setWidth(200);
-		col3.setLabelProvider(new ColumnLabelProvider() {
+		ColumnLabelProvider col3Provider = new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof LayerDefinition){
-					return ((LayerDefinition) element).style;
+					if (((LayerDefinition) element).style == null){
+						return "default";
+					}else if (getImage(element) == null){
+						return ((LayerDefinition) element).style;
+					}
+					return "";
 				}
 				return super.getText(element);
 			}
-		});
-		cellEditor = new StyleCellEditor(tblLayers.getTable());
+			
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof LayerDefinition){
+					if (((LayerDefinition) element).style != null){
+						Style sld = (Style) BirtMapUtils.mementoToStyle(((LayerDefinition)element).style);
+						if (sld != null){
+							return createImage(sld);
+						}
+					}
+				}
+				return null;
+			}
+		};
+		col3.setLabelProvider(col3Provider);
+		cellEditor = new StyleCellEditor(tblLayers.getTable(), col3Provider);
 		col3.setEditingSupport(new EditingSupport(col3.getViewer()) {
 
 			@Override
@@ -246,7 +277,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			@Override
 			protected void setValue(Object element, Object value) {
 				if (element instanceof LayerDefinition ){
-					((LayerDefinition)element).style = null;
 					if (value instanceof String){
 						((LayerDefinition)element).style = (String)value;
 					}
@@ -288,7 +318,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				LayerDefinition ld = new LayerDefinition();
 				ld.handle = dialog.getValue();
 				ld.name = ld.handle.getDisplayName();
-				ld.style = "default";
 				
 				layerItems.add(ld);
 				tblLayers.refresh();
@@ -653,6 +682,55 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		}
 
 	}
+	
+	private  Image createImage(Style sld){
+		Rule r = getRule(sld);
+		if (r == null){
+			return null;
+		}
+		if (r.symbolizers().size() == 0){
+			return null;
+		}
+		
+		Symbolizer sym = r.symbolizers().get(0);
+		if (PointSymbolizer.class.isAssignableFrom(sym.getClass())){
+			return Glyph.point(r).createImage();
+		}else if (LineSymbolizer.class.isAssignableFrom(sym.getClass())){
+			return Glyph.line(r).createImage();
+		}else if (PolygonSymbolizer.class.isAssignableFrom(sym.getClass())){
+			return Glyph.polygon(r).createImage();
+		}else if (RasterSymbolizer.class.isAssignableFrom(sym.getClass())){
+			return Glyph.grid(null, null, null, null).createImage();
+		}		
+		return null;
+	}
+	
+	 private static Rule getRule( Style sld ) {
+	        Rule rule = null;
+	        int size = 0;
+
+	        for( FeatureTypeStyle style : sld.featureTypeStyles() ) {
+	            for( Rule potentialRule : style.rules() ) {
+	                if (potentialRule != null) {
+	                    Symbolizer[] symbs = potentialRule.getSymbolizers();
+	                    for( int m = 0; m < symbs.length; m++ ) {
+	                        if (symbs[m] instanceof PointSymbolizer) {
+	                            int newSize = SLDs.pointSize((PointSymbolizer) symbs[m]);
+	                            if (newSize > 16 && size != 0) {
+	                                // return with previous rule
+	                                return rule;
+	                            }
+	                            size = newSize;
+	                            rule = potentialRule;
+	                        } else {
+	                            return potentialRule;
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	        return rule;
+	    }
 	
 }
 

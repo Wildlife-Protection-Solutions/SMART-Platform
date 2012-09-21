@@ -35,7 +35,6 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.util.DimensionUtil;
-import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 
 /**
@@ -53,16 +52,15 @@ public class BirtMapUtils {
 	 * 
 	 * @param xmlMemento
 	 * @return
-	 * @throws WorkbenchException
 	 */
-	public static Object mementoToStyle(String xmlMemento)
-			throws WorkbenchException {
+	public static Object mementoToStyle(String xmlMemento) {
 		try {
 			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(
 					xmlMemento));
 			SLDContent cnt = new SLDContent();
 			return cnt.load(memento);
 		} catch (Exception ex) {
+			SmartMapItemPlugIn.log("Error parsing sld", ex);
 			return null;
 		}
 	}

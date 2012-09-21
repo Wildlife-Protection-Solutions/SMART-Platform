@@ -40,10 +40,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
@@ -66,13 +69,16 @@ public class StyleCellEditor extends DialogCellEditor {
 
 	private Layer layer;
 	private IService qs;
-
 	private Map map;
 	
-	public StyleCellEditor(Composite parent) {
+	private ColumnLabelProvider lblProvider;
+	
+	public StyleCellEditor(Composite parent, ColumnLabelProvider lblProvider) {
 		super(parent);
+		this.lblProvider = lblProvider;
 	}
 
+	
 	/**
 	 * @see org.eclipse.jface.viewers.DialogCellEditor#openDialogBox(org.eclipse.swt.widgets.Control)
 	 */
@@ -83,7 +89,8 @@ public class StyleCellEditor extends DialogCellEditor {
 			map = ProjectFactory.eINSTANCE.createMap();
 			LayerDefinition mapLayer = (LayerDefinition) super.getValue();
 			final OdaDataSetHandle ds = mapLayer.handle;
-			final Object style = BirtMapUtils.mementoToStyle(mapLayer.style);
+			
+			final Object style = mapLayer.style != null ? BirtMapUtils.mementoToStyle(mapLayer.style) : null;
 
 			Job j = new Job("create map with layer") {
 
@@ -165,5 +172,17 @@ public class StyleCellEditor extends DialogCellEditor {
 				SWT.DEFAULT).y;
 		return data;
 	}
+	
+	
+	@Override
+    protected void updateContents(Object value) {
+        if (getDefaultLabel() == null || lblProvider == null) {
+			return;
+		}
+        String text = lblProvider.getText(value);
+        if (text != null){
+        	getDefaultLabel().setText(text);
+        }
+    }
 
 }

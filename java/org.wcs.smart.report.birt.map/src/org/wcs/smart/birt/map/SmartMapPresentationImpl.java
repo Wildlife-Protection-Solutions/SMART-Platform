@@ -203,9 +203,11 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				for (GeoSmart smrt : layers){
 					if (smrt.georesource.equals(l.getGeoResource())){
 						l.setName(smrt.name);
-						Object st = BirtMapUtils.mementoToStyle(smrt.style);
-						if (st != null) {
-							l.getStyleBlackboard().put(SLDContent.ID, st);
+						if (smrt.style != null){
+							Object st = BirtMapUtils.mementoToStyle(smrt.style);
+							if (st != null) {
+								l.getStyleBlackboard().put(SLDContent.ID, st);
+							}
 						}
 					}
 				}
