@@ -286,6 +286,7 @@ public class ReportListView extends ViewPart {
 	
 	@Override
 	public void setFocus() {
+		reportList.getControl().setFocus();
 	}
 
 }
