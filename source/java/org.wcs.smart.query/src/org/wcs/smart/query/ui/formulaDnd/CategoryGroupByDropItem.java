@@ -134,7 +134,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	 * Updates the text label
 	 */
 	private void updateLabel(){
-		lblText.setText(getText());
+		lblText.setText( formatStringForLabel(getText()));
 		updateToolTipMessage();
 	}
 	
@@ -242,8 +242,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 		comp.setLayout(new GridLayout(2, false));
 		
 		lblText = new Label(comp, SWT.WRAP);
-//		lbl.setText(parentCategory.getFullCategoryName());
-		lblText.setText(getText());
+		lblText.setText( formatStringForLabel(getText()));
 		lblText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		initDrag(lblText);
 		

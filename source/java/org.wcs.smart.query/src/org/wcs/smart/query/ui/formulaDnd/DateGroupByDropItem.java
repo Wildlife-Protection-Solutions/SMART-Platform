@@ -103,7 +103,7 @@ public class DateGroupByDropItem extends DropItem implements IGroupByDropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(dateOption.getGuiName());
+		lbl.setText( formatStringForLabel(dateOption.getGuiName()));
 		
 		initDrag(lbl);
 	}

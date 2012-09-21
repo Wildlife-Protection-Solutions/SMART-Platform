@@ -229,7 +229,7 @@ public class AttributeDropItem extends DropItem{
 		initDrag(main);
 		initDrag(lblAttribute);
 		
-		lblAttribute.setText(this.text);
+		lblAttribute.setText(formatStringForLabel(this.text));
 		if (currentValue != null){
 			value.setText(currentValue);
 		}

@@ -139,7 +139,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		comp.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText(groupBy.getGuiName());
+		lbl.setText( formatStringForLabel(groupBy.getGuiName()));
 		initDrag(lbl);
 		
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);

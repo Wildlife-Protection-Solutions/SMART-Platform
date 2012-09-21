@@ -75,7 +75,7 @@ public class BooleanPatrolDropItem extends DropItem {
 		lbl.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));		
 		initDrag(lbl);
 		
-		this.lbl.setText(this.text);
+		this.lbl.setText( formatStringForLabel(this.text)) ;
 	}
 
 	@Override

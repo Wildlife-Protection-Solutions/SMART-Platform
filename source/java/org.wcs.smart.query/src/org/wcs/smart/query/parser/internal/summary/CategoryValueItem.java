@@ -88,6 +88,17 @@ public class CategoryValueItem implements IValueItem {
 	}
 
 	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
+	 */
+	public String getFullName(Session session){
+		Category c = QueryHibernateManager.getCategory(session, categoryHkey);
+		if (c == null){
+			return this.key;
+		}
+		return "Count " +  c.getFullCategoryName();
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override

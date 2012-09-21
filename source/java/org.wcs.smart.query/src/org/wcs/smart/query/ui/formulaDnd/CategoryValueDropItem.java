@@ -83,7 +83,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 		Label lblText = new Label(main, SWT.NONE);
 		StringBuilder sb = new StringBuilder();
 		sb.append("Count " + category.getFullCategoryName());
-		lblText.setText(sb.toString());
+		lblText.setText( formatStringForLabel(sb.toString()));
 
 		initDrag(main);
 		initDrag(lblText);

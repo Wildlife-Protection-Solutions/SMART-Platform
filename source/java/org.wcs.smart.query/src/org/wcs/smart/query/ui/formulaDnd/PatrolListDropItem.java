@@ -218,7 +218,7 @@ public class PatrolListDropItem extends DropItem{
 		initDrag(main);
 		initDrag(lbl);
 
-		lbl.setText(this.text + " = ");	
+		lbl.setText( formatStringForLabel(this.text + " = "));	
 		loadItemsJobs.schedule();
 	}
 

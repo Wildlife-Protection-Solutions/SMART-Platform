@@ -980,7 +980,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){
-			SummaryHeader header = new SummaryHeader(item.getName(session), item.asString(), true);
+			SummaryHeader header = new SummaryHeader(item.getName(session), item.getFullName(session), item.asString(), true);
 			results.addValueHeader(header);
 		}
 		
@@ -993,9 +993,9 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					rowHeader[i] = new SummaryHeader( it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
 				}else{
-					rowHeader[i] = new SummaryHeader( it.getName(), item.getKeyPart(), it.getKey(), false);
+					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}	
 				
 			}
@@ -1011,9 +1011,9 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					colHeader[i] = new SummaryHeader( it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
 				}else{
-					colHeader[i] = new SummaryHeader( it.getName(), item.getKeyPart(), it.getKey(), false);
+					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}
 				
 			}

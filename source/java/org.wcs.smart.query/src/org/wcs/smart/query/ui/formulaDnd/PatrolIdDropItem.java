@@ -192,7 +192,7 @@ public class PatrolIdDropItem  extends DropItem{
 		initDrag(lblAttribute);
 		
 		
-		lblAttribute.setText(this.text);
+		lblAttribute.setText(formatStringForLabel(this.text));
 		
 		int index = 0;
 		for (int i = 0; i < Operator.STRING_OPS.length; i ++){

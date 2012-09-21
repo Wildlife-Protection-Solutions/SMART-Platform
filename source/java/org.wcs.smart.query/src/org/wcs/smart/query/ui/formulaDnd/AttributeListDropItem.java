@@ -230,7 +230,7 @@ public class AttributeListDropItem extends DropItem{
 		initDrag(lblAttribute);
 		
 		
-		lblAttribute.setText(this.text + " = ");
+		lblAttribute.setText(formatStringForLabel(this.text + " = "));
 		loadItemsJobs.schedule();
 	}
 	

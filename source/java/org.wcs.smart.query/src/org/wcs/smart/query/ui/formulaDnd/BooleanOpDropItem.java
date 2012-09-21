@@ -117,7 +117,7 @@ public class BooleanOpDropItem extends DropItem {
 		initDrag(operator);
 		
 		if (currentSelection != null){
-			operator.setText(currentSelection);
+			operator.setText( formatStringForLabel(currentSelection));
 		}else{
 			operator.select(0);
 		}

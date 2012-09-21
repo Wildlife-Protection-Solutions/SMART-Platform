@@ -229,17 +229,19 @@ public abstract class DropItem {
 			@Override
 			public void dragFinished(DragSourceEvent event) {
 				LocalSelectionTransfer.getTransfer().setSelection(null);
-//				Composite w = DropItem.this.widget;
-//				if (w!= null && !w.isVisible()){
-//					//the widget is no longer used in the query so we need
-//					//to ensure it is disposed of properly
-//					DropItem.this.dispose();
-//					System.out.println("add back to default position");
-//					event.doit = false;
-//				}
 				targetPanel.finishDrag(DropItem.this);
 
 			}
 		});		
+	}
+	
+	/**
+	 * Formats string for diaplay in label.
+	 * Specifically replaces & with &&
+	 * @param text
+	 * @return
+	 */
+	protected String formatStringForLabel(String text){
+		return text.replaceAll("&", "&&");
 	}
 }

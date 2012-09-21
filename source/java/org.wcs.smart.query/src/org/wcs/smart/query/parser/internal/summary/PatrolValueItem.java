@@ -86,6 +86,13 @@ public class PatrolValueItem implements IValueItem {
 	}
 
 	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
+	 */
+	public String getFullName(Session session){
+		return getName(session);
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override

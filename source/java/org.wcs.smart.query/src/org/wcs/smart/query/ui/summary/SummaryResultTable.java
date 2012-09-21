@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.summary;
 
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -178,6 +180,7 @@ public class SummaryResultTable extends Composite {
 		for (int i = 0; i < results.getNumDataColumns(); i ++){
 			TableViewerColumn tvc = new TableViewerColumn(mainTable, SWT.NONE);
 			tvc.getColumn().setWidth(DEFAULT_COL_SIZE);
+			ColumnViewerToolTipSupport.enableFor(tvc.getViewer());
 		}
 		mainTable.setLabelProvider(new SummaryResultDataLabelProvider());
 		mainTable.setContentProvider(new SummaryResultDataContentProvider());
@@ -196,6 +199,16 @@ public class SummaryResultTable extends Composite {
 		for (int i = 0; i < results.getRowHeaders().size(); i++){
 			TableViewerColumn tvc = new TableViewerColumn(leftTable, SWT.NONE);
 			tvc.getColumn().setWidth(DEFAULT_COL_SIZE);
+			ColumnViewerToolTipSupport.enableFor(tvc.getViewer());
+			tvc.setLabelProvider(new SummaryHeaderLabelProvider(i));
+		}
+		if (results.getRowHeaders().size() == 0){
+			leftTable.setLabelProvider(new CellLabelProvider() {
+				@Override
+				public void update(ViewerCell cell) {
+					//leave it blank
+				}
+			});
 		}
 		
 		//add a listener so we can re-size the columns as we are not using the swt headers for resizing
@@ -229,7 +242,6 @@ public class SummaryResultTable extends Composite {
 				return results.getRowHeaderValues();
 			}
 		});
-		leftTable.setLabelProvider(new SummaryHeaderLabelProvider());
 	}
 	
 	
@@ -237,7 +249,7 @@ public class SummaryResultTable extends Composite {
 		final Composite topTableComp = new Composite(this, SWT.NONE);
 		topTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		topTable = new TableViewer(topTableComp, SWT.VIRTUAL | SWT.BORDER | SWT.NO_SCROLL   );
+		topTable = new TableViewer(topTableComp, SWT.VIRTUAL | SWT.BORDER | SWT.NO_SCROLL | SWT.FULL_SELECTION   );
 		topTable.getTable().setHeaderVisible(false);
 		topTable.getTable().setLinesVisible(true);
 		topTable.getTable().setLocation(0, 0);
@@ -252,12 +264,13 @@ public class SummaryResultTable extends Composite {
 			}
 		});
 		
-		
 		topTable.getTable().setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR));
 		
 		for (int i = 0; i < results.getNumDataColumns(); i ++){
 			TableViewerColumn tvc = new TableViewerColumn(topTable, SWT.NONE);
 			tvc.getColumn().setWidth(DEFAULT_COL_SIZE);
+			ColumnViewerToolTipSupport.enableFor(tvc.getViewer());
+			tvc.setLabelProvider(new SummaryHeaderLabelProvider(i));
 		}
 		
 		topTable.setContentProvider(new IStructuredContentProvider() {
@@ -274,8 +287,6 @@ public class SummaryResultTable extends Composite {
 				return results.getColumnHeaderValues();
 			}
 		});
-		topTable.setLabelProvider(new SummaryHeaderLabelProvider());
-		
 		
 		TableResizeColumnListener topListener = new TableResizeColumnListener(
 				topTable.getTable(), new Listener() {
@@ -371,25 +382,58 @@ public class SummaryResultTable extends Composite {
 		}
 		
 	}
+	
 	private class SummaryHeaderLabelProvider extends StyledCellLabelProvider{
+		
+		private int index;
+
+		/**
+		 * The data column index
+		 * @param index
+		 */
+		public SummaryHeaderLabelProvider(int index) {
+			super();
+			this.index = index;
+		}
+
 		@Override
-		public void update(ViewerCell cell){
+		public void update(ViewerCell cell) {
 			Object element = cell.getElement();
-			if (element instanceof SummaryHeader[]){
-				SummaryHeader[] array = (SummaryHeader[])element;
-				if (array.length > cell.getColumnIndex()){
-					SummaryHeader header = ((SummaryHeader[])element)[cell.getColumnIndex()];
+			if (element instanceof SummaryHeader[]) {
+				SummaryHeader[] array = (SummaryHeader[]) element;
+				if (array.length > cell.getColumnIndex()) {
+					SummaryHeader header = ((SummaryHeader[]) element)[cell
+							.getColumnIndex()];
 					cell.setText(header.getName());
-							
-					if (header.isValue()){
-						cell.setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR_2));
-					}else{
-					
+
+					if (header.isValue()) {
+						cell.setBackground(Display.getDefault().getSystemColor(
+								TABLE_HEADER_COLOR_2));
+					} else {
+
 					}
 				}
-			}	
+			}
 			super.update(cell);
-		}	
+		}
+
+		public Point getToolTipShift(Object object) {
+			return new Point(5, 5);
+		}
+
+		public int getToolTipDisplayDelayTime(Object object) {
+			return 2;
+		}
+
+		public int getToolTipTimeDisplayed(Object object) {
+			return 5000;
+		}
+
+		@Override
+		public String getToolTipText(Object element) {
+			return ((SummaryHeader[]) element)[index].getFullName().replaceAll(
+					"&", "&&");
+		}
 	}
 }
 
