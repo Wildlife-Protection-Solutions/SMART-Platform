@@ -308,5 +308,12 @@ public class GriddedTableContent {
 	public QueryResultsTable getQueryResultsTable() {
 		return resultsTable;
 	}
+	
+	/**
+	 * Sets the focus on the run query link
+	 */
+	public void setFocus() {
+		runQueryLink.setFocus();
+	}
 
 }

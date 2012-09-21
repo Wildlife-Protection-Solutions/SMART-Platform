@@ -457,7 +457,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 
 	@Override
 	public void setFocus() {
-
+		resultsArea.setFocus();
 	}
 
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());

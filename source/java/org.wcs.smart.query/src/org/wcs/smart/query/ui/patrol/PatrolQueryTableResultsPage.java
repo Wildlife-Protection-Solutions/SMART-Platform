@@ -157,6 +157,7 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	
 	@Override
 	public void setFocus() {
+		content.setFocus();
 	}
 
 

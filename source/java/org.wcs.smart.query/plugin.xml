@@ -230,6 +230,20 @@
                </with>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.wcs.smart.query.openQuery"
+               label="Open Query"
+               style="push"
+               tooltip="Opens the query for running/editing.">
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate>
+                  <instanceof
+                        value="org.wcs.smart.query.model.QueryInput">
+                  </instanceof>
+               </iterate>
+            </visibleWhen>
+         </command>
          <separator
                name="org.wcs.smart.query.separator1"
                visible="true">
@@ -260,7 +274,6 @@
          </separator>
          <command
                commandId="org.wcs.smart.query.DeleteItem"
-               icon="images/icons/etool16/delete.png"
                label="Delete"
                style="push"
                tooltip="Delete the selected item">
@@ -425,7 +438,6 @@
             locationURI="toolbar:org.wcs.smart.query.QueryListView">
          <command
                commandId="org.wcs.smart.query.DeleteItem"
-               icon="images/icons/etool16/delete.png"
                label="Delete"
                style="push"
                tooltip="Delete the selected item">
@@ -500,6 +512,10 @@
             commandId="org.wcs.smart.query.createUnknownQuery"
             icon="images/icons/etool16/addquery.png">
       </image>
+      <image
+            commandId="org.wcs.smart.query.DeleteItem"
+            icon="images/icons/etool16/delete.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -555,6 +571,10 @@
       <command
             id="org.wcs.smart.query.createUnknownQuery"
             name="Create Unknown Query">
+      </command>
+      <command
+            id="org.wcs.smart.query.openQuery"
+            name="Open Query">
       </command>
    </extension>
    <extension
@@ -701,7 +721,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.querylist.RenameFolderHandler"
+            class="org.wcs.smart.query.ui.querylist.RenameHandler"
             commandId="org.wcs.smart.query.renameFolder">
          <enabledWhen>
             <with
@@ -736,6 +756,10 @@
       <handler
             class="org.wcs.smart.query.internal.ui.CreateUnknownQueryHandler"
             commandId="org.wcs.smart.query.createUnknownQuery">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.querylist.OpenQueryHandler"
+            commandId="org.wcs.smart.query.openQuery">
       </handler>
    </extension>
    <extension

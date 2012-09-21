@@ -26,30 +26,66 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.gridded.GriddedEditor;
+import org.wcs.smart.query.ui.observation.QueryResultsEditor;
+import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
+import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
- * Rename folder handler for the query list view
+ * Command handler for adding a new folder to 
+ * the query list view.
+ * 
  * @author Emily
  * @since 1.0.0
  */
-public class RenameFolderHandler extends AbstractHandler{
+public class OpenQueryHandler extends AbstractHandler {
 
-	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		QueryListView view = (QueryListView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID);
 		
 		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
 		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
 			return null;
 		}
 		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
-		if (o instanceof QueryFolder){
-			view.editElement(o);
+		if (o instanceof QueryInput){
+			openQuery((QueryInput) o);
 		}
 		return null;
+		
+	}
+	
+	/**
+	 * Opens the appropriate editor for the given 
+	 * query input.
+	 * 
+	 * @param input
+	 */
+	public static void openQuery(QueryInput input){
+		
+		String editorid = null;
+		if (input.getType() == QueryType.OBSERVATION){
+			editorid = QueryResultsEditor.ID;
+		}else if (input.getType() == QueryType.SUMMARY){
+			editorid = SummaryEditor.ID;
+		}else if (input.getType() == QueryType.PATROL){
+			editorid = PatrolQueryResultsEditor.ID;
+		}else if (input.getType() == QueryType.GRIDDED){
+			editorid = GriddedEditor.ID;
+		}
+		if (editorid != null){
+			try {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, editorid);	
+			} catch (Throwable t) {
+				QueryPlugIn.displayLog(t.getMessage(), t);
+			}
+		}
+		
 	}
 
 }

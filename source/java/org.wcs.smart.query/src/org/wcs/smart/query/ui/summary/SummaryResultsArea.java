@@ -145,4 +145,6 @@ public class SummaryResultsArea extends Composite{
 	public IProgressMonitor createProgressMonitor(){
 		return progressComp.createProgressMonitor();
 	}
+	
+	
 }

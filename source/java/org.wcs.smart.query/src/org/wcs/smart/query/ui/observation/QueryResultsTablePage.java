@@ -161,5 +161,6 @@ public class QueryResultsTablePage  extends EditorPart  {
 	
 	@Override
 	public void setFocus() {
+		content.setFocus();
 	}
 }

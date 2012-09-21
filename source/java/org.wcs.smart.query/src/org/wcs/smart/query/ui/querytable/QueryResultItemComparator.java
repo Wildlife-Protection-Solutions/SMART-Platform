@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.wcs.smart.query.model.IResultItem;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn.ColumnType;
 import org.wcs.smart.util.SmartUtils;
 

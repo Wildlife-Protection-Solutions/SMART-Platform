@@ -19,44 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.querytable;
+package org.wcs.smart.query.ui.querylist;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.query.model.GridResultItem;
-import org.wcs.smart.query.model.observation.QueryColumn;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.QueryInput;
 
 /**
- * An table column in the results table that represents an attribute.
- * <p>
- * There should be one column for each attribute defined in the data model
- * </p>
- * 
+ * Rename folder handler for the query list view
  * @author Emily
  * @since 1.0.0
  */
+public class RenameHandler extends AbstractHandler{
 
-public class GridColumnLabelProvider extends ColumnLabelProvider {
-
-
-	private QueryColumn column;
-
-	public GridColumnLabelProvider(QueryColumn column) {
-		this.column = column;
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-	 */
-	public String getText(Object element) {
-		if (element instanceof GridResultItem) {
-			Object value = column.getValue((GridResultItem) element);
-			if (value == null) {
-				return "";
-			} else {
-				return value.toString();
-			}
+	
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		QueryListView view = (QueryListView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID);
+		
+		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
+		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
+			return null;
 		}
-		return element == null ? "" : element.toString();//$NON-NLS-1$
+		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
+		if (o instanceof QueryFolder || o instanceof QueryInput){
+			view.editElement(o);
+		}
+		return null;
 	}
 
 }

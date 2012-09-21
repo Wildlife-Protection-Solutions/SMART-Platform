@@ -48,7 +48,7 @@ import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.querylist.AddFolderHandler;
-import org.wcs.smart.query.ui.querylist.FolderNameCellEditor;
+import org.wcs.smart.query.ui.querylist.NameCellEditor;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.query.ui.querylist.QueryListViewContentProvider;
 import org.wcs.smart.query.ui.querylist.SavedQueryTree;
@@ -113,7 +113,7 @@ public class QueryFolderTreeComposite extends Composite{
 	
 		tblViewer.setCellEditors(new CellEditor[] { new TextCellEditor(tblViewer.getTree()) });
 		tblViewer.setColumnProperties(new String[] { "col1" });
-		tblViewer.setCellModifier(new FolderNameCellEditor(tblViewer));
+		tblViewer.setCellModifier(new NameCellEditor(tblViewer));
 		
 		new TreeViewerFocusCellManager(tblViewer, new FocusCellOwnerDrawHighlighter(tblViewer));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(tblViewer) {

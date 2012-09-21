@@ -154,5 +154,6 @@ public class GriddedTableResults  extends EditorPart  {
 	
 	@Override
 	public void setFocus() {
+		content.setFocus();
 	}
 }

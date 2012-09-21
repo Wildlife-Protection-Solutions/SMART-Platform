@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -141,11 +140,16 @@ public class RasterService extends AbstractRasterService {
 	private File createRaster() throws Exception {
 
 		RasterBuilder rb = new RasterBuilder();
-
+		if(rasterFile == null){
+			return null;
+		}
 		rb.setFileName(rasterFile.getCanonicalPath());
 		
 		GridQueryResultMetadata metadata = query.getResultMetadata();
-		
+		if (metadata == null){
+			//query has not been run
+			return null;
+		}
 		int width = metadata.getMaxXTile() - metadata.getMinXTile() + 1;
 		int height = metadata.getMaxYTile() - metadata.getMinYTile() + 1;
 		
@@ -173,19 +177,17 @@ public class RasterService extends AbstractRasterService {
 	 * @throws RasterServiceException 
 	 */
 	private List<AbstractRasterGeoResource> getGeoResource() throws Exception {
-	
-		final AbstractRasterGeoResource resource = new AbstractRasterGeoResource(
-				this, rasterFile.getCanonicalPath()) {
-			
+		AbstractRasterGeoResource resource = null;
+		resource = createGeoResource(this.rasterFile);
+		return Collections.singletonList(resource);
+	}
+
+	private AbstractRasterGeoResource createGeoResource(File file) throws IOException{
+		return new AbstractRasterGeoResource(this, file.getCanonicalPath()) {
 			
 			private AbstractRasterGeoResourceInfo  info = null;
 			
 			
-			public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor)
-					 throws IOException {
-							T ret = super.resolve(adaptee, monitor);
-							return ret;
-			}
 			@Override
 			protected AbstractRasterGeoResourceInfo createInfo(
 					IProgressMonitor monitor) throws IOException {
@@ -195,12 +197,6 @@ public class RasterService extends AbstractRasterService {
 						 public String getTitle() {
 							 return query.getName() + " [" + query.getId() + "]";
 						 }
-						
-//						 @Override
-//						 public Icon getIcon() {
-//							 
-//							 return AWTSWTImageUtils.imageDescriptor2awtIcon(Glyph.grid(null, null, null, null));
-//						 }
 					};
 				}
 				return info;
@@ -232,12 +228,7 @@ public class RasterService extends AbstractRasterService {
  				
 			 }
 		};
-
-		List<AbstractRasterGeoResource> geoResources = new ArrayList<AbstractRasterGeoResource>();
-		geoResources.add(resource);
-		return geoResources;
 	}
-
 	
 	/**
      * Finds or creates the Reader used to access this service. Apon any exception, the message
@@ -257,6 +248,10 @@ public class RasterService extends AbstractRasterService {
         		return null;
         	}
         	
+        	if (this.rasterFile == null){
+        		this.message = new Exception("query not run.");
+        		return null;
+        	}
         	
             try {
                 AbstractGridFormat frmt = (AbstractGridFormat) getFormat();
@@ -269,6 +264,8 @@ public class RasterService extends AbstractRasterService {
         }
         return this.reader;
     }
+	
+	
 	
 	/**
 	 * Refreshes 
@@ -327,8 +324,12 @@ public class RasterService extends AbstractRasterService {
         }
 		super.dispose(monitor);
     	
-		//remove service from catalog
-		
+		if (this.reader != null){
+			this.reader.dispose();
+			this.reader = null;
+		}
+    	
+		//remove service from catalog		
 		factory = null;
 		CatalogPlugin.getDefault().getLocalCatalog().remove(this);
     	
