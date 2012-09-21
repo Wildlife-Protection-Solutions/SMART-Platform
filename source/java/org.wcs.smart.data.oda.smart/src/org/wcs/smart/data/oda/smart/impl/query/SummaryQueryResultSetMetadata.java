@@ -110,8 +110,10 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		}else{
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
+				if (i != 0){
+					sb.append("\n");	
+				}
 				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getName());
-				sb.append("\n");
 			}
 			return sb.toString();
 		}
@@ -122,11 +124,25 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		String name = getColumnLabel(index);
-		if(name.length() == 0){
-			return "Header";
+		index = index - 1;
+		if (index < results.getRowHeaders().size()){
+			return "header_" + index;
+		}else{
+			StringBuilder sb= new StringBuilder();
+			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
+				if (i != 0){
+					sb.append(" _ ");
+				}
+				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getFullName());
+			}
+			return sb.toString();
 		}
-		return getColumnLabel(index);
+		
+//		String name = getColumnLabel(index);
+//		if(name.length() == 0){
+//			return "Header";
+//		}
+//		return getColumnLabel(index);
 	}
 
 	/**

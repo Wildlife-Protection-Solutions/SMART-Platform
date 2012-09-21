@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -196,11 +198,26 @@ public class SmartQuery implements IQuery {
 		IResultSet resultSet = null;
 
 		//create date filter
+		Date startDate = (Date) parameters.get(SmartParameterMetaData.Parameter.STARTDATE);
+		Date endDate = (Date) parameters.get(SmartParameterMetaData.Parameter.ENDDATE);
+		
+		if (startDate == null || endDate == null){
+			if (smartQuery.getType() == QueryType.SUMMARY){
+				//we choose to run summaries in order to get 
+				//all header information
+				Calendar cal = GregorianCalendar.getInstance();
+				cal.set(1900, Calendar.JANUARY, 1);
+				startDate = new Date( cal.getTimeInMillis() );
+				endDate = new Date(startDate.getTime());
+			}else{
+				//all others will just return an empty
+				return EmptyResultSet.INSTANCE;
+			}
+			
+		}
 		DateFilter dateFilter = new DateFilter(
 				DateFilter.DATE_FIELD_OP.WAYPOINT, DATE_FILTER_OP.CUSTOM,
-				(Date) parameters
-						.get(SmartParameterMetaData.Parameter.STARTDATE),
-				(Date) parameters.get(SmartParameterMetaData.Parameter.ENDDATE));
+				startDate, endDate);
 
 		//the result set
 		if (smartQuery.getType() == QueryType.OBSERVATION
@@ -218,6 +235,7 @@ public class SmartQuery implements IQuery {
 					(SummaryQuery) smartQuery,
 					new SummaryQueryResultSetMetadata((SummaryQuery) smartQuery));
 		}
+		
 		return resultSet;
 	}
 
