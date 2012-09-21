@@ -68,6 +68,7 @@ public class PatrolDayEditor extends EditorPart {
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	private PatrolLegDayInputComposite[] children ;
+	private ScrolledForm frmSummary; 
 	
 	public PatrolDayEditor(PatrolEditor editor) {
 		super.setPartName("");
@@ -94,7 +95,7 @@ public class PatrolDayEditor extends EditorPart {
 		
 		Session session = HibernateManager.openSession();	
 		session.update(editor.getPatrol());
-		ScrolledForm frmSummary = toolkit.createScrolledForm(parent);
+		frmSummary = toolkit.createScrolledForm(parent);
 		
 		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
@@ -202,7 +203,7 @@ public class PatrolDayEditor extends EditorPart {
 	
 	@Override
 	public void setFocus() {
-		// Set the focus
+		frmSummary.setFocus();
 	}
 
 	/**

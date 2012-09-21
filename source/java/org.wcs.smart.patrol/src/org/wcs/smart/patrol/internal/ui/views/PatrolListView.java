@@ -264,10 +264,8 @@ public class PatrolListView extends ViewPart {
 		updateJob.schedule();		
 	}
 	
-	
 	@Override
 	public void setFocus() {
+		patrolListViewer.getControl().setFocus();
 	}
-
-	
 }
