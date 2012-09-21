@@ -457,7 +457,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	
 	@Override
 	public void setFocus() {
-		// Set the focus
+		txtPatrolId.setFocus();
 	}
 
 	@Override
