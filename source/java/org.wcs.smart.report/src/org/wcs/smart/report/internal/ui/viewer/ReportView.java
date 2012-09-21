@@ -137,7 +137,7 @@ public class ReportView extends ViewPart implements IReportListener{
 
 	@Override
 	public void setFocus() {
-		
+		browser.setFocus();
 	}
 	
 	@Override
