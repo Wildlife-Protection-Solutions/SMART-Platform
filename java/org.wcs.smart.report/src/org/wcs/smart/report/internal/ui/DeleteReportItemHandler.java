@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -63,11 +64,42 @@ public class DeleteReportItemHandler extends AbstractHandler implements IHandler
 		
 		final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
 		Collections.reverse(selection);
-				
+		
+		
+		if (selection.size() == 1 && (selection.get(0) instanceof Report) ){
+			Report r = ((Report)selection.get(0)) ;
+			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Confirm Delete", "Are you sure you want to delete the report '" + r.getName() + " [" + r.getId()  + "]'?"  )){
+				return null;
+			}
+		}else{
+			int reportCnt = 0;
+			int folderCnt = 0;
+			for (int i = 0; i < selection.size(); i ++){
+				if (selection.get(i) instanceof Report){
+					reportCnt++;
+				}else if (selection.get(i) instanceof ReportFolder){
+					folderCnt++;
+				}
+			}
+			String message = "Are you sure you want to delete the ";
+			if (reportCnt > 0){
+				message += reportCnt + " selected reports";
+			}
+			if (folderCnt > 0){
+				message += " and the " + folderCnt + " selected folders";
+			}
+			message += "?";
+			if (reportCnt > 0){
+				if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Confirm Delete", message )){
+					return null;
+				}	
+			}
+		}
+		
 		Job job = new Job("Delete Items Job") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 					Object o = (Object) iterator.next();
 					
 					String name = "";
