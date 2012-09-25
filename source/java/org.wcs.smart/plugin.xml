@@ -288,6 +288,20 @@
                tooltip="zoom to various locations on map">
          </command>
          <command
+               commandId="org.wcs.smart.map.zoomOut"
+               icon="images/icons/elcl16/zoom_out_co.gif"
+               label="Zoom Out"
+               style="push"
+               tooltip="zooms the map out">
+         </command>
+         <command
+               commandId="org.wcs.smart.map.zoomIn"
+               icon="images/icons/elcl16/zoom_in_co.gif"
+               label="Zoom In"
+               style="push"
+               tooltip="zooms the map int">
+         </command>
+         <command
                commandId="org.wcs.smart.map.zoomExtents"
                icon="images/icons/elcl16/zoom_layers.png"
                label="Zoom to map extents"
@@ -444,6 +458,14 @@
             id="org.wcs.smart.map.commands"
             name="Map Tools">
       </category>
+      <command
+            id="org.wcs.smart.map.zoomIn"
+            name="zoom in">
+      </command>
+      <command
+            id="org.wcs.smart.map.zoomOut"
+            name="zoom out">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -530,6 +552,14 @@
       <handler
             class="org.wcs.smart.map.internal.LoadBasemapHandler"
             commandId="org.wcs.smart.map.loadBasemap">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.ZoomInHandler"
+            commandId="org.wcs.smart.map.zoomIn">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.ZoomOutHandler"
+            commandId="org.wcs.smart.map.zoomOut">
       </handler>
    </extension>
    <extension

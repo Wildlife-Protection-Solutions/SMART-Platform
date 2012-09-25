@@ -250,7 +250,7 @@ public class MapSettings {
 					LayerRegister layerRegister = new LayerRegister (
 									name, colourSchema, uri, crs, cql ,defaultColor, 
 								maxScaleDenominator, minScaleDenominator, 
-								envelop, styleRegisterList);
+								envelop, styleRegisterList, layer.isVisible());
 						
 					layerRegisterList.add(layerRegister);
 				}
@@ -281,7 +281,6 @@ public class MapSettings {
 		
 	}
 
-
 	/**
 	 * Applies the custom settings to the map.
 	 * <p>
@@ -299,7 +298,7 @@ public class MapSettings {
 			((RenderManagerImpl)currentMap.getRenderManager()).disableRendering();
 		}
 		try{
-		List<ILayer> layers = currentMap.getMapLayers();
+		List<ILayer> currentMapLayers = currentMap.getMapLayers();
 
 		//keep track of current basemap layers
 		List<ILayer> layersToRemove = (List<ILayer>) currentMap.getBlackboard().get(BASEMAP_BLACKBOARD_KEY);
@@ -316,22 +315,23 @@ public class MapSettings {
 		
 	    //determine which layers need to be added/removed
 	    List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-	    synchronized(layers){
-	    	for (LayerRegister sharedLayer : userMap.getLayerList()) {
+	    synchronized(currentMapLayers){
+	    	for (LayerRegister basemapLayer : userMap.getLayerList()) {
 				LayerRegister foundSharedLayer = null;
-				for (ILayer layer : layers) {
-					if(sharedLayer.getName().equals(layer.getName())){
-						foundSharedLayer = sharedLayer;
+				for (ILayer mapLayer : currentMapLayers) {
+					
+					if(basemapLayer.getName().equals(mapLayer.getName())){
+						foundSharedLayer = basemapLayer;
 						if(layersToRemove != null){
-							layersToRemove.remove(layer);
+							layersToRemove.remove(mapLayer);
 						}
-						basemapLayers.add(layer);
+						basemapLayers.add(mapLayer);
 						break;
 					}
 				}
 				if(foundSharedLayer == null){
 					// the register layer is not found in the map, then it must be added
-					List<IGeoResource> resources = prepareLayers( currentMap, sharedLayer.getURI(), sharedLayer.getName());
+					List<IGeoResource> resources = prepareLayers( currentMap, basemapLayer.getURI(), basemapLayer.getName());
 					if (resources != null){
 						toAdd.addAll(resources);
 					}
@@ -366,6 +366,8 @@ public class MapSettings {
 	    for (LayerRegister sharedLayer : userMap.getLayerList()) {
 	    	for (ILayer layer : basemapLayers) {	
 	    		if (layer.getName().equals(sharedLayer.getName())) {
+	    			//update visibility of layer
+	    			((Layer)layer).setVisible(sharedLayer.getVisible());
 	    			orderedLayers.add((Layer)layer);
 	    			break;
 	    		}
@@ -518,7 +520,7 @@ public class MapSettings {
 				for (IService service : newServices) {
 		            catalog.add(service);
 				}
-				resolveList = catalog.find(new ID(uri), monitor);
+				resolveList = catalog.find(new ID(urlWithoutFragment), monitor);
 				assert !resolveList.isEmpty();
 			} 
 			// the service for the url exist then gets the resource
@@ -550,6 +552,9 @@ public class MapSettings {
 	 * Saves the lastSavedMap setting in the database
 	 * 
 	 * @param lastSavedMap lastSavedMap to be save
+	 * 
+	 * @return list of layers in the saved basemap; only return layers
+	 * saved in the basemap; null if error occurs
 	 */
 	public synchronized void save(final Map map) {
 		
@@ -583,6 +588,7 @@ public class MapSettings {
 			
 		} catch (Exception e) {
 			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
+		
 		} 
 	}
 

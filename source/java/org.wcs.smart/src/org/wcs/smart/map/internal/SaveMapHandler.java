@@ -66,6 +66,9 @@ public class SaveMapHandler extends AbstractHandler {
 			MapSettings settings = MapSettings.getInstance(mapDef);
 			settings.save(map);
 			
+			
+			//update map blackboard
+			map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY, map.getLayersInternal());
 		}
 		return null;
 	}
