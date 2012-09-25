@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.internal.ui.observation;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -106,7 +108,14 @@ public class AttributeTreeDialog extends TitleAreaDialog {
 		});
 		tblTree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tblTree.getTree().getLayoutData()).heightHint = 200;
-		
+		tblTree.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				AttributeTreeDialog.this.okPressed();
+				
+			}
+		});
 		
 		getShell().setText(attribute.getName());
 		setMessage("Select the attribute value from tree. Or search using the provided search box.");

@@ -42,8 +42,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -122,7 +124,11 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		parent.setLayout(new GridLayout(1, false));
+		GridLayout gl = new GridLayout(1, false);
+		
+		gl.marginBottom = gl.marginTop = gl.verticalSpacing = 0;
+		parent.setLayout(gl);
+		
 		setMessage("Select information for the patrol split.");
 		super.getShell().setText("Patrol Split");
 		
@@ -152,16 +158,27 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
 		// -------- Group A -------------------
-		Group groupA = createGroup(right, "Group A");		
-		cmbTransportTypeA = createTransportTypeComboViewer(groupA);
+			
+		
+		Group groupA = createGroup(right, "Group A");
+		
+		
+		ScrolledComposite sc = new ScrolledComposite(groupA, SWT.H_SCROLL | SWT.V_SCROLL);
+		sc.setExpandHorizontal(true);
+		sc.setExpandVertical(true);
+		
+		Composite gA = new Composite(sc, SWT.NONE);
+		sc.setContent(gA);
+		gA.setLayout(new GridLayout(2, false));
+		
+		cmbTransportTypeA = createTransportTypeComboViewer(gA);
 	
-		lbl = new Label(groupA, SWT.NONE);
+		lbl = new Label(gA, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		lbl.setText("Members:");
+		createEmployeeButtonPanelAndTable(gA, employeeListA, emplList);
 		
-		createEmployeeButtonPanelAndTable(groupA, employeeListA, emplList);
-		
-		Composite leaderComp = new Composite(groupA, SWT.NONE);
+		Composite leaderComp = new Composite(gA, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
@@ -169,25 +186,34 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		if (existingLeg.getPatrol().hasPilot()){
 			groupAPilot = createLeaderPilot(leaderComp, "Group A Pilot:", employeeListA);
 		}
-		
+		sc.setMinSize(gA.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		// -------- Group B -------------------
 		Group groupB = createGroup(right, "Group B");
-		cmbTransportTypeB = createTransportTypeComboViewer(groupB);
+		sc = new ScrolledComposite(groupB, SWT.H_SCROLL | SWT.V_SCROLL);
+		sc.setExpandHorizontal(true);
+		sc.setExpandVertical(true);
+		
+		Composite gB = new Composite(sc, SWT.NONE);
+		sc.setContent(gB);
+		gB.setLayout(new GridLayout(2, false));
+				
+		cmbTransportTypeB = createTransportTypeComboViewer(gB);
 	
-		lbl = new Label(groupB, SWT.NONE);
+		lbl = new Label(gB, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		lbl.setText("Members:");
 		
-		createEmployeeButtonPanelAndTable(groupB, employeeListB, emplList);
+		createEmployeeButtonPanelAndTable(gB, employeeListB, emplList);
 		
-		leaderComp = new Composite(groupB, SWT.NONE);
+		leaderComp = new Composite(gB, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		groupBLeader = createLeaderPilot(leaderComp, "Group B Leader:", employeeListB);
 		if (existingLeg.getPatrol().hasPilot()){
 			groupBPilot = createLeaderPilot(leaderComp, "Group B Pilot:", employeeListB);
 		}
+		sc.setMinSize(gB.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		return parent;
 	}
@@ -294,7 +320,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	private Group createGroup(Composite parent, String name){
 		Group group = new Group(parent, SWT.NONE);	
 		group.setText(name);
-		group.setLayout(new GridLayout(2, false));
+		group.setLayout(new FillLayout());
 		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return group;
 	}
@@ -305,7 +331,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	private void createStartTimeComposite(Composite parent) {
 		
 		Composite timecomp = new Composite(parent, SWT.NONE);
-		timecomp.setLayout(new GridLayout(2, false));
+		GridLayout layout = new GridLayout(2, false);
+		layout.marginBottom = layout.marginTop = layout.verticalSpacing = 0;
+		timecomp.setLayout(layout);
 		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(timecomp, SWT.NONE);
@@ -354,7 +382,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	private void createEndTimeComposite(Composite parent) {
 		
 		Composite timecomp = new Composite(parent, SWT.NONE);
-		timecomp.setLayout(new GridLayout(2, false));
+		GridLayout layout = new GridLayout(2, false);
+		layout.marginBottom = layout.marginTop = layout.verticalSpacing = 0;
+		timecomp.setLayout(layout);
 		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(timecomp, SWT.NONE);
