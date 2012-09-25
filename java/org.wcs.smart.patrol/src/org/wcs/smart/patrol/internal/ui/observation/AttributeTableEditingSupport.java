@@ -204,7 +204,7 @@ public class AttributeTableEditingSupport extends EditingSupport {
 				att.setNumberValue(0.0);
 			}
 		} else if (type == AttributeType.LIST) {
-			if (((AttributeListItem) value).getUuid() == null) {
+			if (value == null || ((AttributeListItem) value).getUuid() == null) {
 				att.setAttributeListItem(null);
 			} else {
 				att.setAttributeListItem((AttributeListItem) value);
