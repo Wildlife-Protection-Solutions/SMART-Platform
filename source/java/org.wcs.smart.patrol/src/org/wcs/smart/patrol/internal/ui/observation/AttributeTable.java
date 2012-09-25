@@ -34,8 +34,10 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 
@@ -101,17 +103,25 @@ public class AttributeTable {
 			column.getColumn().setMoveable(false);
 			column.getColumn().setWidth(30);
 		}
-	
-		for (int i = 0; i < attributes.size(); i ++){
-			column = new TableViewerColumn(attributeTable,SWT.NONE);
-			column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
-			column.getColumn().setText(attributes.get(i).getName());
-			column.getColumn().setResizable(true);
-			column.getColumn().setMoveable(false);
-			column.getColumn().setWidth(100);
-			if (canEdit){
-				column.setEditingSupport(createEditor(column.getViewer(), attributeTable, attributes.get(i), listener));
+		GC gc = new GC(Display.getDefault().getActiveShell());
+		try{
+			gc.setFont(attributeTable.getTable().getFont());
+			for (int i = 0; i < attributes.size(); i ++){
+				column = new TableViewerColumn(attributeTable,SWT.NONE);
+				column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
+				column.getColumn().setText(attributes.get(i).getName());
+				column.getColumn().setResizable(true);
+				column.getColumn().setMoveable(false);
+				
+				int width = gc.textExtent(attributes.get(i).getName() ).x + 20;
+				if (width < 60) width = 60;
+				column.getColumn().setWidth( width );
+				if (canEdit){
+					column.setEditingSupport(createEditor(column.getViewer(), attributeTable, attributes.get(i), listener));
+				}
 			}
+		}finally{
+			gc.dispose();
 		}
 		return attributeTable;
 	}
