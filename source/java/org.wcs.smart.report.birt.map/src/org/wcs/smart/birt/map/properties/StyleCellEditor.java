@@ -56,6 +56,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -105,7 +106,7 @@ public class StyleCellEditor extends DialogCellEditor {
 						try {
 							q = QueryHibernateManager.findQuery(session,
 									SmartUtils.decodeHex(ds.getQueryText().split(":")[1]),
-									null);
+									QueryType.valueOf(ds.getQueryText().split(":")[0]));
 						} finally {
 							session.getTransaction().commit();
 							session.close();

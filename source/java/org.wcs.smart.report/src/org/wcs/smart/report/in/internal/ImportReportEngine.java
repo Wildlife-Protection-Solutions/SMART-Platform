@@ -607,7 +607,7 @@ public class ImportReportEngine {
 		final List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
 
 		//search by uuid
-		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.findQuery(session, SmartUtils.decodeHex(queryUuid), null);
+		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.findQuery(session, SmartUtils.decodeHex(queryUuid), importedQuery.getType());
 		if (uuidQuery != null){
 			queries.add(uuidQuery);
 		}else{
