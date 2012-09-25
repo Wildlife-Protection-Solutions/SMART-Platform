@@ -116,6 +116,13 @@ public class AreaFilter implements IFilter {
 	}
 	
 	/**
+	 * 
+	 * @return the geometry type associated with the filter
+	 */
+	public AreaFilterGeometryType getGeometryType(){
+		return this.geomType;
+	}
+	/**
 	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
