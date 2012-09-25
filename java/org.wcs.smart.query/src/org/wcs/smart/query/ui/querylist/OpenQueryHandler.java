@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
+import java.util.Iterator;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -52,9 +54,11 @@ public class OpenQueryHandler extends AbstractHandler {
 		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
 			return null;
 		}
-		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
-		if (o instanceof QueryInput){
-			openQuery((QueryInput) o);
+		for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
+			Object o = (Object) iterator.next();
+			if (o instanceof QueryInput){
+				openQuery((QueryInput) o);
+			}	
 		}
 		return null;
 		

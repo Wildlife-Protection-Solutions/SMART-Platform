@@ -93,6 +93,20 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 				refreshQuery();
 			}
 		}
+		
+		@Override
+		public void queryNameUpdated(Query query) {
+			if (query != null && query.equals(QueryResultsEditor.this.query)){
+				boolean lIsDirty = isDirty;
+				QueryResultsEditor.this.query.setName(query.getName());
+				((QueryInput)getEditorInput()).setQueryName(query.getName());
+				updatePartName();
+				page1.updateQueryName();
+				
+				isDirty = lIsDirty;
+				firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
+			}
+		}
 	};
 	
 	

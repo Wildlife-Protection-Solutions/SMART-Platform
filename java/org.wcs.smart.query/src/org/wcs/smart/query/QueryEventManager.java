@@ -60,25 +60,41 @@ public class QueryEventManager {
 	/**
 	 * Fires the query changed method of all
 	 * query listeners
-	 * 
+	 * <p>Must be called from the 
+	 * display thread</p>
 	 * @param query the query that was modified
 	 */
 	public void fireQueryChangedListeners(Query query){
 		for (IQueryListener listener: listeners){
 			listener.queryChanged(query);
-			
+		}
+	}
+	
+	
+	/**
+	 * Fires the queryNameUpdated method of all
+	 * query listeners
+	 * <p>Must be called from the 
+	 * display thread</p>
+	 * @param query the query that was modified
+	 */
+	public void fireQueryNameChangedListeners(Query query){
+		for (IQueryListener listener: listeners){
+			listener.queryNameUpdated(query);
 		}
 	}
 	
 	/**
 	 * Fires all query run event on all query listeners.
 	 * 
+	 * <p>Must be called from the 
+	 * display thread</p>
+	 * 
 	 * @param query the query that is to be run 
 	 */
 	public void fireQueryRunListeners(Query query){
 		for (IQueryListener listener: listeners){
 			listener.queryRun(query);
-			
 		}
 	}
 	
@@ -90,7 +106,6 @@ public class QueryEventManager {
 	public void fireFolderChangedListeners(int eventType, Object folder){
 		for (IQueryFolderListener listener: folderListeners){
 			listener.folderChanged(eventType, folder);
-			
 		}
 	}
 	

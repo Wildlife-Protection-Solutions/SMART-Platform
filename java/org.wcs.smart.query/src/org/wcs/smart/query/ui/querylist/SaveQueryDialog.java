@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;

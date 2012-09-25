@@ -163,4 +163,11 @@ public class QueryResultsTablePage  extends EditorPart  {
 	public void setFocus() {
 		content.setFocus();
 	}
+	
+	/**
+	 * update name field
+	 */
+	public void updateQueryName(){
+		content.setQueryName(parentEditor.getQueryInternal());
+	}
 }
