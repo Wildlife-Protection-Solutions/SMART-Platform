@@ -572,7 +572,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 					sql.append(" on ");
 					sql.append( tableName +".ca_uuid = " + tablePrefix.get(Patrol.class) + ".ca_uuid and ");
 					sql.append( tableName +".area_type = '" + ff.getType().name() + "' and ");
-					sql.append(tableName + ".keyid = '" + ff.getKey() + "' ");				}
+					sql.append(tableName + ".keyid = '" + ff.getKey() + "' ");
+					if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK){
+						//add join to track geom
+						sql.append(" left join " + tableNames.get(Track.class)+ " " + tablePrefix.get(Track.class) ); 
+						sql.append(" ON " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = " + tablePrefix.get(PatrolLegDay.class) + ".uuid" );
+					}
+				}
 			}
 			if (kid.getChildren() != null){
 				kidsToProcess.addAll(kid.getChildren());
