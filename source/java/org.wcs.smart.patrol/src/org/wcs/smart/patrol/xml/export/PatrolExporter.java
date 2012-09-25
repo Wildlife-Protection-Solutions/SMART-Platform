@@ -53,7 +53,7 @@ public class PatrolExporter {
 
 	
 	/**
-	 * Writes a patrol to a file in xml file.
+	 * Writes a simple patrol to the provided file.
 	 * 
 	 * <p>Does not check to determine if
 	 * the file already exists.  That check must be done outside this

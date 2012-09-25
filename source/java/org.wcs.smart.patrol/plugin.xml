@@ -37,7 +37,7 @@
             <command
                   commandId="org.wcs.smart.patrol.importPatrol"
                   icon="images/icons/etool16/patrol_import.png"
-                  label="Import Patrol"
+                  label="Import Patrols ..."
                   mnemonic="I"
                   style="push">
                <visibleWhen
@@ -61,7 +61,7 @@
             <command
                   commandId="org.wcs.smart.patrol.exportPatrol"
                   icon="images/icons/etool16/patrol_export.png"
-                  label="Export Patrol"
+                  label="Export Patrols ..."
                   mnemonic="x"
                   style="push">
             </command>
@@ -360,14 +360,22 @@
       <handler
             class="org.wcs.smart.patrol.xml.export.ExportPatrolHandler"
             commandId="org.wcs.smart.patrol.exportPatrol">
-         <enabledWhen>
-            <with
-                  variable="activeEditorId">
-               <equals
-                     value="org.wcs.smart.patrol.ui.PatrolEditor">
-               </equals>
-            </with>
-         </enabledWhen>
+         <activeWhen>
+            <or>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="dataentry">
+               </test>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="manager">
+               </test>
+            </or>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.xml.in.ImportPatrolHandler"

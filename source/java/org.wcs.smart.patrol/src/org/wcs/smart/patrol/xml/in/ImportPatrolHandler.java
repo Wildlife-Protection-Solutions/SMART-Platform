@@ -24,7 +24,9 @@ package org.wcs.smart.patrol.xml.in;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -68,23 +70,25 @@ public class ImportPatrolHandler extends AbstractHandler {
 			return null;
 		}
 
-		final File file = new File(dialog.getFileName());
-		if (!file.exists()) {
-			MessageDialog.openError(Display.getCurrent().getActiveShell(),
-					"Error", "The location " + file.toString()
-							+ " cannot be found. ");
-			return null;
-		}
+		List<String> files = dialog.getFileNames();
 		
-		if (file.isFile()) {
+		if (files.size() == 1){
+			File file = new File(files.get(0));
+			if (!file.exists()) {
+				MessageDialog.openError(Display.getCurrent().getActiveShell(),
+						"Error", "The location " + file.toString()
+								+ " cannot be found. ");
+				return null;
+			}			
 			importFile(activeWorkbench, file);
-		}else if (file.isDirectory()){
-			importDirectory(activeWorkbench, file);
+		
+		}else if (files.size() > 0){
+			importFiles(activeWorkbench, files);
 		}
 		return null;
 	}
 
-	public void importDirectory(final IWorkbench activeWorkbench, final File directory){
+	public void importFiles(final IWorkbench activeWorkbench, final List<String> files){
 		final Display display = Display.getCurrent();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
 		
@@ -93,36 +97,35 @@ public class ImportPatrolHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					File[] files = directory.listFiles();
-					
-					Arrays.sort(files, new Comparator<File>() {
+					Collections.sort(files, new Comparator<String>() {
 
 						@Override
-						public int compare(File o1, File o2) {
-							if (o1.getName().length() < o2.getName().length()){
+						public int compare(String o1, String o2) {
+							if (o1.length() < o2.length()){
 								return -1;
-							}else if (o1.getName().length() > o2.getName().length()){
+							}else if (o1.length() > o2.length()){
 								return 1;
 							}
-							return o1.getName().compareTo(o2.getName());
+							return o1.compareTo(o2);
 						}
 					});
 					
 					
-					monitor.beginTask("Loading Patrols", files.length);
+					monitor.beginTask("Loading Patrols", files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
-					for (int i = 0; i < files.length; i ++){
-						monitor.subTask("Processing " + files[i].toString());
+					for (int i = 0; i < files.size(); i ++){
+						File file = new File(files.get(i));
+						monitor.subTask("Processing " + file.toString());
 						monitor.worked(1);
-						if (files[i].isDirectory()) continue;
+						if (file.isDirectory()) continue;
 						try{
-							Patrol p = PatrolImporter.importPatrol(files[i], nullPm);
+							Patrol p = PatrolImporter.importPatrol(file, nullPm);
 							if (p != null) {
 								PatrolEventManager.getInstance().patrolAdded(p);
 							}
 						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog("File " + files[i].toString() + " not imported: " + ex.getMessage(), ex);
+							SmartPatrolPlugIn.displayLog("File " + file.toString() + " not imported: " + ex.getMessage(), ex);
 						}
 						if (monitor.isCanceled()){
 							display.syncExec(new Runnable() {
