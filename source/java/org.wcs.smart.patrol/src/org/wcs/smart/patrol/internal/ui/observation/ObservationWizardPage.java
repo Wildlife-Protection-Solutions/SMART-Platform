@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.internal.ui.observation;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -107,6 +109,16 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 					setPageComplete(true);
 				}else{
 					setPageComplete(false);
+				}
+				
+			}
+		});
+		dmTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
+				if (o instanceof Category){
+					ObservationWizardPage.this.getWizard().getContainer().showPage(getNextPage());
 				}
 				
 			}

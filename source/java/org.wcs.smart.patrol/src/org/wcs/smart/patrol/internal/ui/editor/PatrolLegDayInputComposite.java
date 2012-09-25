@@ -1017,6 +1017,7 @@ public class PatrolLegDayInputComposite {
 	
 	private void addWaypoint() {
 		double y = 0, x = 0;
+		int id = -1;
 		Time last = null;
 		for (Iterator<Waypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
 			Waypoint e = (Waypoint) iterator.next();
@@ -1025,6 +1026,7 @@ public class PatrolLegDayInputComposite {
 			if(last == null || t.after(last) || t.equals(last)  ){
 				y = (Double) getWaypointValue(e, OtColumn.NORTH);
 				x = (Double) getWaypointValue(e, OtColumn.EAST);
+				id = (Integer) getWaypointValue(e, OtColumn.ID);
 				last = t;
 			}
 		}
@@ -1032,7 +1034,7 @@ public class PatrolLegDayInputComposite {
 		if(x == 0 && y == 0){
 			add = new AddWaypointDialog(Display.getCurrent().getActiveShell());
 		}else{
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x);
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x, id+1);
 		}
 		if (add.open() == Window.OK){
 			Waypoint wp = add.getWaypoint();
