@@ -88,9 +88,13 @@ public class GriddedTableContent {
 	 * @param query the grid query to initialize data with
 	 */
 	public void initValues(GriddedQuery query) {
-		compQueryName.setText(query.getName(), query.getId());
+		setQueryName(query);
 		resultsTable.initQuery(query);
 		resultsTable.updateVisible(query.getQueryColumns());
+	}
+	
+	public void setQueryName(GriddedQuery query){
+		compQueryName.setText(query.getName(), query.getId());
 	}
 
 	/**

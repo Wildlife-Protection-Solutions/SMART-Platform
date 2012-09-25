@@ -50,11 +50,9 @@ public abstract class SimpleQueryExporter {
 	 * 
 	 * @return <code>true</code> if export successful, <code>false</code> otherwise
 	 */
-	public boolean export(IProgressMonitor monitor) {
+	public boolean export(IProgressMonitor monitor) throws Exception{
 		if (data == null) {
-			QueryPlugIn.displayLog(
-					"Query needs to be run before it can be exported.", null);
-			return false;
+			throw new Exception("Query needs to be run before it can be exported.");
 		}
 		
 		monitor.beginTask("Export File", data.size() + 2);
@@ -79,8 +77,7 @@ public abstract class SimpleQueryExporter {
 			monitor.done();
 			return true;
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Export failed: " + ex.getMessage(), ex);
-			return false;
+			throw new Exception("Export failed: " + ex.getMessage(), ex);
 		}
 	}
 	

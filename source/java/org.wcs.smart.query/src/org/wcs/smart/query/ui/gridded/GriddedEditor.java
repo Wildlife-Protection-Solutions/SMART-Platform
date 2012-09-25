@@ -97,6 +97,20 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 				refreshQuery();
 			}
 		}
+		
+		@Override
+		public void queryNameUpdated(Query query) {
+			if (query != null && query.equals(GriddedEditor.this.query)){
+				boolean lIsDirty = isDirty;
+				GriddedEditor.this.query.setName(query.getName());
+				((QueryInput)getEditorInput()).setQueryName(query.getName());
+				updatePartName();
+				resultPage.updateQueryName();
+				
+				isDirty = lIsDirty;
+				firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
+			}
+		}
 	};
 	
 	

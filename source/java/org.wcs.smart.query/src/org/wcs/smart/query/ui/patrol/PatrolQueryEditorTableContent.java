@@ -88,11 +88,18 @@ public class PatrolQueryEditorTableContent {
 	 * @param query the patrol query to initialize data with
 	 */
 	public void initValues(PatrolQuery query) {
-		compQueryName.setText(query.getName(), query.getId());
+		updateName(query);
 		resultsTable.initQuery(query);
 		resultsTable.updateVisible(query.getQueryColumns());
 	}
 
+	/**
+	 * Updates the patrol query name
+	 * @param query
+	 */
+	public void updateName(PatrolQuery query){
+		compQueryName.setText(query.getName(), query.getId());
+	}
 	/**
 	 * @return the date filter
 	 */

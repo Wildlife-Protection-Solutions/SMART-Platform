@@ -48,6 +48,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -94,6 +95,20 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		public void queryRun(Query query) {
 			if (query != null && query.equals(SummaryEditor.this.query)) {
 				refreshQuery();
+			}
+		}
+		
+		@Override
+		public void queryNameUpdated(Query query) {
+			if (query != null && query.equals(SummaryEditor.this.query)){
+				boolean lIsDirty = isDirty;
+				SummaryEditor.this.query.setName(query.getName());
+				((QueryInput)getEditorInput()).setQueryName(query.getName());
+				updatePartName();
+				compQueryName.setText(query.getName(), query.getId());
+				
+				isDirty = lIsDirty;
+				firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 			}
 		}
 	};

@@ -93,6 +93,22 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				refreshQuery();
 			}
 		}
+		
+		@Override
+		public void queryNameUpdated(Query query) {
+			if (query != null && query.equals(PatrolQueryResultsEditor.this.query)){
+				boolean lIsDirty = isDirty;
+				PatrolQueryResultsEditor.this.query.setName(query.getName());
+				((QueryInput)getEditorInput()).setQueryName(query.getName());
+				updatePartName();
+				page1.updateQueryName();
+				
+				isDirty = lIsDirty;
+				firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
+			}
+		}
+
+		
 	};
 	
 	

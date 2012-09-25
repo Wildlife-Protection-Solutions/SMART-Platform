@@ -47,4 +47,11 @@ public interface IQueryListener {
 	 */
 	public void queryRun(Query query);
 	
+	
+	/**
+	 * Fired when the query name has been modified.
+	 * @param query with newName set
+	 */
+	public void queryNameUpdated(Query query);
+	
 }

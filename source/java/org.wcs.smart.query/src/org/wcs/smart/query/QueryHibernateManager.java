@@ -42,12 +42,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.SummaryQuery;
-import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -630,21 +626,9 @@ public class QueryHibernateManager {
 	 * @return
 	 */
 	public static org.wcs.smart.query.model.Query findQuery(Session session, 
-			byte[] queryUuid, QueryType queryType) {
-		org.wcs.smart.query.model.Query smartQuery = null;
-		
-		QueryType[] types = new QueryType[]{QueryType.OBSERVATION, QueryType.PATROL, QueryType.SUMMARY, QueryType.GRIDDED};
-		Class<?>[] queryClasses = new Class[]{ObservationQuery.class, PatrolQuery.class, SummaryQuery.class, GriddedQuery.class};
-		for (int i = 0; i < types.length; i ++){
-			if (queryType == null || queryType.equals(types[i])){
-				smartQuery = (org.wcs.smart.query.model.Query) session.get(queryClasses[i], queryUuid);
-				if (smartQuery != null){
-					return smartQuery;
-				}
-			}
-		}
-		
-		return null;
+			byte[] queryUuid, QueryType queryType) {		
+		return (org.wcs.smart.query.model.Query) session.get(queryType.getHibernateClass(), queryUuid);
+
 	}
 	
 	
@@ -659,25 +643,19 @@ public class QueryHibernateManager {
 	 * @param queryType the type of query or null if query type not known
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<org.wcs.smart.query.model.Query> findQuery(Session session, 
 			String queryName, QueryType queryType) {
-		org.wcs.smart.query.model.Query smartQuery = null;
 		
-		QueryType[] types = new QueryType[]{QueryType.OBSERVATION, QueryType.PATROL, QueryType.SUMMARY, QueryType.GRIDDED};
-		Class<?>[] queryClasses = new Class[]{ObservationQuery.class, PatrolQuery.class, SummaryQuery.class, GriddedQuery.class};
+		
 		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
-		for (int i = 0; i < types.length; i ++){
-			if (queryType == null || queryType.equals(types[i])){
+		String hsql = "FROM " + queryType.getHibernateClass().getSimpleName() + " WHERE conservationArea = :ca and name=:name and (isShared = 'true' or (isShared = 'false' and owner = :employee))";
+		Query query = session.createQuery(hsql);
+		query.setParameter("ca", SmartDB.getCurrentConservationArea());
+		query.setParameter("employee", SmartDB.getCurrentEmployee());
+		query.setParameter("name", queryName);
+		queries.addAll(query.list());
 				
-				String hsql = "FROM " + queryClasses[i].getSimpleName() + " WHERE conservationArea = :ca and name=:name and (isShared = 'true' or (isShared = 'false' and owner = :employee))";
-				Query query = session.createQuery(hsql);
-				query.setParameter("ca", SmartDB.getCurrentConservationArea());
-				query.setParameter("employee", SmartDB.getCurrentEmployee());
-				query.setParameter("name", queryName);
-
-				queries.addAll(query.list());
-			}
-		}		
 		return queries;
 	}
 }

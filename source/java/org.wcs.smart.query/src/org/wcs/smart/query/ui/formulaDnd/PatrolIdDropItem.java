@@ -71,12 +71,18 @@ public class PatrolIdDropItem  extends DropItem{
 	private Job loadPIdJob = new Job("Loading Patrol Ids"){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			if (value.isDisposed()){
+				return Status.OK_STATUS;
+			}
 			Session s = HibernateManager.openSession();
 			try{
 				final List<String> data = QueryHibernateManager.getPatrolIds(s);
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
+						if (value.isDisposed()){
+							return ;
+						}
 						for (String id : data){
 							value.add(id);
 						}		

@@ -88,11 +88,14 @@ public class QueryEditorTableContent {
 	 * @param query the observation query to initialize data with
 	 */
 	public void initValues(ObservationQuery query) {
-		compQueryName.setText(query.getName(), query.getId());
+		setQueryName(query);
 		resultsTable.initQuery(query);
 		resultsTable.updateVisible(query.getQueryColumns());
 	}
 
+	public void setQueryName(ObservationQuery query){
+		compQueryName.setText(query.getName(), query.getId());
+	}
 	/**
 	 * @return the date filter
 	 */
@@ -315,4 +318,6 @@ public class QueryEditorTableContent {
 	public void setFocus() {
 		runQueryLink.setFocus();
 	}
+	
+	
 }

@@ -42,7 +42,6 @@ import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.filter.DateFilter.DATE_FIELD_OP;
-
 import org.wcs.smart.util.SmartUtils;
 
 /**

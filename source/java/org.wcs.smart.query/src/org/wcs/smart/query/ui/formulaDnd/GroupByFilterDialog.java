@@ -44,6 +44,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.model.ListItem;
 
@@ -131,8 +135,9 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 		main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(1, false);
 		main.setLayout(gl);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		viewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
+		viewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.MULTI);
 		viewer.setLabelProvider(new LabelProvider(){
 			/**
 			 * The <code>LabelProvider</code> implementation of this
@@ -150,7 +155,7 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 		viewer.setInput(new String[]{"Loading...."});
 		viewer.getControl().setEnabled(false);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)viewer.getControl().getLayoutData()).heightHint = 250;
+		((GridData)viewer.getControl().getLayoutData()).heightHint = 300;
 		viewer.getControl().addKeyListener(new KeyListener() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -167,6 +172,31 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 					}
 					e.doit = false;
 				}
+			}
+		});
+		
+		Composite links = new Composite(main, SWT.NONE);
+		links.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		gl = new GridLayout(3,false);
+		gl.marginBottom=gl.marginTop=gl.marginHeight=gl.marginLeft=gl.marginRight=gl.marginWidth = 0;
+		links.setLayout(gl);
+		
+		Link lnkSelectAll = new Link(links,SWT.NONE);
+		lnkSelectAll.setText("<a>Select All</a>");
+		lnkSelectAll.addListener (SWT.Selection, new Listener () {
+			public void handleEvent(Event event) {
+				viewer.setAllChecked(true);
+			}
+		});
+		Label lbl = new Label(links, SWT.SEPARATOR | SWT.VERTICAL);
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		gd.heightHint = lnkSelectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		lbl.setLayoutData(gd);
+		Link lnkDeSelectAll = new Link(links,SWT.NONE);
+		lnkDeSelectAll.setText("<a>De-Select All</a>");
+		lnkDeSelectAll.addListener (SWT.Selection, new Listener () {
+			public void handleEvent(Event event) {
+				viewer.setAllChecked(false);
 			}
 		});
 		

@@ -164,5 +164,9 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	public PatrolResultsTable getQueryResultsTable() {
 		return content.getQueryResultsTable();
 	}
+	
+	public void updateQueryName(){
+		content.updateName(parentEditor.getQueryInternal());
+	}
 }
 

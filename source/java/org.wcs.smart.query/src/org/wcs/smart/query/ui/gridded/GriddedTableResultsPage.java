@@ -139,5 +139,10 @@ public class GriddedTableResultsPage  extends EditorPart  {
 	
 	@Override
 	public void setFocus() {
+		content.setFocus();
+	}
+	
+	public void updateQueryName(){
+		content.setQueryName(parentEditor.getQueryInternal());
 	}
 }

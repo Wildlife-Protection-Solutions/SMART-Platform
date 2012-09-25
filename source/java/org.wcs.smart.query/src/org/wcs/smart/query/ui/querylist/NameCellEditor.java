@@ -106,7 +106,7 @@ public class NameCellEditor implements ICellModifier {
 					thisquery.setName(newName);
 					query.setQueryName(newName);
 					session.getTransaction().commit();
-//					QueryEventManager.getInstance().fireQueryChangedListeners(thisquery);
+					fireChangeListener(thisquery);
 					updateViewer(query);
 				} catch (Exception ex) {
 					if (session.getTransaction().isActive()){
@@ -162,6 +162,15 @@ public class NameCellEditor implements ICellModifier {
 			}
 		};
 		j.schedule();
+	}
+	
+	private void fireChangeListener(final Query query){
+		viewer.getTree().getDisplay().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				QueryEventManager.getInstance().fireQueryNameChangedListeners(query);
+			}});
+		
 	}
 	
 	private void updateViewer(final Object obj){
