@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.xml.export;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -33,78 +34,124 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Handler for exporting patrol data.
  * 
- * <p>Displays a dialog for users to select
- * export location and other parameters, then exports
- * the patrol data.</p>
+ * <p>
+ * Displays a dialog for users to select export location and other parameters,
+ * then exports the patrol data.
+ * </p>
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class ExportPatrolHandler extends AbstractHandler  {
-
+public class ExportPatrolHandler extends AbstractHandler {
 
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-		
-		if (editor instanceof PatrolEditor){
-			PatrolExportDialog dialog = new PatrolExportDialog(editor.getSite().getShell(), ((PatrolEditor) editor).getPatrol());
-			if (dialog.open() != IDialogConstants.OK_ID){
+
+		Shell shell = HandlerUtil.getActiveShell(event);
+		MultiPatrolExportDialog dialog = new MultiPatrolExportDialog(shell);
+		if (dialog.open() != IDialogConstants.OK_ID) {
+			return null;
+		}
+		final List<byte[]> patrols = dialog.getPatrolUuids();
+		if (patrols.size() == 0) {
+			MessageDialog.openInformation(shell, "Export", "Nothing to export.");
+			return null;
+		}
+		final boolean includeAtt = dialog.getIncludeAttachments();
+		final File dir = new File(dialog.getDirectory());
+
+		if (!dir.exists()) {
+			if (!MessageDialog.openQuestion(shell,"Export","The directory '" + dir.getAbsolutePath() + "' does not exist and will be created.  Do you want to continue?")) {
 				return null;
 			}
-			
-			final boolean includeAtt = dialog.getIncludeAttachments();
-			final File file = PatrolExporter.getOutputFile(dialog.getFileName(), includeAtt);
-			
-			if (file.exists()){
-				if (!MessageDialog.openConfirm(editor.getSite().getShell(), "Overwrite?", "The file " + file.toString() + " exists.  Are you sure you want to overwrite?")){
-					return null;
-				}
-			}
-			
-			ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
-			try {
-				pmd.run(true, false, new IRunnableWithProgress() {				
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException,
-							InterruptedException {
-						try {
-							final File f = PatrolExporter.exportPatrol(((PatrolEditor) editor).getPatrol(), file, includeAtt, monitor);
-							Display.getDefault().syncExec(new Runnable() {
-								@Override
-								public void run() {
-									MessageDialog.openInformation(editor.getSite().getShell(), "Export", "Patrol data exported successfully to " + f.getAbsolutePath());
-								}
-							});
-							
-						} catch (final Exception e) {
-							Display.getDefault().syncExec(new Runnable() {
-								@Override
-								public void run() {
-									SmartPatrolPlugIn.displayLog("Could not export the patrol. " + e.getMessage(), e);
-								}
-							});
-							
-						}						
-					}
-				});
-			} catch (Exception e) {
-				SmartPatrolPlugIn.displayLog("Could not export the patrol. " + e.getMessage(), e);
-			}			
 		}
+
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Exporting patrols", patrols.size());
+					int exportCnt = 0;
+					for (int i = 0; i < patrols.size(); i++) {
+
+						byte[] puuid = patrols.get(i);
+						try {
+							monitor.subTask("Loading Patrol: "+ SmartUtils.encodeHex(puuid));
+							Patrol p = null;
+							Session s = HibernateManager.openSession();
+							s.beginTransaction();
+							try {
+								p = (Patrol) s.load(Patrol.class, puuid);
+								p.getId();
+							} catch (Exception ex) {
+								displayLogError("Patrol could not be found.  Skipping id '"+ SmartUtils.encodeHex(puuid) + "'", ex);
+								continue;
+							} finally {
+								s.getTransaction().commit();
+								s.close();
+							}
+
+							monitor.subTask("Exporting Patrol: " + SmartUtils.encodeHex(puuid));
+
+							File outFile = PatrolExporter.getOutputFile(
+									new File(dir, p.getId() + ".xml").toString(),
+									includeAtt);
+							PatrolExporter.exportPatrol(p, outFile, includeAtt,
+									monitor);
+							exportCnt++;
+						} catch (Exception ex) {
+							displayLogError("Error exporting patrol.  Skipping id '"+ SmartUtils.encodeHex(puuid) + "'.\n\n" + ex.getMessage(), ex);
+						}
+					}
+
+					displayInfo("Export Complete.", exportCnt
+							+ " patrols exported to '" + dir.toString() + "'");
+
+				}
+
+			});
+		} catch (Exception e) {
+			SmartPatrolPlugIn.displayLog(
+					"Could not export the patrols. " + e.getMessage(), e);
+		}
+
 		return null;
+
 	}
 
+	private void displayInfo(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(Display.getDefault()
+						.getActiveShell(), title, message);
+			}
+		});
+	}
 
+	private void displayLogError(final String error, final Exception ex) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				SmartPatrolPlugIn.displayLog(error, ex);
+			}
+		});
+
+	}
 }

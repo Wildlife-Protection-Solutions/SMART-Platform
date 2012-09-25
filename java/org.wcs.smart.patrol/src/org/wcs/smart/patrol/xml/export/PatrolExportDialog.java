@@ -188,6 +188,7 @@ public class PatrolExportDialog extends TitleAreaDialog {
 		lbl.setText("*If attachments are included a zip file will be generated that includes the patrol and attachments.  Otherwise only xml file is exported.");
 
 		setMessage("Export patrol '" + patrol.getId() + "' to xml file");
+		getShell().setText("Export Patrol");
 		return composite;
 
 	}
