@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.map.internal;
 
+import net.refractions.udig.tools.internal.ZoomIn;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -29,22 +31,19 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.ui.map.MapView;
 
 /**
- * Zoom handler
- * @author egouge
- * @since 1.0.0
+ * Zoom In Handler
+ * @author Emily
+ *
  */
-public class ZoomHandler extends AbstractHandler {
-
-	public static String ZoomToolId = "net.refractions.udig.tools.Zoom";
-	
+public class ZoomInHandler extends AbstractHandler{
+		
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
-			view.setModalTool(ZoomToolId);
+			view.runActionTool(new ZoomIn());
 		} 
 		return null;
 	}
-
 }

@@ -53,7 +53,10 @@ public class MapToolComposite {
 			SetBasemapTool.ID, 
 			"org.wcs.smart.udig.ZoomExtents", 
 			"net.refractions.udig.tools.Pan",
-			"net.refractions.udig.tools.Zoom", InfoTool.ID};
+			"net.refractions.udig.tools.Zoom", 
+			"net.refractions.udig.tool.default.ZoomIn",
+			"net.refractions.udig.tool.default.ZoomOut",
+			InfoTool.ID};
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();
 	

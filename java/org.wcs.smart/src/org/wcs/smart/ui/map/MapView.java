@@ -28,11 +28,13 @@ import net.refractions.udig.project.ui.internal.tool.ToolContext;
 import net.refractions.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
+import net.refractions.udig.project.ui.tool.ActionTool;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.project.ui.tool.ModalTool;
 import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
+import net.refractions.udig.tools.internal.ZoomIn;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -49,6 +51,7 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.map.internal.ZoomHandler;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -207,8 +210,14 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 			}
 		});        
         getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
+        setModalTool(ZoomHandler.ZoomToolId);
     }
 
+	public void runActionTool(ActionTool tool) {
+		tool.setContext(getToolContext());
+		tool.run();
+	}
+    
     public void setModalTool( String toolId ) {
     	   if (activeTool != null) {
                // ask the current tool to stop listening etc...

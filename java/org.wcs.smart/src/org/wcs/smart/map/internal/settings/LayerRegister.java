@@ -33,7 +33,7 @@ import net.refractions.udig.ui.palette.ColourScheme;
  * @author Mauricio Pazos
  *
  */
-final class LayerRegister {
+public final class LayerRegister {
 
 	
 	private final String name;
@@ -46,7 +46,7 @@ final class LayerRegister {
 	private final double maxScaleDenominator;
 	private final double minScaleDenominator;
 	private final String envelope;
-	
+	private final boolean isVisible;
 	
 	public LayerRegister(
 			final String name, 
@@ -58,7 +58,8 @@ final class LayerRegister {
 			final Double maxScaleDenominator,
 			final Double minScaleDenominator,
 			final String envelope,
-			final List<StyleRegister> styleList) {
+			final List<StyleRegister> styleList,
+			final boolean isVisible) {
 		
 		this.URI = uri;
 		this.name = name;
@@ -71,6 +72,7 @@ final class LayerRegister {
 		this.envelope = envelope;
 		
 		this.styleRegisterList = styleList;
+		this.isVisible = isVisible;
 	}
 
 	@Override
@@ -80,7 +82,7 @@ final class LayerRegister {
 				+ ", defaultColor=" + defaultColor + ", styleRegisterList="
 				+ styleRegisterList + ", maxScaleDenominator="
 				+ maxScaleDenominator + ", minScaleDenominator="
-				+ minScaleDenominator + ", envelope=" + (envelope ==null ? "" : envelope) + "]";
+				+ minScaleDenominator + ", envelope=" + (envelope ==null ? "" : envelope) + ", visible:" + (isVisible ? "true" : "false") + "]";
 	}
 
 	public String getName() {
@@ -114,6 +116,9 @@ final class LayerRegister {
 		return styleRegisterList;
 	}
 
+	public boolean getVisible(){
+		return this.isVisible;
+	}
 
 	@Override
 	public int hashCode() {
