@@ -46,6 +46,7 @@ import org.wcs.smart.query.export.DefinitionQueryExporter;
 import org.wcs.smart.query.export.IQueryExporter;
 import org.wcs.smart.query.export.QueryExportEngine;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IReportExporter;
 import org.wcs.smart.report.manger.ReportManager;
@@ -141,11 +142,12 @@ public class ReportDefintionExporter implements IReportExporter {
 			if (dataset instanceof OdaDataSetHandle){
 				if (((OdaDataSetHandle)dataset).getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
 					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1];
+					QueryType qType = QueryType.valueOf(((OdaDataSetHandle) dataset).getQueryText().split(":")[0]);
 					byte[] uuid = SmartUtils.decodeHex(queryUuid);Session hsession = HibernateManager.openSession();
 					Query smartQuery = null;
 					try{
 						hsession.beginTransaction();
-						smartQuery = QueryHibernateManager.findQuery(hsession, uuid, null);
+						smartQuery = QueryHibernateManager.findQuery(hsession, uuid, qType);
 					}finally{
 						hsession.getTransaction().commit();
 						hsession.close();

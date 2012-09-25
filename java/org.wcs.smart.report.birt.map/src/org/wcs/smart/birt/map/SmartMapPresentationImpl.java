@@ -62,6 +62,7 @@ import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
@@ -142,8 +143,10 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 
 				if (mapqueries != null){
 					for (int i = 0; i < mapqueries.size(); i++) {
-						Query q = QueryHibernateManager.findQuery(session,
-								SmartUtils.decodeHex(mapqueries.get(i).split(":")[1]), null);
+						byte[] quuid = SmartUtils.decodeHex(mapqueries.get(i).split(":")[1]);
+						QueryType qtype = QueryType.valueOf(mapqueries.get(i).split(":")[0]);
+						
+						Query q = QueryHibernateManager.findQuery(session,quuid, qtype);
 						GeoSmart layer = new GeoSmart();
 						layer.name = mapnames.get(i);
 						layer.dbQuery = q;
