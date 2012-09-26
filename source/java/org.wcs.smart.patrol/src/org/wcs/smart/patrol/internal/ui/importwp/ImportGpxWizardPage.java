@@ -23,7 +23,15 @@ package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -35,7 +43,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 /**
  * Wizard page for selecting GPX file to import and
@@ -53,8 +60,13 @@ public class ImportGpxWizardPage extends WizardPage {
 	private Button opSelect;
 	private Button opDate;
 	private Button opAll;
+	
+	private Button btnRemove;
+	private Button btnAdd;
 
-	private Text txtFile;
+	private ListViewer lstFiles;
+	private WritableList files = new WritableList();
+	
 	private boolean importAll;
 	
 	private ImportWpSelectWizardPage nextPage = null;
@@ -85,44 +97,70 @@ public class ImportGpxWizardPage extends WizardPage {
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Composite center = new Composite(comp, SWT.NONE);
-		center.setLayout(new GridLayout(1, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		center.setLayout(new GridLayout(3, false));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		
 		
-		Composite fileComp = new Composite(center, SWT.NONE);
-		fileComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		fileComp.setLayout(new GridLayout(3, false));
-		Label lbl = new Label(fileComp, SWT.NONE);
-		lbl.setText("File:");
+		Label lbl = new Label(center, SWT.NONE);
+		lbl.setText("Files:");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 		
-		txtFile = new Text(fileComp, SWT.BORDER);
-		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtFile.setEditable(false);
-		Button btnBrowse = new Button(fileComp, SWT.PUSH);
-		btnBrowse.setText("&Browse...");
-		btnBrowse.addSelectionListener(new SelectionAdapter() {
-			
+		lstFiles = new ListViewer(center, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		lstFiles.setContentProvider(ArrayContentProvider.getInstance());
+		lstFiles.setLabelProvider(new LabelProvider());
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = 100;
+		lstFiles.getList().setLayoutData(gd);
+		lstFiles.setInput(files);
+		
+		Composite buttons = new Composite(center, SWT.NONE);
+		GridLayout gl = new GridLayout(1, false);
+		gl.marginTop = gl.marginBottom = gl.marginHeight = 0;
+		buttons.setLayout(gl);		
+		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
+		btnAdd = new Button(buttons, SWT.PUSH);
+		btnAdd.setText("Add");
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fd = new FileDialog(ImportGpxWizardPage.this.getShell());
+				FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN );
 				
 				fd.setFilterExtensions(new String[]{"*.gpx", "*.*"});
 				fd.setFilterNames(new String[]{"GPX files (*.gpx)", "All Files (*.*)"});
-				if (txtFile.getText().length() > 0){
-					File f = new File(txtFile.getText());
-					fd.setFileName(f.getName());
-					fd.setFilterPath(f.getAbsolutePath());
+				
+				String x = fd.open();
+				if (x != null){
+					for (int i = 0; i < fd.getFileNames().length; i ++){
+						String file = (new File(fd.getFilterPath(),fd.getFileNames()[i])).toString() ;
+						if (!files.contains(file)){
+							files.add(file);
+						}
+					}
+					lstFiles.refresh();
 				}
-				String file = fd.open();
-				if (file != null){
-					txtFile.setText(file);
-					updateComplete();
+				updateComplete();
+			}		
+		});
+		
+		btnRemove = new Button(buttons, SWT.PUSH);
+		btnRemove.setText("Remove");
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnRemove.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection sel = ((IStructuredSelection)lstFiles.getSelection());
+				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();
+					files.remove(x);
 				}
-			}
+				lstFiles.refresh();
+				updateComplete();
+			}	
 		});
 		
 		Composite ops = new Composite(center, SWT.NONE);
-		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		ops.setLayout(new GridLayout(1, false));
 		
 		this.importAll = true;
@@ -164,11 +202,11 @@ public class ImportGpxWizardPage extends WizardPage {
 	}
 	
 	private void updateComplete(){
-		if (txtFile.getText().isEmpty()){
-			((ImportGpsDataWizard)getWizard()).setCanFinish(false);
+		if (files.size() == 0){
 			setPageComplete(false);
 			return;
 		}
+		
 		setPageComplete(true);
 		if (opDate.getSelection() || opAll.getSelection() ){
 			((ImportGpsDataWizard)getWizard()).setCanFinish(true);
@@ -178,10 +216,16 @@ public class ImportGpxWizardPage extends WizardPage {
 		getWizard().getContainer().updateButtons();		
 	}
 	
-	public String getFileName(){
-		return txtFile.getText();
+	/**
+	 * 
+	 * @return list of files selected by the user
+	 */
+	@SuppressWarnings("unchecked")
+	public List<String> getFiles(){
+		List<String> fs = new ArrayList<String>();
+		fs.addAll(files);
+		return fs;
 	}
-
 
 	public boolean importAll(){
 		if (opSelect.getSelection()){
