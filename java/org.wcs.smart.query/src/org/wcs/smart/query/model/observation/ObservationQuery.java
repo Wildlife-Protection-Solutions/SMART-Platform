@@ -138,6 +138,7 @@ public class ObservationQuery extends SimpleQuery{
 	 * @see java.lang.Object#clone()
 	 */
 	@Transient
+	@Override
 	public ObservationQuery clone(){
 		ObservationQuery q = new ObservationQuery();
 		q.setUuid(null);
