@@ -156,6 +156,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalIndent = 20;
+		gd.heightHint = 100;
 		compList.setLayoutData(gd);
 		
 		

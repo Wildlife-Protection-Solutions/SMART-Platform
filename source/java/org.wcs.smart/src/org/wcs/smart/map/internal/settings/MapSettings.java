@@ -120,6 +120,8 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class MapSettings {
 	
+	private static final String SMARTBM_FILE_PROTOCOL = "smartbm";
+
 	/**
 	 * 
 	 */
@@ -507,9 +509,16 @@ public class MapSettings {
     	ICatalog catalog = CatalogPlugin.getDefault().getLocalCatalog();
         
     	try {
-    		// removes the fragment from the URL
+    		if (uri.getScheme().equals(SMARTBM_FILE_PROTOCOL)){
+    			//smart basemap file; needs to re-create uri with absolute path
+    			File fileStoreDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), MAP_DIRECTORY);
+    			File path = new File(fileStoreDirectory, uri.getSchemeSpecificPart());
+    			String fragment = uri.getFragment();
+    			uri = path.toURI();
+    			uri = new java.net.URI(uri.getScheme(), uri.getSchemeSpecificPart(), fragment);
+    		}
     		URL url  = new URL(null, uri.toString(), CorePlugin.RELAXED_HANDLER);
-
+    		
         	List<IGeoResource> geoResources = null;
 			List<IResolve> resolveList = catalog.find(url, monitor);
 			// it doesn't exist a service for the url then create one and try again
@@ -601,21 +610,15 @@ public class MapSettings {
 	 * @return {@link java.net.URI} if the copy process was successful. null in other case.
 	 */
 	private java.net.URI importFile(final java.net.URI srcUri){
-		
 		assert srcUri != null;
-		
 		// creates the "filestore" folder if it is necessary
-
-
 		File fileStoreDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), MAP_DIRECTORY);
 		if(!fileStoreDirectory.exists()){
 			fileStoreDirectory.mkdir();
 		}
-
 		java.net.URI trgUri = null;
 		try {
-
-			String srcPath = srcUri.getRawPath();
+			String srcPath = srcUri.getPath();
 			if (!containsFileStoreDirectory(srcPath, fileStoreDirectory.getAbsolutePath())) {
 
 				// copies the file to filestore directory
@@ -633,15 +636,13 @@ public class MapSettings {
 				}
 			}	 
 			String fileName = new File(srcPath).getName();
-			StringBuilder pathBuilder = new StringBuilder(50);
-			pathBuilder.append("file:")
-						.append(fileStoreDirectory.getCanonicalPath())
-						.append(File.separator )
-						.append(fileName);
 			
-			java.net.URI uri = URIUtil.fromString(pathBuilder.toString());
-			trgUri = new java.net.URI(srcUri.getScheme(), srcUri.getHost(), uri.getPath(), srcUri.getFragment() );
-
+			//create a custom uri that uses smartbm protocol 
+			//this allows the file to be relative
+			//so if the data is copied to a new location
+			//the basemap files still work;
+			java.net.URI uri = new java.net.URI( SMARTBM_FILE_PROTOCOL, "//" + fileName, srcUri.getFragment());
+			trgUri = uri;
 		} catch (Exception e) {
 			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
 		}
@@ -658,19 +659,16 @@ public class MapSettings {
 	private File[] createSourceFileList(final String srcPath) {
 
 		File srcFile = new File(srcPath);
+		File dir = srcFile.getParentFile();
 		
 		//creates a pattern like [path]/layerName.*, then retrieves all file that match
 		String fullFileName= srcFile.getName();
+		int index = fullFileName.lastIndexOf('.');
+		String layerName = fullFileName;
+		if (index >= 0){
+			layerName = layerName.substring(0, index);
+		}
 		
-		String layerName = fullFileName.split("[.]")[0];
-		
-		// makes the path
-		int i  = srcPath.indexOf(fullFileName);
-		assert i > -1;
-		String path = srcPath.substring(0,i);
-		
-		File dir = new File(path);
-
 		String pattern = layerName + ".*";
 		FileFilter filter = new WildcardFileFilter(pattern);
 

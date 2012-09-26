@@ -21,8 +21,6 @@
  */
 package org.wcs.smart;
 
-import java.util.Collection;
-
 import net.refractions.udig.project.ui.internal.LayersView;
 import net.refractions.udig.project.ui.internal.MapPart;
 
@@ -30,8 +28,6 @@ import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbench;
@@ -104,9 +100,13 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	return new ActionBarAdvisor(configurer);
     }
     
+
     public void preWindowOpen() {
         IWorkbenchWindowConfigurer configurer = getWindowConfigurer();
-        configurer.setInitialSize(new Point(1200, 800));
+        //configurer.setInitialSize(new Point(1200, 800));
+//        Rectangle bounds = Display.getDefault().getPrimaryMonitor().getClientArea();
+//        configurer.setInitialSize(new Point(bounds.width, bounds.height));
+      	
         configurer.setShowCoolBar(true);
         configurer.setShowStatusLine(false);
         configurer.setShowProgressIndicator(true);
@@ -215,6 +215,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     		}
     	}    	
     }    
+
     
 //    /**
 //     * Look up configuration object, using UDIGWorkbenchConfiguration as a default.

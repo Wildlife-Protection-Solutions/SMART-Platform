@@ -106,6 +106,25 @@
                   tooltip="Change your username or password">
             </command>
             <separator
+                  name="org.wcs.smart.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.file.export"
+                  id="x"
+                  label="Export Map"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.DefaultPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <separator
                   name="org.wcs.smart.file.separator1">
             </separator>
             <command
