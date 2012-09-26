@@ -49,38 +49,5 @@ public class SmartWorkbenchAdvisor extends WorkbenchAdvisor {
 		return DefaultPerspective.ID;
 	}
 
-	
-//	@Override
-//	public ContributionComparator getComparatorFor(String contributionType) {
-//		if (contributionType.equals("property")){
-//			return new ConservationPageComparator();
-//		}
-//		return new ContributionComparator();
-//	}
 }
-//
-///**
-// * Comparator for ordering the conservation area property pages.
-// *
-// */
-//class ConservationPageComparator extends ContributionComparator {
-//	public int category(IComparableContribution c) {
-//
-//		if (c instanceof PreferenceNode) {
-//			String id = ((PreferenceNode) c).getId();
-//			if (CaPropertyPage.ID.equals(id)) {
-//				return 1;
-//			} else if (StationListPropertyPage.ID.equals(id)) {
-//				return 2;
-//			} else if (AgencyRankPropertyPage.ID.equals(id)) {
-//				return 3;
-//			} else if (EmployeePropertyPage.ID.equals(id)) {
-//				return 4;
-//			} else {
-//				return super.category(c);
-//			}
-//		} else {
-//			return super.category(c);
-//		}
-//	}
-//}
+
