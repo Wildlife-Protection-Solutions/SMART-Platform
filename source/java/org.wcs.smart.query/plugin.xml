@@ -428,6 +428,21 @@
                </with>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.eclipse.ui.file.export"
+               id="x"
+               label="Export Map"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.query.SmartQueryPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
          <separator
                name="org.wcs.smart.query.separator3"
                visible="true">
