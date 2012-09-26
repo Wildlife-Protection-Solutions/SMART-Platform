@@ -254,7 +254,10 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 				String x = fd.open();
 				if (x != null){
 					for (int i = 0; i < fd.getFileNames().length; i ++){
-						files.add(  (new File(fd.getFilterPath(),fd.getFileNames()[i])).toString() );
+						String file = (new File(fd.getFilterPath(),fd.getFileNames()[i])).toString() ;
+						if (!files.contains(file)){
+							files.add(file);
+						}
 					}
 					lstFiles.refresh();
 				}

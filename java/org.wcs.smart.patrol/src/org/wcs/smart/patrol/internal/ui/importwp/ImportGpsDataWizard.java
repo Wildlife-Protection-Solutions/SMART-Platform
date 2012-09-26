@@ -142,7 +142,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 		}
 		if (lastPage instanceof ImportGpxWizardPage){
 			allData = ((ImportGpxWizardPage)lastPage).getImportAll();
-			final String filename = ((ImportGpxWizardPage)lastPage).getFileName();
+			final List<String> filenames = ((ImportGpxWizardPage)lastPage).getFiles();
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 			
 			try {
@@ -151,9 +151,9 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 						if (allData){
-							importedData = (GPSDataImport.convertGpx(new File(filename), null, Collections.singleton(type), monitor)).get(type);
+							importedData = (GPSDataImport.convertGpx(filenames, null, Collections.singleton(type), monitor)).get(type);
 						}else{
-							importedData = (GPSDataImport.convertGpx(new File(filename), currentDay, Collections.singleton(type), monitor)).get(type);
+							importedData = (GPSDataImport.convertGpx(filenames, currentDay, Collections.singleton(type), monitor)).get(type);
 						}
 					}
 				});
@@ -243,7 +243,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 		if (event.getTargetPage() instanceof ImportWpSelectWizardPage){
 			if (event.getCurrentPage() instanceof ImportGpxWizardPage){
 				//read all waypoints from gpx file
-				final String filename = ((ImportGpxWizardPage)event.getCurrentPage()).getFileName();
+				final List<String> filenames = ((ImportGpxWizardPage)event.getCurrentPage()).getFiles();
 				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 				try{
 				pmd.run(true, false, new IRunnableWithProgress() {
@@ -251,9 +251,10 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 						if (type == GPSDataImport.ImportType.WAYPOINT){
-							allWaypoints = GPSDataImport.getWaypointsGpx(new File(filename), monitor);
+							allWaypoints = GPSDataImport.getWaypointsGpx(filenames, monitor);
 						}else if (type == GPSDataImport.ImportType.TRACK){
-							allWaypoints = GPSDataImport.getTrackPoints(new File(filename), monitor);
+							//TODO: TRACK FIX THIS
+							allWaypoints = GPSDataImport.getTrackPoints(filenames, monitor);
 						}
 					}
 				});
@@ -275,9 +276,9 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							monitor.setTaskName("Importing Data from GPS Device");
 							f = GPSBabel.getData(deviceType, Collections.singleton(type));
 							if (type == ImportType.WAYPOINT){
-								allWaypoints = GPSDataImport.getWaypointsGpx(f, monitor);
+								allWaypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(f.getAbsolutePath()), monitor);
 							}else if (type == ImportType.TRACK){
-								allWaypoints = GPSDataImport.getTrackPoints(f, monitor);
+								allWaypoints = GPSDataImport.getTrackPoints(Collections.singletonList(f.getAbsolutePath()), monitor);
 							}
 						}catch (final Exception ex){
 							Display.getDefault().syncExec(new Runnable(){
