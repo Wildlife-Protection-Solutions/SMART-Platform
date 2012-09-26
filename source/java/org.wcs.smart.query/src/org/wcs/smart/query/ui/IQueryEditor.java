@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui;
 
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryInput;
 
 /**
  * All query editor should implement this interface.
@@ -35,4 +36,10 @@ public interface IQueryEditor {
 	 * @return the query being edited
 	 */
 	public Query getQuery();
+	
+	/**
+	 * 
+	 * @return the editor input
+	 */
+	public QueryInput getInputInternal();
 }

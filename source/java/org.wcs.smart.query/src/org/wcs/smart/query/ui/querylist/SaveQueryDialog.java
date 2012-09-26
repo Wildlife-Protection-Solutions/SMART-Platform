@@ -105,7 +105,6 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 		getShell().setText("Save Query");
 		if (this.includeName){
 			setMessage("Select the new query name and location to save query.");
-			queryName = "Copy of " + queryName;
 		}else{
 			setMessage("Select location to save the query '" + queryName + "'");
 		}

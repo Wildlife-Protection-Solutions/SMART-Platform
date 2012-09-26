@@ -328,4 +328,9 @@ public abstract class Query {
 	@Transient
 	public abstract void copyFrom(Query copy);
 
+	/**
+	 * Creates a copy of the current query.
+	 * @return new query
+	 */
+	public abstract Query clone();
 }

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui.patrol;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +34,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -47,19 +43,16 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.ui.IQueryEditor;
+import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
-import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -254,18 +247,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			showBusy(false);
 		}
 	}
-		
-	private void updateQuery(){
-		//update date filter
-		getQueryInternal().setDateFilter(page1.getDateFilter());
-	}
 
 	/**
 	 * Re-run the query and refresh the results.
 	 */
 	public void refreshQuery(){
 		//update date filter
-		updateQuery();
+		getQueryInternal().setDateFilter(page1.getDateFilter());
 		
 		if (!getQuery().isValid()){
 			MessageDialog.openError(getSite().getShell(), "Error", "Query invalid.  Please fix query definition and try again.");
@@ -313,160 +301,48 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	 */
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		//validate if user can save the current query
-		if (query.getIsShared() && !QueryHibernateManager.canModifyCaQueries()){			
-			boolean ret = MessageDialog.openQuestion(getContainer().getShell(), "Save", "You do not have permission to overwrite this query.  Would you like to save it as a new query?");
-			if (ret){
-				doSaveAs();
-			}
+		boolean newQuery = query.getUuid() == null;
+		
+		Query savedQuery = QueryEditorUtils.doSave(this, monitor);
+		if (savedQuery == null){
+			//error 
 			return;
 		}
-		
-		//ensure query is valid
-		if (!query.isValid()){
-			MessageDialog.openError(getSite().getShell(), "Save", "You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
-			monitor.setCanceled(true);
-			return;
-		}else if (query.getName().trim().length() == 0){
-			MessageDialog.openError(getSite().getShell(), "Save", "Query name must not be blank.");
-			monitor.setCanceled(true);
-			return;
-		}
-				
-		//update the query definition 
-		updateQuery();
-		
-		boolean newQuery = false;
-		if (query.getUuid() == null){
+		if (savedQuery != query){
+			//saved as new query
+			this.query = (PatrolQuery) savedQuery;
+			setInput(new QueryInput(savedQuery));
 			newQuery = true;
-			//new query; we need to get folder location
-			SaveQueryDialog dialog = new SaveQueryDialog(getContainer().getShell(), query, false);
-			if (dialog.open() != IDialogConstants.OK_ID){
-				monitor.setCanceled(true);
-				return;
-			}
-			
-			QueryFolder qf = dialog.getQueryFolder() ; 
-			if (qf == null){
-				QueryPlugIn.displayLog("Query not saved.  Could not determine folder.", null);
-				monitor.setCanceled(true);
-				return;
-			}
-			
-			if (!qf.isRootFolder()){
-				query.setFolder(qf);
-				query.setIsShared(qf.getEmployee() == null);
-			
-			}else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)){
-				query.setIsShared(true);
-			}
-			query.setOwner(SmartDB.getCurrentEmployee());
-			query.setConservationArea(SmartDB.getCurrentConservationArea());
 		}
-		 
-		if (!QueryHibernateManager.saveQuery(query, false)){
-			monitor.setCanceled(true);
-			return ;
-		}
-		if (newQuery){
-			page1.setQuery();
-			((QueryInput)super.getEditorInput()).setUuid(query.getUuid());
-			((QueryInput)super.getEditorInput()).setId(query.getId());
-		}
-		((QueryInput)super.getEditorInput()).setQueryName(query.getName());
 		
+		if (newQuery){
+			page1.setQuery();			
+		}
 		updatePartName();
-	
 		setDirty(false);
 	}
 	
+	/** 
+	 * Saves a copy of the query as a new query
+	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
+	 */
 	@Override
 	public void doSaveAs() {
-		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getContainer().getShell());
-		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					
-					//ensure query is valid
-					if (!getQuery().isValid()){
-						MessageDialog.openError(getSite().getShell(), "Save", "You cannot save an invalid query.  Please ensure fix the errors in the query and try saving again.");
-						return;
-					}
-					
-					monitor.beginTask("Save As...", 3);
-					monitor.subTask("Cloning query...");
-					updateQuery();
-					PatrolQuery newQuery = getQueryInternal().clone();
-					
-					monitor.worked(1);
-					
-					monitor.subTask("Getting save location...");
-					SaveQueryDialog dialog = new SaveQueryDialog(getContainer().getShell(), query, true);
-					if (dialog.open() != IDialogConstants.OK_ID){
-						return;
-					}
-					
-					newQuery.setName(dialog.getQueryName());
-					if (newQuery.getName().trim().length() == 0){
-						MessageDialog.openError(getSite().getShell(), "Save", "Query name must not be blank.");
-						monitor.setCanceled(true);
-						return;
-					}
-					
-					QueryFolder qf = dialog.getQueryFolder();
-					if (!qf.isRootFolder()){
-						newQuery.setFolder(qf);
-						newQuery.setIsShared(qf.getEmployee() == null);
-					
-					}else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)){
-						newQuery.setIsShared(true);
-					}
-					newQuery.setOwner(SmartDB.getCurrentEmployee());
-					newQuery.setConservationArea(SmartDB.getCurrentConservationArea());
-					
-					
-					PatrolQuery oldQuery = PatrolQueryResultsEditor.this.query;
-					
-					PatrolQueryResultsEditor.this.query = newQuery;
-					monitor.subTask("Saving query...");
-					
-					if (!QueryHibernateManager.saveQuery(query, true)){
-						PatrolQueryResultsEditor.this.query = oldQuery;
-						return ;
-					}
-					PatrolQueryResultsEditor.this.setInput(new QueryInput(newQuery));
-					
-					updatePartName();
-					monitor.worked(1);
-					
-					page1.setQuery();
-					monitor.worked(1);
-					
-					setDirty(false);
-					monitor.worked(1);
-					
-					//TODO: update the Query Def View; see if there is a better way to do this
-					QueryDefView view = (QueryDefView)getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
-					if(view != null){
-						if (!view.getQuery().equals(oldQuery)){
-							view.setQuery(newQuery);
-						}
-					}
-					
-					//TODO: this is a bit of a hack to get the querylistview to be updated
-					//correctly
-					getSite().getWorkbenchWindow().getActivePage().activate(view);
-					getSite().getWorkbenchWindow().getActivePage().activate(getSite().getPart());
-										
-				}
-			});
-		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Error saving query: " + ex.getMessage(), ex);
+		Query savedQuery = QueryEditorUtils.doSaveAs(this, true);
+		if (savedQuery == null){
+			return;
 		}
+		this.query = (PatrolQuery) savedQuery;
+		setInput(new QueryInput(savedQuery));
+		updatePartName();
+		page1.setQuery();
+		
+		setDirty(false);
+		//TODO: this is a bit of a hack to get the querylistview to be updated
+		//correctly
+		//this cannot be called until setinput has bee called
+		getSite().getWorkbenchWindow().getActivePage().activate(getSite().getWorkbenchWindow().getActivePage().findView(QueryDefView.ID));
+		getSite().getWorkbenchWindow().getActivePage().activate(getSite().getPart());
 	}
 
 	/**
@@ -531,6 +407,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	public void setFocus() {
 		super.setFocus();
 		
+	}
+	
+	/**
+	 * @return the editor input as query input
+	 */
+	public QueryInput getInputInternal(){
+		return (QueryInput) getEditorInput();
 	}
 
 }
