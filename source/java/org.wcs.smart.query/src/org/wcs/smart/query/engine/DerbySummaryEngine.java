@@ -349,7 +349,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder fromSql = new StringBuilder();
 		
-		fromSql.append(queryTempTable + " a ");
+		fromSql.append(queryTempTable + " temp ");
 		
 		String tmp = getNameByClass(patrolItem.getOption().getOptionClass()) ;
 		if (tmp != null){
@@ -375,7 +375,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			fromSql.append(tableNames.get(Track.class));
 			fromSql.append(" ");
 			fromSql.append(tablePrefix.get(Track.class) );
-			fromSql.append( " on a.pld_uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid " );
+			fromSql.append( " on temp.pld_uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid " );
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_MEMBERS ||
 			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  || 
@@ -384,7 +384,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			fromSql.append(tableNames.get(PatrolLegMember.class));
 			fromSql.append(" ");
 			fromSql.append(tablePrefix.get(PatrolLegMember.class) );
-			fromSql.append(" on a.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid " );
+			fromSql.append(" on temp.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid " );
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS ||
 			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS ||
@@ -393,7 +393,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			fromSql.append(tableNames.get(PatrolLegDay.class));
 			fromSql.append(" ");
 			fromSql.append(tablePrefix.get(PatrolLegDay.class));
-			fromSql.append( " on a.pld_uuid = " + tablePrefix.get(PatrolLegDay.class)+ ".uuid ");
+			fromSql.append( " on temp.pld_uuid = " + tablePrefix.get(PatrolLegDay.class)+ ".uuid ");
 		}
 		
 		StringBuilder sql = new StringBuilder();
@@ -442,15 +442,15 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		
 		StringBuilder fromSql = new StringBuilder();
 		
-		fromSql.append(queryTempTable + " tmp ");
+		fromSql.append(queryTempTable + " temp ");
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
 		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
 		
-		String valueSql = "tmp.ob_uuid";
+		String valueSql = "temp.ob_uuid";
 		if (attributeItem.getCategoryKey() != null){
-			valueSql = valueSql + ",tmp.cat_hkey";
+			valueSql = valueSql + ",temp.cat_hkey";
 		}
 		StringBuilder valueAggSql = new StringBuilder();
 		valueAggSql.append(attributeItem.getAggregation().getName());
@@ -639,13 +639,13 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		
 		StringBuilder fromSql = new StringBuilder();
 		
-		fromSql.append(queryTempTable + " a ");
+		fromSql.append(queryTempTable + " temp ");
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
 		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
 		
-		String valueSql = "a.ob_uuid";
+		String valueSql = "temp.ob_uuid";
 		StringBuilder valueAggSql = new StringBuilder();
 		valueAggSql.append("count(ob_uuid)");
 		
@@ -657,7 +657,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		}
 		sql.append(valueAggSql);
 		sql.append(" FROM ( SELECT distinct ");
-		sql.append("a.cat_hkey, ");
+		sql.append("temp.cat_hkey, ");
 		sql.append(groupByInnerSql);
 		if (groupByInnerSql.length() > 0){
 			sql.append(",");
@@ -738,7 +738,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					fromSql.append(tableNames.get(PatrolLegMember.class));
 					fromSql.append(" ");
 					fromSql.append(tablePrefix.get(PatrolLegMember.class));
-					fromSql.append(" on a.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid ");
+					fromSql.append(" on temp.pl_uuid = " + tablePrefix.get(PatrolLegMember.class) + ".patrol_leg_uuid ");
 				}
 			}else if (gb instanceof DateGroupBy){
 				DateGroupByOption op = ((DateGroupBy)gb).getOption();
@@ -782,15 +782,15 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class));
 				fromSql.append(" on ");
 				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class));
-				fromSql.append(".observation_uuid = a.ob_uuid ");
-				
+				fromSql.append(".observation_uuid = temp.ob_uuid ");
+			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
 					fromSql.append(" and (");
-					fromSql.append("a.cat_hkey >= '");
+					fromSql.append("temp.cat_hkey >= '");
 					fromSql.append(catkey);
 					fromSql.append("' and ");
-					fromSql.append("a.cat_hkey < '");
+					fromSql.append("temp.cat_hkey < '");
 					fromSql.append(catkey.substring(0, catkey.length() - 1));
 					fromSql.append("/') ");
 				}
