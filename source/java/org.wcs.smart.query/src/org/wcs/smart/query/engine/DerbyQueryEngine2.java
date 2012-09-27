@@ -557,6 +557,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		LinkedList<IFilter> kidsToProcess = new LinkedList<IFilter>();
 		kidsToProcess.add(queryFilter);
 		Set<String> processedAreaFilters = new HashSet<String>();
+		boolean joinedTracks = false;
 		while(kidsToProcess.size() > 0){
 			IFilter kid = kidsToProcess.poll();
 			if (kid instanceof AreaFilter){
@@ -573,8 +574,9 @@ public class DerbyQueryEngine2 implements QueryEngine {
 					sql.append( tableName +".ca_uuid = " + tablePrefix.get(Patrol.class) + ".ca_uuid and ");
 					sql.append( tableName +".area_type = '" + ff.getType().name() + "' and ");
 					sql.append(tableName + ".keyid = '" + ff.getKey() + "' ");
-					if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK){
+					if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && !joinedTracks){
 						//add join to track geom
+						joinedTracks = true;
 						sql.append(" left join " + tableNames.get(Track.class)+ " " + tablePrefix.get(Track.class) ); 
 						sql.append(" ON " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = " + tablePrefix.get(PatrolLegDay.class) + ".uuid" );
 					}
