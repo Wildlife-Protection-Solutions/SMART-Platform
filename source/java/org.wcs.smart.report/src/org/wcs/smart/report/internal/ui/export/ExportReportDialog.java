@@ -118,11 +118,11 @@ public class ExportReportDialog extends TitleAreaDialog {
 	@Override
 	protected Composite createDialogArea(Composite parent) {
 		if (!multipleFiles){
-			setMessage("Export Report: " + this.report.getName());
+			getShell().setText("Export Report: " + this.report.getName());
 		}else{
-			setMessage("Export Reports");
+			getShell().setText("Export Reports");
 		}
-		getShell().setText("Export");
+		setMessage("Select the export location and format.");
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		
@@ -222,7 +222,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog dd = new DirectoryDialog(getShell());
 				dd.setMessage("Select directory to place exported report(s).");
-				dd.setText("Export");
+				dd.setText("Export Directory");
 				dd.setFilterPath(txtFileName.getText());
 				String dir = dd.open();
 				if (dir != null){
