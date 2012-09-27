@@ -591,6 +591,26 @@
                   </and>
                </visibleWhen>
             </menu>
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
+            </visibleWhen>
          </menu>
       </menuContribution>
    </extension>
