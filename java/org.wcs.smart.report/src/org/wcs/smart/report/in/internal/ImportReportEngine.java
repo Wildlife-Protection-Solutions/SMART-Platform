@@ -36,6 +36,7 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.LibraryHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
@@ -196,8 +197,10 @@ public class ImportReportEngine {
 			
 			ReportDesignHandle rdh = SessionHandleAdapter.getInstance().getSessionHandle().openDesign(reportXmlFile.getAbsolutePath());
 			//remove existing library & make sure it points to the library associated with this ca
-			rdh.dropLibrary(rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE));
+			LibraryHandle library = rdh.getLibrary("smart");		
+			rdh.dropLibraryAndBreakExtends(library);
 			rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFile().toString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
+			
 			//update report/query info			
 			ReportManager.updateReportQueries(session, rdh, importReport);
 			
