@@ -154,15 +154,6 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 					if (infoView != null){
 						partRef.getPage().hideView(infoView);
 					}
-					
-//					MapPart mp = (MapPart)partRef.getPart(false); 
-//					if (PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() == null){
-//						return;
-//					}
-//					LayersView view = (LayersView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(LayersView.ID);
-//					if (view.getCurrentMap() == mp.getMap()){
-//						view.setCurrentMap(null);
-//					}
 				}
 			}
 
