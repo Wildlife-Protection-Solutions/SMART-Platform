@@ -252,7 +252,7 @@ public class PatrolQueryOptions {
 		NUM_HOURS("Number of Hours", "numhours", PatrolLegDay.class),
 		NUM_MEMBERS("Number of Employees", "nummembers", PatrolLegMember.class),
 		MAN_HOURS("Person - Hours", "manhours", PatrolLegDay.class),
-		MAN_DAYS("Person - Days", "mandays", PatrolLegDay.class);
+		MAN_DAYS("Person - Days", "mandays", Patrol.class);
 		
 		String key;		//unique key
 		String guiName; //display name

@@ -56,7 +56,7 @@ public class QueryEditorUtils {
 			return null;
 		}
 				
-		if (!query.getName().equals(((IQueryEditor)editor).getInputInternal().getName())){
+		if (query.getUuid() != null && !query.getName().equals(((IQueryEditor)editor).getInputInternal().getName())){
 			MessageDialog md = new MessageDialog(shell, "Save Query",
 					null, 
 					"You have changed the name of this query do you want to overwrite the existing query or save as a new query?",
