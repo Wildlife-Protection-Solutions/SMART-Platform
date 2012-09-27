@@ -24,7 +24,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,7 +56,7 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -73,6 +73,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 	private Button btnImport;
 	private Button btnUseCustom;
 	private Button btnUseIucn;
+	private Button btnBlank;
+	
 	private Label lblFileName;
 	private ComboViewer caViewer;
 
@@ -137,6 +139,11 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		btnUseIucn.addSelectionListener(validateListener);
 		btnUseIucn.setSelection(false);
 
+		btnBlank = new Button(comp, SWT.RADIO);
+		btnBlank.setText("Use a blank data model");
+		btnBlank.addSelectionListener(validateListener);
+		btnBlank.setSelection(false);
+		
 		createImportFromCa(comp);
 		createImportXml(comp, validateListener);
 
@@ -147,7 +154,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			SelectionListener validateListener) {
 		GridLayout layout;
 		btnUseCustom = new Button(comp, SWT.RADIO);
-		btnUseCustom.setText("Import a custom data model.");
+		btnUseCustom.setText("Import a custom data model");
 		btnUseCustom.addSelectionListener(validateListener);
 		btnUseCustom.setSelection(false);
 
@@ -336,6 +343,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 //							
 //						}
 						dm = dmToClone.clone(ca, code);
+					}else if (btnBlank.getSelection()){
+						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());
 					}
 					
 					if (dm == null){
@@ -375,6 +384,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
 		} else if (btnUseIucn.getSelection() | (btnClone != null && btnClone.getSelection())) {
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
+		} else if (btnBlank.getSelection()){
 			getButton(IDialogConstants.OK_ID).setEnabled(true);
 		}
 	}
