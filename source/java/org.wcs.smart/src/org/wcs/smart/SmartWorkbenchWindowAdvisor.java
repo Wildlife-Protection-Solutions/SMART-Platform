@@ -23,6 +23,7 @@ package org.wcs.smart;
 
 import net.refractions.udig.project.ui.internal.LayersView;
 import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.tool.info.internal.InfoView2;
 
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
@@ -30,6 +31,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -147,7 +149,12 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 			@Override
 			public void partHidden(IWorkbenchPartReference partRef) {
-//				if (partRef.getPart(false) instanceof MapPart){
+				if (partRef.getPart(false) instanceof MapPart){
+					IViewPart infoView = partRef.getPage().findView(InfoView2.VIEW_ID);
+					if (infoView != null){
+						partRef.getPage().hideView(infoView);
+					}
+					
 //					MapPart mp = (MapPart)partRef.getPart(false); 
 //					if (PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() == null){
 //						return;
@@ -156,7 +163,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 //					if (view.getCurrentMap() == mp.getMap()){
 //						view.setCurrentMap(null);
 //					}
-//				}
+				}
 			}
 
 			@Override
