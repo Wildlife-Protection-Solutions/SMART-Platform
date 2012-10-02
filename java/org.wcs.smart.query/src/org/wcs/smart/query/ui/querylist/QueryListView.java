@@ -53,6 +53,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.model.QueryInput;
+import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
 
@@ -102,13 +103,11 @@ public class QueryListView extends ViewPart {
 		
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef.getId().equals(QueryResultsEditor.ID) || partRef.getId().equals(SummaryEditor.ID) ){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof EditorPart){				
-					IStructuredSelection selection = new StructuredSelection(((EditorPart)part).getEditorInput());
-					queryList.setSelection(selection);
-					focusCellManager.getFocusCell();
-				}	
+			IWorkbenchPart part = partRef.getPart(false);
+			if ( IQueryEditor.class.isAssignableFrom( part.getClass() ) ){
+				IStructuredSelection selection = new StructuredSelection(((EditorPart)part).getEditorInput());
+				queryList.setSelection(selection);
+				focusCellManager.getFocusCell();
 			}
 		}
 	};

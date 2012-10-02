@@ -71,25 +71,11 @@ public class OpenQueryHandler extends AbstractHandler {
 	 * @param input
 	 */
 	public static void openQuery(QueryInput input){
-		
-		String editorid = null;
-		if (input.getType() == QueryType.OBSERVATION){
-			editorid = QueryResultsEditor.ID;
-		}else if (input.getType() == QueryType.SUMMARY){
-			editorid = SummaryEditor.ID;
-		}else if (input.getType() == QueryType.PATROL){
-			editorid = PatrolQueryResultsEditor.ID;
-		}else if (input.getType() == QueryType.GRIDDED){
-			editorid = GriddedEditor.ID;
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, input.getType().getEditorId());	
+		} catch (Throwable t) {
+			QueryPlugIn.displayLog(t.getMessage(), t);
 		}
-		if (editorid != null){
-			try {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, editorid);	
-			} catch (Throwable t) {
-				QueryPlugIn.displayLog(t.getMessage(), t);
-			}
-		}
-		
 	}
 
 }

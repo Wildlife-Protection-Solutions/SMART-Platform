@@ -163,6 +163,7 @@ public class SummaryQuery extends Query {
 	 * Sets the date filter 
 	 * @param dateFilter
 	 */
+	@Override
 	public void setDateFilter(DateFilter dateFilter){
 		this.dateFilter = dateFilter;
 	}

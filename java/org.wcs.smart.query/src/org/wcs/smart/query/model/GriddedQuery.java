@@ -23,6 +23,7 @@ package org.wcs.smart.query.model;
 
 import java.awt.Point;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A class to represent a summary query.
@@ -139,6 +141,7 @@ public class GriddedQuery extends Query {
 	 * Sets the date filter 
 	 * @param dateFilter
 	 */
+	@Override
 	public void setDateFilter(DateFilter dateFilter){
 		this.dateFilter = dateFilter;
 	}
@@ -460,6 +463,42 @@ public class GriddedQuery extends Query {
 	@Transient
 	public ConservationAreaFilter getConservationAreaFilter(){
 		return this.caFilter;
+	}
+	
+	private File lastRasterFile = null;
+	@Transient
+	public File getLastRasterFile(){
+		return this.lastRasterFile;
+	}
+	
+	/**
+	 * @return the raster file name for the gridded query
+	 */
+	@Transient
+	public File getRasterFileName() {
+		// ensure query dir exists
+		File dir = QueryPlugIn.getDefault().getQueryTempDirectory();
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
+
+		// create raster file name
+		String fName = null;
+		if (getUuid() == null) {
+			fName = String.valueOf(System.nanoTime());
+		} else {
+			// ensure filename is unique for each raster service created
+			fName = SmartUtils.encodeHex(getUuid()) + "_"
+					+ String.valueOf(System.nanoTime());
+		}
+
+		StringBuilder pathBuilder = new StringBuilder(50);
+		pathBuilder.append(dir.getAbsolutePath()).append(File.separator)
+				.append(fName).append(".tiff");
+		
+		lastRasterFile = new File(pathBuilder.toString());
+		return lastRasterFile;
+
 	}
 
 }
