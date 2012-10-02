@@ -151,20 +151,12 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 							throw ex;
 						}finally{
 							session.close();
-						}
-						
+						}				
 						QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, query);
 						
 						//open query in editor
 						QueryInput qi = new QueryInput(query);
-						if (qi.getType() == QueryType.OBSERVATION){
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, QueryResultsEditor.ID);
-						}else if (qi.getType() == QueryType.SUMMARY){
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, SummaryEditor.ID);
-						}else if (qi.getType() == QueryType.PATROL){
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, PatrolQueryResultsEditor.ID);
-						}
-						
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, query.getType().getEditorId());
 					}catch (Exception ex){
 						QueryPlugIn.displayLog("Could not import query. " + ex.getMessage(), ex);
 					}

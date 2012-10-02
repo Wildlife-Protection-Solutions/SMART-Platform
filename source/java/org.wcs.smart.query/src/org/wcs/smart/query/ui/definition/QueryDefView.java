@@ -31,23 +31,24 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISourceProviderListener;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 
 /**
  * A view for building query definition.
@@ -97,8 +98,20 @@ public class QueryDefView extends ViewPart {
 		
 		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
-			if (partRef.getPage().findEditors(null, QueryResultsEditor.ID, IWorkbenchPage.MATCH_ID).length == 0){
-				setQuery(null);	
+			try{
+				IEditorReference[] editors = partRef.getPage().getEditorReferences();
+				boolean hasQueryEditor= false;
+				for (int i = 0; i < editors.length; i ++){
+					if (QueryInput.class.isAssignableFrom(editors[i].getEditorInput().getClass() )){
+						hasQueryEditor = true;
+						break;
+					}
+				}
+				if (!hasQueryEditor){
+					setQuery(null);	
+				}
+			}catch (Exception ex){
+				QueryPlugIn.displayLog("Error closing part: " + ex.getMessage(), ex);
 			}
 		}
 		

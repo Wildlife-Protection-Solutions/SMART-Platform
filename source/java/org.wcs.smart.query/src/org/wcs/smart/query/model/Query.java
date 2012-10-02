@@ -41,6 +41,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
@@ -333,4 +334,11 @@ public abstract class Query {
 	 * @return new query
 	 */
 	public abstract Query clone();
+	
+	/**
+	 * Sets the date filter associated with the current
+	 * query.
+	 * @param filter date filter
+	 */
+	public abstract void setDateFilter(DateFilter filter);
 }

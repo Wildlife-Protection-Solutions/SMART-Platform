@@ -29,6 +29,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
 import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
 import org.wcs.smart.query.ui.summary.SummaryEditor;
@@ -48,12 +49,8 @@ public class ExportQueryHandler extends AbstractHandler implements IHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		Query query = null;
-		if (editor instanceof QueryResultsEditor){
-			query = ((QueryResultsEditor) editor).getQuery();
-		}else if (editor instanceof SummaryEditor){
-			query = ((SummaryEditor) editor).getQuery();
-		}else if (editor instanceof PatrolQueryResultsEditor){
-			query = ((PatrolQueryResultsEditor) editor).getQuery();
+		if (editor instanceof IQueryEditor){
+			query = ((IQueryEditor) editor).getQuery();
 		}
 		if (query != null){
 			ExportQueryWizard wizard = new ExportQueryWizard(query);

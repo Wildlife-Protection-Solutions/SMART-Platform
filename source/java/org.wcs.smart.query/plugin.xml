@@ -856,6 +856,15 @@
       <Exporter
             class="org.wcs.smart.query.export.ShapePatrolQueryExporter">
       </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.GridQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.GridArcImageExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.export.GridTiffImageExporter">
+      </Exporter>
    </extension>
 
 </plugin>
