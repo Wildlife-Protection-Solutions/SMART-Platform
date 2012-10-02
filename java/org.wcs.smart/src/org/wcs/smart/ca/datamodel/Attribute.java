@@ -43,6 +43,7 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 
 /**
@@ -87,7 +88,7 @@ public class Attribute extends DmObject{
 	
 	/* for tree type attributes */
 	private List<AttributeTreeNode> rootTreeNodes = null;
-	
+	private List<AttributeTreeNode> activeTootTreeNodes = null;
 	/**
 	 * Represents the type of the data model attribute
 	 */
@@ -293,15 +294,11 @@ public class Attribute extends DmObject{
 	 * Only valid for tree attributes.
 	 * @return  set of root tree nodes
 	 */
-	@OneToMany(fetch=FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@JoinTable(name="smart.dm_att_tree_nodes",
-		joinColumns={@JoinColumn(name="attribute_uuid")},
-		inverseJoinColumns={@JoinColumn(name="node_uuid")}
-	)
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@Where(clause = "parent_uuid is null")
+	@OrderBy(clause = "node_order")
 	@BatchSize(size=200)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	//TODO: figure out how we can sort this on the node_order of the attribute_tree_node table
-	//currently sorted in the attributetree.content provider
 	public List<AttributeTreeNode> getTree(){
 		return this.rootTreeNodes;
 	}
@@ -314,6 +311,27 @@ public class Attribute extends DmObject{
 		this.rootTreeNodes = tree;
 	}
 	
+	
+	/**
+	 * Only valid for tree attributes.
+	 * @return  set of root tree nodes
+	 */
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@Where(clause = "parent_uuid is null and is_active")
+	@OrderBy(clause = "node_order")
+	@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<AttributeTreeNode> getActiveTreeNodes(){
+		return this.activeTootTreeNodes;
+	}
+	/**
+	 * Only valid for tree attributes.
+	 * 
+	 * @param tree the set of root tree nodes
+	 */
+	public void setActiveTreeNodes(List<AttributeTreeNode> activeTootTreeNodes){
+		this.activeTootTreeNodes = activeTootTreeNodes;
+	}
 	
 	
 	public void moveAttributeTreeNode(AttributeTreeNode toMove, AttributeTreeNode to, boolean before){

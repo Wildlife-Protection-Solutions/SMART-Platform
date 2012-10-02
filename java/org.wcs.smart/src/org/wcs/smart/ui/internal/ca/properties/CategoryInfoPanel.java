@@ -23,6 +23,8 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -66,6 +68,14 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 		chMultiple.setSelection(true);
 		if (!canEdit){
 			chMultiple.setEnabled(false);
+		}else{
+			chMultiple.addSelectionListener(new SelectionAdapter(){
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					validate();	
+				}
+			});
 		}
 		
 	}

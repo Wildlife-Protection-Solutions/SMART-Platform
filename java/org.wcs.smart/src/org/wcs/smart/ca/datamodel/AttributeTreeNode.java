@@ -39,6 +39,7 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 
 /**
@@ -56,6 +57,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	private Attribute attribute = null;
 	private int nodeOrder;
 	private List<AttributeTreeNode> children = new ArrayList<AttributeTreeNode>();
+	private List<AttributeTreeNode> activeChildren = new ArrayList<AttributeTreeNode>();
 	private AttributeTreeNode parent = null;
 	private boolean isActive;
 	
@@ -140,6 +142,19 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		this.children = children;
 	}
 	
+	@OneToMany(fetch=FetchType.EAGER, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
+	@Where(clause = "is_active")
+	@OrderBy(clause = "node_order")
+	@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<AttributeTreeNode> getActiveChildren(){
+		return this.activeChildren;
+	}
+	
+	public void setActiveChildren(List<AttributeTreeNode> activeChildren){
+		this.activeChildren = activeChildren;
+	}
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="parent_uuid")
 //	@Cascade({CascadeType.SAVE_UPDATE})	
@@ -183,21 +198,6 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		clone.updateHkey();
 	
 		return clone;
-	}
-	
-	
-	public static class NodeComparator implements Comparator<AttributeTreeNode> {
-
-		public int compare(AttributeTreeNode d1, AttributeTreeNode d2){
-			if (d1.getNodeOrder() == d2.getNodeOrder()) {
-				return 0;
-			} else if (d1.getNodeOrder() > d2.getNodeOrder()) {
-				return 1;
-			} else {
-				return -1;
-			}
-
-		}
 	}
 
 }

@@ -49,36 +49,9 @@ public class DataModelExporter implements ICaDataExporter {
 	public void exportData(ICaDataExportEngine exportEngine,
 			IProgressMonitor monitor) throws Exception {
 		monitor.beginTask("Exporting datamodel tables", 1);
-		exportAttTreeNodesTable(exportEngine);
 		exportAttAggMapTable(exportEngine);
 		exportAggregationTable(exportEngine);
 		monitor.worked(1);
-	}
-	
-	private void exportAttTreeNodesTable(ICaDataExportEngine exportEngine) throws Exception{
-		String tableName = "smart.dm_att_tree_nodes";
-		
-		String columns[] = exportEngine.getTableColumns(tableName);
-		
-		StringBuilder query = new StringBuilder();
-		query.append("SELECT ");
-		for (int i = 0; i < columns.length; i ++){
-			query.append("a." + columns[i]);
-			if (i != columns.length - 1){
-				query.append(", ");
-			}
-		}
-		query.append(" FROM ");
-		query.append(tableName + " a join ");
-		query.append(HibernateManager.getTableName(Attribute.class));
-		query.append(" b on a.attribute_uuid = b.uuid ");
-		query.append(" WHERE b.ca_uuid = x''");
-		query.append(SmartUtils.encodeHex(exportEngine.getConservationArea().getUuid()));
-		query.append("''");
-		
-		exportEngine.writeTableDefinitionFile(tableName, columns);
-		exportEngine.writeQuery(tableName, query.toString());
-			
 	}
 
 	private void exportAttAggMapTable(ICaDataExportEngine exportEngine) throws Exception{

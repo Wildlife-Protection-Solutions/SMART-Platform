@@ -109,12 +109,15 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param canEdit if fields can be editing
 	 * @param createNew <code>true</code> if a new object is being created or <code>false</code> if exisitng object being modified
 	 */
-	protected void createNameKeyFields(Composite parent, boolean canEdit, boolean createNew){
+	protected void createNameKeyFields(Composite parent, final boolean canEdit, boolean createNew){
 		final KeyListener generateKeyListener = new KeyListener() {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				String newKey = DataModel.generateKey(txtName.getText(), getSiblings());
 				txtKey.setText(newKey);
+				if (canEdit){
+					validate();
+				}
 			}
 			
 			@Override
@@ -133,6 +136,13 @@ public abstract class NameKeyComposite extends Composite {
 			txtName.setEditable(false);
 		}else if (createNew){
 			txtName.addKeyListener(generateKeyListener);
+		}else if (canEdit){
+			txtName.addListener(SWT.Modify, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					validate();					
+				}
+			});
 		}
 		txtName.setTextLimit(1024);
 	
@@ -146,14 +156,7 @@ public abstract class NameKeyComposite extends Composite {
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		if (canEdit){
-			txtName.addListener(SWT.Modify, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					validate();					
-				}
-			});
-			
+		if (canEdit){			
 			cdKey = createDecoration(txtKey);
 			cdKey.setDescriptionText("Invalid key.  It must not be blank");
 			
