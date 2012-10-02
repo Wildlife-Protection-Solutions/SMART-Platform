@@ -58,15 +58,6 @@ CREATE TABLE smart.dm_att_agg_map
 	PRIMARY KEY (ATTRIBUTE_UUID, AGG_NAME)
 );
 
-
-CREATE TABLE smart.dm_att_tree_nodes
-(
-	attribute_uuid CHAR(16) FOR BIT DATA NOT NULL,
-	node_uuid CHAR(16) FOR BIT DATA NOT NULL,
-	PRIMARY KEY (ATTRIBUTE_UUID, NODE_UUID)
-);
-
-
 CREATE TABLE smart.dm_category
 (
 	uuid CHAR(16) FOR BIT DATA NOT NULL,
@@ -135,26 +126,9 @@ ALTER TABLE smart.dm_att_agg_map
 	ON DELETE CASCADE
 ;
 
-
-ALTER TABLE smart.dm_att_tree_nodes 
-	ADD CONSTRAINT dm_att_tree_nodes_attribute_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
-	REFERENCES smart.dm_attribute (UUID)
-	ON UPDATE RESTRICT
-	ON DELETE CASCADE
-;
-
-
 ALTER TABLE smart.dm_cat_att_map
 	ADD CONSTRAINT dm_cat_att_map_attribute_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID)
 	REFERENCES smart.dm_attribute (UUID)
-	ON UPDATE RESTRICT
-	ON DELETE CASCADE
-;
-
-
-ALTER TABLE smart.dm_att_tree_nodes
-	ADD CONSTRAINT dm_att_tree_nodes_node_uuid_fk FOREIGN KEY (NODE_UUID)
-	REFERENCES smart.dm_attribute_tree (UUID)
 	ON UPDATE RESTRICT
 	ON DELETE CASCADE
 ;
