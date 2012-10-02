@@ -53,19 +53,20 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 	public ShowDataModelPropertyPageHandler() {
 		super(DataModelPropertyPage.class);
 	}
-
+	DataModelPropertyPage dialog = null;
+	Session loadedSession = null;
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		
-		DataModelPropertyPage dialog = new DataModelPropertyPage( Display.getCurrent().getActiveShell());
-		Session session = dialog.getSession();
+		dialog = new DataModelPropertyPage( Display.getCurrent().getActiveShell());
 		
-		DataModelProgressMonitorDialog ppd = new DataModelProgressMonitorDialog(Display.getCurrent().getActiveShell(), session);
+		DataModelProgressMonitorDialog ppd = new DataModelProgressMonitorDialog(Display.getCurrent().getActiveShell());
 		try {
 			ppd.run();
 		} catch (Exception ex) {
-			session.close();
+			loadedSession.close();
 			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), "Could not load data model", ex);
 			return null;
 		}
@@ -73,9 +74,9 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 		DataModel dataModel = ppd.dm;
 		if ( dataModel == null || dataModel.getCategories() == null || dataModel.getCategories().size() == 0 ){
 			//no datamodel; ask user to init
-			InitCaDataModelDialog dd = new InitCaDataModelDialog(session);
+			InitCaDataModelDialog dd = new InitCaDataModelDialog(loadedSession);
 			if (dd.open() == Window.CANCEL){
-				session.close();
+				loadedSession.close();
 				return null;
 			}
 			dataModel = dd.getDataModel();
@@ -91,11 +92,9 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 	class DataModelProgressMonitorDialog extends ProgressMonitorDialog {
 
 		protected DataModel dm;
-		private Session session ;
 		
-		public DataModelProgressMonitorDialog(Shell shell, Session session) {
+		public DataModelProgressMonitorDialog(Shell shell) {
 			super(shell);
-			this.session = session;
 		}
 
 		public void run() throws InvocationTargetException,
@@ -105,9 +104,10 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("Loading data model...", 0);
-					session.beginTransaction();
-					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-					session.getTransaction().rollback();
+					loadedSession = dialog.getSession();
+					loadedSession.beginTransaction();
+					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), loadedSession);
+					loadedSession.getTransaction().rollback();
 					monitor.done();					
 				}
 			});

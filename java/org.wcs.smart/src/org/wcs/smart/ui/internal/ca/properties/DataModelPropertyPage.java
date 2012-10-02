@@ -222,7 +222,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		viewer = fTree.getViewer();
 		viewer.setContentProvider(new DataModelContentProvider());
 		viewer.setLabelProvider(new DataModelLabelProvider(getLanguage()));
-		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
+		gd.heightHint = 300;
+		viewer.getTree().setLayoutData(gd);
 		viewer.setAutoExpandLevel(3);
 		viewer.setInput(this.dataModel);
 		
@@ -305,14 +307,17 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Group infoPanel = new Group(rightPanel, SWT.SHADOW_ETCHED_IN);
 		((Group)infoPanel).setText("Properties");
 		
-		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		infoPanel.setLayout(new GridLayout(1, false));
 		
 		
 		infoInnerPanel = new Composite(infoPanel, SWT.NONE);
 		infoInnerPanel.setLayout(new StackLayout());
 		infoInnerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
+		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
 		catInfoPanel = new CategoryInfoPanel(infoInnerPanel, SWT.NONE, false, false, SmartDB.getCurrentConservationArea().getDefaultLanguage()) {
 			@Override
 			protected List<Category> getSiblings() {
@@ -328,6 +333,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				return null;
 			}
 		};
+		attInfoPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		
 		Composite infoButtonPanel = new Composite(infoPanel , SWT.NONE);
 		infoButtonPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
