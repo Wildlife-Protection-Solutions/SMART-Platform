@@ -22,7 +22,7 @@
 package org.wcs.smart.ui.properties;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -98,39 +98,23 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
+		List<AttributeTreeNode> kids = null;
 		if (parentElement instanceof RootNode){
-			if (attribute.getTree() != null && attribute.getTree().size() > 0){
-				ArrayList<AttributeTreeNode> nodes = new ArrayList<AttributeTreeNode>();
-				if (!active){
-					nodes.addAll(attribute.getTree());
-				}else{
-					for (AttributeTreeNode nd : attribute.getTree()){
-						if (nd.getIsActive()){
-							nodes.add(nd);
-						}
-					}
-				}
-				Collections.sort(nodes, new AttributeTreeNode.NodeComparator());
-				return nodes.toArray();
+			if (!active){
+				kids = attribute.getTree();
+			}else{
+				kids = attribute.getActiveTreeNodes();
 			}
-			return null;
 		}
 		if (parentElement instanceof AttributeTreeNode){
-			if (((AttributeTreeNode)parentElement).getChildren() != null && ((AttributeTreeNode)parentElement).getChildren().size() > 0){
-				
-				ArrayList<AttributeTreeNode> nodes = new ArrayList<AttributeTreeNode>();
-				if (!active){
-					nodes.addAll( ((AttributeTreeNode)parentElement).getChildren()  );
-				}else{
-					for (AttributeTreeNode nd : ((AttributeTreeNode)parentElement).getChildren()){
-						if (nd.getIsActive()){
-							nodes.add(nd);
-						}
-					}
-				}
-				
-				return nodes.toArray();
+			if (!active){
+				kids = ((AttributeTreeNode)parentElement).getChildren();
+			}else{
+				kids = ((AttributeTreeNode)parentElement).getActiveChildren();
 			}
+		}
+		if (kids != null && kids.size() > 0){
+			return kids.toArray();
 		}
 		return null;
 	}

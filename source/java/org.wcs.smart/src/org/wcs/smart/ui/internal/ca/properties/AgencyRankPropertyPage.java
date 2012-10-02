@@ -496,7 +496,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	}
  
 	private void deleteAgency() {
-		for (Iterator iterator = ((IStructuredSelection)tblAgencies.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)tblAgencies.getSelection()).iterator(); iterator.hasNext();) {
 			Agency type = (Agency) iterator.next();
 			agencies.remove(type);
 			if (type.getUuid() != null){

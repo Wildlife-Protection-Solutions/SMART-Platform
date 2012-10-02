@@ -122,7 +122,9 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			
 			//add children attributes
 			if (onlyEnabled){
-				children.addAll(category.getChildren(true));
+				if (category.getActiveChildren() != null){
+					children.addAll(category.getActiveChildren());
+				}
 			}else{
 				if (category.getChildren() != null ){
 					children.addAll(category.getChildren());
@@ -168,14 +170,14 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	public boolean hasChildren(Object element) {
 		
 		if (element instanceof Category){
+			List<Category> ckids = null;
 			if (onlyEnabled){
-				if (((Category)element).getChildren(true).size() > 0){
-					return true;
-				}
+				ckids = ((Category)element).getActiveChildren();
 			}else{
-				if (((Category)element).getChildren() != null && ((Category)element).getChildren().size() > 0){
-					return true;
-				}	
+				ckids = ((Category)element).getChildren();
+			}
+			if (ckids != null && ckids.size() > 0){
+				return true;
 			}
 			
 			if (!onlyCategories){

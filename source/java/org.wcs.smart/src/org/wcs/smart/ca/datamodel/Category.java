@@ -39,6 +39,7 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 
@@ -65,6 +66,7 @@ public class Category extends DmObject implements HkeyObject{
 	private boolean isMultiple;			//if multiple observations can be recorded
 	private ConservationArea ca; 		//conservation area of category
 	private List<Category> children;	//children categories
+	private List<Category> activeChildren;	//children categories
 	private Category parent;			//parent category
 	private int categoryOrder;			//order of the category in relation to its siblings
 	private List<CategoryAttribute> attributes;	//list of attributes
@@ -186,28 +188,9 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "cat_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+//	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<Category> getChildren(){
 		return this.children;
-	}
-	
-	/**
-	 * Gets children that are active or inactive  
-	 * @param active <code>true</code> for active only children, <code>false</code> for in-active only children
-	 * @return list of only active or inactive children
-	 */
-	@Transient 
-	public List<Category> getChildren(boolean active){
-		List<Category> tmp = new ArrayList<Category>();
-		if (getChildren() != null){
-			for (Iterator<Category> iterator = getChildren().iterator(); iterator.hasNext();) {
-				Category category = (Category) iterator.next();
-				if (category.getIsActive() == active){
-					tmp.add(category);
-				}
-			}
-		}
-		return tmp;
 	}
 	
 	/**
@@ -216,6 +199,26 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	public void setChildren(List<Category> children){
 		this.children = children;
+	}
+	
+	/**
+	 * 
+	 * @return all children categories; <code>null</code> if leaf node
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@Where(clause = "is_active")
+	@OrderBy(clause = "cat_order")
+//	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<Category> getActiveChildren(){
+		return this.activeChildren;
+	}
+	
+	/**
+	 * 
+	 * @param children children categories
+	 */
+	public void setActiveChildren(List<Category> activeChildren){
+		this.activeChildren = activeChildren;
 	}
 	
 	/**
