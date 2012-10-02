@@ -103,22 +103,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-//		Label lbldesc = new Label(main, SWT.WRAP);
-//		Label lbldesc2 = new Label(main, SWT.NONE);
-//
-//		
-//		lbldesc.setText("The automatic backup system checks each time the application is closed if the specified time has passed to ");
-//		lbldesc2.setText("warrant a backup. This means that no backups will occur if the application is left running indefinietly.");
-//		
-//		lbldesc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
-//		lbldesc2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
-//
-//
-//		Label spc = new Label(main, SWT.NONE);
-//		spc.setText("");
-//		spc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
-		
+
 		int indent = 20;
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText("How often would you like the system to perform an automatic backup? ");
@@ -134,8 +119,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 
 		days = new Text(backup, SWT.BORDER);
 		String timer = "-1";
-		if(prop.containsKey("backup_timer")){
-			timer = prop.getProperty("backup_timer");
+		if(prop.containsKey(AutoBackupEngine.PROP_BACKUP_TIMER)){
+			timer = prop.getProperty(AutoBackupEngine.PROP_BACKUP_TIMER);
 		}
 		days.setText(timer);
 		days.setTextLimit(3);
@@ -173,8 +158,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 
 		deleteDays = new Text(backup, SWT.BORDER);
 		String deletetimer = "30";
-		if(prop.containsKey("delete_timer")){
-			deletetimer = prop.getProperty("delete_timer");
+		if(prop.containsKey(AutoBackupEngine.PROP_DELETE_TIMER)){
+			deletetimer = prop.getProperty(AutoBackupEngine.PROP_DELETE_TIMER);
 		}
 		deleteDays.setText(deletetimer);
 		deleteDays.setTextLimit(3);
@@ -209,8 +194,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		if(!b.exists()){
 			SmartUtils.createDirectory(b);
 		}
-		if(prop.containsKey("backup_location")){
-			loc = prop.getProperty("backup_location");
+		if(prop.containsKey(AutoBackupEngine.PROP_BACKUP_LOCATION)){
+			loc = prop.getProperty(AutoBackupEngine.PROP_BACKUP_LOCATION);
 		}
 		txtBackupDir.setText(loc);
 		
@@ -274,11 +259,11 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			prop.setProperty("backup_timer", days.getText());
-			prop.setProperty("delete_timer", deleteDays.getText());
-			prop.setProperty("backup_location", txtBackupDir.getText());
-			if(!prop.containsKey("last_backup")){
-				prop.setProperty("last_backup", "0");
+			prop.setProperty(AutoBackupEngine.PROP_BACKUP_TIMER, days.getText());
+			prop.setProperty(AutoBackupEngine.PROP_DELETE_TIMER, deleteDays.getText());
+			prop.setProperty(AutoBackupEngine.PROP_BACKUP_LOCATION, txtBackupDir.getText());
+			if(!prop.containsKey(AutoBackupEngine.PROP_LASTBACKUP)){
+				prop.setProperty(AutoBackupEngine.PROP_LASTBACKUP, "0");
 			}
 			if (!AutoBackupEngine.setAutoBackupProperties(prop)){
 				return;
@@ -337,14 +322,19 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		}
 		return isComplete;
 	}
-	public static boolean isNumeric(String str) {  
-	  try{  
-	    double d = Double.parseDouble(str);  
-	  }  
-	  catch(NumberFormatException nfe){  
-	    return false;  
-	  }
-	  return true;  
+	
+	/**
+	 * Determines if string can be parsed to double
+	 * @param str
+	 * @return
+	 */
+	private static boolean isNumeric(String str) {
+		try {
+			Double.parseDouble(str);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
 	}
 
 }

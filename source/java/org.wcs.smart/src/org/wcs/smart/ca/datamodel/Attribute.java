@@ -297,7 +297,7 @@ public class Attribute extends DmObject{
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null")
 	@OrderBy(clause = "node_order")
-	@BatchSize(size=200)
+	//@BatchSize(size=200)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getTree(){
 		return this.rootTreeNodes;
@@ -319,7 +319,7 @@ public class Attribute extends DmObject{
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null and is_active")
 	@OrderBy(clause = "node_order")
-	@BatchSize(size=200)
+	//@BatchSize(size=200)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getActiveTreeNodes(){
 		return this.activeTootTreeNodes;

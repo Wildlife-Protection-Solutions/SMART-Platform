@@ -216,14 +216,9 @@ public class SmartUtils {
 	}
 
 	public static String getDirectoryPath(byte[] uuid) {
-		return Arrays.toString(uuid).replaceAll(", ", "").replace("[", "")
-				.replace("]", "");
+		return SmartUtils.encodeHex(uuid);
 	}
 
-	public static String getUuidAsString(byte[] uuid) {
-		return Arrays.toString(uuid).replaceAll(", ", "").replace("[", "")
-				.replace("]", "").replace("-", "_");
-	}
 
 	/**
 	 * Creates the given directory.  
