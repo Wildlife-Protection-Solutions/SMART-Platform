@@ -175,6 +175,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				IService qs = QueryServiceFactory.generateQueryService(layer.dbQuery);
 				if (qs != null) {
 					layer.service = qs;
+					if (Query.class.isAssignableFrom( layer.dbQuery.getClass() )){
+						((Query)layer.dbQuery).setDateFilter(dateFilter);
+					}
 					if (layer.dbQuery instanceof ObservationQuery) {
 						((ObservationQuery) layer.dbQuery).setDateFilter(dateFilter);
 						((ObservationQuery) layer.dbQuery)
