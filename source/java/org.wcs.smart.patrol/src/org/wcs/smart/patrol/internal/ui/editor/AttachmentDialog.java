@@ -112,9 +112,10 @@ public class AttachmentDialog extends TitleAreaDialog {
 		
 		Composite buttonPanel = new Composite(main, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
-		buttonPanel.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, false, false));
 		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
 		btnAdd.setText("Add");
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -141,6 +142,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 		
 		btnRemove = new Button(buttonPanel, SWT.PUSH);
 		btnRemove.setText("Delete");
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -156,6 +158,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 		
 		btnOpen = new Button(buttonPanel, SWT.PUSH);
 		btnOpen.setText("Open");
+		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
