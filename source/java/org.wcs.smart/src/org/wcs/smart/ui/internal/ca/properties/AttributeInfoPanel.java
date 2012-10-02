@@ -183,7 +183,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		lblRequired.setText("Required:");
 		
 		chRequired = new Button(this, SWT.CHECK);
-		chRequired.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		chRequired.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
 		if (!canEdit){
 			chRequired.setEnabled(false);
 		}
@@ -196,7 +196,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/* Numeric Attribute Options */
 		numericComposite = new Composite(optionComposite, SWT.NONE);
 		numericComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		numericComposite.setBounds(0, 0, 64, 64);
+//		numericComposite.setBounds(0, 0, 64, 64);
 		numericComposite.setLayout(new GridLayout(2, false));
 		
 		Label lblAggregations = new Label(numericComposite, SWT.NONE);
@@ -223,12 +223,11 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		Label lblNewLabel_3 = new Label(numericComposite, SWT.NONE);
 		lblNewLabel_3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel_3.setBounds(0, 0, 55, 15);
 		lblNewLabel_3.setText("Minimum Value:");
 		
 		txtMinValue = new Text(numericComposite, SWT.BORDER);
 		txtMinValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		txtMinValue.setBounds(0, 0, 76, 21);
+//		txtMinValue.setBounds(0, 0, 76, 21);
 		
 		if (canEdit){
 			cdMinValue = createDecoration(txtMinValue);
@@ -242,12 +241,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		Label lblNewLabel_4 = new Label(numericComposite, SWT.NONE);
 		lblNewLabel_4.setAlignment(SWT.RIGHT);
-		lblNewLabel_4.setBounds(0, 0, 55, 15);
+//		lblNewLabel_4.setBounds(0, 0, 55, 15);
 		lblNewLabel_4.setText("Maximum Value:");
 		
 		txtMaxValue = new Text(numericComposite, SWT.BORDER);
 		txtMaxValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		txtMaxValue.setBounds(0, 0, 76, 21);
+//		txtMaxValue.setBounds(0, 0, 76, 21);
 		
 		if (canEdit){
 			cdMaxValue = createDecoration(txtMaxValue);		
@@ -267,16 +266,16 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/*   Text Attribute Options */
 		textComposite = new Composite(optionComposite, SWT.NONE);
 		textComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		textComposite.setBounds(0, 0, 64, 64);
+//		textComposite.setBounds(0, 0, 64, 64);
 		textComposite.setLayout(new GridLayout(2, false));
 		
 		Label lblNewLabel_5 = new Label(textComposite, SWT.NONE);
-		lblNewLabel_5.setBounds(0, 0, 55, 15);
+//		lblNewLabel_5.setBounds(0, 0, 55, 15);
 		lblNewLabel_5.setText("Regular Expression Validation:");
 		
 		txtRegex = new Text(textComposite, SWT.BORDER);
 		txtRegex.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		txtRegex.setBounds(0, 0, 76, 21);
+//		txtRegex.setBounds(0, 0, 76, 21);
 		if (!canEdit){
 			txtRegex.setEditable(false);
 		}
@@ -285,20 +284,20 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/*   List Attribute Options */
 		listComposite = new Composite(optionComposite, SWT.NONE);
 		listComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		listComposite.setBounds(0, 0, 64, 64);
+		//listComposite.setBounds(0, 0, 64, 64);
 		listComposite.setLayout(new GridLayout(3, false));
 		
 		Label lblValues = new Label(listComposite, SWT.NONE);
 		lblValues.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		lblValues.setBounds(0, 0, 55, 15);
+		//lblValues.setBounds(0, 0, 55, 15);
 		lblValues.setText("Values:");
 		
 		lstAttributeList = new TableViewer(listComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		Table list = lstAttributeList.getTable();
-		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)list.getLayoutData()).heightHint = 80;
 		((GridData)list.getLayoutData()).widthHint = 100;
-		list.setBounds(0, 0, 88, 68);
+		//list.setBounds(0, 0, 88, 68);
 		lstAttributeList.setContentProvider(new ObservableListContentProvider());
 		lstAttributeList.setInput(attributeList);
 		if (canEdit){
@@ -472,7 +471,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		treeComposite = new Composite(optionComposite, SWT.NONE);
 		treeComposite.setLayout(new GridLayout(1, false));
 		treeComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		treeComposite.setBounds(0, 0, 64, 64);
+		//treeComposite.setBounds(0, 0, 64, 64);
 		
 		
 		if (canEdit){
@@ -489,6 +488,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 
 		/*   Boolean Attribute Options */
 		booleanComposite = new Composite(optionComposite, SWT.NONE);
+		booleanComposite.setLayout(new GridLayout(1, false));
+		booleanComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
 		selectOption();
 		if (canEdit){

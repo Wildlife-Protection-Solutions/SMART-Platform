@@ -82,22 +82,7 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 		ca = SmartDB.getCurrentConservationArea();
 		getSession();
 	}
-	
-	
-//	@Override 
-//	protected Point getInitialSize() {
-//		Point p = super.getInitialSize();
-//		
-//		Rectangle r = getShell().getMonitor().getBounds();
-//		if (p.x < r.width / 2){
-//			p.x  = r.width / 2;
-//		}
-//		if (p.y < r.height / 2){
-//			p.y  = r.height / 2;
-//		}
-//		return new Point(r.width / 2, r.height / 2);
-//	}
-	
+
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
@@ -169,6 +154,10 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 			}
 		}
 		
+		if (session.isOpen() && session.getTransaction().isActive()){
+			//at this point we want to rollback any active transactions
+			session.getTransaction().rollback();
+		}
 		if (session != null && session.isOpen()){
 			session.close();
 		}
