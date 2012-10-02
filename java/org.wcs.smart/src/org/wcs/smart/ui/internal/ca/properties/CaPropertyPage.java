@@ -26,11 +26,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * The conservation area property dialog for managing 
@@ -62,7 +64,8 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1,1));
 		lbl.setText("Default Language:");
 		
-		Label lblLang = new Label(caComposite, SWT.NONE);
+		Text lblLang = new Text(caComposite, SWT.NONE);
+		lblLang.setEditable(false);
 		lblLang.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false,1,1));
 		String name = ca.getDefaultLanguage().getName();
 		if (name == null){
@@ -71,6 +74,16 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			name = name + " (" + ca.getDefaultLanguage().getCode() + ")";
 		}
 		lblLang.setText(name);
+		
+		
+		lbl = new Label(caComposite, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1,1));
+		lbl.setText("Unique ID:");
+		
+		Text txt = new Text(caComposite, SWT.NONE);
+		txt.setEditable(false);
+		txt.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false,1,1));
+		txt.setText(SmartUtils.getDirectoryPath(ca.getUuid()));
 		
 		caComposite.addChangeListener(new CaInfoComposite.IChangeListener() {
 			
