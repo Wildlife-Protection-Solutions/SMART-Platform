@@ -54,10 +54,10 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="%wizard.data.set.window.title">
+               windowTitle="New Smart Table Dataset">
          </dataSetWizard>
          <dataSetPage
-               displayName="%wizard.data.set.page.title"
+               displayName="New Smart Table Dataset"
                icon="icons/datasetpage.ico"
                id="org.wcs.smart.data.ods.smart.smartTable.page1"
                path="/"
@@ -71,10 +71,10 @@
             id="org.wcs.smart.data.oda.smart.smartQueryDataset">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="%wizard.data.set.window.title">
+               windowTitle="New Query Dataset">
          </dataSetWizard>
          <dataSetPage
-               displayName="%wizard.data.set.page.title"
+               displayName="New Query Dataset"
                icon="icons/datasetpage.ico"
                id="org.wcs.smart.data.ods.smart.smartQuery.page1"
                path="/"
