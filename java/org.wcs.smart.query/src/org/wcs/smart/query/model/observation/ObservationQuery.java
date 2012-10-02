@@ -83,7 +83,9 @@ public class ObservationQuery extends SimpleQuery{
 				sb.deleteCharAt(sb.length() - 1);
 			}
 			setVisibleColumns(sb.toString());
-		}	
+		}else{
+			setVisibleColumns(null);
+		}
 	}
 	
 	/**

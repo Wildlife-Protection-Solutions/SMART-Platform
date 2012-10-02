@@ -278,9 +278,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				File dir = getQueryTempDirectory();
-				File[] toDel = dir.listFiles();
-				for (int i = 0; i < toDel.length; i ++){
-					toDel[i].delete();
+				if (dir.exists() && dir.isDirectory()){
+					File[] toDel = dir.listFiles();
+					for (int i = 0; i < toDel.length; i ++){
+						toDel[i].delete();
+					}
 				}
 				return Status.OK_STATUS;
 			}

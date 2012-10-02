@@ -14,6 +14,7 @@ import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.querylist.SaveQueryDialog;
 
@@ -33,7 +34,6 @@ public class QueryEditorUtils {
 			throw new IllegalStateException("invalid editor");
 		}
 		Query query = ((IQueryEditor)editor).getQuery();
-//		Query query = ((IQueryEditor)editor).getQuery();
 		Shell shell = editor.getSite().getShell();
 		
 		//validate if user can save the current query

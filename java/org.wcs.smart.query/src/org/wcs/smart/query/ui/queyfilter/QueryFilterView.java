@@ -189,7 +189,7 @@ public class QueryFilterView extends ViewPart {
 	 * @param cat
 	 */
 	private void visitCategory(Category cat){
-		for (Category child : cat.getChildren()){
+		for (Category child : cat.getActiveChildren()){
 			visitCategory(child);
 			child.getName();
 		}
