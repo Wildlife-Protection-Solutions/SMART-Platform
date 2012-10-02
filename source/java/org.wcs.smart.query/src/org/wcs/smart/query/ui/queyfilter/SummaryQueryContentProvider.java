@@ -240,11 +240,9 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					if (parent.getObject() instanceof Attribute){
 						s.update(parent.getObject());
 						nodes = ((Attribute)parent.getObject()).getTree() ;
-						Collections.sort(nodes, new AttributeTreeNode.NodeComparator());
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						s.update(((CategoryAttribute)parent.getObject()).getAttribute() );
 						nodes = ((CategoryAttribute)parent.getObject()).getAttribute().getTree() ;
-						Collections.sort(nodes, new AttributeTreeNode.NodeComparator());
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						s.update(parent.getObject());
 						nodes =  ((AttributeTreeNode)parent.getObject()).getChildren() ;

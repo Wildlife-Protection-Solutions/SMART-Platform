@@ -79,8 +79,8 @@ public class AttributeTreeDropItem extends DropItem{
 			s.beginTransaction();
 			try{
 				attribute = (Attribute) s.load(Attribute.class, attribute.getUuid());
-				if (attribute.getTree() != null){
-					for (AttributeTreeNode node : attribute.getTree()){
+				if (attribute.getActiveTreeNodes() != null){
+					for (AttributeTreeNode node : attribute.getActiveTreeNodes()){
 						visitTreeNode(node);
 					}
 				}
@@ -94,7 +94,7 @@ public class AttributeTreeDropItem extends DropItem{
 		}
 		private void visitTreeNode(AttributeTreeNode parent){
 			if (parent.getChildren() != null){
-				for (AttributeTreeNode child: parent.getChildren()){
+				for (AttributeTreeNode child: parent.getActiveChildren()){
 					child.getHkey();
 					child.getName();
 					visitTreeNode(child);
