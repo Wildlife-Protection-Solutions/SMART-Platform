@@ -287,11 +287,12 @@ public class PatrolLegDayInputComposite {
 		dtStartTime.addFocusListener(new FocusAdapter() {			
 			@Override
 			public void focusLost(FocusEvent e) {
+				if (timeEqual(SmartUtils.getTime(dtStartTime).getTime(), patrolLegDate.getStartTime().getTime())){
+					//no changes made
+					return;
+				}
 				editor.getPatrolEditor().save(patrolLegDate);
-//				editor.getPatrolEditor().doSave(null);
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
-
-				
 			}
 		});
 
@@ -310,8 +311,10 @@ public class PatrolLegDayInputComposite {
 		dtEndTime.addFocusListener(new FocusAdapter() {			
 			@Override
 			public void focusLost(FocusEvent e) {
-//				editor.setDirty(true);
-//				editor.getPatrolEditor().doSave(null);
+				if (timeEqual(SmartUtils.getTime(dtEndTime).getTime(), patrolLegDate.getEndTime().getTime())){
+					//no changes made
+					return;
+				}
 				editor.getPatrolEditor().save(patrolLegDate);
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
@@ -331,7 +334,10 @@ public class PatrolLegDayInputComposite {
 			@Override
 			public void focusLost(FocusEvent e) {
 				try{
-					Integer.parseInt(restMinutes.getText());
+					int x = Integer.parseInt(restMinutes.getText());
+					if (x == patrolLegDate.getRestMinutes()){
+						return;
+					}
 				}catch (Exception ex){
 					restMinutes.setText(oldValue + "");
 					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Error", "Rest Minutes must be a valid number.");
@@ -344,7 +350,6 @@ public class PatrolLegDayInputComposite {
 					
 				}
 				updateTotalHours();
-//				editor.getPatrolEditor().doSave(null);
 				editor.getPatrolEditor().save(patrolLegDate);
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
@@ -468,6 +473,23 @@ public class PatrolLegDayInputComposite {
 		return mainComposite;
 	}
 	
+	private boolean timeEqual(long t1, long t2){
+		Calendar c1 = new GregorianCalendar();
+		c1.setTimeInMillis(t1);
+		Calendar c2 = new GregorianCalendar();
+		c2.setTimeInMillis(t2);
+		
+		int[] fields = new int[]{Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND};
+		
+		for (int i = 0; i < fields.length; i ++){
+			if (c1.get(fields[i]) != c2.get(fields[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
 	public void dispose(){
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, waypointListener);
@@ -489,7 +511,7 @@ public class PatrolLegDayInputComposite {
 		Session session = HibernateManager.openSession();
 		try {
 			IStructuredSelection selection = ((IStructuredSelection) observationTable.getSelection());
-			for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 				Waypoint w = (Waypoint) iterator.next();
 				Waypoint toClone = w;
 				if (toClone.getUuid() != null) {
@@ -533,16 +555,13 @@ public class PatrolLegDayInputComposite {
 		IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
 		ArrayList<Waypoint> deleted = new ArrayList<Waypoint>();
 		
-		for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Waypoint w = (Waypoint) iterator.next();
 			if (patrolLegDate.getWaypoints().remove(w)){
 				w.setPatrolLegDay(null);
 				deleted.add(w);
-			}
-			
+			}	
 		}
-//		editor.setDirty(true);
-//		editor.getPatrolEditor().doSave(null);
 		//delete waypoints
 		editor.getPatrolEditor().delete(deleted);
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
@@ -582,8 +601,8 @@ public class PatrolLegDayInputComposite {
 		int width = 0;
 		Point extent = gc.textExtent(column.guiName);
 		width = extent.x;
-		for (Iterator iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
-			Waypoint e = (Waypoint) iterator.next();
+		for (Iterator<Waypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
+			Waypoint e = iterator.next();
 			String str = getWaypointValueAsString(e, column);
 			
 			if (str != null){
@@ -834,13 +853,7 @@ public class PatrolLegDayInputComposite {
 				}
 		
 	}
-	private void setTime(DateTime d, Time time){
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(time);
-		d.setTime(cal.get(Calendar.HOUR), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-	}
 
-	
 	private void setWaypointValue(Waypoint element, OtColumn column, Object value){
 		boolean needSave = false;
 		if (column == OtColumn.ID) {
