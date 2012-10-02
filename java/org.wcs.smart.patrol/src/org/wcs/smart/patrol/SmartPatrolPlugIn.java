@@ -221,9 +221,17 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 * @param message  Error message to display
 	 * @param t exception to log
 	 */
-	public static void displayLog(String message, Throwable t){
+	public static void displayLog(final String message, Throwable t){
 		log(message, t);
-		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", message);
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+			}
+			
+		});
+		
 	}
 	
 	/**

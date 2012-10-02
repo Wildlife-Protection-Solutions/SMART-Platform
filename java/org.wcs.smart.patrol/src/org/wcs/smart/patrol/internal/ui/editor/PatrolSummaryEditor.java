@@ -580,7 +580,9 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * Refresh the patrol summary table.
 	 */
 	public void refreshPatrolSummaryTable(){
-		tblPatrolData.refresh();
+		if (!tblPatrolData.getTable().isDisposed()){
+			tblPatrolData.refresh();
+		}
 	}
 	
 	@Override
