@@ -46,6 +46,7 @@ import net.refractions.udig.project.internal.ProjectPackage;
 import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.StyleEntry;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
 import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
 import net.refractions.udig.ui.palette.ColourScheme;
@@ -64,6 +65,7 @@ import org.eclipse.ui.XMLMemento;
 import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -181,8 +183,8 @@ public class MapSettings {
 			String name = map.getName();
 			BrewerPalette colorPalette = map.getColorPalette();
 			ColourScheme colourScheme = map.getColourScheme();
-			
-			mapRegister = new MapRegister(uri, name, colorPalette, colourScheme,  layerRegisterList);
+			String crs = map.getViewportModel().getCRS().toWKT();
+			mapRegister = new MapRegister(uri, name, colorPalette, colourScheme,  layerRegisterList, crs);
 			
 		} catch (Exception e) {
 			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
@@ -403,6 +405,18 @@ public class MapSettings {
 				((Layer)layer).eNotify(new ENotificationImpl((InternalEObject)layer, Notification.SET, ProjectPackage.LAYER__STYLE_BLACKBOARD,
 		                layer.getStyleBlackboard(), layer.getStyleBlackboard()));
 			}
+		}
+		
+		try{
+			if (userMap.getCrsWkt() != null){
+				CoordinateReferenceSystem crs = CRS.parseWKT(userMap.getCrsWkt());
+				if (!CRS.equalsIgnoreMetadata(crs, currentMap.getViewportModel().getCRS())){
+					ChangeCRSCommand command = new ChangeCRSCommand(crs);
+					currentMap.sendCommandSync(command);
+				}
+			}
+		}catch (Exception ex){
+			ex.printStackTrace();
 		}
 
 		//turn back on events

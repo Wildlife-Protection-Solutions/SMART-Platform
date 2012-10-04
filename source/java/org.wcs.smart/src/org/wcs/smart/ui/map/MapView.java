@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
@@ -34,14 +35,17 @@ import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.project.ui.tool.ModalTool;
 import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
-import net.refractions.udig.tools.internal.ZoomIn;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -50,6 +54,7 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.map.internal.ZoomHandler;
 
@@ -119,6 +124,8 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
     	layout.marginRight = 0;
     	layout.marginTop = 0;
     	layout.marginWidth = 0;
+    	layout.verticalSpacing = 2; 
+    	layout.horizontalSpacing = 0;
         parent.setLayout(layout);
         
         // mapviewer = new MapViewer(parent, SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.MULTI);
@@ -142,12 +149,14 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         map.getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		map.getViewportModelInternal().setCRS(Area.AREA_CRS);
 		
-        Composite infoArea = new Composite(parent, SWT.BORDER);
-        infoArea.setLayout(new GridLayout(3, false));
+        Composite infoArea = new Composite(parent, SWT.NONE);
+        GridLayout gl = new GridLayout(3, false);
+        gl.marginTop = gl.marginBottom = gl.marginHeight= 0;
+        infoArea.setLayout(gl);
         infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         lblCoordinates = new Label(infoArea, SWT.NONE);
         lblCoordinates.setText("Coordinates");
-        lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         lblCoordinates.setAlignment(SWT.RIGHT);
         
         final Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
@@ -155,9 +164,28 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
         lblSeparator.setLayoutData(gd);
         
-        final Label lblSRID = new Label(infoArea, SWT.NONE);
+        final Button lblSRID = new Button(infoArea, SWT.NONE);
         lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
         lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+        lblSRID.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ProjectionDialog pd = new ProjectionDialog(getSite().getShell());
+				if (pd.open() == IDialogConstants.OK_ID){
+					try{
+						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
+						map.sendCommandASync(command);
+//						map.executeASyncWithoutUndo(command);
+					}catch (Exception ex){
+						SmartPlugIn.displayLog(getSite().getShell(), "Error setting map projection.\n\n" + ex.getMessage(), ex);
+					}
+					
+				}
+				
+				
+			}
+		});
+        
         map.getViewportModel().addViewportModelListener(new IViewportModelListener() {
 			
 			@Override
