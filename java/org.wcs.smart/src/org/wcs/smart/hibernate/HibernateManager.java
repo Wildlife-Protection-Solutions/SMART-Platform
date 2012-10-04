@@ -51,6 +51,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -565,5 +566,31 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 		return null;
 	}
+	
 
+	/**
+	 * 
+	 * @param session
+	 * @return list of projections available for the conservation
+	 * area
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Projection> getCaProjectinList(Session session){
+		return ((List<Projection>)session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list());
+	}
+
+	/**
+	 * 
+	 * @param session
+	 * @return the default CRS for the current conservation
+	 * area of null of non selected
+	 */
+	public static Projection getDefaultProjection(Session session){
+		List<?> defaults = session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDeafult", true)).list();
+		if (defaults.size() == 0){
+			return null;
+		}else{
+			return (Projection)defaults.get(0);
+		}
+	}
 }

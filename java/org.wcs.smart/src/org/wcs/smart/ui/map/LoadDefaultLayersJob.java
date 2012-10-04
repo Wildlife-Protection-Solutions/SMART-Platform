@@ -32,6 +32,7 @@ import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
 import net.refractions.udig.project.ui.ProjectUtil;
 
@@ -40,8 +41,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
@@ -114,6 +117,7 @@ public class LoadDefaultLayersJob extends Job{
     				MapSettings settings = MapSettings.getInstance(mapDef);
     				settings.applyTo((Map) map);
     			}else{
+					@SuppressWarnings("unchecked")
 					List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);
     				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     				List<IGeoResource> cleanedGeoResources;
@@ -126,6 +130,16 @@ public class LoadDefaultLayersJob extends Job{
     				map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY,alCommand.getLayers());
     				((RenderManagerImpl)map.getRenderManager()).enableRendering();
     				((RenderManagerImpl)map.getRenderManager()).refresh(null);
+    				Projection prj = getDefaultCrs();
+    				if (prj != null){
+    					try{
+    						CoordinateReferenceSystem crs = prj.getCrs();
+    						ChangeCRSCommand cmd = new ChangeCRSCommand(crs);
+    						map.sendCommandSync(cmd);
+    					}catch(Exception ex){
+    						SmartPlugIn.log("Error parsing default crs" + ex.getMessage(), ex);
+    					}
+    				}
     				
     			}
     			if (zoom){
@@ -139,6 +153,19 @@ public class LoadDefaultLayersJob extends Job{
 		return Status.OK_STATUS;
 	}
 	
+	private Projection getDefaultCrs(){
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			return HibernateManager.getDefaultProjection(s);	
+		}finally{
+			if (s.getTransaction().isActive()){
+				s.getTransaction().commit();
+			}
+			s.close();
+		}
+		
+	}
 	
 	private BasemapDefinition getDefaultDefinition(){
 		BasemapDefinition selection = SmartPlugIn.getDefault().getBasemapSelection();

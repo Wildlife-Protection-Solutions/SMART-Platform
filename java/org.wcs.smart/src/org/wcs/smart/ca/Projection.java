@@ -1,0 +1,164 @@
+/* uDig - User Friendly Desktop Internet GIS client
+ * http://udig.refractions.net
+ * (C) 2004-2008, Refractions Research Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 of the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ */
+package org.wcs.smart.ca;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.geotools.referencing.CRS;
+import org.hibernate.annotations.GenericGenerator;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+
+/**
+ * Represents a projection option.  A projection constains
+ * a name, and wkt defintion.
+ * 
+ * @author egouge
+ *
+ */
+@Entity
+@Table(name="smart.ca_projection")
+public class Projection {
+
+	public static final int MAX_NAME_LENGTH = 1024;
+	public static final int MAX_DEF_LENGTH = 32672;
+
+	private byte[] uuid;
+	
+	private ConservationArea ca;
+	private String name;
+	private String definition;
+	private boolean isDefault;
+	
+	private CoordinateReferenceSystem crs;
+
+	/**
+	 * Creates a new empty projection
+	 */
+	public Projection(){
+		
+	}
+
+	/**
+	 * 
+	 * @return the uuid for the list element
+	 */
+	@Id
+	@GeneratedValue(generator="uuid")
+	@GenericGenerator(name= "uuid", strategy="uuid2")
+	public byte[] getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(byte[] uuid) {
+		this.uuid = uuid;
+	}
+	
+	/**
+	 * 
+	 * @return the conservation area associated
+	 * with the projection
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea(){
+		return this.ca;
+	}
+	/**
+	 * @param ca
+	 */
+	public void setConservationArea(ConservationArea ca){
+		this.ca = ca;
+	}
+	
+	/**
+	 * 
+	 * @return the projection name
+	 */
+	@Column(name="name")
+	public String getName(){
+		return this.name;
+	}
+	/**
+	 * Sets the projection name
+	 * @param name
+	 */
+	public void setName(String name){
+		this.name = name;
+	}
+	
+	/**
+	 * 
+	 * @return the projection definition
+	 */
+	public String getDefinition(){
+		return this.definition;
+		
+	}
+	/**
+	 * 
+	 * @param definition the projection definition
+	 */
+	public void setDefinition(String definition){
+		this.crs = null;
+		this.definition = definition;
+	}
+	
+	/**
+	 * 
+	 * @return if this is the default projection for ca
+	 */
+	@Column(name="is_default")
+	public boolean getIsDefault(){
+		return this.isDefault;
+	}
+	
+	
+	public void setIsDefault(boolean isDefault){
+		this.isDefault = isDefault;
+	}
+	
+	
+	/**
+	 * Parses the definition into a coordinate reference system
+	 * object.
+	 * 
+	 * @return 
+	 * @throws FactoryException
+	 */
+	@Transient
+	public CoordinateReferenceSystem getCrs() throws FactoryException{
+		if (this.crs != null){
+			return crs;
+		}
+		String def = getDefinition();
+		if (def == null){
+			return null;
+		}
+		
+		crs = CRS.parseWKT(def);
+		return crs;
+	}
+	
+}

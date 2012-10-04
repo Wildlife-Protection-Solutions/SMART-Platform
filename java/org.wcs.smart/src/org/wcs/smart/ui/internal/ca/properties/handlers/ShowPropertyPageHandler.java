@@ -30,6 +30,7 @@ import org.wcs.smart.ui.internal.ca.properties.AreaPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.ProjectionPropertyDialog;
 import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
 
 /**
@@ -48,27 +49,23 @@ public class ShowPropertyPageHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
+		Dialog dialog = null;
 		if (page.equals(CaPropertyPage.class)){
-			CaPropertyPage dialog = new CaPropertyPage();
-			dialog.open();
+			dialog = new CaPropertyPage();
 		}else if (page.equals(StationListPropertyPage.class)){
-			StationListPropertyPage dialog = new StationListPropertyPage();
-			dialog.open();
+			dialog = new StationListPropertyPage();
 		}else if (page.equals(AgencyRankPropertyPage.class)){
-			AgencyRankPropertyPage dialog = new AgencyRankPropertyPage();
-			dialog.open();
+			dialog = new AgencyRankPropertyPage();
 		}else if (page.equals(EmployeePropertyPage.class)){
-			EmployeePropertyPage dialog = new EmployeePropertyPage();
-			dialog.open();
+			dialog = new EmployeePropertyPage();
 		}else if (page.equals(AreaPropertyPage.class)){
-			AreaPropertyPage dialog = new AreaPropertyPage();
-			dialog.open();
+			dialog = new AreaPropertyPage();
 		}else if (page.equals(BasemapPropertyPage.class)){
-			BasemapPropertyPage dialog = new BasemapPropertyPage();
-			dialog.open();
+			dialog = new BasemapPropertyPage();
+		}else if (page.equals(ProjectionPropertyDialog.class)){
+			dialog = new ProjectionPropertyDialog();
 		}
-		
+		dialog.open();
 		return null;
 	}
 }

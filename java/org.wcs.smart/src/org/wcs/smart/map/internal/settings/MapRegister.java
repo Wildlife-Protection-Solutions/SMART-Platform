@@ -28,6 +28,8 @@ import net.refractions.udig.ui.palette.ColourScheme;
 
 import org.geotools.brewer.color.BrewerPalette;
 
+import com.google.gson.GsonBuilder;
+
 /**
  * Maintains the custom setting done in the map object
  * 
@@ -41,12 +43,14 @@ final class MapRegister {
 	private final URI id;
 	private final String name;
 	private final ColourScheme colourScheme;
+	private final String crsWkt;
 
 	public MapRegister(
 			final URI id, final String sName, 
 			final BrewerPalette colorPalette,
 			final ColourScheme colourScheme,
-			final List<LayerRegister> layerRegisterList) {
+			final List<LayerRegister> layerRegisterList,
+			final String crsWkt) {
 
 		this.id = id;
 		this.name = sName;
@@ -54,19 +58,20 @@ final class MapRegister {
 		this.colourScheme = colourScheme;
 
 		this.layerList = layerRegisterList;
+		this.crsWkt = crsWkt;
 	}
 
+	public String getCrsWkt(){
+		return this.crsWkt;
+	}
 	
 	public URI getId() {
 		return id;
 	}
 
-
 	public String getName() {
 		return name;
 	}
-
-
 
 	public BrewerPalette getColorPalette() {
 		return colorPalette;
@@ -76,12 +81,9 @@ final class MapRegister {
 		return layerList;
 	}
 
-
 	public ColourScheme getColourScheme() {
 		return colourScheme;
 	}
-
-
 
 	@Override
 	public String toString() {
