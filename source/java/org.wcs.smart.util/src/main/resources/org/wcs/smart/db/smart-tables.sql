@@ -187,3 +187,19 @@ ALTER TABLE smart.saved_maps
 	ON UPDATE RESTRICT
 	ON DELETE CASCADE
 ;
+
+CREATE TABLE smart.ca_projection
+(
+	UUID CHAR(16) for bit data NOT NULL,
+	CA_UUID CHAR(16) for bit data NOT NULL,
+	NAME VARCHAR(1024) NOT NULL,
+	DEFINITION VARCHAR(32372) NOT NULL,
+	IS_DEFAULT BOOLEAN,
+	PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.ca_projection ADD CONSTRAINT ca_projection_ca_uuid_fk FOREIGN KEY (ca_uuid)
+	REFERENCES smart.conservation_area(UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
