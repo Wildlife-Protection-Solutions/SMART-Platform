@@ -179,6 +179,13 @@
                   style="push">
             </command>
             <command
+                  commandId="org.wcs.smart.ca.showProjection"
+                  label="Manage Projections ..."
+                  mnemonic="P"
+                  style="push"
+                  tooltip="Add, Remove, Modify projections available to users">
+            </command>
+            <command
                   commandId="org.wcs.smart.ca.showArea"
                   icon="images/icons/etool16/area_polygon.png"
                   label="Define Area Boundaries ..."
@@ -485,6 +492,10 @@
             id="org.wcs.smart.map.zoomOut"
             name="zoom out">
       </command>
+      <command
+            id="org.wcs.smart.ca.showProjection"
+            name="Manager Projections ....">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -579,6 +590,10 @@
       <handler
             class="org.wcs.smart.map.internal.ZoomOutHandler"
             commandId="org.wcs.smart.map.zoomOut">
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowProjectionsPageHandler"
+            commandId="org.wcs.smart.ca.showProjection">
       </handler>
    </extension>
    <extension
@@ -678,6 +693,9 @@
       </class>
       <class
             class="org.wcs.smart.ca.BasemapDefinition">
+      </class>
+      <class
+            class="org.wcs.smart.ca.Projection">
       </class>
    </extension>
    <extension
