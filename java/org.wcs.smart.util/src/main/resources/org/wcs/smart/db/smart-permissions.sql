@@ -5,7 +5,9 @@ GRANT ALL PRIVILEGES ON smart.employee TO login;
 GRANT ALL PRIVILEGES ON smart.language TO login;
 GRANT ALL PRIVILEGES  ON smart.i18n_label TO login;
 GRANT ALL PRIVILEGES  ON smart.station TO login;
+GRANT ALL PRIVILEGES  ON smart.ca_projection TO login;
 GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO login;
+
 GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE TO login;
 GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_FREEZE_DATABASE TO login;
 GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE TO data_entry;
@@ -42,6 +44,10 @@ GRANT SELECT ON smart.station TO data_entry;
 GRANT SELECT ON smart.saved_maps TO manager;
 GRANT SELECT ON smart.saved_maps TO analyst;
 GRANT SELECT ON smart.saved_maps TO data_entry;
+
+GRANT SELECT ON smart.ca_projection TO manager;
+GRANT SELECT ON smart.ca_projection TO analyst;
+GRANT SELECT ON smart.ca_projection TO data_entry;
 
 --data_entry
 GRANT SELECT ON smart.dm_category TO data_entry;
