@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.geotools.referencing.CRS;
 import org.hibernate.Criteria;
 import org.hibernate.EntityMode;
 import org.hibernate.Query;
@@ -44,6 +45,7 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.Joinable;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -347,7 +349,24 @@ public class HibernateManager extends SmartHibernateManager{
 			for(Employee e: newCa.getEmployees()){
 				generateEmployeeId(e, s);
 				s.save(e);
-			}			
+			}		
+			
+			//create initial default projection
+			CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
+			Projection prj = new Projection();
+			prj.setConservationArea(newCa);
+			String code = "unknown";
+			try{
+				code = CRS.lookupIdentifier(crs.getName().getAuthority(), crs, true);
+			}catch (Exception ex){
+				
+			}
+			prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]");
+			prj.setDefinition(crs.toWKT());
+			prj.setIsDefault(true);
+			s.save(prj);
+			
+			
 			tx.commit();
 		} catch (Exception ex) {
 			tx.rollback();
@@ -532,6 +551,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param session
 	 * @return all basemaps defined for the current conservation area
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<BasemapDefinition> getBasemaps(Session session){
 		String query = "FROM BasemapDefinition WHERE conservationArea = :ca";
 		Query q = session.createQuery(query);
@@ -586,7 +606,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * area of null of non selected
 	 */
 	public static Projection getDefaultProjection(Session session){
-		List<?> defaults = session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDeafult", true)).list();
+		List<?> defaults = session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDefault", true)).list();
 		if (defaults.size() == 0){
 			return null;
 		}else{
