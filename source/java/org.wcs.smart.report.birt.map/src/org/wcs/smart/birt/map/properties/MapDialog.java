@@ -60,12 +60,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.map.tools.ZoomTool;
@@ -207,11 +205,13 @@ public class MapDialog extends Dialog implements MapPart{
 	
 	private void createInfoPanel(Composite parent){
 		 Composite infoArea = new Composite(parent, SWT.NONE);
-	        infoArea.setLayout(new GridLayout(3, false));
+		 	GridLayout gl = new GridLayout(3, false);
+		 	gl.marginBottom = gl.marginTop = gl.verticalSpacing = gl.marginHeight = 0;
+	        infoArea.setLayout(gl);
 	        infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 	        lblCoordinates = new Label(infoArea, SWT.NONE);
 	        lblCoordinates.setText("Coordinates");
-	        lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	        lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 	        lblCoordinates.setAlignment(SWT.RIGHT);
 	        
 	        final Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
@@ -243,18 +243,13 @@ public class MapDialog extends Dialog implements MapPart{
 				@Override
 				public void changed(ViewportModelEvent event) {
 					if(event.getType() == ViewportModelEvent.EventType.CRS){
-						Display display = PlatformUI.getWorkbench().getDisplay();
-				        if (display == null){
-				        	display = Display.getDefault();
-				        }
-				        display.asyncExec(new Runnable(){
+						getShell().getDisplay().asyncExec(new Runnable(){
 							@Override
 							public void run() {
 								lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
 								lblSRID.getParent().layout();
 							}});
-					}
-					
+					}					
 				}
 			});
 	      
