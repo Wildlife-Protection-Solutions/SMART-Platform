@@ -48,11 +48,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
@@ -175,27 +173,18 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 					try{
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
 						map.sendCommandASync(command);
-//						map.executeASyncWithoutUndo(command);
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(getSite().getShell(), "Error setting map projection.\n\n" + ex.getMessage(), ex);
-					}
-					
+					}	
 				}
-				
-				
 			}
 		});
         
         map.getViewportModel().addViewportModelListener(new IViewportModelListener() {
-			
 			@Override
 			public void changed(ViewportModelEvent event) {
 				if(event.getType() == ViewportModelEvent.EventType.CRS){
-					Display display = PlatformUI.getWorkbench().getDisplay();
-			        if (display == null){
-			        	display = Display.getDefault();
-			        }
-			        display.asyncExec(new Runnable(){
+					getSite().getShell().getDisplay().asyncExec(new Runnable(){
 						@Override
 						public void run() {
 							lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());

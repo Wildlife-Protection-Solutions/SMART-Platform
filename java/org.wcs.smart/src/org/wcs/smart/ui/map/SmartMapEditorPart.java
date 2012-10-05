@@ -71,7 +71,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -81,12 +80,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -245,9 +243,9 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         Map map = (Map) ProjectFactory.eINSTANCE.createMap();
         map.setName(getEditorInput().getName());
         mapViewer.setMap(map);
-        //set default crs
+//        //set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
-		mapViewer.getMap().getViewportModelInternal().setCRS(Area.AREA_CRS);
+		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
 		
 		MapToolComposite tools = new MapToolComposite();
 		tools.createComposite(composite);
@@ -281,14 +279,10 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 					try{
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
 						getMap().sendCommandASync(command);
-//						map.executeASyncWithoutUndo(command);
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(getSite().getShell(), "Error setting map projection.\n\n" + ex.getMessage(), ex);
-					}
-					
+					}	
 				}
-				
-				
 			}
 		});
         
@@ -296,11 +290,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 			@Override
 			public void changed(ViewportModelEvent event) {
 				if(event.getType() == ViewportModelEvent.EventType.CRS){
-					Display display = PlatformUI.getWorkbench().getDisplay();
-			        if (display == null){
-			        	display = Display.getDefault();
-			        }
-			        display.asyncExec(new Runnable(){
+					getSite().getShell().getDisplay().asyncExec(new Runnable(){
 						@Override
 						public void run() {
 							lblSRID.setText(getMap().getViewportModel().getCRS().getName().getCode());

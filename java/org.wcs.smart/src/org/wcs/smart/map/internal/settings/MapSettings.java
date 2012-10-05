@@ -301,6 +301,7 @@ public class MapSettings {
 		if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
 			((RenderManagerImpl)currentMap.getRenderManager()).disableRendering();
 		}
+		 MapRegister userMap = null;
 		try{
 		List<ILayer> currentMapLayers = currentMap.getMapLayers();
 
@@ -315,7 +316,7 @@ public class MapSettings {
 	    GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
 		Gson gson = gsonBuilder.create();
 	    
-	    MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
+		userMap = gson.fromJson(jsonMap, MapRegister.class);
 		
 	    //determine which layers need to be added/removed
 	    List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
@@ -407,6 +408,15 @@ public class MapSettings {
 			}
 		}
 		
+	
+
+		//turn back on events
+		}finally{
+			currentMap.eSetDeliver(true);
+			if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
+				((RenderManagerImpl)currentMap.getRenderManager()).enableRendering();
+			}
+		}
 		try{
 			if (userMap.getCrsWkt() != null){
 				CoordinateReferenceSystem crs = CRS.parseWKT(userMap.getCrsWkt());
@@ -418,15 +428,6 @@ public class MapSettings {
 		}catch (Exception ex){
 			ex.printStackTrace();
 		}
-
-		//turn back on events
-		}finally{
-			currentMap.eSetDeliver(true);
-			if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
-				((RenderManagerImpl)currentMap.getRenderManager()).enableRendering();
-			}
-		}
-		
 		if (currentMap.getRenderManager() != null){
 			currentMap.getRenderManager().refresh(null);
 		}

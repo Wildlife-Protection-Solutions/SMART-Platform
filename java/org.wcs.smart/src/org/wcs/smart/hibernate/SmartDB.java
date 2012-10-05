@@ -24,6 +24,10 @@ package org.wcs.smart.hibernate;
 import java.io.File;
 
 import org.eclipse.core.runtime.Platform;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
@@ -38,6 +42,16 @@ import org.wcs.smart.ca.Language;
  */
 public class SmartDB {
 
+	public static CoordinateReferenceSystem DATABASE_CRS;
+	static{
+		try {
+			DATABASE_CRS = CRS.decode("EPSG:4326");
+		} catch (NoSuchAuthorityCodeException e) {
+			SmartPlugIn.log("Error determining default crs", e);
+		} catch (FactoryException e) {
+			SmartPlugIn.log("Error determining default crs", e);
+		}
+	}
 	/**
 	 * MapSettingsStore user accounts
 	 * 
