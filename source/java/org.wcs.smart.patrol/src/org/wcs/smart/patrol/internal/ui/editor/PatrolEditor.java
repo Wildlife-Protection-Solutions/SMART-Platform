@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -81,6 +82,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private PatrolSummaryEditor summaryEditor;
 	private PatrolMapPageEditor mapPage;
+	
+	private Projection[] projections;
 	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
 		@Override
@@ -123,6 +126,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolDeleteListener);
 	}
 
+	public Projection[] getAvailableProjections(){
+		return this.projections;
+	}
 	
 	@Override
 	public void dispose() {
@@ -174,6 +180,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			this.patrol = (Patrol) session.load(Patrol.class, puuid);
 			this.patrol.getLegs().size();
 			this.patrol.getPatrolDatastorePath();
+			List<Projection> tmp = HibernateManager.getCaProjectinList(session);
+			this.projections = tmp.toArray(new Projection[tmp.size()]);
 			ops = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 			session.close();
 		}

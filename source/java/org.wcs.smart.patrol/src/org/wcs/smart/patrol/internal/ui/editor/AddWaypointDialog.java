@@ -22,6 +22,13 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -32,7 +39,17 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Projection;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Waypoint;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Dialog for adding a new waypoint.
@@ -41,24 +58,28 @@ import org.wcs.smart.patrol.model.Waypoint;
  */
 public class AddWaypointDialog extends TitleAreaDialog{
 
+	private static final GeometryFactory gf = new GeometryFactory();
 	private Text txtWaypointId;
-	private Text txtEasting;
-	private Text txtNorthing;
+	private Text txtX;
+	private Text txtY;
+	private ComboViewer lstProjections;
 	private double y;
 	private double x;
 	private int waypointId;
+	private Projection[] projections;
 	
 	private Waypoint newWaypoint;
 	
-	public AddWaypointDialog(Shell parentShell) {
+	public AddWaypointDialog(Shell parentShell, Projection[] projections) {
 		super(parentShell);
 		x = 0;
 		y = 0;
 		waypointId = 0;
+		this.projections = projections;
 	}
 	
-	public AddWaypointDialog(Shell parentShell, double y, double x, int waypointId) {
-		this(parentShell);
+	public AddWaypointDialog(Shell parentShell, double y, double x, int waypointId, Projection[] projections) {
+		this(parentShell, projections);
 		
 		this.x = x;
 		this.y = y;
@@ -67,15 +88,24 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	
 	public Waypoint getWaypoint(){
 		return newWaypoint;
-		
 	}
 	
 	@Override
 	protected void okPressed() {
 		newWaypoint = new Waypoint();
 		newWaypoint.setId(Integer.parseInt(txtWaypointId.getText()));
-		newWaypoint.setX(Double.parseDouble(txtEasting.getText()));
-		newWaypoint.setY(Double.parseDouble(txtNorthing.getText()));
+		try{
+			//reproject
+			CoordinateReferenceSystem sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs();
+			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+
+			newWaypoint.setX(p.getX());
+			newWaypoint.setY(p.getY());
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), "Error saving waypoint.\n\n" + ex.getMessage(), ex);
+			return;
+		}
 		super.okPressed();
 	}
 	
@@ -89,11 +119,54 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		
 		parent.setLayout(new GridLayout(1, false));
 		
-		Composite legtype = new Composite(parent, SWT.NONE);
-		legtype.setLayout(new GridLayout(2, false));
-		legtype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite waypointComp = new Composite(parent, SWT.NONE);
+		waypointComp.setLayout(new GridLayout(2, false));
+		waypointComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label lbl = new Label(legtype, SWT.NONE);
+		
+		Label lbl = new Label(waypointComp, SWT.NONE);
+		lbl.setText("Projection:");
+
+		
+		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN);
+		lstProjections.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstProjections.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof Projection){
+					return ((Projection)element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		lstProjections.setContentProvider(ArrayContentProvider.getInstance());
+		lstProjections.setInput(projections);
+		Projection defaultProj = projections.length > 0 ? projections[0] : null;
+		for (int i = 0; i < projections.length; i ++){
+			if (projections[i].getIsDefault() ){
+				defaultProj = projections[i];
+				break;
+			}
+		}
+		if (defaultProj != null){
+			lstProjections.setSelection(new StructuredSelection(defaultProj));			
+			try{
+				Point point = gf.createPoint(new Coordinate(x,y));
+				Point np = (Point)JTS.transform(point, CRS.findMathTransform(SmartDB.DATABASE_CRS, defaultProj.getCrs()));
+				x = np.getX();
+				y = np.getY();
+			}catch (Exception ex){
+				
+			}
+		}
+		lstProjections.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+			}
+		});
+		
+		lbl = new Label(waypointComp, SWT.NONE);
 		lbl.setText("Waypoint Id:" );
 		
 		ModifyListener validation = new ModifyListener() {
@@ -103,25 +176,25 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			}
 		};
 		
-		txtWaypointId = new Text(legtype, SWT.BORDER);
+		txtWaypointId = new Text(waypointComp, SWT.BORDER);
 		txtWaypointId.setText(String.valueOf(waypointId));
 		txtWaypointId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWaypointId.addModifyListener(validation);
 		
-		lbl = new Label(legtype, SWT.NONE);
-		lbl.setText("Longitude:" );
-		txtEasting = new Text(legtype, SWT.BORDER);
-		txtEasting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if(x != 0)txtEasting.setText(String.valueOf(x));
-		txtEasting.addModifyListener(validation);
+		lbl = new Label(waypointComp, SWT.NONE);
+		lbl.setText("X Coordinate:" );
+		txtX = new Text(waypointComp, SWT.BORDER);
+		txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if(x != 0)txtX.setText(String.valueOf(x));
+		txtX.addModifyListener(validation);
 		
 		
-		lbl = new Label(legtype, SWT.NONE);
-		lbl.setText("Latitude:" );
-		txtNorthing = new Text(legtype, SWT.BORDER);
-		txtNorthing.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if(y != 0)txtNorthing.setText(String.valueOf(y));
-		txtNorthing.addModifyListener(validation);
+		lbl = new Label(waypointComp, SWT.NONE);
+		lbl.setText("Y Coordinate:" );
+		txtY = new Text(waypointComp, SWT.BORDER);
+		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if(y != 0)txtY.setText(String.valueOf(y));
+		txtY.addModifyListener(validation);
 		
 		
 		setMessage("Add a new waypoint.");
@@ -142,6 +215,18 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		getButton(OK).setEnabled(error == null);
 	}
 	private String findError(){
+		CoordinateReferenceSystem sourceCrs = null;
+		double x = -1;
+		double y = -1;
+		if (lstProjections.getSelection().isEmpty()){
+			return "Projection must be selected.";
+		}
+		try{
+			sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs(); 
+		}catch (Exception ex){
+			return "Could not parse CRS: " + ex.getMessage();
+		}
+		
 		if (txtWaypointId.getText().trim().length() == 0){
 			return "Waypoint id must be specified.";
 		}
@@ -151,31 +236,37 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			return "Invalid waypoint id.  The waypoint id must be an integer.";
 		}
 		
-		if (this.txtEasting.getText().trim().length() == 0){
-			return "Longitude must be specified.";
+		if (this.txtX.getText().trim().length() == 0){
+			return "X Coordinate  must be specified.";
+		}
+
+		try{
+			x = Double.parseDouble(txtX.getText());
+//			if (e < -180 || e > 180){
+//				return "Longitude must be between -180 and 180";
+//			}
+		}catch (NumberFormatException ex){
+			return "Invalid x coordinate value.";
+		}
+		
+		if (this.txtY.getText().trim().length() == 0){
+			return "Y Coordinate must be specified.";
 		}
 		try{
-			double e = Double.parseDouble(txtEasting.getText());
-			if (e < -180 || e > 180){
-				return "Longitude must be between -180 and 180";
-			}
+			y = Double.parseDouble(txtY.getText());
+//			if (n < -90 || n > 90){
+//				return "Latitude must be between -90 and 90";
+//			}
 		}catch (NumberFormatException ex){
-			return "Invalid longitude value.";
+			return "Invalid y coordinate value.";
 		}
 		
-		if (this.txtNorthing.getText().trim().length() == 0){
-			return "Latitude Coordinate must be specified.";
-		}
 		try{
-			double n = Double.parseDouble(txtNorthing.getText());
-			if (n < -90 || n > 90){
-				return "Latitude must be between -90 and 90";
-			}
-		}catch (NumberFormatException ex){
-			return "Invalid latitude value.";
+			Point point = gf.createPoint(new Coordinate(x,y));
+			JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+		}catch (Exception ex){
+			return "Invalid x,y values. " + ex.getMessage();
 		}
-		
-		
 		
 		return null;
 	}
