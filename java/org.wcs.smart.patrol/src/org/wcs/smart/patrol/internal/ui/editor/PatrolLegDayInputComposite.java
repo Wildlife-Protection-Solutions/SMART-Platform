@@ -1044,10 +1044,11 @@ public class PatrolLegDayInputComposite {
 			}
 		}
 		AddWaypointDialog add;
+	
 		if(x == 0 && y == 0){
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell());
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), editor.getPatrolEditor().getAvailableProjections());
 		}else{
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x, id+1);
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x, id+1, editor.getPatrolEditor().getAvailableProjections());
 		}
 		if (add.open() == Window.OK){
 			Waypoint wp = add.getWaypoint();
