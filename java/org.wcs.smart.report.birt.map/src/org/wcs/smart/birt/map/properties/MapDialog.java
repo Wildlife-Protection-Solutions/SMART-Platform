@@ -26,6 +26,7 @@ import java.text.NumberFormat;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
@@ -50,10 +51,13 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -63,10 +67,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.map.tools.ZoomTool;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
+import org.wcs.smart.ui.map.ProjectionDialog;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -213,9 +219,25 @@ public class MapDialog extends Dialog implements MapPart{
 	        gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	        lblSeparator.setLayoutData(gd);
 	        
-	        final Label lblSRID = new Label(infoArea, SWT.NONE);
+	        final Button lblSRID = new Button(infoArea, SWT.NONE);
 	        lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
 	        lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+	        lblSRID.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ProjectionDialog pd = new ProjectionDialog(getShell());
+					if (pd.open() == IDialogConstants.OK_ID){
+						try{
+							ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
+							map.sendCommandASync(command);
+						}catch (Exception ex){
+							SmartPlugIn.displayLog(getShell(), "Error setting map projection.\n\n" + ex.getMessage(), ex);
+						}
+					}
+					
+					
+				}
+			});
 	        map.getViewportModel().addViewportModelListener(new IViewportModelListener() {
 				
 				@Override

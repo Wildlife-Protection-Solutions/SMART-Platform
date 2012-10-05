@@ -66,7 +66,6 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
 import org.geotools.styling.FeatureTypeStyle;
 import org.geotools.styling.LineSymbolizer;
 import org.geotools.styling.PointSymbolizer;
@@ -399,7 +398,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		gd.widthHint = 200;
 		txtBounds.setLayoutData(gd);
 		
-		toolkit.createLabel(bm, "SRID:");
+		toolkit.createLabel(bm, "CRS:");
 		txtSrid = toolkit.createText(bm, Area.AREA_CRS.getName().getCode());
 		txtSrid.setEditable(false);
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
@@ -421,13 +420,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				}
 				
 				ReferencedEnvelope re = md.getBounds();
+				txtBounds.setData(re);
+				updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
 				
-				if(!CRS.equalsIgnoreMetadata(re.getCoordinateReferenceSystem(), Area.AREA_CRS)){
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Coordinate reference system must be lat/long");
-				}else{
-					txtBounds.setData(re);
-					updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
-				}
 			}
 		});
 		
@@ -540,6 +535,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				}else{
 					mapItem.setMapBounds((ReferencedEnvelope)txtBounds.getData());
 				}
+				
 			}
 		} catch (Exception ex) {
 			SmartMapItemPlugIn.displayLog(

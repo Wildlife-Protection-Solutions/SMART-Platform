@@ -42,6 +42,7 @@ import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.impl.MapImpl;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.ApplicationGIS.DrawMapParameter;
@@ -243,8 +244,8 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			((MapImpl) renderedMap).getLayersInternal().addAll(0,orderedLayers);
 			((MapImpl) renderedMap).getContextModel().eSetDeliver(true);
 		    
-			
-			renderedMap.sendCommandASync(new SetViewportBBoxCommand(bounds));
+			renderedMap.sendCommandSync(new ChangeCRSCommand(bounds.getCoordinateReferenceSystem()));
+			renderedMap.sendCommandSync(new SetViewportBBoxCommand(bounds));
 			try {
 				DrawMapParameter drawMapParameter = new DrawMapParameter(g,
 						new java.awt.Dimension(iwidth, iheight), renderedMap,
