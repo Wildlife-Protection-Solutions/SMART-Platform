@@ -206,6 +206,8 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 					if (!SmartUtils.isSimpleString(newKey, RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Area.KEY_MAX_LENGTH)){
 						setErrorMessage("Invalid key.  Key mush only contain " + RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc +" and be less than " + Area.KEY_MAX_LENGTH + " characters.");
 						return;
+					}else if (newKey.substring(0, 1).matches("[0-9_]")){
+						setErrorMessage("Invalid key.  Key cannot start with a number or '_'. ");
 					}else{
 						Object[] data = (Object[]) tableViewer.getInput();
 						for (int i = 0; i < data.length; i ++){
