@@ -159,6 +159,7 @@
             icon="images/icons/etool16/zoom_layers.png"
             id="org.wcs.smart.birt.map.tools.ZoomExtents"
             name="Zoom Extents"
+            onToolbar="false"
             tooltip="Zoom to map extents">
       </actionTool>
       <modalTool
@@ -167,7 +168,7 @@
             icon="images/icons/etool16/zoom_mode.gif"
             id="org.wcs.smart.birt.map.tools.Zoom"
             name="Zoom Tool"
-            onToolbar="true"
+            onToolbar="false"
             toolCursorId="zoomCursor"
             tooltip="Zoom the map">
       </modalTool>
@@ -177,7 +178,7 @@
             icon="images/icons/etool16/pan_mode.gif"
             id="org.wcs.smart.birt.map.tools.Pan"
             name="Pan Tool"
-            onToolbar="true"
+            onToolbar="false"
             toolCursorId="move"
             tooltip="Pans the map">
       </modalTool>
