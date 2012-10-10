@@ -208,6 +208,10 @@ public class Area {
 	
 		int count = 0;
 		String key = raw;
+		if (key.substring(0, 1).matches("[0-9_]")){
+			//cannot start with a digit
+			key = "A" + key;
+		}
 		if (raw.length() > Area.KEY_MAX_LENGTH){
 			key = raw.substring(0, Area.KEY_MAX_LENGTH);
 		}

@@ -24,7 +24,6 @@ package org.wcs.smart.util;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -94,6 +93,14 @@ public class SmartUtils {
 			return o1.compareTo(o2);
 		}
 	});
+	
+	public static NullComparator nullFloatComparator = new NullComparator(new Comparator<Float>() {
+		@Override
+		public int compare(Float o1, Float o2) {
+			return o1.compareTo(o2);
+		}
+	});
+	
 	
 	public static NullComparator nullBooleanComparator = new NullComparator(new Comparator<Boolean>() {
 		@Override
