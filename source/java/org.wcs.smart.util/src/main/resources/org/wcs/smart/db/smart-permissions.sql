@@ -57,7 +57,7 @@ GRANT SELECT ON smart.dm_att_agg_map TO data_entry;
 GRANT SELECT ON smart.dm_aggregation TO data_entry;
 GRANT SELECT ON smart.dm_attribute_list TO data_entry;
 GRANT SELECT ON smart.dm_attribute_tree TO data_entry;
-GRANT SELECT ON smart.DM_ATT_TREE_NODES TO data_entry;
+
 --manager
 GRANT SELECT ON smart.dm_category TO manager;
 GRANT SELECT ON smart.dm_cat_att_map TO manager;
@@ -66,8 +66,6 @@ GRANT SELECT ON smart.dm_att_agg_map TO manager;
 GRANT SELECT ON smart.dm_aggregation TO manager;
 GRANT SELECT ON smart.dm_attribute_list TO manager;
 GRANT SELECT ON smart.dm_attribute_tree TO manager;
-GRANT SELECT ON smart.DM_ATT_TREE_NODES TO manager;
-
 
 --analyst
 GRANT SELECT ON smart.dm_category TO analyst;
@@ -77,8 +75,6 @@ GRANT SELECT ON smart.dm_att_agg_map TO analyst;
 GRANT SELECT ON smart.dm_aggregation TO analyst;
 GRANT SELECT ON smart.dm_attribute_list TO analyst;
 GRANT SELECT ON smart.dm_attribute_tree TO analyst;
-GRANT SELECT ON smart.DM_ATT_TREE_NODES TO analyst;
-
 
 GRANT SELECT ON smart.AREA_GEOMETRIES to analyst;
 GRANT SELECT ON smart.AREA_GEOMETRIES to manager;
