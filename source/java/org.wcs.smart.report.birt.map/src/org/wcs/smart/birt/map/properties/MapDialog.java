@@ -27,18 +27,15 @@ import java.text.NumberFormat;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
+import net.refractions.udig.project.internal.render.RenderPackage;
 import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.internal.tool.ToolContext;
-import net.refractions.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,13 +44,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -66,11 +64,14 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.birt.map.tools.PanTool;
+import org.wcs.smart.birt.map.tools.ZoomExtentTool;
 import org.wcs.smart.birt.map.tools.ZoomTool;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
+import org.wcs.smart.ui.map.ScaleRatioComposite;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -83,14 +84,8 @@ public class MapDialog extends Dialog implements MapPart{
 
 	private MapViewer viewer;
 	private Map map;
-	
 	private Label lblCoordinates;
-	
-	private ToolContext toolcontext;
-	private ModalTool activeTool;
 	private byte[] basemapUuid = null;
-	 
-	
 	private ReferencedEnvelope  bounds = null;
 	
 	protected MapDialog(Shell parentShell, byte[] basemapUuid, ReferencedEnvelope mapBounds) {
@@ -120,6 +115,7 @@ public class MapDialog extends Dialog implements MapPart{
 		bounds = map.getViewportModel().getBounds();
 		close();
 	}
+	
 	@Override
 	public boolean close(){
 		boolean ok = super.close();
@@ -129,6 +125,7 @@ public class MapDialog extends Dialog implements MapPart{
 		}
 		return ok;
 	}
+	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		
@@ -142,46 +139,42 @@ public class MapDialog extends Dialog implements MapPart{
 		gd.marginWidth = 0;
 		composite.setLayout(gd);
 		
-		
 		viewer = new MapViewer(composite, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 	    map = (Map) ProjectFactory.eINSTANCE.createMap();
         map.setName("Smart Map");
         viewer.setMap(map);
-		
+        
+        
         //set default crs
         map.getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		map.getViewportModelInternal().setCRS(Area.AREA_CRS);
 		
+		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, bounds == null, this.basemapUuid);
+		// we need to do this because this map is in a dialog box and
+		// events does work correctly
+		layer.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				map.getViewportModelInternal().setBounds(bounds);
+				map.getRenderManager().refresh(null);
+			}
+		});
+		layer.schedule();
+		
+		
+		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		String[] thisTools = new String[]{
-				"org.wcs.smart.birt.map.tools.ZoomExtents", 
-				"org.wcs.smart.birt.map.tools.Pan",
+				ZoomExtentTool.ID,
+				PanTool.ID,
 				ZoomTool.ID};
 		
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(composite);
-		
 		createInfoPanel(composite);
 
-		ApplicationGIS.getToolManager().setCurrentEditor(this);
-		
-		
-		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, bounds == null, this.basemapUuid);
-		layer.schedule();
-		
-		if (bounds != null){
-			map.getViewportModelInternal().setBounds(bounds);
-		}else{
-			//we need to do this because this map is in a dialog box and
-			//events does work correctly 
-			layer.addJobChangeListener(new JobChangeAdapter() {
-				@Override
-				public void done(IJobChangeEvent event) {
-					map.getRenderManager().refresh(null);
-				}
-			});
-		}
+		tools.selectTool(PanTool.ID);
 		
 		getShell().setText("Set Map Bounds");
 		super.getShell().addListener(SWT.Resize, new Listener(){
@@ -198,88 +191,109 @@ public class MapDialog extends Dialog implements MapPart{
 				j.schedule(500);
 			}});
 
-		tools.selectTool("org.wcs.smart.birt.map.tools.Pan");
+		ApplicationGIS.getToolManager().setCurrentEditor(this);
+		tools.selectTool(PanTool.ID);
+//		setModalTool(PanTool.ID); 
 		return composite;
 	}
 
 	
-	private void createInfoPanel(Composite parent){
-		 Composite infoArea = new Composite(parent, SWT.NONE);
-		 	GridLayout gl = new GridLayout(3, false);
-		 	gl.marginBottom = gl.marginTop = gl.verticalSpacing = gl.marginHeight = 0;
-	        infoArea.setLayout(gl);
-	        infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-	        lblCoordinates = new Label(infoArea, SWT.NONE);
-	        lblCoordinates.setText("Coordinates");
-	        lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	        lblCoordinates.setAlignment(SWT.RIGHT);
-	        
-	        final Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
-	        GridData gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
-	        gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-	        lblSeparator.setLayoutData(gd);
-	        
-	        final Button lblSRID = new Button(infoArea, SWT.NONE);
-	        lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
-	        lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-	        lblSRID.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					ProjectionDialog pd = new ProjectionDialog(getShell());
-					if (pd.open() == IDialogConstants.OK_ID){
-						try{
-							ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
-							map.sendCommandASync(command);
-						}catch (Exception ex){
-							SmartPlugIn.displayLog(getShell(), "Error setting map projection.\n\n" + ex.getMessage(), ex);
-						}
+	private void createInfoPanel(Composite parent) {
+		Composite infoArea = new Composite(parent, SWT.NONE);
+		GridLayout gl = new GridLayout(5, false);
+		gl.marginBottom = gl.marginTop = gl.verticalSpacing = gl.marginHeight = 0;
+		infoArea.setLayout(gl);
+		infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,
+				2, 1));
+		lblCoordinates = new Label(infoArea, SWT.NONE);
+		lblCoordinates.setText("Coordinates");
+		lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false));
+		lblCoordinates.setAlignment(SWT.RIGHT);
+
+		Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
+		GridData gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
+		gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		lblSeparator.setLayoutData(gd);
+
+		ScaleRatioComposite scale = new ScaleRatioComposite(infoArea, getMap(), true);
+		scale.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+
+		lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
+		gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
+		gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		lblSeparator.setLayoutData(gd);
+
+		final Button lblSRID = new Button(infoArea, SWT.NONE);
+		lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
+		lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		lblSRID.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ProjectionDialog pd = new ProjectionDialog(getShell());
+				if (pd.open() == IDialogConstants.OK_ID) {
+					try {
+						ChangeCRSCommand command = new ChangeCRSCommand(pd
+								.getSelection().getCrs());
+						map.sendCommandASync(command);
+					} catch (Exception ex) {
+						SmartPlugIn.displayLog(
+								getShell(),
+								"Error setting map projection.\n\n"
+										+ ex.getMessage(), ex);
 					}
-					
-					
 				}
-			});
-	        map.getViewportModel().addViewportModelListener(new IViewportModelListener() {
-				
-				@Override
-				public void changed(ViewportModelEvent event) {
-					if(event.getType() == ViewportModelEvent.EventType.CRS){
-						getShell().getDisplay().asyncExec(new Runnable(){
-							@Override
-							public void run() {
-								lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
-								lblSRID.getParent().layout();
-							}});
-					}					
-				}
-			});
-	      
-	        
-	        viewer.getViewport().addMouseMotionListener(new MapMouseMotionListener() {
-				
-				@Override
-				public void mouseMoved(MapMouseEvent event) {
-					event.getPoint();
-					Coordinate c = map.getViewportModelInternal().pixelToWorld(event.x, event.y);
-					lblCoordinates.setText(format(c.x) + ", " + format(c.y));
-					//see CursorPosition Tool
-				}
-				
-				private String format(double d){
-					 DecimalFormat format = (DecimalFormat) NumberFormat.getNumberInstance();
-			         format.setMaximumFractionDigits(4);
-			         format.setMinimumIntegerDigits(1);
-			         format.setGroupingUsed(false);
-			         String string = format.format(d);
-			         return string;
-				}
-				@Override
-				public void mouseHovered(MapMouseEvent event) {
-				}
-				
-				@Override
-				public void mouseDragged(MapMouseEvent event) {
-				}
-			});        
+			}
+		});
+		final Map thisMap = map;
+        map.getViewportModelInternal().eAdapters().add(new AdapterImpl(){
+        	public void notifyChanged(Notification notification) {
+        		if (notification.getEventType() == Notification.SET &&
+        				notification.getFeatureID(thisMap.getViewportModelInternal().getClass()) == RenderPackage.VIEWPORT_MODEL__CRS){
+        			getShell().getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							lblSRID.setText(map.getViewportModel()
+									.getCRS().getName().getCode());
+							lblSRID.getParent().layout();
+						}
+					});
+        		}
+        	}
+        	
+        });
+
+		viewer.getViewport().addMouseMotionListener(
+				new MapMouseMotionListener() {
+
+					@Override
+					public void mouseMoved(MapMouseEvent event) {
+						event.getPoint();
+						Coordinate c = map.getViewportModelInternal()
+								.pixelToWorld(event.x, event.y);
+						lblCoordinates
+								.setText(format(c.x) + ", " + format(c.y));
+						// see CursorPosition Tool
+					}
+
+					private String format(double d) {
+						DecimalFormat format = (DecimalFormat) NumberFormat
+								.getNumberInstance();
+						format.setMaximumFractionDigits(4);
+						format.setMinimumIntegerDigits(1);
+						format.setGroupingUsed(false);
+						String string = format.format(d);
+						return string;
+					}
+
+					@Override
+					public void mouseHovered(MapMouseEvent event) {
+					}
+
+					@Override
+					public void mouseDragged(MapMouseEvent event) {
+					}
+				});
 	}
 	
 	
@@ -296,43 +310,42 @@ public class MapDialog extends Dialog implements MapPart{
 		return true;
 	}
 	
-	
-	 public void setModalTool( String toolId ) {
-  	   if (activeTool != null) {
-             // ask the current tool to stop listening etc...
-  		   activeTool.setActive(false);
-  		   //activeTool.setEnabled(false);
-             activeTool = null;
-         }
-  	   
-  	   Tool tool = ApplicationGIS.getToolManager().findTool(toolId);
- 		
-         if( tool == null || !(tool instanceof ModalTool)){
-             return;
-         }
-         activeTool = (ModalTool)tool;
-         activeTool.setContext(getToolContext());
-         activeTool.setActive(true);
-         
-         Cursor toolCursor = ApplicationGIS.getToolManager().findToolCursor(activeTool.getCursorID());
-         if (toolCursor != null){
-      	   activeTool.getContext().getViewportPane().setCursor(toolCursor);
-         }
-         
-  }
-  
- 
-  /**
-   * @return tool context (used to teach tools about our MapViewer facilities.
-   */
-  protected synchronized ToolContext getToolContext(){
-      if( toolcontext == null ){
-          toolcontext = new ToolContextImpl();
-          toolcontext.setMapInternal(map);        
-          toolcontext.setRenderManagerInternal(map.getRenderManagerInternal());            
-      }
-      return toolcontext;
-  }
+//	
+//	 public void setModalTool( String toolId ) {
+//  	   if (activeTool != null) {
+//           // ask the current tool to stop listening etc...
+//		   activeTool.setActive(false);
+//		   //activeTool.setEnabled(false);
+//           activeTool = null;
+//       }
+//	   
+//	   Tool tool = ApplicationGIS.getToolManager().findTool(toolId);
+//		
+//       if( tool == null || !(tool instanceof ModalTool)){
+//           return;
+//       }
+//       activeTool = (ModalTool)tool;
+//       activeTool.setContext(getToolContext());
+//       activeTool.setActive(true);
+//       
+//       Cursor toolCursor = ApplicationGIS.getToolManager().findToolCursor(activeTool.getCursorID());
+//       if (toolCursor != null){
+//    	   activeTool.getContext().getViewportPane().setCursor(toolCursor);
+//       }
+//  }
+//  
+// 
+//  /**
+//   * @return tool context (used to teach tools about our MapViewer facilities.
+//   */
+//  protected synchronized ToolContext getToolContext(){
+//      if( toolcontext == null ){
+//          toolcontext = new ToolContextImpl();
+//          toolcontext.setMapInternal(map);        
+//          toolcontext.setRenderManagerInternal(map.getRenderManagerInternal());            
+//      }
+//      return toolcontext;
+//  }
   
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object getAdapter(Class adaptee) {
