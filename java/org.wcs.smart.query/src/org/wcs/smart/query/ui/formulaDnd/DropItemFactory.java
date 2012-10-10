@@ -378,9 +378,9 @@ public class DropItemFactory {
 		}else if (object instanceof Area){
 			if (queryType == QueryType.OBSERVATION){
 				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
-			}else if (queryType == QueryType.PATROL){
-				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
-			}else if (queryType == QueryType.SUMMARY){
+			}else if (queryType == QueryType.PATROL ||
+					queryType == QueryType.SUMMARY ||
+					queryType == QueryType.GRIDDED){
 				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}
 		}

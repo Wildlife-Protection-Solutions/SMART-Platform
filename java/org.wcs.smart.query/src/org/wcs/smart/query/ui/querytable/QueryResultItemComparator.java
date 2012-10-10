@@ -116,7 +116,11 @@ public class QueryResultItemComparator extends ViewerComparator{
 		}else if (type == ColumnType.BOOLEAN){
 			compare = SmartUtils.nullBooleanComparator;
 		}else if (type == ColumnType.NUMBER){
-			compare = SmartUtils.nullDoubleComparator;
+			if (data1 instanceof Float){
+				compare = SmartUtils.nullFloatComparator;
+			}else{
+				compare = SmartUtils.nullDoubleComparator;
+			}
 		}if (type == ColumnType.STRING){
 			compare = SmartUtils.nullStringComparator;
 		}
