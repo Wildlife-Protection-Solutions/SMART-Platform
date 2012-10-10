@@ -337,6 +337,8 @@ public class AttributeTree {
 							node.setAttribute(null);
 						}else{
 							a.getTree().remove(node);
+//							node.getAttribute().getActiveTreeNodes().remove(node);
+							node.getAttribute().getTree().remove(node);
 							node.setAttribute(null);
 						}
 					}

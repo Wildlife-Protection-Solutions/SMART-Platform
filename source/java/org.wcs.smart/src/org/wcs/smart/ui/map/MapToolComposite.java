@@ -63,6 +63,7 @@ public class MapToolComposite {
 	public MapToolComposite(){
 		
 	}
+	
 	public MapToolComposite(String tools[]){
 		this();
 		this.tools = tools;
@@ -129,6 +130,8 @@ public class MapToolComposite {
 			for (ToolItem it : items){
 				if (!item.equals(it)){
 					it.setSelection(false);
+				}else{
+					it.setSelection(true);
 				}
 			}
 		}

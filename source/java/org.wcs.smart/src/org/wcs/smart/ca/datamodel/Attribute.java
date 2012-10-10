@@ -316,7 +316,7 @@ public class Attribute extends DmObject{
 	 * Only valid for tree attributes.
 	 * @return  set of root tree nodes
 	 */
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute")
 	@Where(clause = "parent_uuid is null and is_active")
 	@OrderBy(clause = "node_order")
 	//@BatchSize(size=200)

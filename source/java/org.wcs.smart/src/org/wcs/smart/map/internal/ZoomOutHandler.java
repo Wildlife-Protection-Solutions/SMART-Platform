@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.map.internal;
 
-import net.refractions.udig.tools.internal.ZoomOut;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -41,7 +39,7 @@ public class ZoomOutHandler extends AbstractHandler{
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
-			view.runActionTool(new ZoomOut());
+			view.setTool("net.refractions.udig.tool.default.ZoomOut");
 		} 
 		return null;
 	}

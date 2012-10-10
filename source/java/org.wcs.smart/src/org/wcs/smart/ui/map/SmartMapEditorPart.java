@@ -34,9 +34,8 @@ import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
+import net.refractions.udig.project.internal.render.RenderPackage;
 import net.refractions.udig.project.internal.render.ViewportModel;
-import net.refractions.udig.project.render.IViewportModelListener;
-import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.ui.AnimationUpdater;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.IAnimation;
@@ -44,20 +43,18 @@ import net.refractions.udig.project.ui.commands.IDrawCommand;
 import net.refractions.udig.project.ui.internal.FeatureAnimation;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.internal.commands.draw.DrawFeatureCommand;
-import net.refractions.udig.project.ui.internal.tool.ToolContext;
-import net.refractions.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.tool.IToolManager;
-import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 import net.refractions.udig.ui.IBlockingSelection;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
@@ -65,7 +62,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -99,8 +95,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 	protected MapViewer mapViewer;
 
 	private Label lblCoordinates;
-	private ModalTool activeTool;
-	private ToolContext toolcontext;
+	private Button lblSRID;
 	
 	 IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
@@ -183,7 +178,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 			throws PartInitException {
 		setSite(site);
 		setInput(input);
-		
+		 
 	}
 
 	/**
@@ -243,16 +238,18 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         Map map = (Map) ProjectFactory.eINSTANCE.createMap();
         map.setName(getEditorInput().getName());
         mapViewer.setMap(map);
-//        //set default crs
+        //set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
-		
+	      
+        ApplicationGIS.getToolManager().setCurrentEditor(this);
+        
 		MapToolComposite tools = new MapToolComposite();
 		tools.createComposite(composite);
-		
+		tools.selectTool("net.refractions.udig.tools.Pan");
 		
         Composite infoArea = new Composite(parent, SWT.NONE);
-        GridLayout gl = new GridLayout(3, false);
+        GridLayout gl = new GridLayout(5, false);
         gl.marginTop = gl.marginBottom = gl.marginHeight= 0;
         gl.marginRight = 0;
         gl.marginWidth = 0;
@@ -263,12 +260,21 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         lblCoordinates.setAlignment(SWT.RIGHT);
         
-        final Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
+        Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
         GridData gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
         gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
         lblSeparator.setLayoutData(gd);
         
-        final Button lblSRID = new Button(infoArea, SWT.NONE);
+        ScaleRatioComposite scale = new ScaleRatioComposite(infoArea, getMap());
+        scale.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+        
+        
+        lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
+        gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
+        gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+        lblSeparator.setLayoutData(gd);
+        
+        lblSRID = new Button(infoArea, SWT.NONE);
         lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
         lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
         lblSRID.addSelectionListener(new SelectionAdapter() {
@@ -286,20 +292,17 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 			}
 		});
         
-        map.getViewportModel().addViewportModelListener(new IViewportModelListener() {
-			@Override
-			public void changed(ViewportModelEvent event) {
-				if(event.getType() == ViewportModelEvent.EventType.CRS){
-					getSite().getShell().getDisplay().asyncExec(new Runnable(){
-						@Override
-						public void run() {
-							lblSRID.setText(getMap().getViewportModel().getCRS().getName().getCode());
-							lblSRID.getParent().layout();
-						}});
-				}
-				
-			}
-		});
+        final Map thisMap = map;
+        map.getViewportModelInternal().eAdapters().add(new AdapterImpl(){
+        	public void notifyChanged(Notification notification) {
+        		if (notification.getEventType() == Notification.SET &&
+        				notification.getFeatureID(thisMap.getViewportModelInternal().getClass()) == RenderPackage.VIEWPORT_MODEL__CRS){
+        			updateLabel();
+        		}
+        	}
+        	
+        });
+        
       
         
         mapViewer.getViewport().addMouseMotionListener(new MapMouseMotionListener() {
@@ -327,47 +330,24 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 			}
 		});   
         mapViewer.init(this);
+ 
+        
         getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         registerFeatureFlasher();
 	}
 
-    public void setModalTool( String toolId ) {
-    	   if (activeTool != null) {
-               // ask the current tool to stop listening etc...
-    		   activeTool.setActive(false);
-    		   //activeTool.setEnabled(false);
-               activeTool = null;
-           }
-    	   
-    	   Tool tool = ApplicationGIS.getToolManager().findTool(toolId);
-   		
-           if( tool == null || !(tool instanceof ModalTool)){
-               return;
-           }
-           activeTool = (ModalTool)tool;
-           activeTool.setContext(getToolContext());
-           activeTool.setActive(true);
-           
-           Cursor toolCursor = ApplicationGIS.getToolManager().findToolCursor(activeTool.getCursorID());
-           if (toolCursor != null){
-        	   activeTool.getContext().getViewportPane().setCursor(toolCursor);
-           }
-    }
-    
-   
-    /**
-     * @return tool context (used to teach tools about our MapViewer facilities.
-     */
-    protected synchronized ToolContext getToolContext(){
-        if( toolcontext == null ){
-            toolcontext = new ToolContextImpl();
-            toolcontext.setMapInternal(mapViewer.getMap());        
-            toolcontext.setRenderManagerInternal(mapViewer.getMap().getRenderManagerInternal());            
-        }
-        return toolcontext;
-    }
+	private void updateLabel() {
+		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				lblSRID.setText(getMap().getViewportModel().getCRS().getName()
+						.getCode());
+				lblSRID.getParent().layout();
+			}
+		});
 
-
+	}
+        
     public Map getMap() {
         return mapViewer.getMap();
     }
@@ -379,17 +359,14 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null) {
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
-        //getSite().getWorkbenchWindow().getPartService().removePartListener(partListener);
-		
+        
         getMap().getViewportModelInternal().setInitialized(false);
-//        getSite().removeSelectionProvider(replaceableSelectionProvider);
         mapViewer.dispose();
         getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
         
         partlistener = null;
         deregisterFeatureFlasher();
         this.selectFeatureListener = null;
-      
     }
 
     public void openContextMenu() {
