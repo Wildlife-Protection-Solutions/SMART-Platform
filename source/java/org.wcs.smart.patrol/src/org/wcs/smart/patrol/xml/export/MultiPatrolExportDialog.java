@@ -131,6 +131,9 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 				IDialogConstants.CANCEL_LABEL, false);
 
 		b.setEnabled(false);
+		if (txtFile.getText() != null && txtFile.getText().length() > 0) {
+			b.setEnabled(true);
+		}
 	}
 
 	/**
