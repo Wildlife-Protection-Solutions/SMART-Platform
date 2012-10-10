@@ -54,7 +54,7 @@ public class SaveMapHandler extends AbstractHandler {
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
 			
-			view.setModalTool(ID);
+			view.setTool(ID);
 			Map map = view.getMap();
 			if(map == null) return null;
 			

@@ -25,15 +25,12 @@ import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.internal.tool.ToolContext;
-import net.refractions.udig.project.ui.internal.tool.impl.ToolContextImpl;
+import net.refractions.udig.project.ui.internal.tool.display.ToolManager;
+import net.refractions.udig.project.ui.internal.tool.display.ToolProxy;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
-import net.refractions.udig.project.ui.tool.ActionTool;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.tool.IToolManager;
-import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -42,7 +39,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -73,8 +69,8 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
     // private RenderManager renderManager;
     private Map map;
 
-    private ModalTool activeTool;
-    private ToolContext toolcontext;
+//    private ModalTool activeTool;
+//    private ToolContext toolcontext;
     
     
     IPartListener2 partlistener = new IPartListener2(){
@@ -130,12 +126,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         mapviewer = new MapViewer(parent, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
         mapviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
-        
-//        MapToolComposite tools = new MapToolComposite();
-//		tools.createComposite(parent);
-		
-		
-        // create a new empty map
+		// create a new empty map
         // if you are going to add layers do so now
         // prior to adding to the mapviewer
         // 
@@ -148,7 +139,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 		map.getViewportModelInternal().setCRS(Area.AREA_CRS);
 		
         Composite infoArea = new Composite(parent, SWT.NONE);
-        GridLayout gl = new GridLayout(3, false);
+        GridLayout gl = new GridLayout(5, false);
         gl.marginTop = gl.marginBottom = gl.marginHeight= 0;
         infoArea.setLayout(gl);
         infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -157,8 +148,17 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         lblCoordinates.setAlignment(SWT.RIGHT);
         
-        final Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
+        Label lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
         GridData gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
+        gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+        lblSeparator.setLayoutData(gd);
+        
+        ScaleRatioComposite scale = new ScaleRatioComposite(infoArea, getMap());
+        scale.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+        
+        
+        lblSeparator = new Label(infoArea, SWT.SEPARATOR | SWT.VERTICAL);
+        gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
         gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
         lblSeparator.setLayoutData(gd);
         
@@ -212,10 +212,6 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 		         format.setMinimumIntegerDigits(1);
 		         format.setGroupingUsed(false);
 		         String string = format.format(d);
-//		         String[] parts = string.split("\\.");
-//		         if(parts[0].length()>6){
-//		         	string = parts[0];
-//		         }
 		         return string;
 			}
 			@Override
@@ -227,51 +223,16 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 			}
 		});        
         getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
-        setModalTool(ZoomHandler.ZoomToolId);
+        setTool(ZoomHandler.ZoomToolId);
     }
 
-	public void runActionTool(ActionTool tool) {
-		tool.setContext(getToolContext());
-		tool.run();
-	}
-    
-    public void setModalTool( String toolId ) {
-    	   if (activeTool != null) {
-               // ask the current tool to stop listening etc...
-    		   activeTool.setActive(false);
-    		   //activeTool.setEnabled(false);
-               activeTool = null;
-           }
-    	   
-    	   Tool tool = ApplicationGIS.getToolManager().findTool(toolId);
-   		
-           if( tool == null || !(tool instanceof ModalTool)){
-               return;
-           }
-           activeTool = (ModalTool)tool;
-           activeTool.setContext(getToolContext());
-           activeTool.setActive(true);
-           
-           Cursor toolCursor = ApplicationGIS.getToolManager().findToolCursor(activeTool.getCursorID());
-           if (toolCursor != null){
-        	   activeTool.getContext().getViewportPane().setCursor(toolCursor);
-           }
+    public void setTool( String toolId ) {
+    	ToolProxy mi =((ToolManager)ApplicationGIS.getToolManager()).findToolProxy(toolId);
+    	if (mi != null){
+    		ApplicationGIS.getToolManager().getToolAction(mi.getId(), mi.getCategoryId()).run();
+    	}
     }
     
-   
-    /**
-     * @return tool context (used to teach tools about our MapViewer facilities.
-     */
-    protected synchronized ToolContext getToolContext(){
-        if( toolcontext == null ){
-            toolcontext = new ToolContextImpl();
-            toolcontext.setMapInternal(map);        
-            toolcontext.setRenderManagerInternal(map.getRenderManagerInternal());            
-        }
-        return toolcontext;
-    }
-  
-
     @Override
     public void setFocus() {
         mapviewer.getViewport().getControl().setFocus();

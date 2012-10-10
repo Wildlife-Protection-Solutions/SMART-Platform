@@ -47,7 +47,7 @@ public class PanMapHandler extends AbstractHandler {
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
-			view.setModalTool(PanToolId);
+			view.setTool(PanToolId);
 		} 
 		return null;
 	}

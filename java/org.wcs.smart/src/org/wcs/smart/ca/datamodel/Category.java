@@ -205,7 +205,7 @@ RETURNS NULL ON NULL INPUT;
 	 * 
 	 * @return all children categories; <code>null</code> if leaf node
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent")
 	@Where(clause = "is_active")
 	@OrderBy(clause = "cat_order")
 //	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

@@ -42,7 +42,7 @@ public class ZoomHandler extends AbstractHandler {
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
-			view.setModalTool(ZoomToolId);
+			view.setTool(ZoomToolId);
 		} 
 		return null;
 	}
