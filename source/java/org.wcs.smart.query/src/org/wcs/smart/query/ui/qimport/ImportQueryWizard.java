@@ -176,7 +176,6 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 	public void handlePageChanging(PageChangingEvent event) {
 		if (event.getTargetPage() == page2){
 			page2.initValues();
-			page2.setPageComplete(true);
 		}else{
 			page2.setPageComplete(false);
 		}
