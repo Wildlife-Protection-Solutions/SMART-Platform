@@ -35,7 +35,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
@@ -67,6 +69,10 @@ public class GriddedQuery extends Query {
 	private DateFilter dateFilter;
 	
 	private List<QueryColumn> queryColumns = null;
+	
+	private String crsDefinition;
+	@Transient
+	private CoordinateReferenceSystem crs;
 	
 	/* transient fields for tracking ui items */
 	@Transient
@@ -178,6 +184,47 @@ public class GriddedQuery extends Query {
 		this.query = queryDef;
 	}
 	
+	/**
+	 * 
+	 * @return the coordinate reference system definition string
+	 */
+	@Column(name="crs_definition")
+	public String getCrsDefinition(){
+		return this.crsDefinition;
+	}
+	/**
+	 * 
+	 * @param defintion the coordinate reference system string
+	 */
+	public void setCrsDefinition(String defintion){
+		this.crsDefinition = defintion;
+		this.crs = null;
+	}
+	
+	/**
+	 * 
+	 * @return the decoded coordinate reference system
+	 * @throws Exception
+	 */
+	@Transient
+	public CoordinateReferenceSystem getCoordinateReferenceSystem() throws Exception{
+		if (this.crs == null && getCrsDefinition() != null){
+			this.crs = CRS.decode(getCrsDefinition());
+		}
+		return this.crs;
+	}
+	
+	
+	/**
+	 * 
+	 * @return the decoded coordinate reference system
+	 * @throws Exception
+	 */
+	@Transient
+	public void setCoordinateReferenceSystem(CoordinateReferenceSystem crs) throws Exception{
+		this.crs = crs;
+		setCrsDefinition(this.crs.toWKT());
+	}
 	
 	/**
 	 * @return the query filter as string

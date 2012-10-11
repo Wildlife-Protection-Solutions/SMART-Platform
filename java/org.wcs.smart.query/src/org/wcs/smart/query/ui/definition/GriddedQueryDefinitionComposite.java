@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
@@ -135,11 +136,20 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		GridQueryDefinition def = null;
 		String error = null;
 		
+		CoordinateReferenceSystem crs = null;
 		try{
-			query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ;
+			crs = panel.getCrs();
 		}catch (Exception ex){
 			isvalid = false;
-			error = ex.getMessage();
+			error = "Could not determine query projection. " + ex.getMessage();
+		}
+		if (isvalid){
+			try{
+				query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ;
+			}catch (Exception ex){
+				isvalid = false;
+				error = ex.getMessage();
+			}
 		}
 		
 		
@@ -168,7 +178,13 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 				error = "Grid size must be greater than 0";
 			}
 		}
-		
+
+		try{
+			((GriddedQuery)parentView.getQuery()).setCoordinateReferenceSystem(crs);
+		}catch (Exception ex){
+			isvalid = false;
+			error = "Invalid coordinate reference system. " + ex.getMessage();
+		}
 		provider.setQueryValue(isvalid, error);
 		if (parentView.getQuery() != null){
 			parentView.getQuery().setIsValid(isvalid);

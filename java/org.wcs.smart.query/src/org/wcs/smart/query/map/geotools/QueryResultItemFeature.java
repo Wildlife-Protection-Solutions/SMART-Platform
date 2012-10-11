@@ -61,7 +61,7 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createObservationFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getPatrolId() + "_" + it.getWaypointId() + "_" + System.nanoTime();
+		data[0] = it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime();
 		
 		for (int i = 0; i < columns.size(); i ++){
 			Object x =  columns.get(i).getValue(it);
@@ -95,7 +95,7 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createTrackFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getPatrolId() + "_" + System.nanoTime();
+		data[0] = it.getPatrolId() + "." + System.nanoTime();
 		
 		for (int i = 0; i < columns.size(); i ++){
 			Object x =  columns.get(i).getValue(it);

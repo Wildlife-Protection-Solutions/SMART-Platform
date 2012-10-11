@@ -52,6 +52,7 @@ public class QueryErrorControlContribution extends
 	
 	private ISourceProviderListener listener = new ISourceProviderListener() {
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public void sourceChanged(int sourcePriority, Map sourceValuesByName) {
 		}
@@ -63,23 +64,7 @@ public class QueryErrorControlContribution extends
 				return;
 			}
 			if (sourceName.equals(SourceProvider.QUERY_VALID)){
-				Boolean bool = (Boolean)sourceValue;
-				if (!bool){
-					main.setVisible(true);
-					if (provider != null){
-						String tip = (String)provider.getCurrentState().get(SourceProvider.QUERY_ERROR_MESSAGE);
-						if (tip != null){
-							lblError.setToolTipText(tip);
-						}else{
-							lblError.setToolTipText("");
-						}
-					}
-					lblError.setText("Query error");
-//					lblError.setToolTipText(  )
-					main.layout();
-				}else{
-					main.setVisible(false);
-				}
+				initValues();
 			}
 		}
 		
@@ -119,7 +104,34 @@ public class QueryErrorControlContribution extends
 		lblError.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		lblError.setText("Query error");
 		main.setVisible(false);
+		
+		initValues();
 		return main;
+	}
+	
+	private void initValues() {
+		boolean isValid = (Boolean) provider.getCurrentState().get(
+				SourceProvider.QUERY_VALID);
+		if (main.isDisposed()){
+			return;
+		}
+		if (!isValid) {
+			main.setVisible(true);
+			if (provider != null) {
+				String tip = (String) provider.getCurrentState().get(
+						SourceProvider.QUERY_ERROR_MESSAGE);
+				if (tip != null) {
+					lblError.setToolTipText(tip);
+				} else {
+					lblError.setToolTipText("");
+				}
+			}
+			lblError.setText("Query error");
+			main.layout();
+		} else {
+			main.setVisible(false);
+		}
+
 	}
 
 }

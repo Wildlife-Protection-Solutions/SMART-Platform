@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.smartconservationsoftware.org/xml/query/" 
-xmlns:tns="http://www.smartconservationsoftware.org/xml/query/" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/query" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/query" 
 elementFormDefault="qualified">
 
     <complexType name="QueryType">

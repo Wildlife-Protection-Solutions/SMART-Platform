@@ -5,5 +5,5 @@
 // Generated on: 2012.05.23 at 03:29:26 PM PDT 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/query/", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/query", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.wcs.smart.query.xml.model;
