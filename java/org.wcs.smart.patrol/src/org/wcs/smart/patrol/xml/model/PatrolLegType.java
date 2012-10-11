@@ -30,9 +30,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="transportType" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}LabelType"/>
- *         &lt;element name="members" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}PatrolMemberType" maxOccurs="unbounded"/>
- *         &lt;element name="days" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}PatrolLegDayType" maxOccurs="unbounded"/>
+ *         &lt;element name="transportType" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}LabelType"/>
+ *         &lt;element name="members" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}PatrolMemberType" maxOccurs="unbounded"/>
+ *         &lt;element name="days" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}PatrolLegDayType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="startDate" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="endDate" type="{http://www.w3.org/2001/XMLSchema}date" />

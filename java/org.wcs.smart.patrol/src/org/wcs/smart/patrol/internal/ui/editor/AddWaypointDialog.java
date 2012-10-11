@@ -46,6 +46,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.ui.ProjectionLabelProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -130,15 +131,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		
 		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN);
 		lstProjections.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		lstProjections.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof Projection){
-					return ((Projection)element).getName();
-				}
-				return super.getText(element);
-			}
-		});
+		lstProjections.setLabelProvider(ProjectionLabelProvider.getInstance());
 		lstProjections.setContentProvider(ArrayContentProvider.getInstance());
 		lstProjections.setInput(projections);
 		Projection defaultProj = projections.length > 0 ? projections[0] : null;

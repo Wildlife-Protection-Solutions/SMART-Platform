@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Patrol_QNAME = new QName("http://www.smartconservationsoftware.org/xml/patrol.xsd", "patrol");
+    private final static QName _Patrol_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/patrol", "patrol");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.patrol.xml.model
@@ -124,7 +124,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link PatrolType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/patrol.xsd", name = "patrol")
+    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/1.0/patrol", name = "patrol")
     public JAXBElement<PatrolType> createPatrol(PatrolType value) {
         return new JAXBElement<PatrolType>(_Patrol_QNAME, PatrolType.class, null, value);
     }
