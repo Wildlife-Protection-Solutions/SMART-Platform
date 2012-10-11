@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _SmartQuery_QNAME = new QName("http://www.smartconservationsoftware.org/xml/query/", "SmartQuery");
+    private final static QName _SmartQuery_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/query", "SmartQuery");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.query.xml.model
@@ -76,7 +76,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link Query }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/query/", name = "SmartQuery")
+    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/1.0/query", name = "SmartQuery")
     public JAXBElement<Query> createSmartQuery(Query value) {
         return new JAXBElement<Query>(_SmartQuery_QNAME, Query.class, null, value);
     }

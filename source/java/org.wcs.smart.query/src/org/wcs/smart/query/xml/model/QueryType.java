@@ -27,8 +27,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="queryPart" type="{http://www.smartconservationsoftware.org/xml/query/}QueryPart" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="uuiditem" type="{http://www.smartconservationsoftware.org/xml/query/}UuidItemType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="queryPart" type="{http://www.smartconservationsoftware.org/xml/1.0/query}QueryPart" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="uuiditem" type="{http://www.smartconservationsoftware.org/xml/1.0/query}UuidItemType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="language" type="{http://www.w3.org/2001/XMLSchema}string" />

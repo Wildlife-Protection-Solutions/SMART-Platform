@@ -465,6 +465,15 @@
                id="org.wcs.smart.query.queryError">
             <control
                   class="org.wcs.smart.query.QueryErrorControlContribution">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
             </control>
          </toolbar>
       </menuContribution>

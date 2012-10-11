@@ -78,6 +78,16 @@ public class QueryDefView extends ViewPart {
 		
 		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
+			IWorkbenchPart part = partRef.getPart(false);
+			if (part instanceof IQueryEditor){
+				Query q =((IQueryEditor)part).getQuery();
+				if (q != current){
+					setQuery(q);
+				}
+				if (currentPanel != null){
+					currentPanel.validate();
+				}
+			}
 		}
 		
 		@Override

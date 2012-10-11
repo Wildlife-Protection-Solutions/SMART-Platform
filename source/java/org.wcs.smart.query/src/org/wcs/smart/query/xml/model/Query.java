@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="query" type="{http://www.smartconservationsoftware.org/xml/query/}QueryType"/>
+ *         &lt;element name="query" type="{http://www.smartconservationsoftware.org/xml/1.0/query}QueryType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
