@@ -5,5 +5,5 @@
 // Generated on: 2012.01.24 at 09:34:44 AM PST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://wsc.smart.org/datamodel", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/datamodel", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.wcs.smart.internal.ca.datamodel.xml.generate;

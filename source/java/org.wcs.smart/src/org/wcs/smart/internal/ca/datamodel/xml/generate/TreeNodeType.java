@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="names" type="{http://wsc.smart.org/datamodel}NameType" maxOccurs="unbounded"/>
- *         &lt;element name="children" type="{http://wsc.smart.org/datamodel}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}NameType" maxOccurs="unbounded"/>
+ *         &lt;element name="children" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="isactive" type="{http://www.w3.org/2001/XMLSchema}boolean" />

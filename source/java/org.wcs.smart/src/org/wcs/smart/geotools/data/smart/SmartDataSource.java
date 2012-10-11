@@ -76,7 +76,7 @@ public class SmartDataSource extends AbstractDataStore{
 	 */
 	@Override
 	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		String spec = "uuid:String,id:String,key:String,geom:MultiPolygon:srid=4326";
+		String spec = "fid:String,id:String,key:String,uuid:String,geom:MultiPolygon:srid=4326";
 		try {
 			SimpleFeatureType type =  DataUtilities.createType("smart." + typeName, spec);
 			return type;

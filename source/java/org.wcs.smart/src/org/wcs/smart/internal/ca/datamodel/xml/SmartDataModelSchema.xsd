@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://wsc.smart.org/datamodel" 
-xmlns:smrt="http://wsc.smart.org/datamodel" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/datamodel" 
+xmlns:smrt="http://www.smartconservationsoftware.org/xml/1.0/datamodel" 
 xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0"
 xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" jaxb:extensionBindingPrefixes="xjc"
 elementFormDefault="qualified">
