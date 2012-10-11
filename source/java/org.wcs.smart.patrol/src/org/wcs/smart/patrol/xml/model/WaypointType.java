@@ -33,7 +33,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="distance" type="{http://www.w3.org/2001/XMLSchema}float" minOccurs="0"/>
  *         &lt;element name="comment" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="attachments" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="observations" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}WaypointObservationType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="observations" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}WaypointObservationType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}int" />
  *       &lt;attribute name="x" type="{http://www.w3.org/2001/XMLSchema}double" />

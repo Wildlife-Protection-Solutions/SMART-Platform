@@ -29,8 +29,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="waypoints" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}WaypointType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="track" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}TrackType" minOccurs="0"/>
+ *         &lt;element name="waypoints" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}WaypointType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="track" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}TrackType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="date" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="startTime" type="{http://www.w3.org/2001/XMLSchema}time" />

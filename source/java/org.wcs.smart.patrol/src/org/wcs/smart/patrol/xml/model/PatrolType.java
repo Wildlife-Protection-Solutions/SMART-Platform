@@ -30,11 +30,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="mandate" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}LabelType"/>
- *         &lt;element name="objective" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}ObjectiveType" minOccurs="0"/>
- *         &lt;element name="team" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}LabelType" minOccurs="0"/>
- *         &lt;element name="station" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}LabelType" minOccurs="0"/>
- *         &lt;element name="legs" type="{http://www.smartconservationsoftware.org/xml/patrol.xsd}PatrolLegType" maxOccurs="unbounded"/>
+ *         &lt;element name="mandate" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}LabelType"/>
+ *         &lt;element name="objective" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}ObjectiveType" minOccurs="0"/>
+ *         &lt;element name="team" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}LabelType" minOccurs="0"/>
+ *         &lt;element name="station" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}LabelType" minOccurs="0"/>
+ *         &lt;element name="legs" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}PatrolLegType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="patrolType">
  *         &lt;simpleType>

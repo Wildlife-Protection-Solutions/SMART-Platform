@@ -129,7 +129,7 @@ public class XmlToPatrolConverter {
 		patrol.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
 		patrol.setComment(xml.getComment());
 		
-		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType()));
+		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType().toUpperCase()));
 		if (xml.getObjective() != null){
 			patrol.setObjective(xml.getObjective().getDescription());
 		}

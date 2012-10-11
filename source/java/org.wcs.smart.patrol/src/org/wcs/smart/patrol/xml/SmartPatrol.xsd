@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.smartconservationsoftware.org/xml/patrol.xsd" 
-xmlns:tns="http://www.smartconservationsoftware.org/xml/patrol.xsd"
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/patrol" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/patrol"
 elementFormDefault="qualified">
 
   	

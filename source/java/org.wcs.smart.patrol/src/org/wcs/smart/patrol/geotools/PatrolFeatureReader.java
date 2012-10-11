@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.geotools;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +52,9 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 
 	private SimpleFeatureType ftype;
 	private String thisType;
-	private Iterator fIterator;
+	private Iterator<?> fIterator;
+	
+	private static SimpleDateFormat trackDt = new SimpleDateFormat("MMMddyyyy"); 
 	private static GeometryFactory gf = new GeometryFactory();
 	
 	public PatrolFeatureReader(Patrol patrol,
@@ -129,7 +132,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private SimpleFeature getWaypointAsFeature(Waypoint waypoint){
 		//String spec = "fid:String,id:integer,date:Date,time:Time,comment:String,geom:Point:srid=4326";
 		Object data[] = new Object[7];
-		data[0] = waypoint.getId() + "_" + SmartUtils.encodeHex(waypoint.getUuid());
+		data[0] = ftype.getName() + "." + waypoint.getId() + "." + SmartUtils.encodeHex(waypoint.getUuid());
 		data[1] = waypoint.getId();
 		data[2] = waypoint.getPatrolLegDay().getDate();
 		data[3] = waypoint.getTime();
@@ -147,7 +150,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	
 	private SimpleFeature getTrackAsFeature(Track track){
 		//String spec = "uuid:String,distance:Double,geom:Linestring:srid=4326";
-		String fid = DateFormat.getDateInstance(DateFormat.MEDIUM).format(track.getPatrolLegDay().getDate()) + "_" +SmartUtils.encodeHex(track.getUuid()); 
+		String fid = ftype.getName() + "." + trackDt.format(track.getPatrolLegDay().getDate()) ; 
 		Object data[] = new Object[4];
 		data[0] = fid;
 		data[1] = track.getDistance();
