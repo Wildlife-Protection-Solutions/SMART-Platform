@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<smrt:DataModel xmlns:smrt="http://wsc.smart.org/datamodel" 
+<smrt:DataModel xmlns:smrt="http://www.smartconservationsoftware.org/xml/1.0/datamodel" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:schemaLocation="http://wsc.smart.org/datamodel 
+xsi:schemaLocation="http://www.smartconservationsoftware.org/xml/1.0/datamodel 
 ../src/org/wcs/smart/internal/ca/datamodel/xml/SmartDataModelSchema.xsd ">
 
  <smrt:languages>

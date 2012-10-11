@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="names" type="{http://wsc.smart.org/datamodel}NameType" maxOccurs="unbounded"/>
- *         &lt;element name="attribute" type="{http://wsc.smart.org/datamodel}CategoryAttributeLink" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="category" type="{http://wsc.smart.org/datamodel}CategoryType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}NameType" maxOccurs="unbounded"/>
+ *         &lt;element name="attribute" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}CategoryAttributeLink" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="category" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}CategoryType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="ismultiple" type="{http://www.w3.org/2001/XMLSchema}boolean" />

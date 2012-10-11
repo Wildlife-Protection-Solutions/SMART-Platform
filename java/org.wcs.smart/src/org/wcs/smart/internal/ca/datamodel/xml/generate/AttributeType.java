@@ -28,12 +28,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="aggregations" type="{http://wsc.smart.org/datamodel}AggregationType" maxOccurs="unbounded"/>
- *         &lt;element name="qa_minmax" type="{http://wsc.smart.org/datamodel}MinMaxType" minOccurs="0"/>
+ *         &lt;element name="aggregations" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}AggregationType" maxOccurs="unbounded"/>
+ *         &lt;element name="qa_minmax" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}MinMaxType" minOccurs="0"/>
  *         &lt;element name="qa_regex" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="names" type="{http://wsc.smart.org/datamodel}NameType" maxOccurs="unbounded"/>
- *         &lt;element name="values" type="{http://wsc.smart.org/datamodel}ListNode" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="tree" type="{http://wsc.smart.org/datamodel}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}NameType" maxOccurs="unbounded"/>
+ *         &lt;element name="values" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}ListNode" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="tree" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="isrequired" type="{http://www.w3.org/2001/XMLSchema}boolean" />

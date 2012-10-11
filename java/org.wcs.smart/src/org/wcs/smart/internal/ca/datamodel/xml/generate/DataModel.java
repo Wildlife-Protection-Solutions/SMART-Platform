@@ -25,9 +25,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="languages" type="{http://wsc.smart.org/datamodel}LanguageListType"/>
- *         &lt;element name="attributes" type="{http://wsc.smart.org/datamodel}AttributeListType" minOccurs="0"/>
- *         &lt;element name="categories" type="{http://wsc.smart.org/datamodel}CategoryTypeList" minOccurs="0"/>
+ *         &lt;element name="languages" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}LanguageListType"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}AttributeListType" minOccurs="0"/>
+ *         &lt;element name="categories" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}CategoryTypeList" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

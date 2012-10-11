@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="language" type="{http://wsc.smart.org/datamodel}LanguageType" maxOccurs="unbounded"/>
+ *         &lt;element name="language" type="{http://www.smartconservationsoftware.org/xml/1.0/datamodel}LanguageType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
