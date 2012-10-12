@@ -80,8 +80,8 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lbl = new Label(container, SWT.NONE);
-		lbl.setText("Track Distance and Direction");
-		lbl.setToolTipText("allows users to record direction and distance values for waypoints.");
+		lbl.setText("Allow users to additionally record the Distance and Direction to each Observation:");
+		lbl.setToolTipText("This allows users to record direction and distance values for waypoints. These values will be added to the patrol observation table.");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		btnTrackDistanceDirection = new Button(container, SWT.CHECK);
@@ -92,8 +92,8 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		lbl = new Label(container, SWT.NONE);
-		lbl.setText("Edit Time (days)");
-		lbl.setToolTipText("the number days after entry that patrol data can be modified for (-1 for always allow editing)");
+		lbl.setText("Number of days after which the patrol data are no longer editable:");
+		lbl.setToolTipText("The value -1 specifies that the patrol data will always be editable.");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		final ControlDecoration cdEditTime =createDecoration(lbl);
@@ -161,7 +161,8 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 			return false;
 		}
 		if (edittime < -1){
-			SmartPatrolPlugIn.displayLog("Edit time must be > -1", null);
+			SmartPatrolPlugIn.displayLog("Edit time must be >= -1", null);
+			return false;
 		}
 		patrolOption.setEditTime(edittime);
 		
