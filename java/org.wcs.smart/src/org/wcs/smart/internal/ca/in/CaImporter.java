@@ -112,7 +112,7 @@ public class CaImporter {
 				}catch (Exception e){
 					throw new Exception("Error occurred during database import.  Temporary backup could not be restored and system is in an inconsistant state.  It is recomended that you restore a previous system backup.\n\n" + ex.getMessage() + "\n\n" + e.getMessage(), e);
 				}
-				throw new Exception("Error occurred druing import. System restored to previous state. \n\n" + ex.getMessage(), ex);
+				throw new Exception("Error occurred during import. System restored to previous state. \n\n" + ex.getMessage(), ex);
 			}
 			
 			try{
