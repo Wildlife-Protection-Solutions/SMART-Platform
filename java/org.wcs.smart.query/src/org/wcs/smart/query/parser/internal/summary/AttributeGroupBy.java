@@ -224,21 +224,18 @@ public class AttributeGroupBy implements IGroupBy {
 				}
 			}
 		}else if (att.getType() == AttributeType.TREE){
-			//do something different
 			if (filterHkeys == null){
 				//get all attribute nodes with given hkey length
-				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, att.getUuid(), treeLevel)){
+				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
 					//TODO: full name
-					if (child.getIsActive()){
-						items.add(new ListItem(null, child.getName(), child.getHkey()));
-					}
+					items.add(new ListItem(null, child.getName(), child.getHkey()));
 				}
 			}else{
 				HashSet<String> keys = new HashSet<String>();
 				for (int i = 0; i < filterHkeys.length; i ++){
 					keys.add(filterHkeys[i]);
 				}
-				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, att.getUuid(), treeLevel)){
+				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
 					//TODO: full name
 					if (keys.contains(child.getHkey())){
 						items.add(new ListItem(null, child.getName(), child.getHkey()));	
@@ -295,7 +292,7 @@ public class AttributeGroupBy implements IGroupBy {
 					keys.add(filterHkeys[i]);
 				}
 				ArrayList<ListItem> items = new ArrayList<ListItem>();
-				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, attribute.getUuid(), treeLevel)){
+				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, attribute.getUuid(), treeLevel, true)){
 					//TODO: full name
 					if (keys.contains(child.getHkey())){
 						items.add(new ListItem(null, child.getName(), child.getHkey()));	

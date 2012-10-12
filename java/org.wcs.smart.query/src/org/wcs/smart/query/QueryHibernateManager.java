@@ -441,13 +441,15 @@ public class QueryHibernateManager {
 	 * Gets all the categories at a given level in the data tree.  Throws and exception if not found.
 	 * @param session
 	 * @param level
+	 * @param active if only active tree nodes should be loaded
 	 * @return
 	 */
-	public static List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level){
-		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level";
+	public static List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level, boolean active){
+		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level and isActive = :active";
 		Query q = session.createQuery(query);
 		q.setParameter("uuid", uuid);
 		q.setParameter("level", level);
+		q.setParameter("active", active);
 		
 		List<AttributeTreeNode> nodes = q.list();
 		return nodes;
