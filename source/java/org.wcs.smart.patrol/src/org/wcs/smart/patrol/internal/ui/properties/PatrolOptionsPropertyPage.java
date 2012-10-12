@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -76,32 +77,51 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected Composite createContent(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(2, false));
+		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label lbl = new Label(container, SWT.NONE);
-		lbl.setText("Allow users to additionally record the Distance and Direction to each Observation:");
-		lbl.setToolTipText("This allows users to record direction and distance values for waypoints. These values will be added to the patrol observation table.");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		Group g = new Group(container, SWT.NONE);
+		g.setText("Distance and Direction");
+		g.setLayout(new GridLayout(2, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		btnTrackDistanceDirection = new Button(container, SWT.CHECK);
-		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		Label lbl = new Label(g, SWT.WRAP);
+		lbl.setText("Allow users to additionally record the Distance and Direction of each waypoint.  These values will be added to the patrol observation table.");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)lbl.getLayoutData()).widthHint = 350;
+		
+		
+		
+		btnTrackDistanceDirection = new Button(g, SWT.CHECK);
+		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnTrackDistanceDirection.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				setChangesMade(true);
 			}
 		});
-		lbl = new Label(container, SWT.NONE);
-		lbl.setText("Number of days after which the patrol data are no longer editable:");
-		lbl.setToolTipText("The value -1 specifies that the patrol data will always be editable.");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl = new Label(g, SWT.NONE);
+		lbl.setText("Track Distance and Direction");
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		
+		lbl = new Label(container, SWT.NONE);  //spacer
+		
+		g = new Group(container, SWT.NONE);
+		g.setText("Edit Options");
+		g.setLayout(new GridLayout(2, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		lbl = new Label(g, SWT.WRAP);
+		lbl.setText("Number of days after which the patrol data are no longer editable.  The vlaue -1 specifies that the patrol data will alway be editable.");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)lbl.getLayoutData()).widthHint = 350;
 		
 		final ControlDecoration cdEditTime =createDecoration(lbl);
 		cdEditTime.hide();
 		
 		
-		txtEditTime = new Text(container, SWT.BORDER);
-		txtEditTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtEditTime = new Text(g, SWT.BORDER);
+		txtEditTime.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		((GridData)txtEditTime.getLayoutData()).widthHint = 30;
 		txtEditTime.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -115,8 +135,9 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			}
 		});
-		
-		
+		lbl = new Label(g, SWT.NONE);
+		lbl.setText("Days");
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		//init values
 		if (patrolOption != null){
