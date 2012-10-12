@@ -110,8 +110,11 @@ public class QueryErrorControlContribution extends
 	}
 	
 	private void initValues() {
-		boolean isValid = (Boolean) provider.getCurrentState().get(
-				SourceProvider.QUERY_VALID);
+		Object x = provider.getCurrentState().get(SourceProvider.QUERY_VALID);
+		boolean isValid = true;
+		if (x instanceof Boolean){
+			isValid = (Boolean)x;
+		}
 		if (main.isDisposed()){
 			return;
 		}
