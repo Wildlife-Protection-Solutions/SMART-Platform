@@ -22,6 +22,7 @@
 package org.wcs.smart.ui;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.opengis.referencing.FactoryException;
 import org.wcs.smart.ca.Projection;
 
 /**
@@ -50,7 +51,16 @@ public class ProjectionLabelProvider extends LabelProvider{
 	@Override
 	public String getText(Object element){
 		if (element instanceof Projection){
-			return ((Projection) element).getName();
+			String name =  ((Projection) element).getName();
+			if (name != null){
+				return name;
+			}else{
+				try {
+					return ((Projection) element).getCrs().getName().getCode();
+				} catch (FactoryException e) {
+					return "";
+				}
+			}
 		}
 		return super.getText(element);
 	}

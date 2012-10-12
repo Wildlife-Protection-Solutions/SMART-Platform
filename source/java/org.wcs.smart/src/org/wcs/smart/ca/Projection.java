@@ -161,4 +161,9 @@ public class Projection {
 		return crs;
 	}
 	
+	@Transient
+	public void setCrs(CoordinateReferenceSystem crs){
+		this.crs = crs;
+		this.definition = crs.toWKT();
+	}
 }

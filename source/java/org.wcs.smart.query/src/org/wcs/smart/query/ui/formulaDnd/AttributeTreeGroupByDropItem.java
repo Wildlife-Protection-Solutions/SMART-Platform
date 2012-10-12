@@ -143,11 +143,9 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			List<AttributeTreeNode> nodes = QueryHibernateManager.getAttributeTreeNodes(session, attribute.getUuid(), level);
+			List<AttributeTreeNode> nodes = QueryHibernateManager.getAttributeTreeNodes(session, attribute.getUuid(), level, true);
 			for (AttributeTreeNode it : nodes) {
-				if (it.getIsActive()){
-					items.add(new ListItem(null, it.getName(), it.getHkey()));
-				}
+				items.add(new ListItem(null, it.getName(), it.getHkey()));
 			}
 			session.getTransaction().rollback();
 			session.close();

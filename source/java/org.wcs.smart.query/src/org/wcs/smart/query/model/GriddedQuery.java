@@ -209,7 +209,7 @@ public class GriddedQuery extends Query {
 	@Transient
 	public CoordinateReferenceSystem getCoordinateReferenceSystem() throws Exception{
 		if (this.crs == null && getCrsDefinition() != null){
-			this.crs = CRS.decode(getCrsDefinition());
+			this.crs = CRS.parseWKT(getCrsDefinition());
 		}
 		return this.crs;
 	}

@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
@@ -96,17 +97,6 @@ public class GriddedValuePanel {
 				public void run() {
 					if (!lstProjections.getControl().isDisposed()){
 						lstProjections.setInput(projs.toArray(new Projection[projs.size()]));
-						
-						if (projs.size() > 0){
-							Projection sel = projs.get(0);
-							for (Projection p : projs){
-								if (p.getIsDefault()){
-									sel = p;
-									break;
-								}
-							}
-							lstProjections.setSelection(new StructuredSelection(sel));
-						}
 					}
 				}});
 			return Status.OK_STATUS;
@@ -136,6 +126,49 @@ public class GriddedValuePanel {
 		isInitializing = true;
 		lstValues.addElements(query.getValueDropItems());
 		txtGridSize.setText(Double.toString(query.getGridSize()));
+		
+		try {
+			Projection[] values = (Projection[]) lstProjections.getInput();
+			List<Projection> ps = new ArrayList<Projection>();
+			Projection defaultP = null;
+			for (int i = 0; i <values.length; i ++){
+				if (values[i].getUuid() != null){
+					//remove any custom projections
+					ps.add(values[i]);
+					if (values[i].getIsDefault()){
+						defaultP = values[i];
+					}
+				}
+			}
+			if (query.getCoordinateReferenceSystem() != null) {
+				
+				boolean found = false;
+				//search for projection
+				for (Projection p : ps){
+					if (CRS.equalsIgnoreMetadata(p.getCrs(),
+							query.getCoordinateReferenceSystem())) {
+						defaultP = p;
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					//projection not in default list; add custom
+					//projection for this query
+					Projection p = new Projection();
+					p.setCrs(query.getCoordinateReferenceSystem());
+					defaultP = p;
+					ps.add(p);
+				}
+
+			}
+			lstProjections.setInput(ps.toArray(new Projection[ps.size()]));
+			lstProjections.setSelection(new StructuredSelection(defaultP));
+			lstProjections.refresh();
+		} catch (Exception ex) {
+			QueryPlugIn.displayLog("Error parsing projection information. "
+					+ ex.getMessage(), ex);
+		}
 		isInitializing = false;
 	}
 
@@ -288,6 +321,10 @@ public class GriddedValuePanel {
 					}else{
 						lblUnits.setText("unknown");
 					}
+					
+					if (isInitializing) return;
+					parentView.validate();
+					parentView.fireQueryModifiedListeners();
 				}
 				
 			}

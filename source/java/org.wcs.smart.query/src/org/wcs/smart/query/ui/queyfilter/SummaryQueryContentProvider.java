@@ -24,7 +24,6 @@ package org.wcs.smart.query.ui.queyfilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -239,19 +238,15 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					List<AttributeTreeNode> nodes = null;
 					if (parent.getObject() instanceof Attribute){
 						s.update(parent.getObject());
-						nodes = ((Attribute)parent.getObject()).getTree() ;
+						nodes = ((Attribute)parent.getObject()).getActiveTreeNodes() ;
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						s.update(((CategoryAttribute)parent.getObject()).getAttribute() );
-						nodes = ((CategoryAttribute)parent.getObject()).getAttribute().getTree() ;
+						nodes = ((CategoryAttribute)parent.getObject()).getAttribute().getActiveTreeNodes() ;
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						s.update(parent.getObject());
-						nodes =  ((AttributeTreeNode)parent.getObject()).getChildren() ;
+						nodes =  ((AttributeTreeNode)parent.getObject()).getActiveChildren() ;
 					}
-					for (AttributeTreeNode node : nodes){
-						if (node.getIsActive()){
-							kids.add( node );								
-						}
-					}
+					kids.addAll(nodes);					
 					s.getTransaction().rollback();
 				}catch (Exception ex){
 					QueryPlugIn.log("Could not load tree children:" + ex.getMessage(), ex);
