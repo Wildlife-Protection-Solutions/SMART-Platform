@@ -231,7 +231,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 				ok = false;
 			}
 			if (!SmartUtils.isSimpleString(name, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, BasemapDefinition.MAX_NAME_LENGTH)){
-				setErrorMessage("Basemap names must only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + " and be less than " + BasemapDefinition.MAX_NAME_LENGTH + " character in length.");
+				setErrorMessage("Basemap names must only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + ", and be less than " + BasemapDefinition.MAX_NAME_LENGTH + " character in length.");
 				ok = false;
 			}
 			baseMap = new BasemapDefinition();
