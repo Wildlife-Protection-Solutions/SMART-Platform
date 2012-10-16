@@ -145,7 +145,7 @@
             <command
                   commandId="org.eclipse.ui.file.save"
                   id="org.wcs.smart.query.save.toolbar"
-                  label="Save Query/Summary"
+                  label="Save Query"
                   mnemonic="S"
                   tooltip="Saves the query or summary">
                <visibleWhen
@@ -160,7 +160,7 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save Query/Summary As"
+                  label="Save Query"
                   mnemonic="e"
                   tooltip="Save a copy of the query/summary">
                <visibleWhen
@@ -302,7 +302,7 @@
                mnemonic="Q">
             <menu
                   icon="images/icons/etool16/addquery.png"
-                  label="New Query ...">
+                  label="New Query">
                <command
                      commandId="org.wcs.smart.query.createQuery"
                      label="New Observation Query ..."
@@ -338,7 +338,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.query.exportQuery"
-                  label="Export Query/Summary ..."
+                  label="Export Query ..."
                   mnemonic="x"
                   style="push"
                   tooltip="Exports the current query or summary">
@@ -346,7 +346,7 @@
             <command
                   commandId="org.wcs.smart.query.importQuery"
                   icon="images/icons/etool16/importquery.png"
-                  label="Import Query/Summary ..."
+                  label="Import Query ..."
                   mnemonic="i"
                   style="push"
                   tooltip="Imports a query or summary definition file">
@@ -364,7 +364,7 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save As"
+                  label="Save As ..."
                   mnemonic="e"
                   tooltip="Save as a new query">
             </command>
@@ -400,7 +400,7 @@
          <command
                commandId="org.eclipse.ui.file.save"
                id="org.wcs.smart.query.save.toolbar"
-               label="Save Query/Summary"
+               label="Save Query"
                mnemonic="S"
                tooltip="Save the query or summary">
             <visibleWhen
@@ -415,7 +415,7 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
-               label="Save Query/Summary As"
+               label="Save Query As ..."
                mnemonic="e"
                tooltip="Saves a copy of the query/summary">
             <visibleWhen

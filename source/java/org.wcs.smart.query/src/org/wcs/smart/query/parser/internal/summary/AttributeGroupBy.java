@@ -35,6 +35,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.xml.model.UuidItemType;
@@ -325,16 +326,16 @@ public class AttributeGroupBy implements IGroupBy {
 	public List<String> validateAndImport(String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception{
 		//ensure category key exists
 		if (categoryHkey != null){
-			QueryHibernateManager.validateCategory(categoryHkey, session);
+			FilterValidator.validateCategory(categoryHkey, session);
 		}
-		QueryHibernateManager.validateAttribute(attributeKey, session);
+		FilterValidator.validateAttribute(attributeKey, session);
 		if (attributeType == AttributeType.TREE){
 			for (int i = 0; i < filterHkeys.length; i ++){
-				QueryHibernateManager.validateAttributeTreeNode(filterHkeys[i],attributeKey, session);
+				FilterValidator.validateAttributeTreeNode(filterHkeys[i],attributeKey, session);
 			}
 		}else{
 			for (int i = 0; i < filterHkeys.length; i ++){
-				QueryHibernateManager.validateAttributeListItem(filterHkeys[i], attributeKey, session);
+				FilterValidator.validateAttributeListItem(filterHkeys[i], attributeKey, session);
 			}
 		}
 		return null;

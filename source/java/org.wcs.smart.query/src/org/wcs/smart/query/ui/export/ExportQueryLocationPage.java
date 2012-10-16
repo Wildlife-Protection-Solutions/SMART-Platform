@@ -48,6 +48,8 @@ public class ExportQueryLocationPage extends WizardPage {
 
 	
 	private Text txtFile = null;
+	private static String lastDir = null;	//remember the last export dir
+	
 	/**
 	 * Creates a new query wizard page.
 	 */
@@ -59,7 +61,11 @@ public class ExportQueryLocationPage extends WizardPage {
 	 * Initializes the values in the query wizard
 	 */
 	public void initValues(){
-		String location = System.getProperty("user.home");
+		String location = lastDir;
+		if (location == null){
+			location = System.getProperty("user.home");
+		}
+		
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		IQueryExporter exporter = wizard.getQueryExporter();
 		
@@ -133,4 +139,15 @@ public class ExportQueryLocationPage extends WizardPage {
 	public File getFile(){
 		return new File(txtFile.getText());
 	}
+	
+	public void performFinish(){
+		try{
+			File f = new File(txtFile.getText());
+			lastDir = f.getParent().toString();
+		}catch (Exception ex){
+			//eatme
+		}
+		
+	}
+	
 }

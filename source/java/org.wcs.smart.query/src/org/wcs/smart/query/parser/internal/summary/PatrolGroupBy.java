@@ -28,13 +28,12 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
-import org.wcs.smart.query.qimport.QueryImporter;
+import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.xml.model.UuidItemType;
@@ -208,7 +207,7 @@ public class PatrolGroupBy implements IGroupBy {
 						if (item == null) {
 							throw new Exception("Could not resolve patrol filter: "+ asString() + ".");
 						}
-						SimpleListItem it = QueryHibernateManager.findValue(langCode, item.getValue().get(0), option.getSourceClass().getSimpleName(), session, warnings);
+						SimpleListItem it = FilterValidator.findValue(langCode, item.getValue().get(0), option.getSourceClass().getSimpleName(), session, warnings);
 						if (it == null) {
 							throw new Exception(
 									"Could not resolve patrol filter : "
@@ -236,7 +235,7 @@ public class PatrolGroupBy implements IGroupBy {
 											+ asString() + ".");
 						}
 						// lookup employee
-						Employee e = QueryImporter.findEmployee(item.getId(),
+						Employee e = FilterValidator.findEmployee(item.getId(),
 								item.getValue().get(0), item.getValue().get(1),
 								session, warnings);
 						if (e != null) {
