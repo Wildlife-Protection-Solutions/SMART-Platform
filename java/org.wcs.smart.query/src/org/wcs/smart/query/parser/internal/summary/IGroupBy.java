@@ -103,7 +103,7 @@ public interface IGroupBy {
 	 * if required.
 	 * 
 	 * <p>Warnings are created when the process can continue but
-	 * incorrect values my be substitued.  Errors are thrown 
+	 * incorrect values my be substituted.  Errors are thrown 
 	 * if the process cannot continue (ie attribute key not found in database).
 	 * </p>
 	 * 

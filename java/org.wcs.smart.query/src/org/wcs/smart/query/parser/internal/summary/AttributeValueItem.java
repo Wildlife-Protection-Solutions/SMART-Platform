@@ -30,6 +30,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
@@ -231,10 +232,10 @@ public class AttributeValueItem implements IValueItem {
 	public void validateDatabase(Session session) throws Exception{
 		if (categoryKey != null){
 			//ensure category key exists
-			QueryHibernateManager.validateCategory(categoryKey, session);
+			FilterValidator.validateCategory(categoryKey, session);
 		}else if (attributeKey != null){
 			//ensure attribute key exists
-			QueryHibernateManager.validateAttribute(attributeKey, session);
+			FilterValidator.validateAttribute(attributeKey, session);
 		}else if(aggregationKey != null){
 			boolean found = false;
 			for (Aggregation agg : DataModel.getAggregations()){

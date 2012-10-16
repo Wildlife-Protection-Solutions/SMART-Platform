@@ -58,6 +58,10 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 		defPart.setValue( ((GriddedQuery)query).getQueryDefinition().asQuery() );
 		xmlQuery.getQueryPart().add(defPart);
 
+		QueryPart crsPart = new QueryPart();
+		crsPart.setKey("crs");
+		crsPart.setValue(((GriddedQuery)query).getCrsDefinition());
+		xmlQuery.getQueryPart().add(crsPart);
 	}
 
 }

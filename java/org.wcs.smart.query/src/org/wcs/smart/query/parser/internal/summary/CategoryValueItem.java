@@ -24,6 +24,7 @@ package org.wcs.smart.query.parser.internal.summary;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
@@ -136,6 +137,6 @@ public class CategoryValueItem implements IValueItem {
 	 */
 	public void validateDatabase(Session session) throws Exception{
 		//ensure category key exists
-		QueryHibernateManager.validateCategory(categoryHkey, session);
+		FilterValidator.validateCategory(categoryHkey, session);
 	}
 }

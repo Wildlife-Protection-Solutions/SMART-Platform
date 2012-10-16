@@ -43,9 +43,7 @@ import org.wcs.smart.query.model.Query;
  */
 public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 
-	
 	private Query query;
-
 
 	private ExportQueryTypePage page1;
 	private ExportQueryLocationPage page2;
@@ -60,9 +58,6 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	public ExportQueryWizard(Query query) {
 		setWindowTitle("Export the current query.");
-		
-//		this.data = data;
-//		this.columns = columns;
 		this.query = query;
 	}
 
@@ -130,6 +125,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 //						exporter.setData(data,  columns, outputFile, query);
 						exporter.export(query, outputFile, monitor);
 							
+						page2.performFinish();
+						
 						if (monitor.isCanceled()){
 							MessageDialog.openInformation(
 									Display.getDefault().getActiveShell(), "Export",

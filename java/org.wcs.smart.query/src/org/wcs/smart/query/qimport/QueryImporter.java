@@ -28,16 +28,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.Session;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**
- * Query deifnition importer
+ * Query definition importer
  * 
  * @author egouge
  * @since 1.0.0
@@ -72,15 +68,15 @@ public class QueryImporter {
 		fin.close();
 		
 		QueryType qt = q.getQuery();
-		if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.SUMMARY.name())){
-			return importSummary(qt);
-		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name())){
-			return importObservation(qt);
-		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
-			return importObservation(qt);
-		}else{
+		IQueryImporter importer = getQueryImporter(qt);
+		if (importer == null){
 			throw new Exception("Could not import query of type " + qt.getQueryType());
 		}
+		
+		org.wcs.smart.query.model.Query importedQuery = importer.importQuery(qt);
+		warnings.addAll(importer.getWarnings());
+		return importedQuery;
+		
 	}
 	
 	/**
@@ -90,65 +86,18 @@ public class QueryImporter {
 		return this.warnings;
 	}
 	
-	/*
-	 * process summary query
-	 */
-	private org.wcs.smart.query.model.Query importSummary(QueryType qt) throws Exception{
-		SummaryQueryDefinitionImporter importer = new SummaryQueryDefinitionImporter();
-		org.wcs.smart.query.model.Query query = importer.importQuery(qt);
-		warnings.addAll(importer.getWarnings());
-		return query;
-	}
-	
-	/*
-	 * processes observation query
-	 */
-	private org.wcs.smart.query.model.Query importObservation(QueryType qt) throws Exception{
-		SimpleQueryDefinitionImporter importer = new SimpleQueryDefinitionImporter();
-		org.wcs.smart.query.model.Query query = importer.importQuery(qt);
-		warnings.addAll(importer.getWarnings());
-		return query;
-	}
-		
-	
-	/**
-	 * Attempts to find an employee based on the values.
-	 * <p>
-	 * First attempts based on the id & name, then the id only, then the name only.
-	 * </p>
-	 * @param employeeId
-	 * @param givenName
-	 * @param familyName
-	 * @param session
-	 * @return null if employee not found, otherwise employee found
-	 * 
-	 */
-	public static Employee findEmployee(String employeeId, String givenName, String familyName, Session session, List<String> warnings){
-		Employee e = HibernateManager.findEmployeeByIdAndName(employeeId, givenName, familyName, SmartDB.getCurrentConservationArea(), session);
-		if (e != null){
-			warnings.add("The unique identifier for Employee " + givenName + " " + familyName + "[" + employeeId + "] did not match the database unique identifier. However an employee with the same name and identifier was found and will be used in the query.");
-			return e;
+	private IQueryImporter getQueryImporter(QueryType qt) {
+		if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.SUMMARY.name())){
+			return new SummaryQueryDefinitionImporter();
+		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name())){
+			return new SimpleQueryDefinitionImporter();
+		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
+			return new SimpleQueryDefinitionImporter();
+		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.GRIDDED.name())){
+			return new GriddedQueryDefinitionImporter();
 		}
-		
-		e = HibernateManager.findEmployeeById(employeeId, SmartDB.getCurrentConservationArea(), session);
-		if (e != null){
-			warnings.add("The unique identifier for Employee " + givenName + " " + familyName + "[" + employeeId + "] did not match the database unique identifier. However an employee with the same identifier but a different name '" + e.getGivenName() + " " + e.getFamilyName() + "' was found and will be used in the query.");
-			return e;
-		}
-		
-		e = HibernateManager.findEmployeeByName(givenName, familyName, SmartDB.getCurrentConservationArea(), session);
-		if (e != null){
-			warnings.add("The unique identifier for Employee " + givenName + " " + familyName + "[" + employeeId + "] did not match the database unique identifier. However employee with the same name but a different identifier '" + e.getId() + "' was found and will be used in the query.");
-			return e;
-		}
-		
 		return null;
 	}
-	
-	
-
-	
-	
 	
 }
 

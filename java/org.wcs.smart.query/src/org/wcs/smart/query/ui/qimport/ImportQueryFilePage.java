@@ -97,7 +97,6 @@ public class ImportQueryFilePage extends WizardPage {
 				
 				fd.setFilterExtensions(extensions);
 				fd.setFilterNames(names);
-				
 				fd.setFilterPath(txtFile.getText());
 				fd.setFileName(txtFile.getText());
 				
@@ -116,6 +115,6 @@ public class ImportQueryFilePage extends WizardPage {
 	 * @return the selected file
 	 */
 	public File getFile(){
-		return new File(txtFile.getText());
+		return new File(txtFile.getText().trim());
 	}
 }
