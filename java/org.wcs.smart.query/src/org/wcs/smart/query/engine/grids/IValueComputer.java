@@ -33,14 +33,16 @@ import com.vividsolutions.jts.geom.LineString;
 public interface IValueComputer<T> {
 
 	/**
-	 * Computes the cell value with rasterizing a linestring.
+	 * Computes the cell value when rasterizing a linestring.
 	 * 
-	 * @param existingValue if the linestring has already visited this
-	 * tile then this is the value computed earlier 
-	 * @param t tile 
-	 * @param gridDef grid definition
+	 * @param existingValue if a linestring has already visited this
+	 * tile then this is the value computed earlier; otherwise the value 
+	 * is null 
+	 * @param t tile being visited
+	 * @param gridDef grid definition grid definition
 	 * @param ls linestring being rasterized
-	 * @return value for cell
+	 * @return value for cell computed for the cell
+	 * @throws expection if error occurs computing value
 	 */
-	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls);
+	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls) throws Exception;
 }

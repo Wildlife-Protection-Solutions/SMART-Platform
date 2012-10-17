@@ -27,6 +27,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.wcs.smart.hibernate.SmartDB;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineString;
@@ -46,20 +54,26 @@ public class GridAnalysisEngine<T> {
 	private ICellMerger<T> cellMerger;
 	private IValueComputer<T> valueCal;
 	private HashMap<Tile, T> data;
-
+	private MathTransform transform = null;
 	/**
 	 * Creates a new grid analysis engine
 	 * @param gridDef the grid definition
 	 * @param cellMerger how cell values computed for different linestrings are merged
 	 * @param valueCal computes the cell value for a given linestring
+	 * @throws FactoryException 
 	 */
 	public GridAnalysisEngine(Grid gridDef, ICellMerger<T> cellMerger,
-			IValueComputer<T> valueCal) {
+			IValueComputer<T> valueCal) throws FactoryException {
 		this.gridDef = gridDef;
 		this.cellMerger = cellMerger;
 		this.valueCal = valueCal;
 
 		data = new HashMap<Tile, T>();
+		
+		//reproject ls to gridDef crs
+		if (!CRS.equalsIgnoreMetadata(gridDef.getCrs(), SmartDB.DATABASE_CRS)){
+			transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, gridDef.getCrs());
+		}
 	}
 
 	/**
@@ -83,6 +97,8 @@ public class GridAnalysisEngine<T> {
 	 * using the provided cell merger.
 	 * 
 	 * @param ls rasterizes the linestring 
+	 * @throws TransformException 
+	 * @throws MismatchedDimensionException 
 	 */
 	/*
 	 * The way rasterization is performed:
@@ -96,8 +112,11 @@ public class GridAnalysisEngine<T> {
 	 * a single cell -> find the cell these line within and process
 	 * 
 	 */
-	public void rasterizeLinestring(final LineString ls) {
+	public void rasterizeLinestring(LineString ls) throws Exception {
 
+		if (transform != null){
+			ls = (LineString)JTS.transform(ls, transform);
+		}
 		
 		//find ls envelope
 		Envelope env = ls.getEnvelopeInternal();
@@ -141,14 +160,16 @@ public class GridAnalysisEngine<T> {
 			SimpleMCSweepLineIntersector processor = new SimpleMCSweepLineIntersector();			
 			SegmentIntersector si = new SegmentIntersector(intersector, false, false);
 			processor.computeIntersections(edges, lsEdges, si);
-
+			if (intersector.getException() != null){
+				throw intersector.getException();
+			}
 			ldata = intersector.getData();
 		}
 		
 		if (datapnts.size() == 0 || intersector.getIntersectionCount() == 0){
 			//here either the linestring consisted of one point
 			//or there were no intersections with grid so linestring must
-			//be wholly contained within a singe grid cell.
+			//be wholly contained within a single grid cell.
 			Coordinate c = datapnts.get(0);
 			List<Tile> tiles = gridDef.findTiles(c.x, c.y);
 			ldata = new HashMap<Tile, T>();

@@ -48,6 +48,7 @@ public class GriddedLineIntersector<T> extends RobustLineIntersector {
 	private Grid gridDef;
 	private LineString ls;
 	private int intersectionCnt = 0;
+	private Exception ex;
 	
 	/**
 	 * 
@@ -59,7 +60,7 @@ public class GriddedLineIntersector<T> extends RobustLineIntersector {
 			Grid gridDef, LineString ls) {
 		
 		super();
-		
+		this.ex = null;
 		this.valueComputer = valueComputer;
 		this.gridDef = gridDef;
 		this.data = new HashMap<Tile, T>();
@@ -104,10 +105,20 @@ public class GriddedLineIntersector<T> extends RobustLineIntersector {
 			List<Tile> tiles = gridDef.findTiles(c.x, c.y);
 			for (Tile t : tiles) {
 				T value = this.data.get(t);
-				T x = valueComputer.computeValue(value, t, gridDef, ls);
-				this.data.put(t, x);
+				try{
+					T x = valueComputer.computeValue(value, t, gridDef, ls);
+					this.data.put(t, x);
+				}catch (Exception ex){
+					this.ex = ex;
+					return -1;
+				}
+				
 			}
 		}
 		return r;
+	}
+	
+	public Exception getException(){
+		return this.ex;
 	}
 }

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.engine.grids;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -47,7 +48,7 @@ public class DistanceValueComputer<T> implements IValueComputer<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls) {
+	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls) throws Exception{
 		if (existingValue != null){
 			return existingValue;
 		}
@@ -56,23 +57,22 @@ public class DistanceValueComputer<T> implements IValueComputer<T> {
 		
 		GeometryFactory gf = new GeometryFactory();
 		Geometry g = ls.intersection(gf.toGeometry(env));
+
 		
-		
-		double newlength = processGeometry(g);
+		double newlength = processGeometry(g, gridDef.getCrs());
 		return (T)(Double)((Double)newlength);
 	}
 	
-	private double processGeometry(Geometry g){
+	private double processGeometry(Geometry g, CoordinateReferenceSystem crs) throws Exception{
 		if (g instanceof GeometryCollection ){
 			double distance = 0;
 			int cnt = ((GeometryCollection)g).getNumGeometries();
 			for (int i = 0; i < cnt; i++){
-				distance += processGeometry(((GeometryCollection)g).getGeometryN(i));
+				distance += processGeometry(((GeometryCollection)g).getGeometryN(i), crs);
 			}
 			return distance;
 		}else if (g instanceof LineString){
-			System.out.println(g.toText());
-			return GeometryUtils.distanceInMeters((LineString)g) / 1000.0;
+			return GeometryUtils.distanceInMeters((LineString)g, crs ) / 1000.0;
 		}
 		return 0;
 	}
