@@ -674,6 +674,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			List<Category> siblings = null;
 			if (((Category) o).getParent() != null){
 				siblings = ((Category) o).getParent().getChildren();
+			}else{
+				siblings = dataModel.getCategories();
 			}
 			CategoryDialogPage dd = new CategoryDialogPage(getShell(), (Category)o, siblings, ca.getDefaultLanguage());
 			int ret = dd.open();

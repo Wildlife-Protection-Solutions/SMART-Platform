@@ -63,6 +63,8 @@ public abstract class NameKeyComposite extends Composite {
 	protected ControlDecoration cdKey;
 	protected ControlDecoration cdTxt;
 	
+	private String originalKey = null;
+	
 	/**
 	 * 
 	 */
@@ -94,6 +96,7 @@ public abstract class NameKeyComposite extends Composite {
 	protected void initFields(DmObject dmObject, Language defaultLang){
 		if (txtKey != null && dmObject.getKeyId() != null){
 			txtKey.setText(dmObject.getKeyId());
+			originalKey = dmObject.getKeyId();
 		}
 		if (txtName != null ){
 			txtName.setText(dmObject.findName(defaultLang));
@@ -185,6 +188,10 @@ public abstract class NameKeyComposite extends Composite {
 
 								@Override
 								public String isValid(String newText) {
+									if (originalKey != null && originalKey.equals(newText)){
+										//same key
+										return "";
+									}
 									String error = DataModel.validateKey(newText, getSiblings());
 									return error;
 
