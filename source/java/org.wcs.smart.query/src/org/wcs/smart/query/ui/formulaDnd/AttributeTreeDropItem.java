@@ -93,7 +93,7 @@ public class AttributeTreeDropItem extends DropItem{
 			return Status.OK_STATUS;
 		}
 		private void visitTreeNode(AttributeTreeNode parent){
-			if (parent.getChildren() != null){
+			if (parent.getActiveChildren() != null){
 				for (AttributeTreeNode child: parent.getActiveChildren()){
 					child.getHkey();
 					child.getName();

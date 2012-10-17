@@ -128,7 +128,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		this.hkey = hkey;
 	}
 	
-	@OneToMany(fetch=FetchType.EAGER, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
 //	@Cascade({CascadeType.SAVE_UPDATE})
 //	@JoinColumn(name="parent_uuid")
 	@OrderBy(clause = "node_order")

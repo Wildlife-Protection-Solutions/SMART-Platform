@@ -408,7 +408,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		}else if (element instanceof SummaryDmObject){
 			if (!((SummaryDmObject) element).isValue()){
 				if (((SummaryDmObject) element).getObject() instanceof AttributeTreeNode){
-					return ((AttributeTreeNode)((SummaryDmObject) element).getObject()).getChildren().size() > 0;
+					return getAttributeTreeChildren((SummaryDmObject)element) != null;
 				}else if (((SummaryDmObject) element).getObject() instanceof Attribute){
 					if (((Attribute)((SummaryDmObject) element).getObject()).getType() == AttributeType.TREE){
 						return true;
@@ -430,7 +430,6 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		}
 	}
 
-	
 	/*
 	 * A root node of the content provider
 	 */
