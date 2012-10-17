@@ -52,7 +52,6 @@ import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.gce.geotiff.GeoTiffFormatFactorySpi;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.styling.Style;
-import org.wcs.smart.ca.Area;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.GridQueryResultMetadata;
 import org.wcs.smart.query.model.GriddedQuery;
@@ -159,7 +158,7 @@ public class RasterService extends AbstractRasterService {
 		double gridCellSize = query.getGridSize();
 		rb.setEnvelope(
 				new Envelope2D(
-					Area.AREA_CRS,//TODO: fix this 
+					query.getCoordinateReferenceSystem(), 
 					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
 					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
 					width * gridCellSize , height*gridCellSize)); 

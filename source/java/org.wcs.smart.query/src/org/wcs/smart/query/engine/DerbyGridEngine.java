@@ -43,7 +43,6 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.Track;
@@ -141,7 +140,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					
 					monitor.subTask("Calculating Grid Values");
 					
-					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), Area.AREA_CRS);
+					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					
 					//select the tile_id, and value that we want to show on the grid
 					myResults = getGridResults(c, session, gridDef, query.getQueryDefinition().getValuePart());
@@ -262,9 +261,13 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			double minX = gridDef.getOriginX();
 			double minY = gridDef.getOriginY();
 			double size = gridDef.getCellSize();
+			
 			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT " + strAgg + "(value) as value, tile_id");
+			sql.append(" FROM (");
 			sql.append("SELECT ");
-			sql.append( strAgg + "(number_value) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
+			sql.append(" number_value as value,  ");
+			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id");
 			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
 			sql.append(" JOIN " + queryTempTable 
 				+ " on " + tablePrefix.get(WaypointObservation.class)
@@ -287,7 +290,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				+ ".uuid = "
 				+ queryTempTable
 				+ ".wp_uuid");
-			sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
+			sql.append(") as foo group by tile_id");
 		
 			QueryPlugIn.logSql(sql.toString());
 			rs = c.createStatement().executeQuery(sql.toString());
@@ -302,7 +305,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			double size = gridDef.getCellSize();
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT ");
-			sql.append( strAgg + "(keyid) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
+			sql.append(strAgg + "(keyid) as value,tile_id");
+			sql.append(" FROM (");
+			sql.append("SELECT keyid, ");
+			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id");
 			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
 			sql.append(" JOIN " + queryTempTable 
 				+ " on " + tablePrefix.get(WaypointObservation.class)
@@ -323,7 +329,11 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				+ ".uuid = "
 				+ queryTempTable
 				+ ".wp_uuid");
-			sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
+			//sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
+			//sql.append(" group by tile_id");
+			sql.append(") as foo ");
+			sql.append(" group by ");
+			sql.append("tile_id");
 		
 			QueryPlugIn.logSql(sql.toString());
 			rs = c.createStatement().executeQuery(sql.toString());
@@ -338,8 +348,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 				GridResultItem it = new GridResultItem();
 				it.setValue(rs.getDouble("value"));
-				it.setTileX(rs.getInt("TILE_X"));
-				it.setTileY(rs.getInt("TILE_Y"));
+				String[] tileids = rs.getString("TILE_ID").split("_");
+				
+				it.setTileX(Integer.parseInt(tileids[0]));
+				it.setTileY(Integer.parseInt(tileids[1]));
 
 				items.add(it);
 			}
@@ -423,7 +435,6 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 						ls.setUserData(data);
 					}
 				}
-				
 				try{
 					engine.rasterizeLinestring(ls);
 				}catch (Exception ex){
