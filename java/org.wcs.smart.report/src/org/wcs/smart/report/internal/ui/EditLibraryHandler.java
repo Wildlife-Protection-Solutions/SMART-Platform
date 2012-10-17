@@ -40,16 +40,13 @@ public class EditLibraryHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
 		ReportEditorInput ri = new ReportEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
 		try {
 			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
-					ri, IReportEditorContants.LIBRARY_EDITOR_ID);
+					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
 		} catch (Exception ex) {
 			ReportPlugIn.displayLog("Error loading Smart Report Library for editing. " + ex.getMessage(), ex);
-		}
-		
-		
+		}		
 		return null;
 	}
 

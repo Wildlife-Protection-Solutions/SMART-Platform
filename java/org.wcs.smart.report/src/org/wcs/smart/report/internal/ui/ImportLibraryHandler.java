@@ -26,6 +26,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
+import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
+import org.eclipse.birt.report.designer.ui.lib.explorer.LibraryExplorerView;
 import org.eclipse.birt.report.model.api.command.LibraryChangeEvent;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -36,7 +38,11 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.internal.PartSite;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.library.SmartBirtLibrary;
@@ -63,6 +69,15 @@ public class ImportLibraryHandler extends AbstractHandler {
 			return null;
 		}
 		
+		//close existing report library editor
+		ReportEditorInput ri = new ReportEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
+		IEditorPart part = HandlerUtil.getActivePart(event).getSite().getPage().findEditor(ri);
+		if (part != null){
+			HandlerUtil.getActivePart(event).getSite().getPage().closeEditor(part, false);
+		}
+		
+		final IViewPart site = HandlerUtil.getActivePart(event).getSite().getPage().findView(LibraryExplorerView.ID);
+		
 		//zip up the contents of the rptlibrary
 		ProgressMonitorDialog outputDialog = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
 		try{
@@ -82,10 +97,11 @@ public class ImportLibraryHandler extends AbstractHandler {
 					
 					//fire library change event
 					SessionHandleAdapter.getInstance().getSessionHandle().fireResourceChange(new LibraryChangeEvent(SmartBirtLibrary.getInstance().getLibraryFile().getAbsolutePath()));
-					//TODO: figure out how to refresh shared resources programatically
-					
-					
-					
+
+					//refresh shared resources programatically; this does not refresh editors 
+					if (site != null){
+						((PartSite)site.getSite()).getActionBars().getGlobalActionHandler(ActionFactory.REFRESH.getId( )).run();
+					}
 				} catch (Exception ex) {
 					ReportPlugIn.displayLog("Error importing report library: " + ex.getMessage(), ex);
 				}	
