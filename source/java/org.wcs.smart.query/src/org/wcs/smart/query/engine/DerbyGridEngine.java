@@ -263,11 +263,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			double size = gridDef.getCellSize();
 			
 			StringBuilder sql = new StringBuilder();
-			sql.append("SELECT " + strAgg + "(value) as value, tile_id");
+			sql.append("SELECT " + strAgg + "(value), tile_id");
 			sql.append(" FROM (");
 			sql.append("SELECT ");
 			sql.append(" number_value as value,  ");
-			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id");
+			//TODO: escape wkt string
+			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT() + "'," + minX + "," + minY + "," + size + ") as tile_id");
 			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
 			sql.append(" JOIN " + queryTempTable 
 				+ " on " + tablePrefix.get(WaypointObservation.class)
@@ -308,7 +309,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			sql.append(strAgg + "(keyid) as value,tile_id");
 			sql.append(" FROM (");
 			sql.append("SELECT keyid, ");
-			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id");
+			//sql.append( strAgg + "(keyid) as value,  min(floor(  (X - " + minX + ") /" + size + " ) + 1) as TILE_X , min(floor(  (Y - " + minY + ") / " + size + " ) + 1) as TILE_Y ");
+			
+			//TODO: escape from wkt string
+			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT() + "'," + minX + "," + minY + "," + size + ") as tile_id");
 			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
 			sql.append(" JOIN " + queryTempTable 
 				+ " on " + tablePrefix.get(WaypointObservation.class)
