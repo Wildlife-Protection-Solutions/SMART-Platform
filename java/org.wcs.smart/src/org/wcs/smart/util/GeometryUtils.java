@@ -47,6 +47,8 @@ import java.sql.SQLException;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.GeodeticCalculator;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -195,16 +197,37 @@ public class GeometryUtils {
 	 * 
 	 * @param ls
 	 * @return
+	 * @throws TransformException 
 	 */
-	public static double distanceInMeters(LineString ls){
+	public static double distanceInMeters(LineString ls, CoordinateReferenceSystem crs) throws TransformException{
+		GeodeticCalculator cal = new GeodeticCalculator(crs);
+		double distance = 0;
+		for (int i = 1; i < ls.getCoordinates().length; i ++){
+			cal.setStartingPosition(  JTS.toDirectPosition( new Coordinate(ls.getCoordinateN(i-1).x, ls.getCoordinateN(i-1).y), crs ));
+			cal.setDestinationPosition( JTS.toDirectPosition( new Coordinate(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y), crs ));
+			
+			distance +=cal.getOrthodromicDistance();
+		}
+		return distance;
+	
+	}
+	
+	/**
+	 * Computes the distance in  meters of the given linestring
+	 * in 4326 projections.
+	 * @param ls
+	 * @return
+	 * @throws TransformException
+	 */
+	public static double distanceInMeters(LineString ls) {
 		GeodeticCalculator cal = new GeodeticCalculator();
 		double distance = 0;
 		for (int i = 1; i < ls.getCoordinates().length; i ++){
 			cal.setStartingGeographicPoint(ls.getCoordinateN(i-1).x, ls.getCoordinateN(i-1).y);
 			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y);
+			
 			distance +=cal.getOrthodromicDistance();
 		}
 		return distance;
-	
 	}
 }

@@ -45,7 +45,7 @@ public class SmartDB {
 	public static CoordinateReferenceSystem DATABASE_CRS;
 	static{
 		try {
-			DATABASE_CRS = CRS.decode("EPSG:4326");
+			DATABASE_CRS = CRS.decode("EPSG:4326", true);
 		} catch (NoSuchAuthorityCodeException e) {
 			SmartPlugIn.log("Error determining default crs", e);
 		} catch (FactoryException e) {
