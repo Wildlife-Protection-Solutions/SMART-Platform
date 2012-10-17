@@ -1,0 +1,61 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.tests;
+
+import org.geotools.referencing.CRS;
+import org.junit.Test;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.util.ReprojectUtils;
+
+import com.vividsolutions.jts.util.Assert;
+
+/**
+ * Test case for computing tile ids for gridded 
+ * queries.
+ * @author egouge
+ *
+ */
+public class TileIdTest {
+
+	@Test
+	public void testTileId() throws Exception{
+		CoordinateReferenceSystem DATABASE_CRS = CRS.decode("EPSG:4326");
+		String tid = "";
+		
+		tid = ReprojectUtils.computeTileId(0, 0, DATABASE_CRS.toWKT(), 0, 0, 1);
+		Assert.equals("1_1", tid);
+		
+		tid = ReprojectUtils.computeTileId(1.5, 0.5, DATABASE_CRS.toWKT(), 0, 0, 1);
+		Assert.equals("2_1", tid);
+		
+		tid = ReprojectUtils.computeTileId(5.5, 6.78, DATABASE_CRS.toWKT(), 0, 0, 1);
+		Assert.equals("6_7", tid);
+		
+		CoordinateReferenceSystem BC_ALBERS = CRS.decode("EPSG:3005");
+		tid = ReprojectUtils.computeTileId(-123.4498, 48.4268, BC_ALBERS.toWKT(), 0, 0, 1000);
+		Assert.equals("1190_383", tid);
+		
+		
+		tid = ReprojectUtils.computeTileId(-123.4498, 48.4268, BC_ALBERS.toWKT(), 0, 0, 100);
+		Assert.equals("11891_3825", tid);
+	}
+}
