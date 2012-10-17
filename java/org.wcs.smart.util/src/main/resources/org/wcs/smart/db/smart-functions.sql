@@ -31,3 +31,13 @@ external name 'org.wcs.smart.util.GeometryUtils.intersects'
 PARAMETER STYLE JAVA
 NO SQL
 RETURNS NULL ON NULL INPUT;
+
+
+CREATE FUNCTION smart.computeTileId(x double, y double, destCrsWkt varchar(32672), originX double, originY double, gridSize double)
+ returns varchar(32672)
+LANGUAGE JAVA
+deterministic 
+external name 'org.wcs.smart.util.ReprojectUtils.computeTileId'
+PARAMETER STYLE JAVA
+NO SQL 
+RETURNS NULL ON NULL INPUT;
