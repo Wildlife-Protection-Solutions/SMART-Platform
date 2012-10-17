@@ -35,7 +35,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.geotools.referencing.GeodeticCalculator;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.util.GeometryUtils;
