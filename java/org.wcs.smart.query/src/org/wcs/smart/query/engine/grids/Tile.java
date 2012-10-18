@@ -26,27 +26,27 @@ import com.vividsolutions.jts.geom.Envelope;
 /**
  * Represents a tile in a grid.
  * Tiles are ordered from the lower_left starting 
- * at (0,0)
+ * at (1,1)
  * 
- * n,0
+ * n,1
  * .
  * .
- * 0,0 ........... n,0
+ * 1,1 ........... n,1
  * 
  * @author egouge
  *
  */
 public class Tile {
 
-	private int xid = -1;
-	private int yid = -1;
+	private long xid = -1;
+	private long yid = -1;
 
 	/**
 	 * Creates a new tile
 	 * @param x x tile id
 	 * @param y y tile id
 	 */
-	public Tile(int x, int y) {
+	public Tile(long x, long y) {
 		this.xid = x;
 		this.yid = y;
 	}
@@ -54,14 +54,14 @@ public class Tile {
 	/**
 	 * @return tile x id
 	 */
-	public int getXId() {
+	public long getXId() {
 		return xid;
 	}
 
 	/**
 	 * @return tile y id
 	 */
-	public int getYId() {
+	public long getYId() {
 		return yid;
 	}
 
@@ -80,12 +80,13 @@ public class Tile {
 		return false;
 	}
 
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + xid;
-		result = prime * result + yid;
+		result = prime * result + (int) (xid ^ (xid >>> 32));
+		result = prime * result + (int) (yid ^ (yid >>> 32));
 		return result;
 	}
 
@@ -106,6 +107,8 @@ public class Tile {
 		double ymax = g.getOriginY() + g.getCellSize() * (yid + 1);
 		return new Envelope(xmin, xmax, ymin, ymax);
 	}
+
+
 
 	/**
 	 * Prints the grid cell as a wkt POLYGON

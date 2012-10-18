@@ -37,6 +37,9 @@ import com.vividsolutions.jts.geomgraph.Edge;
  */
 public class Grid {
 
+	public static final int MAX_GRID_CELLS = 1000*1000;
+	public static final Exception GRID_TO_BIG_EXCEPTION = new Exception("Grid too large.  Increase the grid size.");
+	
 	private double EPSILON = 0.0000000001;
 	
 	private double originX;
@@ -98,11 +101,15 @@ public class Grid {
 	 * @param tymin minimum y tile id
 	 * @param width width of grid (number of cells)
 	 * @param height height of grid (number of cells)
+	 * @throws Exception if the grid size is too large
 	 * @return
 	 */
-	public List<Edge> computeEdges(int txmin, int tymin, 
-			int width, int height){
+	public List<Edge> computeEdges(long txmin, long tymin, 
+			long width, long height) throws Exception{
 		
+		if (width * height > MAX_GRID_CELLS){
+			throw GRID_TO_BIG_EXCEPTION;
+		}
 		ArrayList<Edge> graphEdges = new ArrayList<Edge>();
 		
 		double ymin = ( tymin ) * cellSize + originY;

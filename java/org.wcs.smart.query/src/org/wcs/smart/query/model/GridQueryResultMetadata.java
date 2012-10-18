@@ -9,17 +9,17 @@ public class GridQueryResultMetadata {
 	
 	private double maxResultValue = Double.POSITIVE_INFINITY;
 	
-	private int minXTile = 0;
+	private long minXTile = 0;
 	
-	private int maxXTile = 0;
+	private long maxXTile = 0;
 	
-	private int minYTile = 0;
+	private long minYTile = 0;
 	
-	private int maxYTile = 0;
+	private long maxYTile = 0;
 
 	public GridQueryResultMetadata(double minResultValue,
-			double maxResultValue, int minXTile, int maxXTile, int minYTile,
-			int maxYTile) {
+			double maxResultValue, long minXTile, long maxXTile, long minYTile,
+			long maxYTile) {
 		super();
 		this.minResultValue = minResultValue;
 		this.maxResultValue = maxResultValue;
@@ -37,19 +37,19 @@ public class GridQueryResultMetadata {
 		return maxResultValue;
 	}
 
-	public int getMinXTile() {
+	public long getMinXTile() {
 		return minXTile;
 	}
 
-	public int getMaxXTile() {
+	public long getMaxXTile() {
 		return maxXTile;
 	}
 
-	public int getMinYTile() {
+	public long getMinYTile() {
 		return minYTile;
 	}
 
-	public int getMaxYTile() {
+	public long getMaxYTile() {
 		return maxYTile;
 	}
 	
@@ -58,7 +58,7 @@ public class GridQueryResultMetadata {
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
 		
-		int[] values = new int[]{Integer.MAX_VALUE,Integer.MIN_VALUE, Integer.MAX_VALUE,Integer.MIN_VALUE};
+		long[] values = new long[]{Long.MAX_VALUE,Long.MIN_VALUE, Long.MAX_VALUE,Long.MIN_VALUE};
 		
 		for (Iterator<GridResultItem> iterator = items.iterator(); iterator.hasNext();) {
 			GridResultItem type = (GridResultItem) iterator.next();

@@ -41,7 +41,6 @@ import javax.media.jai.TiledImage;
 
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.GridQueryResultMetadata;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.util.SmartUtils;
@@ -102,8 +101,8 @@ final class RasterBuilder {
 	
 	/**
 	 * 
-	 * @param width a value between 0 and 360
-	 * @param height a value between 0 and 180
+	 * @param width 
+	 * @param height 
 	 */
 	public void setRasterDimensions( final int width, final int height){
 		assert width > 0 ;
@@ -168,7 +167,7 @@ final class RasterBuilder {
 			this.file = out;
 			
 		}catch (Exception ex){
-			QueryPlugIn.displayLog("Error creating grid: " + ex.getMessage(), ex);
+			throw ex;
 		} finally {
 			if (raster != null){
 				raster.dispose();
@@ -280,8 +279,8 @@ final class RasterBuilder {
 		for (GridResultItem item : table) {
 			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
 			if (item.getTileX() >= metadata.getMinXTile() && item.getTileX() <= metadata.getMaxXTile() && item.getTileY() >= metadata.getMinYTile() && item.getTileY() <= metadata.getMaxYTile()){
-				int x = item.getTileX() - metadata.getMinXTile();
-				int y = height - (item.getTileY() - metadata.getMinYTile() +1);
+				int x = (int)(item.getTileX() - metadata.getMinXTile());
+				int y = (int)(height - (item.getTileY() - metadata.getMinYTile() +1));
 				raster.setSample(x, y,BAND_0, item.getValue());
 			}
 		}			

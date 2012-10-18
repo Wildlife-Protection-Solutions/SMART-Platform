@@ -122,14 +122,14 @@ public class GridAnalysisEngine<T> {
 		Envelope env = ls.getEnvelopeInternal();
 
 		//create grid lines 
-		int txmin = (int) Math.floor((env.getMinX() - gridDef.getOriginX())
+		long txmin = (long) Math.floor((env.getMinX() - gridDef.getOriginX())
 				/ gridDef.getCellSize());
-		int txmax = (int) Math.ceil((env.getMaxX() - gridDef.getOriginX())
+		long txmax = (long) Math.ceil((env.getMaxX() - gridDef.getOriginX())
 				/ gridDef.getCellSize());
 
-		int tymin = (int) Math.floor((env.getMinY() - gridDef.getOriginY())
+		long tymin = (long) Math.floor((env.getMinY() - gridDef.getOriginY())
 				/ gridDef.getCellSize());
-		int tymax = (int) Math.ceil((env.getMaxY() - gridDef.getOriginY())
+		long tymax = (long) Math.ceil((env.getMaxY() - gridDef.getOriginY())
 				/ gridDef.getCellSize());
 
 		List<Edge> edges = gridDef.computeEdges(txmin, tymin,
@@ -185,6 +185,9 @@ public class GridAnalysisEngine<T> {
 			Entry<Tile, T> mydata = (Entry<Tile, T>) iterator.next();
 			T x = data.get(mydata.getKey());
 			data.put(mydata.getKey(),cellMerger.mergeCell(x, mydata.getValue()));
+			if (data.size() > Grid.MAX_GRID_CELLS){
+				throw Grid.GRID_TO_BIG_EXCEPTION;
+			}
 		}
 	}
 }
