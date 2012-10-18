@@ -61,8 +61,8 @@ public class ReprojectUtils {
 	public static String computeTileId(double x, double y, String destCrsWkt,
 			double originX, double originY, double gridSize) throws Exception{
 		Coordinate c = reproject(x, y, destCrsWkt);
-		int tileidx = (int)Math.floor( (c.x - originX) / gridSize) + 1;
-		int tileidy = (int)Math.floor( (c.y - originY) / gridSize) + 1;
+		long tileidx = (long)Math.floor( (c.x - originX) / gridSize) + 1;
+		long tileidy = (long)Math.floor( (c.y - originY) / gridSize) + 1;
 
 		return tileidx + "_" + tileidy;
 	}
