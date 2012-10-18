@@ -85,6 +85,11 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	    				id = String.valueOf(System.nanoTime());
 	    			}
 	    			rasterService = new RasterService(query);
+	    			rasterService.getReader(monitor);	//this will create the raster
+	    			if (rasterService.getMessage() != null){
+	    				QueryPlugIn.displayLog("Error creating map raster layer.\n\n" + rasterService.getMessage().getMessage(), rasterService.getMessage());
+	    				return Status.OK_STATUS;
+	    			}
 	    		}
 				List<? extends IGeoResource> rasterResourceList = rasterService.resources(monitor);
 				assert !rasterResourceList.isEmpty();
