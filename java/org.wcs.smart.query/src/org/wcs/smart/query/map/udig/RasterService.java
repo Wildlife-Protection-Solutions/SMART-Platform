@@ -138,7 +138,7 @@ public class RasterService extends AbstractRasterService {
 	 * @throws IOException 
 	 */
 	private File createRaster() throws Exception {
-
+		
 		RasterBuilder rb = new RasterBuilder();
 		
 		rb.setFileName(rasterFileName);
@@ -166,6 +166,7 @@ public class RasterService extends AbstractRasterService {
 		rb.setTable(query.getLastResults(), query.getResultMetadata());
 		rb.setGridCellSize(gridCellSize);
 		rb.build();
+		
 		return rb.getResult();
 	}
 
@@ -238,13 +239,15 @@ public class RasterService extends AbstractRasterService {
      */
 	@Override
     public synchronized AbstractGridCoverage2DReader getReader(IProgressMonitor monitor) {
+		this.message = null;
         if (this.reader == null) {
         	// create the raster
         	try {
         		this.rasterFile = createRaster();
         	} catch (Exception ex) {
-        		String message = "Could create map raster layer. \n\n" + ex.getMessage();
-        		QueryPlugIn.displayLog(message, ex);
+        		this.message = ex;
+//        		String message = "Could create map raster layer. \n\n" + ex.getMessage();
+//        		QueryPlugIn.displayLog(message, ex);
         		return null;
         	}
         	
