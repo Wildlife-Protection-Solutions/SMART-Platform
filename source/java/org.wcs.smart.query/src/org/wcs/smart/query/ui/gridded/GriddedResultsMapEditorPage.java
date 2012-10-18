@@ -135,8 +135,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 		protected IStatus run(IProgressMonitor monitor) {
 			if (rasterService != null){
 				try {
-					rasterService.refresh(null);
-					
+					//remove existing layers
 					List<? extends IGeoResource> layers = rasterService.resources(monitor);
 					if (layers.size() > 0){
 						IGeoResource rasterLayers = layers.get(0);
@@ -149,9 +148,12 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 		                	}
 		                }
 					}
+					//refresh and add new layers
+					rasterService.refresh(null);
 					addLayerJob.schedule();				
-				} catch (Exception e) {
-					QueryPlugIn.log("Error refreshing raster service.", e);
+				} catch (Exception ex) {
+					String message = "Could create map raster layer. \n\n" + ex.getMessage();
+					QueryPlugIn.displayLog(message, ex);
 				}
 			}
 			//clear selection

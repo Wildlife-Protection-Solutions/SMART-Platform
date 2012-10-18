@@ -147,7 +147,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					
 					monitor.worked(1);
 				}catch (Exception ex){
-					throw new SQLException("Failed to process grid query: " + ex.getMessage(), ex);
+					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
@@ -350,10 +350,13 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				it.setValue(rs.getDouble("value"));
 				String[] tileids = rs.getString("TILE_ID").split("_");
 				
-				it.setTileX(Integer.parseInt(tileids[0]));
-				it.setTileY(Integer.parseInt(tileids[1]));
+				it.setTileX(Long.parseLong(tileids[0]));
+				it.setTileY(Long.parseLong(tileids[1]));
 
 				items.add(it);
+				if (items.size() > Grid.MAX_GRID_CELLS){
+					throw Grid.GRID_TO_BIG_EXCEPTION;
+				}
 			}
 		} finally {
 			rs.close();

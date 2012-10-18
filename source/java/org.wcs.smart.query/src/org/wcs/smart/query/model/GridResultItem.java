@@ -31,8 +31,8 @@ public class GridResultItem implements IResultItem{
 
 
 	private double value;
-	private int tileX;
-	private int tileY;
+	private long tileX;
+	private long tileY;
 	
 	/**
 	 * the gird value
@@ -46,7 +46,7 @@ public class GridResultItem implements IResultItem{
 	 * 
 	 * @param x x tile id starting at 1 in the lower left
 	 */
-	public void setTileX(int x) {
+	public void setTileX(long x) {
 		this.tileX = x;
 		
 	}
@@ -54,7 +54,7 @@ public class GridResultItem implements IResultItem{
 	 * 
 	 * @param y y tile id starting at 1 in the lower left
 	 */
-	public void setTileY(int y) {
+	public void setTileY(long y) {
 		this.tileY = y;
 		
 	}
@@ -72,7 +72,7 @@ public class GridResultItem implements IResultItem{
 	 * 
 	 * @return x tile id
 	 */
-	public int getTileX() {
+	public long getTileX() {
 		return tileX;
 	}
 	
@@ -80,7 +80,7 @@ public class GridResultItem implements IResultItem{
 	 * 
 	 * @return y tile id
 	 */
-	public int getTileY() {
+	public long getTileY() {
 		return tileY;
 	}
 		

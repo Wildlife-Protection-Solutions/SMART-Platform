@@ -279,7 +279,13 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 					
 					resultPage.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
-					QueryPlugIn.displayLog("Could not execute query.", ex);
+					String message = "Could not execute query. \n\n";
+					if (ex.getCause() != null){
+						message += ex.getCause().getMessage();
+					}else{
+						message += ex.getMessage();
+					}
+					QueryPlugIn.displayLog(message, ex);
 					resultPage.updateAndShowTable(new ArrayList<GridResultItem>(), mymonitor);
 				}
 				mapPage.refresh();

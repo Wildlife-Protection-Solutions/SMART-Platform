@@ -53,6 +53,7 @@ import org.geotools.gce.geotiff.GeoTiffFormatFactorySpi;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.styling.Style;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.engine.grids.Grid;
 import org.wcs.smart.query.model.GridQueryResultMetadata;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.util.SmartUtils;
@@ -75,6 +76,7 @@ public class RasterService extends AbstractRasterService {
     public final static String URL_PARAM = "URL"; //$NON-NLS-1$
 
 	private static GeoTiffFormatFactorySpi factory = null;
+	private String rasterFileName;
 	private File rasterFile;
 	private List<AbstractRasterGeoResource> geoResources = null;
 	private GriddedQuery query = null;
@@ -90,8 +92,7 @@ public class RasterService extends AbstractRasterService {
 		super(buildUrl(query.getUuid()),"geotiff", getFactory());
 		this.query = query;		
 		
-		this.rasterFile = query.getRasterFileName();
-		
+		rasterFileName = query.getRasterFileName().getAbsolutePath();
 	}
 	
 	/**
@@ -139,20 +140,20 @@ public class RasterService extends AbstractRasterService {
 	private File createRaster() throws Exception {
 
 		RasterBuilder rb = new RasterBuilder();
-		if(rasterFile == null){
-			return null;
-		}
-		rb.setFileName(rasterFile.getCanonicalPath());
+		
+		rb.setFileName(rasterFileName);
 		
 		GridQueryResultMetadata metadata = query.getResultMetadata();
 		if (metadata == null){
 			//query has not been run
 			return null;
 		}
-		int width = metadata.getMaxXTile() - metadata.getMinXTile() + 1;
-		int height = metadata.getMaxYTile() - metadata.getMinYTile() + 1;
-		
-		rb.setRasterDimensions(width, height);
+		long width = metadata.getMaxXTile() - metadata.getMinXTile() + 1;
+		long height = metadata.getMaxYTile() - metadata.getMinYTile() + 1;
+		if (width > Integer.MAX_VALUE || height > Integer.MAX_VALUE || width * height > Grid.MAX_GRID_CELLS){
+			throw Grid.GRID_TO_BIG_EXCEPTION;
+		}
+		rb.setRasterDimensions((int)width, (int)height);
 			
 		// sets the envelope based in the map bound
 		double gridCellSize = query.getGridSize();
@@ -177,12 +178,12 @@ public class RasterService extends AbstractRasterService {
 	 */
 	private List<AbstractRasterGeoResource> getGeoResource() throws Exception {
 		AbstractRasterGeoResource resource = null;
-		resource = createGeoResource(this.rasterFile);
+		resource = createGeoResource(this.rasterFileName);
 		return Collections.singletonList(resource);
 	}
 
-	private AbstractRasterGeoResource createGeoResource(File file) throws IOException{
-		return new AbstractRasterGeoResource(this, file.getCanonicalPath()) {
+	private AbstractRasterGeoResource createGeoResource(String fileName) throws IOException{
+		return new AbstractRasterGeoResource(this, fileName) {
 			
 			private AbstractRasterGeoResourceInfo  info = null;
 			
@@ -230,7 +231,7 @@ public class RasterService extends AbstractRasterService {
 	}
 	
 	/**
-     * Finds or creates the Reader used to access this service. Apon any exception, the message
+     * Finds or creates the Reader used to access this service. Upon any exception, the message
      * field is populated and null is returned.
      * 
      * @return Reader linked to this service.
@@ -238,12 +239,12 @@ public class RasterService extends AbstractRasterService {
 	@Override
     public synchronized AbstractGridCoverage2DReader getReader(IProgressMonitor monitor) {
         if (this.reader == null) {
-        	
         	// create the raster
         	try {
         		this.rasterFile = createRaster();
         	} catch (Exception ex) {
-        		QueryPlugIn.displayLog("Error creating gridded query.", ex);
+        		String message = "Could create map raster layer. \n\n" + ex.getMessage();
+        		QueryPlugIn.displayLog(message, ex);
         		return null;
         	}
         	
@@ -291,7 +292,7 @@ public class RasterService extends AbstractRasterService {
 			this.reader = null;
 		}
 		
-		this.rasterFile = createRaster();
+		createRaster();
 
 	}	
 	
