@@ -38,7 +38,7 @@ import com.vividsolutions.jts.geom.LineString;
  * @author egouge
  *
  */
-public class DistanceValueComputer<T> implements IValueComputer<T> {
+public class DistanceValueComputer implements IValueComputer<Double> {
 
 	/**
 	 * Computes the distance of the linestring
@@ -46,10 +46,10 @@ public class DistanceValueComputer<T> implements IValueComputer<T> {
 	 * 
 	 * @see org.wcs.smart.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.wcs.smart.query.engine.grids.Tile, org.wcs.smart.query.engine.grids.Grid, com.vividsolutions.jts.geom.LineString)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public T computeValue(T existingValue, Tile t, Grid gridDef, LineString ls) throws Exception{
+	public Double computeValue(Double existingValue, Tile t, Grid gridDef, LineString ls) throws Exception{
 		if (existingValue != null){
+			//already computed for this cell
 			return existingValue;
 		}
 		
@@ -60,7 +60,7 @@ public class DistanceValueComputer<T> implements IValueComputer<T> {
 
 		
 		double newlength = processGeometry(g, gridDef.getCrs());
-		return (T)(Double)((Double)newlength);
+		return newlength;
 	}
 	
 	private double processGeometry(Geometry g, CoordinateReferenceSystem crs) throws Exception{

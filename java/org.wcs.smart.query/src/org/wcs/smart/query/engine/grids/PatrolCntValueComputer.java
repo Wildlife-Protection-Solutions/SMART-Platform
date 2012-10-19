@@ -34,7 +34,7 @@ import com.vividsolutions.jts.geom.LineString;
  * @author egouge
  *
  */
-public class PatrolCntValueComputer<T> implements IValueComputer<T> {
+public class PatrolCntValueComputer implements IValueComputer<HashSet<Object>> {
 
 	
 	/**
@@ -43,8 +43,7 @@ public class PatrolCntValueComputer<T> implements IValueComputer<T> {
 	 * @return a hashset that contains the hashcode patrol_uuid represented by the linestring
 	 * being processed
 	 */
-	@SuppressWarnings("unchecked")
-	public T computeValue(T existingValue, Tile t, 
+	public HashSet<Object> computeValue(HashSet<Object> existingValue, Tile t, 
 			Grid gridDef, LineString ls) {
 		if (existingValue != null){
 			return existingValue;
@@ -56,7 +55,6 @@ public class PatrolCntValueComputer<T> implements IValueComputer<T> {
 			//this should never happen
 			return null;
 		}
-		return (T) values;
+		return values;
 	}
 }
-
