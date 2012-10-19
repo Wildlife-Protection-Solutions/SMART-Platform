@@ -52,11 +52,13 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.grids.AddCellMerger;
 import org.wcs.smart.query.engine.grids.DistanceValueComputer;
+import org.wcs.smart.query.engine.grids.ExistsValueComputer;
 import org.wcs.smart.query.engine.grids.Grid;
 import org.wcs.smart.query.engine.grids.GridAnalysisEngine;
 import org.wcs.smart.query.engine.grids.PatrolCntCellMerger;
 import org.wcs.smart.query.engine.grids.PatrolCntValueComputer;
 import org.wcs.smart.query.engine.grids.PatrolDayCntValueComputer;
+import org.wcs.smart.query.engine.grids.PatrolExistsCellMerger;
 import org.wcs.smart.query.engine.grids.Tile;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
@@ -215,8 +217,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	protected List<GridResultItem> getGridResults(Connection c, 
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
-		List<GridResultItem> items = new ArrayList<GridResultItem>();
-		
+
 		String strAgg ="";
 		ResultSet rs;
 
@@ -342,55 +343,83 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		}else{
 			throw new SQLException("Not an Attribute or Category Selected");	
 		}
+		
 		try {
-
+			HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
 			while (rs.next()) {
-
 				GridResultItem it = new GridResultItem();
-				it.setValue(rs.getDouble("value"));
-				String[] tileids = rs.getString("TILE_ID").split("_");
+				
+				String tid = rs.getString("TILE_ID");
+				String[] tileids = tid.split("_");
 				
 				it.setTileX(Long.parseLong(tileids[0]));
 				it.setTileY(Long.parseLong(tileids[1]));
-
-				items.add(it);
+				it.setValue(rs.getDouble("value"));
+				
+				items.put(tid, it);
 				if (items.size() > Grid.MAX_GRID_CELLS){
 					throw Grid.GRID_TO_BIG_EXCEPTION;
 				}
 			}
+			//combine the two if patrol and no count then we want the
+			//value 0 to display otherwise we keep the count value
+			List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef);
+			for (GridResultItem it : patrolLocations){
+				if (items.get(it.getTileX() + "_" + it.getTileY()) == null){
+					GridResultItem newitem = new GridResultItem();
+					newitem.setTileX(it.getTileX());
+					newitem.setTileY(it.getTileY());
+					newitem.setValue(0);
+					items.put(it.getTileX() + "_" + it.getTileY(), newitem);
+				}
+			}
+			ArrayList<GridResultItem> list = new ArrayList<GridResultItem>();
+			list.addAll(items.values());
+			return list;
 		} finally {
 			rs.close();
 		}
-		return items;
 	}
 
-	private List<GridResultItem> computePatrolValue(Connection c,
-			PatrolValueItem item, 
-			Grid gridDef) throws Exception{
-
+	private List<GridResultItem> computePatrolExistance(Connection c, Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
 		String dataField[] = null;
 		
+		PatrolExistsCellMerger cellMerger = new PatrolExistsCellMerger();
+		ExistsValueComputer valueComputer = new ExistsValueComputer();
+		
+		engine = new GridAnalysisEngine<Boolean>(gridDef, cellMerger, valueComputer);
+		return computePatrolTrack(c, engine, dataField);
+	}
+	
+	private List<GridResultItem> computePatrolValue(Connection c,
+			PatrolValueItem item, 
+			Grid gridDef) throws Exception{
+		GridAnalysisEngine<?> engine = null;
+		String dataField[] = null;
 		
 		if (item.getOption() == PatrolValueOption.DISTANCE){
-			AddCellMerger<Double> cellMerger = new AddCellMerger<Double>();	//adds cell values
-			DistanceValueComputer<Double> valueComputer = new DistanceValueComputer<Double>();
+			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
+			DistanceValueComputer valueComputer = new DistanceValueComputer();
 			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
 		}else if (item.getOption() == PatrolValueOption.NUM_DAYS){	
 			dataField = new String[]{"p_uuid", "pld_patrol_day"};
-			PatrolCntCellMerger<HashSet<String>> cellMerger = new PatrolCntCellMerger<HashSet<String>>();
-			PatrolDayCntValueComputer<HashSet<String>> valueComputer = new PatrolDayCntValueComputer<HashSet<String>>();
-			engine = new GridAnalysisEngine<HashSet<String>>(gridDef, cellMerger, valueComputer);
+			PatrolCntCellMerger cellMerger = new PatrolCntCellMerger();
+			PatrolDayCntValueComputer valueComputer = new PatrolDayCntValueComputer();
+			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 		}else if (item.getOption() == PatrolValueOption.NUM_PATROLS){
 			dataField = new String[]{"p_uuid"};
-			PatrolCntCellMerger<HashSet<Object>> cellMerger = new PatrolCntCellMerger<HashSet<Object>>();
-			PatrolCntValueComputer<HashSet<Object>> valueComputer = new PatrolCntValueComputer<HashSet<Object>>();
+			PatrolCntCellMerger cellMerger = new PatrolCntCellMerger();
+			PatrolCntValueComputer valueComputer = new PatrolCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 			
 		}else{
 			throw new UnsupportedOperationException("Patrol value option " + item.getOption().getGuiName() + " not supported for grid analysis.");
 		}
-		
+		return computePatrolTrack(c, engine, dataField);
+	}
+	
+	private List<GridResultItem> computePatrolTrack(Connection c, GridAnalysisEngine<?> engine, String[] dataField) throws Exception{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom ");
 		if (dataField != null){

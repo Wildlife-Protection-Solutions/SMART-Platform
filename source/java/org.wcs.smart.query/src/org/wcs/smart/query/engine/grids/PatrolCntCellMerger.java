@@ -32,14 +32,13 @@ import java.util.HashSet;
  * @param <T> must be hashset
  */
 
-public class PatrolCntCellMerger<T> implements ICellMerger<T> {
+public class PatrolCntCellMerger implements ICellMerger<HashSet<Object>> {
 
 	/**
 	 * @see org.wcs.smart.query.engine.grids.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public T mergeCell(T v1, T v2) {
+	public HashSet<Object> mergeCell(HashSet<Object> v1, HashSet<Object> v2) {
 		if (v1 == null && v2 == null){
 			return null;
 		}
@@ -49,12 +48,8 @@ public class PatrolCntCellMerger<T> implements ICellMerger<T> {
 		if (v1 == null && v2 != null){
 			return v2;
 		}
-		
-		HashSet<Object> pid1 = (HashSet<Object>) v1;
-		HashSet<Object> pid2 = (HashSet<Object>) v2;
-		pid1.addAll(pid2);
-		
-		return (T)pid1;
+		v1.addAll(v2);
+		return v1;
 	}
 
 	/**
@@ -63,12 +58,11 @@ public class PatrolCntCellMerger<T> implements ICellMerger<T> {
 	 * @see org.wcs.smart.query.engine.grids.ICellMerger#getFinalValue(java.lang.Object)
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public Double getFinalValue(T value) {
+	public Double getFinalValue(HashSet<Object> value) {
 		if (value == null) {
 			return 0.0;
 		} else {
-			return (double) ((HashSet<Object>) value).size();
+			return (double)value.size();
 		}
 	}
 

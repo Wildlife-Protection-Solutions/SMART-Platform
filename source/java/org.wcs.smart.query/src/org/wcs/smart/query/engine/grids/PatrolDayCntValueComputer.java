@@ -28,7 +28,7 @@ import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.LineString;
 
-public class PatrolDayCntValueComputer<T> implements IValueComputer<T> {
+public class PatrolDayCntValueComputer implements IValueComputer<HashSet<Object>> {
 
 	/** 
 	 * <p>This counts the number of patrol days in a given cell.
@@ -39,13 +39,12 @@ public class PatrolDayCntValueComputer<T> implements IValueComputer<T> {
 	 * @return 1
 	 * @see org.wcs.smart.query.engine.grids.IValueComputer#computeValue(java.lang.Object, org.wcs.smart.query.engine.grids.Tile, org.wcs.smart.query.engine.grids.Grid, com.vividsolutions.jts.geom.LineString)
 	 */
-	@SuppressWarnings("unchecked")
-	public T computeValue(T existingValue, Tile t, Grid gridDef,
+	public HashSet<Object> computeValue(HashSet<Object> existingValue, Tile t, Grid gridDef,
 			LineString ls) {
 		if (existingValue != null){
 			return existingValue;
 		}
-		HashSet<String> d = new HashSet<String>();
+		HashSet<Object> d = new HashSet<Object>();
 		
 		Object[] data = (Object[]) ls.getUserData();
 		byte[] pid = (byte[]) data[0];
@@ -54,6 +53,6 @@ public class PatrolDayCntValueComputer<T> implements IValueComputer<T> {
 		String key = SmartUtils.encodeHex(pid) + "_" + day.getTime();
 		d.add(key);
 		
-		return (T)(d);
+		return d;
 	}
 }

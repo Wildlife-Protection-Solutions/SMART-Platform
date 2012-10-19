@@ -28,7 +28,7 @@ package org.wcs.smart.query.engine.grids;
  * @author egouge
  *
  */
-public class AddCellMerger<T> implements ICellMerger<T> {
+public class AddCellMerger implements ICellMerger<Double> {
 
 	/**
 	 * <p>
@@ -37,9 +37,8 @@ public class AddCellMerger<T> implements ICellMerger<T> {
 	 * </p>
 	 * @see org.wcs.smart.query.engine.grids.ICellMerger#mergeCell(java.lang.Object, java.lang.Object)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public T mergeCell(T v1, T v2) {
+	public Double mergeCell(Double v1, Double v2) {
 		if(v1 == null ){
 			return v2;
 		}
@@ -47,15 +46,15 @@ public class AddCellMerger<T> implements ICellMerger<T> {
 			return v1;
 		}
 		
-		return (T)(Double)((Double)v1 + (Double)v2);
+		return v1 + v2;
 	}
 
 	/**
 	 * @see org.wcs.smart.query.engine.grids.ICellMerger#getFinalValue(java.lang.Object)
 	 */
 	@Override
-	public Double getFinalValue(T value) {
-		return (Double)value;
+	public Double getFinalValue(Double value) {
+		return value;
 	}
 
 }
