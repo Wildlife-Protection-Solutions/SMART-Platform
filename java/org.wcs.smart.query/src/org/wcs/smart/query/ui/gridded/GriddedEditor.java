@@ -73,6 +73,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private GriddedTableResultsPage resultPage;	//table result page
 	private GriddedResultsMapEditorPage mapPage;	//map results page
 
+	private boolean firstRun = true;
 	
 	private IQueryListener qListener = new IQueryListener() {
 		@Override
@@ -87,6 +88,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		public void queryRun(Query query) {
 			if (query != null && query.equals(GriddedEditor.this.query)){
 				refreshQuery();
+				GriddedEditor.this.firstRun = false;
 			}
 		}
 		
@@ -270,6 +272,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 		//run query
 		final IProgressMonitor mymonitor = resultPage.createProgressMonitor();
+		final boolean isFirstRun = this.firstRun;
 		Job runQueryJob = new Job("Running query: " + this.query.getName()) {
 
 			@Override
@@ -288,7 +291,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 					QueryPlugIn.displayLog(message, ex);
 					resultPage.updateAndShowTable(new ArrayList<GridResultItem>(), mymonitor);
 				}
-				mapPage.refresh();
+				mapPage.refresh(isFirstRun);
 				return Status.OK_STATUS;
 			}
 		};

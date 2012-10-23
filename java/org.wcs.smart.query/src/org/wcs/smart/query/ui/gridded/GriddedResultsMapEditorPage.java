@@ -32,6 +32,7 @@ import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayerCommand;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,12 +40,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.map.udig.RasterService;
 import org.wcs.smart.query.model.GridResultItem;
@@ -251,11 +255,55 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
     /**
      * Refresh the service on the map
      */
-    public void refresh(){
+    public void refresh(boolean firstRun){
     	if (rasterService == null){
     		addLayerJob.schedule();
     	}else{
     		refreshJob.schedule();
+    	}
+    	
+    	//update the map CRS as necessary
+    	if (firstRun){
+    		//set crs of map to crs of query
+    		//only do this on the first run;
+    		Job setCrs = new Job("Set CRS"){
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try{
+					loadDefaultLayers.join();
+					if (!CRS.equalsIgnoreMetadata(getMap().getViewportModel().getCRS(), parentEditor.getQueryInternal().getCoordinateReferenceSystem() )){
+						ChangeCRSCommand crs = new ChangeCRSCommand(parentEditor.getQueryInternal().getCoordinateReferenceSystem());
+						getMap().sendCommandASync(crs);
+					}
+					}catch (Exception ex){
+						// we will just log these
+						QueryPlugIn.log("Error setting initial CRS for Query. " + ex.getMessage(), ex);
+					}
+					return Status.OK_STATUS;
+				}
+    		
+    		};
+    		setCrs.schedule();
+    	}else{
+    		//if map crs != query crs ask user if they want to update
+    		try{
+    			final CoordinateReferenceSystem querycrs = parentEditor.getQueryInternal().getCoordinateReferenceSystem();
+    			if (!CRS.equalsIgnoreMetadata(getMap().getViewportModel().getCRS(), querycrs)){
+    				parentEditor.getSite().getShell().getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							if ( MessageDialog.openQuestion(parentEditor.getSite().getShell(), "Coordinate Reference System", "The map coordinate reference system does not match the query coordinate reference system.  Would you like to update the map coordinate reference system to match the query?")){
+		    					ChangeCRSCommand crs = new ChangeCRSCommand(querycrs);
+								getMap().sendCommandASync(crs);
+		    				}
+						}});
+    				
+    			}
+    		}catch (Exception ex){
+    			QueryPlugIn.log("Could not check CRS of query. " + ex.getMessage(), ex);
+    		}
+    		
     	}
     }
 
