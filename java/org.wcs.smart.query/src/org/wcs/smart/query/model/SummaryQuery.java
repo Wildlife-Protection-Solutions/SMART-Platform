@@ -39,6 +39,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbySummaryEngine;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
@@ -53,6 +54,7 @@ import org.wcs.smart.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.ValuePart;
+import org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
@@ -362,6 +364,11 @@ public class SummaryQuery extends Query {
 		//---- generate drop items for value items ----
 		ValuePart part = getQueryDefinition().getValuePart();
 		List<DropItem> valueItems = part.getDropItems(session);
+		for (DropItem di : valueItems){
+			if (di instanceof AbstractValueDropItem){
+				((AbstractValueDropItem) di).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
+			}
+		}
 		valueDropItems.addAll(valueItems);
 		
 		//---- generate drop items for group by items ----

@@ -163,7 +163,7 @@ public class QueryFilterView extends ViewPart {
 				summaryInput.put(SummaryQueryContentProvider.NodeType.GROUP_BY_NODE, dm);
 				
 				final HashMap<GriddedQueryContentProvider.NodeType, Object> griddedInput = new HashMap<GriddedQueryContentProvider.NodeType, Object> ();
-				griddedInput.put(GriddedQueryContentProvider.NodeType.PATROL_VALUES, PatrolQueryOptions.GRID_RATIO_OPTIONS);
+				griddedInput.put(GriddedQueryContentProvider.NodeType.PATROL_VALUES, PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
 				griddedInput.put(GriddedQueryContentProvider.NodeType.DATAMODEL_VALUES, dm);
 				
 				Display.getDefault().asyncExec(new Runnable(){

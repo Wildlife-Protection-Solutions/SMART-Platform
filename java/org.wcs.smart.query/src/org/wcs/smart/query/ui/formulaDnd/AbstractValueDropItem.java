@@ -81,7 +81,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 	 * @param options the patrol value options to be used as the 
 	 * encounter rate choices
 	 */
-	void setEncounterRateOptions(PatrolValueOption[] options){
+	public void setEncounterRateOptions(PatrolValueOption[] options){
 		
 		encounterRateOptions = options;
 	}
@@ -211,10 +211,11 @@ public abstract class AbstractValueDropItem extends DropItem {
 		EncounterRateDialog dialog = new EncounterRateDialog(main.getShell(), encounterRateOptions);
 		if (dialog.open() == Window.OK){
 			encounterRatio = dialog.getSelectedItems();
+			updateUi();
+			targetPanel.layout();
+			queryChanged();
 		}
-		updateUi();
-		targetPanel.layout();
-		queryChanged();
+		
 	}
 	
 	/* (non-Javadoc)
