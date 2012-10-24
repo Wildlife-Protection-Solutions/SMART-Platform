@@ -99,7 +99,7 @@ public class PatrolDataSource extends AbstractDataStore{
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "fid:String,distance:Double,day:Date,geom:LineString:srid=4326";
+		String spec = "fid:String,distance:Double,day:Date,leg:String,geom:LineString:srid=4326";
 		SimpleFeatureType type =  DataUtilities.createType("smart." + TRACK_TYPE, spec);
 		return type;
 	}

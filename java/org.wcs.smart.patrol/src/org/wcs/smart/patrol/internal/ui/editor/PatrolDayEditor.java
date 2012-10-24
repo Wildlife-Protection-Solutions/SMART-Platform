@@ -24,6 +24,8 @@ package org.wcs.smart.patrol.internal.ui.editor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -121,7 +123,7 @@ public class PatrolDayEditor extends EditorPart {
 		
 		try{
 			//find all patrol legs for this day
-			List<PatrolLeg> legs = editor.getPatrol().getLegs();
+			List<PatrolLeg> legs = editor.getPatrol().getLegs();		
 			ArrayList<PatrolLegDay> plds = new ArrayList<PatrolLegDay>();
 			for (PatrolLeg leg: legs){
 				for (PatrolLegDay day : leg.getPatrolLegDays()){
@@ -153,6 +155,19 @@ public class PatrolDayEditor extends EditorPart {
 				comp.setData((PatrolLegDay)plds.get(0));
 				children[0] = comp;
 			}else{
+				//sort legs by start date
+				Collections.sort(plds, new Comparator<PatrolLegDay>(){
+
+					@Override
+					public int compare(PatrolLegDay o1, PatrolLegDay o2) {
+						if (o1.getStartTime().before(o2.getStartTime())){
+							return -1;
+						}else if (o1.getStartTime().after(o2.getStartTime())){
+							return 1;
+						}else{
+							return o1.getPatrolLeg().getId().compareTo(o2.getPatrolLeg().getId());
+						}
+					}});
 				children = new PatrolLegDayInputComposite[plds.size()];
 				Composite mainComp = toolkit.createComposite(frmSummary.getBody());
 				mainComp.setLayout(new GridLayout(1, false));

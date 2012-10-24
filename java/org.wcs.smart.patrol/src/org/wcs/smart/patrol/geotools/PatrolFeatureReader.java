@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.geotools;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -149,13 +148,14 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	}
 	
 	private SimpleFeature getTrackAsFeature(Track track){
-		//String spec = "uuid:String,distance:Double,geom:Linestring:srid=4326";
-		String fid = ftype.getName() + "." + trackDt.format(track.getPatrolLegDay().getDate()) ; 
-		Object data[] = new Object[4];
+		//String spec = "fid:String,distance:Double,day:Date,leg:String,geom:LineString:srid=4326";
+		String fid = ftype.getName() + "." + trackDt.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId(); 
+		Object data[] = new Object[5];
 		data[0] = fid;
 		data[1] = track.getDistance();
 		data[2] = track.getPatrolLegDay().getDate();
-		data[3] = track.getLineString();
+		data[3] = track.getPatrolLegDay().getPatrolLeg().getId();
+		data[4] = track.getLineString();
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
 	}
