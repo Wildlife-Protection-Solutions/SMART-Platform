@@ -43,12 +43,14 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyGridEngine;
 import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
+import org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.util.SmartUtils;
 
@@ -364,8 +366,11 @@ public class GriddedQuery extends Query {
 		//---- generate drop items for value items ----
 		List<DropItem> valueItems = new ArrayList<DropItem>();
 		IValueItem part = getQueryDefinition().getValuePart();
-
-		valueItems.add(part.asDropItem(session));
+		DropItem di = part.asDropItem(session);
+		if (di instanceof AbstractValueDropItem){
+			((AbstractValueDropItem) di).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
+		}
+		valueItems.add(di);
 		valueDropItems.addAll(valueItems);
 		
 			

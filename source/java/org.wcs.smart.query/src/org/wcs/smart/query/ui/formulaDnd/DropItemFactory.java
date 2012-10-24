@@ -388,9 +388,9 @@ public class DropItemFactory {
 			for (int i = 0; i < items.length; i ++){
 				if (items[i] instanceof AbstractValueDropItem){
 					if(queryType == QueryType.GRIDDED){
-						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.GRID_RATIO_OPTIONS);
+						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
 					}else{
-						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.PATROL_ENCOUNTER_RATE_OPTIONS);
+						((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
 					}
 				}
 			}

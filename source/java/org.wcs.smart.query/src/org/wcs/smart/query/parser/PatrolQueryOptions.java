@@ -219,7 +219,7 @@ public class PatrolQueryOptions {
 	/**
 	 * Options for computing encounter rates
 	 */
-	public final static PatrolValueOption[] PATROL_ENCOUNTER_RATE_OPTIONS = {
+	public final static PatrolValueOption[] SUMMARY_ENCOUNTER_RATE_OPTIONS = {
 		PatrolValueOption.DISTANCE,
 		PatrolValueOption.NUM_HOURS,
 		PatrolValueOption.NUM_DAYS,
@@ -231,7 +231,7 @@ public class PatrolQueryOptions {
 	/**
 	 * Options for computing encounter rates
 	 */
-	public final static PatrolValueOption[] GRID_RATIO_OPTIONS = {
+	public final static PatrolValueOption[] GRID_ENCOUNTER_RATE_OPTIONS = {
 		PatrolValueOption.DISTANCE,
 		PatrolValueOption.NUM_PATROLS,
 		PatrolValueOption.NUM_DAYS
