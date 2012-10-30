@@ -217,12 +217,14 @@ public class DataModelXmlToSmartConverter {
 		if (attributes != null && attributes.size() > 0){
 			newCategory.setAttributes(new ArrayList<CategoryAttribute>());
 		
-			for (CategoryAttributeLink attribute : attributes){
+			for (int i = 0; i < attributes.size(); i ++){
+				CategoryAttributeLink attribute = attributes.get(i);
 				Attribute att = attributeLookUp.get(attribute.getAttributekey());
 				if (att == null){
 					throw new ParseException("Attribute " + attribute + " not found for category " + xmlCat.getKey(), 0);
 				}
 				CategoryAttribute ca = new CategoryAttribute(newCategory, att);
+				ca.setOrder(i);
 				newCategory.getAttributes().add(ca);
 				ca.setIsActive(attribute.isIsactive());
 			}
