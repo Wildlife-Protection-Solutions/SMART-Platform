@@ -502,4 +502,16 @@ public class SmartUtils {
 		return false;
 		
 	}
+	
+	/**
+	 * Formats a string for placement in an swt label.
+	 * <p>
+	 * Replaces all & with &&
+	 * </p>
+	 * @param text
+	 * @return
+	 */
+	public static String formatStringForLabel(String text){
+		return text.replaceAll("&", "&&");
+	}
 }
