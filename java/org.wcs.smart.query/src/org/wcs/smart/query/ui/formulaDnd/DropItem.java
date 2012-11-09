@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A super class for a query drag and drop item.
@@ -242,6 +243,6 @@ public abstract class DropItem {
 	 * @return
 	 */
 	protected String formatStringForLabel(String text){
-		return text.replaceAll("&", "&&");
+		return SmartUtils.formatStringForLabel(text);
 	}
 }
