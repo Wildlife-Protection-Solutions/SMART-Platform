@@ -78,7 +78,11 @@ public class GPSBabel {
 	
 	
 	/**
-	 * Reads the device options from GPS Babbel
+	 * Reads the device options from GPS Babbel.
+	 * <p>Will only return items that
+	 * device type 'serial' and can read both
+	 * tracks and waypoints.
+	 * </p>
 	 * 
 	 * @return map of gps babel key to display name
 	 * @throws IOException if error occurs

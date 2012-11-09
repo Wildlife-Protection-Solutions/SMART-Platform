@@ -19,30 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.observation;
+package org.wcs.smart.patrol.internal.ui.observation.field;
 
-import org.eclipse.jface.wizard.IWizardPage;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 
 /**
- * Interface for observation wizard pages.
+ * Factory for creating fields for entering/editing
+ * observation attributes.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
-public interface IObservationWizardPage {
+public class AttributeFieldFactory {
 
 	/**
-	 * Called before the wizard page moves to the next page
-	 * @param targetPage the page being moved to
-	 * @return <code>true</code> if okay to move on; <code>false</code> otherwise
-	 */
-	boolean beforeMoveNext(IWizardPage targetPage);
-	
-	/**
-	 * Called before the page is shown.
+	 * Creates a new attribute field based on the given attribute.
 	 * 
-	 * <p>Can be used to update wizard 
-	 * buttons.</p>
+	 * @param attribute
+	 * @return
 	 */
-	void beforeShow();
+	public static IAttributeField<?> findAttributeField(Attribute attribute){
+		if (attribute.getType() == AttributeType.BOOLEAN){
+			return new BooleanAttributeField(attribute);
+		}else if (attribute.getType() == AttributeType.TEXT){
+			return new StringAttributeField(attribute);
+		}else if (attribute.getType() == AttributeType.NUMERIC){
+			return new NumericAttributeField(attribute);
+		}else if (attribute.getType() == AttributeType.LIST){
+			return new ListAttributeField(attribute);
+		}else if (attribute.getType() == AttributeType.TREE){
+			return new TreeAttributeField(attribute);
+		}
+		throw new IllegalStateException("Invalid attribute type.");
+	}
 }

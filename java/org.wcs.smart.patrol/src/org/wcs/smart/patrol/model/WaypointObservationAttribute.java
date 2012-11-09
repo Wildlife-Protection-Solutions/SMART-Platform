@@ -128,49 +128,6 @@ public class WaypointObservationAttribute {
 		return this.dValue != null || this.listItem != null || this.nodeItem != null || this.sValue != null;
 	}
 	
-	@Transient
-	public String validate(){
-		if (getAttribute().getType() == AttributeType.BOOLEAN){
-			if (getAttribute().getIsRequired() && getNumberValue() == null){
-				return getAttribute().getName() + " must be provided.";
-			}
-		}else if (getAttribute().getType() == AttributeType.NUMERIC){
-			if (getAttribute().getIsRequired() && getNumberValue() == null){
-				return getAttribute().getName() + " must be provided.";
-			}
-			if (getNumberValue() != null ){
-				if (getAttribute().getMinValue() != null){
-					if (getNumberValue() < getAttribute().getMinValue()){
-						return getAttribute().getName() + " must be greater than " + getAttribute().getMinValue();
-					}
-				}
-				if (getAttribute().getMaxValue() != null){
-					if (getNumberValue() > getAttribute().getMaxValue()){
-						return getAttribute().getName() + " must be less than " + getAttribute().getMaxValue();
-					}
-				}
-			}
-		}else if (getAttribute().getType() == AttributeType.TEXT){
-			if (getAttribute().getIsRequired() && getStringValue() == null){
-				return  getAttribute().getName() + " must be provided.";
-			}
-			if (getStringValue() != null && getAttribute().getRegex() != null && getAttribute().getRegex().length() > 0){
-				if (!getStringValue().matches(getAttribute().getRegex())){
-					return "The value '" + getStringValue() + "' for attribute " + getAttribute().getName() + " does not match the required expression '" + getAttribute().getRegex() + "'";
-				}
-			}
-		}else if (getAttribute().getType() == AttributeType.LIST){
-			if (getAttribute().getIsRequired()&& getAttributeListItem() == null){
-				return getAttribute().getName() + " must be provided.";
-			}
-		}else if (getAttribute().getType() == AttributeType.TREE){
-			if (getAttribute().getIsRequired() && getAttributeTreeNode() == null){
-				return getAttribute().getName() + " must be provided.";
-			}
-		}
-		return null;
-	}
-	
 	@Override
 	public int hashCode(){
 		if (id == null){
@@ -210,6 +167,27 @@ public class WaypointObservationAttribute {
 			clone.sValue = new String(sValue);
 		}
 		return clone;
+	}
+	
+	/**
+	 * 
+	 * @return the value of the observation based
+	 * on the attribute type.
+	 */
+	@Transient
+	public Object getAttributeValue(){
+		AttributeType type = getAttribute().getType();
+		if (type == AttributeType.BOOLEAN ||
+				type == AttributeType.NUMERIC){
+			return getNumberValue();
+		}else if (type == AttributeType.TEXT){
+			return getStringValue();
+		}else if (type == AttributeType.LIST){
+			return getAttributeListItem();
+		}else if (type == AttributeType.TREE){
+			return getAttributeTreeNode();
+		}
+		throw new IllegalStateException("Invalid attribute type");
 	}
 	
 	@Embeddable

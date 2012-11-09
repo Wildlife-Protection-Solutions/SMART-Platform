@@ -834,7 +834,7 @@ public class PatrolLegDayInputComposite {
 									PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", count + " waypoints succesfully imported.");
 								}
-								editor.getPatrolEditor().save(patrolLegDate.getWaypoints());
+								editor.getPatrolEditor().save(wp);
 //								editor.setDirty(true);
 //								editor.getPatrolEditor().doSave(null);
 								
@@ -892,10 +892,7 @@ public class PatrolLegDayInputComposite {
 //			editor.setDirty(true);
 		} else if (column == OtColumn.OBSERVATION) {
 			//updated in cell editor
-			if (value != null){
-//				editor.setDirty(true);
-				needSave = true;
-			}
+			needSave = false;
 		} else if (column == OtColumn.COMMENT) {
 			element.setComment((String)value);
 //			editor.setDirty(true);

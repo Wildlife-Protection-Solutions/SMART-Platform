@@ -29,6 +29,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -172,6 +174,15 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		txtWaypointId.setText(String.valueOf(waypointId));
 		txtWaypointId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWaypointId.addModifyListener(validation);
+		txtWaypointId.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				txtWaypointId.selectAll();
+			}
+		});
 		
 		lbl = new Label(waypointComp, SWT.NONE);
 		lbl.setText("X Coordinate:" );
@@ -179,7 +190,15 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if(x != 0)txtX.setText(String.valueOf(x));
 		txtX.addModifyListener(validation);
-		
+		txtX.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				txtX.selectAll();
+			}
+		});
 		
 		lbl = new Label(waypointComp, SWT.NONE);
 		lbl.setText("Y Coordinate:" );
@@ -187,7 +206,15 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if(y != 0)txtY.setText(String.valueOf(y));
 		txtY.addModifyListener(validation);
-		
+		txtY.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				txtY.selectAll();
+			}
+		});
 		
 		setMessage("Add a new waypoint.");
 		super.getShell().setText("Add Waypoints");

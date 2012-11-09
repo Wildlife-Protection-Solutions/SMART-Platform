@@ -475,6 +475,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 */
 	private void initValues(){
 		Session session = HibernateManager.openSession();
+		session.beginTransaction();
 		try {
 			Patrol patrol = editor.getPatrol();
 			session.update(patrol);
@@ -572,6 +573,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 			}
 		}finally{
+			session.getTransaction().rollback();
 			session.close();
 		}
 	}
