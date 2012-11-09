@@ -21,15 +21,51 @@
  */
 package org.wcs.smart.patrol.internal.ui.observation;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Shell;
+
 /**
- * Listener for attribute table changes.
- * @author Emily
- * @since 1.0.0
+ * Extension to the wizard dialog and disables
+ * the default ESC function and provides
+ * access to the next button for focus.
+ * 
+ * @author egouge
+ *
  */
-public interface IAttributeTableChangeListener {
+public class ObservationWizardDialog extends WizardDialog {
+
+	public ObservationWizardDialog(Shell parentShell, IWizard newWizard) {
+		super(parentShell, newWizard);
+
+	}
+
+	@Override
+	public void create() {
+		super.create();
+		getShell().addTraverseListener(new TraverseListener() {
+			@Override
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_ESCAPE) {
+					e.doit = false;
+				}
+			}
+		});
+	}
 
 	/**
-	 * fired when attribute table has changed
+	 * Attempts to set focus on the next button of the 
+	 * wizard dialog.
 	 */
-	void updated();
+	public void setNextFocus() {
+		Button btn = getButton(IDialogConstants.NEXT_ID);
+		if (btn != null) {
+			btn.setFocus();
+		}
+	}
 }

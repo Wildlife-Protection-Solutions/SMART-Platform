@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.observation.ObservationWizard;
+import org.wcs.smart.patrol.internal.ui.observation.ObservationWizardDialog;
 import org.wcs.smart.patrol.model.Waypoint;
 
 /**
@@ -45,7 +46,7 @@ import org.wcs.smart.patrol.model.Waypoint;
  */
 public class ObservationCellEditor extends DialogCellEditor{
 
-	private WizardDialog dialog;
+	private ObservationWizardDialog dialog;
 	
 	public ObservationCellEditor(Composite parent){
 		super(parent);
@@ -69,7 +70,7 @@ public class ObservationCellEditor extends DialogCellEditor{
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName("Loading Wizard");
-					dialog = new WizardDialog(shell, wizard);
+					dialog = new ObservationWizardDialog(shell, wizard);
 					wizard.setWizardDialog(dialog);
 
 				}

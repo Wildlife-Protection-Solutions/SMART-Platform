@@ -21,14 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.ui.observation;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.databinding.observable.list.IListChangeListener;
+import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -36,26 +35,27 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
 /**
- * A wizard page to display the observation data model
- * and allow the users to select a category from the data
- * model.
+ * First page of observation wizard dialog with the
+ * data model category is shown and users can
+ * selected categories.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
 public class ObservationWizardPage extends WizardPage implements IObservationWizardPage{
 
-	public static final String PAGE_NAME = "Observation Wizard Page";
+	public static final String PAGE_NAME = "Observation Categories";
 
 	private boolean isNext = true;
 	private TreeViewer dmTreeViewer = null;
+	private SearchTree searchTree = null;
 	
 	/**
 	 * @param pageName
@@ -74,56 +74,28 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		PatternFilter patternFilter = new PatternFilter(){			
-			protected boolean isChildMatch(Viewer viewer, Object element) {
-				Object parent = ((DataModelContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
-				if (parent != null) {
-					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
-				}
-				return false;
-			}
-
-			@Override
-			protected boolean isLeafMatch(Viewer viewer, Object element) {
-				String labelText = ((DataModelLabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
-				if (labelText == null) {
-					return false;
-				}
-				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
-			}
-			
-		};
-		FilteredTree fTree = new FilteredTree(main, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
-		dmTreeViewer = fTree.getViewer();
+		PatternFilter patternFilter = new PatternFilter();
+		
+		searchTree = new SearchTree(main,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER  | SWT.MULTI, patternFilter);
+		dmTreeViewer = searchTree.getViewer();
 		dmTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dmTreeViewer.setContentProvider(new DataModelContentProvider(true, true));
 		dmTreeViewer.setLabelProvider(new DataModelLabelProvider());
 		dmTreeViewer.setAutoExpandLevel(3);
 		dmTreeViewer.setInput(  ((ObservationWizard)getWizard()).getDataModel() ); 
 		
-		dmTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		searchTree.selectedList.addListChangeListener(new IListChangeListener() {
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
-				if (o instanceof Category){
-					setPageComplete(true);
-				}else{
-					setPageComplete(false);
-				}
+			public void handleListChange(ListChangeEvent event) {
+				setPageComplete(searchTree.selectedList.size() > 0);
 				
+				boolean canFinish = canFinish();
+				((ObservationWizard)getWizard()).setCanFinish(canFinish);
+				getWizard().getContainer().updateButtons();
 			}
 		});
-		dmTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
-				if (o instanceof Category){
-					ObservationWizardPage.this.getWizard().getContainer().showPage(getNextPage());
-				}
-				
-			}
-		});
-		setMessage("Select the type of observation made at the waypoint.  If multiple observations were observed select one here, additional observations can be made later.");
+		
+		setMessage("Select the category(ies) of observation made at the waypoint.  More than one category can be selected here.");
 		super.setPageComplete(false);
 		((ObservationWizard)getWizard()).setCanFinish(false);
 		setControl(main);
@@ -143,6 +115,40 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	}
 	
 	/**
+	 * The wizard can immediately finish if the categories selected
+	 * don't have any attribute data to enter.
+	 * 
+	 * @return
+	 */
+	private boolean canFinish(){
+		List<Category> categories = searchTree.getSelectedItems();
+		if (categories.size() > 0){
+			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
+				Category category = (Category) iterator.next();
+				if (findAttributes(category).size() == 0){
+					iterator.remove();
+				}
+			}
+			if (categories.size() == 0){
+				return true;
+				
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.observation.IObservationWizardPage#beforeShow()
+	 */
+	@Override
+	public void beforeShow(){
+		if (searchTree != null && !searchTree.isDisposed()){
+			setPageComplete(searchTree.selectedList.size() > 0);
+			((ObservationWizard)getWizard()).setCanFinish(canFinish());
+		}
+	}
+	
+	/**
 	 * The next page is either the attribute page
 	 * or the summary page if the current selected attribute
 	 * has no attributes.
@@ -150,13 +156,31 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	@Override
     public IWizardPage getNextPage() {
 		isNext = true;
-		Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
-		if (o instanceof Category && ((Category)o).hasAttributes()  ){
-			return new AttributeWizardPage((Wizard)getWizard());
-		}else{
-			return new ObservationSummaryWizardPage((Wizard) getWizard());
+		
+		List<Category> categories = searchTree.getSelectedItems();
+		if (categories.size() > 0){
+			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
+				Category category = (Category) iterator.next();
+				if (findAttributes(category).size() > 0){
+					//at least one category with attribute exists
+					return new AttributeWizardPage((Wizard)getWizard(), 0);
+				}
+			}
+			return new ObservationSummaryWizardPage((Wizard)getWizard());
 		}
+		return null;
     }
+	
+	/*
+	 * finds all attributes associated with the given category
+	 */
+	private List<Attribute> findAttributes(Category category){
+		List<Attribute> catAttributes = new ArrayList<Attribute>();
+		category.getAllAttribute(catAttributes, true);
+		return catAttributes;
+	}
+	
+	
 	
 	/**
 	 * Update the wizard current observation before moving to the next page.
@@ -165,29 +189,27 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	 */
 	@Override
 	public boolean beforeMoveNext(IWizardPage targetPage) {
-		if (!isNext && targetPage instanceof ObservationSummaryWizardPage){
-			((ObservationWizard)getWizard()).setCurrentObservation(null);
-			//we are moving backward to summary page
-			return true;
-		}
-		Object o = ((IStructuredSelection)dmTreeViewer.getSelection()).getFirstElement();
-		if (o instanceof Category){
-			if (((Category) o).getChildren() != null && ((Category)o).getChildren().size() > 0 ){
-				//validate if they want to look further in the tree
-				if (MessageDialog.openQuestion(getWizard().getContainer().getShell(), "Observation", "The observation category " + ((Category)o).getName() + " you have selected contains " + ((Category)o).getChildren().size() + " sub-categories.  If possible you should select one of these sub-categories.  Do you want to select a sub-category?")){
-					dmTreeViewer.setExpandedState(o, true);
-					return false;
-				}
-			}
-			if (o instanceof Category && ((Category)o).hasAttributes() ){
-				((ObservationWizard)getWizard()).setCurrentObservation((Category)o);
-			}else{
-				((ObservationWizard)getWizard()).setWaypointObservation((Category)o, null);
-			}
+		if (!isNext && targetPage != null && targetPage instanceof ObservationSummaryWizardPage){
 			return true;
 		}
 		
-		return false;
+		if (searchTree.getSelectedItems().size() == 0){
+			return false;
+		}
+		
+		//add categories for observations without attributes
+		List<Category> categories = searchTree.getSelectedItems();
+		if (categories.size() > 0){
+			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
+				Category category = (Category) iterator.next();
+				if (findAttributes(category).size() == 0){
+					((ObservationWizard)getWizard()).setWaypointObservation(category, null);
+					iterator.remove();
+				}
+			}
+			((ObservationWizard)getWizard()).setCategoriesToProcess(categories);
+		}
+		return true;
 	}
 	
 }

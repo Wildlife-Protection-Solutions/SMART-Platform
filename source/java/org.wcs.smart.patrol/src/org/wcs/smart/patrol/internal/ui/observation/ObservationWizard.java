@@ -54,14 +54,18 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  */
 public class ObservationWizard extends Wizard implements IPageChangingListener{
 
+	private Waypoint wp;
+	private ObservationWizardDialog wizardDialog;
+	
+	//current observations
 	private HashMap<Category, List<WaypointObservation>> observations = new HashMap<Category, List<WaypointObservation>>();
 	
 	private DataModel dm = null;
-	private Session session;
-	private Waypoint wp;
-	private WizardDialog wizardDialog;
-	private Category current;
 	public boolean canFinish = false;
+	private Session session;
+	
+	//categories to process
+	private List<Category> toProcess;
 	
 	/**
 	 * Creates a new wizard. 
@@ -69,23 +73,17 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @param wp Waypoint to gather observations for
 	 */
 	public ObservationWizard(Waypoint wp){
-		setWindowTitle("Modify Waypoint Observations - Waypoint Id: " + wp.getId());
-		this.wp = wp;
+		setWindowTitle("Waypoint Observations - Waypoint Id: " + wp.getId());
+		
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
+		this.wp = wp;
 		
-		// -- Make a copy of the current observations so we can cancel changes if required --//
+		
+		getSession().beginTransaction();
 		getSession().update(wp);
-		if (wp.getObservations() != null){
+		if (this.wp.getObservations() != null){
 			for (WaypointObservation ob : wp.getObservations()){
-				if(ob.getUuid() == null){
-					//this should never happen as items are auto-saved
-					throw new IllegalStateException("Waypoint Observation cannot have a null uuid");
-				}else{
-					//we need to merge this with hibernate so we have a copy and can rollback changes
-					ob = (WaypointObservation) getSession().merge(ob);
-				}
-
 				//add to list
 				List<WaypointObservation> lst = observations.get(ob.getCategory());
 				if (lst == null) {
@@ -93,17 +91,35 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					observations.put(ob.getCategory(), lst);
 				}
 				lst.add(ob);
-
 				//re-attach category and attributes to session
 				getSession().update(ob.getCategory()); //attach cat to session
 				for (WaypointObservationAttribute att : ob.getAttributes()){
 					getSession().update(att.getAttribute());
 				}
-				
 			}
 		}
 	}
+	/**
+	 * @param toProcess The list of categories to gather addition attribute information.
+	 */
+	public void setCategoriesToProcess(List<Category> toProcess){
+		this.toProcess = toProcess;
+	}
+	/**
+	 * 
+	 * @param index
+	 * @return the categories to process at the given index
+	 */
+	public Category  getCategoryToProcess(int index){
+		return toProcess.get(index);
+	}
 	
+	/**
+	 * @return the total number of categories to process
+	 */
+	public int getCategoryCount(){
+		return toProcess.size();
+	}
 	/**
 	 * Sets the current waypoint observation category selected by the 
 	 * user
@@ -112,7 +128,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @param catObservations set of observations associated with the category
 	 */
 	public void setWaypointObservation(Category category, Collection<WaypointObservation> catObservations){
-		if (catObservations == null){
+		if (catObservations == null || catObservations.size() == 0){
 			catObservations = new ArrayList<WaypointObservation>();
 			WaypointObservation wo = new WaypointObservation();
 			wo.setCategory(category);
@@ -123,6 +139,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		ops.addAll(catObservations);
 		this.observations.put(category, ops);
 	}
+	
 	
 	/**
 	 * Gets the waypoint observations for a given category 
@@ -144,15 +161,18 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * Sets the wizard dialog.
 	 * @param wd wizard dialog
 	 */
-	public void setWizardDialog(WizardDialog wd){
+	public void setWizardDialog(ObservationWizardDialog wd){
 		this.wizardDialog = wd;
 	}
+	
 	/**
-	 * Gets the wizard dialog
-	 * @return the wizard dialog
+	 * Sets the current focus to the next button
+	 * of the wizard dialog if applicable.
 	 */
-	public WizardDialog getWizardDialog(){
-		return this.wizardDialog;
+	public void setFocusNextButton(){
+		if (this.wizardDialog != null){
+			this.wizardDialog.setNextFocus();
+		}
 	}
 	
 	/**
@@ -198,6 +218,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	public void dispose() {
 		super.dispose();
 		if (session != null && session.isOpen()){
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
 			session.close();
 		}
 	}
@@ -226,22 +249,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		if (event.getCurrentPage() instanceof IObservationWizardPage){			
 			event.doit = ((IObservationWizardPage)event.getCurrentPage()).beforeMoveNext( (IWizardPage)event.getTargetPage() );
 		}
+		if (event.doit && event.getTargetPage() instanceof IObservationWizardPage){
+			((IObservationWizardPage)event.getTargetPage()).beforeShow(  );
+		}
 		
-	}
-
-	/**
-	 * Sets current category being processed.
-	 * @param current the current selected category
-	 */
-	public void setCurrentObservation(Category current){
-		this.current = current;
-	}
-	/**
-	 * Gets current category being processed.
-	 * @return the current selected category
-	 */
-	public Category getCurrentObservation(){
-		return this.current;
 	}
 	
 	/**
@@ -250,6 +261,13 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 */
 	@Override
 	public boolean performFinish() {
+		if (getContainer().getCurrentPage() instanceof IObservationWizardPage){
+			//need to finish the page
+			if (!((IObservationWizardPage)getContainer().getCurrentPage()).beforeMoveNext(null)){
+				return false;
+			}
+		}
+		
 		List<WaypointObservation> wobservations = new ArrayList<WaypointObservation>();
 		for (Entry<Category,List<WaypointObservation>> entry : this.observations.entrySet()){
 			wobservations.addAll(entry.getValue());	
@@ -267,6 +285,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		wp.getObservations().clear();
 		wp.getObservations().addAll(wobservations);
 
+		//commit changes
+		getSession().getTransaction().commit();
 		return true;
 	}
 
@@ -281,6 +301,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
     			return false;
     		}
     	}
+    	getSession().getTransaction().rollback();
         return true;
     }
 }

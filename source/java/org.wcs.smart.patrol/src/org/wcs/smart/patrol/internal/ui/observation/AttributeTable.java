@@ -23,16 +23,9 @@ package org.wcs.smart.patrol.internal.ui.observation;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.databinding.observable.list.ObservableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
-import org.eclipse.jface.viewers.ColumnViewerEditor;
-import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
-import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
@@ -40,10 +33,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.patrol.model.WaypointObservation;
+import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
- * Table for displaying attribute associated with a given category and
- * allowing users to input attribute information
+ * A table for displaying observations for a specific 
+ * category.  This is a read-only table.
  * 
  * @author Emily
  * @since 1.0.0
@@ -53,56 +49,23 @@ public class AttributeTable {
 	/**
 	 * Creates a new attribute table.
 	 * 
-	 * @param canEdit true if table can be edited
 	 * @param parent parent composite
 	 * @param currentCategory category containing attributes to display
-	 * @param listener listener fired when item in the table is changed, can be null if canEdit is false
 	 * @return created attribute table
 	 */
-	public static TableViewer createAttributeTable(boolean canEdit, 
+	public static TableViewer createAttributeTable( 
 			Composite parent, 
-			Category currentCategory, 
-			IAttributeTableChangeListener listener){
+			Category currentCategory){
 		
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		currentCategory.getAllAttribute(attributes, true);
 		
-		final TableViewer attributeTable = new TableViewer(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
-	
-		attributeTable.setContentProvider(new ObservableListContentProvider());
-	
+		final TableViewer attributeTable = new TableViewer(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER);
 		attributeTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		attributeTable.getTable().setLinesVisible(true);
 		attributeTable.getTable().setHeaderVisible(true);
 		
-		if (canEdit){
-			ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(attributeTable) {
-				protected boolean isEditorActivationEvent(
-						ColumnViewerEditorActivationEvent event) {
-					return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
-							|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_CLICK_SELECTION
-//							|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
-							|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
-							|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
-				}
-			};
-	
-			TableViewerEditor.create(attributeTable, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR );
-		}
 		TableViewerColumn column  = null;
-		
-		if (canEdit){
-			column = new TableViewerColumn(attributeTable,SWT.NONE);
-			column.setLabelProvider(new ColumnLabelProvider(){
-				public String getText(Object element) {
-					return (((ObservableList)attributeTable.getInput()).indexOf(element) + 1) + ".";
-				}
-			});
-			column.getColumn().setText("");
-			column.getColumn().setResizable(true);
-			column.getColumn().setMoveable(false);
-			column.getColumn().setWidth(30);
-		}
 		GC gc = new GC(Display.getDefault().getActiveShell());
 		try{
 			gc.setFont(attributeTable.getTable().getFont());
@@ -116,9 +79,6 @@ public class AttributeTable {
 				int width = gc.textExtent(attributes.get(i).getName() ).x + 20;
 				if (width < 60) width = 60;
 				column.getColumn().setWidth( width );
-				if (canEdit){
-					column.setEditingSupport(createEditor(column.getViewer(), attributeTable, attributes.get(i), listener));
-				}
 			}
 		}finally{
 			gc.dispose();
@@ -126,16 +86,54 @@ public class AttributeTable {
 		return attributeTable;
 	}
 	
-	/*
-	 * Creates editor for given column
-	 */
-	private static AttributeTableEditingSupport createEditor(ColumnViewer column, TableViewer table, Attribute att, IAttributeTableChangeListener listener){
-		
+	 static class AttributeTableLabelProvider extends ColumnLabelProvider {
 
-		AttributeTableEditingSupport support = new AttributeTableEditingSupport(column, table, att);
-		if (listener != null){
-			support.addChangeListener(listener);
-		}
-		return support;
-	}
+			private Attribute attribute;
+
+			public AttributeTableLabelProvider(Attribute attribute) {
+				this.attribute = attribute;
+			}
+
+			public String getText(Object element) {
+				if (element instanceof WaypointObservation){
+					WaypointObservation observation = (WaypointObservation) element;					
+					WaypointObservationAttribute att = observation.findAttribute(attribute);
+					if (att != null){
+						if (this.attribute.getType() == AttributeType.TEXT){
+							if (att.getStringValue() == null){
+								return "";
+							}
+							return att.getStringValue();
+						}else if (this.attribute.getType() == AttributeType.BOOLEAN ){
+							if (att.getNumberValue() == null){
+								return "";
+							}
+							if (att.getNumberValue() < 0.5){
+								return Attribute.BOOLEAN_FALSE_LABEL;
+							}else{
+								return Attribute.BOOLEAN_TRUE_LABEL;
+							}
+						}else if (this.attribute.getType() == AttributeType.NUMERIC){
+							if (att.getNumberValue() == null){
+								return "";
+							}
+							return String.valueOf(att.getNumberValue());
+						}else if (this.attribute.getType() == AttributeType.LIST){
+							if (att.getAttributeListItem() == null){
+								return "";
+							}
+							return att.getAttributeListItem().getName();
+						}else if (this.attribute.getType() == AttributeType.TREE){
+							if (att.getAttributeTreeNode() == null){
+								return "";
+							}
+							return att.getAttributeTreeNode().getName();
+						}
+					}
+					return "";
+				}
+				return super.getText(element);
+			}
+	 }
+
 }

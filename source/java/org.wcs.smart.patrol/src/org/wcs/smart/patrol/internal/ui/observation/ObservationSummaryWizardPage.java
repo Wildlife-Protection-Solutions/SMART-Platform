@@ -47,15 +47,16 @@ import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SmartUtils;
 
 /**
- * Observation input wizard summary page. This page displays all the observations
- * collected to date to the user and lets them review and modify if required.
+ * Wizard summary page that displays a summary of all
+ * the observations entered at a given waypoint.
  * 
- * @author Emily
- * @since 1.0.0
+ * @author egouge
+ *
  */
-public class ObservationSummaryWizardPage extends WizardPage implements IObservationWizardPage{
+public class ObservationSummaryWizardPage  extends WizardPage implements IObservationWizardPage{
 
 	public static final String PAGE_NAME = "Observation Summary Page";
 
@@ -111,7 +112,7 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 				boldFont = new Font(Display.getCurrent(), boldFontData);
 			}
 			lbl.setFont(boldFont);
-			lbl.setText(ob.getKey().getFullCategoryName().replaceAll("&", "&&"));
+			lbl.setText(SmartUtils.formatStringForLabel(ob.getKey().getFullCategoryName()));
 			lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			Link lnkDelete = new Link(lblComp, SWT.NONE);
@@ -136,8 +137,6 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 				lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 
-//			List<WaypointObservation> wob = ob.getValue();
-			//only  keep observations with data
 			List<WaypointObservation> items = new ArrayList<WaypointObservation>();
 			for (WaypointObservation wo :ob.getValue()){
 				for (WaypointObservationAttribute att: wo.getAttributes()){
@@ -148,14 +147,13 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 				}
 			}
 			
-			//if (wob.size() > 1 || (wob.size() == 1 && (wob.get(0).getAttributes() != null && wob.get(0).getAttributes().size() > 0))){
 			if (items.size() > 0){
-				TableViewer viewer = AttributeTable.createAttributeTable(false, entryComp, ob.getKey(), null);
-				viewer.setContentProvider(ArrayContentProvider.getInstance());
-				
+				TableViewer viewer = AttributeTable.createAttributeTable(entryComp, ob.getKey());
+				viewer.setContentProvider(ArrayContentProvider.getInstance());			
 				viewer.setInput(items.toArray());
 				GridData gd = new GridData(SWT.FILL, SWT.FILL,true, false);
 				gd.heightHint = Math.min(viewer.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y, 50);
+				gd.widthHint = 300;
 				viewer.getTable().setLayoutData(gd);
 				
 			}
@@ -189,8 +187,11 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 	 * @param category
 	 */
 	private void editCategory(Category category){
-		((ObservationWizard)getWizard()).setCurrentObservation(category);
-		((ObservationWizard)getWizard()).getWizardDialog().showPage( new AttributeWizardPage((Wizard)getWizard()) );
+		List<Category> cats = new ArrayList<Category>();
+		cats.add(category);
+		ObservationWizard wizard = (ObservationWizard) getWizard();
+		wizard.setCategoriesToProcess(cats);
+		wizard.getContainer().showPage( new AttributeWizardPage((Wizard)getWizard(), 0) );
 	}
 	
 	/**
@@ -223,7 +224,14 @@ public class ObservationSummaryWizardPage extends WizardPage implements IObserva
 	public boolean beforeMoveNext(IWizardPage target) {
 		return true;
 	}
-
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.observation.IObservationWizardPage#beforeShow()
+	 */
+	@Override
+	public void beforeShow(){
+		
+	}
 	
 	
 }
