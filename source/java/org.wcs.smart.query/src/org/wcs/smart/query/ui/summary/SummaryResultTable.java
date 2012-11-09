@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.query.model.SummaryHeader;
 import org.wcs.smart.query.model.SummaryQueryResult;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Summary results table which display the results
@@ -431,8 +432,7 @@ public class SummaryResultTable extends Composite {
 
 		@Override
 		public String getToolTipText(Object element) {
-			return ((SummaryHeader[]) element)[index].getFullName().replaceAll(
-					"&", "&&");
+			return SmartUtils.formatStringForLabel(((SummaryHeader[]) element)[index].getFullName());
 		}
 	}
 }
