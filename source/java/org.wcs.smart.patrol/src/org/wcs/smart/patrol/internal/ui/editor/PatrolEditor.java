@@ -290,47 +290,16 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		savePatrolPart(patrolLegDay);
 	}
 	
-	public void save(final Collection<Waypoint> waypoints) {
-		Job saveJob = new Job("Save Patrol Job"){ 
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-				try{
-					saveSession.beginTransaction();
-					for (Waypoint wp : waypoints){
-						saveSession.saveOrUpdate(wp);
-						saveSession.flush();
-						//remove observations with no data
-						if (wp.getObservations() != null) {
-							for (WaypointObservation wo : wp.getObservations()) {
-								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-								for (WaypointObservationAttribute att : wo
-										.getAttributes()) {
-									if (!att.hasValue()) {
-										toDelete.add(att);
-									}
-								}
-								wo.getAttributes().removeAll(toDelete);
-							}
-						}
-					}
-					saveSession.getTransaction().commit();
-				}catch (Exception ex){
-					if (saveSession.getTransaction().isActive()){
-						saveSession.getTransaction().rollback();	
-					}
-					SmartPatrolPlugIn.displayLog("Could not save changes.  Please close patrol and re-open it before proceeding. \n\n" + ex.getMessage(), ex);
-				}finally{
-					saveSession.close();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		saveJob.schedule();
-			
-		
-		
+	private SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
+	
+	/**
+	 * Saves the collection of waypoints.
+	 * 
+	 * @param waypoints
+	 */
+	public void save(Collection<Waypoint> waypoints) {
+		saveWaypointJob.setWaypoints(waypoints);
+		saveWaypointJob.schedule();
 	}
 	
 	public void delete(final Collection<Waypoint> waypoints) {
@@ -484,5 +453,65 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			return getMap();
 		}
 		return super.getAdapter(adaptee);
+	}
+	
+	
+	
+	class SaveWaypointJob extends Job {
+
+		private Collection<Waypoint> waypoints;
+
+		public SaveWaypointJob() {
+			super("Save Waypoints");
+		}
+
+		public void setWaypoints(Collection<Waypoint> points) {
+			synchronized (waypoints) {
+				this.waypoints = points;
+			}
+
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			ArrayList<Waypoint> pnts = new ArrayList<Waypoint>();
+			synchronized (this.waypoints) {
+				pnts.addAll(waypoints);
+			}
+			Session saveSession = HibernateManager
+					.openSession(new WaypointAttachmentInterceptor());
+			try {
+				saveSession.beginTransaction();
+				for (Waypoint wp : pnts) {
+					saveSession.saveOrUpdate(wp);
+					saveSession.flush();
+					// remove observations with no data
+					if (wp.getObservations() != null) {
+						for (WaypointObservation wo : wp.getObservations()) {
+							List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+							for (WaypointObservationAttribute att : wo
+									.getAttributes()) {
+								if (!att.hasValue()) {
+									toDelete.add(att);
+								}
+							}
+							wo.getAttributes().removeAll(toDelete);
+						}
+					}
+				}
+				saveSession.getTransaction().commit();
+			} catch (Exception ex) {
+				if (saveSession.getTransaction().isActive()) {
+					saveSession.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn
+						.displayLog(
+								"Could not save changes.  Please close patrol and re-open it before proceeding. \n\n"
+										+ ex.getMessage(), ex);
+			} finally {
+				saveSession.close();
+			}
+			return Status.OK_STATUS;
+		}
 	}
 }

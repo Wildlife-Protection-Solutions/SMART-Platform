@@ -28,10 +28,12 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.ui.observation.ObservationWizard;
@@ -52,7 +54,24 @@ public class ObservationCellEditor extends DialogCellEditor{
 		super(parent);
 	}
 
-
+	@Override
+	protected Button createButton(final Composite parent) {
+		Button result = super.createButton(parent);
+		result.addListener(SWT.Traverse, new Listener() {
+			public void handleEvent(Event e) {
+				getControl().notifyListeners(SWT.Traverse, e);
+			}
+		});
+		return result;
+	}
+	
+	@Override
+	protected void fireApplyEditorValue() {
+		super.fireApplyEditorValue();
+		getControl().getParent().setFocus();
+		getControl().getShell().setDefaultButton(null);
+	}
+	
 	/**
 	 * @see org.eclipse.jface.viewers.DialogCellEditor#openDialogBox(org.eclipse.swt.widgets.Control)
 	 */

@@ -24,6 +24,8 @@ package org.wcs.smart.patrol.internal.ui.observation.field;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -31,8 +33,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
@@ -78,12 +78,15 @@ public class TreeDropDown{
 	 */
 	public TreeDropDown(Shell parent){
 		
-		main = new Shell(parent, SWT.BORDER );
+		main = new Shell(parent, SWT.BORDER  );
 		
 		// close dialog if user selects outside of the shell
 		main.addListener(SWT.Deactivate, new Listener() {
 			public void handleEvent(Event e){
-				hide();
+//				if (isVisible()){
+//					System.out.println("hide here");
+//					hide();
+//				}
 			}
 		});
 		
@@ -113,6 +116,9 @@ public class TreeDropDown{
 		createComposite(main);
 	}
 	
+	public TreeViewer getTreeViewer(){
+		return this.attributeTreeViewer;
+	}
 	/**
 	 * Sets the current datamodel attribute to display
 	 * in the tree.
@@ -121,7 +127,7 @@ public class TreeDropDown{
 	 */
 	public void setAttribute(Attribute att){
 		attributeTreeViewer.setInput(att);
-		attributeTreeViewer.expandToLevel(1);
+		attributeTreeViewer.expandToLevel(2);
 		attributeTreeViewer.refresh();
 	}
 	
@@ -166,22 +172,31 @@ public class TreeDropDown{
 				}
 			}
 		});
-		attributeTreeViewer.getTree().addMouseListener(new MouseAdapter() {
+//		attributeTreeViewer.getTree().addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseUp(MouseEvent e) {
+//				fireSelection();
+//				hide();	
+//			}
+//		});
+		attributeTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
-			public void mouseUp(MouseEvent e) {
+			public void doubleClick(DoubleClickEvent event) {
 				fireSelection();
-				hide();	
+				hide();
 			}
 		});
 	}
-	
 	
 	/**
 	 * 
 	 * @return true if drop down is visible
 	 */
 	public boolean isVisible(){
-		return main.getVisible();
+		if (!main.isDisposed()){
+			return main.getVisible();
+		}
+		return false;
 	}
 	
 	/**
@@ -252,6 +267,7 @@ public class TreeDropDown{
 	 * Sets current focus on attribute tree.
 	 */
 	public void setFocus(){
+		System.out.println("tree set focus");
 		attributeTreeViewer.getTree().setFocus();
 	}
 

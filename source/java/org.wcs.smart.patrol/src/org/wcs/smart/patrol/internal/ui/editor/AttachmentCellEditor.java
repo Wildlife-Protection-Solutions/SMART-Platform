@@ -29,8 +29,11 @@ import java.util.List;
 import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachment;
 
@@ -46,6 +49,17 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		super(parent);
 	}
 
+	@Override
+	protected Button createButton(final Composite parent) {
+		Button result = super.createButton(parent);
+		result.addListener(SWT.Traverse, new Listener() {
+			public void handleEvent(Event e) {
+				getControl().notifyListeners(SWT.Traverse, e);
+			}
+		});
+		return result;
+	}
+	
 	/**
 	 * @see org.eclipse.jface.viewers.DialogCellEditor#openDialogBox(org.eclipse.swt.widgets.Control)
 	 */

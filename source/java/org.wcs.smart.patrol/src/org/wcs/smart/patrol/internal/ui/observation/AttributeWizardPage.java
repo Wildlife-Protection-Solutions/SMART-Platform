@@ -107,6 +107,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 
 	@Override
 	public void dispose(){
+		for (IAttributeField<?> field : attributeFields){
+			field.dispose();
+		}
 		super.dispose();
 		if(boldLabelFont != null){
 			boldLabelFont.dispose();

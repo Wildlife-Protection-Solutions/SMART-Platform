@@ -82,4 +82,9 @@ public interface IAttributeField<T> {
 	 * Sets the focus
 	 */
 	public void setFocus();
+	
+	/**
+	 * Disposes the control
+	 */
+	public void dispose();
 }

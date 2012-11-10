@@ -1059,14 +1059,9 @@ public class PatrolLegDayInputComposite {
 			wp.setTime(new Time(cal.getTime().getTime()));
 			patrolLegDate.getWaypoints().add(wp);
 			
-//			editor.getPatrolEditor().doSave(null);
 			editor.getPatrolEditor().save(Collections.singleton(wp));
 			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 		}
-		//saveLegDay();
-		//editor.setDirty(true);
-		
-		
 	}
 
 	class ObsrvationTableLabelProvider extends ColumnLabelProvider {
@@ -1148,8 +1143,5 @@ public class PatrolLegDayInputComposite {
 		protected void setValue(Object element, Object value) {
 			setWaypointValue((Waypoint)element, column, value);
 		}
-
-	
-		
 	}
 }

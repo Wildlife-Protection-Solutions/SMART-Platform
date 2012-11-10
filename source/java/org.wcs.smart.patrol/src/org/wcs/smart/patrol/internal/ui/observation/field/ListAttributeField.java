@@ -220,4 +220,11 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	public void setFocus(){
 		cmbViewer.getControl().setFocus();
 	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#dispose()
+	 */
+	@Override
+	public void dispose(){
+	}
 }

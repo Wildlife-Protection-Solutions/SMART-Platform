@@ -165,4 +165,11 @@ public class StringAttributeField implements IAttributeField<String>{
 	public void setFocus(){
 		txt.setFocus();
 	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#dispose()
+	 */
+	@Override
+	public void dispose(){
+	}
 }
