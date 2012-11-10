@@ -230,4 +230,11 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		btnYes.setFocus();
 		return;
 	}
+	
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#dispose()
+	 */
+	public void dispose(){
+	}
 }

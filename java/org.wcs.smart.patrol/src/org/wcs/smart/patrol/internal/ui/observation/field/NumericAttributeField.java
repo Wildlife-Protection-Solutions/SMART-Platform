@@ -190,4 +190,11 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	public void setFocus(){
 		txt.setFocus();
 	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#dispose()
+	 */
+	@Override
+	public void dispose(){
+	}
 }

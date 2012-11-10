@@ -30,11 +30,18 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
@@ -58,11 +65,24 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 
 	private Attribute attribute;
 	private AttributeTreeNode originalValue;
-	private boolean hideTree = false;
 	private AttributeTreeNode lastValidSelection = null; //last valid selection; tracked to escape can revert
 	
+	private TreeDropDown tree = null;
 	private ControlDecoration cd;
+	private Composite dropDownComposite;
 	private Text txtText;
+	private Button btnDownArrow;
+	
+	private Listener focusListener = new Listener() {
+		@Override
+		public void handleEvent(Event event) {
+			if (!(event.widget == btnDownArrow || event.widget == txtText || event.widget == tree.getTreeViewer().getControl() )){
+				if (tree.isVisible()){
+					tree.hide();
+				}
+			}
+		}
+	};
 	
 	/**
 	 * Creates a new attribute tree field
@@ -99,30 +119,50 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		validate();
 	}
 	
-	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createComposite(Composite parent) {
+		parent.getShell().getDisplay().addFilter(SWT.FocusIn, focusListener);
+		
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(attribute.getName() + ":");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		txtText = new Text(parent, SWT.BORDER);
-		txtText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)txtText.getLayoutData()).horizontalIndent = 5;
+		dropDownComposite = new Composite(parent,  SWT.BORDER );
+		dropDownComposite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		GridLayout layout = new GridLayout(2, false);
+		layout.marginWidth = 
+				layout.marginHeight = 
+				layout.marginLeft = 
+				layout.marginRight = 
+				layout.marginTop = 
+				layout.marginBottom = 
+				layout.horizontalSpacing = 
+				layout.verticalSpacing = 0;
+		dropDownComposite.setLayout(layout);
+		dropDownComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)dropDownComposite.getLayoutData()).horizontalIndent = 5;
+
+		txtText = new Text(dropDownComposite, SWT.NONE);
+		txtText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		final TreeDropDown tree = new TreeDropDown(parent.getShell());
+		tree = new TreeDropDown(parent.getShell());
 		tree.setAttribute(attribute);
+		
+		btnDownArrow = new Button(dropDownComposite, SWT.ARROW | SWT.DOWN);
+		btnDownArrow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				showTree(true);
+			}
+		});
+		
 		
 		txtText.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (hideTree && tree.isVisible()){
-					tree.hide();
-				}
-				hideTree = false;
 				validate();
 			}
 			
@@ -135,21 +175,21 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		txtText.addTraverseListener(new TraverseListener() {
 			@Override
 			public void keyTraversed(TraverseEvent e) {
-				if (e.keyCode == SWT.CR){
-					//update the selection and hide the tree
-					if (!tree.getSelection().isEmpty()){
-						AttributeTreeNode sel = (AttributeTreeNode) tree.getSelection().iterator().next();
-						updateSelection(sel);
-						tree.hide();
+				if (e.keyCode == SWT.CR ){
+					if (tree.isVisible()){
+						//update the selection and hide the tree
+						if (!tree.getSelection().isEmpty()){
+							AttributeTreeNode sel = (AttributeTreeNode) tree.getSelection().iterator().next();
+							updateSelection(sel);
+							tree.hide();
+						}
 					}
 					e.doit = false;
-					hideTree = true;
 				}else if (e.keyCode == SWT.ESC){
 					//revert the selection and hid the tree
 					updateSelection(lastValidSelection);
 					tree.hide();
 					e.doit = false;
-					hideTree = true;
 				}else if (tree.isVisible()){
 					//set focus to the tree
 					tree.setFocus();
@@ -177,34 +217,12 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 						//text has changed
 						tree.setText(txtText.getText());
 						txtText.setData(null);
-					
 						if (!tree.isVisible()){
-							tree.positionAndShow(txtText, new ISelectionListener() {
-							
-							@Override
-							public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-								if (selection == null){
-									//should revert back to previous selection
-									updateSelection(lastValidSelection);
-								}else if (selection.isEmpty()){
-									//nothing selected
-									updateSelection(null);
-								}else{
-									//pick first selection
-									Object x = ((IStructuredSelection)selection).getFirstElement();
-									if (x instanceof AttributeTreeNode) {
-										updateSelection((AttributeTreeNode) x);
-									} else {
-										updateSelection(null);										
-									}
-								}
-								tree.hide();
-							}
-						});
+							showTree(false);
 						}
 					}
 				}
-				}
+			}
 		});
 		
 		cd = new ControlDecoration(txtText, SWT.LEFT | SWT.TOP);
@@ -216,8 +234,36 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		originalValue = null;
 	}
 	
-	
-
+	/**
+	 * shows the tree
+	 */
+	private void showTree(boolean focus){
+		tree.positionAndShow(dropDownComposite, new ISelectionListener() {
+			
+			@Override
+			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				if (selection == null){
+					//should revert back to previous selection
+					updateSelection(lastValidSelection);
+				}else if (selection.isEmpty()){
+					//nothing selected
+					updateSelection(null);
+				}else{
+					//pick first selection
+					Object x = ((IStructuredSelection)selection).getFirstElement();
+					if (x instanceof AttributeTreeNode) {
+						updateSelection((AttributeTreeNode) x);
+					} else {
+						updateSelection(null);										
+					}
+				}
+				tree.hide();
+			}
+		});
+		if (focus){
+			tree.setFocus();
+		}
+	}
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#validate()
 	 */
@@ -293,6 +339,12 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 	@Override
 	public void setFocus() {
 		txtText.setFocus();
+	}
+
+
+	@Override
+	public void dispose() {
+		txtText.getShell().getDisplay().removeFilter(SWT.FocusIn, focusListener);
 	}
 
 }
