@@ -161,7 +161,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 			@Override
 			public void handleEvent(Event event) {
 				if (!(event.widget == ObservationCellEditor.this.txtFilter || event.widget == ObservationCellEditor.this.button ||
-						(ObservationCellEditor.this.treeDropDown != null && event.widget == ObservationCellEditor.this.treeDropDown.getTreeViewer().getTree()) ||
+						(ObservationCellEditor.this.treeDropDown != null && (event.widget == ObservationCellEditor.this.treeDropDown.getTreeViewer().getTree() || event.widget == ObservationCellEditor.this.treeDropDown.getTreeViewer().getControl().getParent()) ) ||
 						dialogOpen
 						)){
 					fireCancelEditor();
@@ -268,7 +268,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 				if (treeDropDown == null){
 					createTree();
 				}
-				if (treeDropDown != null && treeDropDown.isVisible()) {
+				if (treeDropDown != null && !treeDropDown.isVisible()) {
 					//compute width
 					Rectangle r = cell.getBounds();
 					Point pnt = cell.getParent().toDisplay(r.x, r.y);
