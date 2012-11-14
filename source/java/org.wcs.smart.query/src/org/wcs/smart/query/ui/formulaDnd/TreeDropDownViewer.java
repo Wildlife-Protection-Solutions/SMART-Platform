@@ -79,15 +79,6 @@ public class TreeDropDownViewer {
 			}
 		});
 		
-		// resize shell when list resizes
-		main.addControlListener(new ControlListener() {
-			public void controlMoved(ControlEvent e){}
-			public void controlResized(ControlEvent e){
-//				Rectangle shellSize = shell.getClientArea();
-//				list.setSize(shellSize.width, shellSize.height);
-			}
-		});
-		
 		GridLayout gl = new GridLayout(1, false);
 		gl.horizontalSpacing = 0;
 		gl.verticalSpacing = 0;
