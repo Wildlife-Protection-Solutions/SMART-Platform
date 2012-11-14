@@ -96,6 +96,7 @@ public class PatrolDayEditor extends EditorPart {
 	public void createPartControl(Composite parent) {
 		
 		Session session = HibernateManager.openSession();	
+		session.beginTransaction();
 		session.update(editor.getPatrol());
 		frmSummary = toolkit.createScrolledForm(parent);
 		
@@ -202,6 +203,7 @@ public class PatrolDayEditor extends EditorPart {
 			}
 			
 		}finally{
+			session.getTransaction().rollback();
 			session.close();
 		}
 		

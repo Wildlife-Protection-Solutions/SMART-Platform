@@ -107,14 +107,20 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 
 	@Override
 	public void dispose(){
-		for (IAttributeField<?> field : attributeFields){
-			field.dispose();
+		if (attributeFields != null){
+			for (IAttributeField<?> field : attributeFields){
+				field.dispose();
+			}
+			attributeFields = null;
 		}
-		super.dispose();
+		
 		if(boldLabelFont != null){
 			boldLabelFont.dispose();
 		}
+		
+		super.dispose();
 	}
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)

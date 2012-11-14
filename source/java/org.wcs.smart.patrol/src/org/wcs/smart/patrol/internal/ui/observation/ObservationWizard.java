@@ -34,6 +34,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -78,8 +79,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
 		this.wp = wp;
-		
-		
 		getSession().beginTransaction();
 		getSession().update(wp);
 		if (this.wp.getObservations() != null){
@@ -94,15 +93,32 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				//re-attach category and attributes to session
 				getSession().update(ob.getCategory()); //attach cat to session
 				for (WaypointObservationAttribute att : ob.getAttributes()){
-					getSession().update(att.getAttribute());
+					//getSession().update(att.getAttribute());
+					getSession().load(Attribute.class, att.getAttribute().getUuid());
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Initial categories to process.  This must be called
+	 * when initialzed and not setCategoriesToProcess so
+	 * that the categories can be properly associated
+	 * with the current database sesion.
+	 * 
+	 * @param toProcess
+	 */
+	public void setInitialCategories(List<Category> toProcess){
+		this.toProcess = new ArrayList<Category>();
+		for (Category c : toProcess){
+			this.toProcess.add((Category)getSession().load(Category.class, c.getUuid()));
 		}
 	}
 	/**
 	 * @param toProcess The list of categories to gather addition attribute information.
 	 */
 	public void setCategoriesToProcess(List<Category> toProcess){
+
 		this.toProcess = toProcess;
 	}
 	/**
@@ -118,6 +134,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @return the total number of categories to process
 	 */
 	public int getCategoryCount(){
+		if (toProcess == null) return 0;
 		return toProcess.size();
 	}
 	/**

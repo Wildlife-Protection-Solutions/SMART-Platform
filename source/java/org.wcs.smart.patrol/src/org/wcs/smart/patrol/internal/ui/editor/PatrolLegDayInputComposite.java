@@ -48,12 +48,14 @@ import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
+import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -651,7 +653,9 @@ public class PatrolLegDayInputComposite {
 		observationTable.setContentProvider(new ObservableListContentProvider());
 		
 
-//		TreeViewerFocusCellManager focusCellManager = new TreeViewerFocusCellManager(observationTable, new FocusCellOwnerDrawHighlighter(observationTable));
+		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(observationTable, new FocusCellHighlighter(observationTable){});
+		
+		
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(observationTable) {
 			protected boolean isEditorActivationEvent(
 					ColumnViewerEditorActivationEvent event) {
@@ -662,7 +666,7 @@ public class PatrolLegDayInputComposite {
 			}
 		};
 		
-		TableViewerEditor.create(observationTable, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR );
+		TableViewerEditor.create(observationTable, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
 		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
 		nullableDoubleCellEditor = new DoubleCellEditor(observationTable.getTable(), true);
@@ -859,19 +863,15 @@ public class PatrolLegDayInputComposite {
 		if (column == OtColumn.ID) {
 			element.setId((Integer)value);
 			needSave = true;
-//			editor.setDirty(true);
 		} else if (column == OtColumn.EAST) {
 			element.setX((Double)value);
 			needSave = true;
-//			editor.setDirty(true);
 		} else if (column == OtColumn.NORTH) {
 			element.setY((Double)value);
 			needSave = true;
-//			editor.setDirty(true);
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){ 
 				element.setTime(new Time( ((Date)value).getTime()) );
-//				editor.setDirty(true);
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
@@ -881,7 +881,6 @@ public class PatrolLegDayInputComposite {
 			}else{
 				element.setDirection(( (Double)value).floatValue());
 			}
-//			editor.setDirty(true);
 		} else if (column == OtColumn.DISTANCE) {
 			if (value == null){
 				element.setDistance(null);
@@ -889,23 +888,19 @@ public class PatrolLegDayInputComposite {
 				element.setDistance( ( (Double)value).floatValue());
 			}
 			needSave = true;
-//			editor.setDirty(true);
 		} else if (column == OtColumn.OBSERVATION) {
 			//updated in cell editor
 			needSave = false;
 		} else if (column == OtColumn.COMMENT) {
 			element.setComment((String)value);
-//			editor.setDirty(true);
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
 			if (value != null){
 				needSave = true;
-//				editor.setDirty(true);
 			}
 			//updated in cell editor
 		}
 		if (needSave){
-//			editor.getPatrolEditor().doSave(null);
 			editor.getPatrolEditor().save(Collections.singleton(element));
 		}
 		observationTable.refresh(element);
@@ -935,63 +930,59 @@ public class PatrolLegDayInputComposite {
 			}
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
-			//return wp.getAttachments();
 			return wp;
 		}
 	
-	return "";
-}
+		return "";
+	}
 	
 	private String getWaypointValueAsString(Waypoint element, OtColumn column) {
 
-			Waypoint wp = (Waypoint) element;
-			if (column == OtColumn.ID) {
-				return String.valueOf(wp.getId());
-			} else if (column == OtColumn.EAST) {
-				return String.valueOf(wp.getX());
-			} else if (column == OtColumn.NORTH) {
-				return String.valueOf(wp.getY());
-			} else if (column == OtColumn.TIME) {
-				if (wp.getTime() != null) {
-					Calendar ca = Calendar.getInstance();
-					ca.setTime(wp.getTime());
-					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(ca.getTime());
-				}
-				return "";
-			} else if (column == OtColumn.DIRECTION) {
-				if (wp.getDirection() != null) {
-					return String.valueOf(wp.getDirection());
-				}
-				return "";
-			} else if (column == OtColumn.DISTANCE) {
-				if (wp.getDistance() != null) {
-					return String.valueOf(wp.getDistance());
-				}
-				return "";
-			} else if (column == OtColumn.OBSERVATION) {
-				if (wp.getObservations() == null
-						|| wp.getObservations().size() == 0) {
-					return "(None)";
-				} else {
-					if (wp.getObservations().size() == 1){
-						return wp.getObservations().get(0).getCategory().getName();
-					}
-					return wp.getObservations().size() + " Observations";
-				}
-			} else if (column == OtColumn.COMMENT) {
-				if (wp.getComment() == null) {
-					return "";
-				}
-				return wp.getComment();
-			} else if (column == OtColumn.ATTACHMENTS) {
-				if (wp.getAttachments() == null
-						|| wp.getAttachments().size() == 0) {
-					return "(None)";
-				} else {
-					return wp.getAttachments().size() + " Files";
-				}
+		Waypoint wp = (Waypoint) element;
+		if (column == OtColumn.ID) {
+			return String.valueOf(wp.getId());
+		} else if (column == OtColumn.EAST) {
+			return String.valueOf(wp.getX());
+		} else if (column == OtColumn.NORTH) {
+			return String.valueOf(wp.getY());
+		} else if (column == OtColumn.TIME) {
+			if (wp.getTime() != null) {
+				Calendar ca = Calendar.getInstance();
+				ca.setTime(wp.getTime());
+				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(
+						ca.getTime());
 			}
-		
+			return "";
+		} else if (column == OtColumn.DIRECTION) {
+			if (wp.getDirection() != null) {
+				return String.valueOf(wp.getDirection());
+			}
+			return "";
+		} else if (column == OtColumn.DISTANCE) {
+			if (wp.getDistance() != null) {
+				return String.valueOf(wp.getDistance());
+			}
+			return "";
+		} else if (column == OtColumn.OBSERVATION) {
+			if (wp.getObservations() == null
+					|| wp.getObservations().size() == 0) {
+				return "(None)";
+			} else {
+				return wp.getObservationsAsString();
+			}
+		} else if (column == OtColumn.COMMENT) {
+			if (wp.getComment() == null) {
+				return "";
+			}
+			return wp.getComment();
+		} else if (column == OtColumn.ATTACHMENTS) {
+			if (wp.getAttachments() == null || wp.getAttachments().size() == 0) {
+				return "(None)";
+			} else {
+				return wp.getAttachments().size() + " Files";
+			}
+		}
+
 		return "";
 	}
 	

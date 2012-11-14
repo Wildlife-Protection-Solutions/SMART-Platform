@@ -47,7 +47,10 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.patrol.internal.ui.TreeDropDown;
 import org.wcs.smart.patrol.model.AttributeValidator;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
+import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -149,8 +152,11 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		txtText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		tree = new TreeDropDown(parent.getShell());
-		tree.setAttribute(attribute);
-		
+		tree.getTreeViewer().setContentProvider(new AttributeTreeContentProvider(true, false));
+		tree.getTreeViewer().setLabelProvider(new AttributeTreeLabelProvider());
+		tree.getTreeViewer().setInput(attribute);
+		tree.getTreeViewer().expandToLevel(2);
+
 		btnDownArrow = new Button(dropDownComposite, SWT.ARROW | SWT.DOWN);
 		btnDownArrow.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -238,7 +244,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 	 * shows the tree
 	 */
 	private void showTree(boolean focus){
-		tree.positionAndShow(dropDownComposite, new ISelectionListener() {
+		tree.positionAndShow(dropDownComposite, null, null, new ISelectionListener() {
 			
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {

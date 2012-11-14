@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -46,6 +47,7 @@ import javax.persistence.Transient;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
@@ -198,6 +200,34 @@ public class Waypoint {
 	}
 	public void setObservations(List<WaypointObservation> observations){
 		this.observations = observations;
+	}
+	
+	/**
+	 * Concatenates together all the categories
+	 * which make up the observations
+	 * at this waypoint. 
+	 *  
+	 * 
+	 * @return <code>null</code> if no observations otherwise
+	 * string of category names
+	 * 
+	 */
+	@Transient
+	public String getObservationsAsString(){
+		if (getObservations() == null || getObservations().size() == 0){
+			return null;
+		}
+		StringBuilder text = new StringBuilder();
+		HashSet<Category> added = new HashSet<Category>();
+		for (WaypointObservation ob : getObservations()){
+			if (!added.contains(ob.getCategory())){
+				text.append(ob.getCategory().getName());
+				text.append("; ");
+				added.add(ob.getCategory());
+			}
+		}
+		text.delete(text.length() - 2, text.length());
+		return text.toString();
 	}
 	
 	@Transient

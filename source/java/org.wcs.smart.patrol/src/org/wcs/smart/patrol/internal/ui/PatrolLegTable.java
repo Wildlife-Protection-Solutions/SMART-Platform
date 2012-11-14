@@ -120,13 +120,13 @@ public class PatrolLegTable {
 		GC gc = new GC(patrolLegViewer.getTable().getDisplay());
 		try{
 		gc.setFont(patrolLegViewer.getTable().getFont());
-		for (Iterator iterator = columns.entrySet().iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = columns.entrySet().iterator(); iterator.hasNext();) {
 			Entry<TableViewerColumn, LegTableProvider> column = (Entry<TableViewerColumn, LegTableProvider>) iterator.next();
 			if (column.getKey().getColumn().getWidth() == 0){
 				continue;
 			}
 			int width = 100;
-			for (Iterator iter = legs.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter = legs.iterator(); iter.hasNext();) {
 				PatrolLeg leg = (PatrolLeg) iter.next();
 				width = Math.max(100, gc.textExtent(column.getValue().getText(leg)).x + 30);
 			}
