@@ -83,6 +83,10 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		dmTreeViewer.setLabelProvider(new DataModelLabelProvider());
 		dmTreeViewer.setAutoExpandLevel(3);
 		dmTreeViewer.setInput(  ((ObservationWizard)getWizard()).getDataModel() ); 
+
+		for (int i = 0; i <  ((ObservationWizard)getWizard()).getCategoryCount(); i ++){
+			searchTree.selectedList.add(((ObservationWizard)getWizard()).getCategoryToProcess(i));
+		}
 		
 		searchTree.selectedList.addListChangeListener(new IListChangeListener() {
 			@Override
@@ -96,8 +100,8 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		});
 		
 		setMessage("Select the category(ies) of observation made at the waypoint.  More than one category can be selected here.");
-		super.setPageComplete(false);
-		((ObservationWizard)getWizard()).setCanFinish(false);
+		setPageComplete(searchTree.selectedList.size() > 0);
+		((ObservationWizard)getWizard()).setCanFinish(canFinish());
 		setControl(main);
 	}
 	

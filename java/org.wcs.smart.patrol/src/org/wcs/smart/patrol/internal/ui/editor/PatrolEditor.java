@@ -466,7 +466,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 
 		public void setWaypoints(Collection<Waypoint> points) {
-			synchronized (waypoints) {
+			synchronized (this) {
 				this.waypoints = points;
 			}
 
@@ -475,7 +475,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			ArrayList<Waypoint> pnts = new ArrayList<Waypoint>();
-			synchronized (this.waypoints) {
+			synchronized (this) {
 				pnts.addAll(waypoints);
 			}
 			Session saveSession = HibernateManager

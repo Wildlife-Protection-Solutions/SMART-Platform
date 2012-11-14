@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.observation.field;
+package org.wcs.smart.patrol.internal.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -41,19 +41,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.progress.WorkbenchJob;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
-import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
 /**
- * Drop-down tree to support the tree attribute field.
+ * A treeviewer wrapped in its own shell that can 
+ * be displayed as a drop-down below another
+ * ui field.
  * <p>
  * This is adapted from the FilteredTree class.
  * </p>
@@ -62,7 +59,7 @@ import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
  */
 public class TreeDropDown{
 
-	private TreeViewer attributeTreeViewer;
+	private TreeViewer treeViewer;
 	private Composite main;
 	
 	private ISelectionListener onSelected; //called when item in tree selected
@@ -78,25 +75,8 @@ public class TreeDropDown{
 	 */
 	public TreeDropDown(Shell parent){
 		
-		main = new Shell(parent, SWT.BORDER  );
-		
-		// close dialog if user selects outside of the shell
-		main.addListener(SWT.Deactivate, new Listener() {
-			public void handleEvent(Event e){
-//				if (isVisible()){
-//					System.out.println("hide here");
-//					hide();
-//				}
-			}
-		});
-		
-//		// resize shell when list resizes
-//		main.addControlListener(new ControlListener() {
-//			public void controlMoved(ControlEvent e){}
-//			public void controlResized(ControlEvent e){
-//			}
-//		});
-		
+		main = new Shell(parent, SWT.SINGLE | SWT.BORDER );
+
 		main.addTraverseListener(new TraverseListener() {
 			@Override
 			public void keyTraversed(TraverseEvent e) {
@@ -117,19 +97,9 @@ public class TreeDropDown{
 	}
 	
 	public TreeViewer getTreeViewer(){
-		return this.attributeTreeViewer;
+		return this.treeViewer;
 	}
-	/**
-	 * Sets the current datamodel attribute to display
-	 * in the tree.
-	 * 
-	 * @param att
-	 */
-	public void setAttribute(Attribute att){
-		attributeTreeViewer.setInput(att);
-		attributeTreeViewer.expandToLevel(2);
-		attributeTreeViewer.refresh();
-	}
+
 	
 	/*
 	 * Creates the drop down tree control
@@ -155,15 +125,13 @@ public class TreeDropDown{
 				}
 				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
 			}
-
 		};
 
-		attributeTreeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		attributeTreeViewer.setFilters(new ViewerFilter[]{patternFilter});
-		attributeTreeViewer.setContentProvider(new AttributeTreeContentProvider(true, false));
-		attributeTreeViewer.setLabelProvider(new AttributeTreeLabelProvider());
-		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		attributeTreeViewer.getTree().addTraverseListener(new TraverseListener() {
+		treeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		treeViewer.setFilters(new ViewerFilter[]{patternFilter});
+		
+		treeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		treeViewer.getTree().addTraverseListener(new TraverseListener() {
 			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.keyCode == SWT.CR) {
@@ -172,14 +140,8 @@ public class TreeDropDown{
 				}
 			}
 		});
-//		attributeTreeViewer.getTree().addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseUp(MouseEvent e) {
-//				fireSelection();
-//				hide();	
-//			}
-//		});
-		attributeTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
+
+		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				fireSelection();
@@ -204,12 +166,22 @@ public class TreeDropDown{
 	 * 
 	 * @param obj the parent object (used for positioning)
 	 * @param onSelected selection listener to fire when item from tree is selected
+	 * @param width <code>null</code> if width to be the same as the control object otherwise drop down width
+	 * @param height <code>null</code> if height to be default
 	 */
-	public void positionAndShow(Control obj, ISelectionListener onSelected){
+	public void positionAndShow(Control obj, Integer width, Integer height, ISelectionListener onSelected){
 		this.onSelected = onSelected;
 		Rectangle r = obj.getBounds();
 		Point pnt = obj.getParent().toDisplay(r.x, r.y);
-		main.setBounds(pnt.x, pnt.y + r.height, r.width, 200);
+		
+		if (width == null){
+			width = r.width;
+		}
+		
+		if (height == null){
+			height = 200;
+		}
+		main.setBounds(pnt.x, pnt.y + r.height, width, height);
 		main.setVisible(true);
 	}
 	
@@ -246,7 +218,7 @@ public class TreeDropDown{
 	 * Fires selection listener
 	 */
 	private void fireSelection(){
-		onSelected.selectionChanged(null, attributeTreeViewer.getSelection());
+		onSelected.selectionChanged(null, treeViewer.getSelection());
 	}
 	
 	/**
@@ -254,7 +226,7 @@ public class TreeDropDown{
 	 * @return the current selection
 	 */
 	public IStructuredSelection getSelection(){
-		return (IStructuredSelection) attributeTreeViewer.getSelection();
+		return (IStructuredSelection) treeViewer.getSelection();
 	}
 	/**
 	 * Hides the dialog
@@ -267,8 +239,7 @@ public class TreeDropDown{
 	 * Sets current focus on attribute tree.
 	 */
 	public void setFocus(){
-		System.out.println("tree set focus");
-		attributeTreeViewer.getTree().setFocus();
+		treeViewer.getTree().setFocus();
 	}
 
 	/**
@@ -277,7 +248,7 @@ public class TreeDropDown{
 	 * is visible (matched the filter); false otherwise.
 	 */
 	public boolean treeItemsVisible(){
-		return attributeTreeViewer.getTree().getItemCount() > 0;
+		return treeViewer.getTree().getItemCount() > 0;
 	}
 	/**
 	 * Creates a job that refreshes the
@@ -288,7 +259,7 @@ public class TreeDropDown{
 	private WorkbenchJob doCreateRefreshJob() {
 		return new WorkbenchJob("Refresh Filter") {//$NON-NLS-1$
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				if (attributeTreeViewer.getControl().isDisposed()) {
+				if (treeViewer.getControl().isDisposed()) {
 					return Status.CANCEL_STATUS;
 				}
 
@@ -298,7 +269,7 @@ public class TreeDropDown{
 				}
 				patternFilter.setPattern(filterText);
 
-				Control redrawFalseControl = attributeTreeViewer.getControl();
+				Control redrawFalseControl = treeViewer.getControl();
 				try {
 					// don't want the user to see updates that will be made to
 					// the tree
@@ -307,16 +278,16 @@ public class TreeDropDown{
 					redrawFalseControl.setRedraw(false);
 					if (!narrowingDown) {
 						// collapse all
-						TreeItem[] is = attributeTreeViewer.getTree().getItems();
+						TreeItem[] is = treeViewer.getTree().getItems();
 						for (int i = 0; i < is.length; i++) {
 							TreeItem item = is[i];
 							if (item.getExpanded()) {
-								attributeTreeViewer.setExpandedState(item.getData(),
+								treeViewer.setExpandedState(item.getData(),
 										false);
 							}
 						}
 					}
-					attributeTreeViewer.refresh(true);
+					treeViewer.refresh(true);
 
 					if (filterText.length() > 0 ) {
 						/*
@@ -326,14 +297,14 @@ public class TreeDropDown{
 						 * the user doesn't have to endure expansion of all the
 						 * nodes.
 						 */
-						TreeItem[] items = attributeTreeViewer.getTree().getItems();
-						int treeHeight = attributeTreeViewer.getTree().getBounds().height;
+						TreeItem[] items = treeViewer.getTree().getItems();
+						int treeHeight = treeViewer.getTree().getBounds().height;
 						int numVisibleItems = treeHeight
-								/ attributeTreeViewer.getTree().getItemHeight();
+								/ treeViewer.getTree().getItemHeight();
 						long stopTime = 200
 								+ System.currentTimeMillis();
 						boolean cancel = false;
-						attributeTreeViewer.getTree().deselectAll();
+						treeViewer.getTree().deselectAll();
 						if (items.length > 0
 								&& recursiveExpand(items, monitor, stopTime,
 										new int[] { numVisibleItems })) {
@@ -346,10 +317,10 @@ public class TreeDropDown{
 					}
 				} finally {
 					// done updating the tree - set redraw back to true
-					TreeItem[] items = attributeTreeViewer.getTree().getItems();
+					TreeItem[] items = treeViewer.getTree().getItems();
 					if (items.length > 0
-							&& attributeTreeViewer.getTree().getSelectionCount() == 0) {
-						attributeTreeViewer.getTree().setTopItem(items[0]);
+							&& treeViewer.getTree().getSelectionCount() == 0) {
+						treeViewer.getTree().setTopItem(items[0]);
 					}
 					redrawFalseControl.setRedraw(true);
 				}
@@ -382,7 +353,7 @@ public class TreeDropDown{
 							if (!item.getExpanded()) {
 								// do the expansion through the viewer so that
 								// it can refresh children appropriately.
-								attributeTreeViewer.setExpandedState(itemData, true);
+								treeViewer.setExpandedState(itemData, true);
 							}
 							TreeItem[] children = item.getItems();
 							if (items.length > 0) {
@@ -390,9 +361,9 @@ public class TreeDropDown{
 										cancelTime, numItemsLeft);
 							}
 							if (children.length == 0){
-								if (attributeTreeViewer.getTree().getSelectionCount() == 0){
+								if (treeViewer.getTree().getSelectionCount() == 0){
 									//select this item
-									attributeTreeViewer.getTree().setSelection(item);
+									treeViewer.getTree().setSelection(item);
 								}
 							}
 						}

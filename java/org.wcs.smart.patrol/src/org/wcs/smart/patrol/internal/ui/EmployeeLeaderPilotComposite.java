@@ -103,7 +103,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		
 		ArrayList<Employee> current = new ArrayList<Employee>();
     	if (p.getFirstLeg().getMembers() != null){
-    		for (Iterator iterator = p.getFirstLeg().getMembers().iterator(); iterator.hasNext();) {
+    		for (Iterator<PatrolLegMember> iterator = p.getFirstLeg().getMembers().iterator(); iterator.hasNext();) {
     			PatrolLegMember employee = (PatrolLegMember) iterator.next();
     			current.add(employee.getMember());
     		}
@@ -144,7 +144,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 			SmartPatrolPlugIn.displayLog("At least one member must be selected.", null);
 			return false;
 		}
-    	for (Iterator iterator = empListComposite.getSelectedEmployees().iterator(); iterator.hasNext();) {
+    	for (Iterator<?> iterator = empListComposite.getSelectedEmployees().iterator(); iterator.hasNext();) {
 			Employee e = (Employee) iterator.next();
 			firstLeg.addPatrolLegMember(e);
 		}

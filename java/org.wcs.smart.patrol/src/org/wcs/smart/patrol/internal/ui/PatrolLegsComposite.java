@@ -413,7 +413,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		Date pstart = SmartUtils.getDatePart(patrolStartDate, false);
 		Date pend = SmartUtils.getDatePart(patrolEndDate, true);
 		
-		for (Iterator iterator = legs.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = legs.iterator(); iterator.hasNext();) {
 			PatrolLeg legA = (PatrolLeg) iterator.next();
 			
 			Date legstart = SmartUtils.getDatePart(legA.getStartDate(), false);
@@ -435,10 +435,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		}
 		
 		/* Ensure that members are not in two places at the same time */
-		for (Iterator iterator = legs.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = legs.iterator(); iterator.hasNext();) {
 			PatrolLeg legA = (PatrolLeg) iterator.next();
 		
-			for (Iterator iterator2 = legs.iterator(); iterator2.hasNext();) {
+			for (Iterator<?> iterator2 = legs.iterator(); iterator2.hasNext();) {
 				PatrolLeg legB = (PatrolLeg) iterator2.next();
 				if (legA.equals(legB)){
 					continue;
@@ -466,7 +466,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		while (calStart.before(calEnd) || calStart.equals(calEnd)){
 			boolean found = false;
-			for (Iterator iterator = legs.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = legs.iterator(); iterator.hasNext();) {
 				PatrolLeg leg = (PatrolLeg) iterator.next();
 				Date legStart = SmartUtils.getDatePart(leg.getStartDate(), false);
 				Date legEnd = SmartUtils.getDatePart(leg.getEndDate(), true);

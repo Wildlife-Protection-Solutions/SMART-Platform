@@ -137,7 +137,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		});
 		
 		List<Object> items = new ArrayList<Object>();
-		items.addAll(this.attribute.getAttributeList());
+		items.addAll(this.attribute.getActiveListItems());
 		if (!attribute.getIsRequired()){
 			items.add(0, "");
 		}

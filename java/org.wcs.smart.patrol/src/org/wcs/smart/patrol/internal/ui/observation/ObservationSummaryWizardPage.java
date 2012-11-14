@@ -222,6 +222,9 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	 */
 	@Override
 	public boolean beforeMoveNext(IWizardPage target) {
+		if (target instanceof ObservationWizardPage){
+			((ObservationWizard)getWizard()).setCategoriesToProcess(new ArrayList<Category>());
+		}
 		return true;
 	}
 	
