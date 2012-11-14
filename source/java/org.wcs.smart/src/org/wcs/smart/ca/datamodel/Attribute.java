@@ -38,6 +38,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -269,6 +270,20 @@ public class Attribute extends DmObject{
 		this.aggregations = aggs;
 	}
 	
+	/**
+	 * 
+	 * @return list of active list items
+	 */
+	@Transient
+	public List<AttributeListItem> getActiveListItems(){
+		List<AttributeListItem> items = new ArrayList<AttributeListItem>();
+		for(AttributeListItem item : getAttributeList()){
+			if (item.getIsActive()){
+				items.add(item);
+			}
+		}
+		return items;
+	}
 	/**
 	 * Only valid for list attributes.
 	 * 
