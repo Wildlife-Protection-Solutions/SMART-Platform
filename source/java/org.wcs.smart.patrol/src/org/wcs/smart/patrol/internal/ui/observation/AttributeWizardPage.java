@@ -253,6 +253,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			attributeTable.refresh();
 			btnUpdate.setEnabled(false);
 			((ObservationWizard)getWizard()).setFocusNextButton();
+			((ObservationWizard)getWizard()).setModified();
 			
 			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(null);
 			attributeTable.refresh();
@@ -271,6 +272,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			attributeTable.refresh();
 			btnUpdate.setEnabled(false);
 			((ObservationWizard)getWizard()).setFocusNextButton();
+			((ObservationWizard)getWizard()).setModified();
 			return true;
 		}
 		return false;
