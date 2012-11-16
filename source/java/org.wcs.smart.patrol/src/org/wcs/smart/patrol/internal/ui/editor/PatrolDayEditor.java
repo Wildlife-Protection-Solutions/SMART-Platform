@@ -79,13 +79,13 @@ public class PatrolDayEditor extends EditorPart {
 	}
 	
 	@Override
-	public void dispose(){		
-		super.dispose();
+	public void dispose(){
 		if (children != null){
 			for (int i = 0; i < children.length; i ++){
 				children[i].dispose();
 			}
 		}
+		super.dispose();
 	}
 	
 	/**

@@ -29,8 +29,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -218,13 +220,19 @@ public class Waypoint {
 			return null;
 		}
 		StringBuilder text = new StringBuilder();
-		HashSet<Category> added = new HashSet<Category>();
+		HashMap<Category, Integer> added = new HashMap<Category, Integer>();
+		
 		for (WaypointObservation ob : getObservations()){
-			if (!added.contains(ob.getCategory())){
-				text.append(ob.getCategory().getName());
-				text.append("; ");
-				added.add(ob.getCategory());
+			Integer x = added.get(ob.getCategory());
+			if (x == null){
+				x = 0;
 			}
+			added.put(ob.getCategory(), x+1);
+			
+		}
+		for (Entry<Category, Integer> item : added.entrySet()){
+			text.append(item.getKey().getName() + " (" + item.getValue() + ")");
+			text.append("; ");
 		}
 		text.delete(text.length() - 2, text.length());
 		return text.toString();

@@ -60,6 +60,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	
 	//current observations
 	private HashMap<Category, List<WaypointObservation>> observations = new HashMap<Category, List<WaypointObservation>>();
+	private HashMap<Category, List<WaypointObservation>> workingObservations = new HashMap<Category, List<WaypointObservation>>();
 	
 	private DataModel dm = null;
 	public boolean canFinish = false;
@@ -78,27 +79,29 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
-		this.wp = wp;
+		
 		getSession().beginTransaction();
 		getSession().update(wp);
+		this.wp = wp;
 		if (this.wp.getObservations() != null){
-			for (WaypointObservation ob : wp.getObservations()){
+			for (WaypointObservation ob : this.wp.getObservations()){
 				//add to list
+				ob.setCategory((Category)getSession().merge(ob.getCategory()));
 				List<WaypointObservation> lst = observations.get(ob.getCategory());
 				if (lst == null) {
 					lst = new ArrayList<WaypointObservation>();
 					observations.put(ob.getCategory(), lst);
 				}
-				lst.add(ob);
-				//re-attach category and attributes to session
-				getSession().update(ob.getCategory()); //attach cat to session
-				for (WaypointObservationAttribute att : ob.getAttributes()){
-					//getSession().update(att.getAttribute());
-					getSession().load(Attribute.class, att.getAttribute().getUuid());
+				for (WaypointObservationAttribute a : ob.getAttributes()){
+					a.setAttribute((Attribute)getSession().merge(a.getAttribute()));
 				}
+				lst.add(ob);
 			}
 		}
+		
+		this.workingObservations.putAll(observations);
 	}
+	
 	
 	/**
 	 * Initial categories to process.  This must be called
@@ -118,8 +121,12 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @param toProcess The list of categories to gather addition attribute information.
 	 */
 	public void setCategoriesToProcess(List<Category> toProcess){
-
 		this.toProcess = toProcess;
+	}
+	
+	public void clearWorkingObservations(){
+		this.workingObservations.clear();
+		this.workingObservations.putAll(observations);
 	}
 	/**
 	 * 
@@ -154,7 +161,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		}
 		ArrayList<WaypointObservation> ops = new ArrayList<WaypointObservation>();
 		ops.addAll(catObservations);
-		this.observations.put(category, ops);
+//		this.observations.put(category, ops);
+		this.workingObservations.put(category, ops);
 	}
 	
 	
@@ -164,7 +172,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @return set of waypoint observations
 	 */
 	public Collection<WaypointObservation> getWaypointObservation(Category category){
-		return this.observations.get(category);
+//		return this.observations.get(category);
+		return this.workingObservations.get(category);
 	}
 	
 	/**
@@ -172,6 +181,11 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 */
 	public HashMap<Category, List<WaypointObservation>> getAllObservations(){
 		return this.observations;
+	}
+	
+	public void removeObservations(Category category){
+		this.workingObservations.remove(category);
+		this.observations.remove(category);
 	}
 	
 	/**
@@ -278,13 +292,14 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 */
 	@Override
 	public boolean performFinish() {
+		
 		if (getContainer().getCurrentPage() instanceof IObservationWizardPage){
 			//need to finish the page
 			if (!((IObservationWizardPage)getContainer().getCurrentPage()).beforeMoveNext(null)){
 				return false;
 			}
 		}
-		
+		setObservations();
 		List<WaypointObservation> wobservations = new ArrayList<WaypointObservation>();
 		for (Entry<Category,List<WaypointObservation>> entry : this.observations.entrySet()){
 			wobservations.addAll(entry.getValue());	
@@ -307,7 +322,12 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		return true;
 	}
 
-	
+	public void setObservations(){
+		HashMap<Category, List<WaypointObservation>> joined = new HashMap<Category, List<WaypointObservation>>();
+		joined.putAll(observations);
+		joined.putAll(workingObservations);
+		observations= joined;
+	}
     /**
      * Does nothing.
      * @see org.eclipse.jface.wizard.Wizard#performCancel()

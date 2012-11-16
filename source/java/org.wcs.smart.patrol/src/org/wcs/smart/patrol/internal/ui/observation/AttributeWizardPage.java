@@ -146,10 +146,20 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		//get existing observations 
 		Collection<WaypointObservation> currentObservations = ((ObservationWizard)getWizard()).getWaypointObservation(currentCategory);
 		
+		Composite header = new Composite(main, SWT.NONE);
+		GridLayout gl = new GridLayout(2, false);
+		gl.horizontalSpacing = gl.verticalSpacing = gl.marginBottom = gl.marginTop = gl.marginHeight = gl.marginWidth = gl.marginLeft = gl.marginRight = 0;
+		header.setLayout(gl);
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lbl = new Label(main, SWT.NONE);
+		lbl = new Label(header, SWT.NONE);
 		lbl.setText( SmartUtils.formatStringForLabel(currentCategory.getName()));
 		lbl.setFont(getBoldFont(lbl));
+		lbl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, false));
+		
+		lbl = new Label(header, SWT.NONE);
+		lbl.setText("Page " + (index+1) + " of " + ((ObservationWizard)getWizard()).getCategoryCount());
+		lbl.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL, false, false));
 		
 		lbl = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -198,7 +208,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			createObservationTable(main);
 			if (currentObservations != null){
 				this.observations.addAll(currentObservations);
+				AttributeTable.resizeColumns(attributeTable);
 			}
+			
 		}
 		scComp.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		setMessage("Enter the observation attributes for " + currentCategory.getFullCategoryName() + ".  Add multiple rows if required.");
@@ -231,12 +243,19 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	private boolean updateObservation(){
 		WaypointObservation wo = createObservationAndClear();
 		if (wo != null){
+			int index = observations.indexOf(editingOb);
+			if (index < 0){
+				index = 0;
+			}
 			observations.remove(editingOb);
 			editingOb = null;
-			observations.add(wo);
+			observations.add(index, wo);
 			attributeTable.refresh();
 			btnUpdate.setEnabled(false);
 			((ObservationWizard)getWizard()).setFocusNextButton();
+			
+			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(null);
+			attributeTable.refresh();
 			return true;
 		}
 		return false;
@@ -358,7 +377,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	/*
 	 * edits a waypoint boservation
 	 */
-	private void editWaypointObservation(WaypointObservation wo){
+	public void editWaypointObservation(WaypointObservation wo){
 		editingOb = wo;
 		if (btnUpdate != null){
 			btnUpdate.setEnabled(true);
@@ -370,6 +389,10 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}else{
 				field.clear();
 			}
+		}
+		if (attributeTable != null){
+			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(wo);
+			attributeTable.refresh();
 		}
 	}
 	
@@ -470,9 +493,10 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean beforeMoveNext(IWizardPage target) {
-		if (target != null && target instanceof ObservationWizardPage){
+		if (target != null && target != nextPage){		
 			//we are moving backwards
 			//we don't want to save anything
+			((ObservationWizard)getWizard()).clearWorkingObservations();
 			return true;
 		}
 		
@@ -510,6 +534,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 			((ObservationWizard)getWizard()).setWaypointObservation(currentCategory, observations);
 		}
+		
 		return true;
 	}
 

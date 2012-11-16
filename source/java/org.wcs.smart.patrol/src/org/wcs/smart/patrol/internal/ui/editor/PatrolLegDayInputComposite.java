@@ -495,10 +495,29 @@ public class PatrolLegDayInputComposite {
 	public void dispose(){
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, waypointListener);
+		
+		doubleCellEditor.dispose();
+		nullableDoubleCellEditor.dispose();
+		integerCellEditor.dispose();
+		timeEditor.dispose();
+		attachmentEditor.dispose();
+		commentEditor.dispose();
+		observationEditor.dispose();
+		doubleCellEditor = null;
+		nullableDoubleCellEditor = null;
+		integerCellEditor = null;
+		timeEditor = null;
+		attachmentEditor = null;
+		commentEditor = null;
+		observationEditor = null;
+		
 		if (errorFont != null && !errorFont.isDisposed()){
 			errorFont.dispose();
 		}
 		mainComposite.dispose();
+		mainComposite = null;
+		
+		
 	}
 	
 	private void moveSelectedWaypoints(){
