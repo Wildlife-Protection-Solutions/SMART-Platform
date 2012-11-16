@@ -41,6 +41,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.ISelectionListener;
@@ -61,7 +63,7 @@ public class TreeDropDown{
 
 	private TreeViewer treeViewer;
 	private Composite main;
-	
+	private Control positionControl;
 	private ISelectionListener onSelected; //called when item in tree selected
 
 	private PatternFilter patternFilter; 	//tree filter patter
@@ -69,13 +71,15 @@ public class TreeDropDown{
 	private boolean narrowingDown = false;	//if narrowing search
 	private WorkbenchJob refreshJob = null;	//job to search tree itmes
 
+	private Listener moveListener = null;
 	/**
 	 * Creates a new tree drop down viewer 
 	 * @param parent outer shell
 	 */
 	public TreeDropDown(Shell parent){
 		
-		main = new Shell(parent, SWT.SINGLE | SWT.BORDER );
+		
+		main = new Shell(parent, SWT.SINGLE | SWT.BORDER | SWT.NO_FOCUS);
 
 		main.addTraverseListener(new TraverseListener() {
 			@Override
@@ -94,6 +98,32 @@ public class TreeDropDown{
 		gl.marginHeight = 0;
 		main.setLayout(gl);
 		createComposite(main);
+		
+		moveListener = createMoveListener();
+		parent.getShell().addListener(SWT.Move, moveListener);
+	}
+	
+	private Listener createMoveListener() {
+		Listener moveListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				if (isVisible()) {
+					position(null, null);
+				}
+			}
+		};
+		return moveListener;
+	}
+	
+	/**
+	 * Disposes of the tree viewer
+	 */
+	public void dispose(){
+		if (moveListener != null && main != null){
+			main.removeListener(SWT.Move, moveListener);
+		}
+		main.dispose();
+		main = null;
 	}
 	
 	public TreeViewer getTreeViewer(){
@@ -127,7 +157,7 @@ public class TreeDropDown{
 			}
 		};
 
-		treeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		treeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE);
 		treeViewer.setFilters(new ViewerFilter[]{patternFilter});
 		
 		treeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -170,19 +200,31 @@ public class TreeDropDown{
 	 * @param height <code>null</code> if height to be default
 	 */
 	public void positionAndShow(Control obj, Integer width, Integer height, ISelectionListener onSelected){
+		this.positionControl = obj;
 		this.onSelected = onSelected;
 		Rectangle r = obj.getBounds();
-		Point pnt = obj.getParent().toDisplay(r.x, r.y);
-		
 		if (width == null){
 			width = r.width;
 		}
-		
 		if (height == null){
 			height = 200;
 		}
-		main.setBounds(pnt.x, pnt.y + r.height, width, height);
+		position(width, height);
+		
 		main.setVisible(true);
+	}
+	
+	private void position(Integer width, Integer height){
+		if (width == null){
+			width = main.getBounds().width;
+		}
+		if (height == null){
+			height = main.getBounds().height;
+		}
+		Rectangle r = positionControl.getBounds();
+		Point pnt = positionControl.getParent().toDisplay(r.x, r.y);
+		main.setBounds(pnt.x, pnt.y + r.height, width, height);
+		
 	}
 	
 	/**

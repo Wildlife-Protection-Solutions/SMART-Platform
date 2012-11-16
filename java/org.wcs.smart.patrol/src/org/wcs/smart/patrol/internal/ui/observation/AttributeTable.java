@@ -22,18 +22,28 @@
 package org.wcs.smart.patrol.internal.ui.observation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ITableColorProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
@@ -45,6 +55,12 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
  * @since 1.0.0
  */
 public class AttributeTable {
+
+	/**
+	 * Maximum width of table column
+	 */
+	private static final int MAX_COLUMN_WIDTH = 200;
+
 
 	/**
 	 * Creates a new attribute table.
@@ -64,76 +80,241 @@ public class AttributeTable {
 		attributeTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		attributeTable.getTable().setLinesVisible(true);
 		attributeTable.getTable().setHeaderVisible(true);
-		
-		TableViewerColumn column  = null;
+		attributeTable.setLabelProvider(new AttributeTableLabelProvider(attributes));
+		//TableViewerColumn column  = null;
 		GC gc = new GC(Display.getDefault().getActiveShell());
 		try{
 			gc.setFont(attributeTable.getTable().getFont());
 			for (int i = 0; i < attributes.size(); i ++){
-				column = new TableViewerColumn(attributeTable,SWT.NONE);
-				column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
-				column.getColumn().setText(attributes.get(i).getName());
-				column.getColumn().setResizable(true);
-				column.getColumn().setMoveable(false);
+				TableColumn column = new TableColumn(attributeTable.getTable(),SWT.NONE);
+//				column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
+				column.setText(attributes.get(i).getName());
+				column.setResizable(true);
+				column.setMoveable(false);
 				
 				int width = gc.textExtent(attributes.get(i).getName() ).x + 20;
-				if (width < 60) width = 60;
-				column.getColumn().setWidth( width );
+				if (width < 60){
+					width = 60;
+				}
+				column.setWidth( width );
 			}
 		}finally{
 			gc.dispose();
 		}
+		
+		attributeTable.getTable().addListener(SWT.PaintItem, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				TableItem item = (TableItem) event.item;
+				Color c = ((ITableColorProvider)attributeTable.getLabelProvider()).getForeground(item.getData(), event.index);
+				if (c != null){
+					event.gc.setForeground(((ITableColorProvider)attributeTable.getLabelProvider()).getForeground(item.getData(), event.index));
+					Rectangle rect = item.getTextBounds(event.index);
+					event.gc.drawString(item.getText(event.index), rect.x-1, rect.y); // Out-by-one x pixel!
+				}
+				
+			}
+			
+		});
 		return attributeTable;
 	}
 	
-	 static class AttributeTableLabelProvider extends ColumnLabelProvider {
+	/**
+	 * Set the column size based on the data in the table. 
+	 * Thie tableViewer must be created from the createAttributeTable
+	 * function.
+	 * 
+	 * @param table
+	 */
+	public static void resizeColumns(TableViewer table){
+		if (table.getTable().getShell().isDisposed()){
+			return;
+		}
+		
+		GC gc = new GC(table.getTable().getShell());
+		try {
+			gc.setFont(table.getTable().getFont());
 
-			private Attribute attribute;
-
-			public AttributeTableLabelProvider(Attribute attribute) {
-				this.attribute = attribute;
+			/* compute width based on text size */
+			HashMap<Integer, Integer> columnWidth = new HashMap<Integer, Integer>();
+			for (int i = 0; i < table.getTable().getColumnCount(); i++) {
+				columnWidth.put(i, 0);
 			}
-
-			public String getText(Object element) {
-				if (element instanceof WaypointObservation){
-					WaypointObservation observation = (WaypointObservation) element;					
-					WaypointObservationAttribute att = observation.findAttribute(attribute);
-					if (att != null){
-						if (this.attribute.getType() == AttributeType.TEXT){
-							if (att.getStringValue() == null){
-								return "";
-							}
-							return att.getStringValue();
-						}else if (this.attribute.getType() == AttributeType.BOOLEAN ){
-							if (att.getNumberValue() == null){
-								return "";
-							}
-							if (att.getNumberValue() < 0.5){
-								return Attribute.BOOLEAN_FALSE_LABEL;
-							}else{
-								return Attribute.BOOLEAN_TRUE_LABEL;
-							}
-						}else if (this.attribute.getType() == AttributeType.NUMERIC){
-							if (att.getNumberValue() == null){
-								return "";
-							}
-							return String.valueOf(att.getNumberValue());
-						}else if (this.attribute.getType() == AttributeType.LIST){
-							if (att.getAttributeListItem() == null){
-								return "";
-							}
-							return att.getAttributeListItem().getName();
-						}else if (this.attribute.getType() == AttributeType.TREE){
-							if (att.getAttributeTreeNode() == null){
-								return "";
-							}
-							return att.getAttributeTreeNode().getName();
-						}
+			for (int j = 0; j < table.getTable().getItemCount(); j++) {
+				for (int i = 0; i < table.getTable().getColumnCount(); i++) {
+					String string = ((ITableLabelProvider) table
+							.getLabelProvider()).getColumnText(table.getTable()
+							.getItem(j).getData(), i);
+					int width = gc.textExtent(string).x + 20;
+					if (columnWidth.get(i) < width) {
+						columnWidth.put(i, width);
 					}
-					return "";
 				}
-				return super.getText(element);
 			}
-	 }
+			//update column widths
+			//not smaller than current width; not greater than 200
+			for (int i = 0; i < table.getTable().getColumnCount(); i++) {
+				int width = table.getTable().getColumn(i).getWidth();
+				int newWidth = columnWidth.get(i);
+
+				if (newWidth > width) {
+					if (newWidth > MAX_COLUMN_WIDTH) {
+						newWidth = MAX_COLUMN_WIDTH;
+					}
+					table.getTable().getColumn(i).setWidth(newWidth);
+				}
+			}
+		} finally {
+			gc.dispose();
+		}
+	}
+	
+	
+	static class AttributeTableLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider{
+
+		private WaypointObservation editingObservation = null;
+		public List<Attribute> columns;
+		
+		public AttributeTableLabelProvider(List<Attribute> columns){
+			this.columns = columns;
+		}
+
+		public void setEditingObservation(WaypointObservation ob) {
+			this.editingObservation = ob;
+		}
+		
+
+
+		@Override
+		public Color getForeground(Object element, int columnIndex) {
+			if (this.editingObservation != null && this.editingObservation == element){
+				return Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED);
+			}
+			return null;
+		}
+
+		@Override
+		public Color getBackground(Object element, int columnIndex) {
+
+			return null;
+		}
+
+		@Override
+		public Image getColumnImage(Object element, int columnIndex) {
+			return null;
+		}
+
+		@Override
+		public String getColumnText(Object element, int columnIndex) {
+			if (element instanceof WaypointObservation) {
+				WaypointObservation observation = (WaypointObservation) element;
+				Attribute attribute = columns.get(columnIndex);
+				WaypointObservationAttribute att = observation.findAttribute(attribute);
+				
+				if (att != null) {
+					if (attribute.getType() == AttributeType.TEXT) {
+						if (att.getStringValue() == null) {
+							return "";
+						}
+						return att.getStringValue();
+					} else if (attribute.getType() == AttributeType.BOOLEAN) {
+						if (att.getNumberValue() == null) {
+							return "";
+						}
+						if (att.getNumberValue() < 0.5) {
+							return Attribute.BOOLEAN_FALSE_LABEL;
+						} else {
+							return Attribute.BOOLEAN_TRUE_LABEL;
+						}
+					} else if (attribute.getType() == AttributeType.NUMERIC) {
+						if (att.getNumberValue() == null) {
+							return "";
+						}
+						return String.valueOf(att.getNumberValue());
+					} else if (attribute.getType() == AttributeType.LIST) {
+						if (att.getAttributeListItem() == null) {
+							return "";
+						}
+						return att.getAttributeListItem().getName();
+					} else if (attribute.getType() == AttributeType.TREE) {
+						if (att.getAttributeTreeNode() == null) {
+							return "";
+						}
+						return att.getAttributeTreeNode().getName();
+					}
+				}
+				
+			}
+			return "";
+		}
+		
+	}
+//	static class AttributeTableLabelProvider extends ColumnLabelProvider {
+//		
+//		private Attribute attribute;
+//		private WaypointObservation editingObservation = null;
+//
+//		public AttributeTableLabelProvider(Attribute attribute) {
+//			this.attribute = attribute;
+//		}
+//		public void setEditingObservation(WaypointObservation ob){
+//			this.editingObservation = ob;
+//		}
+//
+//		/**
+//		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+//		 */
+//		@Override
+//		public Color getBackground(Object element) {
+//			if (this.editingObservation != null && this.editingObservation == element){
+//				return Display.getDefault().getSystemColor(SWT.COLOR_RED);
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		public String getText(Object element) {
+//			if (element instanceof WaypointObservation) {
+//				WaypointObservation observation = (WaypointObservation) element;
+//				WaypointObservationAttribute att = observation.findAttribute(attribute);
+//				
+//				if (att != null) {
+//					if (this.attribute.getType() == AttributeType.TEXT) {
+//						if (att.getStringValue() == null) {
+//							return "";
+//						}
+//						return att.getStringValue();
+//					} else if (this.attribute.getType() == AttributeType.BOOLEAN) {
+//						if (att.getNumberValue() == null) {
+//							return "";
+//						}
+//						if (att.getNumberValue() < 0.5) {
+//							return Attribute.BOOLEAN_FALSE_LABEL;
+//						} else {
+//							return Attribute.BOOLEAN_TRUE_LABEL;
+//						}
+//					} else if (this.attribute.getType() == AttributeType.NUMERIC) {
+//						if (att.getNumberValue() == null) {
+//							return "";
+//						}
+//						return String.valueOf(att.getNumberValue());
+//					} else if (this.attribute.getType() == AttributeType.LIST) {
+//						if (att.getAttributeListItem() == null) {
+//							return "";
+//						}
+//						return att.getAttributeListItem().getName();
+//					} else if (this.attribute.getType() == AttributeType.TREE) {
+//						if (att.getAttributeTreeNode() == null) {
+//							return "";
+//						}
+//						return att.getAttributeTreeNode().getName();
+//					}
+//				}
+//				return "";
+//			}
+//			return super.getText(element);
+//		}
+//	}
 
 }

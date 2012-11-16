@@ -79,7 +79,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 	private Listener focusListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
-			if (!(event.widget == btnDownArrow || event.widget == txtText || event.widget == tree.getTreeViewer().getControl() )){
+			if (!(event.widget == btnDownArrow || event.widget == txtText || event.widget == tree.getTreeViewer().getControl() || event.widget == tree.getTreeViewer().getControl().getParent())){
 				if (tree.isVisible()){
 					tree.hide();
 				}
@@ -169,6 +169,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		txtText.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent e) {
+				System.out.println("focus lost");
 				validate();
 			}
 			
@@ -350,6 +351,9 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 
 	@Override
 	public void dispose() {
+		if (tree != null){
+			tree.dispose();
+		}
 		txtText.getShell().getDisplay().removeFilter(SWT.FocusIn, focusListener);
 	}
 

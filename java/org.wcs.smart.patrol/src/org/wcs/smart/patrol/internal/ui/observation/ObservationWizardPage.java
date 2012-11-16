@@ -53,9 +53,9 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 
 	public static final String PAGE_NAME = "Observation Categories";
 
-	private boolean isNext = true;
 	private TreeViewer dmTreeViewer = null;
 	private SearchTree searchTree = null;
+	private boolean moveNext = true;
 	
 	/**
 	 * @param pageName
@@ -111,7 +111,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	 */
 	@Override
 	public IWizardPage getPreviousPage() {
-		isNext = false;
+		moveNext = false;
 		if (((ObservationWizard)getWizard()).getAllObservations().size() > 0){
 			return new ObservationSummaryWizardPage((Wizard) getWizard());
 		}
@@ -150,6 +150,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 			setPageComplete(searchTree.selectedList.size() > 0);
 			((ObservationWizard)getWizard()).setCanFinish(canFinish());
 		}
+		((ObservationWizard)getWizard()).clearWorkingObservations();
 	}
 	
 	/**
@@ -159,8 +160,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	 */
 	@Override
     public IWizardPage getNextPage() {
-		isNext = true;
-		
+		moveNext = true;
 		List<Category> categories = searchTree.getSelectedItems();
 		if (categories.size() > 0){
 			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
@@ -193,7 +193,8 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	 */
 	@Override
 	public boolean beforeMoveNext(IWizardPage targetPage) {
-		if (!isNext && targetPage != null && targetPage instanceof ObservationSummaryWizardPage){
+		if (!moveNext && targetPage instanceof ObservationSummaryWizardPage){
+			//moving backwards to summary page
 			return true;
 		}
 		
@@ -203,16 +204,22 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		
 		//add categories for observations without attributes
 		List<Category> categories = searchTree.getSelectedItems();
+		List<Category> emptyCategories = new ArrayList<Category>();
 		if (categories.size() > 0){
 			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
 				Category category = (Category) iterator.next();
 				if (findAttributes(category).size() == 0){
-					((ObservationWizard)getWizard()).setWaypointObservation(category, null);
+					emptyCategories.add(category);
 					iterator.remove();
 				}
 			}
+
 			((ObservationWizard)getWizard()).setCategoriesToProcess(categories);
+			for (Category category : emptyCategories){
+				((ObservationWizard)getWizard()).setWaypointObservation(category, null);
+			}
 		}
+		
 		return true;
 	}
 	

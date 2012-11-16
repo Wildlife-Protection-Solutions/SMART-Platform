@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -123,39 +124,57 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				}
 			});
 			
+			Link lnkEdit = null;
 			if (ob.getKey().hasAttributes()){
-				Link lnkEdit = new Link(lblComp, SWT.NONE);
+				lnkEdit = new Link(lblComp, SWT.NONE);
 				lnkEdit.setText("<a>Edit</a>");
-				//lnkEdit.setBounds(getShell().getClientArea().x, getShell().getClientArea().y,140,40);
-				lnkEdit.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						editCategory(ob.getKey());	
-					}
-				});
 			}else{
 				lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 
 			List<WaypointObservation> items = new ArrayList<WaypointObservation>();
 			for (WaypointObservation wo :ob.getValue()){
-				for (WaypointObservationAttribute att: wo.getAttributes()){
-					if (att.hasValue()){
-						items.add(wo);
-						break;
+				if (wo.getAttributes() != null){
+					for (WaypointObservationAttribute att: wo.getAttributes()){
+						if (att.hasValue()){
+							items.add(wo);
+							break;
+						}
 					}
 				}
 			}
 			
 			if (items.size() > 0){
-				TableViewer viewer = AttributeTable.createAttributeTable(entryComp, ob.getKey());
+				final TableViewer viewer = AttributeTable.createAttributeTable(entryComp, ob.getKey());
 				viewer.setContentProvider(ArrayContentProvider.getInstance());			
 				viewer.setInput(items.toArray());
 				GridData gd = new GridData(SWT.FILL, SWT.FILL,true, false);
 				gd.heightHint = Math.min(viewer.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y, 50);
 				gd.widthHint = 300;
 				viewer.getTable().setLayoutData(gd);
+				AttributeTable.resizeColumns(viewer);
+				if (lnkEdit != null){
+					lnkEdit.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							WaypointObservation wob = null;
+							if (!(((IStructuredSelection)viewer.getSelection()).isEmpty())){
+								wob = (WaypointObservation) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+							}
+							editCategory(ob.getKey(), wob);	
+						}
+					});
+				}
 				
+			}else{
+				if (lnkEdit != null){
+					lnkEdit.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							editCategory(ob.getKey(), null);	
+						}
+					});
+				}
 			}
 		}
 		
@@ -166,6 +185,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		scrolled.setContent(main);
 		setControl(scrolled);
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		
 	}
 	
 	
@@ -175,7 +196,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	 * @param comp
 	 */
 	private void deleteCategory(Category category, Composite comp){
-		((ObservationWizard)getWizard()).getAllObservations().remove(category);
+		((ObservationWizard)getWizard()).removeObservations(category);
 		Composite parent = comp.getParent();
 		comp.dispose();
 		parent.layout();
@@ -186,12 +207,19 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	 * 
 	 * @param category
 	 */
-	private void editCategory(Category category){
+	private void editCategory(Category category, WaypointObservation wo){
 		List<Category> cats = new ArrayList<Category>();
 		cats.add(category);
 		ObservationWizard wizard = (ObservationWizard) getWizard();
 		wizard.setCategoriesToProcess(cats);
-		wizard.getContainer().showPage( new AttributeWizardPage((Wizard)getWizard(), 0) );
+		AttributeWizardPage wizardPage = new AttributeWizardPage((Wizard)getWizard(), 0);
+		
+		
+		wizard.getContainer().showPage( wizardPage );
+		if (wo != null){
+			//we have a particular observation to edit
+			wizardPage.editWaypointObservation(wo);
+		}
 	}
 	
 	/**
@@ -233,7 +261,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	 */
 	@Override
 	public void beforeShow(){
-		
+		((ObservationWizard)getWizard()).setObservations();
 	}
 	
 	

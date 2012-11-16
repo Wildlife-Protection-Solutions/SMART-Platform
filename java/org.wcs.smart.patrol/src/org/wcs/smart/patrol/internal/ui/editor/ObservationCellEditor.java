@@ -83,7 +83,8 @@ public class ObservationCellEditor extends DialogCellEditor {
 	private boolean dialogOpen = false;	//if dialog is being opend
 	
 	private Listener focusListener;		//focus listener for determining when cell looses focus
-
+	private Display focusDisplay;
+	
 	private List<Category> currentSelection = null;	//current catetory selected from tree drop down
 	
 	/**
@@ -113,6 +114,9 @@ public class ObservationCellEditor extends DialogCellEditor {
 				});
 
 			} finally {
+				if (s.getTransaction().isActive()){
+					s.getTransaction().rollback();
+				}
 				s.close();
 			}
 			return Status.OK_STATUS;
@@ -176,8 +180,12 @@ public class ObservationCellEditor extends DialogCellEditor {
 	 */
 	@Override
 	public void activate(){
+		currentSelection = null;
 		super.activate();
-		getControl().getShell().getDisplay().addFilter(SWT.FocusIn, focusListener);
+		if (focusDisplay == null){
+			focusDisplay = getControl().getShell().getDisplay();
+		}
+		focusDisplay.addFilter(SWT.FocusIn, focusListener);
 	}
 	
 	/**
@@ -186,19 +194,24 @@ public class ObservationCellEditor extends DialogCellEditor {
 	@Override
 	public void deactivate(){
 		super.deactivate();
-		if (focusListener != null){
-			getControl().getShell().getDisplay().removeFilter(SWT.FocusIn, focusListener);
+		if (focusListener != null && focusDisplay!= null){
+			focusDisplay.removeFilter(SWT.FocusIn, focusListener);
 		}
 	}
 	
 	/**
 	 * @see org.eclipse.jface.viewers.CellEditor#dispose()
 	 */
+	@Override
 	public void dispose(){
-		super.dispose();
-		if (focusListener != null){
-			getControl().getShell().getDisplay().removeFilter(SWT.FocusIn, focusListener);
+		if (focusListener != null && focusDisplay != null){
+			focusDisplay.removeFilter(SWT.FocusIn, focusListener);
 		}
+		if (treeDropDown != null){
+			treeDropDown.dispose();
+		}
+		super.dispose();
+		
 	}
 	
 	
@@ -253,6 +266,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 					e.doit = false;
 				}else if (e.keyCode == SWT.CR &&
 						treeDropDown != null && 
+						treeDropDown.isVisible() && 
 						!treeDropDown.getSelection().isEmpty()){
 					openWithSelection(treeDropDown.getSelection());
 				}
