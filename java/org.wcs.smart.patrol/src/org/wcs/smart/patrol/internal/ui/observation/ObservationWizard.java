@@ -65,6 +65,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	private DataModel dm = null;
 	public boolean canFinish = false;
 	private Session session;
+	private boolean isModified = false;
 	
 	//categories to process
 	private List<Category> toProcess;
@@ -87,15 +88,19 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			for (WaypointObservation ob : this.wp.getObservations()){
 				//add to list
 				ob.setCategory((Category)getSession().merge(ob.getCategory()));
+
 				List<WaypointObservation> lst = observations.get(ob.getCategory());
 				if (lst == null) {
 					lst = new ArrayList<WaypointObservation>();
 					observations.put(ob.getCategory(), lst);
 				}
+				lst.add(ob);
+				
 				for (WaypointObservationAttribute a : ob.getAttributes()){
 					a.setAttribute((Attribute)getSession().merge(a.getAttribute()));
+
 				}
-				lst.add(ob);
+				
 			}
 		}
 		
@@ -124,6 +129,17 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		this.toProcess = toProcess;
 	}
 	
+	/**
+	 * Sets the modified sate of the wizard to true so cancel prompts
+	 * to ensure they want to cancel.
+	 */
+	public void setModified(){
+		this.isModified = true;
+	}
+	
+	/**
+	 * Clears the working observations
+	 */
 	public void clearWorkingObservations(){
 		this.workingObservations.clear();
 		this.workingObservations.putAll(observations);
@@ -144,6 +160,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		if (toProcess == null) return 0;
 		return toProcess.size();
 	}
+	
 	/**
 	 * Sets the current waypoint observation category selected by the 
 	 * user
@@ -152,6 +169,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @param catObservations set of observations associated with the category
 	 */
 	public void setWaypointObservation(Category category, Collection<WaypointObservation> catObservations){
+		this.isModified = true;
 		if (catObservations == null || catObservations.size() == 0){
 			catObservations = new ArrayList<WaypointObservation>();
 			WaypointObservation wo = new WaypointObservation();
@@ -183,7 +201,12 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		return this.observations;
 	}
 	
+	/**
+	 * Removes all observations associated with the given category
+	 * @param category
+	 */
 	public void removeObservations(Category category){
+		this.isModified = true;
 		this.workingObservations.remove(category);
 		this.observations.remove(category);
 	}
@@ -292,13 +315,13 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 */
 	@Override
 	public boolean performFinish() {
-		
 		if (getContainer().getCurrentPage() instanceof IObservationWizardPage){
 			//need to finish the page
 			if (!((IObservationWizardPage)getContainer().getCurrentPage()).beforeMoveNext(null)){
 				return false;
 			}
 		}
+		
 		setObservations();
 		List<WaypointObservation> wobservations = new ArrayList<WaypointObservation>();
 		for (Entry<Category,List<WaypointObservation>> entry : this.observations.entrySet()){
@@ -322,6 +345,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		return true;
 	}
 
+	/**
+	 * Merges the current working observations with the 'final' observation
+	 * list.
+	 */
 	public void setObservations(){
 		HashMap<Category, List<WaypointObservation>> joined = new HashMap<Category, List<WaypointObservation>>();
 		joined.putAll(observations);
@@ -333,8 +360,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
      * @see org.eclipse.jface.wizard.Wizard#performCancel()
      */
     public boolean performCancel() {
-    	if (observations.size() > 0){
-    		if (!MessageDialog.openQuestion(getShell(), "Confirmation", "All observations you have entered/modified will be lost.  Are you sure you want to cancel?")){
+    	if (isModified){
+    		if (!MessageDialog.openQuestion(getShell(), "Confirmation", "All entries/modifications you have made will be lost.  Are you sure you want to cancel?")){
     			return false;
     		}
     	}

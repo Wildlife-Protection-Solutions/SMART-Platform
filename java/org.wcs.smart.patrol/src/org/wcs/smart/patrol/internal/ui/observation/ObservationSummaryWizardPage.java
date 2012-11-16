@@ -212,9 +212,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		cats.add(category);
 		ObservationWizard wizard = (ObservationWizard) getWizard();
 		wizard.setCategoriesToProcess(cats);
+		
 		AttributeWizardPage wizardPage = new AttributeWizardPage((Wizard)getWizard(), 0);
-		
-		
 		wizard.getContainer().showPage( wizardPage );
 		if (wo != null){
 			//we have a particular observation to edit
