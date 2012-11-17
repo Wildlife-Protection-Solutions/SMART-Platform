@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -65,6 +66,7 @@ import org.hibernate.type.BinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -84,12 +86,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	public static final String ID = "org.wcs.smart.ca.StationListPropertyPage";
 
 	private WritableList stations = null;
-	//private HashSet<Station> toDelete = new HashSet<Station>();
+	private HashSet<Station> toDelete = new HashSet<Station>();
 
 	private LanguageViewer cmbLanguage;
 	private TableViewer tableViewer;
 	private StationSorter sorter;
 	private Button btnDisable; 
+	private Button btnDelete;
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
@@ -227,6 +230,18 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				setChangesMade(true);
 			}
 		});
+		
+		btnDelete = new Button(composite, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setEnabled(false);
+		btnDelete.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				deleteStation();
+			}
+		});
+		
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -234,6 +249,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 				if (stn != null){
 					btnDisable.setEnabled(true);
+					btnDelete.setEnabled(true);
 					if (stn.getIsActive()){
 						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					}else{
@@ -245,10 +261,35 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 
 		setMessage("Manage the list of stations related to the conservation area.");
 		return container;
-		
-		
+
 	}
 
+	
+	private void deleteStation(){
+		Station s = (Station) ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		if (s == null){
+			return;
+		}
+
+		try{
+			if (s.getUuid() != null){
+				if (DeleteManager.canDelete(s, getSession())){
+					stations.remove(s);
+					toDelete.add(s);
+					setChangesMade(true);
+				}
+			}else{
+				stations.remove(s);
+			}
+				
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), "Could not delete station: " + s.getName(), ex);
+		}	
+		
+		tableViewer.refresh();
+		
+	}
+	
 	private void addStation() {
 		sorter.setSortColumn(null, null);	//we want to make sure this is added at the end 
 		
@@ -388,7 +429,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		Session s = getSession();
 		Transaction tx = s.beginTransaction();
 		try {
-
+			for(Station station : toDelete){
+				s.delete(station);
+			}
 			// add/update stations
 			for (int i = 0; i < stations.size(); i++) {
 				Station stn = (Station) stations.get(i);
@@ -410,6 +453,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 
 			tx.commit();
+			toDelete.clear();
 			setChangesMade(false);
 			return true;
 		} catch (RuntimeException ex) {
