@@ -19,21 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.properties;
+package org.wcs.smart.internal.ca.advisors;
 
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 
 /**
- * Dialog constants for conservation
- * area property pages.
+ * Agencies can be deleted if they are not associated with any
+ * employees.
+ * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class DialogConstants {
+public class AgencyDeleteAdvisor implements IDeleteAdvisor {
 
-	public static final String ENABLE_BUTTON_TEXT = "Enable";
-	public static final String DISABLE_BUTTON_TEXT = "Disable";
-	
-	public static final String EDIT_BUTTON_TEXT = "Edit";
-	public static final String DELETE_BUTTON_TEXT = "Delete";
-	
+	@Override
+	public String canDelete(Object object, Session session) {
+		if (!(object instanceof Agency)){
+			return "Object not of type Agency.  Can not delete.";
+		}
+		
+		Long cnt = (Long) session.createCriteria(Employee.class).add(Restrictions.eq("agency", object)).setProjection(Projections.rowCount()).uniqueResult();
+		if (cnt == 0){
+			return null;
+		}else{
+			return cnt + " employees are associated with the agency " + ((Agency)object).getName() + ".  These references must be removed before this agency can be deleted.";
+		}
+	}
+
 }

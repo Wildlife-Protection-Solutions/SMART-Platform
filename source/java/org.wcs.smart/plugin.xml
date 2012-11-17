@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.ca.export" name="Conservation Area Data Exporter" schema="schema/org.wcs.smart.ca.export.exsd"/>
+	<extension-point id="org.wcs.smart.ca.deleteAdvisor" name="Delete Advisor for Deleting Database Objects" schema="schema/org.wcs.smart.ca.deleteAdvisor.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"
@@ -750,5 +751,17 @@
             name="Smart Info">
       </page>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.internal.ca.advisors.AgencyDeleteAdvisor"
+            class="org.wcs.smart.ca.Agency">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.internal.ca.advisors.RankDeleteAdvisor"
+            class="org.wcs.smart.ca.Rank">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>
+

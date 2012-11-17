@@ -19,21 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.properties;
+package org.wcs.smart.ca.advisors;
 
+import org.hibernate.Session;
 
 /**
- * Dialog constants for conservation
- * area property pages.
+ * Advisor for validating deletion of hibernate
+ * objects.  Plugins can extend the deleteAdvisor extension point
+ * and implement an IDeleteAdvisor to validate deletions.
+ * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class DialogConstants {
+public interface IDeleteAdvisor {
 
-	public static final String ENABLE_BUTTON_TEXT = "Enable";
-	public static final String DISABLE_BUTTON_TEXT = "Disable";
-	
-	public static final String EDIT_BUTTON_TEXT = "Edit";
-	public static final String DELETE_BUTTON_TEXT = "Delete";
+	/**
+	 * 
+	 * @param object the object to be removed
+	 * @param session the current open hibernate session
+	 * @return <code>null</code> if okay to delete object; otherwise a string message to 
+	 * display to user explaining whey item cannot be deleted.
+	 */
+	String canDelete(Object object, Session session);
 	
 }

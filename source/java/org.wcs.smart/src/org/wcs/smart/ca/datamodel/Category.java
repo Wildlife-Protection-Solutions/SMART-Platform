@@ -270,7 +270,7 @@ RETURNS NULL ON NULL INPUT;
 	 * 
 	 * @return parent category;  <code>null</code> if root node
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade={CascadeType.ALL})
 	@JoinColumn(name="parent_category_uuid", referencedColumnName="uuid")
 	public Category getParent(){
 		return this.parent;

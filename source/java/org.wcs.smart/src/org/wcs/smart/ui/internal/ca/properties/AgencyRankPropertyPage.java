@@ -58,6 +58,7 @@ import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
@@ -498,10 +499,21 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void deleteAgency() {
 		for (Iterator<?> iterator = ((IStructuredSelection)tblAgencies.getSelection()).iterator(); iterator.hasNext();) {
 			Agency type = (Agency) iterator.next();
-			agencies.remove(type);
-			if (type.getUuid() != null){
-				toDelete.add(type);	
+			try{
+				if (type.getUuid() != null){
+					if (DeleteManager.canDelete(type, getSession())){
+						agencies.remove(type);
+						toDelete.add(type);
+						setChangesMade(true);
+					}
+				}else{
+					agencies.remove(type);
+				}
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(getShell(), "Could not delete agency : " + type.getName(), ex);
 			}
+			
+			
 		}
 		tblAgencies.refresh();
 		setChangesMade(true);
@@ -531,10 +543,26 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	}
 	private void deleteRank() {
 		Rank r =(Rank) ((IStructuredSelection)tblRank.getSelection()).getFirstElement();
-		if (current != null){
-			currentRankSet.remove(r);
-			current.getRanks().remove(r);
+		
+		try{
+		
+			if (current != null){
+				if (r.getUuid() != null){
+					if (DeleteManager.canDelete(r, getSession())){
+						currentRankSet.remove(r);
+						current.getRanks().remove(r);
+						setChangesMade(true);
+					}
+				}else{
+					currentRankSet.remove(r);
+					current.getRanks().remove(r);
+				}
+			}
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), "Could not delete rank: " + r.getName(), ex);
 		}
+		
+		
 		tblRank.refresh();
 		setChangesMade(true);
 	}
