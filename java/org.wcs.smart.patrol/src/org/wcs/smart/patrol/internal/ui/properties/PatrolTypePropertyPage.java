@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.properties;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
@@ -50,9 +51,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -74,7 +76,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private TableViewer transportTblViewer;
 	private Button btnDisableType;
 	private Button btnDisableTransport;
-		
+	private Button btnDeleteTransport;
+	
 	private WritableList patrolTypes = null;
 	private WritableList patrolTransportTypes = null;
 	
@@ -115,9 +118,14 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		
-		patrolTypes = new WritableList(PatrolHibernateManager.getPatrolTypes(ca,
-				getSession()), PatrolMandate.class);
 		
+		patrolTypes = new WritableList(PatrolHibernateManager.getPatrolTypes(ca,
+				getSession()), PatrolType.class);
+		getSession().beginTransaction();
+		for (Object t : patrolTypes){
+			((PatrolType)t).getTransportTypes();
+		}
+		getSession().getTransaction().rollback();
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -231,8 +239,10 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				PatrolTransportType pt = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
+				
 				if (pt == null){
 					btnDisableTransport.setEnabled(false);
+					btnDeleteTransport.setEnabled(false);
 					return;
 				}
 				if (pt.getIsActive()){
@@ -241,6 +251,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 					btnDisableTransport.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 				}
 				btnDisableTransport.setEnabled(true);
+				btnDeleteTransport.setEnabled(true);
 				
 			}
 		});
@@ -281,6 +292,17 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				transportTblViewer.refresh();
 				setChangesMade(true);
+			}
+		});
+		btnDeleteTransport = new Button(composite, SWT.NONE);
+		btnDeleteTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+				false, 1, 1));
+		btnDeleteTransport.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDeleteTransport.setEnabled(false);
+		btnDeleteTransport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteTransportType();
 			}
 		});
 		
@@ -444,6 +466,39 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		
 	}
+	private HashSet<PatrolTransportType> toDelete = new HashSet<PatrolTransportType>();
+	
+	private void deleteTransportType(){
+		PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
+		PatrolTransportType ttype = (PatrolTransportType) ((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
+		if (pt == null || ttype == null){
+			return;
+		}
+
+		try{
+			if (ttype.getUuid() != null){
+				if (DeleteManager.canDelete(ttype, getSession())){
+					patrolTransportTypes.remove(ttype);
+					pt.getTransportTypes().remove(ttype);
+					toDelete.add(ttype);
+//					ttype.setPatrolType(null);
+					setChangesMade(true);
+				}
+			}else{
+				patrolTransportTypes.remove(ttype);
+				pt.getTransportTypes().remove(ttype);
+				ttype.setPatrolType(null);
+			}
+				
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), "Could not delete patrol transport type: " + ttype.getName(), ex);
+		}	
+		
+		transportTblViewer.refresh();
+		
+	}
+	
+	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#performSave()
 	 */
@@ -452,11 +507,19 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		Session s = getSession();
 		s.beginTransaction();
 		try{
-			for (Iterator iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
+			for (PatrolTransportType t : toDelete){
+				s.delete(t);
+			}
+
+			for (Iterator<?> iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
 				PatrolType type = (PatrolType) iterator.next();
 				s.saveOrUpdate(type);
+				for (PatrolTransportType tt : type.getTransportTypes()){
+					s.saveOrUpdate(tt);
+				}
 			}
 			s.getTransaction().commit();
+			toDelete.clear();
 			setChangesMade(false);
 			return true;
 		}catch (Exception ex){
