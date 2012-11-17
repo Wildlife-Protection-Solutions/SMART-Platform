@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -59,6 +60,8 @@ import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -79,10 +82,12 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private TableViewer tableViewer;
 	private TeamSorter sorter ; 
 	private Button btnDisable;
+	private Button btnDelete;
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
 	private WritableList teams = null;
+	private HashSet<Team> toDelete = new HashSet<Team>();
 	private PatrolMandate[] mandates = null;
 
 	public static Color gray = null;
@@ -192,16 +197,21 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		sorter = new TeamSorter();
 		tableViewer.setComparator(sorter);
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Team team = (Team)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+				if (team == null){
+					btnDisable.setEnabled(false);
+					btnDelete.setEnabled(false);
+					return;
+				}
 				if (team.getIsActive()){
 					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 				}else{
 					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 				}
 				btnDisable.setEnabled(true);
+				btnDelete.setEnabled(true);
 			}
 		});
 		Composite composite = new Composite(container, SWT.NONE);
@@ -232,9 +242,44 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				disableTeam(btnDisable.getText().equals(DialogConstants.ENABLE_BUTTON_TEXT));
 			}
 		});
+		
+		btnDelete = new Button(composite, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+				false, 1, 1));
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setEnabled(false);
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteTeam();
+			}
+		});
 
 		setMessage("Manage the list of patrol teams.");
 		return container;
+	}
+	
+	private void deleteTeam(){
+		Team team = (Team ) ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		if (team == null){
+			return;
+		}
+
+		try{
+			if (team.getUuid() != null){
+				if (DeleteManager.canDelete(team, getSession())){
+					teams.remove(team);
+					toDelete.add(team);
+					setChangesMade(true);
+				}
+			}else{
+				teams.remove(team);
+			}
+				
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), "Could not delete team: " + team.getName(), ex);
+		}
+		tableViewer.refresh();
 	}
 
 	/* (non-Javadoc)
@@ -245,7 +290,12 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		Session s = getSession();
 		try {
 			s.beginTransaction();
-			for (Iterator iterator = teams.iterator(); iterator.hasNext();) {
+			
+			for (Team t : toDelete){
+				s.delete(t);
+			}
+			
+			for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
 				Team team = (Team) iterator.next();
 				s.saveOrUpdate(team);
 				
@@ -263,6 +313,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 			}
 			s.getTransaction().commit();
+			toDelete.clear();
 			setChangesMade(false);
 			return true;
 		} catch (Exception ex) {

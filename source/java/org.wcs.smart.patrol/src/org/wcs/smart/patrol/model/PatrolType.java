@@ -154,10 +154,10 @@ public class PatrolType {
 	 * 
 	 * @return list of transport types associated with patrol types
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade={CascadeType.ALL}, orphanRemoval=true)
+	@OneToMany(fetch = FetchType.LAZY) //, cascade={CascadeType.}, orphanRemoval=true)
 	@JoinColumns({
-		@JoinColumn(name="patrol_type", referencedColumnName="patrol_type"),
-		@JoinColumn(name="ca_uuid", referencedColumnName="ca_uuid")
+		@JoinColumn(name="patrol_type", referencedColumnName="patrol_type", insertable = false, updatable = false),
+		@JoinColumn(name="ca_uuid", referencedColumnName="ca_uuid", insertable = false, updatable = false)
 	})
 	public List<PatrolTransportType> getTransportTypes(){
 		return this.transportTypes;

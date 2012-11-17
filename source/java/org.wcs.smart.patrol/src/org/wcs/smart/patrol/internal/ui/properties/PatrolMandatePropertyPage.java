@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.collections.comparators.NullComparator;
@@ -53,6 +54,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -73,10 +76,12 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private TableViewer tableViewer;
 	private MandateSorter sorter ; 
 	private Button btnDisable;
+	private Button btnDelete;
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
 	private WritableList mandates = null;
+	private HashSet<PatrolMandate> toDelete = new HashSet<PatrolMandate>();
 	
 	private static Color gray = null;
 	private static Color black = null;
@@ -152,11 +157,17 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				PatrolMandate md = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+				if (md == null){
+					btnDisable.setEnabled(false);
+					btnDelete.setEnabled(false);
+					return;
+				}
 				if (md.getIsActive()){
 					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 				}else{
 					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 				}
+				btnDelete.setEnabled(true);
 				btnDisable.setEnabled(true);
 			}
 		});
@@ -188,6 +199,17 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				disableMandate(btnDisable.getText().equals(DialogConstants.ENABLE_BUTTON_TEXT));
 			}
 		});
+		
+		btnDelete = new Button(composite, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setEnabled(false);
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteMandate();
+			}
+		});
 
 		setMessage("Manage the list of mandates associated with a patrol.");
 		return container;
@@ -201,14 +223,22 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		Session s = getSession();
 		try {
 			s.beginTransaction();
-			for (Iterator iterator = mandates.iterator(); iterator.hasNext();) {
+			for (PatrolMandate m : toDelete){
+				s.delete(m);
+			}
+			
+			for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
 				PatrolMandate pm = (PatrolMandate) iterator.next();
 				s.saveOrUpdate(pm);
 			}
 			s.getTransaction().commit();
+			toDelete.clear();
 			setChangesMade(false);
 			return true;
 		} catch (Exception ex) {
+			if (s.getTransaction().isActive()){
+				s.getTransaction().rollback();
+			}
 			SmartPatrolPlugIn.displayLog(
 					"Error saving patrol mandate updates. " + ex.getMessage(),
 					ex);
@@ -227,6 +257,31 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		mandates.add(mandate);
 		
 		tableViewer.refresh();
+	}
+	
+	private void deleteMandate(){
+		PatrolMandate mandate = (PatrolMandate) ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		if (mandate == null){
+			return;
+		}
+
+		try{
+			if (mandate.getUuid() != null){
+				if (DeleteManager.canDelete(mandate, getSession())){
+					mandates.remove(mandate);
+					toDelete.add(mandate);
+					setChangesMade(true);
+				}
+			}else{
+				mandates.remove(mandate);
+			}
+				
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(getShell(), "Could not delete mandate: " + mandate.getName(), ex);
+		}	
+		
+		tableViewer.refresh();
+		
 	}
 	
 	/**

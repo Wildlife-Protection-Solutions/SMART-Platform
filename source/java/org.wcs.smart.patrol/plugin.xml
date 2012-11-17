@@ -561,5 +561,24 @@
             name="Patrol Map Editor">
       </editor>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.advisors.MandateDeleteAdvisor"
+            class="org.wcs.smart.patrol.model.PatrolMandate">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.advisors.StationDeleteAdvisor"
+            class="org.wcs.smart.ca.Station">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.advisors.TeamDeleteAdvisor"
+            class="org.wcs.smart.patrol.model.Team">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.advisors.TransportTypeDeleteAdvisor"
+            class="org.wcs.smart.patrol.model.PatrolTransportType">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>
