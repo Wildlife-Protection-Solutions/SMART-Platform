@@ -100,7 +100,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		lbl = new Label(g, SWT.NONE);
-		lbl.setText("Track Distance and Direction");
+		lbl.setText("Record Distance and Direction");
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		lbl = new Label(container, SWT.NONE);  //spacer
@@ -111,7 +111,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		lbl = new Label(g, SWT.WRAP);
-		lbl.setText("Number of days after which the patrol data are no longer editable.  The vlaue -1 specifies that the patrol data will alway be editable.");
+		lbl.setText("Number of days after which the patrol data are no longer editable.  A value of -1 specifies that the patrol data will always be editable.");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)lbl.getLayoutData()).widthHint = 350;
 		
