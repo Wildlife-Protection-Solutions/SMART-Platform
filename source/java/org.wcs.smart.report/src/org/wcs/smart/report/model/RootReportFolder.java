@@ -38,7 +38,7 @@ public class RootReportFolder implements IAdaptable{
 	/**
 	 * User root folder
 	 */
-	public static final RootReportFolder USER_ROOT_FOLDER = new RootReportFolder("User Reports", false);
+	public static final RootReportFolder USER_ROOT_FOLDER = new RootReportFolder("My Reports", false);
 	
 	private String name;
 	private boolean isShared = false;
