@@ -19,44 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.advisors;
+package org.wcs.smart.patrol.internal.advisors;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.Team;
-
-
+ 
 /**
- * Patrol Mandates can be deleted if they are not used
- * in any patrols and not associated with any teams
- * 
- * @author Emily
+ * Advisor for deleting attributes from the data model.
+ * Validates patrol related uses of attributes.
+ * @author egouge
  *
  */
-public class MandateDeleteAdvisor implements IDeleteAdvisor {
+public class AttributeDMAdvisor implements IDeleteAdvisor {
 
+
+	/**
+	 * <p>
+	 * Validates that no observations
+	 * are associated with the given attribute.
+	 * </p>
+	 * @see org.wcs.smart.ca.datamodel.IDataModelAdvisor#canDelete(org.wcs.smart.ca.datamodel.Attribute, org.hibernate.Session)
+	 */
 	@Override
 	public String canDelete(Object object, Session session) {
-		if (!(object instanceof PatrolMandate)){
-			return "Object not of type PatrolMandate. Can not delete.";
+		if (!(object instanceof Attribute)){
+			return "Object not of type Attribute. Can not delete.";
 		}
-		
-		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult();
-		if (cnt > 0){
-			return cnt + " patrols are associated with the mandate " + ((PatrolMandate)object).getName() + ".  These references must be removed before this mandate can be deleted.";
+		Attribute attribute = (Attribute)object;
+		if (attribute.getUuid() == null ) return null;
+		Criteria query = session.createCriteria(WaypointObservationAttribute.class);
+		query.add(Restrictions.eq("id.attribute", attribute));
+		query.setProjection(Projections.rowCount());
+		long cnt = (Long)query.uniqueResult();
+		if (cnt == 0){
+			return null;
 		}
-		
-		cnt = (Long) session.createCriteria(Team.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult();
-		if (cnt > 0){
-			return cnt + " teams are associated with the mandate " + ((PatrolMandate)object).getName() + ".  These references must be removed before this mandate can be deleted.";
-		}
-		
-		return null;
+		return "The attribute is associated in " + cnt + " observations.  These observations must be removed before the attribute can be deleted.";
 	}
-
 }

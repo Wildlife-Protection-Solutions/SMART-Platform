@@ -1,0 +1,68 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.patrol.internal.advisors;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
+
+/**
+ * Advisor for deleting attributes associate
+ * with a specific category from the data model
+ * Validates patrol related uses of this category/attribute.
+ * @author egouge
+ *
+ */
+public class CategoryAttributeDMAdvisor implements IDeleteAdvisor{
+
+	/**
+	 * <p>Validates that no observations
+	 * have both the given category and given attribute or
+	 * a child of the category and the given attribute
+	 * </p>
+	 * @see org.wcs.smart.ca.datamodel.IDataModelAdvisor#canDelete(org.wcs.smart.ca.datamodel.CategoryAttribute, org.hibernate.Session)
+	 */
+	@Override
+	public String canDelete(Object object, Session session) {
+		if (!(object instanceof CategoryAttribute)){
+			return "Object not of type CategoryAttribute. Can not delete.";
+		}
+		CategoryAttribute categoryAttribute = (CategoryAttribute)object;
+		if (categoryAttribute.getCategory().getUuid() == null 
+				|| categoryAttribute.getAttribute().getUuid() == null ){
+			return null;
+		}
+		Query query = session.createQuery("" +
+				"SELECT count(*) FROM WaypointObservation wo join wo.attributes woa join wo.category as cat " +
+				"WHERE cat.hkey like :categoryhkey and woa.id.attribute = :attribute");
+		query.setParameter("categoryhkey", categoryAttribute.getCategory().getHkey() + "%");
+		query.setParameter("attribute", categoryAttribute.getAttribute());
+		long cnt = ((Long)query.list().get(0));
+		if (cnt != 0){
+			return "The category/attribute relationship is used associated with " + cnt + " observations.  These observations must be removed before the attribute can be deleted.";
+		}
+		return null;
+	}
+
+	
+}

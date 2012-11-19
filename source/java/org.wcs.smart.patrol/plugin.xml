@@ -564,20 +564,40 @@
    <extension
          point="org.wcs.smart.ca.deleteAdvisor">
       <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.advisors.MandateDeleteAdvisor"
+            advisor="org.wcs.smart.patrol.internal.advisors.MandateDeleteAdvisor"
             class="org.wcs.smart.patrol.model.PatrolMandate">
       </DeleteAdvisor>
       <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.advisors.StationDeleteAdvisor"
+            advisor="org.wcs.smart.patrol.internal.advisors.StationDeleteAdvisor"
             class="org.wcs.smart.ca.Station">
       </DeleteAdvisor>
       <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.advisors.TeamDeleteAdvisor"
+            advisor="org.wcs.smart.patrol.internal.advisors.TeamDeleteAdvisor"
             class="org.wcs.smart.patrol.model.Team">
       </DeleteAdvisor>
       <DeleteAdvisor
-            advisor="org.wcs.smart.patrol.advisors.TransportTypeDeleteAdvisor"
+            advisor="org.wcs.smart.patrol.internal.advisors.TransportTypeDeleteAdvisor"
             class="org.wcs.smart.patrol.model.PatrolTransportType">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.internal.advisors.CategoryDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Category">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.internal.advisors.AttributeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Attribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.internal.advisors.CategoryAttributeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.CategoryAttribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.internal.advisors.AttributeTreeNodeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.internal.advisors.AttributeListItemDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeListItem">
       </DeleteAdvisor>
    </extension>
 

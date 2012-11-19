@@ -19,37 +19,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.advisors;
+package org.wcs.smart.patrol.internal.advisors;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
-import org.wcs.smart.patrol.model.Patrol;
-
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
- * STations can be deleted if they are not used
- * in any patrols.
+ * Advisor for deleting list items
+ * from a list attribute.
+ * Validates patrol related uses of list items.
  * 
- * @author Emily
+ * @author egouge
  *
  */
-public class StationDeleteAdvisor implements IDeleteAdvisor {
+public class AttributeListItemDMAdvisor implements IDeleteAdvisor {
 
+
+	/**
+	 * <p>
+	 * Validates that that attribute list item
+	 * is not used in any observations.
+	 * <p>
+	 * @see org.wcs.smart.ca.datamodel.IDataModelAdvisor#canDelete(org.wcs.smart.ca.datamodel.AttributeListItem, org.hibernate.Session)
+	 */
 	@Override
 	public String canDelete(Object object, Session session) {
-		if (!(object instanceof Station)){
-			return "Object not of type Station. Can not delete.";
+		if (!(object instanceof AttributeListItem)){
+			return "Object not of type AttributeListItem. Can not delete.";
 		}
-		
-		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("station", object)).setProjection(Projections.rowCount()).uniqueResult();
+		AttributeListItem item = (AttributeListItem)object;
+		if (item.getUuid() == null) return null;
+		Criteria query = session.createCriteria(WaypointObservationAttribute.class);
+		query.add(Restrictions.eq("attributeListItem", item));
+		query.setProjection(Projections.rowCount());
+		long cnt = (Long)query.uniqueResult();
 		if (cnt == 0){
 			return null;
-		}else{
-			return cnt + " patrols are associated with the station " + ((Station)object).getName() + ".  These references must be removed before this station can be deleted.";
 		}
+		return "Attribute list item is associated with " + cnt + " observations.  These observations must be removed before the attribute list item can be deleted.";
+
 	}
 
 }
+
