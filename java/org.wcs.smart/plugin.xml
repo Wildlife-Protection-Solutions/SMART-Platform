@@ -761,6 +761,18 @@
             advisor="org.wcs.smart.internal.ca.advisors.RankDeleteAdvisor"
             class="org.wcs.smart.ca.Rank">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.internal.ca.advisors.CategoryDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Category">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.internal.ca.advisors.AttributeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Attribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.internal.ca.advisors.AttributeTreeNodeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
+      </DeleteAdvisor>
    </extension>
 
 </plugin>

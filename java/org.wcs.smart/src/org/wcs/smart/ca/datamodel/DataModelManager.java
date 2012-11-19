@@ -22,13 +22,14 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 
 /**
  * A class for managing the data model.
@@ -57,12 +58,7 @@ public class DataModelManager {
 	 * Registered change listeners
 	 */
 	private List<IDataModelListener> changeListeners = new ArrayList<IDataModelListener>();
-	
-	/*
-	 * Registered advisors 
-	 */
-	private List<IDataModelAdvisor> advisors = new ArrayList<IDataModelAdvisor>();
-	
+
 	
 	/**
 	 * Creates a new data model manager
@@ -101,29 +97,6 @@ public class DataModelManager {
 		}
 	}
 	
-	/**
-	 * Adds a data model advisor
-	 * @param advisor 
-	 */
-	public void addDataModelAdvisor(IDataModelAdvisor advisor){
-		this.advisors.add(advisor);
-	}
-	
-	/**
-	 * Removes a data model advisor
-	 * @param advisor
-	 */
-	public void removeDataModelAdvisor(IDataModelAdvisor advisor){
-		this.advisors.remove(advisor);
-	}
-	
-	/**
-	 * @return an unmodifiable list of registered advisors
-	 */
-	public List<IDataModelAdvisor> getAdvisors(){
-		return Collections.unmodifiableList(advisors);
-	}
-	
 	private void cancelWork(String message){
 		MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Cancelled", message);
 	}
@@ -141,21 +114,24 @@ public class DataModelManager {
 	 * not be removed.
 	 */
 	public boolean validateDelete(Category category, IProgressMonitor monitor, Session session){
-		monitor.beginTask("Delete Category : " + category.getFullCategoryName(), advisors.size() + 1);
+		monitor.beginTask("Delete Category : " + category.getFullCategoryName(), 1);
 		monitor.subTask("Verifying delete");
 	
-		for (IDataModelAdvisor advisor : advisors){
-			String canDelete = advisor.canDelete(category, session);
-			if (canDelete != null){
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Data Model Delete Error", "Category '" + category.getFullCategoryName() + "' could not be deleted.  Please resolve the following errors and try again:\n\n  -" + canDelete);
+		try{
+			if (!DeleteManager.canDelete(category, session)){
 				return false;
 			}
-			monitor.worked(1);
-			if (monitor.isCanceled()){
-				cancelWork("Delete cancelled. Category " + category.getFullCategoryName() + " not deleted.");
-				return false;
-			}
+		}catch (Exception ex){
+			SmartPlugIn.log("Error verifying delete of category " + category.getFullCategoryName() , ex);
+			cancelWork("Error verifying delete of category " + category.getFullCategoryName() + ": " + ex.getMessage());
+			return false;
 		}
+		
+		if (monitor.isCanceled()){
+			cancelWork("Delete cancelled. Category " + category.getFullCategoryName() + " not deleted.");
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -173,20 +149,25 @@ public class DataModelManager {
 	 * not be removed.
 	 */
 	public boolean validateDelete(Attribute attribute, IProgressMonitor monitor, Session session){
-		monitor.beginTask("Delete Attribute: " + attribute.getName(), advisors.size() + 1);
+		monitor.beginTask("Delete Attribute: " + attribute.getName(), 1);
 		monitor.subTask("Verifying delete");
-		for (IDataModelAdvisor advisor : advisors){
-			String canDelete = advisor.canDelete(attribute, session);
-			if (canDelete != null){
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Data Model Delete Error", "Attribute '" + attribute.getName() + "' could not be deleted.  Please resolve the following errors and try again:\n\n  -" + canDelete);
+		
+		try{
+			if (!DeleteManager.canDelete(attribute, session)){
 				return false;
 			}
-			monitor.worked(1);
-			if (monitor.isCanceled()){
-				cancelWork("Delete cancelled. Attribute " + attribute.getName() + " not deleted.");
-				return false;
-			}
+		}catch (Exception ex){
+			SmartPlugIn.log("Error verifying delete of attribute " + attribute.getName() , ex);
+			cancelWork("Error verifying delete of attribute " + attribute.getName() + ": " + ex.getMessage());
+			return false;
 		}
+		
+		monitor.worked(1);
+		if (monitor.isCanceled()){
+			cancelWork("Delete cancelled. Attribute " + attribute.getName() + " not deleted.");
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -206,21 +187,25 @@ public class DataModelManager {
 	 */
 	public boolean validateDelete(CategoryAttribute categoryAttribute, IProgressMonitor monitor, Session session){
 		String key = categoryAttribute.getCategory().getName() + "/" + categoryAttribute.getAttribute().getName();
-		monitor.beginTask("Delete Category/Attribute: " + key, advisors.size() + 1);
+		monitor.beginTask("Delete Category/Attribute: " + key, 1);
 		monitor.subTask("Verifying delete");
-		for (IDataModelAdvisor advisor : advisors){
-			String canDelete = advisor.canDelete(categoryAttribute, session);
-			if (canDelete != null){
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Data Model Delete Error", "Category/Attribute '" + key + "' could not be deleted.  Please resolve the following errors and try again:\n\n  -" + canDelete);
+		
+		try{
+			if (!DeleteManager.canDelete(categoryAttribute, session)){
 				return false;
 			}
-			monitor.worked(1);
-			
-			if (monitor.isCanceled()){
-				cancelWork("Delete cancelled. Category/Attribute " +  key + " not deleted.");
-				return false;
-			}
+		}catch (Exception ex){
+			SmartPlugIn.log("Error verifying delete of category/attribute" , ex);
+			cancelWork("Error verifying delete of categoryAttribute: " + ex.getMessage());
+			return false;
 		}
+		
+		monitor.worked(1);
+		if (monitor.isCanceled()){
+			cancelWork("Delete cancelled. Category/Attribute " +  key + " not deleted.");
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -240,20 +225,23 @@ public class DataModelManager {
 	 */
 	public boolean validateDelete(AttributeListItem listItem, IProgressMonitor monitor, Session session){
 
-		monitor.beginTask("Delete Attribute List Item: " + listItem.getName(), advisors.size() + 1);
+		monitor.beginTask("Delete Attribute List Item: " + listItem.getName(), 1);
 		monitor.subTask("Verifying delete");
-		for (IDataModelAdvisor advisor : advisors){
-			String canDelete = advisor.canDelete(listItem, session);
-			if (canDelete != null){
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Data Model Delete Error", "Attribute list item '" + listItem.getName() + "' could not be deleted.  Please resolve the following errors and try again:\n\n  -" + canDelete);
+		try{
+			if (!DeleteManager.canDelete(listItem, session)){
 				return false;
 			}
-			monitor.worked(1);
-			if (monitor.isCanceled()){
-				cancelWork("Delete cancelled. Attribute list item " + listItem.getName() + " not deleted.");
-				return false;
-			}
+		}catch (Exception ex){
+			SmartPlugIn.log("Error verifying delete of listitem " + listItem.getName() , ex);
+			cancelWork("Error verifying delete of listItem " + listItem.getName() + ": " + ex.getMessage());
+			return false;
 		}
+		monitor.worked(1);
+		if (monitor.isCanceled()){
+			cancelWork("Delete cancelled. Attribute list item " + listItem.getName() + " not deleted.");
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -272,19 +260,22 @@ public class DataModelManager {
 	 * not be removed.
 	 */
 	public boolean validateDelete(AttributeTreeNode node, IProgressMonitor monitor, Session session){
-		monitor.beginTask("Delete Attribute Tree Node: " + node.getName(), advisors.size() + 1);
+		monitor.beginTask("Delete Attribute Tree Node: " + node.getName(), 1);		
 		monitor.subTask("Verifying delete");
-		for (IDataModelAdvisor advisor : advisors){
-			String canDelete = advisor.canDelete(node, session);
-			if (canDelete != null){
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Data Model Delete Error", "Attribute tree node '" + node.getName() + "' could not be deleted.  Please resolve the following errors and try again:\n\n  -" + canDelete);
+		
+		try{
+			if (!DeleteManager.canDelete(node, session)){
 				return false;
 			}
-			monitor.worked(1);
-			if (monitor.isCanceled()){
-				cancelWork("Delete cancelled. Attribute tree node " + node.getName() + " not deleted.");
-				return false;
-			}
+		}catch (Exception ex){
+			SmartPlugIn.log("Error verifying delete of tree node " + node.getName() , ex);
+			cancelWork("Error verifying delete of tree node " + node.getName() + ": " + ex.getMessage());
+			return false;
+		}
+		monitor.worked(1);
+		if (monitor.isCanceled()){
+			cancelWork("Delete cancelled. Attribute tree node " + node.getName() + " not deleted.");
+			return false;
 		}
 		return true;
 	}
