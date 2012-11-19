@@ -773,6 +773,10 @@
             advisor="org.wcs.smart.internal.ca.advisors.AttributeTreeNodeDMAdvisor"
             class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.internal.ca.advisors.EmployeeDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
    </extension>
 
 </plugin>
