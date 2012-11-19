@@ -599,6 +599,10 @@
             advisor="org.wcs.smart.patrol.internal.advisors.AttributeListItemDMAdvisor"
             class="org.wcs.smart.ca.datamodel.AttributeListItem">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.patrol.internal.advisors.EmployeeDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
    </extension>
 
 </plugin>

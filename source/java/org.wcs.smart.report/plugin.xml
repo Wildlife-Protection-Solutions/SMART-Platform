@@ -785,4 +785,11 @@
             class="org.wcs.smart.report.export.internal.ReportDefintionExporter">
       </exporter>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.report.internal.advisor.EmployeeDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
+   </extension>
 </plugin>

@@ -875,5 +875,12 @@
             class="org.wcs.smart.query.export.GridTiffImageExporter">
       </Exporter>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.query.internal.advisor.EmployeeDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>
