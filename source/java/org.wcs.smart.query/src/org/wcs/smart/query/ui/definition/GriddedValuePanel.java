@@ -140,6 +140,9 @@ public class GriddedValuePanel {
 					}
 				}
 			}
+			if (defaultP==null){
+				defaultP=ps.get(0);
+			}
 			if (query.getCoordinateReferenceSystem() != null) {
 				
 				boolean found = false;
