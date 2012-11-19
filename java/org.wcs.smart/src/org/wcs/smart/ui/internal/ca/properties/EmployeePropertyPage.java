@@ -34,6 +34,7 @@ import javax.swing.event.ChangeListener;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -59,10 +60,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
 import org.wcs.smart.ui.internal.ca.ImportEmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -202,6 +209,16 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		composite.setLayout(new FillLayout(SWT.HORIZONTAL));
 		
+		Button btnNew = new Button(composite, SWT.NONE);
+		btnNew.setText("Create New ...");
+		btnNew.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				createNewEmployee();
+			}
+			
+		});	
+		
 		final Button btnEdit = new Button(composite, SWT.NONE);
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setToolTipText("Edit the selected employee properties.");
@@ -212,27 +229,28 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		btnEdit.setEnabled(false);
+		
+		final Button btnDelete = new Button(composite, SWT.NONE);
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setToolTipText("Delete the selected employee.");
+		btnDelete.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteEmployee();
+			}
+		});
+		btnDelete.setEnabled(false);
+		
 		tblEmployee.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (!tblEmployee.getSelection().isEmpty()){
-					btnEdit.setEnabled(true);
-				}else{
-					btnEdit.setEnabled(false);
-				}
+				btnEdit.setEnabled( !tblEmployee.getSelection().isEmpty() );
+				btnDelete.setEnabled( !tblEmployee.getSelection().isEmpty() );
 			}
 		});
 		
-		Button btnNew = new Button(composite, SWT.NONE);
-		btnNew.setText("Create New ...");
-		btnNew.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				createNewEmployee();
-			}
-			
-		});	
+	
 		Button btnImport = new Button(composite, SWT.NONE);
 		btnImport.setText("Import ...");
 		btnImport.addSelectionListener(new SelectionAdapter(){
@@ -303,6 +321,46 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		Employee e = (Employee)sec.getFirstElement();
 		EmployeeDialog dia = new EmployeeDialog(getShell(), e, ca, getAgencies(), getSession());
 		dia.open();		
+		tblEmployee.refresh();
+	}
+	
+	/**
+	 * deletes selected employee
+	 */
+	private void deleteEmployee(){
+		/* get employee to edit */
+		IStructuredSelection sec = (IStructuredSelection)tblEmployee.getSelection();
+		if (sec.isEmpty()){
+			return;
+		}
+		Employee e = (Employee)sec.getFirstElement();
+		
+		if (!MessageDialog.openConfirm(getShell(), "Delete Employee", "Are you sure you want to delete the employee " + e.getLabel() + ".  This action cannot be undone.")){
+			return;
+		}
+		Session s = getSession();
+		Transaction tx = s.beginTransaction();
+		try{
+			if (!DeleteManager.canDelete(e, s)){
+				tx.rollback();
+				return;
+			}
+			s.delete(e);
+			employees.remove(e);
+			tx.commit();
+		}catch (Exception ex){
+			try{
+				tx.rollback();
+			}catch (Exception ex2){
+				SmartPlugIn.log("Error rolling back transaction", ex2);
+			}
+			SmartPlugIn.displayLog(getShell(), "Can not delete employee " + e.getLabel() + ".\n\n" + ex.getMessage(), ex);			
+		}
+		
+		if (e.equals(SmartDB.getCurrentEmployee())){
+			//restart
+			PlatformUI.getWorkbench().restart();
+		}
 		tblEmployee.refresh();
 	}
 
@@ -604,7 +662,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			int width = 0;
 			Point extent = gc.textExtent(column.name);
 			width = extent.x;
-			for (Iterator<Employee> iterator = EmployeePropertyPage.this.employees.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = EmployeePropertyPage.this.employees.iterator(); iterator.hasNext();) {
 				Employee e = (Employee) iterator.next();
 				String str = getText(e);
 				if (str != null){
