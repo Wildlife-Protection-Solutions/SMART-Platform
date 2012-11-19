@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.advisors;
+package org.wcs.smart.patrol.internal.advisors;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;

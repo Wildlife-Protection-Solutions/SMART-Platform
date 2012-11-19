@@ -19,35 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.advisors;
+package org.wcs.smart.patrol.internal.advisors;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.model.WaypointObservation;
 
 /**
- * Transport type can be deleted if not associated with
- * any patrol legs
- * @author Emily
+ * Advisor for deleting categories from the data model.
+ * Validates patrols not using the category.
+ * 
+ * @author egouge
  *
  */
-public class TransportTypeDeleteAdvisor implements IDeleteAdvisor {
+public class CategoryDMAdvisor implements IDeleteAdvisor {
 
+
+	/**
+	 * <p>Validates that no observations
+	 * are made against the given category or any of it's children
+	 * categories.
+	 * </p>
+	 * @see org.wcs.smart.ca.datamodel.IDataModelAdvisor#canDelete(org.wcs.smart.ca.datamodel.Category, org.hibernate.Session)
+	 */
 	@Override
 	public String canDelete(Object object, Session session) {
-		if (!(object instanceof PatrolTransportType)){
-			return "Object not of type PatrolTransportType. Can not delete.";
+		if (!(object instanceof Category)){
+			return "Object not of type Category. Can not delete.";
+		}
+		Category category = (Category)object;
+		if (category.getUuid() == null) return null;
+		Criteria query = session.createCriteria(WaypointObservation.class);
+		query.add(Restrictions.eq("category", category));
+		query.setProjection(Projections.rowCount());
+		long cnt = (Long)query.uniqueResult();
+		if (cnt != 0){
+			return "The category is associated with " + cnt + " observations.  These observations must be removed before the category can be deleted.";
 		}
 		
-		Long cnt = (Long) session.createCriteria(PatrolLeg.class).add(Restrictions.eq("type", object)).setProjection(Projections.rowCount()).uniqueResult();
-		if (cnt == 0){
-			return null;
-		}else{
-			return cnt + " patrols are associated with the transport type " + ((PatrolTransportType)object).getName() + ".  These references must be removed before this transport type can be deleted.";
+		for(Category kid : category.getChildren()){
+			String canDeleteKid = canDelete(kid, session);
+			if (canDeleteKid != null){
+				return canDeleteKid;
+			}
 		}
+		return null;
 	}
-
 }
+
