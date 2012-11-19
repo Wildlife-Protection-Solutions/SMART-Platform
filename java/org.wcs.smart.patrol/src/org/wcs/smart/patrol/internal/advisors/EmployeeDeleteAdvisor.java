@@ -19,47 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query;
+package org.wcs.smart.patrol.internal.advisors;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.ca.datamodel.IDataModelAdvisor;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 
 /**
- * A data model advisor to query patrols.
+ * Delete advisor for determining if an
+ * employee can be deleted.  
+ * Validates if the employee is a member of a patrol
+ * or not.
  * 
  * @author Emily
  *
  */
-public class QueryDataModelAdvisor implements IDataModelAdvisor{
+public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 
 	@Override
-	public String canDelete(Category category, Session session) {
-		return null;
-	}
-
-	@Override
-	public String canDelete(Attribute attribute, Session session) {
-		return null;
-	}
-
-	@Override
-	public String canDelete(CategoryAttribute categoryAttribute, Session session) {
-		return null;
-	}
-
-	@Override
-	public String canDelete(AttributeListItem item, Session session) {
-		return null;
-	}
-
-	@Override
-	public String canDelete(AttributeTreeNode node, Session session) {
-		return null;
+	public String canDelete(Object object, Session session) {
+		if (!(object instanceof Employee)){
+			return "Object not of type Employee. Can not delete.";
+		}
+		Employee e = (Employee)object;
+		if (e.getUuid() == null){
+			return null;
+		}
+		Long cnt = (Long) session.createCriteria(PatrolLegMember.class).add(Restrictions.eq("id.member", e)).setProjection(Projections.rowCount()).uniqueResult();
+		if (cnt == 0){
+			return null;
+		}else{
+			return cnt + " patrols are associated with the employee " + e.getLabel() + ".  These references must be removed before this employee can be removed.";
+		}
 	}
 
 }
