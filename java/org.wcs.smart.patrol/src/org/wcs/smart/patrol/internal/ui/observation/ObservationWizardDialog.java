@@ -45,6 +45,9 @@ public class ObservationWizardDialog extends WizardDialog {
 
 	}
 
+	/**
+	 * Removes the ESC traverse functionality
+	 */
 	@Override
 	public void create() {
 		super.create();
@@ -67,5 +70,15 @@ public class ObservationWizardDialog extends WizardDialog {
 		if (btn != null) {
 			btn.setFocus();
 		}
+	}
+	
+	/**
+	 * Overwrite to keep default button setting
+	 */
+	@Override
+	public void updateButtons() {
+		Button btn = getShell().getDefaultButton();
+		super.updateButtons();
+		getShell().setDefaultButton(btn);
 	}
 }

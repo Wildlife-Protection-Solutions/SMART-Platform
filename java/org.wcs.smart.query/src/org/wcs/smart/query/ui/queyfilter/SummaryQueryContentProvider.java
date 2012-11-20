@@ -23,7 +23,8 @@ package org.wcs.smart.query.ui.queyfilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -201,21 +202,6 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		if (parentElement instanceof RootNode){
 			return ((RootNode)parentElement).getChildren();
 		//}else if (parentElement instanceof AREA FITLER){
-		}else if (parentElement instanceof DataModelItem){
-			if (parentElement == DataModelItem.CATEGORIES){
-					return provider.getChildren(provider.getElements(null)[0]);	
-			}else if (parentElement == DataModelItem.ATTRIBUTES){
-//				DataModel dm = provider.
-				List<Attribute> atts = new ArrayList<Attribute>();
-				for (Attribute a : this.dataModel.getAttributes()){
-					//TODO: check categories and only include attributes with at least one active 
-					//category
-					atts.add(a);
-				}
-				return atts.toArray(new Attribute[atts.size()]);
-				
-			}
-			return null;
 		}else if (parentElement instanceof SummaryDmObject){
 			SummaryDmObject parent = ((SummaryDmObject)parentElement);
 			return getChildren(parent);
@@ -474,7 +460,13 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				//assume data model
 				return results;
 			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
-				Collection<Attribute> atts = dataModel.getAttributes();
+				List<Attribute> atts = dataModel.getAttributes();
+				Collections.sort(atts, new Comparator<Attribute>() {
+					@Override
+					public int compare(Attribute o1, Attribute o2) {
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
@@ -495,7 +487,13 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				//assume data model
 				return results;
 			}else if (type == NodeType.DATAMODEL_GROUPBY_ATTRIBUTES){
-				Collection<Attribute> atts = dataModel.getAttributes();
+				List<Attribute> atts = dataModel.getAttributes();
+				Collections.sort(atts, new Comparator<Attribute>() {
+					@Override
+					public int compare(Attribute o1, Attribute o2) {
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
