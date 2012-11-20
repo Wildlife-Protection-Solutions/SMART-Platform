@@ -132,7 +132,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 
-			List<WaypointObservation> items = new ArrayList<WaypointObservation>();
+			final List<WaypointObservation> items = new ArrayList<WaypointObservation>();
 			for (WaypointObservation wo :ob.getValue()){
 				if (wo.getAttributes() != null){
 					for (WaypointObservationAttribute att: wo.getAttributes()){
@@ -160,6 +160,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 							WaypointObservation wob = null;
 							if (!(((IStructuredSelection)viewer.getSelection()).isEmpty())){
 								wob = (WaypointObservation) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+							}else if (  items.size() == 1){
+								wob = items.get(0);
 							}
 							editCategory(ob.getKey(), wob);	
 						}
@@ -217,7 +219,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		wizard.getContainer().showPage( wizardPage );
 		if (wo != null){
 			//we have a particular observation to edit
-			wizardPage.editWaypointObservation(wo);
+			wizardPage.editObservation(wo);
 		}
 	}
 	

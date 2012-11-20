@@ -85,6 +85,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	private TableViewer attributeTable = null;
 	private WritableList observations;
 	private Button btnUpdate = null;
+	private Button btnAdd;
 	private WaypointObservation editingOb = null;	//observation being edited
 	
 	private List<IAttributeField<?>> attributeFields = null;
@@ -95,6 +96,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	
 	//bold font
 	private Font boldLabelFont = null;
+	private boolean requiresObservation = false;
+	
 	/**
 	 * @param pageName
 	 */
@@ -104,6 +107,17 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		this.index = index;
 	}
 	
+	private void validate(){
+		boolean canComplete = true;
+		if (requiresObservation){
+			canComplete = observations.size() > 0;
+		}
+		
+		((ObservationWizard)getWizard()).setCanFinish(canComplete && getNextPage() instanceof ObservationSummaryWizardPage);
+		setPageComplete(canComplete);
+
+		getWizard().getContainer().getShell().setDefaultButton(btnAdd);
+	}
 
 	@Override
 	public void dispose(){
@@ -129,7 +143,15 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	public void createControl(Composite parent) {
 		this.currentCategory = ((ObservationWizard)getWizard()).getCategoryToProcess(index);
 		catAttributes = findAttributes(currentCategory);
-
+		requiresObservation = false;
+		if (currentCategory.getIsMultiple()){
+			for (Attribute a : catAttributes){
+				if (a.getIsRequired()){
+					requiresObservation = true;
+					break;
+				}
+			}
+		}
 	
 		Label lbl = null;
 		ScrolledComposite scComp = new ScrolledComposite(parent, SWT.V_SCROLL);
@@ -168,7 +190,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		if (!currentCategory.getIsMultiple()){
 			if (currentObservations != null && currentObservations.size() > 0){
 				WaypointObservation ob = currentObservations.iterator().next();
-				editWaypointObservation(ob);
+				editObservation(ob);
 			}
 		}else{
 			//multiple observations
@@ -188,7 +210,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 					updateObservation();
 				}
 			});
-			Button btnAdd = new Button(buttons, SWT.PUSH);
+			btnAdd = new Button(buttons, SWT.PUSH);
 			btnAdd.setText("Add Observation");
 			btnAdd.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
 			btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -214,6 +236,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		}
 		scComp.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		setMessage("Enter the observation attributes for " + currentCategory.getFullCategoryName() + ".  Add multiple rows if required.");
+		validate();
 	}
 	
 	/*
@@ -248,15 +271,11 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				index = 0;
 			}
 			observations.remove(editingOb);
-			editingOb = null;
 			observations.add(index, wo);
-			attributeTable.refresh();
-			btnUpdate.setEnabled(false);
 			((ObservationWizard)getWizard()).setFocusNextButton();
 			((ObservationWizard)getWizard()).setModified();
-			
-			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(null);
-			attributeTable.refresh();
+			clearEditObservation();		
+			validate();
 			return true;
 		}
 		return false;
@@ -270,9 +289,10 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		if (wo != null){
 			observations.add(wo);
 			attributeTable.refresh();
-			btnUpdate.setEnabled(false);
+			clearEditObservation();
 			((ObservationWizard)getWizard()).setFocusNextButton();
 			((ObservationWizard)getWizard()).setModified();
+			validate();
 			return true;
 		}
 		return false;
@@ -346,7 +366,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 				WaypointObservation wo = (WaypointObservation) ((IStructuredSelection)attributeTable.getSelection()).getFirstElement();
 				if (wo != null){
-					editWaypointObservation(wo);
+					editObservation(wo);
 				}
 			}
 		});
@@ -363,7 +383,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 						observations.remove(type);
 					}
 					attributeTable.refresh();
+					clearEditObservation();
 				}	
+				validate();
 			}
 		});
 		btnDelete.setEnabled(false);
@@ -375,14 +397,17 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				btnEdit.setEnabled(!attributeTable.getSelection().isEmpty());
 			}
 		});
+		
+		
 	}
 	/*
 	 * edits a waypoint boservation
 	 */
-	public void editWaypointObservation(WaypointObservation wo){
+	public void editObservation(WaypointObservation wo){
 		editingOb = wo;
 		if (btnUpdate != null){
 			btnUpdate.setEnabled(true);
+			getWizard().getContainer().getShell().setDefaultButton(btnUpdate);
 		}
 		for (IAttributeField<?> field : attributeFields){
 			WaypointObservationAttribute value = (wo.findAttribute(field.getAttribute()));
@@ -394,6 +419,19 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		}
 		if (attributeTable != null){
 			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(wo);
+			attributeTable.refresh();
+		}
+	}
+	
+	/*
+	 * clears the current editing observations
+	 */
+	private void clearEditObservation(){
+		this.editingOb = null;
+		this.btnUpdate.setEnabled(false);
+		getWizard().getContainer().getShell().setDefaultButton(btnAdd);
+		if (attributeTable != null){
+			((AttributeTable.AttributeTableLabelProvider)attributeTable.getLabelProvider()).setEditingObservation(null);
 			attributeTable.refresh();
 		}
 	}
@@ -547,8 +585,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	 */
 	@Override
 	public void beforeShow() {
-		boolean canFinish = getNextPage() instanceof ObservationSummaryWizardPage;
-		((ObservationWizard)getWizard()).setCanFinish(canFinish);
-		getWizard().getContainer().updateButtons();
+		
+		validate();
 	}
 }

@@ -409,7 +409,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 	protected void doSetValue(Object value) {
 		if (value instanceof Waypoint) {
 			this.wp = (Waypoint) value;
-			this.isEditable = this.wp.getObservations().size() == 0;
+			this.isEditable = this.wp.getObservations() == null || this.wp.getObservations().size() == 0;
 			txtFilter.setEditable(isEditable);
 		}
 		super.doSetValue(value);

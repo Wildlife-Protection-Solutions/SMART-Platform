@@ -26,6 +26,7 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -150,7 +151,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 
 		txtText = new Text(dropDownComposite, SWT.NONE);
 		txtText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
+
 		tree = new TreeDropDown(parent.getShell());
 		tree.getTreeViewer().setContentProvider(new AttributeTreeContentProvider(true, false));
 		tree.getTreeViewer().setLabelProvider(new AttributeTreeLabelProvider());
@@ -169,13 +170,18 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		txtText.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				System.out.println("focus lost");
 				validate();
 			}
 			
 			@Override
 			public void focusGained(FocusEvent e) {
-				txtText.selectAll();
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					//TODO: Test on MAC
+					public void run() {
+						txtText.selectAll();
+					}
+				});
 			}
 		});
 		
@@ -337,7 +343,9 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 			txtText.setText("");
 			txtText.setData(null);
 			this.originalValue = null;
+			
 		}
+		this.lastValidSelection = this.originalValue;
 	}
 
 	/**

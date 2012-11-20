@@ -142,7 +142,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		this.children = children;
 	}
 	
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent")
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL})
 	@Where(clause = "is_active")
 	@OrderBy(clause = "node_order")
 	@BatchSize(size=200)

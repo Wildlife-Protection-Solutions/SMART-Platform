@@ -92,7 +92,8 @@ public class GriddedValuePanel {
 				}
 				s.close();
 			}
-			Display.getDefault().asyncExec(new Runnable(){
+			
+			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					if (!lstProjections.getControl().isDisposed()){
@@ -126,8 +127,14 @@ public class GriddedValuePanel {
 		isInitializing = true;
 		lstValues.addElements(query.getValueDropItems());
 		txtGridSize.setText(Double.toString(query.getGridSize()));
+		selectProjection(query);
+		isInitializing = false;
+	}
+	
+	private void selectProjection(GriddedQuery query){
 		
 		try {
+			loadProjections.join();
 			Projection[] values = (Projection[]) lstProjections.getInput();
 			List<Projection> ps = new ArrayList<Projection>();
 			Projection defaultP = null;
@@ -172,7 +179,6 @@ public class GriddedValuePanel {
 			QueryPlugIn.displayLog("Error parsing projection information. "
 					+ ex.getMessage(), ex);
 		}
-		isInitializing = false;
 	}
 
 	/**
