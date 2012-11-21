@@ -26,6 +26,7 @@ import java.io.Serializable;
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -191,7 +192,7 @@ public class CategoryAttribute {
 			
 		}
 		
-		@ManyToOne
+		@ManyToOne(cascade = {CascadeType.ALL})
 		@JoinColumn(name="category_uuid")
 		public Category getCategory() {
 			return category;
@@ -201,7 +202,7 @@ public class CategoryAttribute {
 			this.category = category;
 		}
 		
-		@ManyToOne
+		@ManyToOne(cascade = {CascadeType.ALL})
 		@JoinColumn(name="attribute_uuid")
 		public Attribute getAttribute() {
 			return attribute;

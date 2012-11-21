@@ -60,13 +60,16 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	protected Composite createContent(Composite parent) {
 		caComposite = new CaInfoComposite(parent,  SWT.NONE, ca);
 		
+		Label lbl2 = new Label(caComposite, SWT.HORIZONTAL | SWT.SEPARATOR);
+		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,2,1));
+		
 		Label lbl = new Label(caComposite, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1,1));
 		lbl.setText("Default Language:");
 		
 		Text lblLang = new Text(caComposite, SWT.NONE);
 		lblLang.setEditable(false);
-		lblLang.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false,1,1));
+		lblLang.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false,1,1));
 		String name = ca.getDefaultLanguage().getName();
 		if (name == null){
 			name = ca.getDefaultLanguage().getCode();
@@ -82,7 +85,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		Text txt = new Text(caComposite, SWT.NONE);
 		txt.setEditable(false);
-		txt.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false,1,1));
+		txt.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false,1,1));
 		txt.setText(SmartUtils.getDirectoryPath(ca.getUuid()));
 		
 		caComposite.addChangeListener(new CaInfoComposite.IChangeListener() {
