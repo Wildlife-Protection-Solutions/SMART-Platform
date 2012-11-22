@@ -100,10 +100,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					a.setAttribute((Attribute)getSession().merge(a.getAttribute()));
 
 				}
-				
 			}
 		}
-		
 		this.workingObservations.putAll(observations);
 	}
 	
