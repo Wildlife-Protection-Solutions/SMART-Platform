@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.properties;
 
+import org.wcs.smart.internal.Messages;
+
 
 /**
  * Dialog constants for conservation
@@ -30,10 +32,17 @@ package org.wcs.smart.ui.properties;
  */
 public class DialogConstants {
 
-	public static final String ENABLE_BUTTON_TEXT = "Enable";
-	public static final String DISABLE_BUTTON_TEXT = "Disable";
+	public static final String ENABLE_BUTTON_TEXT = Messages.DialogConstants_EnableButton_Label;
+	public static final String DISABLE_BUTTON_TEXT = Messages.DialogConstants_DisableButton_Label;
 	
-	public static final String EDIT_BUTTON_TEXT = "Edit";
-	public static final String DELETE_BUTTON_TEXT = "Delete";
+	public static final String ENABLEALL_BUTTON_TEXT = Messages.DialogConstants_EnableAllButton_Label;
+	public static final String DISABLEALL_BUTTON_TEXT = Messages.DialogConstants_DisableAllButton_Label;
+	
+	public static final String EDIT_BUTTON_TEXT = Messages.DialogConstants_EditButton_Label;
+	public static final String DELETE_BUTTON_TEXT = Messages.DialogConstants_DeleteButton_Label;
+	
+	public static final String ADD_BUTTON_TEXT = Messages.DialogConstants_AddButton_Label;
+	
+	public static final String SAVE_TEXT = Messages.DialogConstants_SaveButton_Label;
 	
 }

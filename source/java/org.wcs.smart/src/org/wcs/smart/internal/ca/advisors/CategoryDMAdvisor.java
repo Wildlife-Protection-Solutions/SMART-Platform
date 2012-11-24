@@ -24,6 +24,7 @@ package org.wcs.smart.internal.ca.advisors;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Advisor for deleting categories from the data model.
@@ -48,13 +49,13 @@ public class CategoryDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Category)){
-			return "Object not of type Category. Can not delete.";
+			return Messages.CategoryDMAdvisor_Error_NotCategory;
 		}
 		Category category = (Category)object;
 		if (category.getAttributes() != null && category.getAttributes().size() > 0){
-			return "Category cannot be removed until all attributes are also removed.";
+			return Messages.CategoryDMAdvisor_Error_CategoryReferencedByAttributes;
 		}else if (category.getChildren() != null && category.getChildren().size() > 0){
-			return "Category cannot be removed until all children are also removed.";
+			return Messages.CategoryDMAdvisor_Error_CategoryReferencedByChildren;
 		}
 		return null;
 	}

@@ -61,18 +61,18 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	public String[] getTableColumns(String tableName)
 			throws Exception {
 		/* write column listing to file */
-		String sql = "select a.columnname FROM " +
-				"sys.syscolumns a, sys.systables b, sys.sysschemas c " +
-				" WHERE a.referenceid = b.tableid and b.schemaid = c.schemaid and " +
-				"c.schemaname || '.' || b.tablename = '" + 
-				tableName.toUpperCase() + "' " +
-				" AND (a.autoincrementvalue is null or (a.autoincrementvalue is not null and a.columndefault is not null)) " + //not an generated always identity column
-				"order by a.columnnumber";
+		String sql = "select a.columnname FROM " + //$NON-NLS-1$
+				"sys.syscolumns a, sys.systables b, sys.sysschemas c " + //$NON-NLS-1$
+				" WHERE a.referenceid = b.tableid and b.schemaid = c.schemaid and " + //$NON-NLS-1$
+				"c.schemaname || '.' || b.tablename = '" +  //$NON-NLS-1$
+				tableName.toUpperCase() + "' " + //$NON-NLS-1$
+				" AND (a.autoincrementvalue is null or (a.autoincrementvalue is not null and a.columndefault is not null)) " + //not an generated always identity column //$NON-NLS-1$
+				"order by a.columnnumber"; //$NON-NLS-1$
 		
 		@SuppressWarnings("unchecked")
 		List<String> data = getSession().createSQLQuery(sql).list();
 		if (data.size() == 0){
-			throw new IllegalStateException("Could not determine table columns for table " + tableName);
+			throw new IllegalStateException("Could not determine table columns for table " + tableName); //$NON-NLS-1$
 		}
 		
 		return (String[])data.toArray(new String[data.size()]);
@@ -85,7 +85,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	public void writeTableDefinitionFile(String tableName,
 			String[] columns) throws Exception {
 
-		File columnFile = createFileName(getExportLocation(), tableName + ".def");
+		File columnFile = createFileName(getExportLocation(), tableName + ".def"); //$NON-NLS-1$
 		BufferedWriter writer = new BufferedWriter(new FileWriter(columnFile));
 		writer.write(tableName);
 		writer.newLine();
@@ -94,7 +94,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		for (int i = 0; i < columns.length; i ++){
 			record.append(columns[i]);
 			if (i != columns.length - 1){
-				record.append(",");
+				record.append(","); //$NON-NLS-1$
 			}
 		}
 		writer.write(record.toString());
@@ -110,20 +110,20 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 			String conservationAreaProperty) throws Exception {
 		
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT ");
+		query.append("SELECT "); //$NON-NLS-1$
 		for (int i = 0; i < columns.length; i ++){
 			query.append(columns[i]);
 			if (i != columns.length -1){
-				query.append(",");
+				query.append(","); //$NON-NLS-1$
 			}
 		}
-		query.append(" FROM ");
+		query.append(" FROM "); //$NON-NLS-1$
 		query.append(tableName);
-		query.append(" WHERE ");
+		query.append(" WHERE "); //$NON-NLS-1$
 		query.append(conservationAreaProperty);
-		query.append(" = x''" );
+		query.append(" = x''" ); //$NON-NLS-1$
 		query.append(SmartUtils.encodeHex(getConservationArea().getUuid()));
-		query.append("''" );
+		query.append("''" ); //$NON-NLS-1$
 
 		writeQuery(tableName, query.toString());
 	}
@@ -139,36 +139,36 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 			String caPropertyQuery) throws Exception {
 		
 		
-		Query q = getSession().createQuery("from "
-				+ hibernateClass + " a where a"
-				+ caPropertyQuery + " = :ca");
+		Query q = getSession().createQuery("from " //$NON-NLS-1$
+				+ hibernateClass + " a where a" //$NON-NLS-1$
+				+ caPropertyQuery + " = :ca"); //$NON-NLS-1$
 		
 		//convert hql to sql
 		String sql = SmartHibernateManager.toSql(q.getQueryString());
 		
 		//set sql parameter
-		sql = sql.replace("?", " x''" + SmartUtils.encodeHex(getConservationArea().getUuid()) + "''");
+		sql = sql.replace("?", " x''" + SmartUtils.encodeHex(getConservationArea().getUuid()) + "''"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		//find the alias for the first table in the query
-		Pattern pattern = Pattern.compile(".*from\\s+[^\\s,]*\\s([^,\\s]*)[,\\s].*");
+		Pattern pattern = Pattern.compile(".*from\\s+[^\\s,]*\\s([^,\\s]*)[,\\s].*"); //$NON-NLS-1$
 		Matcher matcher = pattern.matcher(sql);
 		matcher.find();
 		String key = matcher.group(1);
 
-		int fromindex = sql.indexOf("from");
+		int fromindex = sql.indexOf("from"); //$NON-NLS-1$
 		
 		//build sql query for exporting data
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT ");
+		query.append("SELECT "); //$NON-NLS-1$
 		for (int i = 0; i < columns.length; i++) {
 			query.append(key);
-			query.append(".");
+			query.append("."); //$NON-NLS-1$
 			query.append(columns[i]);
 			if (i != columns.length - 1) {
-				query.append(",");
+				query.append(","); //$NON-NLS-1$
 			}
 		}
-		query.append(" ");
+		query.append(" "); //$NON-NLS-1$
 		query.append(sql.substring(fromindex));
 
 	
@@ -181,8 +181,8 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	 */
 	@Override
 	public void writeQuery(String tableName, String query){
-		SQLQuery sqlQuery = getSession().createSQLQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" +
-				createFileName(getExportLocation(), tableName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" );
+		SQLQuery sqlQuery = getSession().createSQLQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
+				createFileName(getExportLocation(), tableName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" ); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		sqlQuery.executeUpdate();
 	}

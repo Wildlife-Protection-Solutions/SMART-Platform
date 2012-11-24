@@ -25,9 +25,14 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.wcs.smart.ui.map.MapView;
 
+/**
+ * Smart default map perspective
+ * @author egouge
+ *
+ */
 public class DefaultPerspective implements IPerspectiveFactory {
 
-	public final static String ID = "org.wcs.smart.DefaultPerspective";
+	public final static String ID = "org.wcs.smart.DefaultPerspective"; //$NON-NLS-1$
 	
 	
 	@Override
@@ -36,7 +41,7 @@ public class DefaultPerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(false);
 		
 		layout.addView(MapView.ID, IPageLayout.LEFT, 0.8f, IPageLayout.ID_EDITOR_AREA);
-		layout.addView( "net.refractions.udig.project.ui.layerManager", IPageLayout.LEFT, 0.2f, MapView.ID);
+		layout.addView( "net.refractions.udig.project.ui.layerManager", IPageLayout.LEFT, 0.2f, MapView.ID); //$NON-NLS-1$
 	//	layout.addView(MapView.ID, IPageLayout.RIGHT, 2, TempView.ID);
 		
 		layout.getViewLayout(MapView.ID).setCloseable(false);

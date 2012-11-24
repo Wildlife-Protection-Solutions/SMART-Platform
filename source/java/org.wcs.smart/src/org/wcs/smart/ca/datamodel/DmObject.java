@@ -121,10 +121,9 @@ public class DmObject extends HasLabel{
 	
 	/**
 	 * Finds the name in a given language.
-	 * Will return empty string if name not found.
 	 * 
 	 * @param lang
-	 * @return
+	 * @return the name for the given language or empty string if name not found
 	 */
 	public String findName(Language lang){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
@@ -133,7 +132,7 @@ public class DmObject extends HasLabel{
 				return type.getValue();
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	/**

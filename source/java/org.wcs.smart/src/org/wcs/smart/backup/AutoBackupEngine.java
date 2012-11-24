@@ -39,7 +39,10 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
+
+import com.ibm.icu.text.Collator;
 
 /**
  * Engine responsible for checking if the auto-backup is supposed to run,
@@ -53,29 +56,29 @@ public class AutoBackupEngine {
 	/**
 	 * prefix of backup file names
 	 */
-	private static final String BACKUP_FILENAME_PREFIX = "SMART-DB_BACKUP_";
+	private static final String BACKUP_FILENAME_PREFIX = "SMART-DB_BACKUP_"; //$NON-NLS-1$
 
 	/**
 	 * backup properties file
 	 */
-	private static final String SMART_BACKUP_PROPERTIES_FILE = "smart_backup.properties";
+	private static final String SMART_BACKUP_PROPERTIES_FILE = "smart_backup.properties"; //$NON-NLS-1$
 	
 	/**
 	 * Property name for how often backup should occur
 	 */
-	public static final String PROP_BACKUP_TIMER = "backup_timer";
+	public static final String PROP_BACKUP_TIMER = "backup_timer"; //$NON-NLS-1$
 	/**
 	 * Property name for when backups should be deleted
 	 */
-	public static final String PROP_DELETE_TIMER = "delete_timer";
+	public static final String PROP_DELETE_TIMER = "delete_timer"; //$NON-NLS-1$
 	/**
 	 * Property name for backup location
 	 */
-	public static final String PROP_BACKUP_LOCATION = "backup_location";
+	public static final String PROP_BACKUP_LOCATION = "backup_location"; //$NON-NLS-1$
 	/**
 	 * Property name for last backup time
 	 */
-	public static final String PROP_LASTBACKUP = "last_backup";
+	public static final String PROP_LASTBACKUP = "last_backup"; //$NON-NLS-1$
 
 	/**
 	 * Performs the auto backup
@@ -95,33 +98,33 @@ public class AutoBackupEngine {
 				if(timerIsExpired(properties)){
 					deleteOldFiles(properties);
 						
-					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss"); //$NON-NLS-1$
 					Date date = new Date();
 					File tmp = new File(properties.getProperty(PROP_BACKUP_LOCATION));
 					if(!tmp.exists()){
 						SmartUtils.createDirectory(tmp);
 					}
-					File f = new File(properties.getProperty(PROP_BACKUP_LOCATION) + File.separator + BACKUP_FILENAME_PREFIX + dateFormat.format(date) + ".zip");
+					File f = new File(properties.getProperty(PROP_BACKUP_LOCATION) + File.separator + BACKUP_FILENAME_PREFIX + dateFormat.format(date) + ".zip"); //$NON-NLS-1$
 					try{
 						if(DerbyBackupEngine.backupSystem(f, monitor)){					
 							//do nothing if success
 						}else if (monitor.isCanceled()){
 							shell.getDisplay().syncExec(new Runnable(){
 							    public void run (){    
-							        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process cancelled");
+							        MessageDialog.openError(shell, Messages.AutoBackupEngine_AutoBackupFailed_Dialog_Title, Messages.AutoBackupEngine_AutoBackupCancelled_Dialog_Message);
 							}
 								});
 						}else{
 							shell.getDisplay().syncExec(new Runnable(){
 							    public void run (){    
-							        MessageDialog.openError(shell, "Auto Backup Failed", "Backup process did not complete");
+							        MessageDialog.openError(shell, Messages.AutoBackupEngine_AutoBackupFailed_Dialog_Title, Messages.AutoBackupEngine_AutoBackupDidNotFinish_Dialog_Message);
 							}
 								});
 
 						}
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(shell,
-								"Backup Failed. " + ex.getMessage(), ex);
+								Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
 					}
 				}
 			}
@@ -129,7 +132,7 @@ public class AutoBackupEngine {
 		});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Automatic Backup Failed. " + ex.getMessage(), ex);
+					Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		properties.setProperty(PROP_LASTBACKUP,String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
@@ -148,7 +151,8 @@ public class AutoBackupEngine {
 
 		File dir = new File(properties.getProperty(PROP_BACKUP_LOCATION));
 		  for (File child : dir.listFiles()) {
-		    if (".".equals(child.getName()) || "..".equals(child.getName())) {
+			  if (Collator.getInstance().equals(child.getName(), ".") || //$NON-NLS-1$
+					  Collator.getInstance().equals(child.getName(), "..")){ //$NON-NLS-1$
 		      continue;  // Ignore the self and parent aliases.
 		    }
 		    if(child.lastModified() < cutoffDate.getTime() && child.getName().contains(BACKUP_FILENAME_PREFIX)){
@@ -199,7 +203,7 @@ public class AutoBackupEngine {
 			String location = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY) + SMART_BACKUP_PROPERTIES_FILE;
 		    properties.load(new FileInputStream(location));
 		} catch (IOException e) {
-			SmartPlugIn.log("Error reading backup properties file. \n\n" + e.getMessage(), e);
+			SmartPlugIn.log(Messages.AutoBackupEngine_ErrorReadingPropFile + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
 		}
 		return properties;
 	}
@@ -210,17 +214,13 @@ public class AutoBackupEngine {
 	 * @return true if successful false if the save failed 
 	 */
 	public static boolean setAutoBackupProperties(Properties prop){
-			
 		try {
 			String location = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY) + SMART_BACKUP_PROPERTIES_FILE;
 			prop.store(new FileOutputStream(location), null);
 			return true;
 		} catch (IOException e) {
-			SmartPlugIn.displayLog(null, "Error setting backup properties file. \n\n" + e.getMessage(), e);
+			SmartPlugIn.displayLog(null, Messages.AutoBackupEngine_ErrorWirtingPropFile + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
 			return false;
 		}
-		
 	}
-
-	
 }

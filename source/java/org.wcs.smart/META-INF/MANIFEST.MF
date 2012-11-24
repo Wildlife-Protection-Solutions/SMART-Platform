@@ -29,7 +29,6 @@ Bundle-ClassPath: .,
  lib/opencsv-2.3.jar
 Export-Package: au.com.bytecode.opencsv,
  au.com.bytecode.opencsv.bean,
- org.eclipse.wb.swt,
  org.wcs.smart,
  org.wcs.smart.ca,
  org.wcs.smart.ca.advisors,

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -86,7 +87,7 @@ public class CaInfoComposite extends Composite {
 		Label lblIdentifier = new Label(this, SWT.NONE);
 		GridData data = new GridData(SWT.RIGHT, SWT.CENTER, false,false, 1, 1);
 		lblIdentifier.setLayoutData(data);
-		lblIdentifier.setText("Identifier:");
+		lblIdentifier.setText(Messages.CaInfoComposite_IdLabel);
 		
 		int indent = 8;
 		
@@ -100,7 +101,7 @@ public class CaInfoComposite extends Composite {
 
 		Label lblName = new Label(this, SWT.NONE);
 		lblName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1, 1));
-		lblName.setText("Name:");
+		lblName.setText(Messages.CaInfoComposite_NameLabel);
 
 		
 		txtName = new Text(this, SWT.BORDER);
@@ -114,10 +115,10 @@ public class CaInfoComposite extends Composite {
 		Label lblDescription = new Label(this, SWT.NONE);
 		lblDescription.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
-		lblDescription.setText("Description:");
+		lblDescription.setText(Messages.CaInfoComposite_DescriptionLabel);
 
 		txtDescription = new Text(this, SWT.BORDER);
-		txtDescription.setText("");
+		txtDescription.setText(""); //$NON-NLS-1$
 		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
 		data.horizontalIndent = indent;
 		txtDescription.setLayoutData(data);
@@ -127,7 +128,7 @@ public class CaInfoComposite extends Composite {
 		Label lblDesignation = new Label(this, SWT.NONE);
 		lblDesignation.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
-		lblDesignation.setText("Designation:");
+		lblDesignation.setText(Messages.CaInfoComposite_DesignationLabel);
 
 		txtDesignation = new Text(this, SWT.BORDER);
 		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
@@ -163,18 +164,18 @@ public class CaInfoComposite extends Composite {
 		
 		cdIdentifier.hide();
 		if (txtIdentifier.getText().trim().isEmpty() || txtIdentifier.getText().length() > ConservationArea.MAX_ID_LENGTH) {
-			cdIdentifier.setDescriptionText("A conservation area id must be provided." );
+			cdIdentifier.setDescriptionText(Messages.CaInfoComposite_Error_NoId );
 			cdIdentifier.show();
 			isValid = false;
 		}
 		if (!SmartUtils.isSimpleString(txtIdentifier.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX) ){
-			cdIdentifier.setDescriptionText("A conservation area id can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
+			cdIdentifier.setDescriptionText(Messages.CaInfoComposite_Error_InvalidCharacters + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
 			cdIdentifier.show();
 			isValid = false;
 		}
 		cdName.hide();
 		if (txtName.getText().trim().isEmpty() || txtIdentifier.getText().length() > ConservationArea.MAX_NAME_LENGTH) {
-			cdName.setDescriptionText("The conservation area name must be provided.");
+			cdName.setDescriptionText(Messages.CaInfoComposite_Error_NoName);
 			cdName.show();
 			isValid = false;
 		}

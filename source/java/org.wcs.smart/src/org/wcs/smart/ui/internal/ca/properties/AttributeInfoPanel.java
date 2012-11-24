@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +79,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -149,7 +151,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/* Type */
 		Label lblNewLabel_2 = new Label(this, SWT.NONE);
 		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel_2.setText("Type:");
+		lblNewLabel_2.setText(Messages.AttributeInfoPanel_Type_Label);
 		
 		cmbType = new ComboViewer(this, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
@@ -180,7 +182,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		/* required */
 		Label lblRequired = new Label(this, SWT.NONE);
 		lblRequired.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblRequired.setText("Required:");
+		lblRequired.setText(Messages.AttributeInfoPanel_Required_Label);
 		
 		chRequired = new Button(this, SWT.CHECK);
 		chRequired.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
@@ -201,8 +203,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		Label lblAggregations = new Label(numericComposite, SWT.NONE);
 		lblAggregations.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
-		lblAggregations.setText("Aggregations:");
-		lblAggregations.setToolTipText("Describes how data to be summarized when creating reports.");
+		lblAggregations.setText(Messages.AttributeInfoPanel_Aggregations_Label);
+		lblAggregations.setToolTipText(Messages.AttributeInfoPanel_Aggregations_ToolTip);
 		
 		Composite compAggs = new Composite(numericComposite, SWT.NONE);
 		GridLayout ll = new GridLayout(2, true);
@@ -215,7 +217,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			btnAggs[i] = new Button(compAggs, SWT.CHECK);
 			btnAggs[i].setText(aggs.get(i).getGuiName());
 			btnAggs[i].setData(aggs.get(i));
-			if (createNew && aggs.get(i).getName().equals("sum")){
+			if (createNew && i == 0){
 				btnAggs[i].setSelection(true);
 			}
 			btnAggs[i].setEnabled(canEdit);
@@ -223,7 +225,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		Label lblNewLabel_3 = new Label(numericComposite, SWT.NONE);
 		lblNewLabel_3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel_3.setText("Minimum Value:");
+		lblNewLabel_3.setText(Messages.AttributeInfoPanel_Min_Label);
 		
 		txtMinValue = new Text(numericComposite, SWT.BORDER);
 		txtMinValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -242,7 +244,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		Label lblNewLabel_4 = new Label(numericComposite, SWT.NONE);
 		lblNewLabel_4.setAlignment(SWT.RIGHT);
 //		lblNewLabel_4.setBounds(0, 0, 55, 15);
-		lblNewLabel_4.setText("Maximum Value:");
+		lblNewLabel_4.setText(Messages.AttributeInfoPanel_Max_Label);
 		
 		txtMaxValue = new Text(numericComposite, SWT.BORDER);
 		txtMaxValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -271,7 +273,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		Label lblNewLabel_5 = new Label(textComposite, SWT.NONE);
 //		lblNewLabel_5.setBounds(0, 0, 55, 15);
-		lblNewLabel_5.setText("Regular Expression Validation:");
+		lblNewLabel_5.setText(Messages.AttributeInfoPanel_Regex_Label);
 		
 		txtRegex = new Text(textComposite, SWT.BORDER);
 		txtRegex.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -290,7 +292,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		Label lblValues = new Label(listComposite, SWT.NONE);
 		lblValues.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		//lblValues.setBounds(0, 0, 55, 15);
-		lblValues.setText("Values:");
+		lblValues.setText(Messages.AttributeInfoPanel_ValuesLabel);
 		
 		lstAttributeList = new TableViewer(listComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		Table list = lstAttributeList.getTable();
@@ -315,11 +317,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			
 			Button btnAddList = new Button(buttonPanel, SWT.NONE);
 			btnAddList.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnAddList.setText("Add");
+			btnAddList.setText(DialogConstants.ADD_BUTTON_TEXT);
 			btnAddList.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					AttributeListItem it = new AttributeListItem();
+					@SuppressWarnings("unchecked")
 					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, AttributeInfoPanel.this.lang);
 					int ret = dd.open();
 					if (ret == Window.CANCEL){
@@ -340,6 +343,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				public void widgetSelected(SelectionEvent e) {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					if (it == null) return;
+					@SuppressWarnings("unchecked")
 					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, AttributeInfoPanel.this.lang);
 					int ret = dd.open();
 					if (ret == Window.CANCEL){
@@ -364,14 +368,13 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			
 			btnDeleteListItem = new Button(buttonPanel, SWT.NONE);
 			btnDeleteListItem.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnDeleteListItem.setText("Delete");
+			btnDeleteListItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			btnDeleteListItem.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
 					final AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
-					boolean ret = MessageDialog.openConfirm(getShell(), "Delete", 
-							"Are you sure you want to delete the list item: " + 
-							it.findName(AttributeInfoPanel.this.lang) + "?");
+					boolean ret = MessageDialog.openConfirm(getShell(), Messages.AttributeInfoPanel_Delete_DialogTitle, 
+							MessageFormat.format(Messages.AttributeInfoPanel_Delete_DialogMessage, new Object[]{it.findName(AttributeInfoPanel.this.lang)}));
 					if (!ret){
 						return;
 					}
@@ -451,7 +454,6 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					}
 					Object obj = selection.getFirstElement();
 					
-					int loc = getCurrentLocation();
 					AttributeListItem target = (AttributeListItem)getCurrentTarget();
 					if (target.equals(obj)){
 						return false;
@@ -506,7 +508,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		try {
 			dialog.run(false, true, runnable);		
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), "Error occurred.", ex);
+			SmartPlugIn.displayLog(getShell(), Messages.AttributeInfoPanel_Error_Message, ex);
 		}
 	}
 	
@@ -536,7 +538,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				}catch (Exception ex){
 					error = true;
 					cdMaxValue.show();
-					cdMaxValue.setDescriptionText("Invalid maximum value");
+					cdMaxValue.setDescriptionText(Messages.AttributeInfoPanel_Error_InvalidMaxValue);
 				}
 			}
 			if (txtMinValue.getText().length() > 0){
@@ -545,19 +547,19 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				}catch (Exception ex){
 					error = true;
 					cdMinValue.show();
-					cdMinValue.setDescriptionText("Invalid minimum value");
+					cdMinValue.setDescriptionText(Messages.AttributeInfoPanel_Error_InvalidMinValue);
 				}
 			}
 			if (min != null && max != null && min > max){
 				cdMaxValue.show();
-				cdMaxValue.setDescriptionText("Maximum value cannot be greater than minimum value.");
+				cdMaxValue.setDescriptionText(Messages.AttributeInfoPanel_Error_MaxValueToBig);
 				error = true;
 			}
 		}else if (type.equals(AttributeType.TEXT)){
 			//TODO: validate regex expression
 		}else if (type.equals(AttributeType.LIST)){
 			if (this.attributeList.size() == 0){
-				cdAttList.setDescriptionText("At least one list element must be defined for an attribute of type list.");
+				cdAttList.setDescriptionText(Messages.AttributeInfoPanel_Error_OneListItemRequired);
 				cdAttList.show();
 				error = false;
 				
@@ -565,7 +567,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}else if (type.equals(AttributeType.TREE)){
 			if (this.attTree != null){
 				if (this.attTree.getAttribute().getTree() == null || this.attTree.getAttribute().getTree().size() == 0){
-					cdAttTree.setDescriptionText("At least one tree node must be defined.");
+					cdAttTree.setDescriptionText(Messages.AttributeInfoPanel_Error_OneTreeNodeRequired);
 					cdAttTree.show();
 					error = false;
 				}
@@ -634,8 +636,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 						}
 					}
 				}
-				txtMaxValue.setText("");
-				txtMinValue.setText("");
+				txtMaxValue.setText(""); //$NON-NLS-1$
+				txtMinValue.setText(""); //$NON-NLS-1$
 				if (att.getMaxValue() != null) {
 					txtMaxValue.setText(String.valueOf(att.getMaxValue()));
 				}
@@ -644,7 +646,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				}
 			} else if (att.getType().equals(Attribute.AttributeType.TEXT)) {
 				textComposite.setVisible(true);
-				txtRegex.setText("");
+				txtRegex.setText(""); //$NON-NLS-1$
 				if (att.getRegex() != null) {
 					txtRegex.setText(att.getRegex());
 				}
@@ -775,7 +777,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		@Override
 		public String getText(Object element) {
 			AttributeListItem it = (AttributeListItem) element;
-			return it.findName(AttributeInfoPanel.this.lang) + " [" + it.getKeyId() + "]";
+			return it.findName(AttributeInfoPanel.this.lang) + " [" + it.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 
 		}
 

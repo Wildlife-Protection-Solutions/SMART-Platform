@@ -23,7 +23,7 @@
             class="org.wcs.smart.ui.map.MapView"
             icon="images/icons/etool16/map.png"
             id="org.wcs.smart.ui.map.MapView"
-            name="SMART Map View"
+            name="%mapview.name"
             restorable="false">
       </view>
    </extension>
@@ -32,7 +32,7 @@
       <perspective
             class="org.wcs.smart.DefaultPerspective"
             id="org.wcs.smart.DefaultPerspective"
-            name="SMART">
+            name="%defaultperspective.name">
       </perspective>
    </extension>
    <extension
@@ -42,14 +42,14 @@
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
                id="org.wcs.smart.menu.file"
-               label="File"
-               mnemonic="F">
+               label="%file.menu.label"
+               mnemonic="%file.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.exportCa"
-                  label="Export Conservation Area ..."
-                  mnemonic="a"
+                  label="%exportca.command.label"
+                  mnemonic="%exportca.command.mnemonic"
                   style="push"
-                  tooltip="Exports all data associated with the current conservation area">
+                  tooltip="%exportca.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -69,18 +69,18 @@
             <command
                   commandId="org.wcs.smart.backup"
                   icon="images/icons/etool16/backup.png"
-                  label="Backup System"
-                  mnemonic="B"
+                  label="%backup.command.label"
+                  mnemonic="%backup.command.mnemonic"
                   style="push"
-                  tooltip="Backup the smart database and files.">
+                  tooltip="%backup.command.tooltip">
             </command>
             <command
                   commandId="org.wcs.smart.auto_backup"
                   icon="images/icons/obj16/cog_go.png"
-                  label="Configure Automatic Backup..."
-                  mnemonic="Au"
+                  label="%configurebackup.command.label"
+                  mnemonic="%autobackup.command.mnemonic"
                   style="push"
-                  tooltip="Configure the automatic backup options.">
+                  tooltip="%configurebackup.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -101,10 +101,10 @@
                   commandId="org.wcs.smart.changeUserPassword"
                   icon="images/icons/etool16/changepass.png"
                   id="org.wcs.menu.file.changeuserpassword"
-                  label="Change Password ..."
-                  mnemonic="P"
+                  label="%changeuserpass.command.label"
+                  mnemonic="%changepass.command.mnemonic"
                   style="push"
-                  tooltip="Change your username or password">
+                  tooltip="%changeuserpass.command.tooltip">
             </command>
             <separator
                   name="org.wcs.smart.separator1"
@@ -113,8 +113,9 @@
             <command
                   commandId="org.eclipse.ui.file.export"
                   id="x"
-                  label="Export Map"
-                  style="push">
+                  label="%exportmap.command.label"
+                  style="push"
+                  tooltip="%exportmap.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -131,28 +132,28 @@
             <command
                   commandId="org.wcs.smart.logout"
                   id="org.wcs.menu.file.logout"
-                  label="Logout"
-                  mnemonic="L"
+                  label="%logout.command.label"
+                  mnemonic="%logoutcommand.mnemonic"
                   style="push"
-                  tooltip="logout of the application">
+                  tooltip="%logout.command.tooltip">
             </command>
             <command
                   commandId="org.wcs.smart.exit"
                   id="org.wcs.menu.file.exit"
-                  label="Exit"
-                  mnemonic="x"
+                  label="%exit.command.label"
+                  mnemonic="%exit.command.mnemonic"
                   style="push"
-                  tooltip="exit the application">
+                  tooltip="%exit.command.tooltip">
             </command>
          </menu>
          <menu
                id="org.wcs.smart.menu.ca"
-               label="Conservation Area"
-               mnemonic="C">
+               label="%ca.menu.label"
+               mnemonic="%ca.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.ca.showProperties"
-                  label="Conservation Area Properties ..."
-                  mnemonic="C"
+                  label="%caprop.command.label"
+                  mnemonic="%caprop.command.mnemonic"
                   style="push">
             </command>
             <separator
@@ -161,50 +162,50 @@
             </separator>
             <command
                   commandId="org.wcs.smart.ca.showAgencyPropertyPage"
-                  label="Agency and Rank List ..."
-                  mnemonic="A"
+                  label="%agencyrank.command.label"
+                  mnemonic="%agencyrank.command.mnemonic"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showEmployees"
                   icon="images/icons/etool16/user.png"
-                  label="Employee List ..."
-                  mnemonic="E"
+                  label="%employeelist.command.label"
+                  mnemonic="%employeelist.command.mnemonic"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showStations"
                   icon="images/icons/etool16/station.png"
-                  label="Station List ..."
-                  mnemonic="S"
+                  label="%stationlist.command.label"
+                  mnemonic="%stationlist.command.mnemonic"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showProjection"
-                  label="Manage Projections ..."
-                  mnemonic="P"
+                  label="%manageprojections.command.label"
+                  mnemonic="%manageprojections.command.mnemonic"
                   style="push"
-                  tooltip="Add, Remove, Modify projections available to users">
+                  tooltip="%manageprojections.command.tooltip">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showArea"
                   icon="images/icons/etool16/area_polygon.png"
-                  label="Define Area Boundaries ..."
-                  mnemonic="B"
+                  label="%boundaries.command.label"
+                  mnemonic="%boundaries.command.mnemonic"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.showBasemaps"
                   icon="images/icons/etool16/map.png"
-                  label="Manage Basemaps ..."
-                  mnemonic="m"
+                  label="%basemaps.command.label"
+                  mnemonic="%basemaps.command.mnemonic"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.ca.showDataModel"
                   icon="images/icons/etool16/data_model.png"
-                  label="Data Model ..."
-                  mnemonic="D"
+                  label="%datamodel.command.label"
+                  mnemonic="%datamodel.command.mnemonic"
                   style="push">
             </command>
             <separator
@@ -214,10 +215,10 @@
             <command
                   commandId="org.wcs.smart.ca.delete"
                   icon="images/icons/etool16/delete.png"
-                  label="Delete Conservation Area"
-                  mnemonic="t"
+                  label="%deleteca.command.label"
+                  mnemonic="%deleteca.command.mnemonic"
                   style="push"
-                  tooltip="delete the conservation area from the database">
+                  tooltip="%deleteca.command.tooltip">
             </command>
             <visibleWhen
                   checkEnabled="true">
@@ -230,13 +231,13 @@
          </menu>
          <menu
                id="org.wcs.smart.menu.help"
-               label="Help"
-               mnemonic="H">
+               label="%help.menu.label"
+               mnemonic="%help.menu.mnemonic">
             <command
                   commandId="org.eclipse.ui.help.aboutAction"
                   icon="images/icons/smart16.gif"
-                  label="About Smart"
-                  mnemonic="A"
+                  label="%about.command.label"
+                  mnemonic="%about.command.mnemonic"
                   style="push">
             </command>
          </menu>
@@ -249,8 +250,9 @@
             <command
                   commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective"
                   icon="images/icons/etool16/map.png"
-                  label="Show Map Perspective"
-                  style="push">
+                  label="%showmapperspective.command.label"
+                  style="push"
+                  tooltip="%showmapperspective.command.tooltip">
             </command>
             <separator
                   name="org.wcs.smart.resetSeparator"
@@ -259,8 +261,9 @@
             <command
                   commandId="org.wcs.smart.ui.internal.ResetPerspective"
                   icon="images/icons/etool16/arrow_refresh.png"
-                  label="Reset Windows"
-                  style="push">
+                  label="%resetwindows.command.label"
+                  style="push"
+                  tooltip="%resetwindows.command.tooltip">
             </command>
          </toolbar>
       </menuContribution>
@@ -293,9 +296,9 @@
          <command
                commandId="org.wcs.smart.map.loadBasemap"
                icon="images/icons/elcl16/load_map.png"
-               label="Set Basemap"
+               label="%selectbasemap.command.label"
                style="push"
-               tooltip="Select the basemap to use on the map">
+               tooltip="%selectbasemap.command.tooltip">
          </command>
          <separator
                name="org.wcs.smart.map.separator2"
@@ -304,36 +307,37 @@
          <command
                commandId="org.wcs.smart.map.pan"
                icon="images/icons/elcl16/pan_tool.png"
-               label="Pan"
-               style="radio">
+               label="%pan.command.label"
+               style="radio"
+               tooltip="%pan.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.map.zoom"
                icon="images/icons/elcl16/zoom_tool.png"
-               label="Zoom "
+               label="%zoom.command.label"
                style="radio"
-               tooltip="zoom to various locations on map">
+               tooltip="%zoom.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.map.zoomOut"
                icon="images/icons/elcl16/zoom_out_co.gif"
-               label="Zoom Out"
+               label="%zoomout.command.label"
                style="push"
-               tooltip="zooms the map out">
+               tooltip="%zoomout.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.map.zoomIn"
                icon="images/icons/elcl16/zoom_in_co.gif"
-               label="Zoom In"
+               label="%zoomin.command.label"
                style="push"
-               tooltip="zooms the map int">
+               tooltip="%zoomin.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.map.zoomExtents"
                icon="images/icons/elcl16/zoom_layers.png"
-               label="Zoom to map extents"
+               label="%zoomextents.command.label"
                style="push"
-               tooltip="Zoom to full extents of all layers">
+               tooltip="%zoomextents.command.tooltip">
          </command>
          <separator
                name="org.wcs.smart.map.separator1"
@@ -342,9 +346,9 @@
          <command
                commandId="org.wcs.smart.map.addLayer"
                icon="images/icons/elcl16/layer_add.png"
-               label="Add Layer "
+               label="%addlayer.command.label"
                style="push"
-               tooltip="Add a layer to the map">
+               tooltip="%addlayer.command.tooltip">
          </command>
       </menuContribution>
    </extension>
@@ -391,111 +395,110 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.ca.showProperties"
-            name="Show Conservation Area Properties Page">
+            name="%caprop.command.name">
       </command>
       <command
             id="org.wcs.smart.logout"
-            name="Logout">
+            name="%logout.command.name">
       </command>
       <command
             id="org.wcs.smart.exit"
-            name="Exit">
+            name="%exit.command.name">
       </command>
       <command
             id="org.wcs.smart.ca.showStations"
-            name="Show Station List">
+            name="%stationlist.command.name">
       </command>
       <command
             id="org.wcs.smart.ca.showEmployees"
-            name="Show Employees">
+            name="%employeelist.command.name">
       </command>
       <command
             id="org.wcs.smart.ca.showAgencyPropertyPage"
-            name="Show Agencies and Ranks">
+            name="%agencyrank.command.name">
       </command>
       <command
             id="org.wcs.smart.ca.showDataModel"
-            name="Show Data Model">
+            name="%datamodel.command.name">
       </command>
       <command
             id="org.wcs.smart.ca.showArea"
-            name="Show Areas">
+            name="%boundaries.command.name">
       </command>
       <command
             id="org.wcs.smart.ui.internal.ShowDefaultPerspective"
-            name="Show Default Map Perspective">
+            name="%showmapperspective.command.name">
       </command>
       <command
             defaultHandler="org.eclipse.ui.internal.handlers.ResetPerspectiveHandler"
-            description="Reset the Default Window Layout"
             id="org.wcs.smart.ui.internal.ResetPerspective"
-            name="Reset Perspective">
+            name="%resetwindows.command.name">
       </command>
       <command
             id="org.wcs.smart.ca.delete"
-            name="Delete Conservation Area">
+            name="%deleteca.command.name">
       </command>
       <command
             id="org.wcs.smart.changeUserPassword"
-            name="Change UserName Password">
+            name="%changeuserpass.command.name">
       </command>
       <command
             id="org.wcs.smart.backup"
-            name="Backup System">
+            name="%backup.command.name">
       </command>
       <command
             id="org.wcs.smart.exportCa"
-            name="Export Conservation Area ...">
+            name="%exportca.command.name">
       </command>
       <command
             id="org.wcs.smart.auto_backup"
-            name="Configure Automatic Backup System">
+            name="%configurebackup.command.name">
       </command>
       <command
             id="org.wcs.smart.showBasemaps"
-            name="Show Basemaps">
+            name="%basemaps.command.name">
       </command>
       <command
             id="org.wcs.smart.map.saveMap"
-            name="Saves as Basemap">
+            name="%savebasemap.command.name">
       </command>
       <command
             category="org.wcs.smart.map.commands"
             id="org.wcs.smart.map.pan"
-            name="Pan Map">
+            name="%pan.command.name">
       </command>
       <command
             category="org.wcs.smart.map.commands"
             id="org.wcs.smart.map.zoom"
-            name="Zoom Tool">
+            name="%zoom.command.name">
       </command>
       <command
             id="org.wcs.smart.map.zoomExtents"
-            name="Zoom Extents Tool">
+            name="%zoomextents.command.name">
       </command>
       <command
             id="org.wcs.smart.map.addLayer"
-            name="Add Layer">
+            name="%addlayer.command.name">
       </command>
       <command
             id="org.wcs.smart.map.loadBasemap"
-            name="Load Basemap">
+            name="%selectbasemap.command.name">
       </command>
       <category
             id="org.wcs.smart.map.commands"
-            name="Map Tools">
+            name="%maptools.category.name">
       </category>
       <command
             id="org.wcs.smart.map.zoomIn"
-            name="zoom in">
+            name="%zoomin.command.name">
       </command>
       <command
             id="org.wcs.smart.map.zoomOut"
-            name="zoom out">
+            name="%zoomout.command.name">
       </command>
       <command
             id="org.wcs.smart.ca.showProjection"
-            name="Manager Projections ....">
+            name="%manageprojections.command.name">
       </command>
    </extension>
    <extension
@@ -612,7 +615,7 @@
       <service
             class="org.wcs.smart.udig.catalog.smart.SmartServiceExtension"
             id="org.wcs.smart.udig.catalog.smartService"
-            name="Smart Service">
+            name="%udig.service.name">
       </service>
    </extension>
    <extension
@@ -624,9 +627,9 @@
       <wizardPage
             banner="images/icons/wizban/smart_wiz.png"
             class="org.wcs.smart.udig.catalog.smart.ui.SmartAreaWizardPage"
-            description="Wizard for loading smart area datasets"
-            icon="images/icons/smart128.gif"
-            name="Smart Area Connection Page">
+            description="%addsmartlayer.wizardPage.description"
+            icon="images/icons/smart16.gif"
+            name="%addsmartlayer.wizardPage.name">
       </wizardPage>
    </extension>
    <extension
@@ -748,7 +751,7 @@
       <page
             class="org.wcs.smart.ui.internal.SmartInstallationInfoPage"
             id="org.wcs.smart.ui.internal.SmartInstallationInfoPage"
-            name="Smart Info">
+            name="%smartinfo.about.page.name">
       </page>
    </extension>
    <extension

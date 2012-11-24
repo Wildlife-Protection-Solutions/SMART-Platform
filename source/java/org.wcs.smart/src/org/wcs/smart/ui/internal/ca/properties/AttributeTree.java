@@ -62,6 +62,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -168,10 +169,10 @@ public class AttributeTree {
 		buttonPanel.setLayout(new GridLayout(1, false));
 		
 		final Button btnAdd = new Button(buttonPanel, SWT.NONE);
-		btnAdd.setText("Add");
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAdd.setEnabled(false);
-		btnAdd.setToolTipText("Add category to attribute tree.");
+		btnAdd.setToolTipText(Messages.AttributeTree_AddButton_Tooltip);
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -183,7 +184,7 @@ public class AttributeTree {
 		btnEdit.setEnabled(false);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setToolTipText("Modify selected category.");
+		btnEdit.setToolTipText(Messages.AttributeTree_EditButton_Tooltip);
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -193,7 +194,7 @@ public class AttributeTree {
 		
 		final Button btnDisable = new Button(buttonPanel, SWT.NONE);
 		btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-		btnDisable.setToolTipText("Disable selected category.");
+		btnDisable.setToolTipText(Messages.AttributeTree_DisableButton_ToolTip);
 		btnDisable.setEnabled(false);
 		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDisable.addSelectionListener(new SelectionAdapter(){
@@ -213,8 +214,8 @@ public class AttributeTree {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		final Button btnDisableAll = new Button(buttonPanel, SWT.NONE);
-		btnDisableAll.setText(DialogConstants.DISABLE_BUTTON_TEXT + " All");
-		btnDisableAll.setToolTipText("Disable all categories.");
+		btnDisableAll.setText(DialogConstants.DISABLEALL_BUTTON_TEXT);
+		btnDisableAll.setToolTipText(Messages.AttributeTree_DisableAll_Tooltip);
 		btnDisableAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDisableAll.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -230,8 +231,8 @@ public class AttributeTree {
 		
 		
 		final Button btnEnableeAll = new Button(buttonPanel, SWT.NONE);
-		btnEnableeAll.setText(DialogConstants.ENABLE_BUTTON_TEXT + " All");
-		btnEnableeAll.setToolTipText("Enable all categories.");
+		btnEnableeAll.setText(DialogConstants.ENABLEALL_BUTTON_TEXT); 
+		btnEnableeAll.setToolTipText(Messages.AttributeTree_EnableAll_Tooltip);
 		btnEnableeAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnEnableeAll.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -251,9 +252,9 @@ public class AttributeTree {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		final Button btnDelete = new Button(buttonPanel, SWT.NONE);
-		btnDelete.setText("Delete");
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setEnabled(false);
-		btnDelete.setToolTipText("Delete selected items");
+		btnDelete.setToolTipText(Messages.AttributeTree_Delete_Tooltip);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -302,10 +303,10 @@ public class AttributeTree {
 		StringBuilder itemsToDelete = new StringBuilder();
 		final ArrayList<AttributeTreeNode> toDelete = new ArrayList<AttributeTreeNode>();
 		
-		for (Iterator iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof AttributeTreeNode){
-				itemsToDelete.append(((AttributeTreeNode) x).findName(currentLanguage) + ", ");
+				itemsToDelete.append(((AttributeTreeNode) x).findName(currentLanguage) + ", "); //$NON-NLS-1$
 				toDelete.add(0, (AttributeTreeNode)x);
 			}
 		}
@@ -316,9 +317,9 @@ public class AttributeTree {
 		itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
 				
 				
-		boolean ret = MessageDialog.openConfirm(viewer.getTree().getShell(), "Delete", 
-						"Are you sure you want to delete the node items: " + 
-						itemsToDelete.toString() + "?");
+		boolean ret = MessageDialog.openConfirm(viewer.getTree().getShell(), Messages.AttributeTree_ConfirmDelete_DialogTitle, 
+						Messages.AttributeTree_ConfirmDelete_DialogMessage + 
+						itemsToDelete.toString() + "?"); //$NON-NLS-1$
 		if (!ret){
 			return;
 		}
@@ -358,7 +359,7 @@ public class AttributeTree {
 		try {
 			dialog.run(false, true, runnable);		
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(viewer.getTree().getShell(), "Error occurred.", ex);
+			SmartPlugIn.displayLog(viewer.getTree().getShell(), Messages.AttributeTree_GenericError, ex);
 		}
 	}
 	/*
@@ -375,7 +376,7 @@ public class AttributeTree {
 	 * disable items in the tree
 	 */
 	private void disableItem(TreeViewer viewer, boolean enabled){
-		for (Iterator iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof AttributeTreeNode){
 				disableNode((AttributeTreeNode)x, enabled);	

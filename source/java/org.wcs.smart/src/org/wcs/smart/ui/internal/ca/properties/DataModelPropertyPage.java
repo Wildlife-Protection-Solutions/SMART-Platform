@@ -24,6 +24,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -69,6 +70,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.ui.internal.ca.CategoryDialogPage;
@@ -84,8 +86,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 
-	public static final String ID = "org.wcs.smart.ca.DataModelPropertyPage";
-	
+	private static final String DELETE_DIALOG_TITLE = Messages.DataModelPropertyPage_Delete_DialogTitle;
+
 	/* ui components */
 	private TreeViewer viewer;
 
@@ -111,7 +113,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * Creates new data model property page
 	 */
 	public DataModelPropertyPage(Shell parent){
-		super(parent, "Data Model");		
+		super(parent, Messages.DataModelPropertyPage_Dialog_Title);		
 		//attach aggregations to current session
 		for (Aggregation agg : DataModel.getAggregations()){
 			getSession().update(agg);
@@ -148,11 +150,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	@Override
 	protected boolean validateSave(){
 		if (getErrorMessage() != null){
-			if (!MessageDialog.openQuestion(getShell(), "Close", "Changes have been made that cannot be saved.  Are you sure you want to close?")){
+			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_Close_DialogTitle, Messages.DataModelPropertyPage_Close_DialogMessage)){
 				return false;
 			}
 		}else{
-			MessageDialog md = new MessageDialog(getShell(), "Save Changes?", null, "There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			MessageDialog md = new MessageDialog(getShell(), Messages.DataModelPropertyPage_SaveChanges_DialogTitle, null, Messages.DataModelPropertyPage_SaveChanges_DialogMessage, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();
 			if (ret == 2){
 				//cancel
@@ -259,8 +261,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		btnAddCategory = new Button(buttonPanel, SWT.PUSH);
 		btnAddCategory.setEnabled(false);
-		btnAddCategory.setText("Add Category");
-		btnAddCategory.setToolTipText("Add a new sub-category to the selected category.");
+		btnAddCategory.setText(Messages.DataModelPropertyPage_AddCategory_Button);
+		btnAddCategory.setToolTipText(Messages.DataModelPropertyPage_AddCategory_Tooltip);
 		btnAddCategory.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -270,8 +272,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		btnAddAttribute = new Button(buttonPanel, SWT.PUSH);
 		btnAddAttribute.setEnabled(false);
-		btnAddAttribute.setText("Add Attribute");
-		btnAddAttribute.setToolTipText("Add a new attribute to the selected category.");
+		btnAddAttribute.setText(Messages.DataModelPropertyPage_AddAttribute_Button);
+		btnAddAttribute.setToolTipText(Messages.DataModelPropertyPage_AddAttribute_Tooltip);
 		btnAddAttribute.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -282,7 +284,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		btnDisableElement = new Button(buttonPanel, SWT.NONE);
 		btnDisableElement.setEnabled(false);
 		btnDisableElement.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-		btnDisableElement.setToolTipText("Disabled categories/attributes are not shown when recording data.");
+		btnDisableElement.setToolTipText(Messages.DataModelPropertyPage_Disable_Tooltip);
 		btnDisableElement.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -293,8 +295,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		btnDeleteElement = new Button(buttonPanel, SWT.NONE);
 		btnDeleteElement.setEnabled(false);
-		btnDeleteElement.setText("Delete");
-		btnDeleteElement.setToolTipText("Deletes the selected category/attribute.");
+		btnDeleteElement.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDeleteElement.setToolTipText(Messages.DataModelPropertyPage_Delete_Tooltip);
 		btnDeleteElement.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -305,7 +307,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		
 		Group infoPanel = new Group(rightPanel, SWT.SHADOW_ETCHED_IN);
-		((Group)infoPanel).setText("Properties");
+		((Group)infoPanel).setText(Messages.DataModelPropertyPage_PropertiesGroup_Label);
 		
 		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		infoPanel.setLayout(new GridLayout(1, false));
@@ -342,7 +344,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		btnModifyElement = new Button(infoButtonPanel, SWT.NONE);
 		btnModifyElement.setEnabled(false);
 		btnModifyElement.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnModifyElement.setToolTipText("Edit selected element.");
+		btnModifyElement.setToolTipText(Messages.DataModelPropertyPage_Edit_Tooltip);
 		btnModifyElement.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -355,7 +357,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		bottomComp.setLayout(new GridLayout(1, false));
 		/* import button @ bottom */
 		Button exportButton = new Button(bottomComp, SWT.PUSH);
-		exportButton.setText("Export To XML ...");
+		exportButton.setText(Messages.DataModelPropertyPage_ExportXml_Button);
 		exportButton.addSelectionListener(new SelectionAdapter() {		
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -364,7 +366,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		});
 			
 		viewer.refresh();
-		setMessage("Manage conservation area data model.");
+		setMessage(Messages.DataModelPropertyPage_Dialog_Message);
 		
 		return thisparent;
 	}
@@ -374,8 +376,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 */
 	private void exportXml(){
 		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
-		fd.setFilterNames(new String[]{"Xml File (.xml)"});
-		fd.setFilterExtensions(new String[]{"*.xml"});;
+		fd.setFilterNames(new String[]{Messages.DataModelPropertyPage_XmlFile_FilterName});
+		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
 		
 		String file = fd.open();
 		if (file == null){
@@ -384,7 +386,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 		final File f = new File(file);
 		if (f.exists()){
-			if (!MessageDialog.openQuestion(getShell(), "Overwrite file", "The file " + f.getName() + " exists.  Do you want to overwrite it?")){
+			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_OverwriteFile_DialogTitle, 
+					MessageFormat.format(Messages.DataModelPropertyPage_OverwriteFile_DialogMessage, new Object[]{ f.getName()}))){
 				return;
 			}
 		}
@@ -396,27 +399,27 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try{
-					monitor.beginTask("Exporting data model to xml file...", 2);
+					monitor.beginTask(Messages.DataModelPropertyPage_Progress_ExportingXml, 2);
 					DataModel dm = ((DataModel) viewer.getInput());
-					monitor.subTask("Converting ...");
+					monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
 					org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = DataModelSmartToXmlConverter.convert(dm);
 					monitor.worked(1);
-					monitor.subTask("Writing ...");
+					monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
 					FileOutputStream fout = new FileOutputStream(f);
 					try{
 						XmlSmartDataModelManager.writeDataModel(xml,fout);
 					}finally{
 						fout.close();
 					}
-					MessageDialog.openInformation(getShell(), "Success", "Data model exported successfully");
+					MessageDialog.openInformation(getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
 					monitor.done();
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getShell(),"Error exporting xml data model.", ex);			
+						SmartPlugIn.displayLog(getShell(),Messages.DataModelPropertyPage_Error_XmlExport, ex);			
 					}
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(),"Error exporting xml data model.", ex);
+			SmartPlugIn.displayLog(getShell(),Messages.DataModelPropertyPage_Error_XmlExport, ex);
 		}
 	}
 	
@@ -456,7 +459,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}catch (Exception ex2){}
 			currentTransaction = null;
 			s.close();
-			SmartPlugIn.displayLog(errorShell,"Error saving data model changes.  Please close this dialog and re-open it before continuing. \n\n" + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(errorShell,Messages.DataModelPropertyPage_Error_SavingDataModel + ex.getMessage(), ex);
 			return false;
 		}
 		return true;
@@ -488,14 +491,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		try {
 			dialog.run(false, true, runnable);		
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), "An error has occurred. " + ex.getMessage() + ".\n\nPlease close the data model window and re-open it.", ex);
+			SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Unknown + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			try{
 				if (currentTransaction != null && currentTransaction.isActive()){
 					currentTransaction.rollback();
 					currentTransaction = null;
 				}
 			}catch (Exception ex2){
-				SmartPlugIn.log("Error in data model dialog", ex2);
+				SmartPlugIn.log("Error in data model dialog", ex2); //$NON-NLS-1$
 			}
 			getSession().close();
 		}
@@ -508,7 +511,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (o instanceof Category){
 			final Category cat  = (Category)o;
-			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category : " + cat.getFullCategoryName(getLanguage()));
+			boolean ret = MessageDialog.openConfirm(getShell(), DELETE_DIALOG_TITLE, Messages.DataModelPropertyPage_ConfirmDeleteCategory_DialogMessage + cat.getFullCategoryName(getLanguage()));
 			if (!ret){
 				return;
 			}
@@ -536,7 +539,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 		}else if (o instanceof CategoryAttribute){
 			final CategoryAttribute catAtt  = (CategoryAttribute)o;
-			boolean ret = MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete the category/attribute relationship:\nCategory: '" + catAtt.getCategory().getFullCategoryName(getLanguage()) + "'\nAttribute: '" + catAtt.getAttribute().findName(getLanguage()) + "'");
+			boolean ret = MessageDialog.openConfirm(getShell(), DELETE_DIALOG_TITLE, MessageFormat.format(Messages.DataModelPropertyPage_ConfirmDeleteCatAtt_DialogMessage, new Object[]{catAtt.getCategory().getFullCategoryName(getLanguage()), catAtt.getAttribute().findName(getLanguage()) }));
 			if (!ret){
 				return;
 			}
@@ -565,8 +568,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 						}
 						if (!contains){
-							MessageDialog dialog = new MessageDialog(getShell(), "Delete", null,
-									"The attribute '" + catAtt.getAttribute().findName(getLanguage()) + "' is not longer associated with any categories.  Would you like to delete this attribute?", 
+							MessageDialog dialog = new MessageDialog(getShell(), DELETE_DIALOG_TITLE, null,
+									MessageFormat.format(Messages.DataModelPropertyPage_Confirm_DeleteAttribute, new Object[]{ catAtt.getAttribute() } ), 
 									MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
 							if (ret == 0){  //YES
@@ -689,7 +692,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 			Set<CategoryAttribute> usages = ((DataModel)viewer.getInput()).findAttribute(((CategoryAttribute)o).getAttribute());
 			if (usages.size() > 1){
-				MessageDialog.openWarning(getShell(), "Modify Warning", "This attribute is referenced by  multiple categories.  Modifying it will affect all categories that reference this attribute.");
+				MessageDialog.openWarning(getShell(), Messages.DataModelPropertyPage_ModifyWarning_DialogTitle, Messages.DataModelPropertyPage_ModifyWarning_DialogMessage);
 			}
 
 			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(),
@@ -705,7 +708,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			try{
 				getSession().flush();
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), "Error editing element.  Please close and re-start.\n\n" + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Edit + ex.getMessage(), ex);
 			}
 			
 		}
@@ -723,7 +726,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 		Category parent = (Category)o;
 		if (parent.getChildren() != null && parent.getChildren().size() > 0){
-			MessageDialog.openInformation(getShell(), "Add Attribute", "The attributes you add to this category will be inherted by all children categories.");
+			MessageDialog.openInformation(getShell(), Messages.DataModelPropertyPage_AddAttribute_DialogTitle, Messages.DataModelPropertyPage_AddAttribute_DialogMessage);
 		}
 		
 		//show dialog

@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +46,7 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.CaExporter;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -78,18 +80,18 @@ public class CaImporter {
 	 */
 	private void importCaFromFile(File f, IProgressMonitor monitor) throws Exception{
 		if (!f.exists()){
-			throw new IOException("The file '" + f.getAbsolutePath() + "' cannot be found.");
+			throw new IOException(Messages.CaImporter_Error_CouldNotFindImportFile + f.getAbsolutePath());
 		}
 		
-		monitor.beginTask("Importing Conservation Area", 4);
+		monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 4);
 		
 		//TODO: consider doing a disk space check to ensure enough disk space for this operation
-		monitor.subTask("Backing up current database");
+		monitor.subTask(Messages.CaImporter_Progress_BackupCurrent);
 		HibernateManager.endSessionFactory(true);
 		File dbBackup = backup();
 		monitor.worked(1);
 		
-		monitor.subTask("Unzipping File");
+		monitor.subTask(Messages.CaImporter_Progress_UnzippingFile);
 		File dir = unzipFile(f);
 		
 		/* need to login as admin user to restore */
@@ -99,7 +101,7 @@ public class CaImporter {
 		try{
 			monitor.worked(1);
 			
-			monitor.subTask("Validating Conservation Area");
+			monitor.subTask(Messages.CaImporter_Progress_ValidatingCaImport);
 			byte[] cauuid = validateConservationAreaInfo(dir, session);
 			monitor.worked(1);
 			
@@ -110,37 +112,37 @@ public class CaImporter {
 					HibernateManager.endSessionFactory(true);
 					restoreBackup(dbBackup);
 				}catch (Exception e){
-					throw new Exception("Error occurred during database import.  Temporary backup could not be restored and system is in an inconsistant state.  It is recomended that you restore a previous system backup.\n\n" + ex.getMessage() + "\n\n" + e.getMessage(), e);
+					throw new Exception(Messages.CaImporter_Error_ImportErrorBackupNoRestored + ex.getMessage() + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 				}
-				throw new Exception("Error occurred during import. System restored to previous state. \n\n" + ex.getMessage(), ex);
+				throw new Exception(Messages.CaImporter_Error_SystemRestored + ex.getMessage(), ex);
 			}
 			
 			try{
 				monitor.worked(2);
-				monitor.beginTask("Importing Conservation Area", 4);				
+				monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 4);				
 				importFileStore(dir, cauuid, monitor);
 				monitor.worked(3);
 			}catch (Exception ex){
-				throw new Exception("Filestore data not imported.\n\nConservation area database information imported.  The filestore (images etc.) could NOT be imported.  This must be imported manually or the system backup should be restored.", ex);
+				throw new Exception(Messages.CaImporter_Error_FilestoreNotImported, ex);
 			}
 			
 		}finally{
-			monitor.subTask("Cleaning up");
+			monitor.subTask(Messages.CaImporter_Progress_CleanUp);
 			try{
 				cleanUp(dbBackup);
 			}catch (Exception ex){
-				SmartPlugIn.log("Could not cleanup directory " + dbBackup.toString(), ex);
+				SmartPlugIn.log(Messages.CaImporter_Error_CleanUpFailed + dbBackup.toString(), ex);
 			}
 			try{
 				cleanUp(dir);
 			}catch (Exception ex){
-				SmartPlugIn.log("Could not cleanup directory " + dir.toString(), ex);
+				SmartPlugIn.log(Messages.CaImporter_Error_CleanUpFailed + dir.toString(), ex);
 			}
 			
 			try{
 				session.close();
 			}catch (Exception ex){
-				SmartPlugIn.log("Could not close session", ex);
+				SmartPlugIn.log(Messages.CaImporter_Error_CouldNotCloseSession, ex);
 			}
 			/* disconnect from admin user */
 			HibernateManager.endSessionFactory(true);
@@ -155,7 +157,7 @@ public class CaImporter {
 	 */
 	private File backup() throws Exception{
 		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
-		File copyTo = new File(databaseDir.getParentFile(), "smartdb.bak");
+		File copyTo = new File(databaseDir.getParentFile(), "smartdb.bak"); //$NON-NLS-1$
 		if (copyTo.exists()){
 			FileUtils.deleteDirectory(copyTo);
 		}
@@ -208,9 +210,9 @@ public class CaImporter {
 		session.beginTransaction();
 		try{
 			byte[] uuid = SmartUtils.decodeHex(cauuid);
-			long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0);
-			if (cnt != 0){
-				throw new Exception("The conservation area " + name + " (" + id + ") already exists in this database and cannot be loaded twice.");
+			long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
+			if (cnt != 0){				
+				throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
 			}
 			return uuid;
 		}finally{
@@ -244,7 +246,7 @@ public class CaImporter {
 	 */
 	private void processDatabaseFiles(File dir, Session session, IProgressMonitor monitor) throws Exception{
 		
-		monitor.subTask("Scanning tables");
+		monitor.subTask(Messages.CaImporter_Progress_ScanningTable);
 		HashMap<String, List<String>> keys = getTableConstraints(session);
 		
 		HashMap<String, TableInfo> tables = scanTables(dir);
@@ -256,13 +258,13 @@ public class CaImporter {
 			tablesToProcess.add(table);
 		}
 		
-		monitor.beginTask("Processing Tables", tablesToProcess.size());
+		monitor.beginTask(Messages.CaImporter_Progress_processingTables, tablesToProcess.size());
 
-		String last = "";  		//used as a check here so we don't go on forever
+		String last = "";  		//used as a check here so we don't go on forever //$NON-NLS-1$
 		while(tablesToProcess.size() > 0){
 			String tableName = tablesToProcess.poll();
 			if (last.equals(tableName)){
-				throw new Exception("System could not import database.  Circular dependencies in database.");
+				throw new Exception(Messages.CaImporter_Error_CirculateTableDependencies);
 			}
 			monitor.subTask(tableName);
 			List<String> requires = keys.get(tableName);
@@ -284,12 +286,12 @@ public class CaImporter {
 			
 			if (exportTable){
 				TableInfo info = tables.get(tableName);
-				if (info == null) throw new Exception("Could not determine table info for table : " + tableName);
-				if (!info.getDataFile().exists()) throw new Exception("Could not find data file for table " + tableName + ": " + info.getDataFile().getAbsolutePath());
+				if (info == null) throw new Exception(Messages.CaImporter_Error_TableInfo + tableName);
+				if (!info.getDataFile().exists()) throw new Exception(MessageFormat.format(Messages.CaImporter_Error_TableDataFiles, new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
 				importData(session,tableName, info.getColumns(), info.getDataFile() );
 				processed.add(tableName);
 				monitor.worked(1);
-				last = "";
+				last = ""; //$NON-NLS-1$
 			}else{
 				tablesToProcess.add(tableName);
 				last = tableName;
@@ -306,7 +308,7 @@ public class CaImporter {
 	 * @throws IOException
 	 */
 	private void importFileStore(File dir, byte[] cauuid, IProgressMonitor monitor) throws IOException{
-		monitor.setTaskName("Importing filestore");
+		monitor.setTaskName(Messages.CaImporter_Progress_ImportingFileStore);
 		File sourceFile = new File(dir, CaExporter.FILESTORE_DIR);
 		
 		
@@ -333,19 +335,19 @@ public class CaImporter {
 	 */
 	private void importData(Session session, String tableName, 
 			String columns, File dataFile) throws Exception{
-		String bits[] = tableName.split("\\.");
+		String bits[] = tableName.split("\\."); //$NON-NLS-1$
 		StringBuilder query = new StringBuilder();
-		query.append("CALL SYSCS_UTIL.SYSCS_IMPORT_DATA(");
-		query.append("'" + bits[0] + "',"); //schema
-		query.append("'" + bits[1] + "',"); //table
-		query.append("'" + columns + "'," ); //columns
-		query.append("NULL,"); //column indexes
-		query.append("'" + dataFile.getCanonicalPath() + "',"); //filename
-		query.append("NULL,"); //column delimiter
-		query.append("NULL,"); //character delimiter
-		query.append("'utf-8',"); //codeset
-		query.append("0"); //replace
-		query.append(")"); 
+		query.append("CALL SYSCS_UTIL.SYSCS_IMPORT_DATA("); //$NON-NLS-1$
+		query.append("'" + bits[0] + "',"); //schema //$NON-NLS-1$ //$NON-NLS-2$
+		query.append("'" + bits[1] + "',"); //table //$NON-NLS-1$ //$NON-NLS-2$
+		query.append("'" + columns + "'," ); //columns //$NON-NLS-1$ //$NON-NLS-2$
+		query.append("NULL,"); //column indexes //$NON-NLS-1$
+		query.append("'" + dataFile.getCanonicalPath() + "',"); //filename //$NON-NLS-1$ //$NON-NLS-2$
+		query.append("NULL,"); //column delimiter //$NON-NLS-1$
+		query.append("NULL,"); //character delimiter //$NON-NLS-1$
+		query.append("'utf-8',"); //codeset //$NON-NLS-1$
+		query.append("0"); //replace //$NON-NLS-1$
+		query.append(")");  //$NON-NLS-1$
 		
 		SQLQuery sqlQuery = session.createSQLQuery(query.toString());		
 		sqlQuery.executeUpdate();
@@ -361,22 +363,22 @@ public class CaImporter {
 	 */
 	private HashMap<String, List<String>> getTableConstraints(Session session){
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT g.schemaname || '.' || c.tablename as sourcetable, ");
-		sql.append("h.schemaname || '.' || f.tablename as requiredtable ");
-		sql.append("FROM ");
-		sql.append("SYS.SYSFOREIGNKEYS a,  ");
-		sql.append("SYS.SYSCONSTRAINTS b, ");
-		sql.append("SYS.SYSTABLES c, ");
-		sql.append("SYS.SYSCONSTRAINTS e, ");
-		sql.append("SYS.SYSTABLES f, ");
-		sql.append("SYS.SYSSCHEMAS g, ");
-		sql.append("SYS.SYSSCHEMAS h ");
-		sql.append("WHERE a.constraintid = b.constraintid ");
-		sql.append("AND b.tableid = c.tableid ");
-		sql.append("AND e.constraintid = a.keyconstraintid ");
-		sql.append("AND f.tableid = e.tableid ");
-		sql.append("AND g.schemaid = f.schemaid ");
-		sql.append("AND h.schemaid = c.schemaid");
+		sql.append("SELECT g.schemaname || '.' || c.tablename as sourcetable, "); //$NON-NLS-1$
+		sql.append("h.schemaname || '.' || f.tablename as requiredtable "); //$NON-NLS-1$
+		sql.append("FROM "); //$NON-NLS-1$
+		sql.append("SYS.SYSFOREIGNKEYS a,  "); //$NON-NLS-1$
+		sql.append("SYS.SYSCONSTRAINTS b, "); //$NON-NLS-1$
+		sql.append("SYS.SYSTABLES c, "); //$NON-NLS-1$
+		sql.append("SYS.SYSCONSTRAINTS e, "); //$NON-NLS-1$
+		sql.append("SYS.SYSTABLES f, "); //$NON-NLS-1$
+		sql.append("SYS.SYSSCHEMAS g, "); //$NON-NLS-1$
+		sql.append("SYS.SYSSCHEMAS h "); //$NON-NLS-1$
+		sql.append("WHERE a.constraintid = b.constraintid "); //$NON-NLS-1$
+		sql.append("AND b.tableid = c.tableid "); //$NON-NLS-1$
+		sql.append("AND e.constraintid = a.keyconstraintid "); //$NON-NLS-1$
+		sql.append("AND f.tableid = e.tableid "); //$NON-NLS-1$
+		sql.append("AND g.schemaid = f.schemaid "); //$NON-NLS-1$
+		sql.append("AND h.schemaid = c.schemaid"); //$NON-NLS-1$
 		
 		HashMap<String, List<String>> results = new HashMap<String, List<String>>();
 		@SuppressWarnings("unchecked")
@@ -413,7 +415,7 @@ public class CaImporter {
 		String files[] = dataFileDir.list(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
-				return (name.endsWith(".def"));
+				return (name.endsWith(".def")); //$NON-NLS-1$
 			}
 		});
 		
@@ -424,10 +426,10 @@ public class CaImporter {
 			try{
 				String tablename = reader.readLine().toUpperCase();
 				String columns = reader.readLine();
-				String data = files[i].substring(0,files[i].lastIndexOf(".def"));
+				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
 				
 				map.put(tablename, new TableInfo(tablename, columns, 
-						new File(dataFileDir,data + ".dat")));
+						new File(dataFileDir,data + ".dat"))); //$NON-NLS-1$
 			}finally{
 				reader.close();
 			}

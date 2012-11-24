@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * SMART property page dialog 
@@ -108,7 +109,7 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CLOSE_LABEL, false);
 		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
@@ -172,11 +173,11 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	 */
 	protected boolean validateSave(){
 		if (getErrorMessage() != null){
-			if (!MessageDialog.openQuestion(getShell(), "Close", "Changes have been made that cannot be saved.  Are you sure you want to close?")){
+			if (!MessageDialog.openQuestion(getShell(), Messages.AbstractPropertyJHeaderDialog_ConfirmClose_DialogTitle, Messages.AbstractPropertyJHeaderDialog_ConfirmClose_DialogMessage)){
 				return false;
 			}
 		}else{
-			MessageDialog md = new MessageDialog(getShell(), "Save Changes?", null, "There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			MessageDialog md = new MessageDialog(getShell(), Messages.AbstractPropertyJHeaderDialog_ConfirmSave_DialogTitle, null, Messages.AbstractPropertyJHeaderDialog_ConfirmSave_DialogMessage, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();
 			if (ret == 2){
 				//cancel

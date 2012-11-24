@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.internal.ca.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Ranks can be deleted if they are not associated with any employees.
@@ -38,14 +41,16 @@ public class RankDeleteAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Rank)){
-			return "Object not of type Rank. Can not delete.";
+			return Messages.RankDeleteAdvisor_Error_NotRank;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Employee.class).add(Restrictions.eq("rank", object)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(Employee.class).add(Restrictions.eq("rank", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{
-			return cnt + " employees are associated with the rank " + ((Rank)object).getName() + ".  These references must be removed before this rank can be deleted.";
+			return MessageFormat.format(
+					Messages.RankDeleteAdvisor_Error_RankReferenced,
+					new Object[]{cnt, ((Rank)object).getName()});
 		}
 	}
 

@@ -28,6 +28,7 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.DefaultPerspective;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 
 public class ShowDefaultMapPerspective extends AbstractHandler {
 
@@ -41,7 +42,7 @@ public class ShowDefaultMapPerspective extends AbstractHandler {
 					.showPerspective(DefaultPerspective.ID,
 							HandlerUtil.getActiveWorkbenchWindow(event));
 		} catch (WorkbenchException e) {
-			SmartPlugIn.displayLog(HandlerUtil.getActiveWorkbenchWindow(event).getShell(),  "Error loading patrol perspective.", e);
+			SmartPlugIn.displayLog(HandlerUtil.getActiveWorkbenchWindow(event).getShell(),  Messages.ShowDefaultMapPerspective_Error_LoadingPerspective, e);
 		}
 		return null;
 	}

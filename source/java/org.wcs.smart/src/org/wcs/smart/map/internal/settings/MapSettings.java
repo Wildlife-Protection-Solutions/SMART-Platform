@@ -75,6 +75,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.google.gson.Gson;
@@ -122,14 +123,14 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class MapSettings {
 	
-	private static final String SMARTBM_FILE_PROTOCOL = "smartbm";
+	private static final String SMARTBM_FILE_PROTOCOL = "smartbm"; //$NON-NLS-1$
 
 	/**
 	 * 
 	 */
-	public static final String BASEMAP_BLACKBOARD_KEY = "org.wcs.smart.basemaplayers";
+	public static final String BASEMAP_BLACKBOARD_KEY = "org.wcs.smart.basemaplayers"; //$NON-NLS-1$
 
-	public static final String MAP_DIRECTORY = "maps";
+	public static final String MAP_DIRECTORY = "maps"; //$NON-NLS-1$
 	
 	/** settings for the current user */
 	private static MapSettings THIS = new MapSettings();  
@@ -504,7 +505,7 @@ public class MapSettings {
 			//layer.refresh(null);
 			
 		} catch (Exception e) {
-			SmartPlugIn.log(Status.ERROR, "Cannot create layer for " + savedLayer.getURI().toString() + ": " + e.getMessage(), e);
+			SmartPlugIn.log(Status.ERROR, Messages.MapSettings_Error_CreateMapLayer + savedLayer.getURI().toString() + ": " + e.getMessage(), e); //$NON-NLS-1$
 		}
 		
 		return layer;
@@ -600,7 +601,7 @@ public class MapSettings {
 				if (s.getTransaction().isActive()){
 					s.getTransaction().rollback();
 				}
-				SmartPlugIn.displayLog(null, "Could not save basemap." + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(null, Messages.MapSettings_Error_SaveBasemap + ex.getMessage(), ex);
 			}finally{
 				s.close();
 			}
@@ -656,7 +657,7 @@ public class MapSettings {
 			//this allows the file to be relative
 			//so if the data is copied to a new location
 			//the basemap files still work;
-			java.net.URI uri = new java.net.URI( SMARTBM_FILE_PROTOCOL, "//" + fileName, srcUri.getFragment());
+			java.net.URI uri = new java.net.URI( SMARTBM_FILE_PROTOCOL, "//" + fileName, srcUri.getFragment()); //$NON-NLS-1$
 			trgUri = uri;
 		} catch (Exception e) {
 			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
@@ -684,7 +685,7 @@ public class MapSettings {
 			layerName = layerName.substring(0, index);
 		}
 		
-		String pattern = layerName + ".*";
+		String pattern = layerName + ".*"; //$NON-NLS-1$
 		FileFilter filter = new WildcardFileFilter(pattern);
 
 		File[] fileList = dir.listFiles(filter);

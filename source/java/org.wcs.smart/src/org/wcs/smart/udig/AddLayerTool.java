@@ -28,11 +28,10 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * Add layer tool for map.
+ * 
  * @author Emily
  * @since 1.0.0
  */
-
-
 public class AddLayerTool extends AbstractActionTool {
 
 	public AddLayerTool() {
@@ -45,10 +44,10 @@ public class AddLayerTool extends AbstractActionTool {
 			public void run() {
 				MapImport mapImport = new MapImport();
 				mapImport.setLayerPosition(0);
-				mapImport.getDialog().open();	
+				mapImport.getDialog().open();
 			}
 		});
-		
+
 	}
 
 	@Override
@@ -56,8 +55,4 @@ public class AddLayerTool extends AbstractActionTool {
 
 	}
 
-	
 }
-
-
-

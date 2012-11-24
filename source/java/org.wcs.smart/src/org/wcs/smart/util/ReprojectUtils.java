@@ -64,7 +64,7 @@ public class ReprojectUtils {
 		long tileidx = (long)Math.floor( (c.x - originX) / gridSize) + 1;
 		long tileidy = (long)Math.floor( (c.y - originY) / gridSize) + 1;
 
-		return tileidx + "_" + tileidy;
+		return tileidx + "_" + tileidy; //$NON-NLS-1$
 	}
 	
 	/**

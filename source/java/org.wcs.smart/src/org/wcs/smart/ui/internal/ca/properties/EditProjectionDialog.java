@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
@@ -36,6 +38,7 @@ import org.eclipse.swt.widgets.Text;
 import org.geotools.referencing.CRS;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Dialog for editing projection information.
@@ -74,14 +77,14 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Name:");
+		lbl.setText(Messages.EditProjectionDialog_Name_Label);
 		
 		txtName = new Text(main, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtName.setText(toEdit.getName());
 		
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("Well-Known-Text Definition:");
+		lbl.setText(Messages.EditProjectionDialog_WKT_Label);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		txtDef = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -93,8 +96,8 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 		txtName.addListener(SWT.Modify, this);
 		txtDef.addListener(SWT.Modify, this);
 		
-		getShell().setText("Edit Projection");
-		setMessage("Modify the projection.");
+		getShell().setText(Messages.EditProjectionDialog_Dialog_Title);
+		setMessage(Messages.EditProjectionDialog_Dialog_Message);
 		
 		return main;
 	}
@@ -127,20 +130,23 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 	 */
 	private boolean validate(){
 		if (txtName.getText().length() <=0 && txtName.getText().length() > Projection.MAX_NAME_LENGTH){
-			setErrorMessage("Name must be between 0 and " + Projection.MAX_NAME_LENGTH + " in length.");
+			setErrorMessage(
+					MessageFormat.format(Messages.EditProjectionDialog_Error_NameLength, new Object[]{0, Projection.MAX_NAME_LENGTH }));
 			return false;
 		}
 		
 		if (txtDef.getText().length() <=0 && txtDef.getText().length() > Projection.MAX_DEF_LENGTH){
-			setErrorMessage("Definition string must be between 0 and " + Projection.MAX_DEF_LENGTH + " in length.");
+			setErrorMessage(
+					MessageFormat.format(Messages.EditProjectionDialog_Error_DefLength, new Object[]{0, Projection.MAX_DEF_LENGTH }));
 			return false;
 		}
 		
 		try{
 			CRS.parseWKT(txtDef.getText());
 		}catch (Exception ex){
-			SmartPlugIn.log("ERror parsing wkt definition", ex);
-			setErrorMessage("WKT Definition could not be parsed. " + ex.getMessage());
+			String err = Messages.EditProjectionDialog_Error_ParsingWKT;
+			SmartPlugIn.log(err, ex);
+			setErrorMessage(err + ex.getMessage());
 			return false;
 		}
 		return true;

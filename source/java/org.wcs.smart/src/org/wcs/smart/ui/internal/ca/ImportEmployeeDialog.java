@@ -46,6 +46,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.in.EmployeeCsvImporter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 
 
 /**
@@ -90,11 +91,11 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(3, false));
 		
 		final FileDialog fd = new FileDialog(getShell());
-		fd.setFilterExtensions(new String[]{"*.csv", "*.*"});
-		fd.setFilterNames(new String[]{"Comma Separated Values (*.csv)", "All Files (*.*)"});
+		fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[]{Messages.ImportEmployeeDialog_CSVFilterName, Messages.ImportEmployeeDialog_AllFilesFilterName});
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("CSV File:");
+		lbl.setText(Messages.ImportEmployeeDialog_FileLabe);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtFile = new Text(main, SWT.BORDER);
@@ -112,7 +113,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse");
+		btnBrowse.setText(Messages.ImportEmployeeDialog_BrowseButton);
 		btnBrowse.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -127,17 +128,17 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		btnSkipHeader = new Button(main, SWT.CHECK);
-		btnSkipHeader.setText("Includes Header Line (skip the first line when importing)");
+		btnSkipHeader.setText(Messages.ImportEmployeeDialog_IncludeHaderOp);
 		btnSkipHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
 		Text txtinfo = new Text(main, SWT.NONE | SWT.READ_ONLY);
 		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
-		txtinfo.setText("The CSV file must have the following format:\n "
-				+ "ID,GIVEN NAME,FAMILY NAME,BIRTHDATE(yyyy-mm-dd),GENDER(M/F),START EMPLOYMENT(yyyy-mm-dd),END EMPLOYMENT(yyyy-mm-dd),AGENCY,RANK\n\n"
-				+ "The following fields are optional: ID, END EMPLOYEMENT, AGANCY, RANK");
+		txtinfo.setText(Messages.ImportEmployeeDialog_CSVFormat_1
+				+ Messages.ImportEmployeeDialog_CSVFormat_2
+				+ Messages.ImportEmployeeDialog_CSVFormat_3);
 		
-		getShell().setText("Import Employees");
-		setMessage("Import employee data from csv file.");
+		getShell().setText(Messages.ImportEmployeeDialog_DialogTitle);
+		setMessage(Messages.ImportEmployeeDialog_DialogMessage);
 		return parent;
 		
 	}
@@ -146,9 +147,9 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button btn = createButton(parent, IDialogConstants.OK_ID, "Import", true);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, Messages.ImportEmployeeDialog_ImportButton, true);
 		btn.setEnabled(false);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 	
 	/**
@@ -197,9 +198,9 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 						@Override
 						public void run() {
 							if(ok){
-								MessageDialog.openInformation(getShell(), "Import Employees", "Employee data loaded successfully");
+								MessageDialog.openInformation(getShell(), Messages.ImportEmployeeDialog_InfoDialog_Title, Messages.ImportEmployeeDialog_SuccessMessage);
 							}else{
-								MessageDialog.openError(getShell(), "Import Employees", "Empoyee data not imported.");
+								MessageDialog.openError(getShell(), Messages.ImportEmployeeDialog_InfoDialog_Title, Messages.ImportEmployeeDialog_FailureMessage);
 							}
 							
 						}
@@ -210,7 +211,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(getShell(), "Failed to load employee data\n\n" + ex.getMessage(), ex);
+							SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getMessage(), ex);
 						}						
 					});
 							
@@ -221,7 +222,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 			}
 		});
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Failed to load employee data. " + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getMessage(), ex);
 		}
 	}
 	

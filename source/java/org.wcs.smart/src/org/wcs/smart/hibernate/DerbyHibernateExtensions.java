@@ -40,7 +40,7 @@ public class DerbyHibernateExtensions {
 	 */
 	public static void shutDown(boolean reconnect){
 		try {
-			DriverManager.getConnection("jdbc:derby:;shutdown=true");
+			DriverManager.getConnection("jdbc:derby:;shutdown=true"); //$NON-NLS-1$
 		} catch (Exception e) {
 			//eatme - this will always through an exception
 			//e.printStackTrace();
@@ -49,7 +49,7 @@ public class DerbyHibernateExtensions {
 		if (reconnect){
 			try{
 				//without this hibernate will not re-connect to the database propery
-				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance(); //$NON-NLS-1$
 			}catch (Exception ex){
 			}
 		}

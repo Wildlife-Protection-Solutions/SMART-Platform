@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.backup.AutoBackupEngine;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -106,7 +107,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 
 		int indent = 20;
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("How often would you like the system to perform an automatic backup? ");
+		lbl.setText(Messages.AutoBackupDialog_TimeLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 				
 		Composite backup = new Composite(main, SWT.NONE);
@@ -136,7 +137,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		
 		
 		Label lbl2 = new Label(main, SWT.NONE);
-		lbl2.setText("* Enter -1 to turn off auto-backup. Enter 0 to perform an auto-backup every time the application is closed."); 
+		lbl2.setText(Messages.AutoBackupDialog_TimerInfo); 
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
 		((GridData)lbl2.getLayoutData()).horizontalIndent = indent;
 		
@@ -144,7 +145,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("When should automatic backup files be deleted? ");
+		lbl.setText(Messages.AutoBackupDialog_DeleteSectionLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		backup = new Composite(main, SWT.NONE);
@@ -152,12 +153,12 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		backup.setLayout(new GridLayout(3, false));
 		
 		Label dlbl = new Label(backup, SWT.NONE);
-		dlbl.setText("Delete files older than ");
+		dlbl.setText(Messages.AutoBackupDialog_DeleteLabel);
 		dlbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)dlbl.getLayoutData()).horizontalIndent = indent;
 
 		deleteDays = new Text(backup, SWT.BORDER);
-		String deletetimer = "30";
+		String deletetimer = "30"; //$NON-NLS-1$
 		if(prop.containsKey(AutoBackupEngine.PROP_DELETE_TIMER)){
 			deletetimer = prop.getProperty(AutoBackupEngine.PROP_DELETE_TIMER);
 		}
@@ -170,7 +171,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		deleteDays.addKeyListener(validate);
 		
 		Label ddayslbl = new Label(backup, SWT.NONE);
-		ddayslbl.setText(" days");
+		ddayslbl.setText(Messages.AutoBackupDialog_Days);
 
 		lbl = new Label(main, SWT.HORIZONTAL | SWT.SEPARATOR);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -179,7 +180,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 //		lblb.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("Where should automatic backup files be placed? ");
+		lbl.setText(Messages.AutoBackupDialog_BackupLocationLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		backup = new Composite(main, SWT.NONE);
@@ -188,8 +189,8 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		
 		
 		txtBackupDir = new Text(backup, SWT.DEFAULT);
-		File temp = new File(System.getProperty("user.dir"));
-		String loc = temp.getParent() + File.separatorChar + "SMART_Backups";
+		File temp = new File(System.getProperty("user.dir")); //$NON-NLS-1$
+		String loc = temp.getParent() + File.separatorChar + "SMART_Backups"; //$NON-NLS-1$
 		File b = new File(loc);
 		if(!b.exists()){
 			SmartUtils.createDirectory(b);
@@ -207,7 +208,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		txtBackupDir.addKeyListener(validate);
 		
 		Button btnBrowse = new Button(backup, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.AutoBackupDialog_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -231,9 +232,9 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		cdLoc = createDecoration(txtBackupDir);
 		
 
-		setTitle("Auto-Backup Configuration");
-		setMessage("Each time the application is closed, the automatic backup system checks to see whether the specified time has passed and a backup is warranted. If so, the system will perform a backup."); 
-		super.getShell().setText("SMART System Automatic Backup Settings");
+		setTitle(Messages.AutoBackupDialog_Title);
+		setMessage(Messages.AutoBackupDialog_Message); 
+		super.getShell().setText(Messages.AutoBackupDialog_SellTitle);
 		
 		validate();
 		
@@ -247,7 +248,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		createButton(parent, IDialogConstants.OK_ID, Messages.AutoBackupDialog_SaveButton, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
 		getButton(IDialogConstants.CANCEL_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);
@@ -263,7 +264,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 			prop.setProperty(AutoBackupEngine.PROP_DELETE_TIMER, deleteDays.getText());
 			prop.setProperty(AutoBackupEngine.PROP_BACKUP_LOCATION, txtBackupDir.getText());
 			if(!prop.containsKey(AutoBackupEngine.PROP_LASTBACKUP)){
-				prop.setProperty(AutoBackupEngine.PROP_LASTBACKUP, "0");
+				prop.setProperty(AutoBackupEngine.PROP_LASTBACKUP, "0"); //$NON-NLS-1$
 			}
 			if (!AutoBackupEngine.setAutoBackupProperties(prop)){
 				return;
@@ -301,19 +302,19 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		boolean isComplete = true;
 		if ( ! isNumeric(days.getText()) ){
 			cdTimer.show();
-			cdTimer.setDescriptionText("Invalid value, you must specify a valid number of days.");
+			cdTimer.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidNumberDays);
 			isComplete = false;
 		}
 		
 		if ( ! isNumeric(deleteDays.getText()) ){
 			cdDeleteTimer.show();
-			cdDeleteTimer.setDescriptionText("Invalid value, you must specify a valid number of days.");
+			cdDeleteTimer.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidNumberDays);
 			isComplete = false;
 		}
 		File f = new File(txtBackupDir.getText());
 		if (!f.exists()){
 			cdLoc.show();
-			cdLoc.setDescriptionText("Invalid Directory, you must select a valid directory.");
+			cdLoc.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidDirectory);
 			isComplete = false;
 		}
 		Button x = getButton(OK);

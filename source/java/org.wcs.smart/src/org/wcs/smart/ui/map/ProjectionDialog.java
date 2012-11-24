@@ -44,6 +44,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Dialog for selecting projection.
@@ -91,7 +92,7 @@ public class ProjectionDialog extends TitleAreaDialog {
 		 GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		 gd.heightHint = 150;
 		 lst.getList().setLayoutData(gd);
-		 Job j = new Job("load projections") {
+		 Job j = new Job(Messages.ProjectionDialog_LoadProjection_JobName) {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -114,7 +115,7 @@ public class ProjectionDialog extends TitleAreaDialog {
 
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(getShell(), "Error loading projection data.\n\n" + ex.getMessage(), ex);							
+							SmartPlugIn.displayLog(getShell(), Messages.ProjectionDialog_Error_LoadProjectionMessage + ex.getMessage(), ex);							
 						}});
 					
 				}finally{
@@ -142,8 +143,8 @@ public class ProjectionDialog extends TitleAreaDialog {
 			}
 		});
 		 
-		 getShell().setText("Map Projection");
-		 setMessage("Select new map projection.");
+		 getShell().setText(Messages.ProjectionDialog_DialogTitle);
+		 setMessage(Messages.ProjectionDialog_DialogMessage);
 		 return composite;
 	 }
 	

@@ -46,6 +46,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
 
 /**
@@ -83,7 +84,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, "Load", true);
+		createButton(parent, IDialogConstants.OK_ID, Messages.LoadBasemapDialog_LoadButton, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 		validate();
@@ -94,9 +95,9 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
-		getShell().setText("Select Basemap");
+		getShell().setText(Messages.LoadBasemapDialog_Title);
 
-		setMessage("Select the map to use as the basemap");
+		setMessage(Messages.LoadBasemapDialog_Message);
 
 		Composite main = new Composite(parent, SWT.NONE);
 
@@ -115,11 +116,11 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		lstBasemaps.setLabelProvider(new BasemapLabelProvider());
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
-		lstBasemaps.setInput(new String[]{"Loading"});
+		lstBasemaps.setInput(new String[]{Messages.LoadBasemapDialog_Loading});
 		lstBasemaps.getList().addListener(SWT.Selection, validateListener);
 	
 		chUseDefault = new Button(main, SWT.CHECK);
-		chUseDefault.setText("Use as session default");
+		chUseDefault.setText(Messages.LoadBasemapDialog_SessionDefaultButton);
 		chUseDefault.setSelection(false);
 		chUseDefault.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -132,7 +133,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 	}
 	
 	private void loadData(){
-		Job loadData = new Job("LoadData"){
+		Job loadData = new Job(Messages.LoadBasemapDialog_LoadJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -173,7 +174,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		setErrorMessage(null);
 		IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
 		if (sel.isEmpty() ){
-			setErrorMessage("Basemap must be selected");
+			setErrorMessage(Messages.LoadBasemapDialog_Error_BasemapNoSelected);
 			ok = false;
 		}
 		baseMap = (BasemapDefinition) sel.getFirstElement();

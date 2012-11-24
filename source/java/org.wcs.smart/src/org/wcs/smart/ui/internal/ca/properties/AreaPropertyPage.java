@@ -62,14 +62,15 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResourceInfo;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
+import com.ibm.icu.text.MessageFormat;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBWriter;
 
@@ -83,12 +84,12 @@ import com.vividsolutions.jts.io.WKBWriter;
 public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 
 	
-	private static final String CLEAR_TEXT = "Clear...";
-	private static final String UPDATE_TEXT = "Change Labels...";
-	private static final String LOAD_TEXT = "Load...";
+	private static final String CLEAR_TEXT = Messages.AreaPropertyPage_Clear_Text;
+	private static final String UPDATE_TEXT = Messages.AreaPropertyPage_ChangeLabels_Text;
+	private static final String LOAD_TEXT = Messages.AreaPropertyPage_Load_Text;
 	
-	private final static String MSG_NOT_SET = "Undefined";
-	private final static String MSG_ERROR = "Error";
+	private final static String MSG_NOT_SET = Messages.AreaPropertyPage_Area_Underfined;
+	private final static String MSG_ERROR = Messages.AreaPropertyPage_Error_Message;
 
 	
 	
@@ -106,7 +107,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	public AreaPropertyPage() {
 		super(Display.getCurrent().getActiveShell(),
-				"Define Conservation Area Boundaries");
+				Messages.AreaPropertyPage_Dialog_Title);
 
 	}
 
@@ -129,8 +130,9 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.log("Error loading feature counts.", ex);
-			setErrorMessage("Error occurred.");
+			String err = Messages.AreaPropertyPage_Error_LoadingFeatureCounts;
+			SmartPlugIn.log(err, ex);
+			setErrorMessage(err);
 		}
 		return super.open();
 	}
@@ -143,7 +145,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	private void initLayers(boolean updated, IProgressMonitor monitor) {
 		
-		monitor.beginTask("Refreshing Feature Counts", Area.AreaType.values().length);
+		monitor.beginTask(Messages.AreaPropertyPage_Progress_RefreshingCounts, Area.AreaType.values().length);
 		
 		// find smart service for given conservation area
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
@@ -164,7 +166,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			List<IResolve> smartresource = ss.members(monitor);
 
 			int i = 0;
-			for (Iterator iterator = smartresource.iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = smartresource.iterator(); iterator.hasNext();) {
 				monitor.worked(i++);
 				SmartGeoResource sgeo = (SmartGeoResource) iterator.next();
 				String message = null;
@@ -172,15 +174,16 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				if (cnt == 0) {
 					message = MSG_NOT_SET;
 				} else if (cnt > 0) {
-					message = "SET ( " + cnt + " features)";
+					message = MessageFormat.format(Messages.AreaPropertyPage_Set_Message, new Object[]{cnt});
 				} else if (cnt < 0){
 					message = MSG_ERROR;
 				}
 				initValues.put(sgeo.getType(), message);
 			}
 		} catch (Exception ex) {
-			SmartPlugIn.log("Error loading feature counts for smart resources.", ex);
-			setErrorMessage("Error loading feature counts for smart resources.");
+			String error = Messages.AreaPropertyPage_Error_LoadingFeatureCountsSmart;
+			SmartPlugIn.log(error, ex);
+			setErrorMessage(error);
 		}
 		monitor.done();
 	}
@@ -192,7 +195,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		setMessage("Setup various conservation area boundaries.");
+		setMessage(Messages.AreaPropertyPage_Dialog_Message);
 
 		Composite comp = new Composite(parent, SWT.BORDER_DASH);
 		comp.setLayout(new GridLayout(5, false));
@@ -203,7 +206,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		btnUpdate = new Button[Area.AreaType.values().length];
 		for (int i = 0; i < Area.AreaType.values().length; i++) {
 			Label lbl = new Label(comp, SWT.NONE);
-			lbl.setText(Area.AreaType.values()[i].getGuiName() + ":");
+			lbl.setText(Area.AreaType.values()[i].getGuiName() + ":"); //$NON-NLS-1$
 			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 			
 			lbl = new Label(comp, SWT.NONE);
@@ -260,21 +263,21 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * clears areas from database
 	 */
 	private void deleteAll(Area.AreaType areatype){
-		boolean ret = MessageDialog.openConfirm(getShell(), "Clear " + areatype.getGuiName(), "Are you sure you want to remove all features defined for " + areatype.getGuiName() + "?  This action cannot be undone.");
+		boolean ret = MessageDialog.openConfirm(getShell(), Messages.AreaPropertyPage_Clear_DialogTitle + areatype.getGuiName(), MessageFormat.format(Messages.AreaPropertyPage_Clear_DialogMessage, new Object[]{areatype.getGuiName()}));
 		if (!ret ){
 			return;
 		}
 		getSession().beginTransaction();
 		try{
 			// remove existing areas
-			String query = "delete from Area where conservationArea = :ca and type =:type";
+			String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
 			Query q = AreaPropertyPage.this.getSession().createQuery(query);
-			q.setParameter("ca", AreaPropertyPage.this.ca);
-			q.setParameter("type", areatype);
+			q.setParameter("ca", AreaPropertyPage.this.ca); //$NON-NLS-1$
+			q.setParameter("type", areatype); //$NON-NLS-1$
 			q.executeUpdate();
 			getSession().getTransaction().commit();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(),"Could not delete area.", ex);
+			SmartPlugIn.displayLog(getShell(),Messages.AreaPropertyPage_Error_DeletingArea, ex);
 			getSession().close();
 		}
 		
@@ -289,8 +292,9 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.log("Error reseting feature counts after delete.", ex);
-			setErrorMessage("Error occurred.");
+			String error = Messages.AreaPropertyPage_Error_ResettingCounts;
+			SmartPlugIn.log(error, ex);
+			setErrorMessage(error);
 		}
 		//update labels
 		updateLabels();
@@ -309,7 +313,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		//check to ensure
 		if (verify){
-			boolean ret = MessageDialog.openConfirm(getShell(), "Update " + areatype.getGuiName(), "Are you sure you want to update " + areatype.getGuiName() + ".  All existing features will be deleted and the new features added.  This action cannot be undone.");
+			boolean ret = MessageDialog.openConfirm(getShell(), Messages.AreaPropertyPage_Update_DialogTitle + areatype.getGuiName(), MessageFormat.format(Messages.AreaPropertyPage_Update_DialogMessage, new Object[]{areatype.getGuiName()}));
 			if (!ret ){
 				return false;
 			}
@@ -317,9 +321,9 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		
 		fileDialog = new FileDialog(parent.getShell(), SWT.SINGLE | SWT.OPEN);
-		fileDialog.setText("Load " + areatype.getGuiName());
-		fileDialog.setFilterExtensions(new String[]{"*.shp", "*,*"});
-		fileDialog.setFilterNames(new String[]{"Shapefiles (*.shp)", "All Files (*.*)"});
+		fileDialog.setText(Messages.AreaPropertyPage_Load_DialogTitle + areatype.getGuiName());
+		fileDialog.setFilterExtensions(new String[]{"*.shp", "*,*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fileDialog.setFilterNames(new String[]{Messages.AreaPropertyPage_Shapefile_FilterName, Messages.AreaPropertyPage_AllFiles_FilterName});
 		
 		String result = fileDialog.open();
 		if (result == null) {
@@ -338,7 +342,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 
 		if (url == null) {
-			setErrorMessage("Could not load file.");
+			setErrorMessage(Messages.AreaPropertyPage_Error_CouldNotLoadFile);
 			return false;
 		}
 		loadDataSet(areatype, url);
@@ -353,7 +357,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Loading features", 0);
+					monitor.beginTask(Messages.AreaPropertyPage_Progress_LoadingFeatures, 0);
 
 					SimpleFeatureCollection collection = null;
 					final AreaIdDialog[] idDialog = new AreaIdDialog[1];
@@ -361,7 +365,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						FileDataStore store = FileDataStoreFinder.getDataStore(url2);
 						collection = store.getFeatureSource().getFeatures();
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(ppd.getShell(),"Error reading data source.", ex);
+						SmartPlugIn.displayLog(ppd.getShell(),Messages.AreaPropertyPage_Error_ReadingFile, ex);
 						return;
 					}
 					if (collection.getSchema().getCoordinateReferenceSystem() == null){
@@ -369,7 +373,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						getShell().getDisplay().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								MessageDialog.openError(ppd.getShell(), "Error", "Projection not set for given file.  Please ensure a projection is defined for the provided dataset.");
+								MessageDialog.openError(ppd.getShell(), Messages.AreaPropertyPage_Error_DialogTitle, Messages.AreaPropertyPage_Error_Projection);
 							}});
 						return;
 					}
@@ -392,10 +396,10 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					// add new areas
 					try {
 						//remove existing areas
-						String query = "delete from Area where conservationArea = :ca and type =:type";
+						String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
 						Query q =s.createQuery(query);
-						q.setParameter("ca", ca);
-						q.setParameter("type", areatype);
+						q.setParameter("ca", ca); //$NON-NLS-1$
+						q.setParameter("type", areatype); //$NON-NLS-1$
 						q.executeUpdate();
 
 						MathTransform transform = CRS.findMathTransform(collection.getSchema().getCoordinateReferenceSystem(), Area.AREA_CRS);
@@ -421,7 +425,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 								geom = JTS.transform(geom, transform);
 								area.setGeom(writer.write(geom));
 								if (idDialog[0].useGenerated()){
-									area.setId(areatype.name() + "_" + cnt++);
+									area.setId(areatype.name() + "_" + cnt++); //$NON-NLS-1$
 								}else{
 									String id = sf.getAttribute(idDialog[0].getSelectedAttribute().getName()).toString();
 									if (id.length() > Area.ID_MAX_LENGTH){
@@ -446,7 +450,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						try{
 							s.getTransaction().rollback();
 						}catch (Exception ex){
-							SmartPlugIn.log("", ex);
+							SmartPlugIn.log("", ex); //$NON-NLS-1$
 						}
 						s.close();
 						throw(new InvocationTargetException(e));
@@ -462,7 +466,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(getShell(),"Error occurred while updating areas.", e);
+			SmartPlugIn.displayLog(getShell(),Messages.AreaPropertyPage_Error_UpdatingAreas, e);
 		}
 	}
 	

@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Dialog for restoring backup file.
@@ -86,7 +87,7 @@ public class RestoreDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("File:");
+		lbl.setText(Messages.RestoreDialog_FileNameLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtRestorefile = new Text(main, SWT.DEFAULT);
@@ -100,7 +101,7 @@ public class RestoreDialog extends TitleAreaDialog {
 		txtRestorefile.setSelection(txtRestorefile.getText().length());
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.RestoreDialog_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -108,15 +109,15 @@ public class RestoreDialog extends TitleAreaDialog {
 				File f = new File(txtRestorefile.getText());
 				fd.setFilterPath(f.getParent());
 				fd.setFileName(f.getName());
-				fd.setFilterNames(new String[]{"zip (*.zip)", "*.*"});
-				fd.setFilterExtensions(new String[]{"*.zip", "*.*"});
+				fd.setFilterNames(new String[]{"zip (*.zip)", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterExtensions(new String[]{"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				String file = fd.open();
 				if (file == null){
 					return;
 				}else{
-					if (!file.endsWith(".zip")){
-						file = file + ".zip";
+					if (!file.endsWith(".zip")){ //$NON-NLS-1$
+						file = file + ".zip"; //$NON-NLS-1$
 					}
 					txtRestorefile.setText(file);
 				}
@@ -155,7 +156,7 @@ public class RestoreDialog extends TitleAreaDialog {
 		if (IDialogConstants.OK_ID == buttonId) {
 			File file = new File(txtRestorefile.getText());
 			if (!file.exists()){
-				MessageDialog.openError(getShell(), "File error", "The file '" + file.getAbsolutePath() + "' does not exist.");
+				MessageDialog.openError(getShell(), Messages.RestoreDialog_Error_DialogTitle, Messages.RestoreDialog_FileError_DialogMessage + file.getAbsolutePath() );
 				return;
 			}
 			selectedFile = file;

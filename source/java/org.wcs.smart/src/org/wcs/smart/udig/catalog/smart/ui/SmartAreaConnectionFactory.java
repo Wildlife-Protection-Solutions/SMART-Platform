@@ -40,8 +40,8 @@ public class SmartAreaConnectionFactory extends UDIGConnectionFactory {
 			return (URL)context;
 		}
 		if (context instanceof Map){
-			@SuppressWarnings("rawtypes")
-			Map<String, Serializable> params = (Map)context;
+			@SuppressWarnings("unchecked")
+			Map<String, Serializable> params = (Map<String,Serializable>)context;
 			return SmartServiceExtension.createURL(params);
 		}
 		return null;

@@ -40,12 +40,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Conservation area data model attribute object
@@ -60,8 +60,8 @@ import org.wcs.smart.ca.ConservationArea;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Attribute extends DmObject{
 
-	public static final String BOOLEAN_TRUE_LABEL = "Yes";
-	public static final String BOOLEAN_FALSE_LABEL = "No";
+	public static final String BOOLEAN_TRUE_LABEL = Messages.Attribute_BooleanAttribute_True_Label;
+	public static final String BOOLEAN_FALSE_LABEL = Messages.Attribute_BooleanAttribute_False_Label;
 	/**
 	 * Conservation are associated with attribute
 	 */
@@ -90,16 +90,20 @@ public class Attribute extends DmObject{
 	/* for tree type attributes */
 	private List<AttributeTreeNode> rootTreeNodes = null;
 	private List<AttributeTreeNode> activeTootTreeNodes = null;
+	
 	/**
 	 * Represents the type of the data model attribute
 	 */
 	public enum AttributeType{
-		NUMERIC("n"),
-		TEXT("s"),
-		LIST("l"),
-		TREE("t"),
-		BOOLEAN("b");
+		NUMERIC("n"), //$NON-NLS-1$
+		TEXT("s"), //$NON-NLS-1$
+		LIST("l"), //$NON-NLS-1$
+		TREE("t"), //$NON-NLS-1$
+		BOOLEAN("b"); //$NON-NLS-1$
 		
+		/**
+		 * type key is used in the queries
+		 */
 		public String typeKey;
 	
 		private AttributeType(String typeKey){

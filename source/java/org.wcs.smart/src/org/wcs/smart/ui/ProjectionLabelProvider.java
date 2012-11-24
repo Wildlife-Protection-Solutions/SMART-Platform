@@ -48,6 +48,7 @@ public class ProjectionLabelProvider extends LabelProvider{
 		return instance;
 		
 	}
+	
 	@Override
 	public String getText(Object element){
 		if (element instanceof Projection){
@@ -58,7 +59,7 @@ public class ProjectionLabelProvider extends LabelProvider{
 				try {
 					return ((Projection) element).getCrs().getName().getCode();
 				} catch (FactoryException e) {
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 			}
 		}

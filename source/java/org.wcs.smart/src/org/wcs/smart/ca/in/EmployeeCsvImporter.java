@@ -38,9 +38,11 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+import com.ibm.icu.text.MessageFormat;
 import com.ibm.icu.text.SimpleDateFormat;
 
 /**
@@ -51,23 +53,26 @@ import com.ibm.icu.text.SimpleDateFormat;
  * @since 1.0.0
  */
 public class EmployeeCsvImporter {
-/* to export employees from derby in correct format:
- * SELECT ID || ',' || givenname ||',' || familyname || ',' || 
-cast( birthdate as varchar(10))  || ',' || gender ||','
-|| 
-cast( startemployementdate as varchar(10)) 
- ||',' || case when endemployementdate is null then '' else  cast(endemployementdate as varchar(10))  end || ',,'
-FROM SMART.EMPLOYEE;
- */
+	private static final String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
+
+	/* to export employees from derby in correct format:
+	 * 	SELECT ID || ',' || givenname ||',' || familyname || ',' || 
+	 * cast( birthdate as varchar(10))  || ',' || gender ||','
+	 * || 
+	 * cast( startemployementdate as varchar(10)) 
+ 	 * ||',' || case when endemployementdate is null then '' else  cast(endemployementdate as varchar(10))  end || ',,'
+	 * FROM SMART.EMPLOYEE;
+	 */
 	
 	/**
 	 * FEMALE key for CSV file format 
 	 */
-	private static final String FEMALE = "F";
+	private static final String FEMALE = Messages.EmployeeCsvImporter_Female_Export_Key;
+
 	/**
 	 * MALE key for CSV file format
 	 */
-	private static final String MALE = "M";
+	private static final String MALE = Messages.EmployeeCsvImporter_Male_Export_Key;
 
 	/**
 	 * Current conservation area agencies
@@ -88,7 +93,7 @@ FROM SMART.EMPLOYEE;
 	 */
 	public boolean importCsvFile(File file, boolean skipHeader, IProgressMonitor monitor, Session session) throws Exception{
 		if (!file.exists()){
-			throw new IOException("The file: " + file.toString() + " does not exist.");
+			throw new IOException(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist + file.toString() );
 		}
 		
 		CSVReader reader = new CSVReader(new FileReader(file));
@@ -104,7 +109,7 @@ FROM SMART.EMPLOYEE;
 		while( (data = reader.readNext()) != null ){
 			if (monitor.isCanceled()) return false;
 			if (data.length != 9){
-				throw new Exception("Invalid number of fields on line: " + line + ".  Was " + data.length + " requires 9.");
+				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InvalidNumberField, new Object[]{line, data.length}) + line);
 			}
 			Employee e = new Employee();
 			int index = 0;
@@ -117,35 +122,35 @@ FROM SMART.EMPLOYEE;
 			// given name
 			String given = data[index++];
 			if (given == null || given.trim().length() == 0){
-				throw new Exception("Give name required and not provided on line: " + line);
+				throw new Exception(Messages.EmployeeCsvImporter_Error_NoGivenName + line);
 			}
 			e.setGivenName(given.trim());
 			
 			//family name
 			String family = data[index++];
 			if (family == null || family.trim().length() == 0){
-				throw new Exception("Family name required and not provided on line: " + line);
+				throw new Exception(Messages.EmployeeCsvImporter_Error_NoFamilyName + line);
 			}
 			e.setFamilyName(family.trim());
 			
 			//birth date
 			String birth = data[index++];
 			if (birth == null || birth.trim().length() != 10){
-				throw new Exception("Birth date must be provided in the format yyyy-mm-dd at line " + line);
+				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDateFormat, new Object[]{DATE_FORMAT}) + line);
 			}
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
 			try{
 				Date dt = format.parse(birth);
 				e.setBirthDate(dt);
 			}catch (ParseException ex){
-				throw new Exception("Invalid birth date format on line " + line, ex);
+				throw new Exception(Messages.EmployeeCsvImporter_Error_BirthDate + line, ex);
 			}
 			
 			//gender
 			String gender = data[index++];
 			if (gender == null || gender.trim().length() != 1 || 
 					!(gender.trim().toUpperCase().equals(FEMALE) || gender.trim().toUpperCase().equals(MALE))){
-				throw new Exception("Gender is required and must be " + FEMALE + " (female) or " + MALE + " male at line " + line);
+				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_Gender, new Object[]{FEMALE, MALE}) + line);
 			}
 			if (gender.trim().toUpperCase().equals(FEMALE)){
 				e.setGender(Employee.DB_FEMALE);
@@ -156,16 +161,16 @@ FROM SMART.EMPLOYEE;
 			//start employment date
 			String start = data[index++];
 			if (start == null || start.trim().length() != 10){
-				throw new Exception("Sart employment date must be provided in the format yyyy-mm-dd at line " + line);
+				throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT }) + line);
 			}
 			try{
 				Date dt = format.parse(start);
 				e.setStartEmploymentDate(dt);
 			}catch (ParseException ex){
-				throw new Exception("Invalid start employment date format on line " + line);
+				throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT }) + line);
 			}
 			if (e.getStartEmploymentDate().before(e.getBirthDate())){
-				throw new Exception("Invalid start employement date on line " + line + ".  It must be after the employee birth date.");
+				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartAfterEmployeeBirthDate, new Object[]{line}));
 			}
 				
 			//start employments
@@ -174,16 +179,16 @@ FROM SMART.EMPLOYEE;
 				e.setEndEmploymentDate(null);
 			}else {
 				if (end.trim().length() != 10){
-					throw new Exception("End employment date must be provided in the format yyyy-mm-dd at line " + line);
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT}) + line);
 				}
 				try{
 					Date dt = format.parse(end);
 					e.setEndEmploymentDate(dt);
 				}catch (ParseException ex){
-					throw new Exception("Invalid end employment date format on line " + line);
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT}) + line);
 				}
 				if (e.getEndEmploymentDate().before(e.getStartEmploymentDate()) || e.getEndEmploymentDate().before(e.getBirthDate())){
-					throw new Exception("Invalid end employment date on line " + line + ".  Date must be after start employement date and after end employment date.");
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndAfterStartDate, new Object[]{line})); 
 				}
 			}
 			
@@ -199,7 +204,7 @@ FROM SMART.EMPLOYEE;
 				Agency ag = findAgency(agency, session);
 				if (ag == null){
 					//warning or something here
-					throw new Exception("Agency " + agency + " not found on line " + line);
+					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency}) + line);
 				}else{
 					e.setAgency(ag);
 					//look for matching rank
@@ -208,7 +213,7 @@ FROM SMART.EMPLOYEE;
 					}else{
 						Rank r = findRank(ag, rank);
 						if (r == null){
-							throw new Exception("Rank " + rank + " not found for agency " + agency + " on line " + line);
+							throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency}) + line);
 						}else{
 							e.setRank(r);
 						}
@@ -231,7 +236,7 @@ FROM SMART.EMPLOYEE;
 			}
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			throw new Exception("Failed to save parsed employees: " + ex.getMessage(), ex);
+			throw new Exception(Messages.EmployeeCsvImporter_Error_ParseError + ex.getMessage(), ex);
 		}
 		return true;
 	}
@@ -284,7 +289,7 @@ FROM SMART.EMPLOYEE;
 	public List<Agency> loadAgencies(Session session){
 		List<Agency> agencies = null;
 		session.beginTransaction();
-		agencies = session.createCriteria(Agency.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+		agencies = session.createCriteria(Agency.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 		session.getTransaction().commit();
 		return agencies;
 	}

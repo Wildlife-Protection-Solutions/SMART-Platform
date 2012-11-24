@@ -81,6 +81,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -91,6 +92,21 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @since 1.0.0
  */
 public abstract class SmartMapEditorPart  extends EditorPart implements MapPart {
+
+	/**
+	 * Coordinate text x,y separator
+	 */
+	public static final String COORDINATE_XYSEPARATOR = Messages.SmartMapEditorPart_MapCoordinate_XYSeparator;
+
+	/**
+	 * Coordinate widget label
+	 */
+	public static final String COORDINATE_LABEL = Messages.SmartMapEditorPart_MapCoordinate_Label;
+
+	/**
+	 * Projection error meesage
+	 */
+	public static final String ERROR_SETTING_MAP_PROJECTION = Messages.SmartMapEditorPart_Error_SettingMapProjection;
 
 	protected MapViewer mapViewer;
 
@@ -246,7 +262,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         
 		MapToolComposite tools = new MapToolComposite();
 		tools.createComposite(composite);
-		tools.selectTool("net.refractions.udig.tools.Pan");
+		tools.selectTool("net.refractions.udig.tools.Pan"); //$NON-NLS-1$
 		
         Composite infoArea = new Composite(parent, SWT.NONE);
         GridLayout gl = new GridLayout(5, false);
@@ -256,7 +272,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         infoArea.setLayout(gl);
         infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2, 1));
         lblCoordinates = new Label(infoArea, SWT.NONE);
-        lblCoordinates.setText("Coordinates");
+        lblCoordinates.setText(COORDINATE_LABEL);
         lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         lblCoordinates.setAlignment(SWT.RIGHT);
         
@@ -286,7 +302,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
 						getMap().sendCommandASync(command);
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getSite().getShell(), "Error setting map projection.\n\n" + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(getSite().getShell(), ERROR_SETTING_MAP_PROJECTION + ex.getMessage(), ex);
 					}	
 				}
 			}
@@ -310,7 +326,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 			public void mouseMoved(MapMouseEvent event) {
 				event.getPoint();
 				Coordinate c = mapViewer.getMap().getViewportModelInternal().pixelToWorld(event.x, event.y);
-				lblCoordinates.setText(format(c.x) + ", " + format(c.y));
+				lblCoordinates.setText(format(c.x) + COORDINATE_XYSEPARATOR + format(c.y));
 			}
 			
 			private String format(double d){

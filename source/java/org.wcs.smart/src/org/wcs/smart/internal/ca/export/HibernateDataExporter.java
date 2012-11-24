@@ -28,6 +28,7 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Conservation area data exporter that will export
@@ -45,9 +46,9 @@ public class HibernateDataExporter implements ICaDataExporter {
 	public void exportData(ICaDataExportEngine exportEngine, IProgressMonitor monitor) throws Exception {
 		/* export all mapped tables */
 		List<TableInfo> info = HibernateManager.getTableInformation();
-		monitor.beginTask("Exporting Mapped Tables", info.size());
+		monitor.beginTask(Messages.HibernateDataExporter_Progress_ExportMappedTables, info.size());
 		for (TableInfo in : info) {
-			monitor.subTask("Processing: " + in.getTableName());
+			monitor.subTask(Messages.HibernateDataExporter_SubProgress_ProcessingTable + in.getTableName());
 			monitor.worked(1);
 
 			if (in.getCaPropertyName() != null) {

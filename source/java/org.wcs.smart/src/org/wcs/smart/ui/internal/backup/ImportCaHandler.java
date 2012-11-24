@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.in.CaImporter;
 
 /**
@@ -45,8 +46,8 @@ public class ImportCaHandler {
 
 		MessageDialog confirm = new MessageDialog(
 				shell,
-				"Confirm Restore",null,
-				"Would you like to backup the current database before importing your conservation area?",
+				Messages.ImportCaHandler_Confirm_DialogTitle,null,
+				Messages.ImportCaHandler_Confirm_DialogMessage,
 				MessageDialog.QUESTION_WITH_CANCEL,
 				new String[]{IDialogConstants.YES_LABEL,
 						IDialogConstants.NO_LABEL,
@@ -58,7 +59,7 @@ public class ImportCaHandler {
 			BackupHandler handler = new BackupHandler();
 			handler.executeBackup(shell, false);
 			if (!handler.backupOk()){
-				MessageDialog.openError(shell, "Error", "Error occurred during backup process.  Restore will not proceed.");
+				MessageDialog.openError(shell, Messages.ImportCaHandler_Error_DialogTitle, Messages.ImportCaHandler_Error_BackupMessage);
 			}
 			
 		}else if (ret == 1){
@@ -69,9 +70,9 @@ public class ImportCaHandler {
 		}
 			
 		final RestoreDialog dialog = new RestoreDialog(shell,
-				"Import Conservation Area",
-				"Select the conservation area data file.", 
-				"Import Conservation Area", "Import");
+				Messages.ImportCaHandler_DialogTitle,
+				Messages.ImportCaHandler_DialogMessage, 
+				Messages.ImportCaHandler_DialogTitle, Messages.ImportCaHandler_ImportButton);
 
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
@@ -86,16 +87,16 @@ public class ImportCaHandler {
 					File f = dialog.getSelectedFile();
 					try{
 						CaImporter.importCa(f, monitor);
-						MessageDialog.openInformation(shell, "Import Complete", "Conservation area import completed");		
+						MessageDialog.openInformation(shell, Messages.ImportCaHandler_Complete_DialogTitle, Messages.ImportCaHandler_Complete_DialogMessage);		
 					}catch (final Exception ex){
-						SmartPlugIn.displayLog(shell,"Import Failed.\n\n" + ex.getMessage(), ex);		
+						SmartPlugIn.displayLog(shell,Messages.ImportCaHandler_ImportFailed_Message + ex.getMessage(), ex);		
 					}
 
 				}
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Import Failed. " + ex.getMessage(), ex);
+					Messages.ImportCaHandler_ImportFailed_Message + ex.getMessage(), ex);
 		}
 		return;
 	}

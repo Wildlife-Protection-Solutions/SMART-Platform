@@ -13,6 +13,7 @@ import org.eclipse.ui.about.InstallationPage;
 
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 public class SmartInstallationInfoPage extends InstallationPage {
@@ -33,7 +34,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txt.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		StringBuilder sb = new StringBuilder();
-		sb.append("Database Location: ");
+		sb.append(Messages.SmartInstallationInfoPage_DBLocation_Label);
 		
 		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY);
 		File db = new File(embeddedDb);
@@ -45,7 +46,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		
-		sb.append("Filestore Location: ");
+		sb.append(Messages.SmartInstallationInfoPage_FilestoreLocation_Label);
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
 		db = new File(embeddedDb);
 		try{
@@ -56,7 +57,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		
-		sb.append("GPS Babel Location: ");
+		sb.append(Messages.SmartInstallationInfoPage_GPSBabel_LocationLabel);
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.GPS_BABLE_KEY);
 		db = new File(embeddedDb);
 		try{
@@ -68,11 +69,11 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		
 		
-		sb.append("System Language: ");
+		sb.append(Messages.SmartInstallationInfoPage_SystemLang_Label);
 		sb.append(Platform.getNL());
 		sb.append(SmartUtils.LINE_SEPARATOR);
-		sb.append("CA Default Language: ");
-		sb.append(SmartDB.getCurrentLanguage().getName() + " [" + SmartDB.getCurrentLanguage().getCode() + "]");
+		sb.append(Messages.SmartInstallationInfoPage_DefaultLang_Label);
+		sb.append(SmartDB.getCurrentLanguage().getName() + " [" + SmartDB.getCurrentLanguage().getCode() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		txt.setText(sb.toString());
 	}

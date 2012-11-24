@@ -40,6 +40,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * 
@@ -55,18 +56,18 @@ public class DeleteConservationArea extends AbstractHandler {
 		
 		//ensure the user has permission
 		if (SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ADMIN){
-			MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Delete", "You do not have permission to delete conservation areas.  Please contact an administrator.");
+			MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Delete_DialogTitle, Messages.DeleteConservationArea_Error_Permission);
 			return null;
 		}
 		
-		if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Delete", "Are you sure you want to delete this conservation area.  This action cannot be undone.")){
+		if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Delete_DialogTitle, Messages.DeleteConservationArea_Confirm_Delete)){
 			return null;
 		}
 		
 		UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(),
-				"Delete Conservation Area",
-				"Enter your username and password to confirm that you want to delete this conservation area.",
-				"Delete");
+				Messages.DeleteConservationArea_UserNameConfirmation_DialogTitle,
+				Messages.DeleteConservationArea_UserNameConfirmation_DialogMessage,
+				Messages.DeleteConservationArea_UserNameConfirmation_DialogButton);
 		if (dialog.open() == Window.CANCEL){
 			return null;
 		}
@@ -74,7 +75,7 @@ public class DeleteConservationArea extends AbstractHandler {
 		if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
 			&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)){
 			
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", "Invalid username and password.");
+			MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Error_DialogTitle, Messages.DeleteConservationArea_Error_Username_DialogMessage);
 			return null;
 		}
 		
@@ -96,7 +97,7 @@ public class DeleteConservationArea extends AbstractHandler {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 				
-				monitor.setTaskName("Deleting Conservation Area");
+				monitor.setTaskName(Messages.DeleteConservationArea_Progress_DeletingCa);
 				ConservationArea ca = SmartDB.getCurrentConservationArea();
 				try{
 					ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor);
@@ -104,7 +105,7 @@ public class DeleteConservationArea extends AbstractHandler {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), "Error deleting conservation area.", ex);
+							SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Error_DeleteError, ex);
 						}
 						
 					});
@@ -114,7 +115,7 @@ public class DeleteConservationArea extends AbstractHandler {
 			}
 		});
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), "Error running delete job.", ex);
+			SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Error_DeleteJobError, ex);
 		}
 		
 		

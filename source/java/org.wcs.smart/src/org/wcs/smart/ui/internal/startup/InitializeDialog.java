@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.startup;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -36,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.SmartStartUp;
 import org.wcs.smart.ui.internal.backup.ImportCaHandler;
 import org.wcs.smart.ui.internal.backup.RestoreHandler;
@@ -43,8 +45,8 @@ import org.wcs.smart.ui.internal.backup.RestoreHandler;
 /**
  * Abstract dialog for start-up smart dialogs.
  * <p>
- * Displays a list of items people can perform without
- * logging into a conservation area.
+ * Displays a list of actions people can perform without
+ * logging into a conservation area such as creating a new CA.
  * </p>
  * 
  * @author egouge
@@ -130,15 +132,15 @@ public abstract class InitializeDialog  extends Dialog {
 		opComp.setLayout(gl);
 		
 		final Button opCreateNew = new Button(opComp, SWT.RADIO);
-		opCreateNew.setText("Create a New Conservation Area");
+		opCreateNew.setText(Messages.InitializeDialog_CreateCa_Label);
 		opCreateNew.setSelection(true);
 		
 
 		final Button opRestore = new Button(opComp, SWT.RADIO);
-		opRestore.setText("Restore a Backup");
+		opRestore.setText(Messages.InitializeDialog_Restore_Label);
 
 		final Button opImport = new Button(opComp, SWT.RADIO);
-		opImport.setText("Import a Conservation Area");
+		opImport.setText(Messages.InitializeDialog_Import_Label);
 		
 		Label lbl = new Label(shell, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,false));
@@ -151,7 +153,7 @@ public abstract class InitializeDialog  extends Dialog {
 		buttonComp.setLayout(gl);
 				
 		Button btnCancel = new Button(buttonComp, SWT.NONE);
-		btnCancel.setText("Cancel");
+		btnCancel.setText(IDialogConstants.CANCEL_LABEL);
 		btnCancel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true));
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -163,7 +165,7 @@ public abstract class InitializeDialog  extends Dialog {
 		});
 
 		Button btnContinue = new Button(buttonComp, SWT.NONE);
-		btnContinue.setText("Continue");
+		btnContinue.setText(Messages.InitializeDialog_Continue_Button);
 		btnContinue.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		btnContinue.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -177,8 +179,8 @@ public abstract class InitializeDialog  extends Dialog {
 					importCa();
 				} else {
 					MessageDialog
-							.openError(shell, "Error",
-									"Invalid option selected.  Please select one of the above options.");
+							.openError(shell, Messages.InitializeDialog_Error_DialogTitle,
+									Messages.InitializeDialog_Error_NoOp_DialogMessage);
 				}
 			}
 
@@ -211,8 +213,7 @@ public abstract class InitializeDialog  extends Dialog {
 			handler.execute(shell);
 			shell.dispose();
 		}catch (Exception ex){
-			MessageDialog.openError(shell, "Restore Error", "Error occurred during system restore.  You may have to restore the system manually. \n\n" + ex.getMessage());
-			SmartPlugIn.log("Error during restore", ex);
+			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_SystemRestore + ex.getMessage(), ex);
 		}
 	}
 	
@@ -225,8 +226,7 @@ public abstract class InitializeDialog  extends Dialog {
 			handler.execute(shell);
 			shell.dispose();
 		}catch(Exception ex){
-			MessageDialog.openError(shell, "Import Error", "Error occurred while importing Conservation Area.\n\n" + ex.getMessage());
-			SmartPlugIn.log("Error during import.", ex);
+			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_ImportCa + ex.getMessage(), ex);
 		}
 	}
 	

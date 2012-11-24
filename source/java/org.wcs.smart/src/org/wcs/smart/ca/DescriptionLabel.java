@@ -102,6 +102,11 @@ public class DescriptionLabel {
 	
 	@Embeddable
 	protected static class DescLabelItemPK implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
 		private Language language;
 		private byte[] element;
 

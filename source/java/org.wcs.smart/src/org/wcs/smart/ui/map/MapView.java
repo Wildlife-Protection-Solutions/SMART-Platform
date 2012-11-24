@@ -50,6 +50,7 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.ZoomHandler;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -63,16 +64,12 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class MapView extends ViewPart implements MapPart, IAdaptable {
 
-	public static String ID = "org.wcs.smart.ui.map.MapView";
-    // private GISWidget widget;
+	public static final String ID = "org.wcs.smart.ui.map.MapView"; //$NON-NLS-1$
+	private static final String MAP_NAME = Messages.MapView_MapName;
+	
     private MapViewer mapviewer;
-    // private RenderManager renderManager;
     private Map map;
 
-//    private ModalTool activeTool;
-//    private ToolContext toolcontext;
-    
-    
     IPartListener2 partlistener = new IPartListener2(){
         public void partActivated( IWorkbenchPartReference partRef ) {
         	if (partRef.getPart(false) == MapView.this){
@@ -131,7 +128,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         // prior to adding to the mapviewer
         // 
         map = (Map) ProjectFactory.eINSTANCE.createMap();
-        map.setName("Smart Map");
+        map.setName(MAP_NAME);
         mapviewer.setMap(map);
 		
         //set default crs
@@ -144,7 +141,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
         infoArea.setLayout(gl);
         infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         lblCoordinates = new Label(infoArea, SWT.NONE);
-        lblCoordinates.setText("Coordinates");
+        lblCoordinates.setText(SmartMapEditorPart.COORDINATE_LABEL);
         lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         lblCoordinates.setAlignment(SWT.RIGHT);
         
@@ -174,7 +171,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
 						map.sendCommandASync(command);
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getSite().getShell(), "Error setting map projection.\n\n" + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(getSite().getShell(), SmartMapEditorPart.ERROR_SETTING_MAP_PROJECTION + ex.getMessage(), ex);
 					}	
 				}
 			}
@@ -202,7 +199,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 			public void mouseMoved(MapMouseEvent event) {
 				event.getPoint();
 				Coordinate c = map.getViewportModelInternal().pixelToWorld(event.x, event.y);
-				lblCoordinates.setText(format(c.x) + ", " + format(c.y));
+				lblCoordinates.setText(format(c.x) + SmartMapEditorPart.COORDINATE_XYSEPARATOR + format(c.y));
 				//see CursorPosition Tool
 			}
 			

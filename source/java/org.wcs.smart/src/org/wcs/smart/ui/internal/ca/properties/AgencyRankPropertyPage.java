@@ -60,6 +60,7 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
@@ -72,7 +73,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 
-	public static final String ID = "org.wcs.smart.ca.AgencyRankPropPage";
+	private static final String INVALID_NAME_DIALOG_TITLE = Messages.AgencyRankPropertyPage_InvalidName_DialogTitle;
+	
 	/* ui components */
 	private LanguageViewer cmbLanguage;
 	private TableViewer tblAgencies;
@@ -122,7 +124,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 * Creates a new agency and rank property page
 	 */
 	public AgencyRankPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Agency and Rank List");
+		super(Display.getCurrent().getActiveShell(), Messages.AgencyRankPropertyPage_DialogTitle);
 		toDelete = new HashSet<Agency>();
 	}
 
@@ -134,7 +136,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		/* Language */
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel.setText("Language:");
+		lblNewLabel.setText(Messages.AgencyRankPropertyPage_Language_Label);
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
 		cmbLanguage = new LanguageViewer(container, SWT.NONE,ca);
@@ -145,7 +147,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		/* Agency */
 		Label lblAgencies = new Label(container, SWT.NONE);
-		lblAgencies.setText("Agencies:");
+		lblAgencies.setText(Messages.AgencyRankPropertyPage_Agencies_Label);
 		lblAgencies.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3,1));
 		
 		Composite owner = new Composite(container, SWT.NONE);
@@ -159,7 +161,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1,1));
 		
 		Button btnAddAgency = new Button(buttons, SWT.NONE);
-		btnAddAgency.setText("Add Agency");
+		btnAddAgency.setText(Messages.AgencyRankPropertyPage_Add_Button);
 		btnAddAgency.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -167,7 +169,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		Button btnDeleteAgency = new Button(buttons, SWT.NONE);
-		btnDeleteAgency.setText("Delete Agency");
+		btnDeleteAgency.setText(Messages.AgencyRankPropertyPage_Delete_Button);
 		btnDeleteAgency.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -203,7 +205,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		/* Rank */
 		Label lblRanks = new Label(container, SWT.NONE);
 		lblRanks.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-		lblRanks.setText("Ranks:");
+		lblRanks.setText(Messages.AgencyRankPropertyPage_Ranks_Label);
 		
 		owner = new Composite(container, SWT.NONE);
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2,1));
@@ -215,7 +217,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		buttons_1.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1,1));
 		
 		btnAddRank = new Button(buttons_1, SWT.NONE);
-		btnAddRank.setText("Add Rank");
+		btnAddRank.setText(Messages.AgencyRankPropertyPage_AddRank_Button);
 		btnAddRank.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -224,7 +226,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		btnDeleteRank = new Button(buttons_1, SWT.NONE);
-		btnDeleteRank.setText("Delete Rank");
+		btnDeleteRank.setText(Messages.AgencyRankPropertyPage_DeleteRank_Button);
 		btnDeleteRank.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -235,7 +237,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		tblAgencies.refresh();
 		
-		setMessage("Agency and Rank for Employees.");
+		setMessage(Messages.AgencyRankPropertyPage_DialogMessage);
 		return container;
 	}
 	
@@ -265,7 +267,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					} 
 					if(matches > 0){
 						//invalid agency name, don't update it.
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Agency Name cannot be a duplicate.");
+						MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, Messages.AgencyRankPropertyPage_Error_DuplicateAgency);
 						setChangesMade(false);
 					}else{
 						element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
@@ -273,7 +275,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					}
 				}else{
 					//invalid agency name, don't update it.
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Agency Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, Messages.AgencyRankPropertyPage_Error_InvalidName + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 					setChangesMade(false);
 				}
 			}
@@ -308,7 +310,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 
 					if(matches > 0){
 						//invalid agency name, don't update it.
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Rank cannot be a duplicate.");
+						MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, Messages.AgencyRankPropertyPage_Error_DuplicateRank);
 						setChangesMade(false);
 					}else{
 						element.updateName(cmbLanguage.getCurrentSelection(), newName.trim());
@@ -316,7 +318,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					}
 				}else{
 					//invalid agency name, don't update it.
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Rank Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, Messages.AgencyRankPropertyPage_Error_InvalidRankName + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 					setChangesMade(false);
 				}
 
@@ -453,7 +455,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			setChangesMade(false);
 			return true;
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(),"Error saving agency/rank updates.  Please close and re-open dialog." + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(getShell(),Messages.AgencyRankPropertyPage_Error_Save + ex.getLocalizedMessage(), ex);
 			tx.rollback();
 			s.close();			
 		}
@@ -484,7 +486,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		final Agency agency = new Agency();
 		org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
 		lbl.setLanguage(cmbLanguage.getCurrentSelection());
-		lbl.setValue("New Agency");
+		lbl.setValue(Messages.AgencyRankPropertyPage_DefaultAgencyName);
 		lbl.setElement(agency);
 		agency.getNames().add(lbl);
 		agency.setConservationArea(ca);
@@ -510,7 +512,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					agencies.remove(type);
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), "Could not delete agency : " + type.getName(), ex);
+				SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName(), ex);
 			}
 			
 			
@@ -526,7 +528,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			final Rank rank = new Rank();
 			org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
 			lbl.setLanguage(cmbLanguage.getCurrentSelection());
-			lbl.setValue("New Rank");
+			lbl.setValue(Messages.AgencyRankPropertyPage_DefaultRankName);
 			lbl.setElement(rank);
 			rank.getNames().add(lbl);
 			rank.setAgency(current);
@@ -559,7 +561,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 			}
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Could not delete rank: " + r.getName(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteRank + r.getName(), ex);
 		}
 		
 		

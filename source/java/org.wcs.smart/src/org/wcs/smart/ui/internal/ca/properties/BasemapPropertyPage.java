@@ -41,7 +41,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Property page for displaying basemaps, picking a deafult
@@ -58,7 +60,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	public BasemapPropertyPage() {
 		super(Display.getCurrent().getActiveShell(),
-				"Manage basemap options");
+				Messages.BasemapPropertyPage_Dialog_Title);
 
 	}
 
@@ -97,7 +99,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		setMessage("The following basemaps are defined for this conservaton area.");
+		setMessage(Messages.BasemapPropertyPage_Dialog_Message);
 
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
@@ -108,7 +110,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			public String getText(Object element){
 				if (element instanceof BasemapDefinition){
 					if (((BasemapDefinition) element).getIsDefault()){
-						return ((BasemapDefinition) element).getName() + "  [default]";
+						return ((BasemapDefinition) element).getName() + Messages.BasemapPropertyPage_DefaultLabel;
 					}else{
 						return ((BasemapDefinition) element).getName();
 					}
@@ -117,14 +119,14 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
-		lstBasemaps.setInput(new String[]{"Loading ..."});
+		lstBasemaps.setInput(new String[]{Messages.BasemapPropertyPage_Progress_Loading});
 		
 		
 		Composite compButtons = new Composite(comp, SWT.NONE);
 		compButtons.setLayout(new GridLayout(1, false));
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		Button btnSetDefault = new Button(compButtons, SWT.PUSH);
-		btnSetDefault.setText("Set As Default");
+		btnSetDefault.setText(Messages.BasemapPropertyPage_SetDefaultButton);
 		btnSetDefault.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnSetDefault.addSelectionListener(new SelectionAdapter() {		
 			@Override
@@ -146,7 +148,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		
 		Button btnDelete = new Button(compButtons, SWT.PUSH);
-		btnDelete.setText("Delete");
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {		
 			@Override
@@ -185,7 +187,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			getSession().getTransaction().commit();
 			setChangesMade(false);
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Could not save basemap changes. " + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getMessage(), ex);
 			return false;
 		}
 		getSession().beginTransaction();

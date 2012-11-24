@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog box for adding/modifing an attribute list
@@ -68,7 +70,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Attribute List Element");
+		shell.setText(Messages.AttributeItemDialog_Dialog_Title);
 	}
 	
 	@Override
@@ -96,7 +98,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		
 		comp.createNameKeyFields(container, true, toUpdate.getKeyId() == null);
 		comp.initFields(toUpdate, lang);
-		setMessage("Create a attribute list element");
+		setMessage(Messages.AttributeItemDialog_Dialog_Message);
 		return container;
 		
 	}
@@ -105,8 +107,8 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Save", true);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 	
 	@Override

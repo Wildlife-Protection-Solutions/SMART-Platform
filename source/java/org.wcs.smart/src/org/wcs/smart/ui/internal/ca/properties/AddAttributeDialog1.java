@@ -50,6 +50,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Dialog to prompt user if they want to create a new attribute or add one of
@@ -105,7 +106,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Add Attribute");
+		shell.setText(Messages.AddAttributeDialog1_DialogTitle);
 	}
 
 	@Override
@@ -136,10 +137,10 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		composite.setLayout(new GridLayout(1, false));
 
 		Label lblNewLabel = new Label(composite, SWT.NONE);
-		lblNewLabel.setText("Would you like to:");
+		lblNewLabel.setText(Messages.AddAttributeDialog1_DialogQuestion_Label);
 
 		btnAddNew = new Button(composite, SWT.RADIO);
-		btnAddNew.setText("Create a new attribute");
+		btnAddNew.setText(Messages.AddAttributeDialog1_OpCreateNew);
 		btnAddNew.setSelection(false);
 		btnAddNew.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -153,7 +154,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 
 		btnAddExsiting = new Button(composite, SWT.RADIO);
 		btnAddExsiting.setSelection(true);
-		btnAddExsiting.setText("Add existing attribute(s)");
+		btnAddExsiting.setText(Messages.AddAttributeDialog1_OpAddExisting);
 		btnAddExsiting.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -173,7 +174,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		lblSelectAttribute.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,
 				false, false, 2, 1));
 		lblSelectAttribute.setBounds(0, 0, 58, 13);
-		lblSelectAttribute.setText("Select the attribute(s) to add:");
+		lblSelectAttribute.setText(Messages.AddAttributeDialog1_SelectAttribute_Label);
 
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(compAddExisting,
 				SWT.BORDER | SWT.FULL_SELECTION);
@@ -192,8 +193,8 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 			public String getText(Object element) {
 				if (element instanceof Attribute) {
 					Attribute att = (Attribute) element;
-					return att.findName(defaultLang) + " [" + att.getKeyId()
-							+ "]";
+					return att.findName(defaultLang) + " [" + att.getKeyId() //$NON-NLS-1$
+							+ "]"; //$NON-NLS-1$
 				}
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
@@ -245,8 +246,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		//set title message for dialog
-		setMessage("Add a new attribute to '" + category.findName(defaultLang)
-				+ "'");
+		setMessage(Messages.AddAttributeDialog1_DialogMessage + category.findName(defaultLang));
 		return myparent;
 	}
 

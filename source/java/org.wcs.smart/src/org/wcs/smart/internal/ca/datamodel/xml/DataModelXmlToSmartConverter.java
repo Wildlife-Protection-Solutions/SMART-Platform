@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +47,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AggregationType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryAttributeLink;
@@ -221,7 +223,7 @@ public class DataModelXmlToSmartConverter {
 				CategoryAttributeLink attribute = attributes.get(i);
 				Attribute att = attributeLookUp.get(attribute.getAttributekey());
 				if (att == null){
-					throw new ParseException("Attribute " + attribute + " not found for category " + xmlCat.getKey(), 0);
+					throw new ParseException(MessageFormat.format(Messages.DataModelXmlToSmartConverter_Error_CategoryAttributeNotFound, new Object[]{ attribute, xmlCat.getKey()}), 0);
 				}
 				CategoryAttribute ca = new CategoryAttribute(newCategory, att);
 				ca.setOrder(i);
@@ -354,7 +356,7 @@ public class DataModelXmlToSmartConverter {
 				return agg;
 			}
 		}
-		throw new ParseException("Could not find SMART database aggregation for xml aggregation " + name, 0);
+		throw new ParseException(Messages.DataModelXmlToSmartConverter_Error_AggregationNotFound + name, 0);
 	}
 	
 	/*
@@ -365,7 +367,7 @@ public class DataModelXmlToSmartConverter {
 		if (newtype != null){
 			return newtype;
 		}
-		throw new ParseException("Cannot determine attribute type for " + xmlType + ".", 0);
+		throw new ParseException(Messages.DataModelXmlToSmartConverter_Error_AttributeTypeNotFound + xmlType, 0);
 	}
 	
 	/*

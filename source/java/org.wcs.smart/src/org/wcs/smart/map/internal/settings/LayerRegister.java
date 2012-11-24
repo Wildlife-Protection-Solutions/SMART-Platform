@@ -77,12 +77,12 @@ public final class LayerRegister {
 
 	@Override
 	public String toString() {
-		return "LayerRegister [name=" + name + ", colourScheme=" + colourScheme
-				+ ", URI=" + URI + ", CRS=" + CRS + ", CQL=" + CQL
-				+ ", defaultColor=" + defaultColor + ", styleRegisterList="
-				+ styleRegisterList + ", maxScaleDenominator="
-				+ maxScaleDenominator + ", minScaleDenominator="
-				+ minScaleDenominator + ", envelope=" + (envelope ==null ? "" : envelope) + ", visible:" + (isVisible ? "true" : "false") + "]";
+		return "LayerRegister [name=" + name + ", colourScheme=" + colourScheme //$NON-NLS-1$ //$NON-NLS-2$
+				+ ", URI=" + URI + ", CRS=" + CRS + ", CQL=" + CQL //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ ", defaultColor=" + defaultColor + ", styleRegisterList=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ styleRegisterList + ", maxScaleDenominator=" //$NON-NLS-1$
+				+ maxScaleDenominator + ", minScaleDenominator=" //$NON-NLS-1$
+				+ minScaleDenominator + ", envelope=" + (envelope ==null ? "" : envelope) + ", visible:" + (isVisible ? "true" : "false") + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	}
 
 	public String getName() {

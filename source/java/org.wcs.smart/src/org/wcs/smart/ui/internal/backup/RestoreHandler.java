@@ -32,6 +32,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyRestoreEngine;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Handler for restoring backup file.
@@ -47,9 +48,7 @@ public class RestoreHandler {
 	 */
 	public void execute(final Shell shell) {
 
-		if (!MessageDialog.openConfirm(shell, "Restore", "Restoring a backup file will cause" +
-				" all conservation areas in the existing database to be removed and replaced" +
-				" with the data in the backup file.\n\nAre you sure you want to continue?")){
+		if (!MessageDialog.openConfirm(shell, Messages.RestoreHandler_ConfirmRestore_DialogTitle, Messages.RestoreHandler_ConfirmRestore_DialogMessage )){
 			return;
 		}
 		
@@ -59,8 +58,8 @@ public class RestoreHandler {
 		
 		MessageDialog confirm = new MessageDialog(
 				shell,
-				"Confirm Restore",null,
-				"It is recommeneded you backup the current database before restoring.  Would you like to backup now?",
+				Messages.RestoreHandler_ConfirmRestore_DialogTitle,null,
+				Messages.RestoreHandler_ConfirmRestore_BackupMessage,
 				MessageDialog.QUESTION_WITH_CANCEL,
 				new String[]{IDialogConstants.YES_LABEL,
 						IDialogConstants.NO_LABEL,
@@ -72,7 +71,7 @@ public class RestoreHandler {
 			BackupHandler handler = new BackupHandler();
 			handler.executeBackup(shell, false);
 			if (!handler.backupOk()){
-				MessageDialog.openError(shell, "Error", "Error occurred during backup process.  Restore will not proceed.");
+				MessageDialog.openError(shell, Messages.RestoreHandler_Error_DialogTitle, Messages.RestoreHandler_Error_Message);
 			}
 			
 		}else if (ret == 1){
@@ -83,9 +82,9 @@ public class RestoreHandler {
 		}
 			
 		final RestoreDialog dialog = new RestoreDialog(shell,
-				"Restore SMART backup",
-				"Select the file to restore.", 
-				"Restore", "Restore");
+				Messages.RestoreHandler_DialogTitle,
+				Messages.RestoreHandler_DialogMessage, 
+				Messages.RestoreHandler_DialogShellTitle, Messages.RestoreHandler_RestoreButton);
 
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
@@ -100,16 +99,16 @@ public class RestoreHandler {
 					File f = dialog.getSelectedFile();
 					try{
 						DerbyRestoreEngine.restoreSystem(f, monitor);	
-						MessageDialog.openInformation(shell, "Restore Complete", "System restore completed");
+						MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage);
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,"Restore Failed.\n\n" + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(shell,Messages.RestoreHandler_ReportFailed_Message + ex.getMessage(), ex);
 					}
 				}
 				
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Restore Failed. " + ex.getMessage(), ex);
+					Messages.RestoreHandler_ReportFailed_Message + ex.getMessage(), ex);
 		}
 		return;
 	}

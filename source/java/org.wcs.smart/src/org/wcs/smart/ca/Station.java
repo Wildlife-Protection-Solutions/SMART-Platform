@@ -30,6 +30,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.internal.Messages;
+
 /**
  * Station object.
  * 
@@ -41,12 +43,19 @@ import javax.persistence.Transient;
 public class Station extends SimpleListItemWithDescription {
 
 	@Transient
-	public static final String ID = "Id";
+	public static final String ID = Messages.Station_Id_Label;
 	@Transient
-	public static final String NAME = "Name";
+	public static final String NAME = Messages.Station_Name_Label;
 	@Transient
-	public static final String DESCRIPTION = "Description";
+	public static final String DESCRIPTION = Messages.Station_Description_Label;
+	
+	/**
+	 * Maximum length of station name
+	 */
 	public static final Integer MAX_STATION_NAME_LENGTH = 128;
+	/**
+	 * Maximum length of station description
+	 */
 	public static final Integer MAX_STATION_DESC_LENGTH = 256;
 
 	private ConservationArea ca;

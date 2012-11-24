@@ -32,6 +32,7 @@ import org.geotools.data.DataStoreFactorySpi;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Smart area data source factory.  This is a read only data source
@@ -40,7 +41,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class SmartDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param CA_UUID = new Param("cauuid", byte[].class, "Conservation Area", true); 
+	public static final Param CA_UUID = new Param("cauuid", byte[].class, Messages.SmartDataSourceFactory_CA_ParameterName, true);  //$NON-NLS-1$
 	  
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -58,7 +59,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "Smart database layers";
+		return Messages.SmartDataSourceFactory_SmartDataSourceDescription;
 	}
 
 	/* (non-Javadoc)
@@ -66,7 +67,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "SMART";
+		return Messages.SmartDataSourceFactory_SmartDataSourceName;
 	}
 
 	/* (non-Javadoc)
@@ -110,7 +111,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 			session.close();
 		}
 		if (ca == null ){
-			throw new IOException("Unable to read hibernate data source.");
+			throw new IOException(Messages.SmartDataSourceFactory_Error_ReadingSmartDataSource);
 		}
 		return new SmartDataSource(ca);
 	}
@@ -121,7 +122,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException("This is a read-only data store.");
+		throw new UnsupportedOperationException(Messages.SmartDataSourceFactory_Error_ReadOnly);
 	}
 
 }

@@ -123,7 +123,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     public void postWindowOpen() {
     	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().addWorkbenchListener(shutdownListener);
         //assign title to window
-        getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getId() + " - " + SmartDB.getCurrentConservationArea().getName());
+        getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getId() + " - " + SmartDB.getCurrentConservationArea().getName()); //$NON-NLS-1$ //$NON-NLS-2$
         
         /* -- setup part listener for layer view legend */
     	partListener = new IPartListener2() {
@@ -208,7 +208,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	PreferenceManager pm = PlatformUI.getWorkbench().getPreferenceManager();
     	IPreferenceNode[] nodes = pm.getRootSubNodes();
     	for (IPreferenceNode node: nodes){
-    		if (!node.getId().contains("smart")){
+    		if (!node.getId().contains("smart")){ //$NON-NLS-1$
     			pm.remove(node.getId());
     		}
     	}    	

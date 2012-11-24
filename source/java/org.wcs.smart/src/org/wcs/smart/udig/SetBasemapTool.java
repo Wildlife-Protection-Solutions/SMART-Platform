@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.ui.internal.LoadBasemapDialog;
 
@@ -42,7 +43,7 @@ import net.refractions.udig.project.ui.tool.AbstractActionTool;
  */
 public class SetBasemapTool extends AbstractActionTool{
 
-	public static final String ID = "org.wcs.smart.map.setBasemap";
+	public static final String ID = "org.wcs.smart.map.setBasemap"; //$NON-NLS-1$
 	
 	private BasemapDefinition selectedDef = null;
 	
@@ -71,7 +72,7 @@ public class SetBasemapTool extends AbstractActionTool{
 		final Map map = (Map) ApplicationGIS.getActiveMap();
 		if (map == null) return;
 		
-		Job loadMap = new Job("restore basemap"){
+		Job loadMap = new Job(Messages.SetBasemapTool_RestoreBasemap_JobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				MapSettings settings = MapSettings.getInstance(selectedDef); 

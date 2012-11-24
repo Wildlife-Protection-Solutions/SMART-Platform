@@ -38,6 +38,9 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.internal.Messages;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Dialog for displaying system
@@ -87,7 +90,7 @@ public class BackupDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("File:");
+		lbl.setText(Messages.BackupDialog_FileLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtBackupFile = new Text(main, SWT.DEFAULT);
@@ -103,7 +106,7 @@ public class BackupDialog extends TitleAreaDialog {
 		txtBackupFile.setSelection(txtBackupFile.getText().length());
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.BackupDialog_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -111,15 +114,15 @@ public class BackupDialog extends TitleAreaDialog {
 				File f = new File(txtBackupFile.getText());
 				fd.setFilterPath(f.getParent());
 				fd.setFileName(f.getName());
-				fd.setFilterNames(new String[]{"zip (*.zip)", "*.*"});
-				fd.setFilterExtensions(new String[]{"*.zip", "*.*"});
+				fd.setFilterNames(new String[]{"zip (*.zip)", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterExtensions(new String[]{"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				String file = fd.open();
 				if (file == null){
 					return;
 				}else{
-					if (!file.endsWith(".zip")){
-						file = file + ".zip";
+					if (!file.endsWith(".zip")){ //$NON-NLS-1$
+						file = file + ".zip"; //$NON-NLS-1$
 					}
 					txtBackupFile.setText(file);
 				}
@@ -153,7 +156,7 @@ public class BackupDialog extends TitleAreaDialog {
 		if (IDialogConstants.OK_ID == buttonId) {
 			File file = new File(txtBackupFile.getText());
 			if (file.exists()){
-				if (!MessageDialog.openConfirm(getShell(), "Confirm Overwrite", "The file '" + file.getAbsolutePath() + "' already exists.\n\nAre you sure you want to overwrite it?")){
+				if (!MessageDialog.openConfirm(getShell(), Messages.BackupDialog_Confirm_DialogTitle, MessageFormat.format(Messages.BackupDialog_Confirm_Message, new Object[]{ file.getAbsolutePath()}) )){
 					return;
 				}
 			}

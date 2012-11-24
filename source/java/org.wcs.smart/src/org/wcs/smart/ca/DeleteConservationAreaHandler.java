@@ -19,13 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.ca;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Handler that deletes all conservation area related information
@@ -44,42 +43,42 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		
-		monitor.subTask("Deleting employees");
+		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_Employees);
 		deleteEmployees(ca, session);
-		monitor.subTask("Deleting agencies and ranks");
+		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_AgencyRank);
 		deleteAgencyRanks(ca, session);
-		monitor.subTask("Deleting data model");
+		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_DataModel);
 		deleteDataModel(ca, session);
-		monitor.subTask("Deleting stations");
+		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_Stations);
 		deleteStations(ca, session);
 
 	}
 	
 	private void deleteAgencyRanks(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Agency where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from Agency where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteStations(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Station where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from Station where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteEmployees(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Employee where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from Employee where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteDataModel(ConservationArea ca, Session session) throws Exception{	
-		Query q = session.createQuery("delete from Category where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from Category where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 
-		q = session.createQuery("delete from Attribute where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		q = session.createQuery("delete from Attribute where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();	
 	}	
 	

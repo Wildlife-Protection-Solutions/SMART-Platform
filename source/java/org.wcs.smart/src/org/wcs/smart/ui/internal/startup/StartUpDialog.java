@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.startup;
 
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 
 /**
  * This dialog is shown to users if no conservation areas exist in the database
@@ -58,7 +59,7 @@ public class StartUpDialog extends InitializeDialog {
 	 */
 	@Override
 	public String getHeaderText() {
-		return "Welcome to SMART";
+		return Messages.StartUpDialog_DialogHeader;
 	}
 
 	/**
@@ -66,7 +67,7 @@ public class StartUpDialog extends InitializeDialog {
 	 */
 	@Override
 	public String getMessageText() {
-		return "No conservation areas currently exist.  Would you like to:";
+		return Messages.StartUpDialog_DialogMessage;
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class StartUpDialog extends InitializeDialog {
 	 */
 	@Override
 	public String getDialogText() {
-		return "Welcome To SMART";
+		return Messages.StartUpDialog_DialogTitle;
 	}
 
 }

@@ -62,6 +62,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.WorkbenchJob;
+import org.wcs.smart.internal.Messages;
 
 /**
  * A filter text box with clear option.
@@ -78,7 +79,7 @@ public class FilterComposite extends Composite {
 	
 	private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
 	
-	private String initialText = "Enter search terms";
+	private String initialText = Messages.FilterComposite_Default_SearchText;
 	private String patternFilter = null;
 	
 	private Job filterJob = null;
@@ -174,7 +175,7 @@ public class FilterComposite extends Composite {
 					public void run() {
 						if (!txtFilter.isDisposed()) {
 							if (txtFilter.getText().equals(initialText)){
-								txtFilter.setText("");
+								txtFilter.setText(""); //$NON-NLS-1$
 							}
 						}
 					}
@@ -206,7 +207,7 @@ public class FilterComposite extends Composite {
 		if (init){
 			txtFilter.setText(initialText);
 		}else{
-			txtFilter.setText("");
+			txtFilter.setText(""); //$NON-NLS-1$
 		}
 		txtFilter.setForeground(colorGray);
 		txtFilter.setMessage(initialText);
@@ -312,7 +313,7 @@ public class FilterComposite extends Composite {
 		clearButton.setImage(inactiveImage);
 		clearButton.setBackground(parent.getDisplay().getSystemColor(
 				SWT.COLOR_LIST_BACKGROUND));
-		clearButton.setToolTipText("Clear Search");
+		clearButton.setToolTipText(Messages.FilterComposite_ClearButton_Tooltip);
 		clearButton.addMouseListener(new MouseAdapter() {
 			private MouseMoveListener fMoveListener;
 

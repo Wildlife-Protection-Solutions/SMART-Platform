@@ -39,6 +39,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyBackupEngine;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Handler for performing backup command.
@@ -82,7 +83,7 @@ public class BackupHandler extends AbstractHandler {
 			}
 		}
 		
-		final BackupDialog dialog = new BackupDialog(shell,"Backup SMART System", "Select the file to backup the system to.", "Backup",DerbyBackupEngine.getDefaultFileName());
+		final BackupDialog dialog = new BackupDialog(shell,Messages.BackupHandler_Backup_DialogTitle, Messages.BackupHandler_Backup_DialotMessage, Messages.BackupHandler_Backup_DialogButton,DerbyBackupEngine.getDefaultFileName());
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}
@@ -104,29 +105,29 @@ public class BackupHandler extends AbstractHandler {
 
 					} catch (final Exception ex) {
 						backupState = 0;
-						SmartPlugIn.log("Error running backup.", ex);
+						SmartPlugIn.log(Messages.BackupHandler_Error_BackupError, ex);
 					}
 
 				}
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Backup Failed. " + ex.getMessage(), ex);
+					Messages.BackupHandler_Error_BackupError + ex.getMessage(), ex);
 		}
 		
 		if (backupState == 1){
 			MessageDialog.openInformation(shell,
-					"Backup Complete",
-					"System backed up successfully to file: \n\n"
+					Messages.BackupHandler_BackupComplete_DialogTitle,
+					Messages.BackupHandler_BackupComplete_DialogMessage + "\n\n" //$NON-NLS-1$
 							+ backupFile.getAbsolutePath());
 		}else if (backupState == 2){
 			MessageDialog.openError(shell,
-					"Backup Failed",
-					"Backup process cancelled");
+					Messages.BackupHandler_BackupFailed_DialogTitle,
+					Messages.BackupHandler_BackupCancelled_DialogMessage);
 		}else{
 			MessageDialog
-			.openError(shell, "Backup Failed",
-					"Backup did not complete.  Please try again.");
+			.openError(shell, Messages.BackupHandler_BackupFailed_DialogTitle,
+					Messages.BackupHandler_BackupFailed_DialogMessage);
 		}
 
 	}

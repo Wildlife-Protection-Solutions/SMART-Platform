@@ -24,6 +24,7 @@ package org.wcs.smart.ui;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Label provider for basemapdefinitions
@@ -36,7 +37,7 @@ public class BasemapLabelProvider extends LabelProvider {
 		if (element instanceof BasemapDefinition){
 			BasemapDefinition def=SmartPlugIn.getDefault().getBasemapSelection();
 			if (def != null && def.equals(element)){					
-				return ((BasemapDefinition)element).getName() + "  [Session Default]";
+				return ((BasemapDefinition)element).getName() + " [" + Messages.BasemapLabelProvider_SessionDefault + "]";  //$NON-NLS-1$//$NON-NLS-2$
 			}else{
 				return ((BasemapDefinition)element).getName();	
 			}

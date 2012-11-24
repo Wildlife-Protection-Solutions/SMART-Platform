@@ -32,7 +32,7 @@ public class LanguageLabelProvider extends LabelProvider {
 		if (name == null) {
 			name = ((Language) element).getCode();
 		} else {
-			name = name + " (" + ((Language) element).getCode() + ")";
+			name = name + " (" + ((Language) element).getCode() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return name;
 	}

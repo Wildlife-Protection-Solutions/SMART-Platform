@@ -29,6 +29,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.internal.Messages;
 
  
 /**
@@ -49,23 +50,23 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Attribute)){
-			return "Object not of type Attribute. Can not delete.";
+			return Messages.AttributeDMAdvisor_Error_NotAttribute;
 		}
 		Attribute attribute = (Attribute)object;
 		if (attribute.getUuid() == null){
 			return null;
 		}
 		Criteria query = session.createCriteria(CategoryAttribute.class);
-		query.add(Restrictions.eq("id.attribute", attribute));
+		query.add(Restrictions.eq("id.attribute", attribute)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<CategoryAttribute> items = query.list();
 		if (items.size() == 0){
 			return null;
 		}else{
 			StringBuilder sb = new StringBuilder();
-			sb.append("Attribute cannot be deleted until the following category relationships are removed: \n" );
+			sb.append(Messages.AttributeDMAdvisor_Error_AttributeReferenced );
 			for (CategoryAttribute it : items){
-				sb.append(it.getCategory().getFullCategoryName() + "\n");
+				sb.append(it.getCategory().getFullCategoryName() + "\n"); //$NON-NLS-1$
 			}
 			return sb.toString();
 		}

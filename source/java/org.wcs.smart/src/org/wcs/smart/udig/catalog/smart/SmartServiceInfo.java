@@ -25,6 +25,7 @@ import net.refractions.udig.catalog.IServiceInfo;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Smart service information.
@@ -34,10 +35,10 @@ import org.wcs.smart.SmartPlugIn;
 public class SmartServiceInfo extends IServiceInfo{
 
 	public SmartServiceInfo(SmartService service){
-		this.description = "Connects to the a conservation area database geometries layers.";
+		this.description = Messages.SmartServiceInfo_Description;
 		this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		this.keywords = new String[]{"Conservation Area", "SMART"};
-		this.title = "SMART";
+		this.keywords = new String[]{Messages.SmartServiceInfo_Keyword1, Messages.SmartServiceInfo_Keyword2};
+		this.title = Messages.SmartServiceInfo_Title;
 	}
 	
 }

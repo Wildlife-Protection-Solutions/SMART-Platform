@@ -38,6 +38,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.UserNamePasswordDialog;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -82,9 +83,9 @@ public class DerbyRestoreEngine {
 			boolean valid = false;
 			UserNamePasswordDialog dialog = new UserNamePasswordDialog(
 					currentShell,
-					"Restore Backup File",
-					"Please enter a username and password for one of the conservation areas in this database.  You must be an administrator in-order to restore a backup file.",
-					"Restore");
+					Messages.DerbyRestoreEngine_RestoreDialogTitle,
+					Messages.DerbyRestoreEngine_RestoreDialogMessage,
+					Messages.DerbyRestoreEngine_ButtonText);
 
 			while (!valid) {
 				if (dialog.open() == Window.CANCEL) {
@@ -96,9 +97,9 @@ public class DerbyRestoreEngine {
 
 				cnt = (Long) session
 						.createCriteria(Employee.class)
-						.add(Restrictions.eq("smartUserId", username).ignoreCase())
-						.add(Restrictions.eq("smartPassword", password))
-						.add(Restrictions.eq("smartUserLevel",
+						.add(Restrictions.eq("smartUserId", username).ignoreCase()) //$NON-NLS-1$
+						.add(Restrictions.eq("smartPassword", password)) //$NON-NLS-1$
+						.add(Restrictions.eq("smartUserLevel", //$NON-NLS-1$
 								SmartUserLevel.ADMIN))
 						.setProjection(Projections.rowCount()).uniqueResult();
 
@@ -106,8 +107,8 @@ public class DerbyRestoreEngine {
 					MessageDialog
 							.openError(
 									currentShell,
-									"Invalid User",
-									"The provided username and password is not a valid administrator user in any of the database conservation areas.");
+									Messages.DerbyRestoreEngine_InvalidUserDialogTitle,
+									Messages.DerbyRestoreEngine_InvalidUserDialogMessage);
 				} else {
 					valid = true;
 				}
@@ -115,7 +116,7 @@ public class DerbyRestoreEngine {
 			return true;
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(currentShell,
-					"Error validating user for restore.", ex);
+					Messages.DerbyRestoreEngine_UserValidationError, ex);
 			return false;
 		} finally {
 			session.close();
@@ -144,13 +145,12 @@ public class DerbyRestoreEngine {
 	 */
 	public static void restoreSystem(File backupFile, IProgressMonitor monitor)
 			throws Exception {
-		monitor.beginTask("Restoring File", 5);
+		monitor.beginTask(Messages.DerbyRestoreEngine_Progress_RestoringFile, 5);
 		if (!backupFile.exists()) {
-			throw new Exception("File '" + backupFile.getAbsolutePath()
-					+ " does not exist.");
+			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		monitor.setTaskName("Extracting contents of backup-file");
+		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ExtractingBackup);
 		/* extract contents of backup file to temporary directory */
 		File temp = SmartUtils.createTemporaryDirectory();
 		
@@ -160,13 +160,15 @@ public class DerbyRestoreEngine {
 			String cleanUpErr = cleanUp(new File[] { temp });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
-						"Could not extract backup file.  The directories(s): "
-								+ cleanUpErr
-								+ " could not be removed and must be removed manually. \n\n"
-								+ ex.getMessage(), ex);
+						Messages.DerbyRestoreEngine_Error_CouldNotExtractFile
+						 + "\n\n"  //$NON-NLS-1$
+						+ Messages.DerbyRestoreEngine_Error_CouldNotCleanup
+						+ cleanUpErr
+						+ "\n\n" //$NON-NLS-1$
+						+ ex.getLocalizedMessage(), ex);
 			}
-			throw new Exception("Could not extract backup file.\n\n"
-					+ ex.getMessage(), ex);
+			throw new Exception(Messages.DerbyRestoreEngine_BackupExtractionError
+					+ ex.getLocalizedMessage(), ex);
 		}
 		monitor.worked(1);
 
@@ -183,39 +185,41 @@ public class DerbyRestoreEngine {
 			String cleanUpErr = cleanUp(new File[] { temp });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
-						"Invalid backup file.  The backup file does not contain a SMART database.\n\n Error cleaning up: The directories(s): "
-								+ cleanUpErr
-								+ " could not be removed and must be removed manually. \n\n");
+						Messages.DerbyRestoreEngine_Error_NoDbInBackupFile
+						+ "\n\n"  //$NON-NLS-1$
+						+ Messages.DerbyRestoreEngine_Error_CouldNotCleanup
+						+ cleanUpErr);
 			}
-			throw new Exception("Invalid backup file.  The backup file does not contain a SMART database");
+			throw new Exception(Messages.DerbyRestoreEngine_Error_NoDbInBackupFile);
 		}
 		if (!extractedFilestore.exists()){
 			String cleanUpErr = cleanUp(new File[] { temp });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
-						"Invalid backup file.  The backup file does not contain a SMART filestore.\n\n Error cleaning up: The directories(s): "
-								+ cleanUpErr
-								+ " could not be removed and must be removed manually. \n\n");
+						Messages.DerbyRestoreEngine_Error_NoFilestoreInBackupFile
+						+ "\n\n"  //$NON-NLS-1$
+						+ Messages.DerbyRestoreEngine_Error_CouldNotCleanup
+						+ cleanUpErr);
 			}
-			throw new Exception("Invalid backup file.  The backup file does not contain a SMART filestore");
+			throw new Exception(Messages.DerbyRestoreEngine_Error_NoFilestoreInBackupFile);
 		}
 		
 		/* shut down the database */
-		monitor.setTaskName("Shutting down database");
+		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ShutDown);
 		HibernateManager.endSessionFactory(true);
 		monitor.worked(1);
 
 		/* create a copy of the current files incase something goes wrong */
-		monitor.setTaskName("moving existing files");
+		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_MovingFiles);
 		File dbFileBack = null;
 		File dataFileBack = null;
 		try {
 
 
 			dbFileBack = new File(dbFile.getParentFile().getCanonicalPath()
-					+ File.separator + dbFile.getName() + ".bak");
+					+ File.separator + dbFile.getName() + ".bak"); //$NON-NLS-1$
 			dataFileBack = new File(dataFile.getParentFile().getCanonicalPath()
-					+ File.separator + dataFile.getName() + ".bak");
+					+ File.separator + dataFile.getName() + ".bak"); //$NON-NLS-1$
 
 			FileUtils.copyDirectory(dbFile, dbFileBack);
 			FileUtils.copyDirectory(dataFile, dataFileBack);
@@ -225,15 +229,16 @@ public class DerbyRestoreEngine {
 					dataFileBack });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
-						"Failed to create temporary copies of existing data.  The directories(s): "
-								+ cleanUpErr
-								+ " could not be removed and must be removed manually. \n\n"
-								+ ex.getMessage(), ex);
+						Messages.DerbyRestoreEngine_Error_CouldNotCreateTempCopy
+						+ Messages.DerbyRestoreEngine_Error_CouldNotCleanup
+						+ cleanUpErr
+						+ "\n\n" //$NON-NLS-1$
+						+ ex.getLocalizedMessage(), ex);
 			}
 
 			throw new Exception(
-					"Failed to create temporary copies of existing data.\n\n"
-							+ ex.getMessage(), ex);
+					Messages.DerbyRestoreEngine_Error_CouldNotCreateTempBackup
+							+ ex.getLocalizedMessage(), ex);
 		}
 		monitor.worked(1);
 
@@ -246,19 +251,19 @@ public class DerbyRestoreEngine {
 					dataFileBack });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
-						"Failed to delete existing data.  The system state is unknown.  You will must restore the system manually.\n\n  In addition, the directories(s): "
+						Messages.DerbyRestoreEngine_Error_Failure
 								+ cleanUpErr
-								+ " could not be removed and must be removed manually. \n\n"
-								+ ex.getMessage(), ex);
+								+ "\n\n" //$NON-NLS-1$
+								+ ex.getLocalizedMessage(), ex);
 			}
 
 			throw new Exception(
-					"Failed to delete existing data. The system state is unknown.  You will must restore the system manually.\n\n"
-							+ ex.getMessage(), ex);
+					Messages.DerbyRestoreEngine_Error_CouldNotDeleteCurrentData
+							+ ex.getLocalizedMessage(), ex);
 		}
 
 		/* restore the unzipped backup files */
-		monitor.setTaskName("Restoring backup files");
+		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_RestoringFiles);
 		try {
 			
 			FileUtils.copyDirectory(extractedDb, dbFile);
@@ -280,18 +285,18 @@ public class DerbyRestoreEngine {
 				FileUtils.moveDirectory(dataFileBack, dataFile);
 			} catch (Exception ex2) {
 				throw new Exception(
-						"Restore failed and system could not be returned to the original state.  You may be able to try the restore again or you may have to restore the system manually.\n\n"
-								+ ex.getMessage() + "\n\n" + ex2.getMessage(),
+						Messages.DerbyRestoreEngine_Error_RestoreFailedCouldNotRevert
+								+ ex.getLocalizedMessage() + "\n\n" + ex2.getLocalizedMessage(), //$NON-NLS-1$
 						ex);
 			}
 			throw new Exception(
-					"Restore failed. System successfully returned to original state.\n\n"
-							+ ex.getMessage(), ex);
+					Messages.DerbyRestoreEngine_Error_RestoreFailedRevertSuccessful
+							+ ex.getLocalizedMessage(), ex);
 		}
 		monitor.worked(1);
 
 		/* clean up */
-		monitor.setTaskName("Cleaning up");
+		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_CleanUp);
 		final String cleanUpErr = cleanUp(new File[] { temp, dbFileBack, dataFileBack });
 		if (cleanUpErr.length() > 0) {
 			Display.getDefault().syncExec(new Runnable(){
@@ -301,8 +306,8 @@ public class DerbyRestoreEngine {
 					MessageDialog
 					.openWarning(
 							Display.getDefault().getActiveShell(),
-							"Restore Warning",
-							"The following directory created during the restore process could not be removed.  It is recommended you remove these directories manually:\n"
+							Messages.DerbyRestoreEngine_Warning_Dialog_Title,
+							Messages.DerbyRestoreEngine_Warning_Dialog_Message
 									+ cleanUpErr);
 				}
 				
@@ -322,9 +327,9 @@ public class DerbyRestoreEngine {
 					FileUtils.deleteDirectory(dirs[i]);
 				} catch (Exception ex) {
 					try {
-						strNoDelete.append(dirs[i].getCanonicalPath() + "\n");
+						strNoDelete.append(dirs[i].getCanonicalPath() + "\n"); //$NON-NLS-1$
 					} catch (Exception ex2) {
-						strNoDelete.append(dirs[i].getAbsolutePath() + "\n");
+						strNoDelete.append(dirs[i].getAbsolutePath() + "\n"); //$NON-NLS-1$
 					}
 				}
 			}
