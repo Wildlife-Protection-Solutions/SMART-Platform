@@ -47,6 +47,7 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
@@ -60,6 +61,7 @@ import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
  */
 public class LoadDefaultLayersJob extends Job{
 
+	private static final String JOB_NAME = Messages.LoadDefaultLayersJob_JobName;
 	private IMap map;
 	private boolean zoom;
 	private byte[] basemapUuid = null;
@@ -73,7 +75,7 @@ public class LoadDefaultLayersJob extends Job{
 	 * @param zoom if should zoom to extens after loading basemap
 	 */
 	public LoadDefaultLayersJob(IMap map, boolean zoom){
-		super("Load default layers to map");
+		super(JOB_NAME);
 		this.map = map;
 		this.zoom = zoom;
 	}
@@ -90,7 +92,7 @@ public class LoadDefaultLayersJob extends Job{
 	 * @param basemapUuid
 	 */
 	public LoadDefaultLayersJob(IMap map, boolean zoom, byte[] basemapUuid){
-		super("Load default layers to map");
+		super(JOB_NAME);
 		this.map = map;
 		this.zoom = zoom;
 		this.basemapUuid = basemapUuid;
@@ -137,7 +139,7 @@ public class LoadDefaultLayersJob extends Job{
     						ChangeCRSCommand cmd = new ChangeCRSCommand(crs);
     						map.sendCommandSync(cmd);
     					}catch(Exception ex){
-    						SmartPlugIn.log("Error parsing default crs" + ex.getMessage(), ex);
+    						SmartPlugIn.log(Messages.LoadDefaultLayersJob_Error_ParsingCrs + ex.getMessage(), ex);
     					}
     				}
     				
@@ -147,7 +149,7 @@ public class LoadDefaultLayersJob extends Job{
 					map.sendCommandASync(new ZoomExtentCommand());
 				}
 			} catch (IOException e) {
-				SmartPlugIn.log("Could not add layers to map.", e);
+				SmartPlugIn.log(Messages.LoadDefaultLayersJob_Error_AddingLayers, e);
 			}
     	}
 		return Status.OK_STATUS;

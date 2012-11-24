@@ -41,7 +41,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
  */
 public class XmlSmartDataModelManager {
 
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.internal.ca.datamodel.xml.generate";
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.internal.ca.datamodel.xml.generate"; //$NON-NLS-1$
 	
 	/**
 	 * Reads a data model xml file.

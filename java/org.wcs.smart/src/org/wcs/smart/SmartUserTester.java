@@ -44,16 +44,16 @@ public class SmartUserTester extends PropertyTester {
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
 		if (SmartDB.getCurrentEmployee() == null) return false;
-		if (expectedValue.equals("admin")){
+		if (expectedValue.equals("admin")){ //$NON-NLS-1$
 			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
 				SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.ADMIN);
-		}else if (expectedValue.equals("manager")){
+		}else if (expectedValue.equals("manager")){ //$NON-NLS-1$
 			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
 					SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.MANAGER);
-		}else if (expectedValue.equals("analyst")){
+		}else if (expectedValue.equals("analyst")){ //$NON-NLS-1$
 			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
 					SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.ANALYST);
-		}else if (expectedValue.equals("dataentry")){
+		}else if (expectedValue.equals("dataentry")){ //$NON-NLS-1$
 			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
 					SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.DATA_ENTRY);
 		}

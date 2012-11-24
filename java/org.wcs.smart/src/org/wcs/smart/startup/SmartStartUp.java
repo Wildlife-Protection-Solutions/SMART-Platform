@@ -33,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
 
 /**
@@ -57,7 +58,7 @@ public class SmartStartUp {
 		//check that the database exists
 		if (!SmartDB.dbExists()){
 			//log error message and exit
-			SmartPlugIn.displayLogExit("No SMART database exists.  The application needs to be re-installed or the database restored manually.", new IllegalStateException("No SMART database."));
+			SmartPlugIn.displayLogExit(Messages.SmartStartUp_Error_NoSmartDb, new IllegalStateException(Messages.SmartStartUp_Error_NoSmartDb));
 		}
 		
 		Session session = HibernateManager.openSession();
@@ -65,7 +66,7 @@ public class SmartStartUp {
 		try{
 			return HibernateManager.getConservationAreas(session);
 		}catch (Throwable t){
-			SmartPlugIn.displayLogExit("Could not load conservation areas from database.", t);
+			SmartPlugIn.displayLogExit(Messages.SmartStartUp_Error_LoadingCas, t);
 		}finally{
 			session.getTransaction().rollback();
 			session.close();
@@ -85,7 +86,7 @@ public class SmartStartUp {
 		try{
 			Employee e = HibernateManager.validateUser(userName, password, ca);
 			if (e == null){
-				MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Error", "The username and password does not exist for the selected conservation area.");
+				MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.SmartStartUp_ErrorDialog_Title, Messages.SmartStartUp_Error_LoginFail);
 				return false;
 			}
 			//disconnect from the database & setup correct user level
@@ -95,7 +96,7 @@ public class SmartStartUp {
 			HibernateManager.openSession();
 			return true;
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(null, "Error logging in user", ex);
+			SmartPlugIn.displayLog(null, Messages.SmartStartUp_Error_LoginError, ex);
 		}
 		return false;
 	}

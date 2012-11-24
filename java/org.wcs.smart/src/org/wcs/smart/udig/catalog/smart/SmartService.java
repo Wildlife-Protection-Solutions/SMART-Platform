@@ -42,6 +42,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.geotools.data.smart.SmartDataSource;
 import org.wcs.smart.geotools.data.smart.SmartDataSourceFactory;
+import org.wcs.smart.internal.Messages;
 
 /**
  * A udig service for smart
@@ -55,7 +56,7 @@ import org.wcs.smart.geotools.data.smart.SmartDataSourceFactory;
  */
 public class SmartService extends IService {
 
-	public static final String SERVICE_ID = "org.wcs.smart.udig.catalog.smartService";
+	public static final String SERVICE_ID = "org.wcs.smart.udig.catalog.smartService"; //$NON-NLS-1$
 	private Map<String, Serializable> params;
 	private URL url;
 	
@@ -149,7 +150,7 @@ public class SmartService extends IService {
                 resolve.dispose(subProgressMonitor);
                 subProgressMonitor.done();
             } catch (Throwable e) {
-            	SmartPlugIn.log("Could not dispose of smart service.", e);
+            	SmartPlugIn.log(Messages.SmartService_Error_DisposingService, e);
             }
         }
         this.ds.dispose();

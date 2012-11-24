@@ -27,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.wcs.smart.internal.Messages;
+
 /**
  * An employee rank. 
  * 
@@ -37,7 +39,7 @@ import javax.persistence.Table;
 @Table(name ="smart.rank")
 public class Rank extends SimpleListItem{
 
-	public static final String NAME = "Rank";
+	public static final String NAME = Messages.Rank_Label;
 	
 	private Agency agency;
 	

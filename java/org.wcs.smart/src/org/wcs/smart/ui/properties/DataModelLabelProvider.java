@@ -36,6 +36,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Label provided for data model tree
@@ -120,7 +121,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 		if (descriptor != null) {
 			JFaceResources.getImageRegistry().put(ATTRIBUTE_TREE_ICON, descriptor);
 		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif");
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
 		if (descriptor != null){
 			JFaceResources.getImageRegistry().put(DATA_MODEL_ICON, descriptor);
 		}
@@ -154,7 +155,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	@Override
 	public String getText(Object element) {
 		if (element instanceof DataModelContentProvider.RootNode){
-			return "Data Model";
+			return Messages.DataModelLabelProvider_RootNode_Label;
 		}
 		if (element instanceof CategoryAttribute){
 			element = ((CategoryAttribute)element).getAttribute();
@@ -168,7 +169,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 				return obj.getName();
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override

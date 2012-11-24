@@ -26,6 +26,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -44,7 +45,7 @@ public class CreateCaWizard extends Wizard {
 	 * Creates a new wizard.
 	 */
 	public CreateCaWizard() {
-		setWindowTitle("Create Conservation Area Wizard");
+		setWindowTitle(Messages.CreateCaWizard_WziardName);
 		
 		
 		
@@ -86,7 +87,7 @@ public class CreateCaWizard extends Wizard {
 			HibernateManager.saveNewConservationArea(newCa);
 			completedOK = true;
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Error creating new conservation error: " + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_Error_CreateCaError + ex.getMessage(), ex);
 		}
 		
 		return completedOK;

@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -39,6 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.CaExporter;
 
 /**
@@ -75,7 +77,7 @@ public class ExportCaHandler extends AbstractHandler {
 			}
 		}
 				
-		final BackupDialog dialog = new BackupDialog(shell,"Export Conservation Area", "Select the file to export the '" + SmartDB.getCurrentConservationArea().getName() + "' conservation area to.", "Export", CaExporter.getDefaultFileName());
+		final BackupDialog dialog = new BackupDialog(shell,Messages.ExportCaHandler_DialogTitle, MessageFormat.format(Messages.ExportCaHandler_DialogMessage, new Object[]{ SmartDB.getCurrentConservationArea().getName() }) , Messages.ExportCaHandler_ExportButton, CaExporter.getDefaultFileName());
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}
@@ -94,14 +96,14 @@ public class ExportCaHandler extends AbstractHandler {
 						shell.getDisplay().syncExec(new Runnable() {
 							@Override
 							public void run() {
-								MessageDialog.openInformation(shell, "Export Conservation Area", "Conservation area exported successfully.");
+								MessageDialog.openInformation(shell, Messages.ExportCaHandler_ExportComplete_DialogTitle, Messages.ExportCaHandler_ExportComplete_DialogMessage);
 							}
 						});
 					}catch (final Exception ex){
 						shell.getDisplay().syncExec(new Runnable() {
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(shell, "Error exporting conservation area: " + ex.getMessage(), ex);
+								SmartPlugIn.displayLog(shell, Messages.ExportCaHandler_Error_ExportFailedMessage + ex.getMessage(), ex);
 							}
 						});
 					}
@@ -109,7 +111,7 @@ public class ExportCaHandler extends AbstractHandler {
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					"Conservation area export failed.\n\n" + ex.getMessage(), ex);
+					Messages.ExportCaHandler_Error_ExportFailedMessage + ex.getMessage(), ex);
 		}
 	}
 	

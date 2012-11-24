@@ -24,6 +24,7 @@ package org.wcs.smart.internal.ca.advisors;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Advisor for deleting nodes
@@ -44,11 +45,11 @@ public class AttributeTreeNodeDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof AttributeTreeNode)){
-			return "Object not of type AttributeTreeNode. Can not delete.";
+			return Messages.AttributeTreeNodeDMAdvisor_Error_NotTreeNode;
 		}
 		AttributeTreeNode node = (AttributeTreeNode)object;
 		if (node.getChildren().size() > 0){
-			return "Attribute tree node cannot be deleted until all children are also removed.";
+			return Messages.AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;
 		}
 		return null;
 	}

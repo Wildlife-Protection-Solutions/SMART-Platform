@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.util.SmartUtils;
@@ -43,15 +44,13 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 
-	public static final String ID = "org.wcs.smart.ca.properties";
-	
 	private CaInfoComposite caComposite = null;
 	
 	/**
 	 * Creates a new dialog
 	 */
 	public CaPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Conservation Area Properties");
+		super(Display.getCurrent().getActiveShell(), Messages.CaPropertyPage_Dialog_Title);
 	}
 
 
@@ -65,7 +64,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		Label lbl = new Label(caComposite, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1,1));
-		lbl.setText("Default Language:");
+		lbl.setText(Messages.CaPropertyPage_DefaultLanguage_Label);
 		
 		Text lblLang = new Text(caComposite, SWT.NONE);
 		lblLang.setEditable(false);
@@ -74,14 +73,14 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		if (name == null){
 			name = ca.getDefaultLanguage().getCode();
 		}else{
-			name = name + " (" + ca.getDefaultLanguage().getCode() + ")";
+			name = name + " (" + ca.getDefaultLanguage().getCode() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		lblLang.setText(name);
 		
 		
 		lbl = new Label(caComposite, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1,1));
-		lbl.setText("Unique ID:");
+		lbl.setText(Messages.CaPropertyPage_UniqueID_Label);
 		
 		Text txt = new Text(caComposite, SWT.NONE);
 		txt.setEditable(false);
@@ -96,7 +95,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		
-		setMessage("Properties related to the conservation area.");
+		setMessage(Messages.CaPropertyPage_DialogMessage);
 		
 		return caComposite;
 	}
@@ -119,7 +118,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		}catch (RuntimeException ex){
 			tx.rollback();
 			session.close();
-			SmartPlugIn.displayLog(getShell(),"Error saving changes to conservation areas.  " + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(getShell(),Messages.CaPropertyPage_Error_SavingChanages + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 	}

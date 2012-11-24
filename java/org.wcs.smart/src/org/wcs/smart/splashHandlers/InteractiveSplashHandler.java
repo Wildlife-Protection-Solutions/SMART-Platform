@@ -38,8 +38,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -54,6 +52,7 @@ import org.eclipse.ui.splash.AbstractSplashHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.SmartStartUp;
 import org.wcs.smart.ui.internal.startup.InitializeDialog;
 import org.wcs.smart.ui.internal.startup.StartUpAdvancedDialog;
@@ -218,19 +217,19 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			String username = txtUserName.getText();
 			String password = txtPassword.getText();
 
-			progressLabel.setText("Validating User");
+			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_ValidatingUser);
 
 			if ((username.length() > 0) && (password.length() > 0)) {
 				if (SmartStartUp.login(ca, username, password)) {
 					fAuthenticated = true;
 				} else {
-					progressLabel.setText("Authentication Failure");
+					progressLabel.setText(Messages.InteractiveSplashHandler_Error_AuthenticationFailure);
 				}
 			} else {
-				progressLabel.setText("Authentication Failure");
+				progressLabel.setText(Messages.InteractiveSplashHandler_Error_AuthenticationFailure);
 			}
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(null, "Error logging in user.  Please ensure a conservation area is selected and correct credentials are supplied.", ex);
+			SmartPlugIn.displayLog(null, Messages.InteractiveSplashHandler_Error_LoginFailed, ex);
 		}
 	}
 	
@@ -264,7 +263,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		
 		progressLabel = new Label(fCompositeLogin, SWT.RIGHT);
-		progressLabel.setText("Progress Label");
+		progressLabel.setText("Progress Label"); //$NON-NLS-1$
 		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		progressLabel.setLayoutData(data);
 		progressLabel.setVisible(true);// false
@@ -272,7 +271,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		Label lblLabel = new Label(fCompositeLogin, SWT.NONE);
 		lblLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblLabel.setText("Conservation Area:");
+		lblLabel.setText(Messages.InteractiveSplashHandler_Ca_Label);
 		
 //		FontData[] fd = lblLabel.getFont().getFontData();
 //		fd[0].setStyle(SWT.BOLD);
@@ -288,13 +287,13 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		cmvConservationArea.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				ConservationArea ca = ((ConservationArea)element);
-				return ca.getId() + " - " + ca.getName();
+				return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
 			}
 		});		
 		
 		Label lblUserName = new Label(fCompositeLogin, SWT.NONE);
 		lblUserName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblUserName.setText("User Name:");
+		lblUserName.setText(Messages.InteractiveSplashHandler_Username_Label);
 //		lblUserName.setFont(newFont);
 //		lblUserName.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
@@ -305,7 +304,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		Label lblPassword = new Label(fCompositeLogin, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblPassword.setText("Password:");
+		lblPassword.setText(Messages.InteractiveSplashHandler_Password_Label);
 //		lblPassword.setFont(newFont);
 //		lblPassword.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
@@ -323,7 +322,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		
 		lblAdvanced = new Label(fCompositeLogin, SWT.NONE | SWT.READ_ONLY);
-		lblAdvanced.setText("Advanced...");
+		lblAdvanced.setText(Messages.InteractiveSplashHandler_Advanced_Label);
 		
 		
 		data = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
@@ -346,11 +345,11 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		
 		btnCancel = new Button(composite_1, SWT.PUSH);
-		btnCancel.setText("Exit"); 
+		btnCancel.setText(Messages.InteractiveSplashHandler_Exit_Button); 
 		btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
 		btnOk = new Button(composite_1, SWT.PUSH);
-		btnOk.setText("Login"); 
+		btnOk.setText(Messages.InteractiveSplashHandler_Login_Button); 
 		btnOk.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
 		widgets.add(btnOk);
@@ -380,7 +379,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	private void startup(){
 		try {
-			progressLabel.setText("Loading Conservation Areas ...");
+			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
 			List<ConservationArea> cas = SmartStartUp.getConservationAreas();
 			cmvConservationArea.getCombo().removeAll();
 
@@ -390,7 +389,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				}
 				cmvConservationArea.getCombo().select(0);
 				enableControls(true);
-				progressLabel.setText("");
+				progressLabel.setText(""); //$NON-NLS-1$
 				
 				validateUi();
 			} else {
@@ -403,7 +402,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		} catch (Exception ex) {
 			SmartPlugIn
 					.displayLogExit(
-							"Error initializing application.  Please see error log for more details.",
+							Messages.InteractiveSplashHandler_Error_Initialization,
 							ex);
 		}
 	}

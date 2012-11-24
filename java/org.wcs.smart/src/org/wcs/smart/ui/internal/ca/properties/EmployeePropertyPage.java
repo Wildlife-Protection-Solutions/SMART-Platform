@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,6 +71,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
 import org.wcs.smart.ui.internal.ca.ImportEmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -84,8 +86,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  *
  */
 public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
-	public static final String ID = "org.wcs.smart.ca.EmployeePropertyPage";
-	
+
 	/* ui components */
 	private TableViewer tblEmployee;
 	private FilterComposite txtFilter;
@@ -158,7 +159,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 * Creates a new agency and rank property page
 	 */
 	public EmployeePropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Employee List");
+		super(Display.getCurrent().getActiveShell(), Messages.EmployeePropertyPage_Dialog_Title);
 	}
 
 	@Override
@@ -191,7 +192,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		tblEmployee.setFilters(new ViewerFilter[]{nameFilter, activeFilter});
 		
 		final Button chActive = new Button(container, SWT.CHECK);
-		chActive.setText("Include Inactive Employees");
+		chActive.setText(Messages.EmployeePropertyPage_Op_IncludeInActive);
 		chActive.setSelection(false);
 		chActive.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		chActive.addSelectionListener(new SelectionAdapter(){
@@ -210,7 +211,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		composite.setLayout(new FillLayout(SWT.HORIZONTAL));
 		
 		Button btnNew = new Button(composite, SWT.NONE);
-		btnNew.setText("Create New ...");
+		btnNew.setText(Messages.EmployeePropertyPage_CreateNew_Button);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -221,7 +222,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		final Button btnEdit = new Button(composite, SWT.NONE);
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setToolTipText("Edit the selected employee properties.");
+		btnEdit.setToolTipText(Messages.EmployeePropertyPage_Edit_ToolTip);
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -232,7 +233,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		final Button btnDelete = new Button(composite, SWT.NONE);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setToolTipText("Delete the selected employee.");
+		btnDelete.setToolTipText(Messages.EmployeePropertyPage_Delete_Tooltip);
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -252,7 +253,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		
 	
 		Button btnImport = new Button(composite, SWT.NONE);
-		btnImport.setText("Import ...");
+		btnImport.setText(Messages.EmployeePropertyPage_Import_Button);
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -276,12 +277,12 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		refreshEmployeeList();
-		setMessage("Manage the employees.");
+		setMessage(Messages.EmployeePropertyPage_DIalog_Message);
 		return container;
 	}
 
 	private void refreshEmployeeList(){
-		employees = new WritableList(getSession().createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(), Employee.class);
+		employees = new WritableList(getSession().createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(), Employee.class); //$NON-NLS-1$
 		
 		tblEmployee.setInput(employees);
 		tblEmployee.refresh();
@@ -335,7 +336,11 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		}
 		Employee e = (Employee)sec.getFirstElement();
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete Employee", "Are you sure you want to delete the employee " + e.getLabel() + ".  This action cannot be undone.")){
+		if (!MessageDialog.openConfirm(getShell(), 
+				Messages.EmployeePropertyPage_8, 
+				MessageFormat.format(
+						Messages.EmployeePropertyPage_DeleteEmployee_DialogMessage, 
+						new Object[]{e.getLabel()}))){
 			return;
 		}
 		Session s = getSession();
@@ -352,9 +357,9 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			try{
 				tx.rollback();
 			}catch (Exception ex2){
-				SmartPlugIn.log("Error rolling back transaction", ex2);
+				SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
 			}
-			SmartPlugIn.displayLog(getShell(), "Can not delete employee " + e.getLabel() + ".\n\n" + ex.getMessage(), ex);			
+			SmartPlugIn.displayLog(getShell(), MessageFormat.format(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee, new Object[]{ e.getLabel()}) + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
 		}
 		
 		if (e.equals(SmartDB.getCurrentEmployee())){
@@ -432,14 +437,14 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			case EMPLOYEMENT_DATE: return DateFormat.getDateInstance().format(element.getStartEmploymentDate());
 			case EMPLOYEMENT_ENDDATE: 
 				if (element.getEndEmploymentDate() == null){
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return DateFormat.getDateInstance().format(element.getEndEmploymentDate());
 			case IS_ACTIVE:
 				if (element.getEndEmploymentDate() == null){
-					return "Y";
+					return Messages.EmployeePropertyPage_ActiveFlag;
 				}else{
-					return "N";
+					return Messages.EmployeePropertyPage_InActiveFlag;
 				}
 			case SMART_USER: return element.getSmartUserId();
 			case SMART_USER_LEVEL: 
@@ -450,7 +455,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				
 			
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	/*
@@ -759,7 +764,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			if (searchString == null || searchString.length() == 0) {
 				return true;
 			}
-			String search = ".*" + searchString.toLowerCase() + ".*";
+			String search = ".*" + searchString.toLowerCase() + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
 			Employee p = (Employee) element;
 			if (p.getGivenName().toLowerCase().matches(search)){
 				return true;

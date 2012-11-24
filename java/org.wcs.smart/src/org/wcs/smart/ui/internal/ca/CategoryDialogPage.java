@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.properties.CategoryInfoPanel;
 
 /**
@@ -68,7 +69,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Category");
+		shell.setText(Messages.CategoryDialogPage_DialogTitle);
 	}
 	
 	@Override
@@ -109,9 +110,9 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 		cip.setCategory(toUpdate);
 		
 		if (toUpdate.getKeyId() == null){
-			setMessage("Create a new category.");
+			setMessage(Messages.CategoryDialogPage_New_DialogMessage);
 		}else{
-			setMessage("Edit the given category.");
+			setMessage(Messages.CategoryDialogPage_Edit_DialogTitle);
 		}
 		return parent;
 		
@@ -125,7 +126,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
 		okBtn.setEnabled(false);
 	}
 	

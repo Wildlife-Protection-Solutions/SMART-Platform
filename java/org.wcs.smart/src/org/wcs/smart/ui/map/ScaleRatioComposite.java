@@ -124,7 +124,7 @@ public class ScaleRatioComposite extends Composite implements FocusListener, Key
 			//take the second part
 			text = text.substring(index+1);
 		}
-		text= text.replaceAll(",", "");
+		text= text.replaceAll(",", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		combo.setText(text);
 		
 		
@@ -142,7 +142,7 @@ public class ScaleRatioComposite extends Composite implements FocusListener, Key
                 String item = toLabel( scaleDenominator );
                 combo.add( item );
             }
-            combo.setText( toLabel(map.getViewportModel().getScaleDenominator())); //$NON-NLS-1$
+            combo.setText( toLabel(map.getViewportModel().getScaleDenominator())); 
             combo.setToolTipText(combo.getText());
         } else {
             combo.setText(""); //$NON-NLS-1$
@@ -150,7 +150,7 @@ public class ScaleRatioComposite extends Composite implements FocusListener, Key
     }
 	    
     private String toLabel( double scaleDenominator ){
-        return "1:" + nf.format( scaleDenominator );
+        return "1:" + nf.format( scaleDenominator ); //$NON-NLS-1$
     }
     
     public void keyPressed(KeyEvent e) {
@@ -201,7 +201,7 @@ public class ScaleRatioComposite extends Composite implements FocusListener, Key
     private void updateMap() {
         String newScale=combo.getText().trim();
         try{
-        	double d = nf.parse(newScale.replace(" ","")).doubleValue();
+        	double d = nf.parse(newScale.replace(" ","")).doubleValue(); //$NON-NLS-1$ //$NON-NLS-2$
             SetScaleCommand command=new SetScaleCommand(d);
 			if (inDialog) {
 				//when running in dialog current must manuall refresh viewport

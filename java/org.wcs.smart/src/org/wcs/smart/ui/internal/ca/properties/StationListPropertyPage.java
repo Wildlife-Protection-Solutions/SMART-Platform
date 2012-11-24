@@ -83,8 +83,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 
-	public static final String ID = "org.wcs.smart.ca.StationListPropertyPage";
-
 	private WritableList stations = null;
 	private HashSet<Station> toDelete = new HashSet<Station>();
 
@@ -355,7 +353,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 					if(matches > 0){
 						//invalid station name, don't update it.
 						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Station Name cannot be a duplicate.");
-						setChangesMade(false);
 					}else{
 						stn.updateName(lang, newValue.trim());
 						setChangesMade(true);
@@ -363,7 +360,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				}else{
 					//invalid value, show error 
 					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
-					setChangesMade(false);
 				}
 			}
 		} else if (type == Column.DESCIPTION) {

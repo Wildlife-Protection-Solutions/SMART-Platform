@@ -32,6 +32,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.wcs.smart.internal.Messages;
+
 /**
  * A class representing an employee agency
  * 
@@ -42,7 +44,7 @@ import javax.persistence.Table;
 @Table(name ="smart.agency")
 public class Agency extends SimpleListItem{
 
-	public static final String NAME = "Agency";
+	public static final String NAME = Messages.Agency_AgencyName;
 	public static final Integer MAX_AGENCY_LENGTH = 128;
 	
 	private ConservationArea ca;

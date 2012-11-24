@@ -40,6 +40,7 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Dialog for creating new employees or
@@ -60,7 +61,7 @@ public class EmployeeDialog extends Dialog {
 	private String title = null;
 	private Session session = null;
 	
-	public static String AUTO_GENERATE = "system-generated";
+	public static String AUTO_GENERATE = "system-generated"; //$NON-NLS-1$
 	
 	/**
 	 * Create the dialog.
@@ -76,9 +77,9 @@ public class EmployeeDialog extends Dialog {
 		
 		super(parent);
 		if (toUpdate == null){
-			title = "Create Employee";
+			title = Messages.EmployeeDialog_Create_DialogTitle;
 		}else{
-			title = "Update Employee: " + toUpdate.getId();
+			title = Messages.EmployeeDialog_Edit_DialogTitle + toUpdate.getId();
 		}
 		
 		this.toUpdate = toUpdate;
@@ -137,9 +138,9 @@ public class EmployeeDialog extends Dialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button btn = createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, Messages.EmployeeDialog_SaveButton, true);
 		btn.setEnabled(false);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		
 	}
 	
@@ -168,7 +169,7 @@ public class EmployeeDialog extends Dialog {
 			}
 			
 			if (!HibernateManager.validateUserIdUnique(smartUser,ca, session)){
-				MessageDialog.openError(this.getShell(), "Invalid User Id", "User Id already exists.  Please select a different user id");
+				MessageDialog.openError(this.getShell(), Messages.EmployeeDialog_Error_InvalidUserId_DialogTitle, Messages.EmployeeDialog_Error_InvalidUserId_DialogMessage);
 				return false;
 			}
 		}
@@ -213,7 +214,7 @@ public class EmployeeDialog extends Dialog {
 			}catch (RuntimeException ex){
 				tx.rollback();
 				session.close();
-				SmartPlugIn.displayLog(getShell(),"Error saving employees: " + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(getShell(),Messages.EmployeeDialog_Error_SaveError + ex.getMessage(), ex);
 				return false;
 			}
 		}

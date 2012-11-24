@@ -19,12 +19,12 @@ import net.refractions.udig.core.internal.CorePlugin;
  * @since 1.0.0
  */
 public class SmartServiceExtension implements ServiceExtension {
-    public static final String KEY = "org.wcs.smart.udig.catalog.smartService";
+    public static final String KEY = "org.wcs.smart.udig.catalog.smartService"; //$NON-NLS-1$
    
     /**
      * Service parameter conservation area uuid key
      */
-    public static final String CA_UUID_KEY = "cauuid";
+    public static final String CA_UUID_KEY = "cauuid"; //$NON-NLS-1$
     
     /*
      *URLS for smart services are of the form
@@ -80,7 +80,7 @@ public class SmartServiceExtension implements ServiceExtension {
 		if (params.get(CA_UUID_KEY) == null || !(params.get(CA_UUID_KEY) instanceof byte[])){
 			return null;
 		}
-		String url = "smart://smartdb/" + SmartUtils.encodeHex((byte[])params.get(CA_UUID_KEY)) ;
+		String url = "smart://smartdb/" + SmartUtils.encodeHex((byte[])params.get(CA_UUID_KEY)) ; //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

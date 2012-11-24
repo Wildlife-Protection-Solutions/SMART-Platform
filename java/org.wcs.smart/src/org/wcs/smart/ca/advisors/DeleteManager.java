@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Delete manager for deleting items from the database.
@@ -44,7 +45,7 @@ import org.hibernate.Session;
  */
 public class DeleteManager {
 
-	public static final String DELETE_ADVIOR_EXTENSION_ID = "org.wcs.smart.ca.deleteAdvisor";
+	public static final String DELETE_ADVIOR_EXTENSION_ID = "org.wcs.smart.ca.deleteAdvisor"; //$NON-NLS-1$
 	
 	
 	/**
@@ -66,10 +67,10 @@ public class DeleteManager {
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(DELETE_ADVIOR_EXTENSION_ID);
 			
 			for (IConfigurationElement e : config) {
-				Class<?> c = Class.forName( e.getAttribute("class") );
+				Class<?> c = Class.forName( e.getAttribute("class") ); //$NON-NLS-1$
 				if (c == clazzz){
 					//matching type add this for processing
-					items.add((IDeleteAdvisor)e.createExecutableExtension("advisor"));
+					items.add((IDeleteAdvisor)e.createExecutableExtension("advisor")); //$NON-NLS-1$
 				}
 			}
 		}
@@ -77,7 +78,7 @@ public class DeleteManager {
 		for (IDeleteAdvisor advisor : items){
 			String error = advisor.canDelete(x, session);
 			if (error != null){
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Delete", error);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, error);
 				return false;
 			}
 		}

@@ -63,6 +63,7 @@ import org.wcs.smart.ca.Language;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Category extends DmObject implements HkeyObject{
 	
+	private static final String FULL_NAME_SEPARATOR = " - "; //$NON-NLS-1$
 	private boolean isMultiple;			//if multiple observations can be recorded
 	private ConservationArea ca; 		//conservation area of category
 	private List<Category> children;	//children categories
@@ -104,21 +105,28 @@ RETURNS NULL ON NULL INPUT;
 		return hkey.substring(0, index+1);
 	}
 	
+	/**
+	 * Functions for supporting computing hkey length.
+	 * This function is wrapped in the derby database.
+	 * 
+	 * @param hkey the hkey
+	 * @return the length of the hkey
+	 */
 	/*
 	 * CREATE FUNCTION smart.hkeyLength(hkey long varchar) returns integer
-LANGUAGE JAVA
-deterministic 
-external name 'org.wcs.smart.ca.datamodel.Category.hkeyLength'
-PARAMETER STYLE JAVA
-NO SQL 
-RETURNS NULL ON NULL INPUT;
+	 * LANGUAGE JAVA
+	 * deterministic 
+	 * external name 'org.wcs.smart.ca.datamodel.Category.hkeyLength'
+	 * PARAMETER STYLE JAVA
+	 * NO SQL 
+	 * RETURNS NULL ON NULL INPUT;
 	 */
 	public static Integer hkeyLength(String hkey){
 		if (hkey == null) return null;
-		if (!hkey.endsWith(".")) return null;
+		if (!hkey.endsWith(DataModel.HKEY_SEPERATOR)) return null;
 		int count = 0;
 		for (int i = 0; i < hkey.length(); i ++){
-			if (hkey.charAt(i) == '.'){
+			if (hkey.charAt(i) == DataModel.HKEY_SEPERATOR.charAt(0)){
 				count ++;
 			}
 		}
@@ -259,9 +267,9 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	private String computeHkey(){
 		if (parent == null){
-			return this.getKeyId() + ".";
+			return this.getKeyId() + DataModel.HKEY_SEPERATOR;
 		}
-		return parent.computeHkey() + this.getKeyId() + ".";
+		return parent.computeHkey() + this.getKeyId() + DataModel.HKEY_SEPERATOR;
 	}
 	
 	
@@ -401,7 +409,7 @@ RETURNS NULL ON NULL INPUT;
 		if (parent == null){
 			return getName();
 		}else{
-			return getName() + " - " + parent.getFullCategoryName();
+			return getName() + FULL_NAME_SEPARATOR + parent.getFullCategoryName(); 
 		}
 	}
 	
@@ -415,7 +423,7 @@ RETURNS NULL ON NULL INPUT;
 		if (parent == null){
 			return findName(lang);
 		}else{
-			return findName(lang) + " - " + parent.getFullCategoryName(lang);
+			return findName(lang) + FULL_NAME_SEPARATOR + parent.getFullCategoryName(lang);
 		}
 	}
 	

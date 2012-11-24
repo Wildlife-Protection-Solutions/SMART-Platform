@@ -24,6 +24,7 @@ package org.wcs.smart.util;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.internal.Messages;
 
 /**
  * General utility functions.
@@ -56,17 +58,17 @@ public class SmartUtils {
 	 */
 	public static enum RegExLevel{
 		/**
-		 * Allows only chars and digits (a-Z and 0-9)
+		 * Allows only letters and digits (a-Z and 0-9)
 		 */
-		ALLOWED_CHARS_SIMPLE_REGEX("a-Z, 0-9", "[^-0-9a-z]"),
+		ALLOWED_CHARS_SIMPLE_REGEX(Messages.SmartUtils_ValidationMessage_1, "[^\\p{Letter}\\p{Mark}\\p{Nd}-]"),  //\p{L} - letters \p{Nd} - digits	is a digit zero through nine //$NON-NLS-1$
 		/**
 		 * Allows chars, digits, - _ and :
 		 */
-		ALLOWED_CHARS_MED_REGEX("a-Z, 0-9 or - _ :", "[^-0-9a-z:_]" ),
+		ALLOWED_CHARS_MED_REGEX(Messages.SmartUtils_ValidationMessage_2, "[^^\\p{L}\\p{M}\\p{Nd}-:_]" ), //$NON-NLS-1$
 		/**
-		 * Allows chars, digits, 0 _ : & and spaces
+		 * Allows chars, digits, _ : & and spaces
 		 */
-		ALLOWED_CHARS_COMPLEX_REGEX("a-Z, 0-9 or - _ : & and spaces", "[^-0-9a-z :_&]");
+		ALLOWED_CHARS_COMPLEX_REGEX(Messages.SmartUtils_ValidationMessage_3, "[^^\\p{L}\\p{M}\\p{Nd}- :_&]"); //$NON-NLS-1$
 		
 		public final String textDesc;
 		public final String regex;
@@ -116,7 +118,7 @@ public class SmartUtils {
 		}
 	});
 	
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
 	
 	
 	/**
@@ -240,7 +242,7 @@ public class SmartUtils {
 			SmartPlugIn
 					.displayLog(
 							null,
-							"Could not create directory.  Attachments will not be imported.",
+							Messages.SmartUtils_Error_CouldNotCreateDir + dir.getAbsolutePath(),
 							ex);
 		}
 		return false;
@@ -259,8 +261,9 @@ public class SmartUtils {
 			return true;
 		} catch (IOException e) {
 			SmartPlugIn.displayLog(null,
-					"Could not copy file " + from.getAbsolutePath() + " to "
-							+ to.getAbsolutePath() + ". ", e);
+					MessageFormat.format(
+					Messages.SmartUtils_Error_CouldNotCopy,
+					new Object[]{from.getAbsolutePath(), to.getAbsolutePath()}), e);
 		}
 		return false;
 	}
@@ -274,7 +277,7 @@ public class SmartUtils {
 	 * @return hex encoded string
 	 */
 	public static String encodeHex(byte[] data) {
-		if (data == null) return "";
+		if (data == null) return ""; //$NON-NLS-1$
 		char[] toDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 				'a', 'b', 'c', 'd', 'e', 'f' };
 		int l = data.length;
@@ -300,7 +303,7 @@ public class SmartUtils {
 		int len = data.length;
 
 		if ((len & 0x01) != 0) {
-			throw new IllegalStateException("Odd number of characters.");
+			throw new IllegalStateException(Messages.SmartUtils_Illegal_HexString);
 		}
 
 		byte[] out = new byte[len >> 1];
@@ -333,8 +336,9 @@ public class SmartUtils {
 	protected static int toDigit(char ch, int index) throws Exception {
 		int digit = Character.digit(ch, 16);
 		if (digit == -1) {
-			throw new IllegalStateException("Illegal hexadecimal character "
-					+ ch + " at index " + index);
+			throw new IllegalStateException(
+					MessageFormat.format(Messages.SmartUtils_Illegal_HexChar,
+							new Object[]{String.valueOf(ch),String.valueOf(index)}));
 		}
 		return digit;
 	}
@@ -471,16 +475,16 @@ public class SmartUtils {
 	 * @return the temporary directory 
 	 */
 	public static File createTemporaryDirectory(){
-		File baseDir = new File(System.getProperty("java.io.tmpdir"));
-		String basename = "smart_" + Long.toString(System.nanoTime());
+		File baseDir = new File(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
+		String basename = "smart_" + Long.toString(System.nanoTime()); //$NON-NLS-1$
 		
 		for (int i = 0; i < 1000; i ++){
-			File tempDir = new File(baseDir, basename + "_"+ i);
+			File tempDir = new File(baseDir, basename + "_"+ i); //$NON-NLS-1$
 			if (tempDir.mkdir()){
 				return tempDir;
 			}
 		}
-		throw new IllegalStateException("Failed to create temporary directory");
+		throw new IllegalStateException(Messages.SmartUtils_Error_CouldNotCreateTempDir);
 		
 	}
 	
@@ -512,6 +516,6 @@ public class SmartUtils {
 	 * @return
 	 */
 	public static String formatStringForLabel(String text){
-		return text.replaceAll("&", "&&");
+		return text.replaceAll("&", "&&");  //$NON-NLS-1$//$NON-NLS-2$
 	}
 }

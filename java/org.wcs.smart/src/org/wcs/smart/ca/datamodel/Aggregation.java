@@ -42,7 +42,8 @@ public class Aggregation {
 	/**
 	 * short name of aggregation used as key
 	 */
-	private String name = "unknown";
+	private String name = ""; //$NON-NLS-1$
+	
 	/**
 	 * name to display on gui
 	 */

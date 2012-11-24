@@ -89,14 +89,11 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 //	 @OneToMany(fetch = FetchType.LAZY)
 //	 @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
 	@Transient
-//	// @Subselect(sql="select a.* from Label a, Station b where a.id.element = b.desccuuid")
-//	// @OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY,
-//	// mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
 	public Set<DescriptionLabel> getDescriptions() {
 		if (this.descriptions == null) {
 			this.descriptions = new HashSet<DescriptionLabel>();
 			Session session = HibernateManager.openSession();
-			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", this.descuuid));
+			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", this.descuuid)); //$NON-NLS-1$
 			this.descriptions.addAll(c.list());
 		}
 		return this.descriptions;
@@ -120,7 +117,7 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 	public String findDescription(Language lang) {
 		DescriptionLabel x = findValue(getDescriptions(), lang);
 		if (x == null) {
-			return "";
+			return ""; //$NON-NLS-1$
 		} else {
 			return x.getValue();
 		}

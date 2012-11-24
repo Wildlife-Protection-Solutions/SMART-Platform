@@ -36,7 +36,7 @@ import org.wcs.smart.ui.map.MapView;
  * @since 1.0.0
  */
 public class PanMapHandler extends AbstractHandler {
-	private String PanToolId = "net.refractions.udig.tools.Pan";
+	private String PanToolId = "net.refractions.udig.tools.Pan"; //$NON-NLS-1$
 	
 	
 	/* (non-Javadoc)

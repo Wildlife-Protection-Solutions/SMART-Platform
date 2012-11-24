@@ -23,13 +23,15 @@ package org.wcs.smart.ui.internal.ca.create;
 
 import java.util.List;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.wb.swt.ResourceManager;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.EmployeeComposite;
 
 /**
@@ -49,11 +51,10 @@ public class CaWizard_UserDef extends CaWizardPage{
 	 * Create the wizard.
 	 */
 	public CaWizard_UserDef() {
-		super("wizardPage");
-		setImageDescriptor(ResourceManager.getPluginImageDescriptor(
-				"org.wcs.smart", "/images/icons/smart48.gif"));
-		setTitle("Administrative User");
-		setDescription("You must create one administrative user here.  Additional users can be created later.");
+		super(Messages.CaWizard_UserDef_PageName);
+		setImageDescriptor(JFaceResources.getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
+		setTitle(Messages.CaWizard_UserDef_PageTitle);
+		setDescription(Messages.CaWizard_UserDef_PageDescription);
 	}
 
 	/**

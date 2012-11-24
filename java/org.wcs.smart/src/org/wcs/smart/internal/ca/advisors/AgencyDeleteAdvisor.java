@@ -27,6 +27,9 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.internal.Messages;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Agencies can be deleted if they are not associated with any
@@ -40,14 +43,14 @@ public class AgencyDeleteAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Agency)){
-			return "Object not of type Agency.  Can not delete.";
+			return Messages.AgencyDeleteAdvisor_Error_NotAgency;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Employee.class).add(Restrictions.eq("agency", object)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(Employee.class).add(Restrictions.eq("agency", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{
-			return cnt + " employees are associated with the agency " + ((Agency)object).getName() + ".  These references must be removed before this agency can be deleted.";
+			return MessageFormat.format(Messages.AgencyDeleteAdvisor_Error_AgencyReferenced, new Object[]{cnt, ((Agency)object).getName()});
 		}
 	}
 

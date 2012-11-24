@@ -26,6 +26,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -48,55 +49,55 @@ public class DataModelExporter implements ICaDataExporter {
 	@Override
 	public void exportData(ICaDataExportEngine exportEngine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Exporting datamodel tables", 1);
+		monitor.beginTask(Messages.DataModelExporter_Progress_DataModelTables, 1);
 		exportAttAggMapTable(exportEngine);
 		exportAggregationTable(exportEngine);
 		monitor.worked(1);
 	}
 
 	private void exportAttAggMapTable(ICaDataExportEngine exportEngine) throws Exception{
-		String tableName = "smart.dm_att_agg_map";
+		String tableName = "smart.dm_att_agg_map"; //$NON-NLS-1$
 		
 		String columns[] = exportEngine.getTableColumns(tableName);
 		
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT ");
+		query.append("SELECT "); //$NON-NLS-1$
 		for (int i = 0; i < columns.length; i ++){
-			query.append("a." + columns[i]);
+			query.append("a." + columns[i]); //$NON-NLS-1$
 			if (i != columns.length - 1){
-				query.append(", ");
+				query.append(", "); //$NON-NLS-1$
 			}
 		}
-		query.append(" FROM ");
-		query.append(tableName + " a join ");
+		query.append(" FROM "); //$NON-NLS-1$
+		query.append(tableName + " a join "); //$NON-NLS-1$
 		query.append(HibernateManager.getTableName(Attribute.class));
-		query.append(" b on a.attribute_uuid = b.uuid ");
-		query.append(" WHERE b.ca_uuid = x''");
+		query.append(" b on a.attribute_uuid = b.uuid "); //$NON-NLS-1$
+		query.append(" WHERE b.ca_uuid = x''"); //$NON-NLS-1$
 		query.append(SmartUtils.encodeHex(exportEngine.getConservationArea().getUuid()));
-		query.append("''");
+		query.append("''"); //$NON-NLS-1$
 		
 		exportEngine.writeTableDefinitionFile(tableName, columns);
 		exportEngine.writeQuery(tableName, query.toString());
 	}
 	
 	private void exportAggregationTable(ICaDataExportEngine exportEngine) throws Exception{
-		String tableName = "smart.dm_aggregation";
+		String tableName = "smart.dm_aggregation"; //$NON-NLS-1$
 		
 		String columns[] = exportEngine.getTableColumns(tableName);		
 		
 		//create a query that returns nothing as the aggregation table does not contain ca specific data
 		//but is required so dm_att_agg_map dependencies can be resolved
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT ");
+		query.append("SELECT "); //$NON-NLS-1$
 		for (int i = 0; i < columns.length; i ++){
 			query.append(columns[i]);
 			if (i != columns.length - 1){
-				query.append(", ");
+				query.append(", "); //$NON-NLS-1$
 			}
 		}
-		query.append(" FROM ");
+		query.append(" FROM "); //$NON-NLS-1$
 		query.append(tableName);
-		query.append(" WHERE false");
+		query.append(" WHERE false"); //$NON-NLS-1$
 		
 		exportEngine.writeTableDefinitionFile(tableName, columns);
 		exportEngine.writeQuery(tableName, query.toString());

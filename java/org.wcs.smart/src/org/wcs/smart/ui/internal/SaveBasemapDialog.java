@@ -48,6 +48,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
@@ -83,7 +84,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		createButton(parent, IDialogConstants.OK_ID, Messages.SaveBasemapDialog_SaveButton, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 		validate();
@@ -94,9 +95,9 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
-		getShell().setText("Save Basemap");
+		getShell().setText(Messages.SaveBasemapDialog_Title);
 
-		setMessage("Saves the current map as a basemap that can be used as basemap on other maps.");
+		setMessage(Messages.SaveBasemapDialog_Message);
 
 		Composite main = new Composite(parent, SWT.NONE);
 
@@ -119,13 +120,13 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		
 		btnCreateNew = new Button(main, SWT.RADIO);
 		btnCreateNew.setSelection(false);
-		btnCreateNew.setText("Create new basemap");
+		btnCreateNew.setText(Messages.SaveBasemapDialog_CreateNewOp);
 		btnCreateNew.addSelectionListener(enableListener);
 		
 		Composite compNew = new Composite(main, SWT.NONE);
 		compNew.setLayout(new GridLayout(2, false));
 		lblCreateNew = new Label(compNew, SWT.NONE);
-		lblCreateNew.setText("Basemap Name:");
+		lblCreateNew.setText(Messages.SaveBasemapDialog_NameLabel);
 		lblCreateNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtName = new Text(compNew, SWT.BORDER);
@@ -138,20 +139,20 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		
 		btnOverwrite = new Button(main, SWT.RADIO);
 		btnOverwrite.setSelection(false);
-		btnOverwrite.setText("Overwrite existing basemap definition");
+		btnOverwrite.setText(Messages.SaveBasemapDialog_OverwriteOp);
 		btnOverwrite.addSelectionListener(enableListener);
 		
 		Composite compList = new Composite(main, SWT.NONE);
 		compList.setLayout(new GridLayout(2, false));
 		lblOverwrite = new Label(compList, SWT.NONE);
-		lblOverwrite.setText("Select Existing Basemap:");
+		lblOverwrite.setText(Messages.SaveBasemapDialog_OverwiteLabel);
 		lblOverwrite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		lstBasemaps = new ListViewer(compList, SWT.DEFAULT | SWT.BORDER | SWT.SINGLE );
 		lstBasemaps.setLabelProvider(new BasemapLabelProvider());
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
-		lstBasemaps.setInput(new String[]{"Loading"});
+		lstBasemaps.setInput(new String[]{Messages.SaveBasemapDialog_Loading});
 		lstBasemaps.getList().addListener(SWT.Selection, validateListener);
 		
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -169,7 +170,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 	}
 	
 	private void loadData(){
-		Job loadData = new Job("LoadData"){
+		Job loadData = new Job(Messages.SaveBasemapDialog_LoadDataJob){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -178,9 +179,9 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					String query = "FROM BasemapDefinition WHERE conservationArea = :ca ";
+					String query = "FROM BasemapDefinition WHERE conservationArea = :ca "; //$NON-NLS-1$
 					Query q = s.createQuery(query);
-					q.setParameter("ca", SmartDB.getCurrentConservationArea());
+					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 					data = q.list().toArray();
 				}finally{
 					if (s.getTransaction().isActive()){
@@ -220,14 +221,14 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 			
 			IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
 			if (sel.isEmpty() ){
-				setErrorMessage("Existing basemap must be selected");
+				setErrorMessage(Messages.SaveBasemapDialog_Error_NoBasemap);
 				ok = false;
 			}
 			baseMap = (BasemapDefinition) sel.getFirstElement();
 		}else{
 			String name = txtName.getText();
 			if (name.trim().length() == 0){
-				setErrorMessage("Basemap must have a name.");
+				setErrorMessage(Messages.SaveBasemapDialog_Error_NoName);
 				ok = false;
 			}
 			if (!SmartUtils.isSimpleString(name, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, BasemapDefinition.MAX_NAME_LENGTH)){

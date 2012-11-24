@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.internal.Messages;
 
 /**
  * A class for managing the data model.
@@ -98,7 +99,7 @@ public class DataModelManager {
 	}
 	
 	private void cancelWork(String message){
-		MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Cancelled", message);
+		MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.DataModelManager_Cancelled_DialogTitle, message);
 	}
 	
 	/**
@@ -114,21 +115,21 @@ public class DataModelManager {
 	 * not be removed.
 	 */
 	public boolean validateDelete(Category category, IProgressMonitor monitor, Session session){
-		monitor.beginTask("Delete Category : " + category.getFullCategoryName(), 1);
-		monitor.subTask("Verifying delete");
+		monitor.beginTask(Messages.DataModelManager_Progress_DeleteCategory + category.getFullCategoryName(), 1);
+		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 	
 		try{
 			if (!DeleteManager.canDelete(category, session)){
 				return false;
 			}
 		}catch (Exception ex){
-			SmartPlugIn.log("Error verifying delete of category " + category.getFullCategoryName() , ex);
-			cancelWork("Error verifying delete of category " + category.getFullCategoryName() + ": " + ex.getMessage());
+			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteCategory + category.getFullCategoryName() , ex);
+			cancelWork(Messages.DataModelManager_Error_DeleteCategory + category.getFullCategoryName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
 			return false;
 		}
 		
 		if (monitor.isCanceled()){
-			cancelWork("Delete cancelled. Category " + category.getFullCategoryName() + " not deleted.");
+			cancelWork(Messages.DataModelManager_Cancelled_CategoryDelete + category.getFullCategoryName() );
 			return false;
 		}
 		
@@ -149,22 +150,22 @@ public class DataModelManager {
 	 * not be removed.
 	 */
 	public boolean validateDelete(Attribute attribute, IProgressMonitor monitor, Session session){
-		monitor.beginTask("Delete Attribute: " + attribute.getName(), 1);
-		monitor.subTask("Verifying delete");
+		monitor.beginTask(Messages.DataModelManager_Progress_DeleteAttribute + attribute.getName(), 1);
+		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 		
 		try{
 			if (!DeleteManager.canDelete(attribute, session)){
 				return false;
 			}
 		}catch (Exception ex){
-			SmartPlugIn.log("Error verifying delete of attribute " + attribute.getName() , ex);
-			cancelWork("Error verifying delete of attribute " + attribute.getName() + ": " + ex.getMessage());
+			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteAttribute + attribute.getName() , ex);
+			cancelWork(Messages.DataModelManager_Error_DeleteAttribute + attribute.getName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
 			return false;
 		}
 		
 		monitor.worked(1);
 		if (monitor.isCanceled()){
-			cancelWork("Delete cancelled. Attribute " + attribute.getName() + " not deleted.");
+			cancelWork(Messages.DataModelManager_Cancelled_AttributeDelete + attribute.getName());
 			return false;
 		}
 		
@@ -186,23 +187,23 @@ public class DataModelManager {
 	 * not be removed.
 	 */
 	public boolean validateDelete(CategoryAttribute categoryAttribute, IProgressMonitor monitor, Session session){
-		String key = categoryAttribute.getCategory().getName() + "/" + categoryAttribute.getAttribute().getName();
-		monitor.beginTask("Delete Category/Attribute: " + key, 1);
-		monitor.subTask("Verifying delete");
+		String key = categoryAttribute.getCategory().getName() + "/" + categoryAttribute.getAttribute().getName(); //$NON-NLS-1$
+		monitor.beginTask(Messages.DataModelManager_Progress_DeleteCatAtt + key, 1);
+		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 		
 		try{
 			if (!DeleteManager.canDelete(categoryAttribute, session)){
 				return false;
 			}
 		}catch (Exception ex){
-			SmartPlugIn.log("Error verifying delete of category/attribute" , ex);
-			cancelWork("Error verifying delete of categoryAttribute: " + ex.getMessage());
+			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteCatAtt , ex);
+			cancelWork(Messages.DataModelManager_Error_DeleteCatAtt + ex.getLocalizedMessage());
 			return false;
 		}
 		
 		monitor.worked(1);
 		if (monitor.isCanceled()){
-			cancelWork("Delete cancelled. Category/Attribute " +  key + " not deleted.");
+			cancelWork(Messages.DataModelManager_Cancelled_DeleteCatAtt +  key );
 			return false;
 		}
 		
@@ -225,20 +226,20 @@ public class DataModelManager {
 	 */
 	public boolean validateDelete(AttributeListItem listItem, IProgressMonitor monitor, Session session){
 
-		monitor.beginTask("Delete Attribute List Item: " + listItem.getName(), 1);
-		monitor.subTask("Verifying delete");
+		monitor.beginTask(Messages.DataModelManager_Progress_DeleteListItem + listItem.getName(), 1);
+		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 		try{
 			if (!DeleteManager.canDelete(listItem, session)){
 				return false;
 			}
 		}catch (Exception ex){
-			SmartPlugIn.log("Error verifying delete of listitem " + listItem.getName() , ex);
-			cancelWork("Error verifying delete of listItem " + listItem.getName() + ": " + ex.getMessage());
+			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteListItem + listItem.getName() , ex);
+			cancelWork(Messages.DataModelManager_Error_DeleteListItem + listItem.getName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
 			return false;
 		}
 		monitor.worked(1);
 		if (monitor.isCanceled()){
-			cancelWork("Delete cancelled. Attribute list item " + listItem.getName() + " not deleted.");
+			cancelWork(Messages.DataModelManager_Cancelled_DeleteListItem + listItem.getName() );
 			return false;
 		}
 		
@@ -260,21 +261,21 @@ public class DataModelManager {
 	 * not be removed.
 	 */
 	public boolean validateDelete(AttributeTreeNode node, IProgressMonitor monitor, Session session){
-		monitor.beginTask("Delete Attribute Tree Node: " + node.getName(), 1);		
-		monitor.subTask("Verifying delete");
+		monitor.beginTask(Messages.DataModelManager_Progress_DeleteTreeNode + node.getName(), 1);		
+		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 		
 		try{
 			if (!DeleteManager.canDelete(node, session)){
 				return false;
 			}
 		}catch (Exception ex){
-			SmartPlugIn.log("Error verifying delete of tree node " + node.getName() , ex);
-			cancelWork("Error verifying delete of tree node " + node.getName() + ": " + ex.getMessage());
+			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteTreeNode + node.getName() , ex);
+			cancelWork(Messages.DataModelManager_Error_DeleteTreeNode + node.getName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
 			return false;
 		}
 		monitor.worked(1);
 		if (monitor.isCanceled()){
-			cancelWork("Delete cancelled. Attribute tree node " + node.getName() + " not deleted.");
+			cancelWork(Messages.DataModelManager_Cancelled_DeleteTreeNode + node.getName() );
 			return false;
 		}
 		return true;

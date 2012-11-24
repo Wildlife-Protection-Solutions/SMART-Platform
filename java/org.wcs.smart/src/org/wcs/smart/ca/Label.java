@@ -71,7 +71,7 @@ public class Label  {
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
 		if (elementuuid == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 		Label.LabelItemPK id = new Label.LabelItemPK();
@@ -80,7 +80,7 @@ public class Label  {
 		id.setElement(h);
 		id.setLanguage(SmartDB.getCurrentLanguage());
 
-		String description = "";
+		String description = ""; //$NON-NLS-1$
 		Session s = HibernateManager.openSession();
 		Label lbl = (Label) s.get(Label.class, id);
 		if (lbl == null) {
@@ -137,6 +137,11 @@ public class Label  {
 	
 	@Embeddable
 	protected static class LabelItemPK implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
 		private Language language;
 		private HasLabel element;
 

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Category information panel for displaying and editing
@@ -64,7 +65,7 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 		
 		chMultiple = new Button(this, SWT.CHECK);
 		chMultiple.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		chMultiple.setText("Can have multiple observations");
+		chMultiple.setText(Messages.CategoryInfoPanel_OpMultiple);
 		chMultiple.setSelection(true);
 		if (!canEdit){
 			chMultiple.setEnabled(false);

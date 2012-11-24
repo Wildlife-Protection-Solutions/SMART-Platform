@@ -42,7 +42,7 @@ import org.wcs.smart.ui.map.MapView;
  * @since 1.0.0
  */
 public class SaveMapHandler extends AbstractHandler {
-	public final static String ID = "org.wcs.smart.action.SaveMapAction";
+	public final static String ID = "org.wcs.smart.action.SaveMapAction"; //$NON-NLS-1$
 
 	
 	/* (non-Javadoc)

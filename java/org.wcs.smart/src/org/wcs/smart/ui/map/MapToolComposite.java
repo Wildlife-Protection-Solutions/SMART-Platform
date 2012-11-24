@@ -49,13 +49,13 @@ import org.wcs.smart.udig.SetBasemapTool;
 public class MapToolComposite {
 
 	
-	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer", 
+	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer",  //$NON-NLS-1$
 			SetBasemapTool.ID, 
-			"org.wcs.smart.udig.ZoomExtents", 
-			"net.refractions.udig.tools.Pan",
-			"net.refractions.udig.tools.Zoom", 
-			"net.refractions.udig.tool.default.ZoomIn",
-			"net.refractions.udig.tool.default.ZoomOut",
+			"org.wcs.smart.udig.ZoomExtents",  //$NON-NLS-1$
+			"net.refractions.udig.tools.Pan", //$NON-NLS-1$
+			"net.refractions.udig.tools.Zoom",  //$NON-NLS-1$
+			"net.refractions.udig.tool.default.ZoomIn", //$NON-NLS-1$
+			"net.refractions.udig.tool.default.ZoomOut", //$NON-NLS-1$
 			InfoTool.ID};
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();

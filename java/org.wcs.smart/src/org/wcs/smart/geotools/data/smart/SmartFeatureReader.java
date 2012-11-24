@@ -24,7 +24,6 @@ package org.wcs.smart.geotools.data.smart;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import org.geotools.data.FIDReader;
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.ScrollMode;
@@ -58,8 +57,8 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		this.session = HibernateManager.openSession();
 		this.session.beginTransaction();
 		itemCursor = session.createCriteria(Area.class)
-				.add(Restrictions.eq("conservationArea", ca))
-				.add(Restrictions.eq("type", type)).setReadOnly(true).setCacheable(false).scroll(ScrollMode.FORWARD_ONLY);
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("type", type)).setReadOnly(true).setCacheable(false).scroll(ScrollMode.FORWARD_ONLY); //$NON-NLS-1$
 		
 		
 		this.ftype = ftype;
@@ -99,7 +98,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 			NoSuchElementException {
 		//		String spec = "uuid:String,id:String,key:String,geom:MultiPolygon:srid=4326";
 		Area a = (Area)itemCursor.get(0);
-		String fid = ftype.getTypeName() + "." + a.getKeyId(); //SmartUtils.encodeHex(a.getUuid());
+		String fid = ftype.getTypeName() + "." + a.getKeyId(); //$NON-NLS-1$
 		Object values[] = new Object[5];
 		values[0] = fid;
 		values[1] = a.getId();

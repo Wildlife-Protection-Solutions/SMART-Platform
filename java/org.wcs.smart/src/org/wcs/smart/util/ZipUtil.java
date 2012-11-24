@@ -34,6 +34,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.internal.Messages;
 
 /**
  * A collection of zip utilities.
@@ -75,7 +76,7 @@ public class ZipUtil {
             	}
             }
             
-            monitor.beginTask("Creating zip file", count);
+            monitor.beginTask(Messages.ZipUtil_Progress_CreatingZip, count);
             for (int i = 0; i < directories.length; i ++){
             	if (directories[i].isDirectory() && directories[i].list().length == 0){
             		//empty directory; create an empty file as a placeholder
@@ -84,7 +85,7 @@ public class ZipUtil {
                     //IOUtils.copy(new FileInputStream(path), zOut);
                     tOut.closeArchiveEntry();
             	}else{
-            		addFileToZip(tOut, directories[i], "", monitor);
+            		addFileToZip(tOut, directories[i], "", monitor); //$NON-NLS-1$
             	}
             }
             
@@ -112,7 +113,7 @@ public class ZipUtil {
     		File path, 
     		String base, IProgressMonitor monitor) throws IOException {
     	
-    	monitor.subTask("processing: " + path.getAbsolutePath());
+    	monitor.subTask(Messages.ZipUtil_Progress_ProcessingFile + path.getAbsolutePath());
     	String entryName = base + path.getName();
         if(monitor.isCanceled()){
         	return false;
@@ -131,7 +132,7 @@ public class ZipUtil {
             File[] children = path.listFiles();
             if (children != null) {
                 for (File child : children) {
-                    if (!addFileToZip(zOut, child, entryName + "/", monitor)){
+                    if (!addFileToZip(zOut, child, entryName + File.separator, monitor)){
                     	return false;
                     }
                     if (monitor.isCanceled()){
@@ -155,7 +156,7 @@ public class ZipUtil {
 			throws Exception {
     	
     	ZipFile archiveFile = new ZipFile(file);
-    	String[] outputZipRootFolder = new String[] { "null" };
+    	String[] outputZipRootFolder = new String[] { "null" }; //$NON-NLS-1$
     	
 		try {
 			byte[] buf = new byte[65536];
@@ -172,11 +173,11 @@ public class ZipUtil {
 				// name = name.substring(i + 1);
 
 				File destinationFile = new File(destinationLocation, name);
-				if (name.endsWith("/")) {
+				if (name.endsWith(File.separator)) {
 					if (!destinationFile.isDirectory()
 							&& !destinationFile.mkdirs()) {
 						throw new Exception(
-								"Could not create temp directory: '"
+								Messages.ZipUtil_Error_CreatingTempDir
 										+ destinationFile.getPath());
 					}
 					continue;
@@ -186,7 +187,7 @@ public class ZipUtil {
 					if (!parentFolder.isDirectory()) {
 						if (!parentFolder.mkdirs()) {
 							throw new Exception(
-									"Could not create temp directory: '"
+									Messages.ZipUtil_Error_CreatingTempDir
 											+ parentFolder.getPath());
 						}
 					}
@@ -210,7 +211,7 @@ public class ZipUtil {
 				}
 			}
 		} catch (IOException e) {
-			throw new Exception("Unzip failed: " + e.getMessage(), e);
+			throw new Exception(Messages.ZipUtil_Error_UnzipFailed + e.getMessage(), e);
 		} finally {
 			try {
 				archiveFile.close();

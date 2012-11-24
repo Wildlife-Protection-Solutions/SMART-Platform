@@ -24,7 +24,7 @@ package org.wcs.smart;
 import java.io.InputStream;
 import java.util.Properties;
 
-import javax.persistence.Transient;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Reads the smart properties file
@@ -34,17 +34,17 @@ import javax.persistence.Transient;
  */
 public class SmartProperties {
 
-	private static final String SMART_PROPERTIES = "properties/smart.properties";
+	private static final String SMART_PROPERTIES = "properties/smart.properties"; //$NON-NLS-1$
 	
-	private static final String IUCN_DATAMODEL_FILE = "properties/IUCN_Threats.xml";
+	private static final String IUCN_DATAMODEL_FILE = "properties/IUCN_Threats.xml"; //$NON-NLS-1$
 
 	/**
 	 * Database location key
 	 */
-	public static final String SMART_DB_KEY = "db.dbname";
-	public static final String FILESTORE_KEY = "filestore";
-	public static final String GPS_BABLE_KEY = "gpsbabel";
-	public static final String BACKUP_DIRECTORY_KEY = "backup.directory";
+	public static final String SMART_DB_KEY = "db.dbname"; //$NON-NLS-1$
+	public static final String FILESTORE_KEY = "filestore"; //$NON-NLS-1$
+	public static final String GPS_BABLE_KEY = "gpsbabel"; //$NON-NLS-1$
+	public static final String BACKUP_DIRECTORY_KEY = "backup.directory"; //$NON-NLS-1$
 	
 	private Properties prop = null;
 	
@@ -76,7 +76,7 @@ public class SmartProperties {
 			prop.load(stream);
 		}catch (Exception ex){
 			//cannot load properties files
-			SmartPlugIn.displayLogExit("Cannot read properties file.", ex);
+			SmartPlugIn.displayLogExit(Messages.SmartProperties_Error_ReadingProperties, ex);
 		}
 	}
 	

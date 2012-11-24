@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
 
 /**
@@ -65,7 +66,7 @@ import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
 		@Override
 		public String getText(Object element) {
 			if (element instanceof RootNode){
-				return "Root";
+				return Messages.AttributeTreeLabelProvider_RootNode_Label;
 			}
 			if (element instanceof AttributeTreeNode){
 				element = ((AttributeTreeNode)element);
@@ -74,12 +75,12 @@ import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
 			if (element instanceof DmObject){
 				DmObject obj = (DmObject)element;
 				if (currentLang != null){
-					return obj.findName(currentLang) + "  [" + obj.getKeyId() + "]";
+					return obj.findName(currentLang) + "  [" + obj.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 				}else{
 					return obj.getName();
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 
 		@Override

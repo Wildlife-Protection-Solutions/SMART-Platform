@@ -42,6 +42,7 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -57,35 +58,35 @@ public class CaExporter {
 	 * The name of the conservation area data file in the exported
 	 * data.
 	 */
-	public static final String CA_INFO_FILENAME = "conservationarea.dat";
+	public static final String CA_INFO_FILENAME = "conservationarea.dat"; //$NON-NLS-1$
 	
 	/**
 	 * The name of the directory where the database data is stored
 	 */
-	public static final String DATABASE_DIR = "database";
+	public static final String DATABASE_DIR = "database"; //$NON-NLS-1$
 	
 	/**
 	 * The name of the directory where the filestore data is 
 	 * stored
 	 */
-	public static final String FILESTORE_DIR = "filestore";
+	public static final String FILESTORE_DIR = "filestore"; //$NON-NLS-1$
 	
 	
 	/**
 	 * Export code extension point
 	 */
-	private static final String EXPORT_EXTENSION_ID = "org.wcs.smart.ca.export";
+	private static final String EXPORT_EXTENSION_ID = "org.wcs.smart.ca.export"; //$NON-NLS-1$
 	
 	/**
 	 * @return the default backup file name based on the current date
 	 */
 	public static String getDefaultFileName(){
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
 		try{
-			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getCanonicalPath();
+			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getCanonicalPath(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}catch (Exception ex){
-			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getAbsolutePath();
+			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 	
@@ -119,7 +120,7 @@ public class CaExporter {
 			try{
 				FileUtils.deleteDirectory(tempDir);
 			}catch(Exception ex){
-				SmartPlugIn.log("Could not delete temporary directory: " + tempDir.getAbsolutePath(), ex);
+				SmartPlugIn.log(Messages.CaExporter_Error_TempDirDelete + tempDir.getAbsolutePath(), ex);
 			}
 		
 		}finally{
@@ -155,7 +156,7 @@ public class CaExporter {
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXPORT_EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
-				items.add((ICaDataExporter)e.createExecutableExtension("caExporter"));
+				items.add((ICaDataExporter)e.createExecutableExtension("caExporter")); //$NON-NLS-1$
 			}
 		}catch (Exception ex){
 			ex.printStackTrace();

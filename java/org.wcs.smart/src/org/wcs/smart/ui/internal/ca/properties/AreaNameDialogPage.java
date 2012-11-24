@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -49,6 +50,8 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
 
@@ -95,7 +98,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	private void loadAreaTypes(){
 		Session session = getSession();
 		session.beginTransaction();
-		List<?> areas = session.createCriteria(Area.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("type", type)).list();
+		List<?> areas = session.createCriteria(Area.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("type", type)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		tableViewer.setInput(areas.toArray());
 		tableViewer.refresh();
@@ -112,7 +115,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			ConservationAreaManager.getInstance().fireAreaChanged(type);
 			getSession().beginTransaction();
 		}catch (Exception ex){
-			SmartPlugIn.log("Could not save changes.\n\n" + ex.getMessage(), ex);
+			SmartPlugIn.log(Messages.AreaNameDialogPage_Error_Save + ex.getMessage(), ex);
 		}
 	}
 	
@@ -129,7 +132,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 
 		TableViewerColumn colName = new TableViewerColumn(tableViewer,SWT.NONE);
 		TableColumn column = colName.getColumn();
-		column.setText("Name");
+		column.setText(Messages.AreaNameDialogPage_Name_ColumnHeader);
 		column.setResizable(true);
 		column.setMoveable(false);
 		TableColumnLayout layout = (TableColumnLayout) tableViewer.getTable().getParent().getLayout();
@@ -141,7 +144,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 				if (element instanceof Area){
 					return ((Area)element).getId();
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		});
 		colName.setEditingSupport(new EditingSupport(colName.getViewer()) {
@@ -151,7 +154,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 				if (!( ((String)value).equals(((Area)element).getId()))){
 					String newId = (String)value;
 					if (newId.length() > Area.ID_MAX_LENGTH){
-						setErrorMessage("Name has been truncated to " + Area.ID_MAX_LENGTH + " characters.");
+						setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_Warning_NameTruncate, new Object[]{ Area.ID_MAX_LENGTH }));
 						newId = newId.substring(0, Area.ID_MAX_LENGTH);
 					}
 					
@@ -164,7 +167,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			@Override
 			protected Object getValue(Object element) {
 				String value = ((Area)element).getId();
-				if (value == null) return "";
+				if (value == null) return ""; //$NON-NLS-1$
 				return value;
 			}
 			
@@ -181,7 +184,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		
 		TableViewerColumn colKey = new TableViewerColumn(tableViewer,SWT.NONE);
 		column = colKey.getColumn();
-		column.setText("Key");
+		column.setText(Messages.AreaNameDialogPage_Key_ColumnName);
 		column.setResizable(true);
 		column.setMoveable(false);
 		layout.setColumnData(column, new ColumnWeightData(40, ColumnWeightData.MINIMUM_WIDTH, true));
@@ -192,7 +195,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 				if (element instanceof Area){
 					return ((Area)element).getKeyId();
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		});
 		colKey.setEditingSupport(new EditingSupport(colKey.getViewer()) {
@@ -204,16 +207,16 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 					//validate that the key is different from all the others
 					//and does not contain weird characters
 					if (!SmartUtils.isSimpleString(newKey, RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Area.KEY_MAX_LENGTH)){
-						setErrorMessage("Invalid key.  Key mush only contain " + RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc +" and be less than " + Area.KEY_MAX_LENGTH + " characters.");
+						setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_Error_InvalidKey, new Object[]{RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc,  Area.KEY_MAX_LENGTH }));
 						return;
-					}else if (newKey.substring(0, 1).matches("[0-9_]")){
-						setErrorMessage("Invalid key.  Key cannot start with a number or '_'. ");
+					}else if (newKey.substring(0, 1).matches("[\\p{Nd}_]")){ //$NON-NLS-1$
+						setErrorMessage(Messages.AreaNameDialogPage_Error_InvalidKey2);
 					}else{
 						Object[] data = (Object[]) tableViewer.getInput();
 						for (int i = 0; i < data.length; i ++){
 							if (((Area)data[i]) == element) continue;
 							if (((Area)data[i]).getKeyId().equals(newKey)){
-								setErrorMessage("Keys cannot be duplicated.");
+								setErrorMessage(Messages.AreaNameDialogPage_Error_DuplicateKey);
 								return;
 							}
 						}				
@@ -228,7 +231,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			@Override
 			protected Object getValue(Object element) {
 				String value = ((Area)element).getKeyId();
-				if (value == null) return "";
+				if (value == null) return ""; //$NON-NLS-1$
 				return value;
 			}
 			
@@ -249,9 +252,9 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		
 		loadAreaTypes();		
 		
-		getShell().setText("Modify Area Labels");
-		setTitle("Modify " + type.getGuiName());
-		setMessage("Update area names here.  Modifying keys is not recommended as it will affect other parts of the system.");
+		getShell().setText(Messages.AreaNameDialogPage_DialogTitle);
+		setTitle(Messages.AreaNameDialogPage_MessageTitle + type.getGuiName());
+		setMessage(Messages.AreaNameDialogPage_DialogMessage);
 		
 		return composite; 
 	}
@@ -264,16 +267,16 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button btn = createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		btn.setEnabled(false);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Close", false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 	}
 	
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.CANCEL_ID){
 			if (dirty){
-				if (!MessageDialog.openConfirm(getShell(), "Confirm Close", "All unsaved changes will be lost.  Are you sure you want to close?")){
+				if (!MessageDialog.openConfirm(getShell(), Messages.AreaNameDialogPage_ConfirmClose_DialogTitle, Messages.AreaNameDialogPage_ConfirmClose_DialogMessage)){
 					return;
 				}
 			}

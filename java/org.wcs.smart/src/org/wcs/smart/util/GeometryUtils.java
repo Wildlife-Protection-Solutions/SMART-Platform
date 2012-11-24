@@ -156,11 +156,11 @@ public class GeometryUtils {
 
 		StringBuilder sb = new StringBuilder(40);
 
-		sb.append("MULTIPOINT ((")
-				.append(envelope.getMaxX()).append(" ").append(envelope.getMaxY())
-				.append("),(")
-				.append(envelope.getMinX()).append(" ").append(envelope.getMinY())
-				.append("))");
+		sb.append("MULTIPOINT ((") //$NON-NLS-1$
+				.append(envelope.getMaxX()).append(" ").append(envelope.getMaxY()) //$NON-NLS-1$
+				.append("),(") //$NON-NLS-1$
+				.append(envelope.getMinX()).append(" ").append(envelope.getMinY()) //$NON-NLS-1$
+				.append("))"); //$NON-NLS-1$
 
 		return sb.toString();
 	}

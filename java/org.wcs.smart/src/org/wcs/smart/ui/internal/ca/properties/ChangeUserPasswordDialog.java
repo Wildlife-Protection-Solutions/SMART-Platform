@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -49,6 +50,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -76,7 +78,7 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 	 * 
 	 */
 	public ChangeUserPasswordDialog(Shell parent) {
-		super(parent, "Change username password.");
+		super(parent, Messages.ChangeUserPasswordDialog_DialogTitle);
 		
 		toUpdate = SmartDB.getCurrentEmployee();
 	}
@@ -105,7 +107,7 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		data.setLayout(new GridLayout(3, false));
 		
 		Label lbl = new Label(data, SWT.NONE);
-		lbl.setText("Username:");
+		lbl.setText(Messages.ChangeUserPasswordDialog_Username_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		final Text txtUserName = new Text(data, SWT.BORDER);
@@ -113,16 +115,16 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		txtUserName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtUserName.setEditable(false);
 		Button modifyUser = new Button(data, SWT.PUSH);
-		modifyUser.setText("Change...");
+		modifyUser.setText(Messages.ChangeUserPasswordDialog_Modify_Button);
 		modifyUser.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				InputDialog dialog = new InputDialog(ChangeUserPasswordDialog.this.getParentShell(), "Change User Name", "Enter your new user name.", toUpdate.getSmartUserId(), 
+				InputDialog dialog = new InputDialog(ChangeUserPasswordDialog.this.getParentShell(), Messages.ChangeUserPasswordDialog_ChangeUser_DialogTitle, Messages.ChangeUserPasswordDialog_ChangeUser_DialogMessage, toUpdate.getSmartUserId(), 
 						new IInputValidator() {
 							@Override
 							public String isValid(String newText) {
-								if (newText.length() < 4){
-									return "User name must be longer than 4 characters.";
+								if (newText.length() < Employee.MIN_SMART_ID_LENGTH){
+									return MessageFormat.format(Messages.ChangeUserPasswordDialog_Error_UserNameLength, new Object[]{ Employee.MIN_SMART_ID_LENGTH });
 								}
 								return null;
 							}
@@ -137,9 +139,9 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 					return;
 				}
 				
-				List otherUsers = getSession().createCriteria(Employee.class).add(Restrictions.eq("smartUserId", newUserName)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				List<?> otherUsers = getSession().createCriteria(Employee.class).add(Restrictions.eq("smartUserId", newUserName)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$ //$NON-NLS-2$
 				if (otherUsers.size() > 0){
-					MessageDialog.openError(ChangeUserPasswordDialog.this.getShell(), "Error", "Cannot change user name.  The username '" + newUserName + "' exists.");
+					MessageDialog.openError(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Error_DialogTitle, MessageFormat.format(Messages.ChangeUserPasswordDialog_Error_UserExists, new Object[]{ newUserName }));
 					return;
 				}
 				else{
@@ -153,7 +155,7 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 						toUpdate.setSmartUserId(old);
 						SmartPlugIn.displayLog(
 								ChangeUserPasswordDialog.this.getShell(),
-								"Could not change user name. " + ex.getMessage(), ex);
+								Messages.ChangeUserPasswordDialog_Error_CouldNoUpdateUser + ex.getMessage(), ex);
 						getSession().close();
 					}
 					
@@ -168,37 +170,37 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		
 		lbl = new Label(data, SWT.NONE);
-		lbl.setText("Current Password:");		
+		lbl.setText(Messages.ChangeUserPasswordDialog_PasswordLabel);		
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txtCurrentPassword = new Text(data, SWT.BORDER | SWT.PASSWORD);
-		txtCurrentPassword.setText("");
+		txtCurrentPassword.setText(""); //$NON-NLS-1$
 		txtCurrentPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)txtCurrentPassword.getLayoutData()).horizontalIndent = 5;
 		txtCurrentPassword.addModifyListener(validateListener);
 		cdCurrentPassword = createDecoration(txtCurrentPassword);
 		
 		lbl = new Label(data, SWT.NONE);
-		lbl.setText("New Password:");		
+		lbl.setText(Messages.ChangeUserPasswordDialog_NewPassword_Label);		
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		txtPassword1 = new Text(data, SWT.BORDER | SWT.PASSWORD);
-		txtPassword1.setText("");
+		txtPassword1.setText(""); //$NON-NLS-1$
 		txtPassword1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)txtPassword1.getLayoutData()).horizontalIndent = 5;
 		txtPassword1.addModifyListener(validateListener);
 		cdPassword1 = createDecoration(txtPassword1);
 		
 		lbl = new Label(data, SWT.NONE);
-		lbl.setText("Re-type New Password:");		
+		lbl.setText(Messages.ChangeUserPasswordDialog_NewPassword2_Label);		
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		txtPassword2 = new Text(data, SWT.BORDER | SWT.PASSWORD);
-		txtPassword2.setText("");
+		txtPassword2.setText(""); //$NON-NLS-1$
 		txtPassword2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)txtPassword2.getLayoutData()).horizontalIndent = 5;
 		txtPassword2.addModifyListener(validateListener);
 		cdPassword2 = createDecoration(txtPassword2);
 		
-		setMessage("To change your password enter your current password and your new password.");
+		setMessage(Messages.ChangeUserPasswordDialog_Dialog_Message);
 		validate();
 		return data;
 	}
@@ -241,24 +243,24 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		boolean error = false;
 		
 		if (txtCurrentPassword.getText().length() == 0){
-			cdCurrentPassword.setDescriptionText("Must enter your current password.");
+			cdCurrentPassword.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterPass);
 			cdCurrentPassword.show();
 			error = true;
 		}
 		
 		if (txtPassword1.getText().length() == 0){
-			cdPassword1.setDescriptionText("Must enter a new password.");
+			cdPassword1.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterNewPass);
 			cdPassword1.show();
 			error = true;
 		}
 		if (txtPassword2.getText().length() == 0){
-			cdPassword2.setDescriptionText("Must re-enter your new password.");
+			cdPassword2.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterNewPass2);
 			cdPassword2.show();
 			error = true;
 		}
 
 		if (!txtPassword1.getText().equals(txtPassword2.getText())){
-			cdPassword2.setDescriptionText("Passwords do not match");
+			cdPassword2.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_PassNotSame);
 			cdPassword2.show();
 			error = true;
 		}
@@ -287,18 +289,18 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 					toUpdate.setSmartPassword(txtPassword1.getText());
 					getSession().getTransaction().commit();
 					
-					MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), "Password Update", "Password successfully updated.");
+					MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Updated_DialogTitle, Messages.ChangeUserPasswordDialog_Updated_DialogMessage);
 					setChangesMade(false);
 					return true;
 				} catch (Exception ex) {
 					toUpdate.setSmartPassword(old);	//reset password
 					SmartPlugIn.displayLog(
 							ChangeUserPasswordDialog.this.getShell(),
-							"Could not change password. " + ex.getMessage(), ex);
+							Messages.ChangeUserPasswordDialog_Error_CouldNotUpdatePass + ex.getMessage(), ex);
 					getSession().close();
 				}	
 			}else{
-				setErrorMessage("The current password entered does not match your current password.");
+				setErrorMessage(Messages.ChangeUserPasswordDialog_Error_NewPassNotSame);
 			}	
 		}
 		return false;

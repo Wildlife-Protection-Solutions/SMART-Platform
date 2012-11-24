@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.internal.Messages;
 
 
 /**
@@ -78,7 +79,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Create Attribute");
+		shell.setText(Messages.AddAttributeDialog2_DialogTitle);
 	}
 	
 	@Override
@@ -137,9 +138,9 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		if (toUpdate.getKeyId() == null){
-			setMessage("Create a new attribute.");
+			setMessage(Messages.AddAttributeDialog2_New_DialogMessage);
 		}else{
-			setMessage("Edit the attribute.");
+			setMessage(Messages.AddAttributeDialog2_Edit_DialogMessage);
 		}
 		return composite;
 	}

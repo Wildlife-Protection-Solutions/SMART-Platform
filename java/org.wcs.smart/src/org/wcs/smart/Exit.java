@@ -26,6 +26,11 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.PlatformUI;
 
+/**
+ * Exit application handler
+ * @author egouge
+ *
+ */
 public class Exit extends AbstractHandler {
 
 	@Override

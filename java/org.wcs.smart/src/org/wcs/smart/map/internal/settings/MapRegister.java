@@ -28,7 +28,6 @@ import net.refractions.udig.ui.palette.ColourScheme;
 
 import org.geotools.brewer.color.BrewerPalette;
 
-import com.google.gson.GsonBuilder;
 
 /**
  * Maintains the custom setting done in the map object
@@ -87,9 +86,9 @@ final class MapRegister {
 
 	@Override
 	public String toString() {
-		return "MapRegister [colorPalette=" + colorPalette + ", layerList="
-				+ layerList + ", id=" + id + ", name=" + name + ", envelop="
-				+ ", colourScheme=" + colourScheme + "]";
+		return "MapRegister [colorPalette=" + colorPalette + ", layerList=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ layerList + ", id=" + id + ", name=" + name + ", envelop=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ ", colourScheme=" + colourScheme + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 

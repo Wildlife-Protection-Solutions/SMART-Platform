@@ -24,6 +24,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 
 /**
@@ -38,7 +39,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
 		UDIGConnectionPage, Listener {
 
 	public SmartAreaWizardPage() {
-		super("Smart Area Layer Connection Page");
+		super(Messages.SmartAreaWizardPage_SmartLayerConnectionPage_Title);
 	}
 
 	@Override
@@ -96,7 +97,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
             return ids;
            
         }catch (Exception ex){
-        	SmartPlugIn.displayLog(getShell(), "Error loading smart resources.", ex);
+        	SmartPlugIn.displayLog(getShell(), Messages.SmartAreaWizardPage_Error_LoadingSmartResources, ex);
         }
         return Collections.emptySet();
     }

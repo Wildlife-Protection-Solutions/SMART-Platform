@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Contribution item to display the current
@@ -58,9 +59,9 @@ public class UserNameControlContribution extends
 		comp.setLayout(gl);
 		Label lbl = new Label(comp, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lbl.setText(SmartDB.getCurrentEmployee().getGivenName() + " " + SmartDB.getCurrentEmployee().getFamilyName());
+		lbl.setText(SmartDB.getCurrentEmployee().getGivenName() + " " + SmartDB.getCurrentEmployee().getFamilyName()); //$NON-NLS-1$
 		
-		lbl.setToolTipText("You are currently logged in as " + SmartDB.getCurrentEmployee().getLabel());
+		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + SmartDB.getCurrentEmployee().getLabel());
 		return comp;
 	}
 

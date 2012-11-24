@@ -27,6 +27,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Delete advisor to ensure that when an employee
@@ -41,15 +42,15 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Employee)){
-			return "Object not of type Employee. Can not delete.";
+			return Messages.EmployeeDeleteAdvisor_Error_NotEmployee;
 		}
 		Employee e = (Employee)object;
 		Long cnt = (Long) session.createCriteria(Employee.class)
-				.add(Restrictions.ne("uuid", e.getUuid()))
-				.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN))
+				.add(Restrictions.ne("uuid", e.getUuid())) //$NON-NLS-1$
+				.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN)) //$NON-NLS-1$
 				.setProjection(Projections.rowCount()).uniqueResult();
 		if (cnt == 0){
-			return "This employee cannot be removed as there would be no other administrative employees for this conservation area.";
+			return Messages.EmployeeDeleteAdvisor_Error_NoMoreAdmin;
 		}else{
 			return null;
 		}

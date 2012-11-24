@@ -34,6 +34,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -64,7 +65,7 @@ public class SmartGeoResourceInfo extends IGeoResourceInfo {
 			this.bounds = env;
 		} catch (IOException e) {
 			this.featureCount = -1;
-			SmartPlugIn.log("Could not determine bounds for smart resource : " + resource.getType().getGuiName(), e);
+			SmartPlugIn.log(Messages.SmartGeoResourceInfo_Error_ComputingBounds + resource.getType().getGuiName(), e);
 		}
 	}
 	

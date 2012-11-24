@@ -31,6 +31,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -47,11 +48,11 @@ public class DerbyBackupEngine {
 	 */
 	public static String getDefaultFileName(){
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
 		try{
-			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getCanonicalPath();
+			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getCanonicalPath(); //$NON-NLS-1$ //$NON-NLS-2$
 		}catch (Exception ex){
-			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getAbsolutePath(); 
+			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getAbsolutePath();  //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
@@ -67,7 +68,7 @@ public class DerbyBackupEngine {
 	public static boolean  backupSystem(File outputFile, IProgressMonitor monitor) throws IOException{
 		if (outputFile.exists()){
 			if (!outputFile.delete()){
-				throw new IllegalStateException("Output file '" + outputFile.getAbsolutePath() + "' could not be deleted.");
+				throw new IllegalStateException(Messages.DerbyBackupEngine_DeleteOutputFileError + " '" + outputFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		if (!outputFile.getParentFile().exists()){
@@ -75,7 +76,7 @@ public class DerbyBackupEngine {
 			try{
 				SmartUtils.createDirectory(outputFile.getParentFile());
 			}catch (Exception ex){
-				throw new IllegalStateException("Output directory : " + outputFile.getParentFile().toString() + " could not be created. \n\n" + ex.getMessage(), ex);
+				throw new IllegalStateException(Messages.DerbyBackupEngine_CreateDirectoryError + " '" + outputFile.getParentFile().toString() + "' \n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		
@@ -83,7 +84,7 @@ public class DerbyBackupEngine {
 		try{
 			try{
 				//here we freeze the database to put it into a state for copying
-				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()");
+				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()"); //$NON-NLS-1$
 				q.executeUpdate();
 				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY));
 				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
@@ -94,12 +95,12 @@ public class DerbyBackupEngine {
 				
 				File[] dirsToBackup = new File[]{filestore, database};
 			
-				monitor.beginTask("Backing Up Database and Files", 2);
+				monitor.beginTask(Messages.DerbyBackupEngine_ProgressMessage, 2);
 			
 				return ZipUtil.createZip(dirsToBackup, outputFile, monitor);
 			}finally{
 				//now un-freeze			
-				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE()");
+				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE()"); //$NON-NLS-1$
 				q.executeUpdate();
 			}
 		}finally{

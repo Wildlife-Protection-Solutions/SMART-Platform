@@ -39,7 +39,7 @@ public class ZoomOutHandler extends AbstractHandler{
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
-			view.setTool("net.refractions.udig.tool.default.ZoomOut");
+			view.setTool("net.refractions.udig.tool.default.ZoomOut"); //$NON-NLS-1$
 		} 
 		return null;
 	}

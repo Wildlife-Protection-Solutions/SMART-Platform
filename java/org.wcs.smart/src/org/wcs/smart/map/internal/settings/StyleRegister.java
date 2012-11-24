@@ -80,7 +80,7 @@ final class StyleRegister {
 
 	@Override
 	public String toString() {
-		return "StyleRegister [id=" + id + ", memento=" + memento + "]";
+		return "StyleRegister [id=" + id + ", memento=" + memento + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	

@@ -31,12 +31,16 @@ import net.refractions.udig.catalog.IService;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.DeleteConservationAreaHandler;
+import org.wcs.smart.internal.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -65,7 +69,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String STATION_ICON = "org.wsc.smart.STATION_ICON"; //$NON-NLS-1$
 	
-	
+	/**
+	 * Image descriptor for smart 48x48 icon
+	 */
+	public static final String SMART_48_ICON = "org.wcs.smart.SMART_48_ICON"; //$NON-NLS-1$
+			
 	public BasemapDefinition defaultDefinition = null;
 	
 	/**
@@ -89,7 +97,20 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString());
+		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
+		
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				ImageDescriptor descriptor = AbstractUIPlugin
+						.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,
+								"/images/icons/smart48.gif"); //$NON-NLS-1$
+				if (descriptor != null) {
+					JFaceResources.getImageRegistry().put(SMART_48_ICON, descriptor);
+				}
+			}});
+		
 		
 		// add delete handler
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
@@ -153,7 +174,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 				currentShell = Display.getDefault().getActiveShell();
 			}
 		}
-		MessageDialog.openError(currentShell, "Error", message);
+		MessageDialog.openError(currentShell, Messages.SmartPlugIn_Error_Dialog_Title, message);
 	}
 	
 	/**
@@ -165,13 +186,13 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLogExit(String message, Throwable t){
 		log(message, t);
-		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", message);
+		MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartPlugIn_Error_Dialog_Title, message);
 		System.exit(1);
 	}
 	
 	
 	public static String lookupLocaleName(String nl){
-		String[] bits = nl.split("_");
+		String[] bits = nl.split("_"); //$NON-NLS-1$
 		for (int i = 0; i < Locale.getAvailableLocales().length;i++){
 			Locale l  = Locale.getAvailableLocales()[i];
 			if (bits[0].equals(l.getLanguage()) && 

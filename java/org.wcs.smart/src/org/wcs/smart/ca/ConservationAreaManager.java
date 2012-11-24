@@ -34,6 +34,7 @@ import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 
 /**
  * This is a manager for conservation areas.
@@ -90,7 +91,7 @@ public class ConservationAreaManager {
 			work += data.size();
 		}
 		
-		monitor.beginTask("Deleting Conservation Area", work);
+		monitor.beginTask(Messages.ConservationAreaManager_Progress_DeleteCa, work);
 		monitor.worked(0);
 		Session session = HibernateManager.openSession();
 		session.update(ca);
@@ -100,26 +101,26 @@ public class ConservationAreaManager {
 			final File fileStore = new File(ca.getFileDataStoreLocation());
 			
 			runDeleteHandlers(ca, session, monitor);
-			monitor.subTask("Deleting Conservation Area");
+			monitor.subTask(Messages.ConservationAreaManager_Progress_DeleteCa);
 			session.delete(ca);
 			session.getTransaction().commit();
 			monitor.worked(1);
 			
 			if (fileStore.exists()){
-				monitor.subTask("Removing File Store");
+				monitor.subTask(Messages.ConservationAreaManager_Progress_RemoveFileStore);
 				try{
 					FileUtils.forceDelete(fileStore);
 				}catch(final Exception ex){
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), "Could not delete the file store associated with this conservation area.  The directory should be deleted manually. " + fileStore.getAbsolutePath(), ex);
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConservationAreaManager_Error_DeletingFilestore + fileStore.getAbsolutePath(), ex);
 						}});
 				}
 			}
 			monitor.worked(1);
 			
-			monitor.subTask("Restarting");
+			monitor.subTask(Messages.ConservationAreaManager_Progress_Restarting);
 
 			//logout
 			Display.getDefault().syncExec(new Runnable(){

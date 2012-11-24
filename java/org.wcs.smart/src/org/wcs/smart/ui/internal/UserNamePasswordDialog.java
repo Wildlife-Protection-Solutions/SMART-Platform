@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.internal.Messages;
 
 /**
  * 
@@ -99,19 +100,19 @@ public class UserNamePasswordDialog extends Dialog{
 		((GridData)lbl.getLayoutData()).widthHint = 400;
 		
 		lbl = new Label(composite, SWT.NONE);
-		lbl.setText("");
+		lbl.setText(""); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		
 		Label lblUsername = new Label(composite, SWT.NONE);
 		lblUsername.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblUsername.setText("Username:");
+		lblUsername.setText(Messages.UserNamePasswordDialog_Username_Label);
 		
 		txtUsername = new Text(composite, SWT.BORDER);
 		txtUsername.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
 		Label lblPassword = new Label(composite, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblPassword.setText("Password:");
+		lblPassword.setText(Messages.UserNamePasswordDialog_Password_Label);
 		
 		txtPassword = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));

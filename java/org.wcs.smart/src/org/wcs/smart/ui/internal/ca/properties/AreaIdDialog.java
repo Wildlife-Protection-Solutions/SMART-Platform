@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -42,6 +43,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.internal.Messages;
 
 public class AreaIdDialog extends TitleAreaDialog {
 	
@@ -76,7 +78,7 @@ public class AreaIdDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		opField = new Button(main, SWT.RADIO);
-		opField.setText("Defined Identifier Field");
+		opField.setText(Messages.AreaIdDialog_Op_DefinedIDField);
 		opField.addListener(SWT.Selection,validateListener);
 		opField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
@@ -100,19 +102,19 @@ public class AreaIdDialog extends TitleAreaDialog {
 		((GridData)cmbAttributes.getCombo().getLayoutData()).horizontalIndent = 20;
 		
 		Label lblInfo = new Label(main, SWT.WRAP);
-		lblInfo.setText("The maximum length of an identifier is " + Area.ID_MAX_LENGTH + ".  Identifiers that exceed this length will be truncated.");
+		lblInfo.setText( MessageFormat.format(Messages.AreaIdDialog_Error_IdToLong, new Object[]{ Area.ID_MAX_LENGTH }));
 		lblInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblInfo.getLayoutData()).horizontalIndent = 20;
 		
 		opGenerated = new Button(main, SWT.RADIO);
-		opGenerated.setText("Use System-Generated Identifiers");
+		opGenerated.setText(Messages.AreaIdDialog_Op_UserSystemId);
 		opGenerated.addListener(SWT.Selection,validateListener);
 		opGenerated.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		opField.setSelection(true);
 		
-		setMessage("Areas required identifiers attached to them to allow SMART to be able to reference these areas.  ");
-		getShell().setText("Area Identifiers");
+		setMessage(Messages.AreaIdDialog_DialogMessage);
+		getShell().setText(Messages.AreaIdDialog_DialogTitle);
 		return composite; 
 	}
 	
@@ -135,7 +137,7 @@ public class AreaIdDialog extends TitleAreaDialog {
 		// create OK and Cancel buttons by default
 		Button btn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		btn.setEnabled(false);
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 	
 	@Override

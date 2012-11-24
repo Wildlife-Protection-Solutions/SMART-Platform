@@ -25,13 +25,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Interface that can be implemented to export
- * conservaton area data.
+ * conservation area data.
  * 
  * @author egouge
  * @since 1.0.0
  */
 public interface ICaDataExporter {
 
+	/**
+	 * Exports data for the conservation area.
+	 * 
+	 * @param exportEngine export engine
+	 * @param monitor progress monitor
+	 * @throws Exception
+	 */
 	void exportData(ICaDataExportEngine exportEngine, IProgressMonitor monitor) throws Exception;
 	
 }

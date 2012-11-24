@@ -35,7 +35,7 @@ import org.wcs.smart.ui.map.MapView;
  */
 public class ZoomHandler extends AbstractHandler {
 
-	public static String ZoomToolId = "net.refractions.udig.tools.Zoom";
+	public static String ZoomToolId = "net.refractions.udig.tools.Zoom"; //$NON-NLS-1$
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {

@@ -24,6 +24,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +61,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
 
@@ -101,7 +103,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Initialize Conservation Area Data Model");
+		shell.setText(Messages.InitCaDataModelDialog_Dialog_Title);
 	}
 
 	@Override
@@ -122,7 +124,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		comp.setLayout(layout);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		setMessage("No data model has been defined.  Please select the initial data model (further modifications can be made later):");
+		setMessage(Messages.InitCaDataModelDialog_NoDataModel_Message);
 
 		SelectionListener validateListener = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -135,12 +137,12 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			}
 		};
 		btnUseIucn = new Button(comp, SWT.RADIO);
-		btnUseIucn.setText("Use the IUCN data model");
+		btnUseIucn.setText(Messages.InitCaDataModelDialog_Op_UseIUCN);
 		btnUseIucn.addSelectionListener(validateListener);
 		btnUseIucn.setSelection(false);
 
 		btnBlank = new Button(comp, SWT.RADIO);
-		btnBlank.setText("Use a blank data model");
+		btnBlank.setText(Messages.InitCaDataModelDialog_Op_UseBlank);
 		btnBlank.addSelectionListener(validateListener);
 		btnBlank.setSelection(false);
 		
@@ -154,7 +156,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			SelectionListener validateListener) {
 		GridLayout layout;
 		btnUseCustom = new Button(comp, SWT.RADIO);
-		btnUseCustom.setText("Import a custom data model");
+		btnUseCustom.setText(Messages.InitCaDataModelDialog_Op_ImportCustom);
 		btnUseCustom.addSelectionListener(validateListener);
 		btnUseCustom.setSelection(false);
 
@@ -166,7 +168,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 
 		btnImport = new Button(imp, SWT.PUSH);
 		btnImport.setEnabled(false);
-		btnImport.setText("Import XML ...");
+		btnImport.setText(Messages.InitCaDataModelDialog_ImportXML_Button);
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if(caViewer != null){
@@ -174,8 +176,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 				}
 				
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-				fd.setFilterExtensions(new String[]{"*.xml", "*.*"});
-				fd.setFilterNames(new String[]{"xml (*.xml)", "All Files (*.*"});
+				fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[]{Messages.InitCaDataModelDialog_XmlFileFilter_Name, Messages.InitCaDataModelDialog_AllFiles_FilterName});
 				
 				String file = fd.open();
 				if (file != null) {
@@ -195,7 +197,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 								} catch (Exception ex) {
 									SmartPlugIn
 											.displayLog(getShell(),
-													"Could not read data model xml file.",
+													Messages.InitCaDataModelDialog_Error_CouldNotReadXml,
 													ex);
 									dm = null;
 								}
@@ -206,7 +208,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						lblFileName.setText(f.getAbsolutePath());
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(getShell(),
-								"Could not read data model xml file.", ex);
+								Messages.InitCaDataModelDialog_Error_CouldNotReadXml, ex);
 						dm = null;
 					}
 				}
@@ -226,7 +228,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		areas.remove(this.ca);
 		if (areas.size() > 0) {
 			btnClone = new Button(comp, SWT.RADIO);
-			btnClone.setText("Copy DataModel From Existing Conservation Area");
+			btnClone.setText(Messages.InitCaDataModelDialog_Op_CopyExistingCa);
 			btnClone.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					caViewer.getControl().setEnabled(true);
@@ -247,7 +249,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 				public String getText(Object element) {
 					if (element instanceof ConservationArea) {
 						ConservationArea ca = (ConservationArea) element;
-						return ca.getId() + " - " + ca.getName();
+						return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
 					}
 					return super.getText(element);
 				}
@@ -283,7 +285,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						InterruptedException {
 					
 					if (btnUseIucn.getSelection()) {
-						monitor.setTaskName("Loading default data model...");
+						monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_LoadingDefaultDm);
 						InputStream is = SmartProperties.getIucnDataModelFile();
 						try {
 							try {
@@ -298,7 +300,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						}
 					}else if (btnClone != null && btnClone.getSelection()) {
 						//clone from another data model
-						monitor.setTaskName("Cloning data model information ...");
+						monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_ClosingDm);
 						ConservationArea caToCloneFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
 						DataModel dmToClone = null;
 						getSession().beginTransaction();
@@ -310,7 +312,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						
 						if (dmToClone.getCategories().size() == 0) {
 							dm = null;
-							throw new InvocationTargetException(new IllegalStateException("The conservation area '" + caToCloneFrom.getId() + " - " + caToCloneFrom.getName() + "' does not have a defined data model.  You cannot copy from this conservation area."), "The conservation area '" + caToCloneFrom.getId() + " - " + caToCloneFrom.getName() + "' does not have a defined data model.  You cannot copy from this conservation area");
+							String error = MessageFormat.format(Messages.InitCaDataModelDialog_Error_Cloning, new Object[]{ caToCloneFrom.getId() + " - " + caToCloneFrom.getName()});  //$NON-NLS-1$
+							throw new InvocationTargetException(new IllegalStateException(error),error);
 						}
 						//TODO: this needs to be tested when we support multiple languages
 						boolean hasLang = false;
@@ -348,16 +351,17 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 					}
 					
 					if (dm == null){
-						throw new InvocationTargetException(new IllegalStateException("No data model defined."), "No data model defined.");
+						String error = Messages.InitCaDataModelDialog_Error_NoDataModel;
+						throw new InvocationTargetException(new IllegalStateException(error), error);
 					}
-					monitor.setTaskName("Saving data model to database...");
+					monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_SavingDm);
 					dm.save(getSession());
 					return ;
 				}
 			});
 			return true;
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(),"Could not save data model. " + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(),Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getMessage(), ex);
 	
 		}
 		return false;

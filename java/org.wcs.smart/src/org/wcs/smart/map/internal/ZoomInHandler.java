@@ -40,7 +40,7 @@ public class ZoomInHandler extends AbstractHandler{
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
-			view.setTool("net.refractions.udig.tool.default.ZoomIn");
+			view.setTool("net.refractions.udig.tool.default.ZoomIn"); //$NON-NLS-1$
 		} 
 		return null;
 	}

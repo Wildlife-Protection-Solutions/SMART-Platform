@@ -75,7 +75,7 @@ final class SyleContentFactory {
                     throws Exception {
                 if (!found && element.getAttribute("id").equals(styleId)) { //$NON-NLS-1$
                     found = true;
-                    StyleContent styleContent = (StyleContent) element.createExecutableExtension("class");
+                    StyleContent styleContent = (StyleContent) element.createExecutableExtension("class"); //$NON-NLS-1$
                     STYLE_TO_CONTENT.put(styleId, styleContent);
                 }
             }

@@ -38,6 +38,9 @@ import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Conservation area data model.
@@ -46,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class DataModel {
 
+	public static final String HKEY_SEPERATOR = "."; //$NON-NLS-1$
 
 	private ConservationArea ca;	//the conservation area of the data model
 	private List<Category> categories;	//the root categories for the data model
@@ -82,17 +86,17 @@ public class DataModel {
 		if (aggregations == null){
 			//done in a job so it has it's own database connection
 			//otherwise i might close an existing connection when it should be.
-			Job loadAttributesJob = new Job("load attributes") {
+			Job loadAttributesJob = new Job(Messages.DataModel_LoadAttribute_JobName) {
 				
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Session s = HibernateManager.openSession();
 					try{
 						s.beginTransaction();
-						aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).list();
+						aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).list(); //$NON-NLS-1$
 						s.getTransaction().rollback();
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(null, "Cannot load aggregations from database.", ex);
+						SmartPlugIn.displayLog(null, Messages.DataModel_Error_LoadAggregations, ex);
 					}finally{
 						s.close();
 					}
@@ -104,7 +108,7 @@ public class DataModel {
 			try{
 				loadAttributesJob.join();
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(null, "Could not load aggregations", ex);
+				SmartPlugIn.displayLog(null, Messages.DataModel_Error_LoadAggregations, ex);
 			}
 			
 		}
@@ -376,9 +380,9 @@ public class DataModel {
 	 * @return valid key
 	 */
 	public static String generateKey (String value, Collection<? extends DmObject> otherValues){
-		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", "");
+		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		if (raw.isEmpty()){
-			raw = "object";
+			raw = "object"; //$NON-NLS-1$
 		}
 	
 		int count = 0;
@@ -426,16 +430,16 @@ public class DataModel {
 	 */
 	public static String validateKey(String key, Collection<? extends DmObject> otherValues){
 		if (key == null || key.isEmpty()){
-			return "The key cannot be empty.";
+			return Messages.DataModel_Error_Key_NotEmpty;
 		}
 		if (key.length() > DmObject.MAX_KEY_LENGTH ){
-			return "Key must be less than " +  DmObject.MAX_KEY_LENGTH + " characters.";
+			return MessageFormat.format(Messages.DataModel_Error_Key_ToLong, new Object[]{DmObject.MAX_KEY_LENGTH});
 		}
-		if (key.matches(".*[^a-z0-9_].*")){
-			return "The can only contain lower case characters a-z, underscore (_), and digits 0-9.";
+		if (key.matches(".*[^a-z0-9_].*")){ //$NON-NLS-1$
+			return Messages.DataModel_Error_Key_InvalidCharacters;
 		}
 		if (checkKeyExists(key, otherValues)){
-			return "The key is not unique.";
+			return Messages.DataModel_Error_Key_NotUnique;
 		}
 		return null;
 	}

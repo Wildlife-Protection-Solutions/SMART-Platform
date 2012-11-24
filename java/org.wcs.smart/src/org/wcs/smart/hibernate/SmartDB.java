@@ -25,14 +25,13 @@ import java.io.File;
 
 import org.eclipse.core.runtime.Platform;
 import org.geotools.referencing.CRS;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Manages the smart database.
@@ -45,11 +44,9 @@ public class SmartDB {
 	public static CoordinateReferenceSystem DATABASE_CRS;
 	static{
 		try {
-			DATABASE_CRS = CRS.decode("EPSG:4326", true);
-		} catch (NoSuchAuthorityCodeException e) {
-			SmartPlugIn.log("Error determining default crs", e);
-		} catch (FactoryException e) {
-			SmartPlugIn.log("Error determining default crs", e);
+			DATABASE_CRS = CRS.decode("EPSG:4326", true); //$NON-NLS-1$
+		} catch (Exception e) {
+			SmartPlugIn.log(Messages.SmartDB_Error_ReadingDefaultCRS, e);
 		}
 	}
 	/**
@@ -59,11 +56,11 @@ public class SmartDB {
 	 *
 	 */
 	public enum DbUser{
-		LOGIN("login", "smrt"),
-		ANALYST("analyst", "smrt"),
-		MANAGER("manager", "smrt"),
-		DATAENTRY("data_entry", "smrt"),
-		ADMIN("smart_admin", "smart_derby");
+		LOGIN("login", "smrt"),  //$NON-NLS-1$//$NON-NLS-2$
+		ANALYST("analyst", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
+		MANAGER("manager", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
+		DATAENTRY("data_entry", "smrt"), //$NON-NLS-1$ //$NON-NLS-2$
+		ADMIN("smart_admin", "smart_derby"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		private final String username;
 		private final String password;
@@ -126,7 +123,7 @@ public class SmartDB {
 		File db = new File(embeddedDb); 
 		boolean exists = db.exists();
 		if (!exists){
-			SmartPlugIn.log("Smart database does not exist. " + db.getAbsolutePath().toString(), null);
+			SmartPlugIn.log(Messages.SmartDB_Error_NoSmartDatabase + db.getAbsolutePath().toString(), null);
 		}
 		return exists;
 	}

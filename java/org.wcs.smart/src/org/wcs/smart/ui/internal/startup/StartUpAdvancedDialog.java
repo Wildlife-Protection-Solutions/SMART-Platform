@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.internal.startup;
 
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Displays the advanced dialog associated
@@ -56,7 +57,7 @@ public class StartUpAdvancedDialog extends InitializeDialog {
 	 */
 	@Override
 	public String getHeaderText() {
-		return "SMART Advanced Options";
+		return Messages.StartUpAdvancedDialog_DialogHeader;
 	}
 
 	/**
@@ -64,7 +65,7 @@ public class StartUpAdvancedDialog extends InitializeDialog {
 	 */
 	@Override
 	public String getMessageText() {
-		return "Would you like to:";
+		return Messages.StartUpAdvancedDialog_DialogContent_Label;
 	}
 
 	/**
@@ -72,6 +73,6 @@ public class StartUpAdvancedDialog extends InitializeDialog {
 	 */
 	@Override
 	public String getDialogText() {
-		return "Advanced Options";
+		return Messages.StartUpAdvancedDialog_DialogTitle;
 	}
 }

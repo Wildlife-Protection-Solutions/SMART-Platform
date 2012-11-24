@@ -34,6 +34,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.ui.internal.LoadBasemapDialog;
 import org.wcs.smart.ui.map.MapView;
@@ -58,7 +59,7 @@ public class LoadBasemapHandler extends AbstractHandler {
 			if (dialog.open() != IDialogConstants.OK_ID){
 				return null;
 			}
-			Job loadMap = new Job("restore basemap"){
+			Job loadMap = new Job(Messages.LoadBasemapHandler_JobName){
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {

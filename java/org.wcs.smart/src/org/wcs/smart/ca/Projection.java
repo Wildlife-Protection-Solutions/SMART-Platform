@@ -31,8 +31,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 
 /**
- * Represents a projection option.  A projection constains
- * a name, and wkt defintion.
+ * Represents a projection option.  A projection contains
+ * a name, and wkt definition.
  * 
  * @author egouge
  *

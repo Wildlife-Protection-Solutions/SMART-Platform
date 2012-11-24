@@ -21,14 +21,14 @@
  */
 package org.wcs.smart.ui.internal.startup;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.wb.swt.ResourceManager;
-import org.eclipse.wb.swt.SWTResourceManager;
 import org.wcs.smart.SmartPlugIn;
 
 /**
@@ -52,11 +52,11 @@ public class DialogHeader extends Composite {
 	 */
 	public DialogHeader(Composite parent, int style, boolean largeFont) {
 		super(parent, style);
-		setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		setLayout(new FormLayout());
 		
 		Label label = new Label(this, SWT.NONE);
-		label.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setAlignment(SWT.CENTER);
 		FormData fd_label = new FormData();
 		fd_label.top = new FormAttachment(0);
@@ -64,13 +64,13 @@ public class DialogHeader extends Composite {
 		fd_label.right = new FormAttachment(100);
 		fd_label.left = new FormAttachment(0, 366);
 		label.setLayoutData(fd_label);
-		label.setImage(ResourceManager.getPluginImage(SmartPlugIn.PLUGIN_ID, "images/icons/smart64.gif"));
+		label.setImage(JFaceResources.getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON).createImage());
 		
 		txtHeader = new Label(this, SWT.NONE);
-		txtHeader.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		txtHeader.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		if (largeFont){
-
-			txtHeader.setFont(SWTResourceManager.getFont("DejaVu Sans", 15, SWT.NORMAL));
+			//TODO: fix font without swtresourcemanager
+			//txtHeader.setFont(SWTResourceManager.getFont("DejaVu Sans", 15, SWT.NORMAL));
 			txtHeader.setAlignment(SWT.CENTER);
 		}
 		
@@ -80,7 +80,7 @@ public class DialogHeader extends Composite {
 		fd_txtHeader.left = new FormAttachment(0, 20);
 		fd_txtHeader.top = new FormAttachment(0, 25);
 		txtHeader.setLayoutData(fd_txtHeader);
-		txtHeader.setText("txtHeader");
+		txtHeader.setText(""); //$NON-NLS-1$
 	}
 
 	/**

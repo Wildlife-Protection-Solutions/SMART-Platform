@@ -22,7 +22,6 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.Cacheable;
@@ -114,9 +113,9 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	 */
 	private String computeHkey(){
 		if (parent == null){
-			return this.getKeyId() + ".";
+			return this.getKeyId() + DataModel.HKEY_SEPERATOR;
 		}
-		return parent.computeHkey() + this.getKeyId() + ".";
+		return parent.computeHkey() + this.getKeyId() + DataModel.HKEY_SEPERATOR;
 	}
 	
 	@Column(name="hkey")
@@ -128,6 +127,10 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		this.hkey = hkey;
 	}
 	
+	/**
+	 * 
+	 * @return children nodes
+	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
 //	@Cascade({CascadeType.SAVE_UPDATE})
 //	@JoinColumn(name="parent_uuid")
@@ -155,6 +158,10 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		this.activeChildren = activeChildren;
 	}
 	
+	/**
+	 * 
+	 * @return parent tree node or null if root node
+	 */
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="parent_uuid")
 //	@Cascade({CascadeType.SAVE_UPDATE})	
@@ -165,6 +172,10 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		this.parent = parent;
 	}
 	
+	/**
+	 * 
+	 * @param isActive the active state of the tree node
+	 */
 	public void setIsActive(boolean isActive){
 		this.isActive = isActive;
 	}

@@ -38,6 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.internal.Messages;
 
 
 /**
@@ -50,19 +51,19 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "smart.employee")
 public class Employee {
 
-	public static final String GIVEN_NAME = "Given Name(s)";
-	public static final String FAMILY_NAME = "Family Name(s)";
-	public static final String IS_ACTIVE = "Active";
-	public static final String AGENCY = "Agency";
-	public static final String RANK = "Rank";
-	public static final String GENDER = "Gender";
-	public static final String ID = "Id";
-	public static final String BIRTHDATE = "Birth Date";
-	public static final String EMPLOYEMENT_DATE = "Conservation Area Start";
-	public static final String EMPLOYEMENT_ENDDATE = "Employment End";
-	public static final String SMART_USER = "Smart User Name";
-	public static final String SMART_USER_LEVEL = "Smart User Level";
-	public static final String DATE_CREATED = "Date Created";
+	public static final String GIVEN_NAME = Messages.Employee_GiveName_Label;
+	public static final String FAMILY_NAME = Messages.Employee_FamilyName_Label;
+	public static final String IS_ACTIVE = Messages.Employee_IsActive_Label;
+	public static final String AGENCY = Messages.Employee_Agency_Label;
+	public static final String RANK = Messages.Employee_Rank_Label;
+	public static final String GENDER = Messages.Employee_Gender_Label;
+	public static final String ID = Messages.Employee_Id_Label;
+	public static final String BIRTHDATE = Messages.Employee_Birthdate_Label;
+	public static final String EMPLOYEMENT_DATE = Messages.Employee_CAStartDate_Label;
+	public static final String EMPLOYEMENT_ENDDATE = Messages.Employee_EndDate_Label;
+	public static final String SMART_USER = Messages.Employee_SmartUser_Label;
+	public static final String SMART_USER_LEVEL = Messages.Employee_SmartUserLevel_Label;
+	public static final String DATE_CREATED = Messages.Employee_DateCreated_Label;
 	
 	//non internationalizable
 	public static final char DB_FEMALE = 'F';
@@ -289,7 +290,7 @@ public class Employee {
 	
 	@Transient
 	public String getLabel(){
-		return this.givenName + " " + this.familyName + " [" + this.id + "]";
+		return this.givenName + " " + this.familyName + " [" + this.id + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }
 

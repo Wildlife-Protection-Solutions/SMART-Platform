@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui.properties;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;

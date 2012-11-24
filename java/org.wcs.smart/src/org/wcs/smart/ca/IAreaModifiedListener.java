@@ -22,12 +22,17 @@
 package org.wcs.smart.ca;
 
 /**
- * 
+ * Listeners for changes to the conservation area defined areas.
+ * This includes: CA Boundaries, Buffered Management Area,
+ * Patrol Sectors, Admin Areas and Managements Sectores
  * @author egouge
  * @since 1.0.0
  */
 public interface IAreaModifiedListener {
 
-	
+	/**
+	 * Fired when areas updated
+	 * @param type the type of area updated
+	 */
 	public void areasUpdated(Area.AreaType type);
 }

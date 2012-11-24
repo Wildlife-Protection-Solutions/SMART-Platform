@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.ui.internal.ca.create;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.wb.swt.ResourceManager;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 
 /**
@@ -45,11 +47,10 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	 * Create the wizard.
 	 */
 	public CaWizard_CaDef() {
-		super("wizardPage");
-		setImageDescriptor(ResourceManager.getPluginImageDescriptor(
-				"org.wcs.smart", "/images/icons/smart48.gif"));
-		setTitle("Conservation Area ");
-		setDescription("Enter the information related to the conservation area.");
+		super(Messages.CaWizard_CaDef_CaDef_PageName);
+		setImageDescriptor(JFaceResources.getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
+		setTitle(Messages.CaWizard_CaDef_PageTitle);
+		setDescription(Messages.CaWizard_CaDef_PageDescription);
 	}
 
 	/**

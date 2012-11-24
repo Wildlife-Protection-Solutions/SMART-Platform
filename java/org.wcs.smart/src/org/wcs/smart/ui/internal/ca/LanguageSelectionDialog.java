@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.internal.ca;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
 /**
@@ -100,7 +103,7 @@ public class LanguageSelectionDialog extends Dialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Data Model Languages");
+		shell.setText(Messages.LanguageSelectionDialog_Dialog_Title);
 	}
 
 	private Image getWarningIcon() {
@@ -150,9 +153,7 @@ public class LanguageSelectionDialog extends Dialog {
 				SWT.CENTER, false, false));
 
 		Label lbl = new Label(header, SWT.WRAP);
-		lbl.setText("The imported data model does not contain labels for the default conservation area language '"
-				+ ca.getDefaultLanguage().getCode()
-				+ "'.  Which language from the imported data model would you like to use as the default language?");
+		lbl.setText(MessageFormat.format(Messages.LanguageSelectionDialog_MissingLanguageMessage, new Object[]{ ca.getDefaultLanguage().getCode()}));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,
 				false));
 

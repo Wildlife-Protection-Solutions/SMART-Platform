@@ -50,6 +50,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for modifying conservation area projection options.
@@ -134,18 +135,18 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		buttonPnl.setLayout(gl);
 		buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		btnAdd = new Button(buttonPnl, SWT.PUSH);
-		btnAdd.setText("Add");
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addSelectionListener(this);
 		
 		btnRemove = new Button(buttonPnl, SWT.PUSH);
-		btnRemove.setText("Delete");
+		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnRemove.addSelectionListener(this);
 		btnRemove.setEnabled(false);
 		
 		btnEdit = new Button(buttonPnl, SWT.PUSH);
-		btnEdit.setText("Edit");
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.addSelectionListener(this);
 		btnEdit.setEnabled(false);

@@ -23,12 +23,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.splash.AbstractSplashHandler;
-import org.eclipse.wb.swt.SWTResourceManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.startup.SmartStartUp;
 import org.wcs.smart.ui.internal.startup.StartUpAdvancedDialog;
@@ -294,7 +294,7 @@ public class SmartSplashHandler extends AbstractSplashHandler {
 		data = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
 		lblAdvanced.setLayoutData(data);
 		lblAdvanced.setVisible(true);// false
-		lblAdvanced.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
+		lblAdvanced.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
 		lblAdvanced.setCursor( new Cursor(getSplash().getDisplay(),  SWT.CURSOR_HAND));
 		lblAdvanced.addMouseListener(new MouseAdapter() {
 			@Override

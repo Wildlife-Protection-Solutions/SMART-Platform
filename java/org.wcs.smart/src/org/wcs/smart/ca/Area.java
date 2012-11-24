@@ -41,6 +41,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -65,11 +66,11 @@ public class Area {
 	public static CoordinateReferenceSystem AREA_CRS;
 	static{
 		try {
-			AREA_CRS = CRS.decode("EPSG:4326");
+			AREA_CRS = CRS.decode("EPSG:4326"); //$NON-NLS-1$
 		} catch (NoSuchAuthorityCodeException e) {
-			SmartPlugIn.log("Error determining default crs", e);
+			SmartPlugIn.log(Messages.Area_Error_LoadingDefaultCRS, e);
 		} catch (FactoryException e) {
-			SmartPlugIn.log("Error determining default crs", e);
+			SmartPlugIn.log(Messages.Area_Error_LoadingDefaultCRS, e);
 		}
 	}
 	
@@ -80,11 +81,11 @@ public class Area {
 	 * @since 1.0.0
 	 */
 	public enum AreaType{
-		CA("Conservation Area Boundary"),
-		BA("Buffered Management Area"),
-		ADMIN("Administrative Areas"),
-		MNGT("Management Sectors"),
-		PATRL("Patrol Sectors");
+		CA(Messages.Area_CaBoundaryArea_Name),
+		BA(Messages.Area_BufferedManagementArea_Name),
+		ADMIN(Messages.Area_AdminArea_Name),
+		MNGT(Messages.Area_ManagementArea_Name),
+		PATRL(Messages.Area_PatrolSectorArea_Name);
 		
 		private String name;
 		
@@ -185,7 +186,7 @@ public class Area {
 					value = new MultiPolygon(new Polygon[]{(Polygon)value}, value.getFactory());
 				}
 			} catch (ParseException e) {
-				SmartPlugIn.log("Could not read geometry from database.", e);
+				SmartPlugIn.log(Messages.Area_Error_LoadingGeom, e);
 			}
 		}
 		return value;
@@ -201,16 +202,16 @@ public class Area {
 	 * @return valid key
 	 */
 	public static String generateKey (String value, Collection<String> otherValues){
-		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", "");
+		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-2$
 		if (raw.isEmpty()){
-			raw = "object";
+			raw = Messages.Area_EmptyKey;
 		}
 	
 		int count = 0;
 		String key = raw;
-		if (key.substring(0, 1).matches("[0-9_]")){
+		if (key.substring(0, 1).matches("[0-9_]")){ //$NON-NLS-1$
 			//cannot start with a digit
-			key = "A" + key;
+			key = "A" + key; //$NON-NLS-1$
 		}
 		if (raw.length() > Area.KEY_MAX_LENGTH){
 			key = raw.substring(0, Area.KEY_MAX_LENGTH);
