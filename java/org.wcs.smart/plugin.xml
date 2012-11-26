@@ -666,8 +666,7 @@
       </class>
       <class
             ca_property=".attribute.conservationArea"
-            class="org.wcs.smart.ca.datamodel.AttributeTreeNode"
-            conservationAreaExportQuery="select a.* from AttributeTreeNode a join a.attribute att where att.conservationArea = :ca">
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
       </class>
       <class
             class="org.wcs.smart.ca.datamodel.Attribute">

@@ -445,7 +445,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					s.delete(agt);
 				}
 			}				
-			for(Iterator<Agency> iterator = agencies.iterator(); iterator.hasNext();){
+			for(Iterator<?> iterator = agencies.iterator(); iterator.hasNext();){
 				Agency agt = (Agency) iterator.next();
 				s.saveOrUpdate(agt);
 			}

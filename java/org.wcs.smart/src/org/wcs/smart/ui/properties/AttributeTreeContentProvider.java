@@ -36,7 +36,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
  */
 public class AttributeTreeContentProvider implements ITreeContentProvider {
 
-	private static RootNode root ;
+	private RootNode root ;
 	private Attribute attribute;
 
 	private boolean active;

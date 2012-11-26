@@ -90,10 +90,16 @@ public class ZipUtil {
             }
             
         } finally {
-            tOut.finish();
-            tOut.close();
-            bOut.close();
-            fOut.close();
+        	if (tOut != null){
+        		tOut.finish();
+        		tOut.close();
+        	}
+            if (bOut != null){
+            	bOut.close();
+            }
+            if (fOut != null){
+            	fOut.close();
+            }
         }
         return true;
  

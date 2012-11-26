@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
@@ -68,6 +69,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
@@ -96,9 +98,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private UUIDGenerator uuidGenerator = null;
 
-	public static Color gray = null;
-	public static Color black = null;
-	
 	
 	/*
 	 * columns in the station table
@@ -121,7 +120,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * Create the property page.
 	 */
 	public StationListPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Station List");
+		super(Display.getCurrent().getActiveShell(), Messages.StationListPropertyPage_Dialog_Title);
 		
 		uuidGenerator = UUIDGenerator
 				.buildSessionFactoryUniqueIdentifierGenerator();
@@ -140,10 +139,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	public Composite createContent(Composite parent) {
-	
-		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
-		
 		getSession().beginTransaction();
 		stations = new WritableList(HibernateManager.getStations(ca,
 				getSession()), Station.class);
@@ -155,7 +150,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
-		lblNewLabel.setText("Language:");
+		lblNewLabel.setText(Messages.StationListPropertyPage_LanguageLabel);
 
 		cmbLanguage = new LanguageViewer(container, SWT.NONE, ca);
 		Combo lblLanguage = cmbLanguage.getCombo();
@@ -189,7 +184,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		Button btnAdd = new Button(composite, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,
 				1, 1));
-		btnAdd.setText("Add");
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -197,17 +192,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 
 		});
-
-//		Button btnDelete = new Button(composite, SWT.NONE);
-//		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
-//				false, 1, 1));
-//		btnDelete.setText("Delete");
-//		btnDelete.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				deleteStation(tableViewer);
-//			}
-//		});
 		
 		btnDisable = new Button(composite, SWT.NONE);
 		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -257,7 +241,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
-		setMessage("Manage the list of stations related to the conservation area.");
+		setMessage(Messages.StationListPropertyPage_Dialog_Message);
 		return container;
 
 	}
@@ -281,7 +265,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 				
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Could not delete station: " + s.getName(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.StationListPropertyPage_Error_CouldNotDelete + s.getName(), ex);
 		}	
 		
 		tableViewer.refresh();
@@ -298,14 +282,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		org.wcs.smart.ca.Label nameLabel = new org.wcs.smart.ca.Label();
 		nameLabel.setElement(x);
 		nameLabel.setLanguage(ca.getDefaultLanguage());
-		nameLabel.setValue("New Station");
+		nameLabel.setValue(Messages.StationListPropertyPage_Default_NewStationName);
 		x.getNames().add(nameLabel);
-
-//		org.wcs.smart.ca.Label descLabel = new org.wcs.smart.ca.Label();
-//		descLabel.setElement(x);
-//		descLabel.setLanguage(ca.getDefaultLanguage());
-//		descLabel.setValue("Description ");
-//		x.getDescriptions().add(descLabel);
 
 		stations.add(x);
 		setChangesMade(true);
@@ -328,7 +306,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		} else if (type == Column.DESCIPTION) {
 			return stn.findDescription(lang);
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -352,14 +330,17 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 					} 
 					if(matches > 0){
 						//invalid station name, don't update it.
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Station Name cannot be a duplicate.");
+						MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.StationListPropertyPage_InvalidName_DialogTitle, Messages.StationListPropertyPage_Error_CannotDuplicate);
 					}else{
 						stn.updateName(lang, newValue.trim());
 						setChangesMade(true);
 					}
 				}else{
 					//invalid value, show error 
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.StationListPropertyPage_InvalidName_DialogTitle, 
+							MessageFormat.format(
+									Messages.StationListPropertyPage_Error_InvalidName,
+									new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 				}
 			}
 		} else if (type == Column.DESCIPTION) {
@@ -368,7 +349,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 					stn.updateDescription(lang, newValue.trim());
 					setChangesMade(true);
 				}else{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Description", "Description must not contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.StationListPropertyPage_InvalidDescription_DialogTitle, 
+							MessageFormat.format(Messages.StationListPropertyPage_Error_InvalidDescription,
+									new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 					setChangesMade(false);
 				}
 			}
@@ -455,7 +438,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		} catch (RuntimeException ex) {
 			tx.rollback();
 			SmartPlugIn.displayLog(getShell(),
-					"Error saving stations. " + ex.getLocalizedMessage(), ex);
+					Messages.StationListPropertyPage_Error_Saving + ex.getLocalizedMessage(), ex);
 			s.close();
 		}
 		return false;
@@ -566,9 +549,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		 
 		public Color getForeground(Object element){
 			 if (((Station)element).getIsActive()){
-				 return StationListPropertyPage.black;
+				 return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 			 }else{
-				 return StationListPropertyPage.gray;
+				 return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
 			 }
 		 }
 		

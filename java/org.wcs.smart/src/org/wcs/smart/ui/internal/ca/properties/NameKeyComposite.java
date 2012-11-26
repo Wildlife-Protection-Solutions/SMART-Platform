@@ -46,7 +46,10 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.HkeyObject;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Composite that has a method to add name and key fields.
@@ -131,7 +134,7 @@ public abstract class NameKeyComposite extends Composite {
 		/* Name */
 		Label lblNewLabel = new Label(parent, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel.setText("Name:");
+		lblNewLabel.setText(Messages.NameKeyComposite_Name_Label);
 		
 		txtName = new Text(parent, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -153,7 +156,7 @@ public abstract class NameKeyComposite extends Composite {
 		/* Key */
 		Label lblNewLabel_1 = new Label(parent, SWT.NONE);
 		lblNewLabel_1.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblNewLabel_1.setText("Key:");
+		lblNewLabel_1.setText(Messages.NameKeyComposite_Key_Label);
 		
 		txtKey = new Text(parent, SWT.BORDER);
 		txtKey.setEditable(false);
@@ -161,16 +164,16 @@ public abstract class NameKeyComposite extends Composite {
 		
 		if (canEdit){			
 			cdKey = createDecoration(txtKey);
-			cdKey.setDescriptionText("Invalid key.  It must not be blank");
+			cdKey.setDescriptionText(Messages.NameKeyComposite_Error_KeyNotEmpty);
 			
 			cdTxt = createDecoration(txtName);
-			cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank");
+			cdTxt.setDescriptionText(Messages.NameKeyComposite_Error_NameNotBlank);
 			
 			txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
 			Button btnChangeKey = new Button(parent, SWT.NONE);
-			btnChangeKey.setText("Change...");
-			btnChangeKey.setToolTipText("Modify the element key.");
+			btnChangeKey.setText(Messages.NameKeyComposite_ChangeKey_Button_Label);
+			btnChangeKey.setToolTipText(Messages.NameKeyComposite_ChangeKey_Button_Tooltip);
 			btnChangeKey.addSelectionListener(new SelectionAdapter() {			
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -178,19 +181,19 @@ public abstract class NameKeyComposite extends Composite {
 					if (!MessageDialog
 							.openConfirm(
 									getShell(),
-									"Set Key",
-									"Keys should not be changed unless you understand the implications.  The keys of the data model effect reporting across multiple conservation areas.  Are you sure you want to continue?")) {
+									Messages.NameKeyComposite_ChangeKey_ConfirmDialog_Title,
+									Messages.NameKeyComposite_ChangeKey_ConfirmDialog_Message)) {
 						return;
 					}
-					InputDialog id = new InputDialog(getShell(), "Set Key",
-							"Enter the new key values for the category.",
+					InputDialog id = new InputDialog(getShell(), Messages.NameKeyComposite_ChangeKey_Dialog_Title,
+							Messages.NameKeyComposite_ChangeKey_Dialog_Message,
 							txtKey.getText(), new IInputValidator() {
 
 								@Override
 								public String isValid(String newText) {
 									if (originalKey != null && originalKey.equals(newText)){
 										//same key
-										return "";
+										return ""; //$NON-NLS-1$
 									}
 									String error = DataModel.validateKey(newText, getSiblings());
 									return error;
@@ -231,13 +234,19 @@ public abstract class NameKeyComposite extends Composite {
 		cdTxt.hide();
 						
 		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_KEY_LENGTH)){
-			cdKey.setDescriptionText("Invalid key.  It must not be blank, and can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdKey.setDescriptionText(
+					MessageFormat.format(
+							Messages.NameKeyComposite_Error_InvalidKey,
+							new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			cdKey.show();
 			error = true;
 		}
 		
 		if (!SmartUtils.isSimpleString(txtName.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH)){
-			cdTxt.setDescriptionText("Invalid Category Name.  It must not be blank, and can only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdTxt.setDescriptionText(
+					MessageFormat.format(
+							Messages.NameKeyComposite_Error_InvalidName,
+							new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			cdTxt.show();
 			error = true;
 		}

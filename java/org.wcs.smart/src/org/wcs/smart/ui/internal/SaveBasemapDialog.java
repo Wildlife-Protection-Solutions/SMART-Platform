@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.internal;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -232,7 +234,10 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 				ok = false;
 			}
 			if (!SmartUtils.isSimpleString(name, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, BasemapDefinition.MAX_NAME_LENGTH)){
-				setErrorMessage("Basemap names must only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + ", and be less than " + BasemapDefinition.MAX_NAME_LENGTH + " character in length.");
+				setErrorMessage(
+						MessageFormat.format(
+								Messages.SaveBasemapDialog_Error_BasemapName,
+								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, BasemapDefinition.MAX_NAME_LENGTH }));
 				ok = false;
 			}
 			baseMap = new BasemapDefinition();

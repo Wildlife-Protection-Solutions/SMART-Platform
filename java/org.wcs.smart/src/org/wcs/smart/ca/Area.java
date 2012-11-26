@@ -202,7 +202,7 @@ public class Area {
 	 * @return valid key
 	 */
 	public static String generateKey (String value, Collection<String> otherValues){
-		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-2$
+		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-1$ //$NON-NLS-2$	//TODO: document that keys can only start with english characters
 		if (raw.isEmpty()){
 			raw = Messages.Area_EmptyKey;
 		}

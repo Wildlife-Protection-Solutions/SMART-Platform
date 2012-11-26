@@ -204,6 +204,9 @@ public class CaImporter {
 		
 		BufferedReader reader = new BufferedReader(new FileReader(caInfo));
 		String cauuid = reader.readLine();
+		if (cauuid == null){
+			throw new Exception(Messages.CaImporter_Error_NoCaIdentifierFound);
+		}
 		String id = reader.readLine();
 		String name = reader.readLine();
 		

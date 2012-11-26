@@ -37,6 +37,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.properties.DataModelPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.InitCaDataModelDialog;
 
@@ -67,7 +68,7 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 			ppd.run();
 		} catch (Exception ex) {
 			loadedSession.close();
-			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), "Could not load data model", ex);
+			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
 			return null;
 		}
 		
@@ -103,7 +104,7 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Loading data model...", 0);
+					monitor.beginTask(Messages.ShowDataModelPropertyPageHandler_Progress_LoadingDataModel, 0);
 					loadedSession = dialog.getSession();
 					loadedSession.beginTransaction();
 					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), loadedSession);
