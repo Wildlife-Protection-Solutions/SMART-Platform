@@ -158,7 +158,7 @@ public class SimpleQueryResultSet implements IResultSet {
 	public String getString(int index) throws OdaException {
 		lastObject = getCurrentItem(index);
 		if (lastObject == null) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		return lastObject.toString();
 	}
@@ -237,7 +237,7 @@ public class SimpleQueryResultSet implements IResultSet {
 			return (BigDecimal) lastObject;
 		} else if (lastObject instanceof Double || lastObject instanceof Float) {
 			return BigDecimal.valueOf((Double) lastObject);
-		} else if (lastObject instanceof Long || lastObject instanceof Long) {
+		} else if (lastObject instanceof Long ) {
 			return BigDecimal.valueOf((Long) lastObject);
 		}
 		return BigDecimal.valueOf(-1);

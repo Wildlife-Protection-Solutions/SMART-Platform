@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.data.oda.smart.impl;
 
+import java.text.MessageFormat;
 import java.util.Properties;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
@@ -29,6 +30,7 @@ import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.query.SmartQuery;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 
 import com.ibm.icu.util.ULocale;
 
@@ -85,8 +87,9 @@ public class SmartConnection implements IConnection {
 			}else if (dataSetType.equals(SmartTableQuery.SMART_DATASET_TYPE)){
 				return new SmartTableQuery();
 			}
-			throw new OdaException("data set type " + dataSetType
-					+ " unsupported");
+			throw new OdaException(
+					MessageFormat.format(Messages.SmartConnection_Error_DatasetNotSupported,
+							new Object[]{dataSetType}));
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}

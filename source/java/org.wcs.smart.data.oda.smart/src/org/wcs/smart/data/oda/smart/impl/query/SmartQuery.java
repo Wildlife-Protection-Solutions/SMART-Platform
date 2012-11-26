@@ -42,6 +42,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.hibernate.Session;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.GriddedQuery;
@@ -63,7 +64,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartQuery implements IQuery {
 
-	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset";
+	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
 
 	private int m_maxRows;
 
@@ -83,7 +84,7 @@ public class SmartQuery implements IQuery {
 	/**
 	 * Job to load the query from the database.
 	 */
-	private Job loadQueryJob = new Job("load query job") {
+	private Job loadQueryJob = new Job(Messages.SmartQuery_LoadQuery_JobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 
@@ -121,7 +122,7 @@ public class SmartQuery implements IQuery {
 		
 		parameters = new HashMap<SmartParameterMetaData.Parameter, Object>();
 		try {
-			String[] bits = queryText.split(":");
+			String[] bits = queryText.split(":"); //$NON-NLS-1$
 			this.queryType = QueryType.valueOf(bits[0]);
 			this.uuid = SmartUtils.decodeHex(bits[1]);
 			
@@ -134,7 +135,7 @@ public class SmartQuery implements IQuery {
 			try {
 				loadQueryJob.join();
 				if (smartQuery == null) {
-					throw new OdaException("Query could not be loaded.");
+					throw new OdaException(Messages.SmartQuery_Error_CouldNoLoadQuery);
 				}
 
 				// TODO:attempt to parse query
@@ -148,7 +149,7 @@ public class SmartQuery implements IQuery {
 					List<IGroupBy> headers = part.getGroupBys();
 					for (IGroupBy h : headers){
 						if (h instanceof DateGroupBy){
-							throw new OdaException("You cannot add summary queries that have date group by column headers to reports.  Modify the query to put date group by's in the row headers.");
+							throw new OdaException(Messages.SmartQuery_Warning_SummaryGroupByDates);
 						}
 					}
 				} else if (smartQuery instanceof GriddedQuery){
@@ -188,7 +189,7 @@ public class SmartQuery implements IQuery {
 		} else if (smartQuery.getType() == QueryType.GRIDDED ){
 			return new SimpleQueryResultSetMetadata( (GriddedQuery) smartQuery);
 		}
-		throw new OdaException("Cannot get metadata for the provided query.");
+		throw new OdaException(Messages.SmartQuery_Error_CouldNoLoadMetadata);
 	}
 
 	/**

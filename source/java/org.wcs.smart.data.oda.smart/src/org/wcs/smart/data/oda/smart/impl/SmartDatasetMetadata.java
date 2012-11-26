@@ -25,6 +25,7 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 
 /**
  * Implementation class of IDataSetMetaData for an ODA runtime driver. <br>
@@ -84,7 +85,7 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 */
 	public String getDataSourceProductName() throws OdaException {
 		// TODO Auto-generated method stub
-		return "Smart Data Source";
+		return Messages.SmartDatasetMetadata_SmartDataSourceName;
 	}
 
 	/*
