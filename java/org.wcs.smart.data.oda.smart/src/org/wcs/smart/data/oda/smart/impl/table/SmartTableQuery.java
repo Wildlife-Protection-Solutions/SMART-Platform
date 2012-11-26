@@ -45,7 +45,7 @@ public class SmartTableQuery implements IQuery {
 	/**
 	 * Query Dataset ID
 	 */
-	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset";
+	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset"; //$NON-NLS-1$
 
 	private int m_maxRows;
 

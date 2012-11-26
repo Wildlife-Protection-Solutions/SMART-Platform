@@ -39,7 +39,7 @@ public class SmartBirtTableUtils {
 	/**
 	 * Extension point id
 	 */
-	public static final String REPORT_MAPPING_ID = "org.wcs.smart.data.ods.smart.table";
+	public static final String REPORT_MAPPING_ID = "org.wcs.smart.data.ods.smart.table"; //$NON-NLS-1$
 	
 	/**
 	 * @return list of all SmartBirtTable extension point implementations
@@ -50,7 +50,7 @@ public class SmartBirtTableUtils {
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_MAPPING_ID);
 		for (int i = 0; i < config.length; i ++){
-			items.add((SmartBirtTable)config[i].createExecutableExtension("SmartBirtTable"));
+			items.add((SmartBirtTable)config[i].createExecutableExtension("SmartBirtTable")); //$NON-NLS-1$
 		}
 		return items;
 	}
@@ -67,7 +67,7 @@ public class SmartBirtTableUtils {
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_MAPPING_ID);
 		for (int i = 0; i < config.length; i ++){
 			
-			SmartBirtTable table = (SmartBirtTable)config[i].createExecutableExtension("SmartBirtTable");
+			SmartBirtTable table = (SmartBirtTable)config[i].createExecutableExtension("SmartBirtTable"); //$NON-NLS-1$
 			if (table.getTableName().equals(tableName)){
 				return table;
 			}

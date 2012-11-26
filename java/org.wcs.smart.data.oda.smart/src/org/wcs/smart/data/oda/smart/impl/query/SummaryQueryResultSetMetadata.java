@@ -29,6 +29,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.data.oda.smart.impl.SmartDriver;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.engine.DerbySummaryEngine;
 import org.wcs.smart.query.model.SummaryQuery;
@@ -54,7 +55,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	public SummaryQueryResultSetMetadata(final SummaryQuery query){
 		results =  new SummaryQueryResult();
-		Job parseQuery = new Job("Parsing Query") {
+		Job parseQuery = new Job(Messages.SummaryQueryResultSetMetadata_ParseQueryJob) {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -106,12 +107,12 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	public String getColumnLabel(int index) throws OdaException {
 		index = index - 1;
 		if (index < results.getRowHeaders().size()){
-			return "";
+			return ""; //$NON-NLS-1$
 		}else{
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
 				if (i != 0){
-					sb.append("\n");	
+					sb.append("\n");	 //$NON-NLS-1$
 				}
 				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getName());
 			}
@@ -126,12 +127,12 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	public String getColumnName(int index) throws OdaException {
 		index = index - 1;
 		if (index < results.getRowHeaders().size()){
-			return "header_" + index;
+			return Messages.SummaryQueryResultSetMetadata_ColumnNamePrefix + "_" + index; //$NON-NLS-1$
 		}else{
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
 				if (i != 0){
-					sb.append(" _ ");
+					sb.append(" _ "); //$NON-NLS-1$
 				}
 				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getFullName());
 			}

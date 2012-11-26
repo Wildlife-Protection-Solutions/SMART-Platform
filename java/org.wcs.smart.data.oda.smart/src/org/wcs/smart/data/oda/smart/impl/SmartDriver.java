@@ -28,6 +28,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.util.manifest.DataTypeMapping;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 
 /**
  * Implementation class of IDriver for a SMART ODA runtime driver.
@@ -92,7 +93,7 @@ public class SmartDriver implements IDriver {
 				.getDataTypeMapping(nativeDataTypeCode);
 		if (typeMapping != null)
 			return typeMapping.getNativeType();
-		return "Non-defined";
+		return Messages.SmartDriver_Underfined_MappingType;
 	}
 
 }
