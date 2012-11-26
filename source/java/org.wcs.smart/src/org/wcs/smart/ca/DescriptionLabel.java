@@ -154,7 +154,7 @@ public class DescriptionLabel {
 		public int hashCode() {
 		    int code = 0;
 		    if (language!= null) {code += Arrays.hashCode(getLanguage().getUuid());}
-		    if (element != null && element != null) {code += Arrays.hashCode(element); }
+		    if (element != null) {code += Arrays.hashCode(element); }
 		    return code;
 		  }
 	}

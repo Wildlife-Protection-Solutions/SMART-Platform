@@ -49,6 +49,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -70,7 +71,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	private Transaction currentTransaction = null;
 	
 	public ProjectionPropertyDialog() {
-		super(Display.getDefault().getActiveShell(), "Projections");
+		super(Display.getDefault().getActiveShell(), Messages.ProjectionPropertyDialog_Dialog_Title);
 		
 	}
 
@@ -90,7 +91,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		main.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Conservation Area Projections:");
+		lbl.setText(Messages.ProjectionPropertyDialog_ProjectionList_Label);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		
@@ -105,7 +106,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				if (element instanceof Projection){
 					String text = ((Projection)element).getName();
 					if (((Projection) element).getIsDefault()){
-						text += " [default]";
+						text += Messages.ProjectionPropertyDialog_DefaultProjection_text;
 					}
 					return text;
 				}
@@ -152,13 +153,13 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		btnEdit.setEnabled(false);
 		
 		btnDefault = new Button(buttonPnl, SWT.PUSH);
-		btnDefault.setText("Set Default");
+		btnDefault.setText(Messages.ProjectionPropertyDialog_SetDefault_Button);
 		btnDefault.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDefault.addSelectionListener(this);
 		btnDefault.setEnabled(false);
 		
-		getShell().setText("Projection List");
-		setMessage("Manage the list of projections available to the users.");
+		getShell().setText(Messages.ProjectionPropertyDialog_Dialog_Name);
+		setMessage(Messages.ProjectionPropertyDialog_Dialog_Message);
 		return main;
 	}
 
@@ -167,7 +168,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		try{
 			currentTransaction.commit();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Could not save changes.  Please close dialog and try again.\n\n" + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getMessage(), ex);
 			return false;
 		}
 		currentTransaction = getSession().beginTransaction();
@@ -178,7 +179,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	private void listModified(){
 		boolean enabled = true;
 		if (projections.size() == 0){
-			setErrorMessage("At least one projection must be defined.");
+			setErrorMessage(Messages.ProjectionPropertyDialog_Error_AtLeastOneProjectionRequired);
 			enabled = false;
 		}else{
 			setErrorMessage(null);
@@ -194,13 +195,13 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			if (crs != null){
 				Projection prj = new Projection();
 				prj.setConservationArea(SmartDB.getCurrentConservationArea());
-				String code = "unknown";
+				String code = Messages.ProjectionPropertyDialog_UnknownCode;
 				try{
 					code = CRS.lookupIdentifier(crs.getName().getAuthority(), crs, true);
 				}catch (Exception ex){
 					
 				}
-				prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]");
+				prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				prj.setDefinition(crs.toWKT());
 				getSession().save(prj);
 				projections.add(prj);

@@ -144,7 +144,7 @@ public class DataModelXmlToSmartConverter {
 			}
 		}
 		
-		DataModel dm = new DataModel(targetCa, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+		DataModel dm = new DataModel(targetCa, Collections.<Category> emptyList(), Collections.<Attribute> emptyList());
 				
 		//read attributes
 		attributeLookUp = getAttributes(xmlDataModel);

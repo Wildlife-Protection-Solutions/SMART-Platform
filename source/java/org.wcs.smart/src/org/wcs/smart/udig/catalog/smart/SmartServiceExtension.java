@@ -5,11 +5,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.wcs.smart.util.SmartUtils;
-
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.ServiceExtension;
 import net.refractions.udig.core.internal.CorePlugin;
+
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Udig service extension for smart conservation area 
@@ -47,7 +47,7 @@ public class SmartServiceExtension implements ServiceExtension {
 
 	@Override
 	public Map<String, Serializable> createParams(URL url) {	
-		return createParams(url);
+		return createParamsFromUrl(url);
 
 	}
 	

@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.udig;
 
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.ApplicationGIS;
+import net.refractions.udig.project.ui.tool.AbstractActionTool;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,10 +35,6 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.ui.internal.LoadBasemapDialog;
-
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
 
 /**
  * Set basemap map tool

@@ -387,7 +387,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			if (dm != null) {
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
-		} else if (btnUseIucn.getSelection() | (btnClone != null && btnClone.getSelection())) {
+		} else if (btnUseIucn.getSelection() || (btnClone != null && btnClone.getSelection())) {
 			getButton(IDialogConstants.OK_ID).setEnabled(true);
 		} else if (btnBlank.getSelection()){
 			getButton(IDialogConstants.OK_ID).setEnabled(true);

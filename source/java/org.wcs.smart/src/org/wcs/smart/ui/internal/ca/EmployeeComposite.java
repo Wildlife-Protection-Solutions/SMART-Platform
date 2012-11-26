@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -59,6 +60,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 public class EmployeeComposite extends Composite {
@@ -126,23 +128,24 @@ public class EmployeeComposite extends Composite {
 				
 			}
 		};
-		Label lbl = createLabelField(this, Employee.ID + ":");
+		Label lbl = createLabelField(this, Employee.ID + ":"); //$NON-NLS-1$
 		txtStaffId = createTextField(this, SWT.NONE,
 				Employee.MAX_ID_LENGTH, validate);
-		lbl.setToolTipText("If set to '" + EmployeeDialog.AUTO_GENERATE + "' the id will be automatically assigned by the system");		
+		lbl.setToolTipText(
+				MessageFormat.format(Messages.EmployeeComposite_AutoAssignId_Label, new Object[]{ EmployeeDialog.AUTO_GENERATE }));		
 		txtStaffId.setText(EmployeeDialog.AUTO_GENERATE);
 		txtStaffId.addKeyListener(validate);
 		
-		createLabelField(this, Employee.GIVEN_NAME + ":");
+		createLabelField(this, Employee.GIVEN_NAME + ":"); //$NON-NLS-1$
 		txtGivenName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
 
-		createLabelField(this, Employee.FAMILY_NAME + ":");
+		createLabelField(this, Employee.FAMILY_NAME + ":"); //$NON-NLS-1$
 		txtFamilyName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
 		
 		
-		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":");
+		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":"); //$NON-NLS-1$
 		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
 				| SWT.LONG, dateValidate);
 		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
@@ -154,7 +157,7 @@ public class EmployeeComposite extends Composite {
 			blank.setVisible(false);
 			
 			chNotActive = new Button(this, SWT.CHECK);
-			chNotActive.setText("Inactive");
+			chNotActive.setText(Messages.EmployeeComposite_Inactive_Label);
 			chNotActive.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					dtEmploymentEnd.setEnabled(chNotActive.getSelection());
@@ -163,7 +166,7 @@ public class EmployeeComposite extends Composite {
 				}
 			});
 			
-			createLabelField(this, Employee.EMPLOYEMENT_ENDDATE + ":");
+			createLabelField(this, Employee.EMPLOYEMENT_ENDDATE + ":"); //$NON-NLS-1$
 			dtEmploymentEnd = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
 					| SWT.LONG, dateValidate);
 			data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
@@ -171,7 +174,7 @@ public class EmployeeComposite extends Composite {
 			dtEmploymentEnd.setLayoutData(data);
 
 		}
-		createLabelField(this, Employee.BIRTHDATE + ":");
+		createLabelField(this, Employee.BIRTHDATE + ":"); //$NON-NLS-1$
 		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG, dateValidate);
 		//default the date to something other than today.
 		dtBirthDate.setYear(1950);
@@ -181,7 +184,7 @@ public class EmployeeComposite extends Composite {
 		data.horizontalIndent = 8;
 		dtBirthDate.setLayoutData(data);
 
-		createLabelField(this, Employee.GENDER + ":");
+		createLabelField(this, Employee.GENDER + ":"); //$NON-NLS-1$
 
 		composite = new Composite(this, SWT.NONE);
 		composite.setLayout(new RowLayout(SWT.HORIZONTAL));
@@ -191,7 +194,7 @@ public class EmployeeComposite extends Composite {
 
 		opMale = new Button(composite, SWT.RADIO);
 		opMale.setSelection(true);
-		opMale.setText("Male");
+		opMale.setText(Messages.EmployeeComposite_Male_Label);
 		
 		SelectionListener changedGender = new SelectionListener() {
 			
@@ -207,11 +210,11 @@ public class EmployeeComposite extends Composite {
 		opMale.addSelectionListener(changedGender);
 		
 		opFemale = new Button(composite, SWT.RADIO);
-		opFemale.setText("Female");
+		opFemale.setText(Messages.EmployeeComposite_Female_Label);
 		opFemale.addSelectionListener(changedGender);
 
 		if (includeAgencyRank){
-			createLabelField(this, Employee.AGENCY + ":");
+			createLabelField(this, Employee.AGENCY + ":"); //$NON-NLS-1$
 			cmbViewerAgency = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 			cmbViewerAgency.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			cmbViewerAgency.setLabelProvider(new LabelProvider(){
@@ -232,14 +235,14 @@ public class EmployeeComposite extends Composite {
 			temp.addAll(agencies);
 
 			Agency ang = new Agency();
-			ang.setName("");
+			ang.setName(""); //$NON-NLS-1$
 			temp.add(0, ang);
 			
 			cmbViewerAgency.setContentProvider(ArrayContentProvider.getInstance());
 			cmbViewerAgency.setInput(temp.toArray(new Agency[temp.size()]));
 			cmbViewerAgency.getCombo().select(0);
 			
-			createLabelField(this, Employee.RANK + ":");
+			createLabelField(this, Employee.RANK + ":"); //$NON-NLS-1$
 			cmbViewerRank = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 			cmbViewerRank.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			cmbViewerRank.setLabelProvider(new LabelProvider(){
@@ -268,7 +271,7 @@ public class EmployeeComposite extends Composite {
 		smartc.setLayout(new GridLayout(2, false));
 		
 		chSmartUser = new Button(smartc, SWT.CHECK);
-		chSmartUser.setText("Smart User");
+		chSmartUser.setText(Messages.EmployeeComposite_IsSmartUser_Label);
 		chSmartUser.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2,1));
 		chSmartUser.addSelectionListener(new SelectionAdapter() {		
 			@Override
@@ -282,21 +285,21 @@ public class EmployeeComposite extends Composite {
 			}
 		});
 		
-		smartc.setText("Smart User");
-		createLabelField(smartc, Employee.SMART_USER + ":");
+		smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
+		createLabelField(smartc, Employee.SMART_USER + ":"); //$NON-NLS-1$
 		txtSmartId = createTextField(smartc, SWT.NONE,
 				Employee.MAX_SMART_ID_LENGTH, validate);
 
-		createLabelField(smartc, "Smart Password:");
+		createLabelField(smartc, Messages.EmployeeComposite_Password_Label);
 		txtSmartPassword = createTextField(smartc, SWT.PASSWORD,
 				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
 
-		createLabelField(smartc, "Re-Type Password:");
+		createLabelField(smartc, Messages.EmployeeComposite_Password2_Label);
 		txtSmartPassword2 = createTextField(smartc, SWT.PASSWORD,
 				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
 
 		if (includeUserLevel){
-			createLabelField(smartc, Employee.SMART_USER_LEVEL + ":");
+			createLabelField(smartc, Employee.SMART_USER_LEVEL + ":"); //$NON-NLS-1$
 			cmbSmartUserLevel = new ComboViewer(smartc , SWT.READ_ONLY | SWT.BORDER);
 			cmbSmartUserLevel.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			cmbSmartUserLevel.setLabelProvider(new LabelProvider(){
@@ -353,7 +356,7 @@ public class EmployeeComposite extends Composite {
 				temp.addAll(ranks);
 
 				Rank none = new Rank();
-				none.setName("");
+				none.setName(""); //$NON-NLS-1$
 				temp.add(0, none);
 				cmbViewerRank.setInput(temp.toArray(new Rank[temp.size()]));
 				cmbViewerRank.getCombo().select(0);
@@ -418,24 +421,25 @@ public class EmployeeComposite extends Composite {
 				|| ! SmartUtils.isSimpleString(txtGivenName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
 			cdGiveName.show();
 			cdGiveName
-					.setDescriptionText("Invalid given name.  The given name must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					.setDescriptionText(
+							MessageFormat.format(Messages.EmployeeComposite_Error_InvalidGivenName, new Object[]{Employee.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isComplete = false;
 		}
 		if (txtFamilyName.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(txtFamilyName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH)) {
 			cdFamilyName.show();
 			cdFamilyName
-					.setDescriptionText("Invalid family name.  The given name must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					.setDescriptionText(
+							MessageFormat.format(Messages.EmployeeComposite_Error_InvalidFamilyName, new Object[]{Employee.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isComplete = false;
 		}
 		if (txtStaffId.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(txtStaffId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_ID_LENGTH)) {
 			cdStaffId.show();
 			cdStaffId
-					.setDescriptionText("Invalid Staff ID.  The ID must be less than "
-							+ Employee.MAX_NAME_LENGTH + " characters and only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					.setDescriptionText(
+							MessageFormat.format(Messages.EmployeeComposite_Error_EmployeeId,
+									new Object[]{Employee.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isComplete = false;
 		}
 		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
@@ -445,7 +449,10 @@ public class EmployeeComposite extends Composite {
 
 		if(min.before(calBirthDate)){
 			cdBirthDate.show();
-			cdBirthDate.setDescriptionText("Invalid Birth Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years in the past.");
+			cdBirthDate.setDescriptionText(
+					MessageFormat.format(
+							Messages.EmployeeComposite_Error_InvalidBirthDate,
+							new Object[]{Employee.MIN_EMPLOYEE_AGE} ));
 			isComplete = false;
 		}
 		// test for startdate being at least Employee.MIN_EMPLOYEE_AGE since birthdate
@@ -454,7 +461,10 @@ public class EmployeeComposite extends Composite {
 		
 		if(calStartDate.before(min)){
 			cdEmploymentStart.show();
-			cdEmploymentStart.setDescriptionText("Invalid Start Date.  Must be more than " + Employee.MIN_EMPLOYEE_AGE + " years after birthdate.");
+			cdEmploymentStart.setDescriptionText(
+					MessageFormat.format(
+							Messages.EmployeeComposite_Error_InvalidStartDate ,
+							new Object[]{Employee.MIN_EMPLOYEE_AGE}));
 			isComplete = false;
 		}
 		if(dtEmploymentEnd != null && chNotActive.getSelection()){
@@ -463,7 +473,7 @@ public class EmployeeComposite extends Composite {
 			Calendar end = new GregorianCalendar(dtEmploymentEnd.getYear(), dtEmploymentEnd.getMonth(), dtEmploymentEnd.getDay() );
 			if(end.before(start)){
 				cdEmploymentEnd.show();
-				cdEmploymentEnd.setDescriptionText("Invalid Employment End Date.  Must be after start date.");
+				cdEmploymentEnd.setDescriptionText(Messages.EmployeeComposite_Error_InvalidEndDate);
 				isComplete = false;
 			}
 		}
@@ -471,21 +481,30 @@ public class EmployeeComposite extends Composite {
 			if (txtSmartId.getText().trim().isEmpty()
 					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH)) {
 				cdSmartId.show();
-				cdSmartId.setDescriptionText("Smart user id must be provided. Must only use the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
+				cdSmartId.setDescriptionText(
+						MessageFormat.format(
+								Messages.EmployeeComposite_Error_InvalidUserId,
+								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc}));
 				isComplete = false;
 			}
 			if (txtSmartPassword.getText().trim().isEmpty()
 					|| ! SmartUtils.isSimpleString(txtSmartPassword.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_PASSWORD_LENGTH)) {
 				cdSmartPassword.show();
 				cdSmartPassword
-						.setDescriptionText("Smart password must be provided and must only use the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc);
+						.setDescriptionText(
+								MessageFormat.format(
+										Messages.EmployeeComposite_Error_InvalidPassword,
+										new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc}));
 				isComplete = false;
 			}
 			
 			if (txtSmartPassword.getText().length()< Employee.MIN_SMART_PASSWORD_LENGTH){
 				cdSmartPassword.show();
 				cdSmartPassword
-						.setDescriptionText("Smart password must be at least " + Employee.MIN_SMART_PASSWORD_LENGTH + " in length.");
+						.setDescriptionText(
+								MessageFormat.format(
+										Messages.EmployeeComposite_Error_InvalidPasswordLength,
+										new Object[]{Employee.MIN_SMART_PASSWORD_LENGTH}));
 				isComplete = false;
 			}
 			if (!txtSmartPassword.getText().equals(txtSmartPassword2.getText())) {
@@ -493,7 +512,7 @@ public class EmployeeComposite extends Composite {
 				if (!txtSmartPassword.getText().trim().isEmpty()
 					|| !txtSmartPassword2.getText().trim().isEmpty()) {
 					cdSmartPassword2.show();
-					cdSmartPassword2.setDescriptionText("Smart passwords do not match");	
+					cdSmartPassword2.setDescriptionText(Messages.EmployeeComposite_Error_PasswordsDontMatch);	
 				}
 			}
 		}
@@ -566,9 +585,9 @@ public class EmployeeComposite extends Composite {
 		}else{
 			enableSmartUser(false);
 			chSmartUser.setSelection(false);
-			txtSmartId.setText("");
-			txtSmartPassword.setText("");
-			txtSmartPassword2.setText("");
+			txtSmartId.setText(""); //$NON-NLS-1$
+			txtSmartPassword.setText(""); //$NON-NLS-1$
+			txtSmartPassword2.setText(""); //$NON-NLS-1$
 			if (cmbSmartUserLevel != null){
 				cmbSmartUserLevel.setSelection(new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
 			}

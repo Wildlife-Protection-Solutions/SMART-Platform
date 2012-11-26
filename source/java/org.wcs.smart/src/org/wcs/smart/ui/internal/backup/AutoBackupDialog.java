@@ -114,12 +114,12 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		backup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		backup.setLayout(new GridLayout(3, false));
 		lbl = new Label(backup, SWT.NONE);
-		lbl.setText("Every ");
+		lbl.setText(Messages.AutoBackupDialog_BackupEveryXDays_1);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)lbl.getLayoutData()).horizontalIndent = indent;
 
 		days = new Text(backup, SWT.BORDER);
-		String timer = "-1";
+		String timer = "-1"; //$NON-NLS-1$
 		if(prop.containsKey(AutoBackupEngine.PROP_BACKUP_TIMER)){
 			timer = prop.getProperty(AutoBackupEngine.PROP_BACKUP_TIMER);
 		}
@@ -132,12 +132,12 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		days.addKeyListener(validate);
 		
 		lbl = new Label(backup, SWT.NONE);
-		lbl.setText(" days*");
+		lbl.setText(Messages.AutoBackupDialog_BackupEveryXDays_2 + "*"); //$NON-NLS-1$
 		
 		
 		
 		Label lbl2 = new Label(main, SWT.NONE);
-		lbl2.setText(Messages.AutoBackupDialog_TimerInfo); 
+		lbl2.setText("*" + Messages.AutoBackupDialog_TimerInfo);  //$NON-NLS-1$
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
 		((GridData)lbl2.getLayoutData()).horizontalIndent = indent;
 		
@@ -153,7 +153,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		backup.setLayout(new GridLayout(3, false));
 		
 		Label dlbl = new Label(backup, SWT.NONE);
-		dlbl.setText(Messages.AutoBackupDialog_DeleteLabel);
+		dlbl.setText(Messages.AutoBackupDialog_DeleteLabel1);
 		dlbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)dlbl.getLayoutData()).horizontalIndent = indent;
 
@@ -171,7 +171,7 @@ public class AutoBackupDialog extends TitleAreaDialog {
 		deleteDays.addKeyListener(validate);
 		
 		Label ddayslbl = new Label(backup, SWT.NONE);
-		ddayslbl.setText(Messages.AutoBackupDialog_Days);
+		ddayslbl.setText(Messages.AutoBackupDialog_DeleteLabel2);
 
 		lbl = new Label(main, SWT.HORIZONTAL | SWT.SEPARATOR);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

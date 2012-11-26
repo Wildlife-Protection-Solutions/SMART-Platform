@@ -65,7 +65,9 @@ public class ShowPropertyPageHandler extends AbstractHandler {
 		}else if (page.equals(ProjectionPropertyDialog.class)){
 			dialog = new ProjectionPropertyDialog();
 		}
-		dialog.open();
+		if (dialog != null){
+			dialog.open();
+		}
 		return null;
 	}
 }

@@ -10,7 +10,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.about.InstallationPage;
-
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;

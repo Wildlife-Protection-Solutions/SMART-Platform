@@ -159,9 +159,6 @@ public class SmartService extends IService {
 
 	
 	SmartDataSource getDataStore( IProgressMonitor monitor ) throws IOException {
-        if (monitor == null)
-            monitor = new NullProgressMonitor();
-
         if (this.ds == null) {
             dsInstantiationLock.lock();
             try {
