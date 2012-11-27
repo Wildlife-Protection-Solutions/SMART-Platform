@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 
@@ -68,7 +69,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Transportation Type:");
+		lbl.setText(Messages.PatrolTransportComposite_TransportType_Lable);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		patrolTypeViewer = new ComboViewer(center, SWT.READ_ONLY);
@@ -119,7 +120,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 			patrolLeg.setType(pm);
 			return true;
 		}else{
-			SmartPatrolPlugIn.displayLog("Patrol must have a transportation type.  If there are no options, the administrator must first setup transportation types.", null);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolTransportComposite_Error_NoTransportType, null);
 			return false;
 		}
 		
@@ -131,7 +132,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Transportation Type";
+		return Messages.PatrolTransportComposite_Title;
 	}
 	
 	

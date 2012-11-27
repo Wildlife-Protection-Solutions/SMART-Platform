@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -51,6 +52,9 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
  */
 public class LeaderPilotComposite extends PatrolLegItemComposite{
 
+	private static final String ERROR_PILOT_REQUIRED = Messages.LeaderPilotComposite_Error_PilotRequired;
+	private static final String ERROR_LEADER_REQUIRED = Messages.LeaderPilotComposite_Error_LeaderRequired;
+	
 	private ComboViewer patrolLeaderViewer = null;
 	private ComboViewer patrolPilotViewer = null;
 	private Label lblPilot;
@@ -71,7 +75,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Leader:");
+		lbl.setText(Messages.LeaderPilotComposite_LeaderLabel);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		patrolLeaderViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -87,7 +91,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		});
 		
 		lblPilot = new Label(center, SWT.NONE);
-		lblPilot.setText("Pilot:");
+		lblPilot.setText(Messages.LeaderPilotComposite_PilotLabel);
 		lblPilot.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 			
 		patrolPilotViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -110,10 +114,10 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	private void validate(){
 		setErrorMessage(null);
 		if (patrolPilotViewer.getControl().isVisible() && (patrolPilotViewer.getSelection() == null || ((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement() == null )){
-			setErrorMessage("A pilot must be selected");
+			setErrorMessage(ERROR_PILOT_REQUIRED);
 		}
 		if (patrolLeaderViewer.getSelection() == null || ((IStructuredSelection)patrolLeaderViewer.getSelection()).getFirstElement() == null ){
-			setErrorMessage("A leader must be selected");
+			setErrorMessage(ERROR_LEADER_REQUIRED);
 		}
 	}
 
@@ -187,7 +191,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	public boolean updatePatrol(PatrolLeg patrolLeg) {
 		Object x = ((IStructuredSelection)patrolLeaderViewer.getSelection()).getFirstElement();
 		if (x == null){
-			SmartPatrolPlugIn.displayLog("A patrol must have a leader.", null);
+			SmartPatrolPlugIn.displayLog(ERROR_LEADER_REQUIRED, null);
 			return false;
 		}
 		if (x instanceof PatrolLegMember){
@@ -198,7 +202,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			if (patrolLeg.getPatrol().hasPilot()){
 				plm = (PatrolLegMember)((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement();
 				if (plm == null){
-					SmartPatrolPlugIn.displayLog("This patrol must have a pilot.", null);
+					SmartPatrolPlugIn.displayLog(ERROR_PILOT_REQUIRED, null);
 					return false;
 				}
 				patrolLeg.setPilot(plm);
@@ -218,7 +222,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			if (patrolLeg.getPatrol().hasPilot()){
 				plm = (Employee)((IStructuredSelection)patrolPilotViewer.getSelection()).getFirstElement();
 				if (plm == null){
-					throw new PatrolSaveException("A patrol pilot must be selected.");	
+					throw new PatrolSaveException(ERROR_PILOT_REQUIRED);	
 				}
 				for (PatrolLegMember mem : patrolLeg.getMembers()){
 					if (mem.getMember().equals(plm)){
@@ -238,7 +242,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Team";
+		return Messages.LeaderPilotComposite_Title;
 	}
 	
 	/**

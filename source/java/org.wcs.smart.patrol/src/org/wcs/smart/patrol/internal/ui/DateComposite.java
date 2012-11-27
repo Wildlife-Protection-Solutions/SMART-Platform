@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,6 +38,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
 
@@ -69,7 +71,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Start Date:");
+		lbl.setText(Messages.DateComposite_StartDate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
@@ -77,7 +79,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
 		
 		lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol End Date:");
+		lbl.setText(Messages.DateComposite_EndDate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
@@ -162,7 +164,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Start and End Dates";
+		return Messages.DateComposite_Title;
 	}
 	
 	/**
@@ -173,15 +175,20 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		String error = null;
 		cdEndDate.hide();
 		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
-			error = "End date must be after the start date.";
+			error = Messages.DateComposite_Error_EndAfterStart;
 		}else{
 			long startD = SmartUtils.getDate(dtStartDate).getTime();
 			long endD = SmartUtils.getDate(dtEndDate).getTime();
 			
 			if (startD + Patrol.MAX_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
-				error = "Patrol cannot be longer that " + Patrol.MAX_PATROL_LENGTH_DAYS + " days in length.";
+				error = MessageFormat.format(
+							Messages.DateComposite_Error_PatrolToLong,
+							new Object[]{ Patrol.MAX_PATROL_LENGTH_DAYS});
 			}else if(startD + Patrol.WARN_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
-				cdEndDate.setDescriptionText("Patrol is longer than 30 days");
+				cdEndDate.setDescriptionText(
+						MessageFormat.format(
+								Messages.DateComposite_PatrolLengthWarning,
+								new Object[]{Patrol.WARN_PATROL_LENGTH_DAYS}));
 				cdEndDate.show();
 			}
 		}

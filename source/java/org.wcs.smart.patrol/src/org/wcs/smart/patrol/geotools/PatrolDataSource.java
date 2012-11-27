@@ -30,6 +30,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -39,8 +40,8 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class PatrolDataSource extends AbstractDataStore{
 
-	public static final String WAYPOINT_TYPE = "Waypoint";
-	public static final String TRACK_TYPE = "Track";
+	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
+	public static final String TRACK_TYPE = "Track"; //$NON-NLS-1$
 	
 	private Patrol patrol;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
@@ -85,7 +86,7 @@ public class PatrolDataSource extends AbstractDataStore{
 					type = createTrackSchema();
 				}
 			}catch(SchemaException ex){
-				throw new IOException("Schema could not be generated. " + ex.getMessage(), ex);
+				throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getMessage(), ex);
 			}
 			schemas.put(typeName, type);
 		}
@@ -93,14 +94,14 @@ public class PatrolDataSource extends AbstractDataStore{
 	}
 
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		String spec = "fid:String,id:Integer,date:Date,time:Date,observation:String,comment:String,geom:Point:srid=4326";
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, spec);
+		String spec = "fid:String,id:Integer,date:Date,time:Date,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "fid:String,distance:Double,day:Date,leg:String,geom:LineString:srid=4326";
-		SimpleFeatureType type =  DataUtilities.createType("smart." + TRACK_TYPE, spec);
+		String spec = "fid:String,distance:Double,day:Date,leg:String,geom:LineString:srid=4326"; //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + TRACK_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}
 }

@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
  
@@ -49,17 +52,19 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Attribute)){
-			return "Object not of type Attribute. Can not delete.";
+			return Messages.AttributeDMAdvisor_Error_InvalidObjectType;
 		}
 		Attribute attribute = (Attribute)object;
 		if (attribute.getUuid() == null ) return null;
 		Criteria query = session.createCriteria(WaypointObservationAttribute.class);
-		query.add(Restrictions.eq("id.attribute", attribute));
+		query.add(Restrictions.eq("id.attribute", attribute)); //$NON-NLS-1$
 		query.setProjection(Projections.rowCount());
 		long cnt = (Long)query.uniqueResult();
 		if (cnt == 0){
 			return null;
 		}
-		return "The attribute is associated in " + cnt + " observations.  These observations must be removed before the attribute can be deleted.";
+		return MessageFormat.format(
+				Messages.AttributeDMAdvisor_Error_AttributeNotDeletable,
+				new Object[]{ cnt});
 	}
 }

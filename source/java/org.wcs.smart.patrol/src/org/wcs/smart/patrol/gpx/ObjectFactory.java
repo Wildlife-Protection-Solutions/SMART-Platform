@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Gpx_QNAME = new QName("http://www.topografix.com/GPX/1/1", "gpx");
+    private final static QName _Gpx_QNAME = new QName("http://www.topografix.com/GPX/1/1", "gpx"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.patrol.gpx

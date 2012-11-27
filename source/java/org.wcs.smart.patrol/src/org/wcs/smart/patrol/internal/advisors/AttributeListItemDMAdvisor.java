@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 
 /**
@@ -50,18 +53,20 @@ public class AttributeListItemDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof AttributeListItem)){
-			return "Object not of type AttributeListItem. Can not delete.";
+			return Messages.AttributeListItemDMAdvisor_InvalidObjectType;
 		}
 		AttributeListItem item = (AttributeListItem)object;
 		if (item.getUuid() == null) return null;
 		Criteria query = session.createCriteria(WaypointObservationAttribute.class);
-		query.add(Restrictions.eq("attributeListItem", item));
+		query.add(Restrictions.eq("attributeListItem", item)); //$NON-NLS-1$
 		query.setProjection(Projections.rowCount());
 		long cnt = (Long)query.uniqueResult();
 		if (cnt == 0){
 			return null;
 		}
-		return "Attribute list item is associated with " + cnt + " observations.  These observations must be removed before the attribute list item can be deleted.";
+		return MessageFormat.format(
+				Messages.AttributeListItemDMAdvisor_DeleteError,
+				new Object[]{ cnt });
 
 	}
 

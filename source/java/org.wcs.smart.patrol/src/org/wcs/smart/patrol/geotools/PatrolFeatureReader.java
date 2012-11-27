@@ -53,7 +53,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private String thisType;
 	private Iterator<?> fIterator;
 	
-	private static SimpleDateFormat trackDt = new SimpleDateFormat("MMMddyyyy"); 
+	private static SimpleDateFormat trackDt = new SimpleDateFormat("MMMddyyyy");  //$NON-NLS-1$
 	private static GeometryFactory gf = new GeometryFactory();
 	
 	public PatrolFeatureReader(Patrol patrol,
@@ -131,16 +131,14 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private SimpleFeature getWaypointAsFeature(Waypoint waypoint){
 		//String spec = "fid:String,id:integer,date:Date,time:Time,comment:String,geom:Point:srid=4326";
 		Object data[] = new Object[7];
-		data[0] = ftype.getName() + "." + waypoint.getId() + "." + SmartUtils.encodeHex(waypoint.getUuid());
+		data[0] = ftype.getName() + "." + waypoint.getId() + "." + SmartUtils.encodeHex(waypoint.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[1] = waypoint.getId();
 		data[2] = waypoint.getPatrolLegDay().getDate();
 		data[3] = waypoint.getTime();
 		if (waypoint.getObservations() == null || waypoint.getObservations().size() == 0){
-			data[4] = "";
-		}else if (waypoint.getObservations().size() == 1){
-			data[4] = waypoint.getObservations().get(0).getCategory().getName();
-		}else{
-			data[4] = "Multiple Observations";
+			data[4] = ""; //$NON-NLS-1$
+		}else{ 
+			data[4] = waypoint.getObservationsAsString();
 		}
 		data[5] = waypoint.getComment();
 		data[6] = gf.createPoint(new Coordinate(waypoint.getX(), waypoint.getY()));
@@ -149,7 +147,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	
 	private SimpleFeature getTrackAsFeature(Track track){
 		//String spec = "fid:String,distance:Double,day:Date,leg:String,geom:LineString:srid=4326";
-		String fid = ftype.getName() + "." + trackDt.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId(); 
+		String fid = ftype.getName() + "." + trackDt.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId();  //$NON-NLS-1$ //$NON-NLS-2$
 		Object data[] = new Object[5];
 		data[0] = fid;
 		data[1] = track.getDistance();

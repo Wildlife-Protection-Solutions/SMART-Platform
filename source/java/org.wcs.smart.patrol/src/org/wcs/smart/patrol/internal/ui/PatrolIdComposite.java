@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -34,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
 
@@ -65,7 +68,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol ID:");
+		lbl.setText(Messages.PatrolIdComposite_Id_Label);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		
 		txtPatrolId = new Text(center, SWT.BORDER | style);
@@ -118,7 +121,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol ID";
+		return Messages.PatrolIdComposite_Title;
 	}
 	
 	/**
@@ -135,8 +138,9 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		
 		if (! SmartUtils.isSimpleString(txtPatrolId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
 			cdPatrolId.show();
-			cdPatrolId.setDescriptionText("Invalid Patrol ID.  The Id name must be less than "
-							+ Patrol.MAX_ID_LENGTH + " characters and only contain the characters " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdPatrolId.setDescriptionText(
+				MessageFormat.format(Messages.PatrolIdComposite_Error_InvalidId,
+						new Object[]{Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isValid = false;
 		}
 		return isValid;

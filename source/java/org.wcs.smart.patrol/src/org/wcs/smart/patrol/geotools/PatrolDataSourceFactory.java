@@ -31,6 +31,7 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -42,7 +43,7 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param PATROL_UUID = new Param("patroluuid", byte[].class, "Patrol", true); 
+	public static final Param PATROL_UUID = new Param("patroluuid", byte[].class, Messages.PatrolDataSourceFactory_PatrolUuidParameterName, true);  //$NON-NLS-1$
 	  
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -60,7 +61,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "Smart patrol layers";
+		return Messages.PatrolDataSourceFactory_PatrolDataSourceDescription;
 	}
 
 	/* (non-Javadoc)
@@ -68,7 +69,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Smart Patrol";
+		return Messages.PatrolDataSourceFactory_PatrolDataSourceName;
 	}
 
 	/* (non-Javadoc)
@@ -112,7 +113,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 			session.close();
 		}
 		if (patrol == null ){
-			throw new IOException("Unable to read patrol data source.");
+			throw new IOException(Messages.PatrolDataSourceFactory_Error_UnableReadPatrolDataSource);
 		}
 		return new PatrolDataSource(patrol);
 	}
@@ -123,7 +124,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException("This is a read-only data store.");
+		throw new UnsupportedOperationException(Messages.PatrolDataSourceFactory_Error_ReadOnlyStore);
 	}
 
 }

@@ -212,7 +212,7 @@ public class GpxType {
      */
     public String getVersion() {
         if (version == null) {
-            return "1.1";
+            return "1.1"; //$NON-NLS-1$
         } else {
             return version;
         }

@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -76,7 +77,7 @@ public class PatrolManager {
 			work += data.size();
 		}
 		
-		monitor.beginTask("Deleting Patrol", work);
+		monitor.beginTask(Messages.PatrolManager_Progress_DeletingPatrol, work);
 		monitor.worked(0);
 		Session session = HibernateManager.openSession();
 		Patrol patrol = (Patrol)session.load(Patrol.class, patrolUuid);
@@ -86,17 +87,17 @@ public class PatrolManager {
 			File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath());
 			
 			runDeleteHandlers(patrol, session, monitor);
-			monitor.subTask("Deleting Patrol");
+			monitor.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
 			session.delete(patrol);
 			session.getTransaction().commit();
 			monitor.worked(1);
 			
 			if (fileStore.exists()){
-				monitor.subTask("Removing File Store Files");
+				monitor.subTask(Messages.PatrolManager_Progress_RemovingFileStore);
 				try{
 					FileUtils.forceDelete(fileStore);
 				}catch(Exception ex){
-					SmartPatrolPlugIn.displayLog("Could not delete the file store associated with this conservation area.  The directory should be deleted manually. " + fileStore.getAbsolutePath(), ex);
+					SmartPatrolPlugIn.displayLog(Messages.PatrolManager_Error_CouldNotDeleteFilestore + fileStore.getAbsolutePath(), ex);
 				}
 			}
 			monitor.worked(1);

@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 
 /**
@@ -42,17 +45,19 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Employee)){
-			return "Object not of type Employee. Can not delete.";
+			return Messages.EmployeeDeleteAdvisor_InvalidObjectType;
 		}
 		Employee e = (Employee)object;
 		if (e.getUuid() == null){
 			return null;
 		}
-		Long cnt = (Long) session.createCriteria(PatrolLegMember.class).add(Restrictions.eq("id.member", e)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(PatrolLegMember.class).add(Restrictions.eq("id.member", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{
-			return cnt + " patrols are associated with the employee " + e.getLabel() + ".  These references must be removed before this employee can be removed.";
+			return  MessageFormat.format(
+					Messages.EmployeeDeleteAdvisor_DeleteError,
+					new Object[]{cnt, e.getLabel()});
 		}
 	}
 

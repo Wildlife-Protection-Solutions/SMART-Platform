@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Advisor for deleting attributes associate
@@ -45,21 +48,23 @@ public class CategoryAttributeDMAdvisor implements IDeleteAdvisor{
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof CategoryAttribute)){
-			return "Object not of type CategoryAttribute. Can not delete.";
+			return Messages.CategoryAttributeDMAdvisor_InvalidObjectType;
 		}
 		CategoryAttribute categoryAttribute = (CategoryAttribute)object;
 		if (categoryAttribute.getCategory().getUuid() == null 
 				|| categoryAttribute.getAttribute().getUuid() == null ){
 			return null;
 		}
-		Query query = session.createQuery("" +
-				"SELECT count(*) FROM WaypointObservation wo join wo.attributes woa join wo.category as cat " +
-				"WHERE cat.hkey like :categoryhkey and woa.id.attribute = :attribute");
-		query.setParameter("categoryhkey", categoryAttribute.getCategory().getHkey() + "%");
-		query.setParameter("attribute", categoryAttribute.getAttribute());
+		Query query = session.createQuery(
+				"SELECT count(*) FROM WaypointObservation wo join wo.attributes woa join wo.category as cat " + //$NON-NLS-1$
+				"WHERE cat.hkey like :categoryhkey and woa.id.attribute = :attribute"); //$NON-NLS-1$
+		query.setParameter("categoryhkey", categoryAttribute.getCategory().getHkey() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+		query.setParameter("attribute", categoryAttribute.getAttribute()); //$NON-NLS-1$
 		long cnt = ((Long)query.list().get(0));
 		if (cnt != 0){
-			return "The category/attribute relationship is used associated with " + cnt + " observations.  These observations must be removed before the attribute can be deleted.";
+			return MessageFormat.format(
+					Messages.CategoryAttributeDMAdvisor_DeleteError,
+					new Object[]{ cnt});
 		}
 		return null;
 	}
