@@ -56,6 +56,7 @@ import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTableUtils;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.data.oda.smart.ui.Activator;
+import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 
 /**
  * Wizard table for smart birt table datasets
@@ -64,7 +65,7 @@ import org.wcs.smart.data.oda.smart.ui.Activator;
  */
 public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 
-	public static final String DEFAULT_MESSAGE = "Pick the smart table.";
+	public static final String DEFAULT_MESSAGE = Messages.SmartTableDataSetWizardPage_PickSmartTable_Message;
 
 	private ListViewer smartTables;
 	/**
@@ -111,7 +112,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		composite.setLayoutData(gridData);
 
 		Label fieldLabel = new Label(composite, SWT.NONE);
-		fieldLabel.setText("Select Smart Table:");
+		fieldLabel.setText(Messages.SmartTableDataSetWizardPage_SelectTableName_Label);
 
 		smartTables = new ListViewer(composite, SWT.BORDER);
 		smartTables.setLabelProvider(new LabelProvider(){
@@ -247,7 +248,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		if (isValid) {
 			setMessage(DEFAULT_MESSAGE);
 		} else {
-			setMessage("Smart table must be selected.", ERROR);
+			setMessage(Messages.SmartTableDataSetWizardPage_Error_MustSelectTable, ERROR);
 		}
 
 		setPageComplete(isValid);
@@ -401,7 +402,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue("TODO: Link to Report Parameter");
+				param.setDefaultScalarValue(Messages.SmartTableDataSetWizardPage_Error_MustLinkReportParameters);
 			}
 		}
 	}
@@ -414,7 +415,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 			if (conn != null && conn.isOpen())
 				conn.close();
 		} catch (OdaException e) {
-			Activator.log("Could not close connection. " + e.getMessage(), e);
+			Activator.log(Messages.SmartTableDataSetWizardPage_Error_CouldNoClose + e.getMessage(), e);
 		}
 	}
 
