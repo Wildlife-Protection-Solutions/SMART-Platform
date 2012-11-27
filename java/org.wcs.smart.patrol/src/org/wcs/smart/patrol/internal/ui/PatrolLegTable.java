@@ -37,6 +37,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 
@@ -57,13 +58,13 @@ public class PatrolLegTable {
 	 * Table columns
 	 */
 	private enum LegColumn {
-		LEGID("Leg"), 
-		STARTDATE("Start Date"), 
-		ENDDATE("End Date"), 
-		TRANSPORTTYPE("Transport Type"), 
-		LEADER("Leader"), 
-		PILOT("Pilot"), 
-		MEMBERS("Members");
+		LEGID(Messages.PatrolLegTable_LegId_ColumnName), 
+		STARTDATE(Messages.PatrolLegTable_LegStartDate_ColumnName), 
+		ENDDATE(Messages.PatrolLegTable_LegEndDate_ColumnName), 
+		TRANSPORTTYPE(Messages.PatrolLegTable_LegTranportType_ColumnName), 
+		LEADER(Messages.PatrolLegTable_LegLeader_ColumnName), 
+		PILOT(Messages.PatrolLegTable_LegPilot_ColumnName), 
+		MEMBERS(Messages.PatrolLegTable_LegMembers_ColumnName);
 
 		private String guiName;
 
@@ -208,14 +209,14 @@ public class PatrolLegTable {
 				return pld.getId();
 			}else if (this.column == LegColumn.LEADER){
 				if (pld.getLeader() == null){
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return pld.getLeader().getMember().getLabel();
 			}else if (this.column == LegColumn.ENDDATE){
 				return DATE_TIME_FORMAT.format( pld.getEndDate() );
 			}else if (this.column == LegColumn.PILOT){
 				if (pld.getPilot() == null){
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return pld.getPilot().getMember().getLabel();
 			}else if (this.column == LegColumn.STARTDATE){
@@ -224,14 +225,14 @@ public class PatrolLegTable {
 				return pld.getType().getName();
 			}else if (this.column == LegColumn.MEMBERS){
 				StringBuilder sb = new StringBuilder();
-				sb.append(pld.getMembers().size() + ": ");
+				sb.append(pld.getMembers().size() + ": "); //$NON-NLS-1$
 				for(PatrolLegMember member: pld.getMembers()){
 					sb.append(member.getMember().getLabel());
-					sb.append(";  ");
+					sb.append("; "); //$NON-NLS-1$
 				}
 				return sb.toString();
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 
 	}
