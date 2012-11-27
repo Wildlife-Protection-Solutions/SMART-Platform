@@ -60,6 +60,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.data.oda.smart.impl.query.SmartQuery;
 import org.wcs.smart.data.oda.smart.ui.Activator;
+import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
@@ -77,11 +78,11 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CustomDataSetWizardPage extends DataSetWizardPage {
 
-	public static final String DEFAULT_MESSAGE = "Pick the query to create data source from. ";
+	public static final String DEFAULT_MESSAGE = Messages.CustomDataSetWizardPage_PickQuery_Message;
 
 	private TreeViewer queryTree;
 	private boolean hideUserQueries = false;
-	private Job loadQueriesJob = new Job("Load Queries") {
+	private Job loadQueriesJob = new Job(Messages.CustomDataSetWizardPage_LoadQueryJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
@@ -174,7 +175,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 		composite.setLayoutData(gridData);
 
 		Label fieldLabel = new Label(composite, SWT.NONE);
-		fieldLabel.setText("Select SMART Query:");
+		fieldLabel.setText(Messages.CustomDataSetWizardPage_SelectQuery_Label);
 
 		queryTree = new TreeViewer(composite, SWT.BORDER);
 		queryTree.setLabelProvider(new QueryListLabelProvider());
@@ -291,7 +292,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 		if (isValid) {
 			setMessage(DEFAULT_MESSAGE);
 		} else {
-			setMessage("Query must be selected.", ERROR);
+			setMessage(Messages.CustomDataSetWizardPage_Error_QueryMustSelected, ERROR);
 		}
 
 		setPageComplete(isValid);
@@ -334,11 +335,11 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 			updateDesign(dataSetDesign, customConn, query);
 
 			//TODO: try to update dataset name
-			if (dataSetDesign.getName().startsWith("Data Set")) {
+			if (dataSetDesign.getName().startsWith(Messages.CustomDataSetWizardPage_DefaultDataSetName)) {
 				// lets update the name
 
-				dataSetDesign.setName(query.getName() + " Data Set");
-				dataSetDesign.setDisplayName(query.getName() + " Data Set");
+				dataSetDesign.setName(query.getName() + Messages.CustomDataSetWizardPage_DataSetName_Postfix);
+				dataSetDesign.setDisplayName(query.getName() + Messages.CustomDataSetWizardPage_DataSetName_Postfix);
 				// dataSetDesign.setDisplayNameKey(query.getName() +
 				// " Data Set");
 			}
@@ -363,7 +364,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 
 		//create dataests
 		IQuery query = conn.newQuery(SmartQuery.SMART_DATASET_TYPE);
-		String queryText = getQuery().getType().name() + ":" + SmartUtils.encodeHex(getQuery().getUuid());
+		String queryText = getQuery().getType().name() + ":" + SmartUtils.encodeHex(getQuery().getUuid()); //$NON-NLS-1$
 		query.prepare(queryText);
 		dataSetDesign.setQueryText(queryText);
 
@@ -392,7 +393,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(smartQuery.getName() + " [" + smartQuery.getId() + "]");
+		dataSetDesign.setDisplayName(smartQuery.getName() + " [" + smartQuery.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataSetDesign.setName(smartQuery.getName());
 	}
 
@@ -454,7 +455,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue("TODO: Link to Report Parameter");
+				param.setDefaultScalarValue(Messages.CustomDataSetWizardPage_LinkToParameters_ToReportParameters);
 			}
 		}
 	}
@@ -467,7 +468,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 			if (conn != null && conn.isOpen())
 				conn.close();
 		} catch (OdaException e) {
-			Activator.log("Could not close connection. " + e.getMessage(), e);
+			Activator.log(Messages.CustomDataSetWizardPage_Error_CouldNotCloseConnection + e.getMessage(), e);
 		}
 	}
 

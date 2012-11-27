@@ -28,6 +28,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -114,7 +115,7 @@ public class Activator extends AbstractUIPlugin {
 			@Override
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
-						"Error", message);
+						Messages.Activator_Error_DialogTitle, message);
 			}
 		});
 
