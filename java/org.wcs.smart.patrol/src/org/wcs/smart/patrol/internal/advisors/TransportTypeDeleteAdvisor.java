@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 
@@ -39,14 +42,16 @@ public class TransportTypeDeleteAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof PatrolTransportType)){
-			return "Object not of type PatrolTransportType. Can not delete.";
+			return Messages.TransportTypeDeleteAdvisor_InvalidObjectType;
 		}
 		
-		Long cnt = (Long) session.createCriteria(PatrolLeg.class).add(Restrictions.eq("type", object)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(PatrolLeg.class).add(Restrictions.eq("type", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{
-			return cnt + " patrols are associated with the transport type " + ((PatrolTransportType)object).getName() + ".  These references must be removed before this transport type can be deleted.";
+			return MessageFormat.format(
+					Messages.TransportTypeDeleteAdvisor_DeleteError,
+					new Object[]{cnt, ((PatrolTransportType)object).getName()});
 		}
 	}
 

@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.patrol.internal.Messages;
 
 
 /**
@@ -223,7 +224,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 
 			@Override
 			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.SmartPatrolPlugIn_Error_DialogMessage1, message);
 			}
 			
 		});
@@ -239,7 +240,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLogExit(String message, Throwable t){
 		log(message, t);
-		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", message);
+		MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartPatrolPlugIn_Error_DialogMessage2, message);
 		System.exit(1);
 	}
 	

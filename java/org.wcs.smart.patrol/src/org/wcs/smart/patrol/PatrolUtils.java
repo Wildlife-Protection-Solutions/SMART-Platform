@@ -24,6 +24,7 @@ package org.wcs.smart.patrol;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
@@ -34,6 +35,7 @@ import org.wcs.smart.patrol.model.PatrolType;
  */
 public class PatrolUtils {
 
+	public static final String EDIT_LINK_TEXT = Messages.PatrolUtils_Edit_Link_Label;
 	/**
 	 * Returns the image to use for a given patrol type or
 	 * null if no image found

@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -42,6 +43,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.util.SmartUtils;
@@ -95,7 +97,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 		newLeg.setPatrol(existingLeg.getPatrol());
 		newLeg.setType(existingLeg.getType());
 		
-		String legId = existingLeg.getId() + " - Transport Change ";
+		String legId = existingLeg.getId() + Messages.PatrolTransportChangeDialog_TransportChangeLegIdentifier;
 		if (legId.length() > PatrolLeg.ID_MAX_SIZE){
 			legId = legId.substring(0, PatrolLeg.ID_MAX_SIZE);
 		}
@@ -122,7 +124,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 		Composite timecomp = new Composite(parent, SWT.NONE);
 		timecomp.setLayout(new GridLayout(2, false));
 		Label lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Date of Transport Change:");
+		lbl.setText(Messages.PatrolTransportChangeDialog_DateLabel);
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
 		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		startDate.addSelectionListener(new SelectionAdapter() {
@@ -130,7 +132,11 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 			public void widgetSelected(SelectionEvent e) {
 				Date d = SmartUtils.getDate(startDate);
 				if (d.before(existingLeg.getStartDate()) || d.after(existingLeg.getEndDate())){
-					setErrorMessage("Invalid date.  Must be before " + DateFormat.getDateInstance().format(existingLeg.getEndDate()) + " and after " + DateFormat.getDateInstance().format(existingLeg.getStartDate()));
+					MessageFormat.format(Messages.PatrolTransportChangeDialog_Error_InvalidDate,
+							new Object[]{DateFormat.getDateInstance().format(existingLeg.getEndDate()),
+							 DateFormat.getDateInstance().format(existingLeg.getStartDate())});
+							 
+		
 					getButton(OK).setEnabled(false);
 				}else{
 					setErrorMessage(null);
@@ -144,7 +150,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 		
 		//time of change
 		lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Time of Transport Change:");
+		lbl.setText(Messages.PatrolTransportChangeDialog_TimeLabel);
 		
 		Composite opComp = new Composite(timecomp, SWT.NONE);
 		opComp.setLayout(new GridLayout(3, false));
@@ -156,12 +162,12 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 			}
 		};
 		opStart = new Button(opComp, SWT.RADIO);
-		opStart.setText("Start of Day");
+		opStart.setText(Messages.PatrolTransportChangeDialog_StartOfDay_Op);
 		opStart.setSelection(true);
 		opStart.addSelectionListener(opAdapter);
 		
 		opCustom = new Button(opComp, SWT.RADIO);
-		opCustom.setText("Custom:");
+		opCustom.setText(Messages.PatrolTransportChangeDialog_CustomLabel);
 		opCustom.addSelectionListener(opAdapter);
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		startTime.setEnabled(false);
@@ -180,8 +186,8 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 			session.close();
 		}
 		
-		super.getShell().setText("Change Transport Type");
-		setMessage("Select the date/time of the transport change and the new transport type.");
+		super.getShell().setText(Messages.PatrolTransportChangeDialog_DialogTitle);
+		setMessage(Messages.PatrolTransportChangeDialog_DialogMessage);
 		return parent;
 	}
 	
@@ -200,10 +206,16 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 		Date newStart = new Date( time );
 		
 		if (newStart.before(existingLeg.getStartDate())){
-			setErrorMessage("Start date/time must be after " + DATE_TIME_FORMATTER.format(existingLeg.getStartDate()) );
+			setErrorMessage(
+					MessageFormat.format(
+							Messages.PatrolTransportChangeDialog_Error_StartDateAfter,
+							new Object[]{DATE_TIME_FORMATTER.format(existingLeg.getStartDate()) }));
 			return;
 		}else if (newStart.after(existingLeg.getEndDate())){
-			setErrorMessage("Start date/time must be before " + DATE_TIME_FORMATTER.format(existingLeg.getEndDate()) );
+			setErrorMessage(
+					MessageFormat.format(
+							Messages.PatrolTransportChangeDialog_Error_StartDateBefore,
+							new Object[]{DATE_TIME_FORMATTER.format(existingLeg.getEndDate())}));
 			return;
 		}
 

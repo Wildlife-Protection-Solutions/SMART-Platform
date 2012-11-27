@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -64,7 +65,7 @@ public class ArmedComposite  extends PatrolItemComposite{
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Is this patrol armed?");
+		lbl.setText(Messages.ArmedComposite_Message);
 
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
@@ -72,7 +73,7 @@ public class ArmedComposite  extends PatrolItemComposite{
 				false));
 
 		btnYes = new Button(buttonPanel, SWT.RADIO);
-		btnYes.setText("Yes");
+		btnYes.setText(Messages.ArmedComposite_OpYes);
 		btnYes.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnYes.setSelection(true);
 		btnYes.addSelectionListener(new SelectionAdapter() {
@@ -83,7 +84,7 @@ public class ArmedComposite  extends PatrolItemComposite{
 		});
 		
 		btnNo = new Button(buttonPanel, SWT.RADIO);
-		btnNo.setText("No");
+		btnNo.setText(Messages.ArmedComposite_OpNo);
 		btnNo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnNo.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -116,7 +117,7 @@ public class ArmedComposite  extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Armed";
+		return Messages.ArmedComposite_Title;
 	}
 
 	/**

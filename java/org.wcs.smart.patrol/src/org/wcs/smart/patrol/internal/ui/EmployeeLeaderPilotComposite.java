@@ -35,6 +35,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeSelectComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -82,7 +83,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		empListComposite.addSelectionChangedListener(new EmployeeSelectComposite.IListChanged(){
 			public void listChanged(List<Employee> newEmployees) {
 				if (newEmployees.size() == 0){
-					setErrorMessage("At least one employee must be selected.");
+					setErrorMessage(Messages.EmployeeLeaderPilotComposite_Error_AtLeastOneEmployee);
 				}else{
 					setErrorMessage(null);
 				}
@@ -116,7 +117,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		}catch(Exception ex){
 			session.getTransaction().rollback();
 			session.close();
-			SmartPlugIn.displayLog(null, "Could not load active employees. " + ex.getMessage(), ex);			
+			SmartPlugIn.displayLog(null, Messages.EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees + ex.getMessage(), ex);			
 		}
 		leaderPilotComp.setEmployeeList(empListComposite.getSelectedEmployees(),p);
 	}
@@ -141,7 +142,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
 		if (empListComposite.getSelectedEmployees().size() <= 0){
-			SmartPatrolPlugIn.displayLog("At least one member must be selected.", null);
+			SmartPatrolPlugIn.displayLog(Messages.EmployeeLeaderPilotComposite_Error_AtLeastOneMember, null);
 			return false;
 		}
     	for (Iterator<?> iterator = empListComposite.getSelectedEmployees().iterator(); iterator.hasNext();) {
@@ -159,7 +160,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Members";
+		return Messages.EmployeeLeaderPilotComposite_Title;
 	}
 	
 	/**

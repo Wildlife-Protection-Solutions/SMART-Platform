@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui;
 
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -50,6 +51,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -136,7 +138,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		patrolIdComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		patrolIdComp.setLayout(new GridLayout(2, false));
 		lbl = new Label(patrolIdComp, SWT.NONE);
-		lbl.setText("Leg Id:" );
+		lbl.setText(Messages.EditPatrolLegDialog_LegId_Label );
 		txtLegId = new Text(patrolIdComp, SWT.BORDER);
 		txtLegId.setTextLimit(PatrolLeg.ID_MAX_SIZE);
 		txtLegId.setText(editLeg.getId());
@@ -163,7 +165,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	
 		lbl = new Label(right, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-		lbl.setText("Members:");
+		lbl.setText(Messages.EditPatrolLegDialog_Members_Label);
 		
 		createEmployeeButtonPanelAndTable(right, employeeListA, emplList);
 		
@@ -171,12 +173,12 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
-		groupALeader = createLeaderPilot(leaderComp, "Group A Leader:", employeeListA, editLeg.getLeader().getMember());
+		groupALeader = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupALeader_Label, employeeListA, editLeg.getLeader().getMember());
 		if (editLeg.getPatrol().hasPilot()){
-			groupAPilot = createLeaderPilot(leaderComp, "Group A Pilot:", employeeListA, editLeg.getPilot().getMember());
+			groupAPilot = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupAPilot_Label, employeeListA, editLeg.getPilot().getMember());
 		}
 		
-		setMessage("Edit the patrol leg information.");
+		setMessage(Messages.EditPatrolLegDialog_DialogMessage);
 		return parent;
 	}
 	
@@ -207,12 +209,12 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		btn.setLayout(new GridLayout(1, false));
 		btn.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		Button btnAddA = new Button(btn, SWT.PUSH);
-		btnAddA.setText("->");
-		btnAddA.setToolTipText("Move employees to patrol leg.");
+		btnAddA.setText("->"); //$NON-NLS-1$
+		btnAddA.setToolTipText(Messages.EditPatrolLegDialog_AddEmployees_ToolTip);
 		
 		Button btnRemoveA = new Button(btn, SWT.PUSH);
-		btnRemoveA.setText("<-");
-		btnRemoveA.setToolTipText("Remove employees from patrol leg.");
+		btnRemoveA.setText("<-"); //$NON-NLS-1$
+		btnRemoveA.setToolTipText(Messages.EditPatrolLegDialog_RemoveEmployees_ToolTip);
 		
 		
 		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
@@ -224,7 +226,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		btnAddA.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (Iterator iterator = ((IStructuredSelection)employeeTableViewer.getSelection()).iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = ((IStructuredSelection)employeeTableViewer.getSelection()).iterator(); iterator.hasNext();) {
 					Employee type = (Employee) iterator.next();
 					((WritableList)employeeTableViewer.getInput()).remove(type);
 					((WritableList)groupList.getInput()).add(type);
@@ -236,7 +238,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		btnRemoveA.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (Iterator iterator = ((IStructuredSelection)groupList.getSelection()).iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = ((IStructuredSelection)groupList.getSelection()).iterator(); iterator.hasNext();) {
 					Employee type = (Employee) iterator.next();
 					((WritableList)employeeTableViewer.getInput()).add(type);
 					((WritableList)groupList.getInput()).remove(type);
@@ -256,7 +258,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		ttype.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(ttype, SWT.NONE);
-		lbl.setText("Transportation Type:");
+		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
 		ComboViewer cmbTransportType = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbTransportType.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
@@ -281,7 +283,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Leg Start Date:");
+		lbl.setText(Messages.EditPatrolLegDialog_LegStartDate_Label);
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
 		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		startDate.addSelectionListener(new SelectionAdapter() {
@@ -295,7 +297,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		startDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
 		
 		lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Leg Start Time:");
+		lbl.setText(Messages.EditPatrolLegDialog_LegStartTime_Label);
 		
 		Composite opComp = new Composite(timecomp, SWT.NONE);
 		opComp.setLayout(new GridLayout(3, false));
@@ -307,11 +309,11 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			}
 		};
 		opStart = new Button(opComp, SWT.RADIO);
-		opStart.setText("Start of Day");
+		opStart.setText(Messages.EditPatrolLegDialog_Op_StartOfDay);
 		opStart.addSelectionListener(opAdapter);
 		
 		opCustom = new Button(opComp, SWT.RADIO);
-		opCustom.setText("Custom:");
+		opCustom.setText(Messages.EditPatrolLegDialog_OpStartTimeCutom);
 		opCustom.addSelectionListener(opAdapter);
 		
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
@@ -336,7 +338,7 @@ private void createEndTimeComposite(Composite parent) {
 		timecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Leg End Date:");
+		lbl.setText(Messages.EditPatrolLegDialog_LegEndDate_Label);
 		endDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
 		endDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		endDate.addSelectionListener(new SelectionAdapter() {
@@ -350,7 +352,7 @@ private void createEndTimeComposite(Composite parent) {
 		endDate.setDate(ca.get(Calendar.YEAR), ca.get(Calendar.MONTH), ca.get(Calendar.DAY_OF_MONTH));
 		
 		lbl = new Label(timecomp, SWT.NONE);
-		lbl.setText("Leg End Time:");
+		lbl.setText(Messages.EditPatrolLegDialog_LegEndTime_Label);
 		
 		Composite opComp = new Composite(timecomp, SWT.NONE);
 		opComp.setLayout(new GridLayout(3, false));
@@ -362,11 +364,11 @@ private void createEndTimeComposite(Composite parent) {
 			}
 		};
 		opEnd = new Button(opComp, SWT.RADIO);
-		opEnd.setText("End of Day");
+		opEnd.setText(Messages.EditPatrolLegDialog_Op_EndOfDay);
 		opEnd.addSelectionListener(opAdapter);
 		
 		opEndCustom = new Button(opComp, SWT.RADIO);
-		opEndCustom.setText("Custom:");
+		opEndCustom.setText(Messages.EditPatrolLegDialog_OpEndTimeCustom);
 		opEndCustom.addSelectionListener(opAdapter);
 		
 		endTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
@@ -432,19 +434,29 @@ private void createEndTimeComposite(Composite parent) {
 		
 		
 		if (legStart.before(patrolStart)){
-			return "Date must be after patrol start date: " + DATE_TIME_FORMAT.format(patrolStartDate);
+			return MessageFormat.format(
+					Messages.EditPatrolLegDialog_Error_StartAfterPStart,
+					new Object[]{ DATE_TIME_FORMAT.format(patrolStartDate)});
 		}
 		if (legStart.after(patrolEnd) ){
-			return "Date must be before patrol end date:" + DATE_TIME_FORMAT.format(patrolEndDate);
+			return MessageFormat.format(
+					Messages.EditPatrolLegDialog_Error_StartBeforePEnd,
+					new Object[]{ DATE_TIME_FORMAT.format(patrolEndDate)});
 		}
 		if (legEnd.before(patrolStart)){
-			return "Date must be after patrol start date: " + DATE_TIME_FORMAT.format(patrolStartDate);
+			return MessageFormat.format(
+					Messages.EditPatrolLegDialog_Error_EndAfterPStart,
+					new Object[]{ DATE_TIME_FORMAT.format(patrolStartDate)});
 		}
 		if (legEnd.after(patrolEnd)){
-			return "Date must be before patrol end date: " + DATE_TIME_FORMAT.format(patrolEndDate);
+			return MessageFormat.format(
+					Messages.EditPatrolLegDialog_Error_EndBeforePStart,
+					new Object[]{ DATE_TIME_FORMAT.format(patrolEndDate)});
 		}
 		if (legEnd.before(legStart)){
-			return "The start date (" + DATE_TIME_FORMAT.format(legStart) + ") must be before the end date (" + DATE_TIME_FORMAT.format(legEnd) + ").";
+			return MessageFormat.format(
+					Messages.EditPatrolLegDialog_Error_StartBeforeEnd,
+					new Object[]{ DATE_TIME_FORMAT.format(legStart), DATE_TIME_FORMAT.format(legEnd)});
 		}
 		return null;
 	}
@@ -454,10 +466,10 @@ private void createEndTimeComposite(Composite parent) {
 	 */
 	private String getValidationErrorString(){
 		if (txtLegId.getText().trim().isEmpty()){
-			return "Leg must have an id";
+			return Messages.EditPatrolLegDialog_Error_EmptyId;
 		}
 		if (employeeListA.size() == 0){
-			return "Leg must have at least one member.";
+			return Messages.EditPatrolLegDialog_Error_NoEmployees;
 		}
 		
 		String dateErr = validateDates();
@@ -466,10 +478,10 @@ private void createEndTimeComposite(Composite parent) {
 		}
 		
 		if (this.groupALeader.getSelection().isEmpty()){
-			return "A leader must be selected";
+			return Messages.EditPatrolLegDialog_Error_NoLeader;
 		}
 		if (this.groupAPilot != null && this.groupAPilot.getSelection().isEmpty()){
-			return "A pilot must be selected";
+			return Messages.EditPatrolLegDialog_Error_NoPilot;
 		}		
 		return null;
 	}
@@ -504,12 +516,9 @@ private void createEndTimeComposite(Composite parent) {
 		Date etime = SmartUtils.getDate(endDate);
 		if (opEndCustom.getSelection()){
 			etime = SmartUtils.combineDateTime(etime, new Time(SmartUtils.getTime(endTime).getTime()));
-			//etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
 		}else{
 			etime = SmartUtils.getDatePart(etime, true);
-//			etime += 24 * 60 * 60 * 1000 - 1000;
 		}
-//		editLeg.setEndDate(new Date( etime ));
 		editLeg.setEndDate(etime);
 		
 		//update transport type
@@ -526,7 +535,7 @@ private void createEndTimeComposite(Composite parent) {
 		
 		//update members
 		editLeg.getMembers().clear();
-		for (Iterator iterator = this.employeeListA.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = this.employeeListA.iterator(); iterator.hasNext();) {
 			Employee type = (Employee) iterator.next();
 			PatrolLegMember member = new PatrolLegMember();
 			member.setPatrolLeg(editLeg);

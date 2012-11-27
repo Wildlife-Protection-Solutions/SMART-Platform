@@ -26,6 +26,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Delete handler for deleting all patrol information attached 
@@ -48,42 +49,42 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
-		monitor.subTask("Deleting Patrols");
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingPatrols);
 		deletePatrols(ca, session);
-		monitor.subTask("Deleting Patrol Teams");
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTeams);
 		deletePatrolTeams(ca, session);
-		monitor.subTask("Deleting Patrol Mandates");
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingMandates);
 		deleteMandates(ca, session);		
-		monitor.subTask("Deleting Patrol Types");
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTypes);
 		deletePatrolTypes(ca, session);		
 	}
 
 	private void deletePatrols(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Patrol where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from Patrol where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteMandates(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from PatrolMandate where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from PatrolMandate where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deletePatrolTypes(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from PatrolType where id.conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from PatrolType where id.conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("delete from PatrolTransportType where id.conservationArea = :ca");
-		q.setParameter("ca", ca);
+		q = session.createQuery("delete from PatrolTransportType where id.conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 	}
 	
 	private void deletePatrolTeams(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Team where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from Team where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 }

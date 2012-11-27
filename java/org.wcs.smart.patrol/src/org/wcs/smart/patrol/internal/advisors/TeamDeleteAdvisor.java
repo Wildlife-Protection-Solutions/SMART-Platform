@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
 
@@ -39,14 +42,17 @@ public class TeamDeleteAdvisor  implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Team)){
-			return "Object not of type Team. Can not delete.";
+			return Messages.TeamDeleteAdvisor_Error_InvalidObjectType;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("team", object)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("team", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{
-			return cnt + " patrols are associated with the team " + ((Team)object).getName() + ".  These references must be removed before this team can be deleted.";
+			return 
+				MessageFormat.format(	
+					Messages.TeamDeleteAdvisor_DeleteError,
+					new Object[]{cnt, ((Team)object).getName()});
 		}
 	}
 

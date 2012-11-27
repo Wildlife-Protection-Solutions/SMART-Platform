@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -52,7 +53,7 @@ import org.wcs.smart.patrol.model.Waypoint;
  */
 public class PatrolHibernateManager extends HibernateManager{
 	
-	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000000");
+	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
 	
 	/**
 	 * Gets all teams (active and in-active) for a given conservation area
@@ -86,9 +87,9 @@ public class PatrolHibernateManager extends HibernateManager{
 	 */
 	private static List<Team> getTeams(ConservationArea ca, Session s, boolean onlyActive){
 		List<Team> list = null;
-		Criteria query = s.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca));
+		Criteria query = s.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 		if (onlyActive){
-			query.add(Restrictions.eq("isActive", true));
+			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
 		}
 		list = query.list();
 		return list;
@@ -126,9 +127,9 @@ public class PatrolHibernateManager extends HibernateManager{
 	 */
 	private static List<PatrolMandate> getMandates(ConservationArea ca, Session s, boolean onlyActive){
 		List<PatrolMandate> list = null;
-		Criteria query = s.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca));
+		Criteria query = s.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 		if (onlyActive){
-			query.add(Restrictions.eq("isActive", true));
+			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
 		}
 		list = query.list();
 		return list;
@@ -152,9 +153,9 @@ public class PatrolHibernateManager extends HibernateManager{
 		s.beginTransaction();
 		try{
 			List<PatrolOptions> ops = s.createCriteria(PatrolOptions.class).
-					add(Restrictions.eq("uuid", ca.getUuid())).list();
+					add(Restrictions.eq("uuid", ca.getUuid())).list(); //$NON-NLS-1$
 			if (ops.size() > 1){
-				throw new IllegalStateException("A conservation area cannot have more than one set of patrol options.");
+				throw new IllegalStateException(Messages.PatrolHibernateManager_Error_ToManyPatrolOptions);
 			}
 			PatrolOptions op = null;
 			if (ops.size() == 0){
@@ -167,7 +168,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog("Could not load patrol options. " + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoLoadPatrolOptions + ex.getMessage(), ex);
 			
 		}
 		return null;
@@ -200,7 +201,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 */
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
 		List<PatrolTransportType> types = null;
-		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
+		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return types;
 		
 	}
@@ -216,10 +217,10 @@ public class PatrolHibernateManager extends HibernateManager{
 	 */
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s){
 		List<PatrolTransportType> types = null;
-		String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix
+		String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix //$NON-NLS-1$
 		Query q = s.createQuery(query);
-		q.setParameter("ca", ca);
-		q.setParameter("ca2", ca);
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.setParameter("ca2", ca); //$NON-NLS-1$
 		types = q.list();
 //		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
 		return types;
@@ -236,7 +237,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 */
 	public static List<PatrolTransportType> getPatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
 		List<PatrolTransportType> types = null;
-		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).list();
+		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		return types;
 	}
 	
@@ -265,8 +266,8 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of active patrol types
 	 */
 	public static List<PatrolType> getActivePatrolTypes(ConservationArea ca, Session s){
-		Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca));
-		query.add(Restrictions.eq("isActive", true));
+		Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca)); //$NON-NLS-1$
+		query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
 		return query.list();
 	}
 
@@ -281,14 +282,14 @@ public class PatrolHibernateManager extends HibernateManager{
 		s.beginTransaction();
 		List<PatrolType> types = null;
 		try{
-			Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca));
+			Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca)); //$NON-NLS-1$
 			if (onlyActive){
-				query.add(Restrictions.eq("isActive", true));
+				query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
 			}
 			types = query.list();
 			s.getTransaction().rollback();
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_20, ex);
 			s.close();
 			return null;
 		}
@@ -323,7 +324,7 @@ public class PatrolHibernateManager extends HibernateManager{
 			return types;
 		} catch (Exception ex) {
 			s.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog("Error loading patrol types.  Please contact the conservation area administrator and ensure the patrol types have been initialized.", ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_21, ex);
 			s.close();
 			return null;
 		}
@@ -342,8 +343,8 @@ public class PatrolHibernateManager extends HibernateManager{
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
 
-		Query q = s.createQuery("SELECT id FROM Patrol WHERE id like :id ORDER BY id desc");
-		q.setParameter("id", sb.toString() + "%");
+		Query q = s.createQuery("SELECT id FROM Patrol WHERE id like :id ORDER BY id desc"); //$NON-NLS-1$
+		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		long idNumber = 0;
 		List<?> results = q.list();
@@ -356,7 +357,7 @@ public class PatrolHibernateManager extends HibernateManager{
 				//not of the form CAID_# skip this one
 			}
 		}
-		sb.append("_");
+		sb.append("_"); //$NON-NLS-1$
 		idNumber = (idNumber+1) % 1000000;
 		if (idNumber <= 0){
 			idNumber = 1;
@@ -436,7 +437,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		}catch (Exception ex){
 			session.getTransaction().rollback();
 			session.close();
-			SmartPatrolPlugIn.displayLog("Could not save patrol. " + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getMessage(), ex);
 			return false;
 		}
 		return true;

@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 
@@ -41,14 +44,15 @@ public class StationDeleteAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Station)){
-			return "Object not of type Station. Can not delete.";
+			return Messages.StationDeleteAdvisor_InvalidObjectType;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("station", object)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("station", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{
-			return cnt + " patrols are associated with the station " + ((Station)object).getName() + ".  These references must be removed before this station can be deleted.";
+			return MessageFormat.format(Messages.StationDeleteAdvisor_DeleteError,
+					new Object[]{cnt,((Station)object).getName() });
 		}
 	}
 

@@ -33,13 +33,6 @@ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRES
          version="0.0.0"/>
 
    <plugin
-         id="org.wcs.smart"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.hibernate.libs"
          download-size="0"
          install-size="0"
@@ -104,6 +97,13 @@ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRES
 
    <plugin
          id="org.wcs.smart.plan"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart"
          download-size="0"
          install-size="0"
          version="0.0.0"

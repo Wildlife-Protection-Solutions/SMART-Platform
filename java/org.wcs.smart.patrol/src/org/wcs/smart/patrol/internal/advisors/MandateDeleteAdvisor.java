@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.Team;
@@ -43,17 +46,23 @@ public class MandateDeleteAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof PatrolMandate)){
-			return "Object not of type PatrolMandate. Can not delete.";
+			return Messages.MandateDeleteAdvisor_InvalidObjectType;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return cnt + " patrols are associated with the mandate " + ((PatrolMandate)object).getName() + ".  These references must be removed before this mandate can be deleted.";
+			MessageFormat.format(
+					Messages.MandateDeleteAdvisor_DeleteError_Patrol,
+					new Object[]{cnt, ((PatrolMandate)object).getName()}
+					);
 		}
 		
-		cnt = (Long) session.createCriteria(Team.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult();
+		cnt = (Long) session.createCriteria(Team.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return cnt + " teams are associated with the mandate " + ((PatrolMandate)object).getName() + ".  These references must be removed before this mandate can be deleted.";
+			return 
+				MessageFormat.format(
+						Messages.MandateDeleteAdvisor_DeleteError_Team,
+						new Object[]{cnt, ((PatrolMandate)object).getName() });
 		}
 		
 		return null;

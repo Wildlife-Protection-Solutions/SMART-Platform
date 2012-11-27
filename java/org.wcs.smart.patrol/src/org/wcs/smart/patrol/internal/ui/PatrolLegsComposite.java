@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -52,7 +53,9 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolDateLegsDialog;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -70,6 +73,9 @@ import org.wcs.smart.util.SmartUtils;
 public class PatrolLegsComposite extends PatrolItemComposite{
 
 	private static final DateFormat DATE_FORMATTER = DateFormat.getDateInstance(DateFormat.MEDIUM);
+	
+	private static final String START_INFO_LABEL = Messages.PatrolLegsComposite_PatrolStart_Label;
+	private static final String END_INFO_LABEL = Messages.PatrolLegsComposite_PatrolEnd_Label;
 	
 	private Label lblDateInfo;
 	private PatrolLegTable patrolLegViewer;
@@ -114,7 +120,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			lblDateInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			lnkEditDate = new Link(tmp, SWT.NONE);
-			lnkEditDate.setText("<a>edit...</a>");
+			lnkEditDate.setText("<a>" + PatrolUtils.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnkEditDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			lnkEditDate.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
@@ -122,7 +128,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					if (dialog.open() == Window.OK){
 						patrolStartDate = dialog.getStartDate();
 						patrolEndDate = dialog.getEndDate();
-						lblDateInfo.setText( "Patrol Start: " + DATE_FORMATTER.format(patrolStartDate) + "  Patrol End: " + DATE_FORMATTER.format(patrolEndDate) );
+						lblDateInfo.setText(START_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 						fireChangeListeners();
 					}
 				}
@@ -139,7 +145,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		buttonPanel.setLayout(new GridLayout(5, false));
 		
 		final Button btnChangeTransport = new Button(buttonPanel, SWT.PUSH);
-		btnChangeTransport.setText("Change of Transport");
+		btnChangeTransport.setText(Messages.PatrolLegsComposite_ChangeTransport_Button);
 		btnChangeTransport.setSelection(false);
 		btnChangeTransport.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -148,7 +154,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				if (pl == null){
 					return;
 				}
-				PatrolTransportChangeDialog leaderDialg = new PatrolTransportChangeDialog(getShell(), pl, legs, session);
+				PatrolTransportChangeDialog leaderDialg = new PatrolTransportChangeDialog(getShell(), 
+						pl, legs, session);
 				leaderDialg.open();
 				sortAndRefresh();
 				fireChangeListeners();
@@ -157,7 +164,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		});
 		
 		final Button btnAddLeg = new Button(buttonPanel, SWT.PUSH);
-		btnAddLeg.setText("Change of Leader");
+		btnAddLeg.setText(Messages.PatrolLegsComposite_ChangeLeader_Button);
 		btnAddLeg.setSelection(false);
 		btnAddLeg.addSelectionListener(new SelectionAdapter() {
 			
@@ -167,7 +174,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				if (pl == null){
 					return;
 				}
-				PatrolLegLeaderChangeDialog leaderDialg = new PatrolLegLeaderChangeDialog(getShell(), pl, legs);
+				PatrolLegLeaderChangeDialog leaderDialg = new PatrolLegLeaderChangeDialog(getShell(),
+						pl, legs);
 				leaderDialg.open();
 				sortAndRefresh();
 				fireChangeListeners();
@@ -177,7 +185,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		
 		final Button btnSplit = new Button(buttonPanel, SWT.PUSH);
-		btnSplit.setText("Patrol Split");
+		btnSplit.setText(Messages.PatrolLegsComposite_SplitPatrol_Button);
 		btnSplit.setSelection(false);
 		btnSplit.addSelectionListener(new SelectionAdapter() {
 			
@@ -187,7 +195,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				if (pl == null){
 					return;
 				}
-				PatrolLegSplitDialog splitDialog = new PatrolLegSplitDialog(getShell(), pl, typeOps, legs);
+				PatrolLegSplitDialog splitDialog = new PatrolLegSplitDialog(getShell(), pl,
+						typeOps, legs);
 				if (splitDialog.open() == Window.OK){
 					sortAndRefresh();
 					fireChangeListeners();
@@ -197,11 +206,11 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		});
 		
 		final Button btnRemoveLeg = new Button(buttonPanel, SWT.PUSH);
-		btnRemoveLeg.setText("Remove Leg");
+		btnRemoveLeg.setText(Messages.PatrolLegsComposite_RemoveLeg_Button);
 		btnRemoveLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				if (MessageDialog.openConfirm(getShell(), "Delete Leg", "Are you sure you want to delete this leg?  This action cannot be undone.")){
+				if (MessageDialog.openConfirm(getShell(), Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Title, Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Message)){
 					removeLeg();	
 				}
 				
@@ -209,7 +218,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		});
 		
 		final Button btnEditLeg = new Button(buttonPanel, SWT.PUSH);
-		btnEditLeg.setText("Edit Leg");
+		btnEditLeg.setText(Messages.PatrolLegsComposite_EditLeg_Button);
 		btnEditLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -314,7 +323,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol types", ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolLegsComposite_Error_LoadingPatrolTypes, ex);
 			session.getTransaction().rollback();
 			session.close();
 		}
@@ -323,7 +332,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		this.patrolStartDate = (Date)patrol.getStartDate().clone();
 		this.patrolEndDate = (Date)patrol.getEndDate().clone();
 		
-		lblDateInfo.setText( "Patrol Start: " + DATE_FORMATTER.format(patrolStartDate) + "  Patrol End: " + DATE_FORMATTER.format(patrolEndDate) );
+		lblDateInfo.setText(START_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		patrolLegViewer.showPilotColum(patrol.hasPilot());
 		
 	}
@@ -400,7 +409,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Modify Patrol Legs";
+		return Messages.PatrolLegsComposite_Title;
 	}
 
 	/**
@@ -420,17 +429,17 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			Date legend = SmartUtils.getDatePart(legA.getEndDate(), true);
 			
 			if (legstart.after(pend)){
-				return legA.getId() + " cannot start after the patrol ends.";
+				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_A, new Object[]{legA.getId()});
 			}
 			if (legstart.before(pstart)){
-				return legA.getId() + " cannot start before the patrol starts.";
+				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_B, new Object[]{legA.getId()});
 			}
 			
 			if (legend.after(pend)){
-				return legA.getId() + " cannot end after the patrol ends.";
+				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_C, new Object[]{legA.getId()});
 			}
 			if (legend.before(pstart)){
-				return legA.getId() + " cannot end before the patrol starts.";
+				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_D, new Object[]{legA.getId()});
 			}
 		}
 		
@@ -452,7 +461,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					}
 					for (PatrolLegMember member : legA.getMembers()){
 						if (bMembers.contains(member.getMember())){
-							return "Patrol member " + member.getMember().getLabel() + " cannot be in legs \"" + legA.getId() + "\" and \"" + legB.getId() + "\" as these legs overlap in time";
+							return MessageFormat.format(Messages.PatrolLegsComposite_LegError_E, 
+								new Object[]{member.getMember().getLabel(), legA.getId(), legB.getId() });
 						}
 					}
 				}
@@ -479,7 +489,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				
 			}
 			if (!found){
-				return "Patrol does not have a leg for day " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(calStart.getTime()) + ".  At least one leg must exist for each day in the patrol.";
+				return MessageFormat.format(Messages.PatrolLegsComposite_Error_MissingLegDay, new Object[]{ DateFormat.getDateInstance(DateFormat.MEDIUM).format(calStart.getTime()) });
 			}			
 			calStart.add(Calendar.DAY_OF_MONTH, 1);
 		}		

@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.patrol.internal.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.WaypointObservation;
 
 /**
@@ -49,16 +52,18 @@ public class CategoryDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Category)){
-			return "Object not of type Category. Can not delete.";
+			return Messages.CategoryDMAdvisor_Error_InvalidObjectType;
 		}
 		Category category = (Category)object;
 		if (category.getUuid() == null) return null;
 		Criteria query = session.createCriteria(WaypointObservation.class);
-		query.add(Restrictions.eq("category", category));
+		query.add(Restrictions.eq("category", category)); //$NON-NLS-1$
 		query.setProjection(Projections.rowCount());
 		long cnt = (Long)query.uniqueResult();
 		if (cnt != 0){
-			return "The category is associated with " + cnt + " observations.  These observations must be removed before the category can be deleted.";
+			return MessageFormat.format(
+					Messages.CategoryDMAdvisor_DeleteError,
+					new Object[]{cnt });
 		}
 		
 		for(Category kid : category.getChildren()){

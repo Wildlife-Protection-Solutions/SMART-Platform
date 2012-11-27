@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -58,7 +59,7 @@ public class CommentComposite extends PatrolItemComposite{
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Comments:");
+		lbl.setText(Messages.CommentComposite_Comments_Label);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		txtComment = new Text(center, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
@@ -99,7 +100,7 @@ public class CommentComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Comments";
+		return Messages.CommentComposite_Title;
 	}
 	
 	/**
