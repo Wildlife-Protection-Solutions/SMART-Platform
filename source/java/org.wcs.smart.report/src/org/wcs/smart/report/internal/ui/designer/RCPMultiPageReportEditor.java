@@ -49,6 +49,7 @@ import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.internal.ui.CreateReportDialog;
 import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
 import org.wcs.smart.report.manger.ReportManager;
@@ -127,8 +128,8 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 						List<?> items = odaDataSetParameterProp.getItems();
 						for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
 							OdaDataSetParameter parameter = (OdaDataSetParameter) iterator.next();
-							if (parameter.getName().equals(SmartDateParameterComponent.START_DATE_NAME) || 
-									parameter.getName().equals(SmartDateParameterComponent.END_DATE_NAME)){
+							if (parameter.getName().equals(SmartReportParameters.PARAM_START_DATE_KEY) || 
+									parameter.getName().equals(SmartReportParameters.PARAM_END_DATE_KEY)){
 								parameter.setDefaultValue("");
 								parameter.setParamName(parameter.getName());
 							}
