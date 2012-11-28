@@ -3,7 +3,7 @@ package org.wcs.smart.report.birt.map.internal;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.wcs.smart.birt.map.internal.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.wcs.smart.report.birt.map.internal.messages"; //$NON-NLS-1$
 	public static String BirtMapUtils_SLDParseError;
 	public static String DatasetComobInputDialog_Error_NoDataset;
 	public static String MapDialog_CoordinatesLabel;
