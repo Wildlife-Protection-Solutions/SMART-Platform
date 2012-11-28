@@ -19,35 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol;
+package org.wcs.smart.reporttable.patrol;
 
 import java.util.List;
-
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.reporttable.internal.Messages;
 
 /**
- * Wrapper to convert patrol team objects
+ * Wrapper to convert patrol transport type objects
  * to a BIRT table data source.
  * 
  * @author Emily
  *
  */
-public class TeamTable  extends SmartBirtTable {
+public class PatrolTransportTable extends SmartBirtTable {
 
 	private enum Column{
 		
-		NAME("Team Name",java.sql.Types.VARCHAR),
-		DESCRIPTION("Description", java.sql.Types.VARCHAR),
-		MANDATE("Mandate", java.sql.Types.VARCHAR),
-		ACTIVE("Active", java.sql.Types.BOOLEAN);
-		
+		NAME(Messages.PatrolTransportTable_TransportType_FieldName,java.sql.Types.VARCHAR),
+		ACTIVE(Messages.PatrolTransportTable_IsActive_FieldName, java.sql.Types.BOOLEAN),
+		PATROL_TYPE(Messages.PatrolTransportTable_PatrolType_FieldName, java.sql.Types.VARCHAR);
 		private String name;
 		private int type;
 		
@@ -62,19 +59,14 @@ public class TeamTable  extends SmartBirtTable {
 			return this.type;
 		}
 		
-		public Object getValue(Team e){
+		public Object getValue(PatrolTransportType e){
 			switch(this){
 			case NAME:
 				return e.getName();
-			case DESCRIPTION:
-				return e.getDescription();
 			case ACTIVE:
 				return e.getIsActive();
-			case MANDATE:
-				if (e.getMandate() != null){
-					return e.getMandate().getName();
-				}
-				return null;
+			case PATROL_TYPE:
+				return e.getPatrolType().getGuiName();
 			}
 			return null;
 		}
@@ -83,10 +75,10 @@ public class TeamTable  extends SmartBirtTable {
 	private Session session = null;
 	
 	/**
-	 * Creates a new patrol team table
+	 * Creates a nw patrol transport type table
 	 */
-	public TeamTable() {
-		super("Patrol Team");
+	public PatrolTransportTable() {
+		super(Messages.PatrolTransportTable_TableName);
 	}
 
 	/**
@@ -119,7 +111,7 @@ public class TeamTable  extends SmartBirtTable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca)).list();
+		return session.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -127,7 +119,7 @@ public class TeamTable  extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((Team)object);
+		return Column.values()[index].getValue((PatrolTransportType)object);
 	}
 
 	/**
@@ -150,5 +142,3 @@ public class TeamTable  extends SmartBirtTable {
 	}
 
 }
-
-

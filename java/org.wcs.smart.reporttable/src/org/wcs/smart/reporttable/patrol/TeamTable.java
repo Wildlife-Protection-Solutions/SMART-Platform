@@ -19,30 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol;
+package org.wcs.smart.reporttable.patrol;
 
 import java.util.List;
+
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.reporttable.internal.Messages;
 
 /**
- * Wrapper to convert patrol mandate objects
+ * Wrapper to convert patrol team objects
  * to a BIRT table data source.
  * 
  * @author Emily
  *
  */
-public class PatrolMandateTable extends SmartBirtTable {
+public class TeamTable  extends SmartBirtTable {
 
 	private enum Column{
 		
-		NAME("Patrol Mandate",java.sql.Types.VARCHAR),
-		ACTIVE("Active", java.sql.Types.BOOLEAN);
+		NAME(Messages.TeamTable_TeamName_FieldName,java.sql.Types.VARCHAR),
+		DESCRIPTION(Messages.TeamTable_Description_FieldName, java.sql.Types.VARCHAR),
+		MANDATE(Messages.TeamTable_Mandate_FieldName, java.sql.Types.VARCHAR),
+		ACTIVE(Messages.TeamTable_IsActive_FieldName, java.sql.Types.BOOLEAN);
 		
 		private String name;
 		private int type;
@@ -58,12 +63,19 @@ public class PatrolMandateTable extends SmartBirtTable {
 			return this.type;
 		}
 		
-		public Object getValue(PatrolMandate e){
+		public Object getValue(Team e){
 			switch(this){
 			case NAME:
 				return e.getName();
+			case DESCRIPTION:
+				return e.getDescription();
 			case ACTIVE:
 				return e.getIsActive();
+			case MANDATE:
+				if (e.getMandate() != null){
+					return e.getMandate().getName();
+				}
+				return null;
 			}
 			return null;
 		}
@@ -72,10 +84,10 @@ public class PatrolMandateTable extends SmartBirtTable {
 	private Session session = null;
 	
 	/**
-	 * Creates a new patrol mandate table.
+	 * Creates a new patrol team table
 	 */
-	public PatrolMandateTable() {
-		super("Patrol Mandate");
+	public TeamTable() {
+		super(Messages.TeamTable_TableName);
 	}
 
 	/**
@@ -108,7 +120,7 @@ public class PatrolMandateTable extends SmartBirtTable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca)).list();
+		return session.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -116,7 +128,7 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((PatrolMandate)object);
+		return Column.values()[index].getValue((Team)object);
 	}
 
 	/**
@@ -139,3 +151,5 @@ public class PatrolMandateTable extends SmartBirtTable {
 	}
 
 }
+
+
