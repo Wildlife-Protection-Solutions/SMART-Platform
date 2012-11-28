@@ -19,33 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.tools;
+package org.wcs.smart.report.birt.map;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.eclipse.birt.report.model.api.DesignElementHandle;
+import org.eclipse.birt.report.model.api.ExtendedItemHandle;
+import org.eclipse.birt.report.model.api.extension.IMessages;
+import org.eclipse.birt.report.model.api.extension.IReportItem;
+import org.eclipse.birt.report.model.api.extension.ReportItemFactory;
 
-import net.refractions.udig.project.IMap;
-import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
+/**
+ * Factory for smart map item.
+ * 
+ * @author Emily
+ *
+ */
+public class SmartMapFactory  extends ReportItemFactory{
 
-public class ZoomExtentTool extends AbstractActionTool {
+	/**
+	 * @see org.eclipse.birt.report.model.api.extension.IReportItemFactory#newReportItem(org.eclipse.birt.report.model.api.DesignElementHandle)
+	 */
+	@Override
+	public IReportItem newReportItem(DesignElementHandle extendedItemHandle) {
+		if ( extendedItemHandle instanceof ExtendedItemHandle &&
+				SmartMapItem.EXTENSION_NAME.equals( ( (ExtendedItemHandle) extendedItemHandle ).getExtensionName( ) ) ){
+			SmartMapItem item = new SmartMapItem( (ExtendedItemHandle) extendedItemHandle );
+			return item;
+		}
+		return null;
 
-	public static final String ID = "org.wcs.smart.birt.map.tools.ZoomExtents";
-	public ZoomExtentTool() {
 	}
 
 	@Override
-	public void run() {
-		
-		IMap map = super.context.getMap();
-		ReferencedEnvelope bounds = map.getBounds(new NullProgressMonitor());
-		map.sendCommandASync(new SetViewportBBoxCommand(bounds));
-		map.getRenderManager().refresh(null);
-	}
-
-	@Override
-	public void dispose() {
-
+	public IMessages getMessages() {
+		return null;
 	}
 
 }

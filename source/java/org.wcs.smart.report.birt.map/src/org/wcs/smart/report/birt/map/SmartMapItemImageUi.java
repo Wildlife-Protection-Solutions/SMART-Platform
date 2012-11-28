@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map;
+package org.wcs.smart.report.birt.map;
 
 import org.eclipse.birt.report.designer.ui.extensions.IReportItemImageProvider;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -28,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.report.birt.map.internal.Messages;
 
 /**
  * The implementation of the smart map item that appears in the report editor.
@@ -70,8 +71,7 @@ public class SmartMapItemImageUi implements IReportItemImageProvider {
 			return img;
 
 		} catch (Exception ex) {
-			SmartMapItemPlugIn.displayLog("Could not create report map item: "
-					+ ex.getMessage(), ex);
+			SmartMapItemPlugIn.displayLog(Messages.SmartMapItemImageUi_ErrorCreatingMapItem + ex.getMessage(), ex);
 		} finally {
 			if (gc != null && !gc.isDisposed()) {
 				gc.dispose();

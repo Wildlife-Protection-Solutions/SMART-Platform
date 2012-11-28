@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map;
+package org.wcs.smart.report.birt.map;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -36,6 +36,7 @@ import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.util.DimensionUtil;
 import org.eclipse.ui.XMLMemento;
+import org.wcs.smart.report.birt.map.internal.Messages;
 
 /**
  * Utilities to support the BIRT Smart map item generation. 
@@ -60,7 +61,7 @@ public class BirtMapUtils {
 			SLDContent cnt = new SLDContent();
 			return cnt.load(memento);
 		} catch (Exception ex) {
-			SmartMapItemPlugIn.log("Error parsing sld", ex);
+			SmartMapItemPlugIn.log(Messages.BirtMapUtils_SLDParseError, ex);
 			return null;
 		}
 	}

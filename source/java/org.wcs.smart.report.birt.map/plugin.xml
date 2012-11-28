@@ -119,7 +119,7 @@
             icon="images/icons/obj16/map.png">
       </outline>
       <reportItemImageUI
-            class="org.wcs.smart.birt.map.SmartMapItemImageUi">
+            class="org.wcs.smart.report.birt.map.SmartMapItemImageUi">
       </reportItemImageUI>
    </extension>
    <extension
@@ -134,7 +134,7 @@
       <adaptable
             class="org.eclipse.birt.report.model.api.ExtendedItemHandle">
          <adapter
-               factory="org.wcs.smart.birt.map.properties.SmartMapItemPageGeneratorFactory"
+               factory="org.wcs.smart.report.birt.map.properties.SmartMapItemPageGeneratorFactory"
                id="ReportDesign.AttributeView.RotatedTextPageGenerator"
                singleton="false"
                type="org.eclipse.birt.report.designer.ui.views.IPageGenerator">
@@ -155,7 +155,7 @@
       </category>
       <actionTool
             categoryId="org.wcs.smart.udig.report.maptools"
-            class="org.wcs.smart.birt.map.tools.ZoomExtentTool"
+            class="org.wcs.smart.report.birt.map.tools.ZoomExtentTool"
             icon="images/icons/etool16/zoom_layers.png"
             id="org.wcs.smart.birt.map.tools.ZoomExtents"
             name="Zoom Extents"
@@ -164,7 +164,7 @@
       </actionTool>
       <modalTool
             categoryId="org.wcs.smart.udig.report.maptools"
-            class="org.wcs.smart.birt.map.tools.ZoomTool"
+            class="org.wcs.smart.report.birt.map.tools.ZoomTool"
             icon="images/icons/etool16/zoom_mode.gif"
             id="org.wcs.smart.birt.map.tools.Zoom"
             name="Zoom Tool"
@@ -174,7 +174,7 @@
       </modalTool>
       <modalTool
             categoryId="org.wcs.smart.udig.report.maptools"
-            class="org.wcs.smart.birt.map.tools.PanTool"
+            class="org.wcs.smart.report.birt.map.tools.PanTool"
             icon="images/icons/etool16/pan_mode.gif"
             id="org.wcs.smart.birt.map.tools.Pan"
             name="Pan Tool"

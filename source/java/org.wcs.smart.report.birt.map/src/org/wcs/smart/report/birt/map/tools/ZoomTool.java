@@ -19,30 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.tools;
+package org.wcs.smart.report.birt.map.tools;
 
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import net.refractions.udig.tools.internal.Zoom;
 
-/**
- * Wrapper around pan tool for using tool in dialog box.
- * 
- * @author Emily
- *
- */
-public class PanTool extends net.refractions.udig.tools.internal.PanTool {
+public class ZoomTool extends Zoom {
 
-	public static final String ID = "org.wcs.smart.birt.map.tools.Pan";
+	public static final String ID = "org.wcs.smart.birt.map.tools.Zoom"; //$NON-NLS-1$
 	
-	public PanTool() {
-		super();
+	@Override
+	public void mouseReleased(MapMouseEvent e) {
+		super.mouseReleased(e);
+		context.getMap().getRenderManager().refresh(null);
 	}
-
-	
-    /**
-     * @see net.refractions.udig.project.ui.tool.AbstractTool#mouseReleased(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
-     */
-    public void mouseReleased( MapMouseEvent e ) {
-     	super.mouseReleased(e);
-     	context.getMap().getRenderManager().refresh(null);
-    }
 }
