@@ -19,29 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.reporttable.patrol;
 
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.reporttable.internal.Messages;
+
 /**
- * Wrapper to convert station objects
+ * Wrapper to convert patrol mandate objects
  * to a BIRT table data source.
  * 
  * @author Emily
  *
  */
-public class StationTable  extends SmartBirtTable {
+public class PatrolMandateTable extends SmartBirtTable {
 
 	private enum Column{
-		NAME("Station Name",java.sql.Types.VARCHAR),
-		DESCRIPTION("Description", java.sql.Types.VARCHAR),
-		ACTIVE("Active", java.sql.Types.BOOLEAN);
+		
+		NAME(Messages.PatrolMandateTable_MandateName_FieldName,java.sql.Types.VARCHAR),
+		ACTIVE(Messages.PatrolMandateTable_IsActive_FieldName, java.sql.Types.BOOLEAN);
 		
 		private String name;
 		private int type;
@@ -57,12 +59,10 @@ public class StationTable  extends SmartBirtTable {
 			return this.type;
 		}
 		
-		public Object getValue(Station e){
+		public Object getValue(PatrolMandate e){
 			switch(this){
 			case NAME:
 				return e.getName();
-			case DESCRIPTION:
-				return e.getDescription();
 			case ACTIVE:
 				return e.getIsActive();
 			}
@@ -73,10 +73,10 @@ public class StationTable  extends SmartBirtTable {
 	private Session session = null;
 	
 	/**
-	 * Creates a new station table
+	 * Creates a new patrol mandate table.
 	 */
-	public StationTable() {
-		super("Stations");
+	public PatrolMandateTable() {
+		super(Messages.PatrolMandateTable_TableName);
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class StationTable  extends SmartBirtTable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(Station.class).add(Restrictions.eq("conservationArea", ca)).list();
+		return session.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((Station)object);
+		return Column.values()[index].getValue((PatrolMandate)object);
 	}
 
 	/**
@@ -140,4 +140,3 @@ public class StationTable  extends SmartBirtTable {
 	}
 
 }
-

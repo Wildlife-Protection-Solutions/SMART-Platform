@@ -4,21 +4,21 @@
    <extension
          point="org.wcs.smart.data.ods.smart.table">
       <class
-            SmartBirtTable="org.wcs.smart.EmployeeTable">
+            SmartBirtTable="org.wcs.smart.reporttable.ca.EmployeeTable">
       </class>
       <class
-            SmartBirtTable="org.wcs.smart.AgencyRankTable">
+            SmartBirtTable="org.wcs.smart.reporttable.ca.AgencyRankTable">
       </class>
       <class
-            SmartBirtTable="org.wcs.smart.StationTable"></class>
+            SmartBirtTable="org.wcs.smart.reporttable.ca.StationTable"></class>
       <class
-            SmartBirtTable="org.wcs.smart.patrol.PatrolMandateTable">
+            SmartBirtTable="org.wcs.smart.reporttable.patrol.PatrolMandateTable">
       </class>
       <class
-            SmartBirtTable="org.wcs.smart.patrol.PatrolTransportTable">
+            SmartBirtTable="org.wcs.smart.reporttable.patrol.PatrolTransportTable">
       </class>
       <class
-            SmartBirtTable="org.wcs.smart.patrol.TeamTable">
+            SmartBirtTable="org.wcs.smart.reporttable.patrol.TeamTable">
       </class>
    </extension>
 

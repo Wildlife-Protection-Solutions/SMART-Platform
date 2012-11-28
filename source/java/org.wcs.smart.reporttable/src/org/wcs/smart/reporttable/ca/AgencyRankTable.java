@@ -19,31 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol;
+package org.wcs.smart.reporttable.ca;
 
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.reporttable.internal.Messages;
 
 /**
- * Wrapper to convert patrol transport type objects
+ * Wrapper to convert agency/rank objects
  * to a BIRT table data source.
  * 
  * @author Emily
  *
  */
-public class PatrolTransportTable extends SmartBirtTable {
+public class AgencyRankTable  extends SmartBirtTable {
 
 	private enum Column{
+		AGENCY(Messages.AgencyRankTable_AgencyName_FieldName, java.sql.Types.VARCHAR),
+		RANK(Messages.AgencyRankTable_RankName_FieldName, java.sql.Types.VARCHAR);
 		
-		NAME("Transport Type",java.sql.Types.VARCHAR),
-		ACTIVE("Active", java.sql.Types.BOOLEAN),
-		PATROL_TYPE("Patrol Type", java.sql.Types.VARCHAR);
 		private String name;
 		private int type;
 		
@@ -58,14 +58,12 @@ public class PatrolTransportTable extends SmartBirtTable {
 			return this.type;
 		}
 		
-		public Object getValue(PatrolTransportType e){
+		public Object getValue(Rank rank){
 			switch(this){
-			case NAME:
-				return e.getName();
-			case ACTIVE:
-				return e.getIsActive();
-			case PATROL_TYPE:
-				return e.getPatrolType().getGuiName();
+			case AGENCY:
+				return rank.getAgency().getName();
+			case RANK:
+				return rank.getName();
 			}
 			return null;
 		}
@@ -74,10 +72,10 @@ public class PatrolTransportTable extends SmartBirtTable {
 	private Session session = null;
 	
 	/**
-	 * Creates a nw patrol transport type table
+	 * Creates a new agency/rank birt table source
 	 */
-	public PatrolTransportTable() {
-		super("Patrol Transport Types");
+	public AgencyRankTable() {
+		super(Messages.AgencyRankTable_TableName);
 	}
 
 	/**
@@ -110,7 +108,11 @@ public class PatrolTransportTable extends SmartBirtTable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).list();
+		String sql = "FROM Rank r WHERE r.agency.conservationArea = :ca"; //$NON-NLS-1$
+		Query q  = session.createQuery(sql);
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		
+		return q.list();
 	}
 
 	/**
@@ -118,7 +120,7 @@ public class PatrolTransportTable extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((PatrolTransportType)object);
+		return Column.values()[index].getValue((Rank)object);
 	}
 
 	/**
@@ -137,7 +139,6 @@ public class PatrolTransportTable extends SmartBirtTable {
 	public void closeQuery() {
 		session.getTransaction().commit();
 		session.close();
-
 	}
 
 }
