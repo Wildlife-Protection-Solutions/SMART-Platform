@@ -4,11 +4,11 @@
    <extension
          point="org.eclipse.birt.report.model.reportItemModel">
       <reportItem
-            class="org.wcs.smart.birt.map.SmartMapFactory"
+            class="org.wcs.smart.report.birt.map.SmartMapFactory"
             extensionName="Smart Map">
          <property
                allowExpression="false"
-               defaultDisplayName="Basemap"
+               defaultDisplayName="%mapitem.parameter.basemap.name"
                hasOwnModel="false"
                isEncryptable="false"
                name="org.wcs.smart.birt.map.basemap"
@@ -16,7 +16,7 @@
          </property>
          <property
                canInherit="true"
-               defaultDisplayName="Smart Map Layers"
+               defaultDisplayName="%mapitem.parameter.layers.name"
                hasOwnModel="true"
                isEncryptable="false"
                isList="false"
@@ -26,7 +26,7 @@
          </property>
          <property
                canInherit="true"
-               defaultDisplayName="Smart Map Layer Names"
+               defaultDisplayName="%mapitem.parameter.layerNames.name"
                hasOwnModel="true"
                isEncryptable="false"
                isList="false"
@@ -36,7 +36,7 @@
          </property>
          <property
                canInherit="true"
-               defaultDisplayName="Smart Map Layer Styles"
+               defaultDisplayName="%mapitem.parameter.layerStyles.name"
                hasOwnModel="true"
                isEncryptable="false"
                isList="false"
@@ -45,11 +45,11 @@
                type="list">
          </property>
          <propertyGroup
-               defaultDisplayName="Map Bounds"
+               defaultDisplayName="%mapitem.parameter.bounds.name"
                name="org.wcs.smart.report.birt.map.bounds">
             <property
                   canInherit="true"
-                  defaultDisplayName="X Min"
+                  defaultDisplayName="%mapitem.parameter.bounds.xmin.name"
                   hasOwnModel="true"
                   isEncryptable="false"
                   isList="false"
@@ -58,7 +58,7 @@
             </property>
             <property
                   canInherit="true"
-                  defaultDisplayName="X Max"
+                  defaultDisplayName="%mapitem.parameter.bounds.xmax.name"
                   hasOwnModel="true"
                   isEncryptable="false"
                   isList="false"
@@ -67,7 +67,7 @@
             </property>
             <property
                   canInherit="true"
-                  defaultDisplayName="Y Min"
+                  defaultDisplayName="%mapitem.parameter.bounds.ymin.name"
                   hasOwnModel="true"
                   isEncryptable="false"
                   isList="false"
@@ -76,7 +76,7 @@
             </property>
             <property
                   canInherit="true"
-                  defaultDisplayName="Y Max"
+                  defaultDisplayName="%mapitem.parameter.bounds.ymax.name"
                   hasOwnModel="true"
                   isEncryptable="false"
                   isList="false"
@@ -85,7 +85,7 @@
             </property>
             <property
                   canInherit="true"
-                  defaultDisplayName="CRS"
+                  defaultDisplayName="%mapitem.parameter.bounds.crs.name"
                   hasOwnModel="true"
                   isEncryptable="false"
                   isList="false"
@@ -126,7 +126,7 @@
          point="org.eclipse.birt.report.engine.reportitemPresentation">
       <reportItem
             class="org.wcs.smart.birt.map.SmartMapPresentationImpl "
-            name="Smart Map">
+            name="%birt.reportitem.smartmap.name">
       </reportItem>
    </extension>
    <extension
@@ -167,20 +167,20 @@
             class="org.wcs.smart.report.birt.map.tools.ZoomTool"
             icon="images/icons/etool16/zoom_mode.gif"
             id="org.wcs.smart.birt.map.tools.Zoom"
-            name="Zoom Tool"
+            name="%zoomlTool.name"
             onToolbar="false"
             toolCursorId="zoomCursor"
-            tooltip="Zoom the map">
+            tooltip="%zoomlTool.tooltip">
       </modalTool>
       <modalTool
             categoryId="org.wcs.smart.udig.report.maptools"
             class="org.wcs.smart.report.birt.map.tools.PanTool"
             icon="images/icons/etool16/pan_mode.gif"
             id="org.wcs.smart.birt.map.tools.Pan"
-            name="Pan Tool"
+            name="%panTool.name"
             onToolbar="false"
             toolCursorId="move"
-            tooltip="Pans the map">
+            tooltip="%panTool.tooltip">
       </modalTool>
    </extension>
 
