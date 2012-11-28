@@ -46,8 +46,10 @@ public class SmartHibernateManager {
 	
 	protected static SessionFactory sessionFactory = null;
 
-	private static  String userName = "login";
-	private static  String passWord = "smrt";
+	private static final String MAPPING_ID = "org.wcs.smart.hibernate.mapping"; //$NON-NLS-1$
+	
+	private static  String userName = "login"; //$NON-NLS-1$
+	private static  String passWord = "smrt"; //$NON-NLS-1$
 	
 	public static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
 	 
@@ -77,10 +79,10 @@ public class SmartHibernateManager {
 	public  static synchronized final void createSessionFactory(){
 		
 		if (sessionFactory == null){
-			Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml"));
+			Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
 			
-			config.setProperty("hibernate.connection.username", userName);
-			config.setProperty("hibernate.connection.password", passWord);
+			config.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
+			config.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
 			
 			//add mapping classes
 			for (Class<?> c: getMappings()){
@@ -90,7 +92,7 @@ public class SmartHibernateManager {
 				
 			if (!((SessionFactoryImplementor)sessionFactory).getSettings().getDialect().supportsSequences()){
 				//fail
-				throw new IllegalStateException("You can't use this database - it does not support sequences");
+				throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
 			}
 		}
 	}
@@ -162,7 +164,6 @@ public class SmartHibernateManager {
 		sessionFactory = null;
 	}
 	
-	private static final String MAPPING_ID = "org.wcs.smart.hibernate.mapping";
 	
 	/**
 	 * @return gets all hibernate mappings
@@ -173,7 +174,7 @@ public class SmartHibernateManager {
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
 		try {
 			for (IConfigurationElement e : config) {
-				items.add(Class.forName(e.getAttribute("class")));
+				items.add(Class.forName(e.getAttribute("class"))); //$NON-NLS-1$
 			}
 		}catch (Exception ex){
 			ex.printStackTrace();
@@ -193,9 +194,9 @@ public class SmartHibernateManager {
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
 		try {
 			for (IConfigurationElement e : config) {
-				Class<?> clzz = Class.forName(e.getAttribute("class"));
+				Class<?> clzz = Class.forName(e.getAttribute("class")); //$NON-NLS-1$
 				if (clzz == clazz){
-					return e.getAttribute("ca_property");
+					return e.getAttribute("ca_property"); //$NON-NLS-1$
 				}
 			}
 		}catch (Exception ex){
