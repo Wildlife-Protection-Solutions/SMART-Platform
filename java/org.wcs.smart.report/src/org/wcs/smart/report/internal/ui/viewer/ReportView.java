@@ -51,6 +51,7 @@ import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
@@ -63,6 +64,9 @@ import org.wcs.smart.report.model.Report;
  */
 public class ReportView extends ViewPart implements IReportListener{
 
+	private static final String REPORT_ERROR_MSG = Messages.ReportView_RunReportError;
+
+
 	/**
 	 * Report view id
 	 */
@@ -74,7 +78,7 @@ public class ReportView extends ViewPart implements IReportListener{
 	private Report report;
 	private HashMap<String, Object> selectedParams;
 
-	Job reportRunner = new Job("Preview Report"){
+	Job reportRunner = new Job(Messages.ReportView_PreviewReportJobName){
 		
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
@@ -86,7 +90,7 @@ public class ReportView extends ViewPart implements IReportListener{
 				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				options = new HTMLRenderOption( );
 				options.setOutputStream(bos);
-				options.setSupportedImageFormats("PNG");
+				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 				options.setOutputFormat(HTMLRenderOption.HTML);
 				task.setRenderOption(options);
 				task.setParameterValues(selectedParams);
@@ -99,7 +103,7 @@ public class ReportView extends ViewPart implements IReportListener{
 
 					}});
 		} catch (Exception e) {
-			ReportPlugIn.displayLog("Error running report: " + e.getMessage(), e);
+			ReportPlugIn.displayLog(REPORT_ERROR_MSG + e.getMessage(), e);
 		}			
 		return Status.OK_STATUS;
 	}};
@@ -159,9 +163,9 @@ public class ReportView extends ViewPart implements IReportListener{
 	 */
 	public void refreshReport(boolean refreshParameters){
 		try{
-			previewReport(refreshParameters); //$NON-NLS-1$
+			previewReport(refreshParameters);
 		}catch (Exception ex){
-			ReportPlugIn.log("Could not run report: " + ex.getMessage(), ex);
+			ReportPlugIn.log(REPORT_ERROR_MSG + ex.getMessage(), ex);
 		}
 	}
 		
@@ -196,20 +200,21 @@ public class ReportView extends ViewPart implements IReportListener{
 	
 	private void previewReport(boolean refreshParameters) throws Exception {
 		if (report == null){
-			ReportPlugIn.displayLog("Report not set.", null);
+			ReportPlugIn.displayLog(Messages.ReportView_ReportNotSelected, null);
 			return; 
 		}
-		browser.setText("Running Report....");
+		browser.setText(Messages.ReportView_Progress_RunningReport);
 		if (refreshParameters){
 			try{
 				selectedParams  = getParameters();
 				if (selectedParams == null){
-					browser.setText("Report cancelled.  Re-run report to view report.");
+					browser.setText(Messages.ReportView_CancelledReportMsg);
 					return;
 				}
 			}catch (Exception ex){
-				browser.setText("Error gathering parameters. " + ex.getMessage());
-				ReportPlugIn.log("Error gathering parameters. ", ex);
+				String error = Messages.ReportView_Error_GatheringParams;
+				browser.setText(error+ ex.getMessage());
+				ReportPlugIn.log(error, ex);
 				return;
 			}
 		}

@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
@@ -81,7 +82,7 @@ public class RunReportHandler extends AbstractHandler  {
 				return null;
 			}
 		}catch (Exception ex){
-			ReportPlugIn.displayLog("Error collecting report parameters. "  + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.RunReportHandler_ParametersError  + ex.getMessage(), ex);
 			return null;
 		}
 		

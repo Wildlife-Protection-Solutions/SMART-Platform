@@ -60,7 +60,7 @@ public class StringParameterComponent extends AbstractBirtParameter{
 		param.setLayout(gl);
 		
 		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText(getDisplayText() + ": ");
+		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
 		
 		inputValue = new Text(param, SWT.SINGLE | SWT.BORDER);
 		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

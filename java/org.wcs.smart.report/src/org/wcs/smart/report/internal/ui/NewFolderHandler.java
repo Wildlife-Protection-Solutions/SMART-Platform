@@ -40,6 +40,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 
@@ -61,7 +62,7 @@ public class NewFolderHandler extends AbstractHandler implements IHandler {
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
 		final Object o = obj;
 		if (o instanceof ReportFolder || o instanceof RootReportFolder){
-			Job job = new Job("Add Folder Job") {
+			Job job = new Job(Messages.NewFolderHandler_JobName) {
 				
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -70,7 +71,7 @@ public class NewFolderHandler extends AbstractHandler implements IHandler {
 					newFolder = new ReportFolder();
 					Label lbl = new Label();
 					lbl.setLanguage(SmartDB.getCurrentLanguage());
-					lbl.setValue("New Folder");
+					lbl.setValue(Messages.NewFolderHandler_DefaultNewFolderName);
 					lbl.setElement(newFolder);
 					newFolder.setNames(new HashSet<Label>());
 					newFolder.getNames().add(lbl);
@@ -96,7 +97,7 @@ public class NewFolderHandler extends AbstractHandler implements IHandler {
 							s.saveOrUpdate(newFolder);
 							s.getTransaction().commit();
 						}catch (Exception ex){
-							ReportPlugIn.displayLog("Could not add folder: " + ex.getMessage(), ex);
+							ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getMessage(), ex);
 							s.getTransaction().rollback();
 							return Status.OK_STATUS;
 						}finally{

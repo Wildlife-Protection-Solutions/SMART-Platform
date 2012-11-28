@@ -45,6 +45,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.internal.PartSite;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.util.ZipUtil;
 
@@ -56,13 +57,15 @@ import org.wcs.smart.util.ZipUtil;
  */
 public class ImportLibraryHandler extends AbstractHandler {
 
+	private static final String ERROR_MSG = Messages.ImportLibraryHandler_ErrorImportingLibrary;
+
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event));
-		fd.setFilterNames(new String[]{"Zip (*.zip)", "*.*"});
-		fd.setFilterExtensions(new String[]{"*.zip", "*.*"});
-		fd.setText("Import File");
-		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_ReportLibrary.zip");
+		fd.setFilterNames(new String[]{Messages.ImportLibraryHandler_ZipFilterName, Messages.ImportLibraryHandler_AllFilesFilterName});
+		fd.setFilterExtensions(new String[]{"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setText(Messages.ImportLibraryHandler_FileLabel);
+		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_ReportLibrary.zip"); //$NON-NLS-1$
 		
 		final String importFile = fd.open();
 		if (importFile == null){
@@ -92,7 +95,7 @@ public class ImportLibraryHandler extends AbstractHandler {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Import", "Library imported successfully");		
+							MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.ImportLibraryHandler_ImportOk_DialogTitle, Messages.ImportLibraryHandler_ImportOk);		
 						}});
 					
 					//fire library change event
@@ -103,12 +106,12 @@ public class ImportLibraryHandler extends AbstractHandler {
 						((PartSite)site.getSite()).getActionBars().getGlobalActionHandler(ActionFactory.REFRESH.getId( )).run();
 					}
 				} catch (Exception ex) {
-					ReportPlugIn.displayLog("Error importing report library: " + ex.getMessage(), ex);
+					ReportPlugIn.displayLog(ERROR_MSG + ex.getMessage(), ex);
 				}	
 			}
 		});
 		}catch (Exception ex){
-			ReportPlugIn.displayLog("Error importing report library", ex);
+			ReportPlugIn.displayLog(ERROR_MSG, ex);
 		}
 		return null;
 	}

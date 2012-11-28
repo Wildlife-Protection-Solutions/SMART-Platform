@@ -2,6 +2,7 @@ package org.wcs.smart.report.internal.ui;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -17,8 +18,11 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.in.internal.ImportReportEngine;
+import org.wcs.smart.report.internal.Messages;
 
 public class ImportReportHandler extends AbstractHandler {
+
+	private static final String ERROR_MSG = Messages.ImportReportHandler_Error_ImportingReport;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -35,15 +39,15 @@ public class ImportReportHandler extends AbstractHandler {
 			
 		} catch (WorkbenchException e) {
 			ReportPlugIn
-					.displayLog("Error loading query perspective.", e);
+					.displayLog(Messages.ImportReportHandler_Error_LoadingPerspective, e);
 		}
 		
 		final Shell parent = HandlerUtil.getActiveShell(event);
 		
 		FileDialog fd = new FileDialog(parent);
-		fd.setFilterNames(new String[]{"zip (*.zip)", "All Files (*.*)"});
-		fd.setFilterExtensions(new String[]{"*.zip", "*.*"});
-		fd.setText("Select report file to import.");
+		fd.setFilterNames(new String[]{Messages.ImportReportHandler_ZipFileFilterName, Messages.ImportReportHandler_AllFilesFilterName});
+		fd.setFilterExtensions(new String[]{"*.zip", "*.*"});  //$NON-NLS-1$//$NON-NLS-2$
+		fd.setText(Messages.ImportReportHandler_SelectReportLabel);
 		String file = fd.open();
 		if (file == null){
 			return null;
@@ -51,7 +55,8 @@ public class ImportReportHandler extends AbstractHandler {
 		
 		final File reportFile = new File(file);
 		if (!reportFile.exists()){
-			MessageDialog.openError(parent, "Error", "File " + reportFile.getAbsolutePath() + " not found.");
+			MessageDialog.openError(parent, Messages.ImportReportHandler_Error_DialogTitle, 
+					MessageFormat.format(Messages.ImportReportHandler_Error_FileNotFound, new Object[]{ reportFile.getAbsolutePath()}));
 			return null;
 		}
 		
@@ -69,17 +74,17 @@ public class ImportReportHandler extends AbstractHandler {
 							Display.getDefault().syncExec(new Runnable(){
 								@Override
 								public void run() {
-									MessageDialog.openInformation(parent, "Import", "Report Imported Successfully");
+									MessageDialog.openInformation(parent, Messages.ImportReportHandler_ImportOk_DialogTitle, Messages.ImportReportHandler_ImportOk);
 								}});
 						}
 					}catch (Exception ex){
-						ReportPlugIn.displayLog("Could not import report file: " + ex.getMessage(), ex);
+						ReportPlugIn.displayLog(ERROR_MSG + ex.getMessage(), ex);
 					}
 					
 				}
 			});
 		} catch (Exception ex) {
-			ReportPlugIn.displayLog("Error importing report: " + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(ERROR_MSG + ex.getMessage(), ex);
 		}
 		
 		

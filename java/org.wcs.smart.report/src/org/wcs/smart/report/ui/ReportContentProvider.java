@@ -39,22 +39,22 @@ import org.wcs.smart.report.model.RootReportFolder;
 public class ReportContentProvider extends BaseWorkbenchContentProvider{
 	
 	private DeferredTreeContentManager manager;
-	private boolean foldersOnly;
 	private boolean ownerOnly;
 	
+	/**
+	 * Creates a new content provide that displays
+	 * all folders
+	 */
 	public ReportContentProvider(){
-		this(false, false);
+		this(false);
 	}
 	
-	//TODO: folderOnly doesn't work
 	/**
 	 * Creates a new content provider.
-	 * @param foldersOnly display only folders 
 	 * @param ownerOnly display only owner owned folders
 	 */
-	public ReportContentProvider(boolean foldersOnly, boolean ownerOnly){
+	public ReportContentProvider(boolean ownerOnly){
 		super();
-		this.foldersOnly = foldersOnly;
 		this.ownerOnly = ownerOnly;
 		
 	}

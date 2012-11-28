@@ -34,9 +34,9 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class SmartCategoryFactory implements IScriptFunctionFactory {
 
-	public static final String SMART_USER_FUNCTION = "SmartUser";
-	public static final String CA_NAME_FUNCTION = "ConservationAreaId";
-	public static final String CA_ID_FUNCTION = "ConservationAreaName";
+	public static final String SMART_USER_FUNCTION = "SmartUser"; //$NON-NLS-1$
+	public static final String CA_NAME_FUNCTION = "ConservationAreaId"; //$NON-NLS-1$
+	public static final String CA_ID_FUNCTION = "ConservationAreaName"; //$NON-NLS-1$
 	
 	public SmartCategoryFactory() {
 	}
@@ -50,7 +50,7 @@ public class SmartCategoryFactory implements IScriptFunctionFactory {
 			public Object execute(Object[] arguments, IScriptFunctionContext context)
 					throws BirtException {
 				if (functionName.equals(SMART_USER_FUNCTION)){
-					return SmartDB.getCurrentEmployee().getGivenName() + " " + SmartDB.getCurrentEmployee().getFamilyName() + " [" + SmartDB.getCurrentEmployee().getId() + "]";
+					return SmartDB.getCurrentEmployee().getGivenName() + " " + SmartDB.getCurrentEmployee().getFamilyName() + " [" + SmartDB.getCurrentEmployee().getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}else if (functionName.equals(CA_NAME_FUNCTION)){
 					return SmartDB.getCurrentConservationArea().getName();
 				}else if (functionName.equals(CA_ID_FUNCTION)){

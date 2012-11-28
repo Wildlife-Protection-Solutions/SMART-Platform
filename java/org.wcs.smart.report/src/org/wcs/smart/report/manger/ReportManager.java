@@ -23,6 +23,7 @@ package org.wcs.smart.report.manger;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,6 +55,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
@@ -72,9 +74,11 @@ import org.wcs.smart.util.SmartUtils;
 public class ReportManager {
 
 	private static IReportEngine reportEngine = null;
-	public static final String SMART_DATASOURCE_ID = "org.wcs.smart.data.oda.smart";
-	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset";
-	public static final String SMART_DATASET_TABLE_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset";
+	private static final Object lock = new Object(); 
+	
+	public static final String SMART_DATASOURCE_ID = "org.wcs.smart.data.oda.smart"; //$NON-NLS-1$
+	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
+	public static final String SMART_DATASET_TABLE_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset"; //$NON-NLS-1$
 
 	
 	/**
@@ -85,18 +89,26 @@ public class ReportManager {
 		if (reportEngine != null){
 			return reportEngine;
 		}
-		IReportEngineFactory factory = (IReportEngineFactory)Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
-		reportEngine = factory.createReportEngine(new EngineConfig());
-		return reportEngine;
+		synchronized (lock) {
+			if (reportEngine != null){
+				return reportEngine;
+			}
+			IReportEngineFactory factory = (IReportEngineFactory)Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
+			reportEngine = factory.createReportEngine(new EngineConfig());
+			return reportEngine;
+		}
+		
 	}
 	
 	/**
 	 * Shuts down the BIRT report engine
 	 */
 	public static void endReportEngine(){
-		if (reportEngine != null){
-			reportEngine.destroy();
-			reportEngine = null;
+		synchronized (lock) {
+			if (reportEngine != null){
+				reportEngine.destroy();
+				reportEngine = null;
+			}
 		}
 	}
 	
@@ -111,17 +123,17 @@ public class ReportManager {
 			session.load(folder, folder.getUuid());
 			//report folders can only be removed if they don't have any children
 			session.beginTransaction();
-			Query q = session.createQuery("SELECT count(*) FROM ReportFolder WHERE parentFolder = :parent");
-			q.setParameter("parent", folder);
+			Query q = session.createQuery("SELECT count(*) FROM ReportFolder WHERE parentFolder = :parent"); //$NON-NLS-1$
+			q.setParameter("parent", folder); //$NON-NLS-1$
 			Long cnt = (Long) q.list().get(0);
 			if (cnt > 0){
-				throw new Exception("Folder cannot be deleted until all children folders are deleted.");
+				throw new Exception(Messages.ReportManager_Error_ChildFoldersExist);
 			}
-			q = session.createQuery("SELECT count(*) FROM Report WHERE folder = :parent");
-			q.setParameter("parent", folder);
+			q = session.createQuery("SELECT count(*) FROM Report WHERE folder = :parent"); //$NON-NLS-1$
+			q.setParameter("parent", folder); //$NON-NLS-1$
 			cnt = (Long) q.list().get(0);
 			if (cnt > 0){
-				throw new Exception("Folder cannot be deleted until all children reports are deleted.");
+				throw new Exception(Messages.ReportManager_Error_ChildReportsExist);
 			}
 			
 			folder.setDeletedParent(folder.getParentFolder());
@@ -160,14 +172,14 @@ public class ReportManager {
 			session.close();
 		}	
 		if (!report.getFullReportFilename().exists()){
-			throw new Exception("Report deleted from database but report file could not be found to remove.\n\n" + report.getFullReportFilename().toString());
+			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotFound + report.getFullReportFilename().toString());
 		}
 		try{
 			if (!report.getFullReportFilename().delete()){
-				throw new Exception("Report deleted from database but report file could not be deleted.  This file should be removed manually.\n\n" + report.getFullReportFilename().toString());
+				throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemoved + report.getFullReportFilename().toString());
 			}
 		}catch (Exception ex){
-			throw new Exception("Report deleted from database but report file could not be deleted.  This file should be removed manually.\n\n" + ex.getMessage(), ex);
+			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemovedB + ex.getMessage(), ex);
 		}	
 	}
 	
@@ -178,9 +190,9 @@ public class ReportManager {
 	 * @throws Exception
 	 */
 	public static String generateReportId(Session session) throws Exception{
-		String newId = "000001";
-		Query q = session.createQuery("SELECT max(id) FROM Report WHERE conservationArea = :ca");
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		String newId = "000001"; //$NON-NLS-1$
+		Query q = session.createQuery("SELECT max(id) FROM Report WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		Object maxid = q.list().get(0);
 		if (maxid != null){
 			int x = Integer.parseInt(maxid.toString());
@@ -188,7 +200,7 @@ public class ReportManager {
 			if (x > 999999){
 				x = 1;
 			}
-			DecimalFormat df = new DecimalFormat("000000");
+			DecimalFormat df = new DecimalFormat("000000"); //$NON-NLS-1$
 			newId = df.format(x);
 		}
 		return newId;
@@ -203,18 +215,18 @@ public class ReportManager {
 	public synchronized static String generateFilename(Report r) throws Exception{
 		File dir = ReportPlugIn.getReportDirectory();
 		
-		String fname = r.getName().replaceAll("[^a-zA-Z0-9]", "");
-		fname += "_" + r.getId();
-		String suffix =  ".rptdesign";
+		String fname = r.getName().replaceAll("[^\\p{Ll}\\p{Lu}\\p{Lt}\\p{Nd}]", ""); //$NON-NLS-1$ //$NON-NLS-2$  letters and digits
+		fname += "_" + r.getId(); //$NON-NLS-1$
+		String suffix =  ".rptdesign"; //$NON-NLS-1$
 		
 		int cnt = 0;
 		File f = new File(dir, fname+suffix);
 		while(f.exists()){
 			cnt ++;
 			if (cnt > 1000){
-				throw new Exception("Could not generate a report file.");
+				throw new Exception(Messages.ReportManager_GeneratingFileError);
 			}
-			f = new File(dir, fname + "_" + cnt + suffix);
+			f = new File(dir, fname + "_" + cnt + suffix); //$NON-NLS-1$
 		}
 		return f.getName();
 	}
@@ -241,7 +253,7 @@ public class ReportManager {
 			}
 		} catch (Exception ex) {
 			ReportPlugIn.displayLog(
-					"Report created.  Error opening report: "
+					Messages.ReportManager_ReportOk_OpenEerror
 							+ ex.getMessage(), ex);
 		}
 	}
@@ -285,7 +297,7 @@ public class ReportManager {
 					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
 					((ReportView)view).setReport(report);
 				} catch (PartInitException e) {
-					ReportPlugIn.displayLog("Could not open report " + report.getName() + ".\n\n" + e.getMessage(), e);
+					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReport, new Object[]{report.getName()}) + e.getMessage(), e);
 				}				
 			}});
 	}
@@ -303,7 +315,7 @@ public class ReportManager {
 					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
 					((ReportView)view).setReport(report, reportParameters);
 				} catch (PartInitException e) {
-					ReportPlugIn.displayLog("Could not open report " + report.getName() + ".\n\n" + e.getMessage(), e);
+					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReportA, new Object[]{report.getName()}) + e.getMessage(), e);
 				}				
 			}});
 	}
@@ -328,12 +340,12 @@ public class ReportManager {
 			if (dataset instanceof OdaDataSetHandle){
 				OdaDataSetHandle h = (OdaDataSetHandle)dataset;
 				if (h.getExtensionID().equals(SMART_DATASET_TYPE)){
-					reportQueries.add(new ReportQuery(r, SmartUtils.decodeHex(h.getQueryText().split(":")[1])));
+					reportQueries.add(new ReportQuery(r, SmartUtils.decodeHex(h.getQueryText().split(":")[1]))); //$NON-NLS-1$
 				}
 			}
 		}
-		Query q = s.createQuery("delete ReportQuery where id.report=:report");
-		q.setParameter("report", r);
+		Query q = s.createQuery("delete ReportQuery where id.report=:report"); //$NON-NLS-1$
+		q.setParameter("report", r); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		for (ReportQuery rq: reportQueries){

@@ -24,6 +24,7 @@ package org.wcs.smart.report.in.internal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -76,6 +78,7 @@ import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.qimport.QueryImporter;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.CreateReportDialog;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
@@ -93,6 +96,13 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ImportReportEngine {
 
+	private static final String OVERWRITEDIALOG_CREATENEW = Messages.ImportReportEngine_CreateNewButton;
+	private static final String OVERWRITEDIALOG_OVERWRITE = Messages.ImportReportEngine_OverwriterButton;
+	private static final String OVERWRITEWARNING_DIALOG_MESSAGE = Messages.ImportReportEngine_Error_ReportExists;
+	private static final String OVERWRITEWARNING_DIALOG_TITLE = Messages.ImportReportEngine_Overwrite_DialotTitle;
+	private static final String IMPORTOP_DIALOG_TITLE = Messages.ImportReportEngine_ImportReport_DialogTitle;
+	private static final String QUERY_ALREADYEXISTS_MSG = Messages.ImportReportEngine_Error_QueryAlreadyExists;
+	
 	/*
 	 * Set of options for importing queries
 	 */
@@ -116,7 +126,8 @@ public class ImportReportEngine {
 		
 		//unzip report deifnition file
 		if (!SmartUtils.isZip(file)){
-			throw new Exception ("Invalid file " + file.getAbsolutePath() + ".  This is not a zip file.");
+			throw new Exception (MessageFormat.format(
+				Messages.ImportReportEngine_Error_InvalidFile, new Object[]{file.getAbsolutePath()}));
 		}
 		File tmpDir = unzip(file);
 		try{
@@ -125,12 +136,12 @@ public class ImportReportEngine {
 		File reportPropFile = null;
 		File[] f = tmpDir.listFiles();
 		for (int i = 0; i < f.length; i ++){
-			if (f[i].getName().endsWith(".rpt")){
+			if (f[i].getName().endsWith(".rpt")){ //$NON-NLS-1$
 				reportPropFile = f[i];
 			}
 		}
 		if (reportPropFile == null){
-			throw new Exception("Report properties file not found.");
+			throw new Exception(Messages.ImportReportEngine_Error_NoPropertiesFile);
 		}
 		Report newReport = readReportInfo(reportPropFile);
 		
@@ -154,7 +165,7 @@ public class ImportReportEngine {
 					@Override
 					public void run() {
 						dialog[0] = new CreateReportDialog(display.getActiveShell(), null, null, false);
-						dialog[0].setTitle("Import Report");
+						dialog[0].setTitle(Messages.ImportReportEngine_CreateReport_DialogTitle);
 						if (dialog[0].open() != Window.OK){
 							dialog[0]= null;
 						}
@@ -179,9 +190,9 @@ public class ImportReportEngine {
 				//existing query
 				//remove report->query link so when validating
 				//queries we get correct results
-				String hsql = "delete from ReportQuery where id.report= :report";
+				String hsql = "delete from ReportQuery where id.report= :report"; //$NON-NLS-1$
 				Query q = session.createQuery(hsql);
-				q.setParameter("report", importReport);
+				q.setParameter("report", importReport); //$NON-NLS-1$
 				q.executeUpdate();
 			}
 			
@@ -197,7 +208,7 @@ public class ImportReportEngine {
 			
 			ReportDesignHandle rdh = SessionHandleAdapter.getInstance().getSessionHandle().openDesign(reportXmlFile.getAbsolutePath());
 			//remove existing library & make sure it points to the library associated with this ca
-			LibraryHandle library = rdh.getLibrary("smart");		
+			LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 			rdh.dropLibraryAndBreakExtends(library);
 			rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFile().toString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 			
@@ -276,8 +287,8 @@ public class ImportReportEngine {
 		Properties prop = new Properties();
 		InputStream inStream = new FileInputStream(f);
 		prop.load(inStream);
-		String reportName = prop.getProperty("name");
-		String fileName = prop.getProperty("filename");
+		String reportName = prop.getProperty("name"); //$NON-NLS-1$
+		String fileName = prop.getProperty("filename"); //$NON-NLS-1$
 		inStream.close();
 		
 		Report r = new Report();
@@ -302,12 +313,12 @@ public class ImportReportEngine {
 	 */
 	private Report validateReport(final Report report){
 		
-		String hql = " from Report where name = :name and ((owner = :owner and shared = 'false') or shared = 'true') and conservationArea = :ca";
+		String hql = " from Report where name = :name and ((owner = :owner and shared = 'false') or shared = 'true') and conservationArea = :ca"; //$NON-NLS-1$
 		Query query = session.createQuery(hql);
 		
-		query.setParameter("name", report.getName());
-		query.setParameter("owner", SmartDB.getCurrentEmployee());
-		query.setParameter("ca", SmartDB.getCurrentConservationArea());
+		query.setParameter("name", report.getName()); //$NON-NLS-1$
+		query.setParameter("owner", SmartDB.getCurrentEmployee()); //$NON-NLS-1$
+		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		
 		List<?> reports = query.list();
 		if (reports.size() == 0){
@@ -323,11 +334,12 @@ public class ImportReportEngine {
 					@Override
 					public void run() {
 						MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(),
-								"Overwrite",
+								OVERWRITEWARNING_DIALOG_TITLE,
 								null,
-								"A report with the name " + report.getName() + " already existings.  Do you wish to overwrite it or create a new report?",
+								MessageFormat.format(
+								OVERWRITEWARNING_DIALOG_MESSAGE, new Object[]{report.getName()}),
 								MessageDialog.QUESTION, 
-								new String[]{"Overwrite", "Create New"}, 0);
+								new String[]{OVERWRITEDIALOG_OVERWRITE, OVERWRITEDIALOG_CREATENEW}, 0);
 						if (md.open() == 0){
 							//overwrite
 							overwrite[0] = true;
@@ -348,11 +360,11 @@ public class ImportReportEngine {
 						@Override
 						public void run() {
 							MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(),
-									"Overwrite",
+									OVERWRITEWARNING_DIALOG_TITLE,
 									null,
-									"A report with the name " + report.getName() + " already existings.  Do you wish to overwrite it or create a new report?",
+									MessageFormat.format(OVERWRITEWARNING_DIALOG_MESSAGE, new Object[]{report.getName()}),
 									MessageDialog.QUESTION, 
-									new String[]{"Overwrite", "Create New"}, 0);
+									new String[]{OVERWRITEDIALOG_OVERWRITE, OVERWRITEDIALOG_CREATENEW}, 0);
 							if (md.open() == 0){
 								//overwrite
 								overwrite[0] = true;
@@ -372,7 +384,10 @@ public class ImportReportEngine {
 
 				@Override
 				public void run() {
-					cont[0] = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Import", "Multiple reports already exist with the name " + report.getName() +".  This report will be imported as a new report.  Do you want to continue?");
+					cont[0] = MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
+							IMPORTOP_DIALOG_TITLE, 
+							MessageFormat.format(
+									Messages.ImportReportEngine_Error_DuplicateName, new Object[]{report.getName()}));
 					
 				}});
 			if (!cont[0]){
@@ -448,7 +463,7 @@ public class ImportReportEngine {
 				OdaDataSetHandle handle = (OdaDataSetHandle)dataset;
 				if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
 					//smart dataset
-					if (!processQuery(handle.getQueryText().split(":")[1], 
+					if (!processQuery(handle.getQueryText().split(":")[1],  //$NON-NLS-1$
 							queryDir, handle, sharedReport)){
 						return false;
 					}
@@ -486,9 +501,10 @@ public class ImportReportEngine {
 			OdaDataSetHandle handle,
 			boolean sharedReport) throws Exception{
 		
-		final File queryFile = new File(queryDir, queryUuid + ".query");
+		final File queryFile = new File(queryDir, queryUuid + ".query"); //$NON-NLS-1$
 		if (!queryFile.exists()){
-			throw new Exception("Query file not found for query " + queryUuid + ".  Report cannot be imported.");
+			throw new Exception(MessageFormat.format(
+					Messages.ImportReportEngine_Error_QueryNotFound, new Object[]{queryUuid}));
 		}
 		
 		importedQuery = null;
@@ -496,7 +512,7 @@ public class ImportReportEngine {
 		
 		
 		final QueryImporter qi = new QueryImporter();
-		Job j = new Job("import query " + queryUuid){
+		Job j = new Job(MessageFormat.format(Messages.ImportReportEngine_ImportQueryJobName, new Object[]{queryUuid})){
 			//run the query importer in a different thread so it 
 			//will use its own db connection
 			@Override
@@ -530,15 +546,15 @@ public class ImportReportEngine {
 			//display warning created during import process
 			if (queryWarnings != null && queryWarnings.size() > 0){
 				final StringBuilder warnings = new StringBuilder();
-				warnings.append("The following warnings were generated while importing the query " + importedQuery.getName() +".\n");
+				
 				for(String warn: queryWarnings){
-					warnings.append(warn + "\n");
+					warnings.append(warn + "\n"); //$NON-NLS-1$
 				}
 				
 				display.syncExec(new Runnable(){
 					@Override
 					public void run() {
-						MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Query Warnings",warnings.toString());
+						MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.ImportReportEngine_ImportQuery_WarningDialog_Title,MessageFormat.format(Messages.ImportReportEngine_ImportQuery_WarningDialog_Message, new Object[]{importedQuery.getName(), warnings.toString()}));
 					}
 				});
 
@@ -577,7 +593,7 @@ public class ImportReportEngine {
 		}
 		
 		//update report definition to point to correct query
-		String newQueryText = smartQuery.getType().name() + ":" + SmartUtils.encodeHex(smartQuery.getUuid()); 
+		String newQueryText = smartQuery.getType().name() + ":" + SmartUtils.encodeHex(smartQuery.getUuid());  //$NON-NLS-1$
 		oldToNewQueries.put(handle.getQueryText(), newQueryText);
 		handle.setQueryText( newQueryText );
 		
@@ -654,7 +670,7 @@ public class ImportReportEngine {
 					public void run() {
 						QueryImportMessageDialog importDia = new QueryImportMessageDialog(Display.getDefault().getActiveShell(), importedQuery.getName(), canOverwrite(importedQuery));
 						int ret = importDia.open();
-						if (ret == QueryImportMessageDialog.CANCEL){
+						if (ret == QueryImportMessageDialog.CANCEL_INDEX){
 							data[0] = null;
 						}else{
 							data[0] = importDia.getOption();
@@ -708,7 +724,7 @@ public class ImportReportEngine {
 					MultiQueryImportMessageDialog importDia = 
 							new MultiQueryImportMessageDialog(Display.getDefault().getActiveShell(), importedQuery.getName(), queries);
 					int ret = importDia.open();
-					if (ret == QueryImportMessageDialog.CANCEL){
+					if (ret == QueryImportMessageDialog.CANCEL_INDEX){
 						data[0] = null;
 					}else{
 						data[0] = importDia.getOption();
@@ -730,7 +746,9 @@ public class ImportReportEngine {
 					display.syncExec(new Runnable() {
 						@Override
 						public void run() {
-							MessageDialog.openError(display.getActiveShell(), "Error", "You do not have the required permissions to overwrite this query.");
+							MessageDialog.openError(display.getActiveShell(), 
+									Messages.ImportReportEngine_Error_DialogTitle, 
+									Messages.ImportReportEngine_Error_CannotOverwirteQuery);
 							
 						}
 					});
@@ -789,8 +807,8 @@ public class ImportReportEngine {
 	
 	class QueryImportMessageDialog extends MessageDialog{
 
-		public static final int OK = 0;
-		public static final int CANCEL = 1;
+		public static final int OK_INDEX = 0;
+		public static final int CANCEL_INDEX = 1;
 		private ImportOption op = null;
 		private boolean canOverwrite;
 		
@@ -805,8 +823,9 @@ public class ImportReportEngine {
 		 */
 		public QueryImportMessageDialog(Shell parentShell, String queryName, boolean canOverwrite) {
 			
-			super(parentShell, "Report Import", null, "The query " + queryName + " used in the report already exists in the database but with a different query definition." ,
-					MessageDialog.QUESTION, new String[]{"Ok", "Cancel"}, OK );
+			super(parentShell, IMPORTOP_DIALOG_TITLE, null, 
+					QUERY_ALREADYEXISTS_MSG,
+					MessageDialog.QUESTION, new String[]{IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, OK_INDEX );
 			this.canOverwrite = canOverwrite;
 			
 		}
@@ -820,16 +839,16 @@ public class ImportReportEngine {
 			comp.setLayout(new GridLayout(1, false));
 			
 			final Button btnOp1 = new Button(comp, SWT.RADIO);
-			btnOp1.setText("Import the report query into the database as a new query. [Recommended]");			
+			btnOp1.setText(Messages.ImportReportEngine_OpImportNewQuery);			
 			
 			
 			final Button btnOp2 = new Button(comp, SWT.RADIO);
-			btnOp2.setText("Overwrite the existing database query with the report query.");
+			btnOp2.setText(Messages.ImportReportEngine_OpOverwirteExisting);
 			
 			btnOp2.setVisible(canOverwrite);
 			
 			final Button btnOp3 = new Button(comp, SWT.RADIO);
-			btnOp3.setText("Replace the report query with the database query [this may result in report errors].");
+			btnOp3.setText(Messages.ImportReportEngine_OpUpdateReport);
 			Listener opSelected = new Listener() {
 				
 				@Override
@@ -861,8 +880,8 @@ public class ImportReportEngine {
 	
 	class MultiQueryImportMessageDialog extends MessageDialog{
 
-		public static final int OK = 0;
-		public static final int CANCEL = 1;
+		public static final int OK_INDEX = 0;
+		public static final int CANCEL_INDEX = 1;
 		private ImportOption op = null;
 		private org.wcs.smart.query.model.Query selectedQuery = null;
 		
@@ -881,9 +900,9 @@ public class ImportReportEngine {
 		public MultiQueryImportMessageDialog(Shell parentShell, String queryName,
 				List<org.wcs.smart.query.model.Query> exisitngQueries) {
 			
-			super(parentShell, "Report Import", null, 
-					"The query " + queryName + " used in the report already exists (mutliple times) in the database but with a different query definition." ,
-					MessageDialog.QUESTION, new String[]{"Ok", "Cancel"}, OK );
+			super(parentShell, IMPORTOP_DIALOG_TITLE, null, 
+					MessageFormat.format(QUERY_ALREADYEXISTS_MSG , new Object[]{queryName}),
+					MessageDialog.QUESTION, new String[]{IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, OK_INDEX );
 			
 			this.exisitngQueries = exisitngQueries;
 			
@@ -903,7 +922,7 @@ public class ImportReportEngine {
 			comp.setLayout(new GridLayout(2, false));
 			
 			final Label lblQuery = new Label(comp, SWT.NONE);
-			lblQuery.setText("Database Query:");
+			lblQuery.setText(Messages.ImportReportEngine_Query_Label);
 			
 			final ComboViewer cmbQueries = new ComboViewer(comp,  SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbQueries.setContentProvider(ArrayContentProvider.getInstance());
@@ -927,7 +946,7 @@ public class ImportReportEngine {
 							sb.append(QueryHibernateManager.MY_QUERIES_NAME);
 						}
 						
-						return ((org.wcs.smart.query.model.Query) element).getName() + " [" + ((org.wcs.smart.query.model.Query)element).getId() + "] - " + sb.toString();
+						return ((org.wcs.smart.query.model.Query) element).getName() + " [" + ((org.wcs.smart.query.model.Query)element).getId() + "] - " + sb.toString(); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					return super.getText(element);
 				}
@@ -944,16 +963,16 @@ public class ImportReportEngine {
 			});
 			
 			final Button btnOp1 = new Button(comp, SWT.RADIO);
-			btnOp1.setText("Import the report query into the database as a new query. [Recommended]");			
+			btnOp1.setText(Messages.ImportReportEngine_OpImportNewQuery_2);			
 			btnOp1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			final Button btnOp2 = new Button(comp, SWT.RADIO);
-			btnOp2.setText("Overwrite the database query (selected above) with the report query.");
+			btnOp2.setText(Messages.ImportReportEngine_OpOverwirteExisting_2);
 			btnOp2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			
 			final Button btnOp3 = new Button(comp, SWT.RADIO);
-			btnOp3.setText("Replace the report query with the database query selected above. [this may result in report errors].");
+			btnOp3.setText(Messages.ImportReportEngine_OpUpdateReport_2);
 			btnOp3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			Listener opSelected = new Listener() {

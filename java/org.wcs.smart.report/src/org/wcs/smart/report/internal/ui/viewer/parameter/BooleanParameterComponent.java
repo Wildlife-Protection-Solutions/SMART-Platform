@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.report.internal.Messages;
 
 /**
  * A Boolean parameter component
@@ -66,13 +67,13 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 		param.setLayout(gl);
 		
 		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText(getDisplayText() + ": ");
+		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
 		
 		btnTrue = new Button(param, SWT.RADIO);
-		btnTrue.setText("True");
+		btnTrue.setText(Messages.BooleanParameterComponent_True_Label);
 		
 		btnFalse = new Button(param, SWT.RADIO);
-		btnFalse.setText("False");
+		btnFalse.setText(Messages.BooleanParameterComponent_False_Label);
 		
 		if (defaultValue != null ){
 			btnTrue.setSelection(  (Boolean)defaultValue );

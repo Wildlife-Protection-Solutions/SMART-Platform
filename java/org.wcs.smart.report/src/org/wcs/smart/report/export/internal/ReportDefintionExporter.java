@@ -24,6 +24,7 @@ package org.wcs.smart.report.export.internal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IReportExporter;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
@@ -62,6 +64,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ReportDefintionExporter implements IReportExporter {
 
+	private static final String QUERYFILE_EXTENSION = ".query"; //$NON-NLS-1$
+
 	public ReportDefintionExporter() {
 	}
 
@@ -73,23 +77,24 @@ public class ReportDefintionExporter implements IReportExporter {
 		ZipOutputStream zout = null; 
 		zout = new ZipOutputStream(new FileOutputStream(file));
 		
-		monitor.beginTask("Exporting work", 3);
+		monitor.beginTask(Messages.ReportDefintionExporter_Progress_Exporting, 3);
 		try{
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 			
 			//export queries
-			monitor.subTask("Exporting Queries");
+			monitor.subTask(Messages.ReportDefintionExporter_Progress_Queries);
 			exportQueries(zout, report);
 			monitor.worked(1);
 
 			//add report file
-			monitor.subTask("Exporting Report Definition");
+			monitor.subTask(Messages.ReportDefintionExporter_Progress_Definition);
 			addFile(report.getFullReportFilename(), report.getFilename(), zout);
 			monitor.worked(1);
 			
 			//add report info file
-			monitor.subTask("Exporting Report Info");
-			File reportInfo = File.createTempFile(report.getName().replaceAll("[^a-zA-Z0-9]", ""), ".rpt");
+			monitor.subTask(Messages.ReportDefintionExporter_Progress_ReportInfo);
+			
+			File reportInfo = File.createTempFile(ExportReportEngine.getOutputFileName(report, null, ".rpt").getName(),""); //$NON-NLS-1$ //$NON-NLS-2$
 			try{
 				writeReportInfo(reportInfo, report);
 				addFile(reportInfo, reportInfo.getName(), zout);
@@ -113,8 +118,8 @@ public class ReportDefintionExporter implements IReportExporter {
 	 */
 	private void writeReportInfo(File f, Report report) throws Exception{
 		Properties prop = new Properties();
-		prop.setProperty("name", report.getName());
-		prop.setProperty("filename", report.getFilename());
+		prop.setProperty("name", report.getName()); //$NON-NLS-1$
+		prop.setProperty("filename", report.getFilename()); //$NON-NLS-1$
 		FileOutputStream fout = new FileOutputStream(f);
 		prop.store(fout, null);
 		fout.close();
@@ -141,8 +146,8 @@ public class ReportDefintionExporter implements IReportExporter {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
 				if (((OdaDataSetHandle)dataset).getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
-					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1];
-					QueryType qType = QueryType.valueOf(((OdaDataSetHandle) dataset).getQueryText().split(":")[0]);
+					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1]; //$NON-NLS-1$
+					QueryType qType = QueryType.valueOf(((OdaDataSetHandle) dataset).getQueryText().split(":")[0]); //$NON-NLS-1$
 					byte[] uuid = SmartUtils.decodeHex(queryUuid);Session hsession = HibernateManager.openSession();
 					Query smartQuery = null;
 					try{
@@ -153,7 +158,7 @@ public class ReportDefintionExporter implements IReportExporter {
 						hsession.close();
 					}
 					
-					if (smartQuery == null) throw new Exception("Failed to find definition for smart query.");
+					if (smartQuery == null) throw new Exception(Messages.ReportDefintionExporter_Error_LoadingQueryDef);
 					exportQuery(smartQuery, zout);
 				}
 			}
@@ -178,13 +183,13 @@ public class ReportDefintionExporter implements IReportExporter {
 			}
 		}
 		if (definitionExporter == null){
-			throw new Exception("Could not find exporter to export query " + query.getName());
+			throw new Exception(MessageFormat.format(Messages.ReportDefintionExporter_Error_NoExporter, new Object[]{ query.getName()}));
 		}
 		
-		File tmpFile = File.createTempFile(SmartUtils.encodeHex(query.getUuid()), ".query");
+		File tmpFile = File.createTempFile(SmartUtils.encodeHex(query.getUuid()), QUERYFILE_EXTENSION);
 		try{
 			definitionExporter.export(query, tmpFile, new NullProgressMonitor());
-			addFile(tmpFile, SmartUtils.encodeHex(query.getUuid()) + ".query", zipOut);
+			addFile(tmpFile, SmartUtils.encodeHex(query.getUuid()) + QUERYFILE_EXTENSION, zipOut);
 		}finally{
 			tmpFile.delete();
 		}
@@ -218,7 +223,7 @@ public class ReportDefintionExporter implements IReportExporter {
 	 */
 	@Override
 	public String getName() {
-		return "Report Definition";
+		return Messages.ReportDefintionExporter_ExporterName;
 	}
 
 	/* (non-Javadoc)
@@ -226,7 +231,7 @@ public class ReportDefintionExporter implements IReportExporter {
 	 */
 	@Override
 	public String getExportFormat() {
-		return "zip";
+		return "zip"; //$NON-NLS-1$
 	}
 
 	@Override

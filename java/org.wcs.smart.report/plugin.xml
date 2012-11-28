@@ -6,55 +6,55 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.report.ShowReportDesigner"
-            name="Show Report Designer">
+            name="%showreporteditor.command.name">
       </command>
       <command
             id="org.wcs.smart.report.ShowReportViewer"
-            name="Show Report Viewer">
+            name="%showreportviewer.command.name">
       </command>
       <command
             id="org.wcs.smart.report.editReport"
-            name="Edit Report">
+            name="%editreport.command.name">
       </command>
       <command
             id="org.wcs.smart.report.newFolder"
-            name="New Folder">
+            name="%newfolder.command.name">
       </command>
       <command
             id="org.wcs.smart.report.renameReportItem"
-            name="Rename">
+            name="%rename.command.name">
       </command>
       <command
             id="org.wcs.smart.report.deleteReportItem"
-            name="Delete ">
+            name="%delete.command.name ">
       </command>
       <command
             id="org.wcs.smart.report.newReport"
-            name="New Report">
+            name="%newreport.command.name">
       </command>
       <command
             id="org.wcs.smart.report.runReport"
-            name="Run Report">
+            name="%runreport.command.name">
       </command>
       <command
             id="org.wcs.smart.report.exportReport"
-            name="Export Report">
+            name="%exportreport.command.name">
       </command>
       <command
             id="org.wcs.smart.report.importReport"
-            name="Import Report">
+            name="%importreport.command.name">
       </command>
       <command
             id="org.wcs.smart.report.exportLibrary"
-            name="Export Library">
+            name="%exportlibrary.command.name">
       </command>
       <command
             id="org.wcs.smart.report.importLibrary"
-            name="Import Library">
+            name="%importlibrary.command.name">
       </command>
       <command
             id="org.wcs.smart.report.editLibrary"
-            name="Edit Library">
+            name="%editlibrary.command.name">
       </command>
    </extension>
    <extension
@@ -236,9 +236,10 @@
          <command
                commandId="org.wcs.smart.report.ShowReportViewer"
                icon="images/icons/etool16/report_view.png"
-               label="Show Reports"
-               mnemonic="R"
-               style="push">
+               label="%showreportperspective.menu.label"
+               mnemonic="%showreportperspective.menu.mnemonic"
+               style="push"
+               tooltip="%showreportperspective.menu.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -267,9 +268,10 @@
          <command
                commandId="org.wcs.smart.report.newFolder"
                icon="images/icons/etool16/folder_add.png"
-               label="New Folder..."
+               label="%reportlist.popupmenu.newfolder.command.name"
+               mnemonic="%reportlist.popupmenu.newfolder.command.mnemonic"
                style="push"
-               tooltip="Adds a sub folder">
+               tooltip="%reportlist.popupmenu.newfolder.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -291,10 +293,10 @@
          </separator>
          <command
                commandId="org.wcs.smart.report.runReport"
-               label="Run Report"
-               mnemonic="R"
+               label="%reportlist.popupmenu.runreport.command.name"
+               mnemonic="%reportlist.popupmenu.runreport.command.mnemonic"
                style="push"
-               tooltip="Run the selected reports">
+               tooltip="%reportlist.popupmenu.runreport.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -315,10 +317,10 @@
          </separator>
          <command
                commandId="org.wcs.smart.report.editReport"
-               label="Edit Report"
-               mnemonic="e"
+               label="%reportlist.popupmenu.editreport.command.name"
+               mnemonic="%reportlist.popupmenu.editreport.command.mnemonic"
                style="push"
-               tooltip="Edit the selected report">
+               tooltip="%reportlist.popupmenu.editreport.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -336,9 +338,10 @@
          </command>
          <command
                commandId="org.wcs.smart.report.exportReport"
-               label="Export Report"
+               label="%reportlist.popupmenu.exportreport.command.name"
+               mnemonic="%reportlist.popupmenu.exportreport.command.mnemonic"
                style="push"
-               tooltip="Run and export the selected reports">
+               tooltip="%reportlist.popupmenu.exportreport.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -356,9 +359,10 @@
          </command>
          <command
                commandId="org.wcs.smart.report.renameReportItem"
-               label="Rename..."
+               label="%reportlist.popupmenu.rename.command.name"
+               mnemonic="%reportlist.popupmenu.rename.command.mnemonic"
                style="push"
-               tooltip="Rename the folder/report">
+               tooltip="%reportlist.popupmenu.rename.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -380,9 +384,10 @@
          </separator>
          <command
                commandId="org.wcs.smart.report.deleteReportItem"
-               label="Delete"
+               label="%reportlist.popupmenu.delete.command.name"
+               mnemonic="%reportlist.popupmenu.delete.command.mnemonic"
                style="push"
-               tooltip="Delete the selected items">
+               tooltip="%reportlist.popupmenu.delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -404,37 +409,33 @@
             locationURI="toolbar:org.wcs.smart.report.ReportListView">
          <command
                commandId="org.wcs.smart.report.deleteReportItem"
-               label="Delete"
-               mnemonic="D"
+               label="%reportlist.toolbar.delete.command.name"
                style="push"
-               tooltip="Delete the selected items">
+               tooltip="%reportlist.toolbar.delete.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.report.newReport"
-               label="New Report"
-               mnemonic="N"
+               label="%reportlist.toolbar.newreport.command.name"
                style="push"
-               tooltip="Creates a new report">
+               tooltip="%reportlist.toolbar.newreport.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.report.editReport"
-               label="Edit Report"
-               mnemonic="E"
+               label="%reportlist.toolbar.editreport.command.name"
                style="push"
-               tooltip="Edit the selected report">
+               tooltip="%reportlist.toolbar.editreport.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.report.exportReport"
-               label="Export Report"
+               label="%reportlist.toolbar.exportreport.command.name"
                style="push"
-               tooltip="Run and export the selected reports">
+               tooltip="%reportlist.toolbar.exportreport.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.report.runReport"
-               label="Run Report"
-               mnemonic="R"
+               label="%reportlist.toolbar.run.command.name"
                style="push"
-               tooltip="Run the selected reports">
+               tooltip="%reportlist.toolbar.run.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -444,10 +445,9 @@
                id="org.wcs.smart.report.edit.toolbar">
             <command
                   commandId="org.eclipse.ui.file.save"
-                  label="Save"
-                  mnemonic="S"
+                  label="%reportedit.toolbar.save.command.name"
                   style="push"
-                  tooltip="Save ">
+                  tooltip="%reportedit.toolbar.save.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -460,10 +460,9 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save"
-                  mnemonic="S"
+                  label="%reportedit.toolbar.saveas.command.name"
                   style="push"
-                  tooltip="Save ">
+                  tooltip="%reportedit.toolbar.saveas.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -486,9 +485,7 @@
          <command
                commandId="org.eclipse.ui.file.save"
                id="org.wcs.smart.query.save.toolbar"
-               label="Save"
-               mnemonic="S"
-               tooltip="Save the report definition">
+               tooltip="%file.menu.save.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -501,9 +498,7 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
-               label="Save Report As"
-               mnemonic="A"
-               tooltip="Saves a copy of the report">
+               tooltip="%file.menu.saveas.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -524,19 +519,19 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.query">
          <menu
                id="org.wcs.smart.report"
-               label="Report"
-               mnemonic="R">
+               label="%report.menu.name"
+               mnemonic="%report.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.report.newReport"
-                  mnemonic="N"
+                  mnemonic="%report.menu.newreport.command.mnemonic"
                   style="push"
-                  tooltip="Creates a new report">
+                  tooltip="%report.menu.newreport.command.tooltip">
             </command>
             <command
                   commandId="org.wcs.smart.report.importReport"
-                  mnemonic="m"
+                  mnemonic="%report.menu.importreport.command.mnemonic"
                   style="push"
-                  tooltip="Import a report">
+                  tooltip="%report.menu.importreport.command.tooltip">
             </command>
             <separator
                   name="org.wcs.smart.report.separator3"
@@ -544,12 +539,12 @@
             </separator>
             <menu
                   id="org.wcs.smart.report.library"
-                  label="Library"
-                  mnemonic="L">
+                  label="%report.library.menu.name"
+                  mnemonic="%report.library.menu.mnemonic">
                <command
                      commandId="org.wcs.smart.report.editLibrary"
                      style="push"
-                     tooltip="Edit the report library">
+                     tooltip="%report.library.editlibrary.command.tooltip">
                </command>
                <separator
                      name="org.wcs.smart.report.separator4"
@@ -557,15 +552,13 @@
                </separator>
                <command
                      commandId="org.wcs.smart.report.exportLibrary"
-                     mnemonic="x"
                      style="push"
-                     tooltip="Export report library and shared resources">
+                     tooltip="%report.library.exportlibrary.command.tooltip">
                </command>
                <command
                      commandId="org.wcs.smart.report.importLibrary"
-                     mnemonic="i"
                      style="push"
-                     tooltip="Import report library and shared resources">
+                     tooltip="%report.library.importlibrary.command.tooltip">
                </command>
                <visibleWhen
                      checkEnabled="false">
@@ -619,12 +612,12 @@
       <perspective
             class="org.wcs.smart.report.internal.ui.designer.SmartReportPerspective"
             id="org.wcs.smart.report.ReportPerspective"
-            name="Report Editor Perspective">
+            name="%reporteditor.perspective.name">
       </perspective>
       <perspective
             class="org.wcs.smart.report.internal.ui.ReportViewerPerspective"
             id="org.wcs.smart.report.ReportViewerPerspective"
-            name="Report Viewer Perspective">
+            name="%reportviewer.perspective.name">
       </perspective>
    </extension>
    <extension
@@ -634,20 +627,14 @@
             default="true"
             icon="platform:/plugin/org.eclipse.birt.report.designer.ui/icons/eview16/report.gif"
             id="org.eclipse.birt.report.designer.ui.editors.ReportEditor"
-            name="SMART Report Editor">
-         <contentTypeBinding
-               contentTypeId="org.eclipse.birt.report.designer.ui.editors.reportdesign">
-         </contentTypeBinding>
+            name="%report.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.report.internal.ui.designer.RCPMultiPageReportEditor"
             default="true"
             icon="platform:/plugin/org.eclipse.birt.report.designer.ui/icons/eview16/library.gif"
             id="org.eclipse.birt.report.designer.ui.editors.LibraryEditor"
-            name="SMART Report Library">
-         <contentTypeBinding
-               contentTypeId="org.eclipse.birt.report.designer.ui.editors.reportlibrary">
-         </contentTypeBinding>
+            name="%library.editor.name">
       </editor>
    </extension>
    <extension
@@ -670,7 +657,7 @@
             class="org.wcs.smart.report.internal.ui.ReportListView"
             icon="images/icons/obj16/report.png"
             id="org.wcs.smart.report.ReportListView"
-            name="Report List"
+            name="%reportlist.view.name"
             restorable="true">
       </view>
       <view
@@ -678,7 +665,7 @@
             class="org.wcs.smart.report.internal.ui.viewer.ReportView"
             icon="images/icons/obj16/report.png"
             id="org.wcs.smart.birt.ReportView"
-            name="Report View"
+            name="%report.view.name"
             restorable="true">
       </view>
    </extension>
@@ -746,16 +733,16 @@
          point="org.eclipse.birt.core.ScriptFunctionService">
       <Category
             factoryclass="org.wcs.smart.report.birt.function.SmartCategoryFactory"
-            name="SmartFunctions">
+            name="%smart.birt.functions.category.name">
          <Function
-               desc="The current logged in smart user"
+               desc="%smart.birt.functions.smartuser.desc"
                name="SmartUser">
             <DataType
                   value="String">
             </DataType>
          </Function>
          <Function
-               desc="The conservation area name"
+               desc="%smart.birt.functions.caname.desc"
                isConstructor="false"
                isStatic="true"
                isVisible="true"
@@ -763,7 +750,7 @@
                variableArguments="false">
          </Function>
          <Function
-               desc="The conservation area identifier"
+               desc="%smart.birt.functions.caid.desc"
                isConstructor="false"
                isStatic="true"
                isVisible="true"

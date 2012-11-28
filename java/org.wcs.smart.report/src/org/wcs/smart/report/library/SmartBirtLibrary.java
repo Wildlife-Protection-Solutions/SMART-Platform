@@ -23,10 +23,8 @@ package org.wcs.smart.report.library;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.runtime.FileLocator;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.util.SmartUtils;
 
@@ -50,21 +48,21 @@ public class SmartBirtLibrary {
 	/**
 	 * Local library directory 
 	 */
-	public static final String LIBRARY_DIR = "rptlibrary";
+	public static final String LIBRARY_DIR = "rptlibrary"; //$NON-NLS-1$
 	
 	/**
 	 * Library file name
 	 */
-	public static final String LIBRARY_FILENAME = "smart.rptlibrary";
+	public static final String LIBRARY_FILENAME = "smart.rptlibrary"; //$NON-NLS-1$
 	
 	/**
 	 * Location of default birt library which contains only the smart
 	 * oda datasource.
 	 */
-	public static final String DEFAULT_LIBRARY_FILENAME = "org/wcs/smart/report/library/default_smart.rptlibrary";
+	public static final String DEFAULT_LIBRARY_FILENAME = "org/wcs/smart/report/library/default_smart.rptlibrary"; //$NON-NLS-1$
 	
 	
-	public static final String DEFAULT_LIBRARY_NAMESPACE = "smart";
+	public static final String DEFAULT_LIBRARY_NAMESPACE = "smart"; //$NON-NLS-1$
 	/**
 	 * @return the current smart library instance
 	 */

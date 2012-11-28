@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -68,7 +70,10 @@ public class DeleteReportItemHandler extends AbstractHandler implements IHandler
 		
 		if (selection.size() == 1 && (selection.get(0) instanceof Report) ){
 			Report r = ((Report)selection.get(0)) ;
-			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Confirm Delete", "Are you sure you want to delete the report '" + r.getName() + " [" + r.getId()  + "]'?"  )){
+			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
+					Messages.DeleteReportItemHandler_Confirm_DialogTitle, 
+					MessageFormat.format(Messages.DeleteReportItemHandler_Confirm_DialogMessage,
+					new Object[]{"'"+ r.getName() + " [" + r.getId()  + "]'"})  )){ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				return null;
 			}
 		}else{
@@ -81,44 +86,45 @@ public class DeleteReportItemHandler extends AbstractHandler implements IHandler
 					folderCnt++;
 				}
 			}
-			String message = "Are you sure you want to delete the ";
+			String message = Messages.DeleteReportItemHandler_Confirm_MultiDialogMessageA;
 			if (reportCnt > 0){
-				message += reportCnt + " selected reports";
+				message +=  Messages.DeleteReportItemHandler_Confirm_MultiDialogMessageB;
 			}
 			if (folderCnt > 0){
-				message += " and the " + folderCnt + " selected folders";
+				message += Messages.DeleteReportItemHandler_Confirm_MultiDialogMessageC;
 			}
-			message += "?";
+			message += "?"; //$NON-NLS-1$
+			message = MessageFormat.format(message, new Object[]{reportCnt, folderCnt});
 			if (reportCnt > 0){
-				if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Confirm Delete", message )){
+				if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteReportItemHandler_Confirm_DialogTitleB, message )){
 					return null;
 				}	
 			}
 		}
 		
-		Job job = new Job("Delete Items Job") {
+		Job job = new Job(Messages.DeleteReportItemHandler_DeleteJobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 					Object o = (Object) iterator.next();
 					
-					String name = "";
+					String name = ""; //$NON-NLS-1$
 					try {
 						if (o instanceof ReportFolder) {
 							ReportFolder parent = (ReportFolder) o;
-							name = "folder '" + parent.getName() + "'";
+							name = MessageFormat.format(Messages.DeleteReportItemHandler_deletefolder_label, new Object[]{ parent.getName()});
 							ReportManager.deleteReportFolder(parent);
 							ReportEventManager.getInstance()
 								.fireReportFolderDeleted(parent);
 						} else if (o instanceof Report) {
-							name = " report '" + ((Report) o).getName() + "'";
+							name = MessageFormat.format(Messages.DeleteReportItemHandler_deletereport_label, new Object[]{ ((Report)o).getName()});
 							ReportManager.deleteReport((Report) o);
 							ReportEventManager.getInstance().fireReportDeleted(
 								(Report) o);
 						}
 					} catch (Exception ex) {
 						ReportPlugIn.displayLog(
-								"Error deleting " + name + ".\n\n" + ex.getMessage(), ex);
+								MessageFormat.format(Messages.DeleteReportItemHandler_Delete_Error, new Object[]{name}) + ex.getMessage(), ex);
 					}
 				}
 

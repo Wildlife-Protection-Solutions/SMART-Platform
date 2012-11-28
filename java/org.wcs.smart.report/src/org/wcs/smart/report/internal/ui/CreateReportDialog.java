@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.report.internal.ui;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -39,11 +41,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.report.ui.ReportContentProvider;
 import org.wcs.smart.report.ui.ReportLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -79,7 +83,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 		if (defaultName != null){
 			this.reportName = defaultName;
 		}else{
-			this.reportName = "New Report";
+			this.reportName = Messages.CreateReportDialog_DefaultReportName;
 		}
 	}
 
@@ -98,7 +102,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 		validate();
@@ -123,9 +127,9 @@ public class CreateReportDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
-		getShell().setText("Create Report");
+		getShell().setText(Messages.CreateReportDialog_Dialog_Title);
 
-		setMessage("Create a new report");
+		setMessage(Messages.CreateReportDialog_Dialog_Message);
 
 		Composite main = new Composite(parent, SWT.NONE);
 
@@ -134,7 +138,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 
 		if (includeName){
 			Label lbl = new Label(main, SWT.NONE);
-			lbl.setText("Report Name:");
+			lbl.setText(Messages.CreateReportDialog_ReportNameLabel);
 
 			txtName = new Text(main, SWT.BORDER);
 			txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -149,16 +153,16 @@ public class CreateReportDialog extends TitleAreaDialog {
 		}
 
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Save Location:");
+		lbl.setText(Messages.CreateReportDialog_SaveLocationLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 
 		reportList = new TreeViewer(main, SWT.SINGLE | SWT.BORDER);
 		reportList.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		reportList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		reportList.setContentProvider(new ReportContentProvider(true, !(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER || SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN)));
+		reportList.setContentProvider(new ReportContentProvider(!(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER || SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN)));
 		reportList.setLabelProvider(new ReportLabelProvider());
-		reportList.setInput("Loading");
+		reportList.setInput(Messages.CreateReportDialog_LoadingLabel);
 		reportList.getTree().addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -206,11 +210,15 @@ public class CreateReportDialog extends TitleAreaDialog {
 		setErrorMessage(null);
 		if (includeName){
 			if (reportName.trim().length() == 0) {
-				setErrorMessage("Report name must not be blank.");
+				setErrorMessage(Messages.CreateReportDialog_Error_ReportNameBlank);
 				ok = false;
 			}
 			if (!SmartUtils.isSimpleString(reportName, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Report.MAX_NAME_LENGTH)){
-				setErrorMessage("Report names must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc + " characters and be less than " + Report.MAX_NAME_LENGTH + " character is length.");
+				setErrorMessage(
+						MessageFormat.format(
+						Messages.CreateReportDialog_Error_InvalidReportName, 
+						new Object[]{Report.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc} ));
+						
 				ok = false;
 			}
 		}

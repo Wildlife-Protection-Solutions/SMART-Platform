@@ -60,7 +60,7 @@ public class ReportLabelProvider extends LabelProvider {
 		if (element instanceof RootReportFolder){
 			return ((RootReportFolder) element).getName();
 		}else if (element instanceof Report){
-			return ((Report) element).getName() + " [" + ((Report)element).getId() + "]";
+			return ((Report) element).getName() + " [" + ((Report)element).getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}else if (element instanceof ReportFolder){
 			return ((ReportFolder)element).getName();
 		}

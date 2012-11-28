@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui.export;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.report.SmartReportParameters;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.viewer.parameter.BooleanParameterComponent;
 import org.wcs.smart.report.internal.ui.viewer.parameter.DateParameterComponent;
 import org.wcs.smart.report.internal.ui.viewer.parameter.GroupedReportParameters;
@@ -61,6 +63,7 @@ import org.wcs.smart.report.model.Report;
  */
 public class ParameterCollecter {
 
+	private static final String PARAMTYPE_NOTSUPPORTED_MSG = Messages.ParameterCollecter_TypeNotSupported;
 	private HashMap<String, IParameterDefnBase> allParameters = null;
 	private HashMap<String, Object> paramValues = null;
 	
@@ -101,7 +104,8 @@ public class ParameterCollecter {
 				allParameters.put(param.getName(), param);	
 			}else{
 				if (def.getParameterType() != param.getParameterType()){
-					throw new Exception("Reports contain parameters with the same name (" + param.getName() + ") but require different parameter types.  These reports cannot be run at the same time.");
+					throw new Exception(MessageFormat.format(
+							Messages.ParameterCollecter_MultipleTypeParameter, new Object[]{param.getName()}));
 				}
 				//TODO: implement more here to make sure they are the same
 			}
@@ -133,7 +137,8 @@ public class ParameterCollecter {
 		}else if (ptype.getDataType() == IParameterDefn.TYPE_BOOLEAN){
 			return new BooleanParameterComponent(ptype.getName(), ptype.getPromptText(), defaultValue);
 		}else{
-			throw new Exception("Parameter type " + ptype.getDataType() + " is not supported.");
+			throw new Exception(MessageFormat.format(
+					Messages.ParameterCollecter_TypeXNotSupported, new Object[]{ ptype.getDataType() }));
 		}		
 	}
 	/*
@@ -171,14 +176,16 @@ public class ParameterCollecter {
 								groupedComponent.addComponent(part);
 							}
 						}else{
-							throw new Exception("Parameter of class " + paramPart.getClass().getName() + " is not supported.");		
+							throw new Exception(MessageFormat.format(
+									PARAMTYPE_NOTSUPPORTED_MSG, new Object[]{paramPart.getClass().getName()}));		
 						}
 					}
 				}
 				dialog.addComponent(groupedComponent);
 				
 			}else{
-				throw new Exception("Parameter of class " + paramPart.getClass().getName() + " is not supported.");
+				throw new Exception(MessageFormat.format(
+						PARAMTYPE_NOTSUPPORTED_MSG, new Object[]{paramPart.getClass().getName()}));
 			}
 		}
 

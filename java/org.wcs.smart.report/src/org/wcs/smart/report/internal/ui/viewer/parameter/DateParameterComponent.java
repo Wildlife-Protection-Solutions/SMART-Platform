@@ -95,7 +95,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 		param.setLayout(gl);
 
 		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText(getDisplayText() + ": ");
+		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
 		if (dFormat != -1){
 			datePicker = new DateTime(param, dFormat);
 			datePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

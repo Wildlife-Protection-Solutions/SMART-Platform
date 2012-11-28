@@ -111,13 +111,13 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 
 			// get kid folders
 			List<?> kidFolders = s.createCriteria(ReportFolder.class)
-					.add(Restrictions.eq("parentFolder", parent)).list();
+					.add(Restrictions.eq("parentFolder", parent)).list(); //$NON-NLS-1$
 			kids.addAll(kidFolders);
 
 			// kid queries
 			// if (!cprovider.foldersOnly()){
 			List<?> kidQueries = s.createCriteria(Report.class)
-					.add(Restrictions.eq("folder", parent)).list();
+					.add(Restrictions.eq("folder", parent)).list(); //$NON-NLS-1$
 			kids.addAll(kidQueries);
 			// }
 			collector.add(kids.toArray(), monitor);

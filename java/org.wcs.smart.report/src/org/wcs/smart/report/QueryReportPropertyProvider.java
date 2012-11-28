@@ -29,6 +29,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.ReportQuery;
 
 /**
@@ -44,21 +45,35 @@ public class QueryReportPropertyProvider extends AbstractQueryPropertyProvider {
 	}
 
 
+	/**
+	 * Determines which reports are used by the given query.
+	 * 
+	 * @see org.wcs.smart.query.AbstractQueryPropertyProvider#getValue(org.wcs.smart.query.model.Query)
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getValue(Query query) {
-		if (query.getUuid() == null) return "";
+		if (query.getUuid() == null) return ""; //$NON-NLS-1$
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			List<ReportQuery> reports = s.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list();
+			List<ReportQuery> reports = s.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list(); //$NON-NLS-1$
 			if (reports.size() == 0){
-				return "none";
+				return Messages.QueryReportPropertyProvider_NoReportsLabel;
 			}else{
 				StringBuilder sb = new StringBuilder();
 				for (ReportQuery rq : reports){
-					sb.append("* " + rq.getReport().getName() + " [" + rq.getReport().getId() + "] {Owner: " + rq.getReport().getOwner().getLabel() + "}");
-					sb.append("\n");
+					sb.append("* "); //$NON-NLS-1$
+					sb.append(rq.getReport().getName());
+					sb.append(" ["); //$NON-NLS-1$
+					sb.append(rq.getReport().getId());
+					sb.append("] {"); //$NON-NLS-1$
+					sb.append(Messages.QueryReportPropertyProvider_OwnerLabel); 
+					sb.append(": "); //$NON-NLS-1$
+					sb.append(rq.getReport().getOwner().getLabel());
+					sb.append( "}");  //$NON-NLS-1$
+					
+					sb.append("\n"); //$NON-NLS-1$
 				}
 				if (sb.length() > 1){
 					sb.delete(sb.length() - 1, sb.length());
@@ -66,8 +81,8 @@ public class QueryReportPropertyProvider extends AbstractQueryPropertyProvider {
 				return sb.toString();
 			}
 		}catch (Exception ex){
-			ReportPlugIn.log("Error loading query properties", ex);
-			return "(ERROR)";
+			ReportPlugIn.log("Error loading query properties", ex); //$NON-NLS-1$
+			return Messages.QueryReportPropertyProvider_ErrorLabel;
 		}finally{
 			if (s.getTransaction().isActive()){
 				s.getTransaction().commit();

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -33,6 +34,7 @@ import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.SummaryQuery;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.ReportQuery;
 
 /**
@@ -46,6 +48,8 @@ import org.wcs.smart.report.model.ReportQuery;
  */
 public class ReportQueryListener implements IQueryEventListener {
 
+	private static final String WARNING_DIALOGTITLE = Messages.ReportQueryListener_Warning_DialogTitle;
+
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.IQuerySaveListener#beforeSave(org.wcs.smart.query.model.Query)
 	 */
@@ -54,7 +58,7 @@ public class ReportQueryListener implements IQueryEventListener {
 		if (query.getUuid() == null) return true;
 		try{
 			@SuppressWarnings("unchecked")
-			List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list();
+			List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list(); //$NON-NLS-1$
 			if (queries.size() == 0) {
 				return true;
 			}else{
@@ -82,11 +86,18 @@ public class ReportQueryListener implements IQueryEventListener {
 					//	if the column definition 
 					StringBuilder sb = new StringBuilder();
 					for (ReportQuery rp : queries){
-						sb.append("   * " + rp.getReport().getName() + " ["+ rp.getReport().getId() + "] {" + rp.getReport().getOwner().getLabel() + "}");
-						sb.append("\n");
+						sb.append("   * "); //$NON-NLS-1$
+						sb.append(rp.getReport().getName());
+						sb.append(" ["); //$NON-NLS-1$
+						sb.append( rp.getReport().getId());
+						sb.append("] {" ); //$NON-NLS-1$
+						sb.append( rp.getReport().getOwner().getLabel());
+						sb.append("}"); //$NON-NLS-1$
+						sb.append("\n"); //$NON-NLS-1$
 					}
 					if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
-						"Warning", "This query '" + query.getName() + "' is used in the following reports.  By changing the query output columns you my invalidate the report.\n"  + sb.toString() + "  Are you sure you want to continue?")){
+						WARNING_DIALOGTITLE, 
+						MessageFormat.format(Messages.ReportQueryListener_BeforeSave_QueryUsedWarning, new Object[]{query.getName(), sb.toString()}))){
 						return false;
 					}
 				}
@@ -94,7 +105,7 @@ public class ReportQueryListener implements IQueryEventListener {
 			}
 		
 		}catch (Exception ex){
-			ReportPlugIn.displayLog("Error saving query : " + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.ReportQueryListener_QuerySaveError + ex.getMessage(), ex);
 			return false;
 		}
 	}
@@ -106,18 +117,26 @@ public class ReportQueryListener implements IQueryEventListener {
 	public boolean beforeDelete(Query query, Session session) {
 		if (query.getUuid() == null) return true;
 		@SuppressWarnings("unchecked")
-		List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list();
+		List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list(); //$NON-NLS-1$
 		if (queries.size() == 0) {
 			return true;
 		}else{
 			
 			StringBuilder sb = new StringBuilder();
 			for (ReportQuery rp : queries){
-				sb.append("   * " + rp.getReport().getName() + " ["+ rp.getReport().getId() + "] {" + rp.getReport().getOwner().getLabel() + "}");
-				sb.append("\n");
+				sb.append("   * "); //$NON-NLS-1$
+				sb.append(rp.getReport().getName());
+				sb.append(" ["); //$NON-NLS-1$
+				sb.append(rp.getReport().getId());
+				sb.append("] {"); //$NON-NLS-1$
+				sb.append(rp.getReport().getOwner().getLabel());
+				sb.append("}"); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
 			}
 			if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
-					"Warning", "This query is referenced by the following reports.  By deleting the queries the reports will no longer run.\n"  + sb.toString() + "\n Are you sure you want to continue?")){
+					WARNING_DIALOGTITLE, 
+					MessageFormat.format(
+							Messages.ReportQueryListener_BeforeDelete_QueryUsedWarning, new Object[]{sb.toString()}))){
 				return false;
 			}
 			return true;

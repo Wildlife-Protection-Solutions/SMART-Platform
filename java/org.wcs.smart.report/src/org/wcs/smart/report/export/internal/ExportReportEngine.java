@@ -59,13 +59,11 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.IReportExporter;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
-
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfStamper;
 
 /**
  * Engine for exporting reports.
@@ -80,7 +78,7 @@ public class ExportReportEngine {
 	/**
 	 * Export options extention
 	 */
-	public static final String REPORT_EXPORT_EXTENSION_ID = "org.wcs.smart.report.exporter";
+	public static final String REPORT_EXPORT_EXTENSION_ID = "org.wcs.smart.report.exporter"; //$NON-NLS-1$
 		
 	/**
 	 * Export jobs
@@ -168,7 +166,7 @@ public class ExportReportEngine {
 				return  null;
 			}
 		}catch (Exception ex){
-			ReportPlugIn.displayLog("Error occured while gathering paramter information.  Reports could not be run. " + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.ExportReportEngine_Error_GatheringParameters + ex.getMessage(), ex);
 			return null;
 		}
 		return params;
@@ -183,7 +181,7 @@ public class ExportReportEngine {
 				@Override
 				public void run() {
 					if (jobs.size() == 0){  //double check to make sure another export hasn't happened 
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Export Report", "Report export completed.");
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ExportReportEngine_ExportComplete_DialogTitle, Messages.ExportReportEngine_ExportComplete_DialogMessage);
 					}
 				}});
 		}
@@ -197,11 +195,27 @@ public class ExportReportEngine {
 		}
 	}
 	
-	/*
-	 * Converts a report name to a output file name
+	/**
+	 * Generates a filename for a given report.  The filename will
+	 * be based on the existing report file name with a new extension.
+	 * <p>
+	 * 
+	 * @param report report to generate filename for
+	 * @param directory location of output file can be null
+	 * @param extension new file extension
 	 */
-	private static File getOutputFileName(Report report, File directory, String extension){
-		return new File(directory, report.getName().replaceAll("[^a-zA-z0-9]", "") + "." + extension);
+	public static File getOutputFileName(Report report, File directory, String extension){
+		String f = report.getFilename();
+		int index = f.lastIndexOf('.');
+		if (index > 0){
+			f = f.substring(0, index+1);
+		}
+		//String filename = report.getName().replaceAll("[^\\p{L&}\\p{Nd}]", ""); ;  //$NON-NLS-1$ //$NON-NLS-2$
+		if (directory != null){
+			return new File(directory, f + "." + extension); //$NON-NLS-1$
+		}else{
+			return new File(f + "." + extension); //$NON-NLS-1$
+		}
 	}
 	
 	// test for printing directly to printer - does not currently work export
@@ -305,7 +319,7 @@ public class ExportReportEngine {
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_EXPORT_EXTENSION_ID);
 			try {
 				for (IConfigurationElement e : config) {
-					IReportExporter prop = (IReportExporter) e.createExecutableExtension("class");
+					IReportExporter prop = (IReportExporter) e.createExecutableExtension("class"); //$NON-NLS-1$
 					formats.add(new ReportExporterFormat(prop));
 				}
 			}catch (Exception ex){

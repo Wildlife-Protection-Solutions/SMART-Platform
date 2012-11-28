@@ -23,6 +23,7 @@ package org.wcs.smart.report.export.internal;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
@@ -37,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
@@ -63,7 +65,7 @@ public class RunReportJob extends Job {
 	 * @param reportParams report parameters
 	 */
 	public RunReportJob(Report report, File file, EmitterInfo info, HashMap<String, Object> reportParams){
-		super("Run Report: " + report.getName());
+		super(MessageFormat.format(Messages.RunReportJob_JobName, new Object[]{report.getName()}));
 		
 		reportFile = report.getFullReportFilename();
 		this.outputFile = file;
@@ -79,7 +81,7 @@ public class RunReportJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		try {
 			if (reportFile == null || outputFile == null || info == null) {
-				throw new Exception("Cannot run report.");
+				throw new Exception(Messages.RunReportJob_Error_NoReportFile);
 			}
 			IReportEngine engine = ReportManager.getReportEngine();
 
@@ -93,7 +95,7 @@ public class RunReportJob extends Job {
 			options.setEmitterID(info.getID());
 			options.setOption(HTMLRenderOption.IMAGE_DIRECTROY,
 					outputFile.getParent());
-			options.setSupportedImageFormats("PNG");
+			options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 
 			task.setRenderOption(options);
 			task.setParameterValues(reportParameters);
@@ -102,8 +104,8 @@ public class RunReportJob extends Job {
 			fout.close();
 
 		} catch (Exception e) {
-			ReportPlugIn.log("Error exporting report", e);
-			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, "Error exporting report. " + e.getMessage() );
+			ReportPlugIn.log("Error exporting report", e); //$NON-NLS-1$
+			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, Messages.RunReportJob_Error_RunningReport + e.getMessage() );
 		}
 		return Status.OK_STATUS;
 	}

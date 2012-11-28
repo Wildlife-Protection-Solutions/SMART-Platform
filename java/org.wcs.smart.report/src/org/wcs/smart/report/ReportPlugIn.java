@@ -36,6 +36,7 @@ import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
 
@@ -50,17 +51,17 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.report"; //$NON-NLS-1$
 
-	public static final String REPORT_DIR = "reports";
+	public static final String REPORT_DIR = "reports"; //$NON-NLS-1$
 
 	/**
 	 * The main query icon
 	 */
-	public static final String REPORT_ICON = "org.wcs.smart.query.reporticon";
+	public static final String REPORT_ICON = "org.wcs.smart.query.reporticon"; //$NON-NLS-1$
 
 	private ReportQueryListener queryListener = new ReportQueryListener();
 	
 	static {
-		addImage("images/icons/obj16/report.png", REPORT_ICON);
+		addImage("images/icons/obj16/report.png", REPORT_ICON); //$NON-NLS-1$
 	}
 
 	private static void addImage(String path, String icon) {
@@ -105,8 +106,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 									.getCanonicalPath());
 		} catch (IOException e) {
 			displayLog(
-					"Could not initialize BIRT parameters. Reporting error will occur. "
-							+ e.getMessage(), e);
+					Messages.ReportPlugIn_Error_InitializingParams+ e.getMessage(), e);
 		}
 	}
 
@@ -179,7 +179,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 			@Override
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
-						"Error", message);
+						Messages.ReportPlugIn_Error_DialogTitle, message);
 			}
 		});
 

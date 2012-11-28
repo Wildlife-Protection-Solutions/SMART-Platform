@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.report.internal.advisor;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 
@@ -46,20 +49,20 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Employee)){
-			return "Object not of type Employee. Can not delete.";
+			return "Object not of type Employee. Can not delete."; //$NON-NLS-1$
 		}
 		Employee e = (Employee)object;
 		if (e.getUuid() == null){
 			return null;
 		}
-		Long cnt = (Long) session.createCriteria(Report.class).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(Report.class).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return "The employee " + e.getLabel() + " owns " + cnt + " reports.  These reports must be deleted before the employee can be removed.";
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{e.getLabel(), cnt});
 		}
 	
-		cnt = (Long) session.createCriteria(ReportFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult();
+		cnt = (Long) session.createCriteria(ReportFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return "The employee " + e.getLabel() + " has " + cnt + " report folders.  These folders must be deleted before the employee can be removed.";
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{e.getLabel(), cnt});
 		}
 		return null;
 	}
