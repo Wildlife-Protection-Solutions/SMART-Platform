@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %plugin.name
+Bundle-Name: Smart Data Source ODA Runtime Driver
 Bundle-SymbolicName: org.wcs.smart.data.oda.smart; singleton:=true
 Bundle-Version: 0.0.1
 Bundle-ClassPath: .,
  src
+Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.data.oda.smart.Activator
-Bundle-Localization: plugin
 Export-Package: org.wcs.smart.data.oda.smart.impl;version="1.0.0.qualifier",
  org.wcs.smart.data.oda.smart.impl.query,
  org.wcs.smart.data.oda.smart.impl.table
@@ -16,4 +16,3 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.datatools.connectivity.oda.profile;bundle-version="[3.2.0,4.0.0)",
  org.wcs.smart.query;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ActivationPolicy: lazy

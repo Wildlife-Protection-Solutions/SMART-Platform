@@ -4,17 +4,17 @@
    <extension-point id="org.wcs.smart.data.ods.smart.table" name="smartbirttable" schema="schema/org.wcs.smart.data.ods.smart.table.exsd"/>
 
    <extension
-         id="%oda.data.source.id"
+         id="org.wcs.smart.data.oda.smart"
          point="org.eclipse.datatools.connectivity.oda.dataSource">
       <dataSource
             driverClass="org.wcs.smart.data.oda.smart.impl.SmartDriver"
-            defaultDisplayName="%data.source.name"
+            defaultDisplayName="%datasource.display.name"
             setThreadContextClassLoader="false"
             odaVersion="3.2"
-            id="%oda.data.source.id">
+            id="org.wcs.smart.data.oda.smart">
       </dataSource>
       <dataSet
-            defaultDisplayName="%data.set.name"
+            defaultDisplayName="%query.dataset.display.name"
             id="org.wcs.smart.data.oda.smart.smartQueryDataset">
          <dataTypeMapping
                nativeDataType="String"
@@ -63,7 +63,7 @@
          </dataTypeMapping>
       </dataSet>
       <dataSet
-            defaultDisplayName="Smart Tables"
+            defaultDisplayName="%table.dataset.display.name"
             id="org.wcs.smart.data.oda.smart.smartTableDataset">
          <dataTypeMapping
                nativeDataType="Double"
@@ -115,21 +115,21 @@
    <extension
          point="org.eclipse.datatools.connectivity.connectionProfile">
       <category
-            name="%data.source.name"
+            name="%smartcategory.connectionprofile.name"
             parentCategory="org.eclipse.datatools.connectivity.oda.profileCategory"
-            id="%oda.data.source.id">
+            id="org.wcs.smart.data.oda.smart">
       </category>
       <connectionProfile
             pingFactory="org.eclipse.datatools.connectivity.oda.profile.OdaConnectionFactory"
-            name="%connection.profile.name"
-            category="%oda.data.source.id"
-            id="%oda.data.source.id">
+            name="%datasource.connectionprofile.name"
+            category="org.wcs.smart.data.oda.smart"
+            id="org.wcs.smart.data.oda.smart">
       </connectionProfile>
       <connectionFactory
-            name="ODA Connection Factory"
-            profile="%oda.data.source.id"
             class="org.eclipse.datatools.connectivity.oda.profile.OdaConnectionFactory"
-            id="org.eclipse.datatools.connectivity.oda.IConnection">
+            id="org.eclipse.datatools.connectivity.oda.IConnection"
+            name="%connectionfactory.name"
+            profile="org.wcs.smart.data.oda.smart">
       </connectionFactory>
    </extension>
 
