@@ -30,6 +30,7 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.SimpleListItemWithDescription;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Team object.
@@ -41,9 +42,9 @@ import org.wcs.smart.ca.SimpleListItemWithDescription;
 @Table(name="smart.team")
 public class Team extends SimpleListItemWithDescription{
 
-	public static final String NAME = "Team";
-	public static final String DESCRIPTION = "Description";
-	public static final String MANDATE = "Mandate";
+	public static final String NAME = Messages.Team_Name;
+	public static final String DESCRIPTION = Messages.Team_DescriptionFieldName;
+	public static final String MANDATE = Messages.Team_MandateFieldName;
 	
 	private PatrolMandate mandate;
 	private boolean isActive;

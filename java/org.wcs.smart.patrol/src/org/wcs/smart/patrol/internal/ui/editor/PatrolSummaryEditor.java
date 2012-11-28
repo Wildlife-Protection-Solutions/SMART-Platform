@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,7 +72,9 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
@@ -102,7 +105,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	/**
 	 * 
 	 */
-	private static final String EDIT_LABEL = "edit";
+	private static final String EDIT_LABEL = PatrolUtils.EDIT_LINK_TEXT;
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolSummaryEditor"; //$NON-NLS-1$
 
@@ -144,7 +147,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * @param editor parent editor
 	 */
 	public PatrolSummaryEditor(PatrolEditor editor) {
-		super.setPartName("Summary");
+		super.setPartName(Messages.PatrolSummaryEditor_Summary_TabName);
 		this.editor = editor;
 	}
 
@@ -176,14 +179,13 @@ public class PatrolSummaryEditor extends EditorPart {
 			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
 			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 			lblImage.setImage(x);
-			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE);
-			lblWarning.setText("This patrol cannot be modified: " + canEdit + ". Please contact administrator if editing is required.");
-			
+			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
+			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
 		}
 		
 		Section patrolSection = toolkit.createSection(frmPatrolSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED  );
-		patrolSection.setText("Patrol Information");
-		patrolSection.setDescription("Details about patrol");
+		patrolSection.setText(Messages.PatrolSummaryEditor_PatrolInfo_SectionHeader);
+		patrolSection.setDescription(Messages.PatrolSummaryEditor_PatrolInfo_SectionDescription);
 		patrolSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite top = toolkit.createComposite(patrolSection, SWT.NONE);
@@ -208,7 +210,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		((GridLayout)right.getLayout()).marginLeft = 10;
 		
 		
-		toolkit.createLabel(right, "Patrol ID:");
+		toolkit.createLabel(right, Messages.PatrolSummaryEditor_PatrolId_Label);
 		txtPatrolId = toolkit.createFormText(right, false);
 		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		txtPatrolId.setData(FormToolkit.KEY_DRAW_BORDER, null);
@@ -218,48 +220,48 @@ public class PatrolSummaryEditor extends EditorPart {
 		editId.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
 				
 		
-		toolkit.createLabel(left, "Patrol Type:");
+		toolkit.createLabel(left, Messages.PatrolSummaryEditor_PatrolType_Label);
 		txtPatrolType = toolkit.createFormText(left, false);
 		txtPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		Label lbl = null;
 		
 		if (editor.getPatrol().getLegs().size() <=1 ){
-			lbl = toolkit.createLabel(left, "Transportation Type:");
-			txtTransport = toolkit.createText(left, "", SWT.NONE);
+			lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
+			txtTransport = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
 			txtTransport.setEditable(false);
 			txtTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 			createEditLink(toolkit, left, new PatrolTransportComposite());
 		}
 		
-		lbl = toolkit.createLabel(left, "Armed?:");
+		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Armed_Label);
 		btnArmed = toolkit.createButton(left, null, SWT.CHECK);
 		btnArmed.setEnabled(false);
 		btnArmed.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, left, new ArmedComposite()); 
 		
 		
-		lbl = toolkit.createLabel(left, "Mandate:");
-		txtMandate = toolkit.createText(left, "AIR/MARINE/LAND", SWT.NONE);
+		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Mandate_Label);
+		txtMandate = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
 		txtMandate.setEditable(false);
 		txtMandate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		 createEditLink(toolkit, left, new PatrolMandateComposite()); 
 		
-		lbl = toolkit.createLabel(left, "Team:");
-		txtTeam= toolkit.createText(left, "");
+		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Team_Label);
+		txtTeam= toolkit.createText(left, ""); //$NON-NLS-1$
 		txtTeam .setEditable(false);
 		txtTeam .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		 createEditLink(toolkit, left, new TeamComposite()); 
 	
-		lbl = toolkit.createLabel(left, "Station:");
-		txtStation = toolkit.createText(left, "");
+		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Station_Label);
+		txtStation = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtStation .setEditable(false);
 		txtStation .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, left, new StationComposite()); 
 
-		lbl = toolkit.createLabel(right, "Objective:");
+		lbl = toolkit.createLabel(right, Messages.PatrolSummaryEditor_Objective_Label);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		txtObjective = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		txtObjective = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtObjective .setEditable(false);
 		txtObjective .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)txtObjective.getLayoutData()).heightHint=80;
@@ -268,9 +270,9 @@ public class PatrolSummaryEditor extends EditorPart {
 		editObjective.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
 		
 		
-		lbl = toolkit.createLabel(right, "Comment:");
+		lbl = toolkit.createLabel(right, Messages.PatrolSummaryEditor_Comment_Label);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		txtComment = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		txtComment = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtComment.setEditable(false);
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)txtComment.getLayoutData()).heightHint=80;
@@ -279,7 +281,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		editComment.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false,1,1));
 		
 		
-		lbl = toolkit.createLabel(left, "Members:");
+		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Member_Label);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		
 		Table employeeTable = toolkit.createTable(left, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -291,8 +293,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		/* ----- Patrol Days / Legs Section ------- */
 		Section dataSection = toolkit.createSection(frmPatrolSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED  );
 		dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		dataSection.setText("Patrol Data");
-		dataSection.setDescription("Details about patrol tracks and waypoints");
+		dataSection.setText(Messages.PatrolSummaryEditor_PatrolData_SectionName);
+		dataSection.setDescription(Messages.PatrolSummaryEditor_PatrolData_SectionDescription);
 		
 		dataSection.setLayout(new GridLayout(1, false));
 		Composite compData = toolkit.createComposite(dataSection, SWT.NONE );
@@ -301,14 +303,14 @@ public class PatrolSummaryEditor extends EditorPart {
 		Composite comp = toolkit.createComposite(compData, SWT.NONE );
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		comp.setLayout(new GridLayout(5, false));
-		toolkit.createLabel(comp, "Start Date:");
-		txtStartDate = toolkit.createText(comp, "");
+		toolkit.createLabel(comp, Messages.PatrolSummaryEditor_StartDate_Label);
+		txtStartDate = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtStartDate.setEditable(false);
 		
 		txtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		lbl = toolkit.createLabel(comp, "End Date:");
+		lbl = toolkit.createLabel(comp, Messages.PatrolSummaryEditor_EndDate_Label);
 		
-		txtEndDate = toolkit.createText(comp, "");
+		txtEndDate = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtEndDate .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtEndDate.setEditable(false);
 		
@@ -340,7 +342,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			//multi-day patrol
 			isMulti = true;
 			employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-			lbl = toolkit.createLabel(top, "This is a multi-leg patrol.  To change the patrol members or transport type use the edit button below in the Patrol Data section.");
+			lbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
 		
@@ -380,7 +382,7 @@ public class PatrolSummaryEditor extends EditorPart {
 					PatrolDayEditorInput input = new PatrolDayEditorInput(pld.getDate());
 					IEditorPart[] parts = editor.findEditors(input);
 					if (parts.length == 0){
-						SmartPatrolPlugIn.displayLog("Could not find appropriate day editor.", null);
+						SmartPatrolPlugIn.displayLog(Messages.PatrolSummaryEditor_Error_CouldNotFindEditor, null);
 					}else{
 						editor.setActiveEditor(parts[0]);
 					}
@@ -409,7 +411,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			editLink.setVisible(false);
 		}else {
 			if (partEditor != null){
-				editLink.setToolTipText("Edit " + partEditor.getTitle());
+				editLink.setToolTipText(MessageFormat.format(Messages.PatrolSummaryEditor_Edit_Tooltip, new Object[]{partEditor.getTitle()}));
 			}
 		}
 		
@@ -484,32 +486,32 @@ public class PatrolSummaryEditor extends EditorPart {
 			txtPatrolId.setText(patrol.getId(), false, false);
 			txtPatrolType.setText(patrol.getPatrolType().getGuiName(), false, false);
 			if (patrol.getStation() == null) {
-				txtStation.setText("(none)");
+				txtStation.setText(Messages.PatrolSummaryEditor_NoStationLabel);
 			} else {
 				txtStation.setText(patrol.getStation().getName());
 			}
 			if (patrol.getMandate() != null) {
 				txtMandate.setText(patrol.getMandate().getName());
 			} else {
-				txtMandate.setText("(none)");
+				txtMandate.setText(Messages.PatrolSummaryEditor_NoManadateLabel);
 			}
 			if (patrol.getComment() != null){
 				txtComment.setText(patrol.getComment());
 			}else{
-				txtComment.setText("");
+				txtComment.setText(""); //$NON-NLS-1$
 			}
 			btnArmed.setSelection(patrol.isArmed());
 
 			if (patrol.getTeam() != null) {
 				txtTeam.setText(patrol.getTeam().getName());
 			} else {
-				txtTeam.setText("(none)");
+				txtTeam.setText(Messages.PatrolSummaryEditor_NoTeamLabel);
 			}
 
 			if (patrol.getObjective() != null) {
 				txtObjective.setText(patrol.getObjective());
 			} else {
-				txtObjective.setText("");
+				txtObjective.setText(""); //$NON-NLS-1$
 			}
 
 //			if (patrol.getObjectiveRating() != null) {
@@ -591,7 +593,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		if (!(input instanceof PatrolEditorInput)){
-			throw new RuntimeException("Invalid editor input.");
+			throw new RuntimeException("Invalid editor input."); //$NON-NLS-1$
 		}
 		setSite(site);
 		setInput(input);
@@ -621,15 +623,15 @@ public class PatrolSummaryEditor extends EditorPart {
 class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 	
 	public enum PatrolLegDayColumn{
-		LEG("Leg", 1, true),
-		DAY("Day", 2, false),
-		START("Start Time", 1, false),
-		END("End Time", 1, false),
-		DISTANCE("Distance", 1, false),
-		HOURS("Hours", 1, false),
-		TRANSPORT("Transport", 1, true),
-		LEADER("Leader", 1, true),
-		PILOT("Pilot", 1, true);
+		LEG(Messages.PatrolSummaryEditor_LegId_ColumnName, 1, true),
+		DAY(Messages.PatrolSummaryEditor_LegDay_ColumnName, 2, false),
+		START(Messages.PatrolSummaryEditor_LegStart_ColumnName, 1, false),
+		END(Messages.PatrolSummaryEditor_LegEnd_ColumnName, 1, false),
+		DISTANCE(Messages.PatrolSummaryEditor_LegDistance_ColumnName, 1, false),
+		HOURS(Messages.PatrolSummaryEditor_LegHours_ColumnName, 1, false),
+		TRANSPORT(Messages.PatrolSummaryEditor_LegTransport_ColumnName, 1, true),
+		LEADER(Messages.PatrolSummaryEditor_LegLeader_ColumnName, 1, true),
+		PILOT(Messages.PatrolSummaryEditor_LegPilot_ColumnName, 1, true);
 		
 		int weight;
 		String name;
@@ -643,7 +645,7 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 	
 	
 	private PatrolLegDayColumn column = null;
-	private SimpleDateFormat dayOfWeekFormatter = new SimpleDateFormat("E");
+	private SimpleDateFormat dayOfWeekFormatter = new SimpleDateFormat("E"); //$NON-NLS-1$
 	public PatrolLegDayLabelProvider(PatrolLegDayColumn column){
 		this.column = column;
 	}
@@ -653,24 +655,24 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 		if (element instanceof PatrolLegDay){
 			if (column == PatrolLegDayColumn.DAY){
 				Date d = ((PatrolLegDay) element).getDate();
-				return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d) + " " + dayOfWeekFormatter.format(d) ;
+				return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d) + " " + dayOfWeekFormatter.format(d) ; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.DISTANCE){
 				if (((PatrolLegDay) element).getTrack() != null){
 					return String.valueOf( ((PatrolLegDay) element).getTrack().getDistance() );
 				}else{
-					return "0";
+					return "0"; //$NON-NLS-1$
 				}
 			}else if (column == PatrolLegDayColumn.START){
 				if (((PatrolLegDay) element).getStartTime() != null){
 					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(((PatrolLegDay) element).getStartTime() );
 				}else{
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 			}else if (column == PatrolLegDayColumn.END){
 				if (((PatrolLegDay) element).getEndTime() != null){
 					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(((PatrolLegDay) element).getEndTime() );
 				}else{
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 			}else if (column == PatrolLegDayColumn.HOURS){
 				double hrs = ((PatrolLegDay) element).getHoursWorked();
@@ -679,14 +681,14 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				return ((PatrolLegDay)element).getPatrolLeg().getId();
 			}else if (column == PatrolLegDayColumn.LEADER){
 				if (((PatrolLegDay)element).getPatrolLeg().getLeader() == null){
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return ((PatrolLegDay)element).getPatrolLeg().getLeader().getMember().getLabel();
 			}else if (column == PatrolLegDayColumn.PILOT){
 				if (((PatrolLegDay)element).getPatrolLeg().getPilot() != null){
 					return ((PatrolLegDay)element).getPatrolLeg().getPilot().getMember().getLabel();
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.TRANSPORT){
 				return ((PatrolLegDay)element).getPatrolLeg().getType().getName();
 				

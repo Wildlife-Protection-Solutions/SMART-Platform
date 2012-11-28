@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.AttributeValidator;
 
 /**
@@ -97,7 +98,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 	@Override
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":");
+		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		Composite comp = new Composite(parent, SWT.NONE);
@@ -109,16 +110,16 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		
 		
 		btnYes = new Button(comp, SWT.RADIO);
-		btnYes.setText("Yes");
+		btnYes.setText(Attribute.BOOLEAN_TRUE_LABEL);
 		btnYes.addSelectionListener(validateListener);
 		
 		btnNo = new Button(comp, SWT.RADIO);
-		btnNo.setText("No");
+		btnNo.setText(Attribute.BOOLEAN_FALSE_LABEL);
 		btnNo.addSelectionListener(validateListener);
 		
 		if (!attribute.getIsRequired()){
 			btnUndefined = new Button(comp, SWT.RADIO);
-			btnUndefined.setText("Undefined");
+			btnUndefined.setText(Messages.BooleanAttributeField_UnderfinedBooleanOption);
 			btnUndefined.setSelection(true);
 			btnUndefined.addSelectionListener(validateListener);
 		}
@@ -184,7 +185,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 	@Override
 	public void setValue(Object x){
 		if (x != null & !(x instanceof Double)){
-			throw new IllegalStateException("Invalid value");
+			throw new IllegalStateException("Invalid value"); //$NON-NLS-1$
 		}
 		if (x == null){
 			this.originalValue = null;

@@ -38,12 +38,12 @@ import net.refractions.udig.core.internal.CorePlugin;
  * @since 1.0.0
  */
 public class PatrolServiceExtension implements ServiceExtension {
-    public static final String KEY = "org.wcs.smart.udig.catalog.smartService";
+    public static final String KEY = "org.wcs.smart.udig.catalog.smartService"; //$NON-NLS-1$
    
     /**
      * Service parameter conservation area uuid key
      */
-    public static final String PATROL_UUID_KEY = "patroluuid";
+    public static final String PATROL_UUID_KEY = "patroluuid"; //$NON-NLS-1$
     
     /*
      *URLS for smart services are of the form
@@ -98,7 +98,7 @@ public class PatrolServiceExtension implements ServiceExtension {
 		if (params.get(PATROL_UUID_KEY) == null || !(params.get(PATROL_UUID_KEY) instanceof byte[])){
 			return null;
 		}
-		String url = "smart://smartdb/patrol/" + new String((byte[])params.get(PATROL_UUID_KEY)) ;
+		String url = "smart://smartdb/patrol/" + new String((byte[])params.get(PATROL_UUID_KEY)) ; //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

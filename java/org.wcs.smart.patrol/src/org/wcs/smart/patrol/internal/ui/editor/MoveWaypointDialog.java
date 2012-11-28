@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -112,7 +113,7 @@ public class MoveWaypointDialog extends TitleAreaDialog{
 		legtype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(legtype, SWT.NONE);
-		lbl.setText("Move To:" );
+		lbl.setText(Messages.MoveWaypointDialog_MoveTo_Label );
 		
 		final Combo dtCombo = new Combo(legtype, SWT.DROP_DOWN | SWT.READ_ONLY);
 
@@ -155,14 +156,14 @@ public class MoveWaypointDialog extends TitleAreaDialog{
 		((GridLayout)legPart.getLayout()).marginHeight = 0;
 		
 		lbl = new Label(legPart, SWT.NONE);
-		lbl.setText("Patrol Leg:" );
+		lbl.setText(Messages.MoveWaypointDialog_PatrolLeg_Label );
 		
 		cmbLegPart = new ComboViewer(legPart, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbLegPart.setContentProvider(ArrayContentProvider.getInstance());;
 		cmbLegPart.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				PatrolLegDay pld = (PatrolLegDay)element;
-				return pld.getPatrolLeg().getId() + "";
+				return pld.getPatrolLeg().getId();
 			}
 		});
 		legPart.setVisible(false);
@@ -198,9 +199,9 @@ public class MoveWaypointDialog extends TitleAreaDialog{
 			legPart.setVisible(true);
 		}
 		
-		setMessage("Select patrol day to move selected waypoints to.");
+		setMessage(Messages.MoveWaypointDialog_DialogMessage);
 		
-		getShell().setText("Move Waypoints");
+		getShell().setText(Messages.MoveWaypointDialog_DialogTitle);
 		return parent;
 	}
 	

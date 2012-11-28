@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.model.Patrol;
@@ -59,7 +60,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	 * Creates a new wizard.
 	 */
 	public CreatePatrolWizard() {
-		setWindowTitle("Create New Patrol");
+		setWindowTitle(Messages.CreatePatrolWizard_Title);
 
 		patrol = new Patrol();
 		

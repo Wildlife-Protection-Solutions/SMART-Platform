@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
+import org.wcs.smart.patrol.internal.ui.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -42,7 +43,7 @@ public class CommentWizardPage extends NewPatrolWizardPage {
 	 * 
 	 */
 	protected CommentWizardPage() {
-		super("Patrol Comment");
+		super(Messages.CommentWizardPage_PageName);
 		
 	}
 
@@ -53,7 +54,7 @@ public class CommentWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		commentComp = new CommentComposite();
-		setMessage("Enter any comments associated with the patrol.");
+		setMessage(Messages.CommentWizardPage_PageMessage);
 		super.setControl(commentComp.createComponent(parent, SWT.NONE));
 	}
 	

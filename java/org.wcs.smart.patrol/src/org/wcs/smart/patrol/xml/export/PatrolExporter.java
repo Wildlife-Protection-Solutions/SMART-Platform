@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -76,12 +77,12 @@ public class PatrolExporter {
 	 * @throws Exception 
 	 */
 	public static File exportPatrol(Patrol patrol, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Exporting Patrol", includeAttachments ? 4 : 2);
+		monitor.beginTask(Messages.PatrolExporter_Progress_Exporting, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
 			session.refresh(patrol);
 			
-			monitor.subTask("Converting patrol");
+			monitor.subTask(Messages.PatrolExporter_Progress_Converting);
 			PatrolType xml = PatrolToXmlConverter.toXml(patrol);
 			monitor.worked(1);
 			
@@ -100,7 +101,7 @@ public class PatrolExporter {
 	 * Writes the patrol without including attachments
 	 */
 	private static File exportPatrolWithoutAttachments(PatrolType xml, File file, IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Writing patrol to file");
+		monitor.subTask(Messages.PatrolExporter_Progress_WritingToFile);
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
 		try {
 			PatrolXmlManager.writeDataModel(xml, out);
@@ -120,19 +121,19 @@ public class PatrolExporter {
 		if (index >= 0){
 			name= name.substring(0, index);
 		}
-		File xmlFile = File.createTempFile(name, ".xml");
+		File xmlFile = File.createTempFile(name, ".xml"); //$NON-NLS-1$
 		exportPatrolWithoutAttachments(xml, xmlFile, monitor);
 		
 		
-		monitor.subTask("Packaging Attachments");
+		monitor.subTask(Messages.PatrolExporter_Progress_PackagingResults);
 		//create zip file
-		File zipFile = new File(f.getParent() + File.separator + name + ".zip");
+		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
 		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
 		try {
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 
 			/* add xml file to zip */
-			zout.putNextEntry(new ZipEntry(name	+ ".xml"));
+			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
 			FileInputStream inStream = new FileInputStream(xmlFile);
 
 			byte[] buffer = new byte[1024];
@@ -202,7 +203,7 @@ public class PatrolExporter {
 			if (index > 0){
 				name = name.substring(0, index);
 			}
-			String zip = in.getParent() + File.separator + name + ".zip";
+			String zip = in.getParent() + File.separator + name + ".zip"; //$NON-NLS-1$
 			return new File(zip);
 		}
 	}

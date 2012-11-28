@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolTransportComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -44,7 +45,7 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 	 * 
 	 */
 	protected TransportTypeWizardPage() {
-		super("Transportation Type");
+		super(Messages.TransportTypeWizardPage_PageName);
 	}
 
 	/**
@@ -64,14 +65,14 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 		transportType.createComponent(center, SWT.NONE);
 		
 		Label lbl = new Label(center, SWT.WRAP);
-		lbl.setText("If the patrol spans multiple transporation types, select the initial transportation type here.  Additional transportation types can be selected later.");
+		lbl.setText(Messages.TransportTypeWizardPage_MultiTransportType_InfoLabel);
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2,1);
 		gd.widthHint = getShell().getBounds().width / 2;
 		lbl.setLayoutData(gd);
 		
 		
 		setControl(main);
-		setMessage("Select Patrol transportation type.");
+		setMessage(Messages.TransportTypeWizardPage_PageMessage);
 	}
 
 	/**

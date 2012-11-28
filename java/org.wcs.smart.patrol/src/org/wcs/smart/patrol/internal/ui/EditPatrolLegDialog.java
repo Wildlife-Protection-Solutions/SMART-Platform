@@ -67,7 +67,7 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class EditPatrolLegDialog extends TitleAreaDialog{
-	private static DateFormat DATE_TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+	private DateFormat dateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	
 	private PatrolLeg editLeg;
 	
@@ -436,27 +436,27 @@ private void createEndTimeComposite(Composite parent) {
 		if (legStart.before(patrolStart)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_StartAfterPStart,
-					new Object[]{ DATE_TIME_FORMAT.format(patrolStartDate)});
+					new Object[]{ dateTimeFormatter.format(patrolStartDate)});
 		}
 		if (legStart.after(patrolEnd) ){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_StartBeforePEnd,
-					new Object[]{ DATE_TIME_FORMAT.format(patrolEndDate)});
+					new Object[]{ dateTimeFormatter.format(patrolEndDate)});
 		}
 		if (legEnd.before(patrolStart)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_EndAfterPStart,
-					new Object[]{ DATE_TIME_FORMAT.format(patrolStartDate)});
+					new Object[]{ dateTimeFormatter.format(patrolStartDate)});
 		}
 		if (legEnd.after(patrolEnd)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_EndBeforePStart,
-					new Object[]{ DATE_TIME_FORMAT.format(patrolEndDate)});
+					new Object[]{ dateTimeFormatter.format(patrolEndDate)});
 		}
 		if (legEnd.before(legStart)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_StartBeforeEnd,
-					new Object[]{ DATE_TIME_FORMAT.format(legStart), DATE_TIME_FORMAT.format(legEnd)});
+					new Object[]{ dateTimeFormatter.format(legStart), dateTimeFormatter.format(legEnd)});
 		}
 		return null;
 	}

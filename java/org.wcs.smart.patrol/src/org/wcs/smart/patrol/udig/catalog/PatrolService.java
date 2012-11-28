@@ -55,7 +55,7 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class PatrolService extends IService {
 
-	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.patrolService";
+	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.patrolService"; //$NON-NLS-1$
 	private Map<String, Serializable> params;
 	private URL url;
 //	private Session session = null;
@@ -81,7 +81,7 @@ public class PatrolService extends IService {
 	
 	public String getPatrolID(){
 		if (patrol == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		return patrol.getId();
 	}
@@ -178,7 +178,7 @@ public class PatrolService extends IService {
                 resolve.dispose(subProgressMonitor);
                 subProgressMonitor.done();
             } catch (Throwable e) {
-            	SmartPatrolPlugIn.log("Could not dispose Patrol Service", e);
+            	SmartPatrolPlugIn.log("Could not dispose Patrol Service", e); //$NON-NLS-1$
             }
         }
         if (this.ds != null){

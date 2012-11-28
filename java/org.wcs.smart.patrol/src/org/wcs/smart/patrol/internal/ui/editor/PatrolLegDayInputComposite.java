@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.editor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -89,6 +90,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -107,6 +109,11 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class PatrolLegDayInputComposite {
 
+	private static final String IMPORT_OK_DIALOG_TITLE = Messages.PatrolLegDayInputComposite_ImportSuccessful_DialogTitle;
+	private static final String LOAD_WIZARD_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_LoadingImportWizard;
+	private static final String SHOW_WIZARD_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_DisplayingImportWizard;
+	private static final String IMPORT_DATA_PROGRESS_MSG = Messages.PatrolLegDayInputComposite_Progress_ImportingData;
+	
 	private DateTime dtStartTime;
 	private DateTime dtEndTime;
 	private Text restMinutes;
@@ -164,10 +171,10 @@ public class PatrolLegDayInputComposite {
 	
 	
 	protected enum OtColumn {
-		ID("Waypoint Id", 1), EAST("Longitude", 2), NORTH("Latitude", 2), TIME(
-				"Time", 2), DIRECTION("Direction", 1), DISTANCE("Distance", 1), OBSERVATION(
-				"Observation", 4), COMMENT("Comment", 3), ATTACHMENTS(
-				"Attachments", 3);
+		ID(Messages.PatrolLegDayInputComposite_WaypointID_ColumnHeader, 1), EAST(Messages.PatrolLegDayInputComposite_Longitude_ColumnHeader, 2), NORTH(Messages.PatrolLegDayInputComposite_Latitude_ColumnHeader, 2), TIME(
+				Messages.PatrolLegDayInputComposite_Time_ColumnHeader, 2), DIRECTION(Messages.PatrolLegDayInputComposite_Direction_ColumnHeader, 1), DISTANCE(Messages.PatrolLegDayInputComposite_Distance_ColumnHeader, 1), OBSERVATION(
+				Messages.PatrolLegDayInputComposite_Observation_ColumnHeader, 4), COMMENT(Messages.PatrolLegDayInputComposite_Comment_ColumnHeader, 3), ATTACHMENTS(
+				Messages.PatrolLegDayInputComposite_Attachment_ColumnHeader, 3);
 
 		protected String guiName;
 		protected int weight;
@@ -207,7 +214,7 @@ public class PatrolLegDayInputComposite {
 			dtEndTime.setTime(23,59,59);
 		}
 		if (data.getRestMinutes() == null) {
-			restMinutes.setText("0");
+			restMinutes.setText("0"); //$NON-NLS-1$
 		} else {
 			restMinutes.setText(String.valueOf(data.getRestMinutes()));
 		}
@@ -276,7 +283,7 @@ public class PatrolLegDayInputComposite {
 		Composite c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		toolkit.createLabel(c, "Start Time:");
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_StartTimeLabel);
 		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtStartTime);
 		dtStartTime.addSelectionListener(new SelectionAdapter() {
@@ -300,7 +307,7 @@ public class PatrolLegDayInputComposite {
 
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
-		toolkit.createLabel(c, "End Time:");
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_EndTimeLabel);
 		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtEndTime);
 		dtEndTime.addSelectionListener(new SelectionAdapter() {
@@ -325,8 +332,8 @@ public class PatrolLegDayInputComposite {
 		
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
-		toolkit.createLabel(c, "Rest Minutes:");
-		restMinutes = toolkit.createText(c, "0");
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_RestMinutesLabel);
+		restMinutes = toolkit.createText(c, "0"); //$NON-NLS-1$
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gd.widthHint = 30;
 		restMinutes.setLayoutData(gd);
@@ -341,8 +348,8 @@ public class PatrolLegDayInputComposite {
 						return;
 					}
 				}catch (Exception ex){
-					restMinutes.setText(oldValue + "");
-					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Error", "Rest Minutes must be a valid number.");
+					restMinutes.setText(String.valueOf(oldValue));
+					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_Error_DialogTitle, Messages.PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage);
 					Display.getCurrent().asyncExec(new Runnable() {
 						@Override
 						public void run() {
@@ -366,8 +373,8 @@ public class PatrolLegDayInputComposite {
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		toolkit.createLabel(c, "Total Hours Patrolled:");
-		lblTotalHours = toolkit.createLabel(c, "N/A");
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalHoursPatrolled_Label);
+		lblTotalHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
 		okayFont = lblTotalHours.getFont();
 		
 		FontData fd = okayFont.getFontData()[0];
@@ -382,18 +389,18 @@ public class PatrolLegDayInputComposite {
 		trackComp.setLayout(new GridLayout(4, false));
 		
 		
-		toolkit.createLabel(trackComp, "Distance Travelled (km): ");
-		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE);
+		toolkit.createLabel(trackComp, Messages.PatrolLegDayInputComposite_DistanceTravelledLabel);
+		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE); //$NON-NLS-1$
 		txtDistance.setEditable(false);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
 		
-		importTrack = toolkit.createHyperlink(trackComp, "Set Track ...", SWT.NONE);
+		importTrack = toolkit.createHyperlink(trackComp, Messages.PatrolLegDayInputComposite_SetTrackLabel, SWT.NONE);
 		importTrack.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				if (patrolLegDate.getTrack() != null){
-					if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Track", "The current track will be replaced.  Are you sure you want to continue?")){
+					if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_SetTrackDialog_Title, Messages.PatrolLegDayInputComposite_SetTrackDialog_Message)){
 						return;
 					}
 				}
@@ -402,7 +409,7 @@ public class PatrolLegDayInputComposite {
 			}
 		});
 		
-		viewTrackPoints = toolkit.createHyperlink(trackComp, "View TrackPoints...", SWT.NONE);
+		viewTrackPoints = toolkit.createHyperlink(trackComp, Messages.PatrolLegDayInputComposite_ViewTrackLabel, SWT.NONE);
 		viewTrackPoints.setEnabled(false);
 		viewTrackPoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
@@ -416,8 +423,8 @@ public class PatrolLegDayInputComposite {
 		
 		Composite observationHcomp = toolkit.createComposite(mainComposite);
 		observationHcomp.setLayout(new GridLayout(2, false));
-		toolkit.createLabel(observationHcomp, "Observations / Waypoints:");
-		lblImportWaypoints = toolkit.createHyperlink(observationHcomp, "Import Waypoints ...", SWT.NONE);
+		toolkit.createLabel(observationHcomp, Messages.PatrolLegDayInputComposite_ObservationsWaypointsLabel);
+		lblImportWaypoints = toolkit.createHyperlink(observationHcomp, Messages.PatrolLegDayInputComposite_ImportWaypointsLabel, SWT.NONE);
 		lblImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				showImportWaypointWizard();
@@ -446,7 +453,7 @@ public class PatrolLegDayInputComposite {
 
 		Composite buttonComp = toolkit.createComposite(mainComposite);
 		buttonComp.setLayout(new GridLayout(3, false));
-		btnAddWaypoint = toolkit.createButton(buttonComp, "Add Waypoint", SWT.PUSH);
+		btnAddWaypoint = toolkit.createButton(buttonComp, Messages.PatrolLegDayInputComposite_AddWaypoint_Button, SWT.PUSH);
 		btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -455,14 +462,14 @@ public class PatrolLegDayInputComposite {
 		});
 		
 		
-		btnDeleteWaypoint = toolkit.createButton(buttonComp, "Delete Waypoint(s)", SWT.PUSH);
+		btnDeleteWaypoint = toolkit.createButton(buttonComp, Messages.PatrolLegDayInputComposite_DeleteWaypoint_Button, SWT.PUSH);
 		btnDeleteWaypoint.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				deleteSelectedWaypoints();
 			}
 		});
 		
-		btnMoveWaypoint = toolkit.createButton(buttonComp, "Move Waypoint(s)", SWT.PUSH);
+		btnMoveWaypoint = toolkit.createButton(buttonComp, Messages.PatrolLegDayInputComposite_MoveWaypoint_Button, SWT.PUSH);
 		btnMoveWaypoint.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				moveSelectedWaypoints();
@@ -569,7 +576,7 @@ public class PatrolLegDayInputComposite {
 	
 	
 	private void deleteSelectedWaypoints() {
-		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Delete Waypoints", "Are you sure you want to delete the selected waypoints.  This action cannot be undone.");
+		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle, Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage);
 		if (!doDel){
 			return;
 		}
@@ -645,7 +652,7 @@ public class PatrolLegDayInputComposite {
 		if (time < 0){
 			lblTotalHours.setFont(errorFont);
 			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-			lblTotalHours.setToolTipText("The start time is before the end time.");
+			lblTotalHours.setToolTipText(Messages.PatrolLegDayInputComposite_Error_StartTimeError_Tooltip);
 		}else{
 			lblTotalHours.setFont(okayFont);
 			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
@@ -657,7 +664,7 @@ public class PatrolLegDayInputComposite {
 	public void updateDistance(){
 		if (this.patrolLegDate.getTrack() == null || this.patrolLegDate.getTrack().getDistance() == null){
 			this.viewTrackPoints.setEnabled(false);
-			this.txtDistance.setText("0");
+			this.txtDistance.setText("0"); //$NON-NLS-1$
 		}else{
 			this.txtDistance.setText(PatrolEditor.DISTANCE_FORMATTER.format(this.patrolLegDate.getTrack().getDistance()));
 			this.viewTrackPoints.setEnabled(true);
@@ -733,9 +740,9 @@ public class PatrolLegDayInputComposite {
 			}
 		
 		}
-
 	}
 	
+
 	
 	private void showImportTrackWizard(){
 		//Show Create Patrol Wizard
@@ -747,22 +754,22 @@ public class PatrolLegDayInputComposite {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName("Loading Wizard");
+					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
 					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
 
 					
 					if (dialog != null) {
 						try{
-							monitor.setTaskName("Displaying Input Wizard");
+							monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
 							dialog.open();
 							Object data = wizard.getImportedData();
 							boolean importAll = wizard.getImportAll();
-							monitor.setTaskName("Importing Data");
+							monitor.setTaskName(IMPORT_DATA_PROGRESS_MSG);
 							
 							if (data != null){
 								if (importAll){
 									HashMap<PatrolLegDay, Track> tracks = null;
-									if (data.equals("CreateFromWaypoints")){
+									if (data.equals(ImportGpsDataWizard.CREATE_FROM_WAYPOINTS)){
 										tracks = GPSDataImport.computeTracksFromWaypoints(editor.getPatrolEditor().getPatrol().getLegs());
 									}else{
 										tracks = GPSDataImport.convertTracks((List<Coordinate>)data, editor.getPatrolEditor().getPatrol().getLegs());
@@ -780,10 +787,12 @@ public class PatrolLegDayInputComposite {
 										PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
 										editor.getPatrolEditor().save(pldToSave);
 									}
-									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Tracks were imported for " + count + " patrol days.");
+									MessageDialog.openInformation(editor.getSite().getShell(), 
+											IMPORT_OK_DIALOG_TITLE, 
+											MessageFormat.format(Messages.PatrolLegDayInputComposite_TrackAllImportSuccessful_DailogMessage, new Object[]{ count }));
 								}else{
 									Track track = null;
-									if (data.equals("CreateFromWaypoints")){
+									if (data.equals(ImportGpsDataWizard.CREATE_FROM_WAYPOINTS)){
 										track = GPSDataImport.createTrackFromWaypoints(patrolLegDate);
 									}else{
 										track = GPSDataImport.convertToTrack((List<Coordinate>)data);
@@ -792,9 +801,13 @@ public class PatrolLegDayInputComposite {
 										track.setPatrolLegDay(patrolLegDate);
 										patrolLegDate.setTrack(track);
 										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
-										MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Track succesfully imported.");
+										MessageDialog.openInformation(editor.getSite().getShell(),
+												IMPORT_OK_DIALOG_TITLE, 
+												Messages.PatrolLegDayInputComposite_TrackSingleImportSuccessful_DailogMessage);
 									}else{
-										MessageDialog.openInformation(editor.getSite().getShell(), "Import Error", "Track could not be generated.  At least two points are required to generate tracks.");
+										MessageDialog.openInformation(editor.getSite().getShell(), 
+												Messages.PatrolLegDayInputComposite_ImportTrackError_DialogTitle, 
+												Messages.PatrolLegDayInputComposite_ImportTrackError_DialogMessage);
 									}
 									
 									editor.getPatrolEditor().save(patrolLegDate);
@@ -809,7 +822,7 @@ public class PatrolLegDayInputComposite {
 			});
 		} catch (Exception ex) {
 			dialog = null;
-			SmartPatrolPlugIn.displayLog("Error loading new patrol wizard. "
+			SmartPatrolPlugIn.displayLog(Messages.PatrolLegDayInputComposite_ErrorImportTracksWizard
 					+ ex.getMessage(), ex);
 				}
 		
@@ -825,14 +838,14 @@ public class PatrolLegDayInputComposite {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName("Loading Wizard");
+					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
 					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
 					
 					if (dialog != null) {
-						monitor.setTaskName("Displaying Input Wizard");
+						monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
 						try{
 							dialog.open();
-							monitor.setTaskName("Importing Data ...");
+							monitor.setTaskName(IMPORT_DATA_PROGRESS_MSG);
 							Object data = wizard.getImportedData();
 							boolean importAll = wizard.getImportAll();
 							if (data != null){
@@ -843,7 +856,9 @@ public class PatrolLegDayInputComposite {
 										for (PatrolLegDay day : modified){
 											PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, day);
 										}
-										MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", "Waypoints successfully imported for " + modified.size() + " days.");
+										MessageDialog.openInformation(editor.getSite().getShell(), 
+												IMPORT_OK_DIALOG_TITLE, 
+												MessageFormat.format(Messages.PatrolLegDayInputComposite_WaypointImportAllSuccess,new Object[]{modified.size()}));
 								}else{
 									int count = 0;
 									for (Waypoint w : wp){
@@ -855,12 +870,9 @@ public class PatrolLegDayInputComposite {
 									}
 									patrolLegDate.getWaypoints().addAll(wp);
 									PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
-									MessageDialog.openInformation(editor.getSite().getShell(), "Import Successful", count + " waypoints succesfully imported.");
+									MessageDialog.openInformation(editor.getSite().getShell(), IMPORT_OK_DIALOG_TITLE, MessageFormat.format(Messages.PatrolLegDayInputComposite_WaypointImportDaySuccess, new Object[]{count }));
 								}
 								editor.getPatrolEditor().save(wp);
-//								editor.setDirty(true);
-//								editor.getPatrolEditor().doSave(null);
-								
 							}
 							
 						}catch (Exception ex){
@@ -871,7 +883,7 @@ public class PatrolLegDayInputComposite {
 			});
 		} catch (Exception ex) {
 			dialog = null;
-			SmartPatrolPlugIn.displayLog("Error loading new patrol wizard. "
+			SmartPatrolPlugIn.displayLog(Messages.PatrolLegDayInputComposite_ErrorImportWaypointWizard
 					+ ex.getMessage(), ex);
 				}
 		
@@ -945,14 +957,14 @@ public class PatrolLegDayInputComposite {
 			return wp;
 		} else if (column == OtColumn.COMMENT) {
 			if (wp.getComment() == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
 			return wp;
 		}
 	
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	private String getWaypointValueAsString(Waypoint element, OtColumn column) {
@@ -971,38 +983,38 @@ public class PatrolLegDayInputComposite {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(
 						ca.getTime());
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.DIRECTION) {
 			if (wp.getDirection() != null) {
 				return String.valueOf(wp.getDirection());
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.DISTANCE) {
 			if (wp.getDistance() != null) {
 				return String.valueOf(wp.getDistance());
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.OBSERVATION) {
 			if (wp.getObservations() == null
 					|| wp.getObservations().size() == 0) {
-				return "(None)";
+				return Messages.PatrolLegDayInputComposite_NoObservationsLabel;
 			} else {
 				return wp.getObservationsAsString();
 			}
 		} else if (column == OtColumn.COMMENT) {
 			if (wp.getComment() == null) {
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
 			if (wp.getAttachments() == null || wp.getAttachments().size() == 0) {
-				return "(None)";
+				return Messages.PatrolLegDayInputComposite_NoAttachmentments_ColumnLabel;
 			} else {
-				return wp.getAttachments().size() + " Files";
+				return MessageFormat.format(Messages.PatrolLegDayInputComposite_AttachmentColumnLabel, new Object[]{wp.getAttachments().size() });
 			}
 		}
 
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	/**
@@ -1030,7 +1042,7 @@ public class PatrolLegDayInputComposite {
 		try{
 			rest = Integer.parseInt(restMinutes.getText());
 		}catch (Exception ex){
-			SmartPatrolPlugIn.log("Could not parse rest minutes", ex);
+			SmartPatrolPlugIn.log("Could not parse rest minutes", ex); //$NON-NLS-1$
 		}
 		patrolLegDate.setRestMinutes(rest);
 	}

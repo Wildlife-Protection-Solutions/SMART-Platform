@@ -24,13 +24,13 @@ package org.wcs.smart.patrol.model;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -51,6 +51,7 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Waypoint object
@@ -231,8 +232,8 @@ public class Waypoint {
 			
 		}
 		for (Entry<Category, Integer> item : added.entrySet()){
-			text.append(item.getKey().getName() + " (" + item.getValue() + ")");
-			text.append("; ");
+			text.append(item.getKey().getName() + " (" + item.getValue() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			text.append("; "); //$NON-NLS-1$
 		}
 		text.delete(text.length() - 2, text.length());
 		return text.toString();
@@ -283,7 +284,7 @@ public class Waypoint {
 					// copy file to emp location so it won't be deleted out from
 					// under us
 					File tmpLocation = File.createTempFile(
-							"smart_" + System.nanoTime(), "");
+							"smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
 					tmpLocation.deleteOnExit();
 					FileUtils.copyFile(sp.getFullFile(), tmpLocation);
 
@@ -292,7 +293,7 @@ public class Waypoint {
 					att.setWaypoint(wp);
 					wp.getAttachments().add(att);
 				} catch (IOException ex) {
-					SmartPatrolPlugIn.displayLog("Could not move attachment " + sp.getFilename(), ex);
+					SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.Waypoint_ErrorImportingAttachment, new Object[]{sp.getFilename()}), ex);
 				}
 
 			}

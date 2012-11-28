@@ -81,7 +81,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	@Override
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":");
+		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		txt = new Text(parent, SWT.BORDER);
@@ -110,7 +110,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 			@Override
 			public void handleEvent(Event event) {
 				Double v = getValue();
-				isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v == originalValue));
+				isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v.doubleValue() == originalValue.doubleValue()));
 				validate();
 			}});
 		
@@ -150,7 +150,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	 */
 	@Override
 	public void clear() {
-		txt.setText("");
+		txt.setText(""); //$NON-NLS-1$
 		validate();
 		this.isModified = false;
 		this.originalValue = null;
@@ -171,13 +171,13 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	@Override
 	public void setValue(Object x){
 		if (x != null & !(x instanceof Double)){
-			throw new IllegalStateException("Invalid value");
+			throw new IllegalStateException("Invalid value"); //$NON-NLS-1$
 		}
 		this.originalValue = (Double)x;
 		if (originalValue == null){
-			txt.setText("");
+			txt.setText(""); //$NON-NLS-1$
 		}else{
-			txt.setText(this.originalValue + "");
+			txt.setText(String.valueOf(this.originalValue));
 		}
 		validate();
 		this.isModified = false;

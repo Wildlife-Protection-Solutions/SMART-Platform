@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.observation;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -54,10 +55,12 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.observation.field.AttributeFieldFactory;
 import org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -75,7 +78,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AttributeWizardPage extends WizardPage implements IObservationWizardPage{
 
-	public static final String PAGE_NAME = "Attribute Wizard Page";
+	public static final String PAGE_NAME = Messages.AttributeWizardPage_PageName;
 
 	/* current categorry & attribute list */
 	private Category currentCategory;
@@ -180,7 +183,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		lbl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, false));
 		
 		lbl = new Label(header, SWT.NONE);
-		lbl.setText("Page " + (index+1) + " of " + ((ObservationWizard)getWizard()).getCategoryCount());
+		lbl.setText(MessageFormat.format(Messages.AttributeWizardPage_PageNumberLabel, new Object[]{(index+1),((ObservationWizard)getWizard()).getCategoryCount()}));
 		lbl.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL, false, false));
 		
 		lbl = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -201,7 +204,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			buttons.setLayout(new GridLayout(2, false));
 			
 			btnUpdate = new Button(buttons, SWT.PUSH);
-			btnUpdate.setText("Update Observation");
+			btnUpdate.setText(Messages.AttributeWizardPage_UpdateObsButton);
 			btnUpdate.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
 			btnUpdate.setEnabled(false);
 			btnUpdate.addSelectionListener(new SelectionAdapter() {
@@ -211,7 +214,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 			});
 			btnAdd = new Button(buttons, SWT.PUSH);
-			btnAdd.setText("Add Observation");
+			btnAdd.setText(Messages.AttributeWizardPage_AddObservation_Button);
 			btnAdd.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
 			btnAdd.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -235,7 +238,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			
 		}
 		scComp.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		setMessage("Enter the observation attributes for " + currentCategory.getFullCategoryName() + ".  Add multiple rows if required.");
+		setMessage(MessageFormat.format(Messages.AttributeWizardPage_PageMessage, new Object[]{currentCategory.getFullCategoryName()}));
 		validate();
 	}
 	
@@ -332,7 +335,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText(SmartUtils.formatStringForLabel(currentCategory.getName()) + " Observations: ");
+		lbl.setText(SmartUtils.formatStringForLabel(
+				MessageFormat.format(Messages.AttributeWizardPage_CategoryObservations_Label, new Object[]{currentCategory.getName()})));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		lbl.setFont(getBoldFont(lbl));
 		
@@ -348,7 +352,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		final Button btnEdit = new Button(buttons, SWT.PUSH);
-		btnEdit.setText("Edit");
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -371,7 +375,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			}
 		});
 		final Button btnDelete = new Button(buttons, SWT.PUSH);
-		btnDelete.setText("Delete");
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -439,9 +443,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	private MessageDialog getSaveObservationDialog(){
 		return new MessageDialog(
 				getShell(), 
-				"Waring", 
+				Messages.AttributeWizardPage_Warning_DialogTitle, 
 				 null,
-				"You have made modifications to the current observation.  Would you like to save these changes before proceeding?", 
+				Messages.AttributeWizardPage_SaveModificationsWarningMessage, 
 				MessageDialog.QUESTION, 
 				new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL}, 
 				0);
@@ -479,7 +483,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		for (IAttributeField<?> field : attributeFields){
 			String err = field.validate();
 			if (err != null){
-				MessageDialog.openError(getShell(), "Error", "Cannot create observation: " + err);
+				MessageDialog.openError(getShell(), Messages.AttributeWizardPage_Error_DialogTitle, Messages.AttributeWizardPage_CannotCreateObservationError_DialogMessage + err);
 				return null;
 			}
 			WaypointObservationAttribute att = new WaypointObservationAttribute();
@@ -567,7 +571,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 			}
 			if (observations.size() == 0){
-				if (!MessageDialog.openQuestion(getShell(), "No Data", "You have not entered any observation details are you sure you want to continue?")){
+				if (!MessageDialog.openQuestion(getShell(), Messages.AttributeWizardPage_DataObservations_DialogTitle, Messages.AttributeWizardPage_DataObservations_DialogMessage)){
 					//cancel and let the user enter data
 					return false;
 				}

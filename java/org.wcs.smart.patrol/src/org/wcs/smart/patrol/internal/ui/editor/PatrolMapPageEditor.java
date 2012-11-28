@@ -44,6 +44,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.udig.catalog.PatrolService;
@@ -66,7 +67,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	private PatrolService patrolService = null;
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
-	private Job addLayerJob = new Job("Add Layers Job") {
+	private Job addLayerJob = new Job(Messages.PatrolMapPageEditor_AddLayersJobName) {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -90,7 +91,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    		getMap().getViewportModel().addViewportModelListener(initListener);
 				
 			} catch (IOException e) {
-				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, "Error loading pages", e);
+				return new Status(IStatus.ERROR, Messages.PatrolMapPageEditor_UnknownError, IStatus.ERROR, Messages.PatrolMapPageEditor_Error_LoadingMapPage, e);
 			}
 			return Status.OK_STATUS;
 		}
@@ -100,14 +101,14 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job("Patrol Refresh Job"){
+    private Job refreshJob = new Job(Messages.PatrolMapPageEditor_RefreshPatrolLayers_Job){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (patrolService != null){
 				try {
 					patrolService.refresh(null);
 				} catch (IOException e) {
-					SmartPatrolPlugIn.log("Error refreshing patrol service.", e);
+					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers, e);
 				}
 			}
 			//clear selection
@@ -165,7 +166,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		if (!(input instanceof PatrolEditorInput)){
-			throw new RuntimeException("Invalid editor input.");
+			throw new RuntimeException("Invalid editor input."); //$NON-NLS-1$
 		}
 		super.init(site, input);
 		

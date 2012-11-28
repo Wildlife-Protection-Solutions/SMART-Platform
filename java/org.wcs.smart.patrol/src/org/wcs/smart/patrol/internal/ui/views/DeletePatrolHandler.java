@@ -1,6 +1,7 @@
 package org.wcs.smart.patrol.internal.ui.views;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.Iterator;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -16,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 
 public class DeletePatrolHandler extends AbstractHandler {
@@ -48,10 +50,9 @@ public class DeletePatrolHandler extends AbstractHandler {
 											.openConfirm(
 													Display.getCurrent()
 															.getActiveShell(),
-													"Delete Patrol",
-													"Are you sure you want to delete patrol "
-															+ in.getPatrolId()
-															+ ".  This action cannot be undone.")) {
+													Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle,
+													MessageFormat.format(
+													Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage, new Object[]{in.getPatrolId()}))) {
 										canDelete = true;
 									}
 									
@@ -69,9 +70,8 @@ public class DeletePatrolHandler extends AbstractHandler {
 									public void run() {
 										MessageDialog.openInformation(Display
 												.getCurrent().getActiveShell(),
-												"Delete Patrol",
-												"Patrol " + in.getPatrolId()
-														+ " successfully deleted.");
+												Messages.DeletePatrolHandler_DeletePatrol_DialogTitle,
+												MessageFormat.format(Messages.DeletePatrolHandler_DeletePatrol_DialogMessage, new Object[]{in.getPatrolId()}));
 									}});
 								
 							} catch (final Exception ex) {
@@ -79,9 +79,7 @@ public class DeletePatrolHandler extends AbstractHandler {
 									@Override
 									public void run() {
 										SmartPatrolPlugIn.displayLog(
-												"Patrol " + in.getPatrolId()
-														+ " could not be deleted. ",
-												ex);
+												MessageFormat.format(Messages.DeletePatrolHandler_DeletePatrol_ErrorMessage, new Object[]{in.getPatrolId()}),ex);
 									}});
 							}
 						}
@@ -91,7 +89,7 @@ public class DeletePatrolHandler extends AbstractHandler {
 			});
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(
-					"Patrols could not be deleted. ",
+					Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol,
 					ex);
 		}
 		

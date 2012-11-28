@@ -2,6 +2,7 @@ package org.wcs.smart.patrol.xml.export;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -51,15 +53,17 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class MultiPatrolExportDialog extends TitleAreaDialog {
 
+	private static final String LOADING_TEXT = Messages.MultiPatrolExportDialog_LoadingText;
+
 	private static final int MAX_RESULTS = 20; 
 	
-	private static final String SHOW_ALL_RESULTS = "Only the last " + MAX_RESULTS + " patrols are shown.  Click <a>here</a> to see all patrols";
-	private static final String SHOW_RESULTS = "Click <a>here</a> to show only the last " + MAX_RESULTS + " patrols.";
+	private static final String SHOW_ALL_RESULTS = MessageFormat.format(Messages.MultiPatrolExportDialog_ShowAllResults_Label, new Object[]{MAX_RESULTS});
+	private static final String SHOW_RESULTS = MessageFormat.format(Messages.MultiPatrolExportDialog_FilterResults_Label, new Object[]{MAX_RESULTS} );
 	
-	private static final String OUTPUT_DIR = "outputDir";
-	private static final String INCLUDE_ATTACHMENT = "attachements";
+	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
+	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
 	
-	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.patrol.export.dialog");
+	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.patrol.export.dialog"); //$NON-NLS-1$
 	static{
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
 	}
@@ -126,7 +130,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button b = createButton(parent, IDialogConstants.OK_ID, "Export", true);
+		Button b = createButton(parent, IDialogConstants.OK_ID, Messages.MultiPatrolExportDialog_ExportButton, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 
@@ -145,7 +149,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(3, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Destination Folder*:");
+		lbl.setText(Messages.MultiPatrolExportDialog_DestinationFolderLabel + "*:");  //$NON-NLS-1$
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -166,7 +170,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		}
 				
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.MultiPatrolExportDialog_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -184,7 +188,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		});
 
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("Include Attachments**:");
+		lbl.setText(Messages.MultiPatrolExportDialog_IncludeAttachmentsLabel + "**:");  //$NON-NLS-1$
 		btnIncludeAttachments = new Button(main, SWT.CHECK);
 		btnIncludeAttachments.setSelection(dialogSettings.getBoolean(INCLUDE_ATTACHMENT));
 			
@@ -200,7 +204,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 			
 			@Override
 			public void handleEvent(Event event) {
-				String[][] loadingdata = {{"Loading", null}}; 
+				String[][] loadingdata = {{LOADING_TEXT, null}}; 
 				patrols.setInput( loadingdata );
 				patrols.refresh();
 			
@@ -249,7 +253,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 			}
 		});
 		patrols.setContentProvider(ArrayContentProvider.getInstance());
-		String[][] loadingdata = {{"Loading", null}}; 
+		String[][] loadingdata = {{LOADING_TEXT, null}}; 
 		patrols.setInput( loadingdata );
 		loadPatrols(false);
 		
@@ -259,7 +263,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		lowerComp.setLayout(gl);
 		
 		final Link selectAll = new Link(lowerComp, SWT.NONE);
-		selectAll.setText("<a>Select All</a>");
+		selectAll.setText("<a>" + Messages.MultiPatrolExportDialog_SelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		
 		lbl = new Label(lowerComp, SWT.VERTICAL | SWT.SEPARATOR);
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
@@ -267,7 +271,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		lbl.setLayoutData(gd);
 		
 		final Link deselectAll = new Link(lowerComp, SWT.NONE);
-		deselectAll.setText("<a>De-Select All</a>");
+		deselectAll.setText("<a>" + Messages.MultiPatrolExportDialog_DeselectAll_Label + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		
 		Listener listener = new Listener(){
 			@Override
@@ -280,32 +284,32 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		lbl = new Label(main, SWT.WRAP);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd.widthHint = 250;
-		lbl.setText("*Existing files may automatically be overwriteen.");
+		lbl.setText("*" + Messages.MultiPatrolExportDialog_OverwriteWarningLabel); //$NON-NLS-1$
 		lbl.setLayoutData(gd);
 		
 		
 		lbl = new Label(main, SWT.WRAP);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd.widthHint = 250;
-		lbl.setText("**If attachments are included a zip file will be generated that includes the patrol and attachments.  Otherwise only xml file is exported.");
+		lbl.setText("**" + Messages.MultiPatrolExportDialog_AttachmentInfoLabel); //$NON-NLS-1$
 		lbl.setLayoutData(gd);
 		
-		setMessage("Export selected patrols to xml files.");
-		getShell().setText("Export Patrols");
+		setMessage(Messages.MultiPatrolExportDialog_Message);
+		getShell().setText(Messages.MultiPatrolExportDialog_Title);
 		return composite;
 
 	}
 	
 	private void loadPatrols(final boolean loadAll){
-		Job loadPatrols = new Job("loading patrols"){
+		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
-					String query = "SELECT uuid, id, startDate, endDate FROM " + Patrol.class.getSimpleName() + " WHERE conservationArea = :ca ORDER BY startDate Desc";
+					String query = "SELECT uuid, id, startDate, endDate FROM " + Patrol.class.getSimpleName() + " WHERE conservationArea = :ca ORDER BY startDate Desc"; //$NON-NLS-1$ //$NON-NLS-2$
 					Query q = s.createQuery(query);
-					q.setParameter("ca", SmartDB.getCurrentConservationArea());
+					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 					if (!loadAll){
 						q.setMaxResults(MAX_RESULTS);
 					}
@@ -315,7 +319,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 					for(Object x : results){
 						Object[] row = (Object[])x;
 						
-						String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[2]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[3]) + "]";  
+						String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[2]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[3]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						Object[] thisdata = {pname, (byte[])row[0]};
 						data[counter++] = thisdata;
 					}

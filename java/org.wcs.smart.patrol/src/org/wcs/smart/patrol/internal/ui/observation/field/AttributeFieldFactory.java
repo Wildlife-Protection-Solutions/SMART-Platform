@@ -51,6 +51,6 @@ public class AttributeFieldFactory {
 		}else if (attribute.getType() == AttributeType.TREE){
 			return new TreeAttributeField(attribute);
 		}
-		throw new IllegalStateException("Invalid attribute type.");
+		throw new IllegalStateException("Invalid attribute type."); //$NON-NLS-1$
 	}
 }

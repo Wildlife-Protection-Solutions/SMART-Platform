@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 
@@ -47,7 +48,7 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 	/**
 	 */
 	protected PatrolTypeWizardPage() {
-		super("Patrol Type");
+		super(Messages.PatrolTypeWizardPage_PageName);
 		
 	}
 
@@ -66,7 +67,7 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Choose the patrol type:");
+		lbl.setText(Messages.PatrolTypeWizardPage_SelectType_Label);
 		
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
@@ -88,11 +89,11 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 			setPageComplete(true);
 		}else{
 			lbl = new Label(main, SWT.MULTI);
-			lbl.setText("No valid patrol types were found for this conservation area.  Please contact the conservation area administrator.");
+			lbl.setText(Messages.PatrolTypeWizardPage_Error_NoTypesFound);
 			setPageComplete(false);
 		}
 		
-		setMessage("Select the patrol type");
+		setMessage(Messages.PatrolTypeWizardPage_PageMessage);
 		super.setControl(main);
 
 	}

@@ -42,6 +42,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.patrol.gpx.WptType;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Wizard page to select the waypoints or track points to import.
@@ -53,7 +54,7 @@ public class ImportWpSelectWizardPage extends WizardPage {
 	/**
 	 * 
 	 */
-	public static final String PAGE_NAME = "Select Waypoints";
+	public static final String PAGE_NAME = Messages.ImportWpSelectWizardPage_PageName;
 	
 	
 	private CheckboxTableViewer tblWaypoint;
@@ -81,11 +82,11 @@ public class ImportWpSelectWizardPage extends WizardPage {
 					WptType wp = (WptType) element;
 					StringBuilder value = new StringBuilder(wp.getName());
 					
-					if (wp.getCmt() != null && !wp.getCmt().toLowerCase().equals("null")){
-						value.append (" (" + wp.getCmt() + ") ");
+					if (wp.getCmt() != null && !wp.getCmt().toLowerCase().equals("null")){ //$NON-NLS-1$
+						value.append (" (" + wp.getCmt() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					if (wp.getTime() != null){
-						value.append(" [ " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM).format(wp.getTime().toGregorianCalendar().getTime()) + "]");
+						value.append(" [ " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM).format(wp.getTime().toGregorianCalendar().getTime()) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					return value.toString();
 				}
@@ -99,7 +100,7 @@ public class ImportWpSelectWizardPage extends WizardPage {
 			public void keyPressed(KeyEvent e) {
 				if (e.character == ' '){
 					boolean value = tblWaypoint.getChecked(   ((IStructuredSelection)tblWaypoint.getSelection()).getFirstElement() );
-					for (Iterator iterator = ((IStructuredSelection)tblWaypoint.getSelection()).iterator(); iterator.hasNext();) {
+					for (Iterator<?> iterator = ((IStructuredSelection)tblWaypoint.getSelection()).iterator(); iterator.hasNext();) {
 						Object tp = (Object) iterator.next();
 						tblWaypoint.setChecked(tp, !value);
 						
@@ -126,7 +127,7 @@ public class ImportWpSelectWizardPage extends WizardPage {
 		links.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		Link lnkSelectAll = new Link(links, SWT.NONE);
-		lnkSelectAll.setText("<a>Select All</a>");
+		lnkSelectAll.setText("<a>" + Messages.ImportWpSelectWizardPage_SelectAll + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkSelectAll.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				tblWaypoint.setAllChecked(true);
@@ -134,7 +135,7 @@ public class ImportWpSelectWizardPage extends WizardPage {
 		});
 		
 		lnkSelectAll = new Link(links, SWT.NONE);
-		lnkSelectAll.setText("<a>De-select All</a>");
+		lnkSelectAll.setText("<a>" + Messages.ImportWpSelectWizardPage_DeSelectAll + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkSelectAll.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				tblWaypoint.setAllChecked(false);

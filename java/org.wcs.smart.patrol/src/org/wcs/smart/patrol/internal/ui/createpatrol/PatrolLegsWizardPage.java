@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolLegsComposite;
 import org.wcs.smart.patrol.model.Patrol;
@@ -37,7 +38,7 @@ import org.wcs.smart.patrol.model.Patrol;
 public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 
 
-	public static final String PAGE_NAME = "Patrol Legs";
+	public static final String PAGE_NAME = Messages.PatrolLegsWizardPage_PageName;
 
 	private PatrolLegsComposite legComposite; 
 	
@@ -68,7 +69,7 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 				
 			}
 		});
-		setMessage("Setup Patrol Legs.  Patrol legs are identified by changes in the patrol leader or the patrol splitting into multiple groups.  Use the buttons below to add, remove, or edit legs.");
+		setMessage(Messages.PatrolLegsWizardPage_PageMessage);
 		super.setControl(comp);
 	}
 	

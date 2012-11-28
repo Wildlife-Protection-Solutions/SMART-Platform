@@ -69,7 +69,7 @@ public class PatrolGeoResourceInfo extends IGeoResourceInfo {
 			}, null);
 			this.bounds = env;
 		} catch (IOException e) {
-			SmartPlugIn.log("Could not determine bounds for smart resource : " + resource.dataType, e);
+			SmartPlugIn.log("Could not determine bounds for smart resource: " + resource.dataType, e); //$NON-NLS-1$
 		}
 	}
 }

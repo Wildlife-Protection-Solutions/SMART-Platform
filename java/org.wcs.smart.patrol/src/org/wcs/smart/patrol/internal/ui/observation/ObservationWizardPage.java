@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -51,7 +52,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  */
 public class ObservationWizardPage extends WizardPage implements IObservationWizardPage{
 
-	public static final String PAGE_NAME = "Observation Categories";
+	public static final String PAGE_NAME = Messages.ObservationWizardPage_PageName;
 
 	private TreeViewer dmTreeViewer = null;
 	private SearchTree searchTree = null;
@@ -99,7 +100,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 			}
 		});
 		
-		setMessage("Select the category(ies) of observation made at the waypoint.  More than one category can be selected here.");
+		setMessage(Messages.ObservationWizardPage_PageMessage);
 		setPageComplete(searchTree.selectedList.size() > 0);
 		((ObservationWizard)getWizard()).setCanFinish(canFinish());
 		setControl(main);

@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Dialog for selecting file to import
@@ -57,6 +58,9 @@ import org.eclipse.swt.widgets.Text;
  * @since 1.0.0
  */
 public class ImportPatrolDialog  extends TitleAreaDialog {
+
+	private static final String[] FILTER_NAMES = new String[] { "*.zip;*.xml", "*.zip", "*.xml", "*.*" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	private static final String[] FILTER_EXTENSIONS = new String[] { Messages.ImportPatrolDialog_PatrolFilters_FilterName, Messages.ImportPatrolDialog_ZipFilter_FilterName, Messages.ImportPatrolDialog_XmlFilter_FilterName, Messages.ImportPatrolDialog_AllFiles_FilterName };
 
 	private List<String> selectedFiles;
 	
@@ -112,7 +116,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button b = createButton(parent, IDialogConstants.OK_ID, "Import", true);
+		Button b = createButton(parent, IDialogConstants.OK_ID, Messages.ImportPatrolDialog_Import_Button, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 
@@ -139,7 +143,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		btnOpSingle = new Button(main, SWT.RADIO);
-		btnOpSingle.setText("Import Single Patrol");
+		btnOpSingle.setText(Messages.ImportPatrolDialog_ImportOpSingleFile);
 		btnOpSingle.addListener(SWT.Selection, new Listener() {			
 			@Override
 			public void handleEvent(Event event) {
@@ -160,7 +164,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		((GridLayout)single.getLayout()).marginLeft = 15;
 		
 		Label lbl = new Label(single, SWT.NONE);
-		lbl.setText("Source File:");
+		lbl.setText(Messages.ImportPatrolDialog_FileLabel);
 		txtFile = new Text(single, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtFile.addModifyListener(new ModifyListener() {
@@ -173,14 +177,14 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 			}
 		});
 		btnFileBrowse = new Button(single, SWT.NONE);
-		btnFileBrowse.setText("Browse...");
+		btnFileBrowse.setText(Messages.ImportPatrolDialog_BrowseButton);
 		btnFileBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(ImportPatrolDialog.this
 						.getShell(), SWT.OPEN);
-				fd.setFilterExtensions(new String[] { "*.zip", "*.xml", "*.*" });
-				fd.setFilterNames(new String[] { "zip (*.zip)", "xml (*.xml)", "All Files (*.*)" });
+				fd.setFilterExtensions(FILTER_EXTENSIONS);
+				fd.setFilterNames(FILTER_NAMES);
 				
 				fd.setFilterPath(txtFile.getText());
 				fd.setFileName(txtFile.getText());
@@ -195,7 +199,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		});
 		
 		btnOpMuliple = new Button(main, SWT.RADIO);
-		btnOpMuliple.setText("Import Multiple Patrols");
+		btnOpMuliple.setText(Messages.ImportPatrolDialog_OpImportMultiplePatrols);
 		btnOpMuliple.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -212,7 +216,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		multi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)multi.getLayout()).marginLeft = 15;
 		lbl = new Label(multi, SWT.NONE);
-		lbl.setText("Files:");
+		lbl.setText(Messages.ImportPatrolDialog_FilesLabel);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, true));
 		
 		lstFiles = new ListViewer(multi, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -228,7 +232,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
 		
 		btnRemove = new Button(buttons, SWT.PUSH);
-		btnRemove.setText("Remove Files");
+		btnRemove.setText(Messages.ImportPatrolDialog_RemoveButton);
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -242,14 +246,14 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 			}	
 		});
 		btnAdd = new Button(buttons, SWT.PUSH);
-		btnAdd.setText("Add Files...");
+		btnAdd.setText(Messages.ImportPatrolDialog_AddButton);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN );
 				
-				fd.setFilterExtensions(new String[] { "*.zip;*.xml", "*.zip", "*.xml", "*.*" });
-				fd.setFilterNames(new String[] { "Patrol Files (*.zip, *.xml)", "zip (*.zip)", "xml (*.xml)", "All Files (*.*)" });
+				fd.setFilterExtensions(FILTER_EXTENSIONS);
+				fd.setFilterNames(FILTER_NAMES);
 				
 				String x = fd.open();
 				if (x != null){
@@ -269,9 +273,9 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		txtFile.setEnabled(btnOpSingle.getSelection());
 		btnFileBrowse.setEnabled(btnOpSingle.getSelection());
 		
-		setMessage("Select the patrol data location.");
-		setTitle("Import Patrol Data");
-		getShell().setText("Import Patrols");
+		setMessage(Messages.ImportPatrolDialog_DialogMessage);
+		setTitle(Messages.ImportPatrolDialog_DialogTitle);
+		getShell().setText(Messages.ImportPatrolDialog_DialogText);
 		return composite;
 	}
 	

@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachment;
 
@@ -113,9 +115,9 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		if (value == null){
 			return;
 		}
-		String text = "(None)";
+		String text = Messages.AttachmentCellEditor_NoAttachment_Label;
 		if ( ((Waypoint)value).getAttachments() != null && ((Waypoint)value).getAttachments().size() > 0){
-			text = ((Waypoint)value).getAttachments().size() + " Files";
+			text = MessageFormat.format(Messages.AttachmentCellEditor_TableCell_Label, new Object[]{((Waypoint)value).getAttachments().size()});
 		}
 		getDefaultLabel().setText( text);  
     }

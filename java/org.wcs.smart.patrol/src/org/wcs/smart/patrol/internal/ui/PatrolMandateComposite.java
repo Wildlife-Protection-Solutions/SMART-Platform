@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolMandate;
 
@@ -69,7 +70,7 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Patrol Mandate:");
+		lbl.setText(Messages.PatrolMandateComposite_Mandate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		patrolMandateViewer = new ComboViewer(center, SWT.READ_ONLY);
@@ -103,7 +104,7 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 			mandates = PatrolHibernateManager.getActiveMandates(p.getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol mandates.", ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolMandateComposite_Error_LoadingMandates, ex);
 			session.getTransaction().rollback();
 			session.close();
 			return;
@@ -145,7 +146,7 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Mandate";
+		return Messages.PatrolMandateComposite_Title;
 	}
 	
 	/**

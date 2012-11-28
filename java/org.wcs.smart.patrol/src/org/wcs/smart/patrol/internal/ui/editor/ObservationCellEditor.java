@@ -55,6 +55,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.TreeDropDown;
 import org.wcs.smart.patrol.internal.ui.observation.ObservationWizard;
 import org.wcs.smart.patrol.internal.ui.observation.ObservationWizardDialog;
@@ -90,7 +91,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 	/**
 	 * Job for loading data model for tree drop down
 	 */
-	private Job loadDataModel = new Job("Loading data mdoel") {
+	private Job loadDataModel = new Job(Messages.ObservationCellEditor_LoadDataModel_JobName) {
 
 		@Override
 		public IStatus run(IProgressMonitor monitor) {
@@ -360,7 +361,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 	 */
 	@Override
 	protected void updateContents(Object value) {
-		String text = "(None)";
+		String text = Messages.ObservationCellEditor_NoObservations_Label;
 		if (value != null && value instanceof Waypoint
 				&& ((Waypoint) value).getObservations() != null
 				&& ((Waypoint) value).getObservations().size() > 0) {

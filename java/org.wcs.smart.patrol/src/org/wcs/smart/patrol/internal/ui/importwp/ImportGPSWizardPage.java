@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -43,6 +44,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
 
 /**
@@ -55,8 +57,9 @@ public class ImportGPSWizardPage extends WizardPage {
 	/**
 	 * 
 	 */
-	public static final String PAGE_NAME = "GPS Device";
+	public static final String PAGE_NAME = Messages.ImportGPSWizardPage_PageName;
 
+	private static final String ERROR_COULD_NOT_READ_DEVICES = Messages.ImportGPSWizardPage_Error_CouldNotReadDevices;
 	private Button opAll;
 	private Button opSelect;
 	private Button opDate;
@@ -100,7 +103,7 @@ public class ImportGPSWizardPage extends WizardPage {
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("GPS Device Type:");
+		lbl.setText(Messages.ImportGPSWizardPage_DeviceType_Label);
 		
 		gpsViewer = new ComboViewer(center, SWT.READ_ONLY);
 		gpsViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -113,7 +116,7 @@ public class ImportGPSWizardPage extends WizardPage {
 		
 
 		opAll = new Button(ops, SWT.RADIO);
-		opAll.setText("Import All (and assign to correct day)");
+		opAll.setText(Messages.ImportGPSWizardPage_ImportAllOption);
 		opAll.setSelection(true);
 		opAll.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -125,7 +128,10 @@ public class ImportGPSWizardPage extends WizardPage {
 		importAll = true;
 		
 		opDate = new Button(ops, SWT.RADIO);
-		opDate.setText("Import Only " +  ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s  for " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate()) );
+		opDate.setText(MessageFormat.format(
+			Messages.ImportGPSWizardPage_OImportOnlyCurrentDayOp,
+			new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(),
+					DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
 		opDate.setSelection(false);
 		opDate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -136,7 +142,14 @@ public class ImportGPSWizardPage extends WizardPage {
 		});
 		
 		opSelect = new Button(ops, SWT.RADIO);
-		opSelect.setText("Select which " + ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s to import for " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate()) );
+		opSelect.setText(MessageFormat.format(
+				Messages.ImportGPSWizardPage_SelectPointsToImportOp,
+				new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(),
+						DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
+
+		
+		
+		
 		opSelect.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -151,8 +164,9 @@ public class ImportGPSWizardPage extends WizardPage {
 		try {
 			supportedDevices = GPSBabel.getDeviceOptions();
 			if (supportedDevices == null || supportedDevices.size() == 0){
-				SmartPatrolPlugIn.displayLog("Could not read support gps devices.  Please ensure GPS Babel is installed correctly.", null);
-				setErrorMessage("Could not read support gps devices.  Please ensure GPS Babel is installed correctly.");
+				
+				SmartPatrolPlugIn.displayLog(ERROR_COULD_NOT_READ_DEVICES, null);
+				setErrorMessage(ERROR_COULD_NOT_READ_DEVICES);
 			}
 			
 			DeviceSelection[] devices = new DeviceSelection[supportedDevices.size()];
@@ -162,7 +176,7 @@ public class ImportGPSWizardPage extends WizardPage {
 				Entry<String, String> type = iterator.next();
 				DeviceSelection ds = new DeviceSelection(type.getKey(), type.getValue());;
 				devices[i++] = ds;
-				if (type.getKey().toLowerCase().contains("garmin")){
+				if (type.getKey().toLowerCase().contains("garmin")){ //$NON-NLS-1$
 					toSelect = ds;
 				}
 				
@@ -170,11 +184,11 @@ public class ImportGPSWizardPage extends WizardPage {
 			gpsViewer.setInput(devices);
 			gpsViewer.setSelection(new StructuredSelection(toSelect));
 		} catch (IOException e) {
-			SmartPatrolPlugIn.displayLog("Could not read support gps devices.  Please ensure GPS Babel is installed correctly.", null);
-			setErrorMessage("Could not read support gps devices.  Please ensure GPS Babel is installed correctly.");
+			SmartPatrolPlugIn.displayLog(ERROR_COULD_NOT_READ_DEVICES, null);
+			setErrorMessage(ERROR_COULD_NOT_READ_DEVICES);
 		}
 		updateComplete();
-		super.setMessage("Select the type of device.");
+		super.setMessage(Messages.ImportGPSWizardPage_DialogMessage);
 		
 	}
 	

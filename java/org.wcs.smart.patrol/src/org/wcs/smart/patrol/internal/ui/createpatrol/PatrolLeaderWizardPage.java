@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.LeaderPilotComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -46,7 +47,7 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 	 * @param pageName
 	 */
 	protected PatrolLeaderWizardPage() {
-		super("Patrol Leader");
+		super(Messages.PatrolLeaderWizardPage_PageName);
 	}
 	
 	/**
@@ -84,9 +85,9 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 	void initModel(Patrol p, Session session) {
 		leaderComposite.setValues(p, session);
     	if (p.hasPilot()){
-    		setMessage("Select the patrol leader and patrol pilot.");
+    		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_LeaderPilot);
     	}else{
-    		setMessage("Select the patrol leader.");
+    		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_Leader);
     	}	
 	}
 }

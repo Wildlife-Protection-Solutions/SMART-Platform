@@ -76,7 +76,7 @@ public class StringAttributeField implements IAttributeField<String>{
 	@Override
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":");
+		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txt = new Text(parent, SWT.BORDER);
@@ -95,7 +95,7 @@ public class StringAttributeField implements IAttributeField<String>{
 
 		validate();
 		this.isModified = false;
-		this.originalValue = "";
+		this.originalValue = ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -125,10 +125,10 @@ public class StringAttributeField implements IAttributeField<String>{
 	 */
 	@Override
 	public void clear() {
-		txt.setText("");
+		txt.setText(""); //$NON-NLS-1$
 		validate();
 		this.isModified = false;
-		this.originalValue = "";
+		this.originalValue = ""; //$NON-NLS-1$
 	}
 	
 	/**
@@ -146,11 +146,11 @@ public class StringAttributeField implements IAttributeField<String>{
 	@Override
 	public void setValue(Object x){
 		if (x != null & !(x instanceof String)){
-			throw new IllegalStateException("Invalid value");
+			throw new IllegalStateException("Invalid value"); //$NON-NLS-1$
 		}
 		this.originalValue = (String)x;
 		if (originalValue == null){
-			txt.setText("");
+			txt.setText(""); //$NON-NLS-1$
 		}else{
 			txt.setText(originalValue);
 		}

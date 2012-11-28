@@ -46,8 +46,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -59,7 +61,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ObservationSummaryWizardPage  extends WizardPage implements IObservationWizardPage{
 
-	public static final String PAGE_NAME = "Observation Summary Page";
+	public static final String PAGE_NAME = Messages.ObservationSummaryWizardPage_PageName;
 
 	public Font boldFont = null;
 	private ObservationWizardPage nextPage = null;
@@ -117,7 +119,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			Link lnkDelete = new Link(lblComp, SWT.NONE);
-			lnkDelete.setText("<a>Delete</a>");
+			lnkDelete.setText("<a>" + DialogConstants.DELETE_BUTTON_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnkDelete.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e){
 					deleteCategory(ob.getKey(), entryComp);
@@ -127,7 +129,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			Link lnkEdit = null;
 			if (ob.getKey().hasAttributes()){
 				lnkEdit = new Link(lblComp, SWT.NONE);
-				lnkEdit.setText("<a>Edit</a>");
+				lnkEdit.setText("<a>" + DialogConstants.EDIT_BUTTON_TEXT + "</a>");  //$NON-NLS-1$//$NON-NLS-2$
 			}else{
 				lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
@@ -180,7 +182,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			}
 		}
 		
-		super.setMessage("Review the observation data you have entered.  Use the edit button to edit observations.  Press 'Next' to enter another observation. 'Finish' if the observations are complete.");
+		super.setMessage(Messages.ObservationSummaryWizardPage_PageMessage);
 		super.setPageComplete(true);
 		((ObservationWizard)getWizard()).setCanFinish(true);
 		

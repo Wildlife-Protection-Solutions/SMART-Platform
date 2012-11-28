@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import org.wcs.smart.patrol.gpx.GpxType;
 import org.wcs.smart.patrol.gpx.TrkType;
 import org.wcs.smart.patrol.gpx.TrksegType;
 import org.wcs.smart.patrol.gpx.WptType;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -69,7 +71,7 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class GPSDataImport {
 
-	private static final String GPX_METADATA_CLASSES = "org.wcs.smart.patrol.gpx";
+	private static final String GPX_METADATA_CLASSES = "org.wcs.smart.patrol.gpx"; //$NON-NLS-1$
 	
 	/**
 	 * 
@@ -79,8 +81,8 @@ public class GPSDataImport {
 	 * @since 1.0.0
 	 */
 	public enum ImportType{
-		WAYPOINT ("Waypoint", "Select the waypoints to import.  The name and date/time of the waypoint is listed below.  If the date/time is not listed it could not be determined."), 
-		TRACK("Track", "Select the track points to import.  Track points listed below contain the track name and the datetime (if available) of the track point.");
+		WAYPOINT (Messages.GPSDataImport_WaypointName, Messages.GPSDataImport_WaypointImportDescription), 
+		TRACK(Messages.GPSDataImport_TrackName, Messages.GPSDataImport_TrackImportDescrption);
 		
 		public String guiName;
 		public String importDesc;
@@ -105,10 +107,10 @@ public class GPSDataImport {
 		
 		final HashMap<ImportType, Object> data = new HashMap<ImportType, Object>();
 
-		monitor.setTaskName("Importing Data from GPS Device");
+		monitor.setTaskName(Messages.GPSDataImport_Progress_ImportingFromGPS);
 		File f = GPSBabel.getData(deviceType, dataType);
 		try {
-			monitor.setTaskName("Reading data");
+			monitor.setTaskName(Messages.GPSDataImport_Progress_ReadingData);
 			Map<ImportType, Object> vals = convertGpx(Collections.singletonList(f.getCanonicalPath()), day, dataType, monitor);
 			for (ImportType type : dataType) {
 				data.put(type, vals.get(type));
@@ -117,7 +119,7 @@ public class GPSDataImport {
 			try {
 				f.delete();
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.log("Error deleting patrol data file.", ex);
+				SmartPatrolPlugIn.log("Error deleting patrol data file.", ex); //$NON-NLS-1$
 			}
 		}
 
@@ -134,23 +136,23 @@ public class GPSDataImport {
 	public static List<TrkType> getTracksGpx(File gpxFile, IProgressMonitor monitor){
 		GpxType type = null;
 		try {
-			monitor.subTask("Reading gpx data.");
+			monitor.subTask(Messages.GPSDataImport_TrackProgress_ReadingGPXData);
 			JAXBContext context = JAXBContext.newInstance(GPX_METADATA_CLASSES);
 			Unmarshaller un = context.createUnmarshaller();
 			Object o = un.unmarshal(gpxFile);
 			type = (GpxType) ((JAXBElement<?>) o).getValue();
 		} catch (Exception ex) {
-			SmartPatrolPlugIn.displayLog("Could not read data from file "
-					+ gpxFile.getAbsolutePath() + ": " + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(MessageFormat.format(
+					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
 			return null;
 		}
 		
 		if (type == null){
-			SmartPatrolPlugIn.displayLog("Could not parse file " + gpxFile.getAbsolutePath(), null);
+			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackError_CouldNotParseFile, new Object[]{ gpxFile.getAbsolutePath()}), null);
 			return null;
 		}
 		
-		monitor.subTask("Parsing tracks.");
+		monitor.subTask(Messages.GPSDataImport_Progress_ParsingTracks);
 		List<TrkType> tracks = type.getTrk();
 		return tracks;
 	}
@@ -341,22 +343,23 @@ public class GPSDataImport {
 			File gpxFile = new File(file);
 			GpxType type = null;
 			try {
-				monitor.subTask("Reading gpx data.");
+				monitor.subTask(Messages.GPSDataImport_WaypointProgress_ReadingGpx);
 				JAXBContext context = JAXBContext.newInstance(GPX_METADATA_CLASSES);
 				Unmarshaller un = context.createUnmarshaller();
 				Object o = un.unmarshal(gpxFile);
 				type = (GpxType) ((JAXBElement<?>) o).getValue();
 			} catch (Exception ex) {
-				displayLog("Could not read data from file "
-						+ gpxFile.getAbsolutePath() + ": " + ex.getMessage(), ex);
+				displayLog(MessageFormat.format(
+						Messages.GPSDataImport_WaypointError_CouldNotReadFile,
+						new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
 				continue;
 			}
 		
 			if (type == null){
-				displayLog("Could not parse file " + gpxFile.getAbsolutePath(), null);
+				displayLog(MessageFormat.format(Messages.GPSDataImport_WaypointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
 				continue;
 			}
-			monitor.subTask("Parsing waypoints.");
+			monitor.subTask(Messages.GPSDataImport_Progress_ParsingWaypoints);
 			waypoints.addAll(type.getWpt());
 		}
 		
@@ -387,22 +390,22 @@ public class GPSDataImport {
 			File gpxFile = new File(file);
 			GpxType type = null;
 			try {
-				monitor.subTask("Reading gpx data: '" + gpxFile.toString() + "'");
+				monitor.subTask(MessageFormat.format(Messages.GPSDataImport_Progress_ReadingGpxFileName, new Object[]{gpxFile.toString()}));
 				JAXBContext context = JAXBContext.newInstance(GPX_METADATA_CLASSES);
 				Unmarshaller un = context.createUnmarshaller();
 				Object o = un.unmarshal(gpxFile);
 				type = (GpxType) ((JAXBElement<?>) o).getValue();
 			} catch (Exception ex) {
-				displayLog("Could not read data from file: " + gpxFile.getAbsolutePath() + ": " + ex.getMessage(), ex);
+				displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotRead, new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
 				continue;
 			}
 
 			if (type == null) {
-				displayLog("Could not parse file: " + gpxFile.getAbsolutePath(), null);
+				displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
 				continue;
 			}
 
-			monitor.subTask("Parsing track points.");
+			monitor.subTask(Messages.GPSDataImport_Progress_ParsingTrackPoints);
 			for (TrkType track : type.getTrk()) {
 				String name = track.getName();
 				for (TrksegType seg : track.getTrkseg()) {
@@ -445,7 +448,7 @@ public class GPSDataImport {
 		} else if (wptType.getCmt() != null) {
 			try {
 				// am-pm
-				SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy h:mm:ssa");
+				SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy h:mm:ssa"); //$NON-NLS-1$
 				wpdt = sdf.parse(wptType.getCmt());
 			} catch (ParseException e) {
 			}
@@ -453,7 +456,7 @@ public class GPSDataImport {
 				try {
 					// 24hr
 					SimpleDateFormat sdf = new SimpleDateFormat(
-							"dd-MMM-yy h:mm:ss");
+							"dd-MMM-yy h:mm:ss"); //$NON-NLS-1$
 					wpdt = sdf.parse(wptType.getCmt());
 				} catch (ParseException e) {
 				}
@@ -551,7 +554,7 @@ public class GPSDataImport {
 
 			if (dataType.contains(ImportType.WAYPOINT)) {
 				List<WptType> waypoints = getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), monitor);
-				monitor.subTask("Parsing waypoints.");
+				monitor.subTask(Messages.GPSDataImport_Progress_ParsingWaypoints);
 				ArrayList<Waypoint> newwaypoints = new ArrayList<Waypoint>();
 				for (Iterator<WptType> iterator = waypoints.iterator(); iterator
 						.hasNext();) {
@@ -572,7 +575,7 @@ public class GPSDataImport {
 				data.put(ImportType.WAYPOINT, newwaypoints);
 			}
 			if (dataType.contains(ImportType.TRACK)) {
-				monitor.subTask("Parsing tracks.");
+				monitor.subTask(Messages.GPSDataImport_Progress_ParsingTracks);
 				List<Coordinate> trackCoords = new ArrayList<Coordinate>();
 
 				List<TrkType> tracks = getTracksGpx(gpxFile, monitor);

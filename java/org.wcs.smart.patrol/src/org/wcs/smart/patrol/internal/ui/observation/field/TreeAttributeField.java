@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.ui.observation.field;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -48,6 +49,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.TreeDropDown;
 import org.wcs.smart.patrol.model.AttributeValidator;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
@@ -112,7 +114,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 	 */
 	private void updateSelection(AttributeTreeNode selection){
 		if (selection == null){
-			txtText.setText("");
+			txtText.setText(""); //$NON-NLS-1$
 			txtText.setData(null);
 		}else{
 			txtText.setText(SmartUtils.formatStringForLabel(selection.getName()));
@@ -131,7 +133,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		parent.getShell().getDisplay().addFilter(SWT.FocusIn, focusListener);
 		
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":");
+		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dropDownComposite = new Composite(parent,  SWT.BORDER );
@@ -284,7 +286,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 	public String validate() {
 		String error = null;
 		if (txtText.getText().length() > 0 && txtText.getData() == null){
-			error = "Invalid " + attribute.getName() + " value.  Select an item from the tree.";
+			error = MessageFormat.format(Messages.TreeAttributeField_InvalidTreeValue, new Object[]{ attribute.getName()});
 		}else{
 			error = AttributeValidator.validateAttribute(attribute, getValue());
 		}
@@ -309,7 +311,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 	 */
 	@Override
 	public void clear() {
-		txtText.setText("");
+		txtText.setText(""); //$NON-NLS-1$
 		txtText.setData(null);
 		originalValue = null;
 		validate();
@@ -340,7 +342,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 			txtText.setData(x);
 			this.originalValue = (AttributeTreeNode)x;
 		}else{
-			txtText.setText("");
+			txtText.setText(""); //$NON-NLS-1$
 			txtText.setData(null);
 			this.originalValue = null;
 			

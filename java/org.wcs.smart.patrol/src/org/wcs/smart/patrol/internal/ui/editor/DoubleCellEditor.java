@@ -89,7 +89,7 @@ public class DoubleCellEditor extends TextCellEditor {
 	@Override
 	public void doSetValue(Object value) {
 		if (value == null){
-			super.doSetValue("");
+			super.doSetValue(""); //$NON-NLS-1$
 		}else{
 			super.doSetValue(value.toString());
 		}

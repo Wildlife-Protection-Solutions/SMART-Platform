@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.observation;
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -79,6 +80,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * This is a customized search tree for entering observation 
@@ -92,7 +94,7 @@ import org.wcs.smart.ca.datamodel.Category;
  */
 public class SearchTree extends Composite {
 
-	private static final String INITIAL_TEXT = "type filter text";
+	private static final String INITIAL_TEXT = Messages.SearchTree_DefaultText;
 
 	/**
 	 * The filter text widget to be used by this tree. This value may be
@@ -387,8 +389,8 @@ public class SearchTree extends Composite {
 		buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		
 		Button btnAdd = new Button(buttonPnl, SWT.PUSH);
-		btnAdd.setText(" > ");
-		btnAdd.setToolTipText("Add selected categories");
+		btnAdd.setText(" > "); //$NON-NLS-1$
+		btnAdd.setToolTipText(Messages.SearchTree_AddCategories_ToolTip);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -398,8 +400,8 @@ public class SearchTree extends Composite {
 		});
 
 		Button btnRemove = new Button(buttonPnl, SWT.PUSH);
-		btnRemove.setText(" < ");
-		btnRemove.setToolTipText("Remove selected categories");
+		btnRemove.setText(" < "); //$NON-NLS-1$
+		btnRemove.setToolTipText(Messages.SearchTree_RemoveCategories_ToolTip);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -412,8 +414,8 @@ public class SearchTree extends Composite {
 			}
 		});
 		Button btnRemoveAll = new Button(buttonPnl, SWT.PUSH);
-		btnRemoveAll.setText(" << ");
-		btnRemoveAll.setToolTipText("Remove all categories");
+		btnRemoveAll.setText(" << "); //$NON-NLS-1$
+		btnRemoveAll.setToolTipText(Messages.SearchTree_RemoveAllCategories_Tooltip);
 		btnRemoveAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnRemoveAll.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -439,7 +441,7 @@ public class SearchTree extends Composite {
 				if (element instanceof Category){
 					String text = ((Category)element).getName();
 					if (((Category) element).getParent() != null){
-						text = text + "   (" + ((Category)element).getParent().getFullCategoryName() + ")";
+						text = text + "  (" + ((Category)element).getParent().getFullCategoryName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					return text;
 				}
@@ -525,7 +527,7 @@ public class SearchTree extends Composite {
 				if (monitor.isCanceled()){
 					return Status.CANCEL_STATUS;
 				}
-				lblCountSelected.setText( matched.size() + " item(s) matched");
+				lblCountSelected.setText(MessageFormat.format(Messages.SearchTree_ItemsMatchedLabel, new Object[]{ matched.size()}));
 				if (matched.size() > 0){
 				//	treeViewer.collapseAll();
 				//	treeViewer.expandToLevel(2);
@@ -761,7 +763,7 @@ public class SearchTree extends Composite {
 
 					}
 					//clear filter text
-					filterText.setText("");
+					filterText.setText(""); //$NON-NLS-1$
 				}
 			}
 		});
@@ -906,7 +908,7 @@ public class SearchTree extends Composite {
 			clearButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 			clearButton.setImage(inactiveImage);
 			clearButton.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			clearButton.setToolTipText("Clear current search term");
+			clearButton.setToolTipText(Messages.SearchTree_ClearSelection_Tooltip);
 			clearButton.addMouseListener(new MouseAdapter() {
 				private MouseMoveListener fMoveListener;
 

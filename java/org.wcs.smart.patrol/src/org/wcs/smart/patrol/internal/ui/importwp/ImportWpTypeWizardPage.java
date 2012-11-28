@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -29,6 +31,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 
 /**
@@ -41,7 +44,7 @@ public class ImportWpTypeWizardPage extends WizardPage {
 	/**
 	 * 
 	 */
-	public static final String PAGE_NAME = "Import Waypoints and Tracks";
+	public static final String PAGE_NAME = Messages.ImportWpTypeWizardPage_PageName;
 	private Button opGPS;
 	private Button opGPX;
 	private Button opWaypoint;
@@ -77,23 +80,24 @@ public class ImportWpTypeWizardPage extends WizardPage {
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Import " + ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s from:");
+		lbl.setText(MessageFormat.format(
+				Messages.ImportWpTypeWizardPage_ImportFromLabel, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() }));
 		
 		Composite ops = new Composite(center, SWT.NONE);
 		ops.setLayout(new GridLayout(1, false));
 		((GridLayout)ops.getLayout()).marginLeft = 20;
 		opGPS = new Button(ops, SWT.RADIO);
-		opGPS.setText("GPS Device");
+		opGPS.setText(Messages.ImportWpTypeWizardPage_GPSOp);
 		opGPX = new Button(ops, SWT.RADIO);
-		opGPX.setText("GPX File");
+		opGPX.setText(Messages.ImportWpTypeWizardPage_GPXOp);
 		opGPS.setSelection(true);
 		
 		if (  ((ImportGpsDataWizard)getWizard()).getType() == ImportType.TRACK ){
 			opWaypoint = new Button(ops, SWT.RADIO);
-			opWaypoint.setText("Generate from Waypoints");
+			opWaypoint.setText(Messages.ImportWpTypeWizardPage_GenerateWaypointsOp);
 		}
 		
-		super.setMessage("Select the location where you wish to import " + ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s from.");
+		super.setMessage(MessageFormat.format(Messages.ImportWpTypeWizardPage_PageMessage, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase()}));
 		super.setControl(comp);
 	}
 	

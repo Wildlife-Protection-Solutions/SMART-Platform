@@ -29,6 +29,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 
 /**
@@ -44,6 +45,9 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
  */
 public class EmployeeLabelProvider extends LabelProvider {
 
+	private static final String LEADER_LABEL = Messages.EmployeeLabelProvider_LeaderIdentifier;
+	private static final String PILOT_LABEL = Messages.EmployeeLabelProvider_PilotIdentifier;
+	
 	private Set<Employee> leaders;
 	private Set<Employee> pilots;
 
@@ -104,21 +108,21 @@ public class EmployeeLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof Employee) {
-			String text = "";
+			String text = ""; //$NON-NLS-1$
 			if (leaders != null && leaders.contains(element)) {
-				text = "[Leader] ";
+				text = "[" + LEADER_LABEL + "] "; //$NON-NLS-1$ //$NON-NLS-2$
 			} 
 			if (pilots != null && pilots.contains(element)) {
-				text += "[Pilot] ";
+				text += "[" + PILOT_LABEL + "] "; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return text + ((Employee) element).getLabel();
 		} else if (element instanceof PatrolLegMember) {
-			String text = "";
+			String text = ""; //$NON-NLS-1$
 			if (((PatrolLegMember) element).getIsLeader()) {
-				text = "[Leader]";
+				text = "[" + LEADER_LABEL + "]";  //$NON-NLS-1$//$NON-NLS-2$
 			} 
 			if (((PatrolLegMember) element).getIsPilot()) {
-				text += "[Pilot]";
+				text += "[" + PILOT_LABEL + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return text + ((PatrolLegMember) element).getMember().getLabel();
 		}

@@ -35,16 +35,16 @@ import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
  */
 public class PatrolPerspective implements IPerspectiveFactory {
 
-	public static final String ID = "org.wcs.smart.patrol.PatrolPerspective";
+	public static final String ID = "org.wcs.smart.patrol.PatrolPerspective"; //$NON-NLS-1$
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
 		layout.setEditorAreaVisible(true);
 		layout.addView(PatrolListView.ID, IPageLayout.LEFT, 0.3f, IPageLayout.ID_EDITOR_AREA);
 		layout.getViewLayout(PatrolListView.ID).setCloseable(false);
 		
-		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.patrol.patrolMapFolder", IPageLayout.BOTTOM, 0.8f, PatrolListView.ID);
+		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.patrol.patrolMapFolder", IPageLayout.BOTTOM, 0.8f, PatrolListView.ID); //$NON-NLS-1$
 		
-		folder1.addView("net.refractions.udig.project.ui.layerManager");
+		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
 		folder1.addPlaceholder(InfoView2.VIEW_ID);
 	}
 

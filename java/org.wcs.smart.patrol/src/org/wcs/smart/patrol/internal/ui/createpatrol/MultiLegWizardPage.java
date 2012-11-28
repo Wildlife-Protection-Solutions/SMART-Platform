@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 
@@ -53,7 +54,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 	 * Creates a new wizard page
 	 */
 	protected MultiLegWizardPage() {
-		super("Multiple Leg Patrol");
+		super(Messages.MultiLegWizardPage_PageName);
 		
 	}
 
@@ -71,7 +72,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Is this a multi-leg patrol?");
+		lbl.setText(Messages.MultiLegWizardPage_IsMulti_Label);
 		
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
@@ -79,7 +80,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		
 
 		btnNo = new Button(buttonPanel, SWT.RADIO);
-		btnNo.setText("No");
+		btnNo.setText(Messages.MultiLegWizardPage_OpNo);
 		btnNo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnNo.setSelection(true);
 		btnNo.addSelectionListener(new SelectionAdapter() {
@@ -90,7 +91,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 			}
 		});
 		btnYes = new Button(buttonPanel, SWT.RADIO);
-		btnYes.setText("Yes");
+		btnYes.setText(Messages.MultiLegWizardPage_OpYes);
 		btnYes.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnYes.setSelection(false);
 		btnYes.addSelectionListener(new SelectionAdapter() {
@@ -101,11 +102,11 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		});
 		
 		lbl = new Label(center, SWT.WRAP);
-		lbl.setText("A multiple leg patrol is identified by a change in patrol leader, or by a patrol splitting into multiple groups.");
+		lbl.setText(Messages.MultiLegWizardPage_LegInfo_Label);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		lbl.setLayoutData(gd);
 		
-		setMessage("Identify whether the patrol was a multi-leg patrol.");
+		setMessage(Messages.MultiLegWizardPage_PageMessage);
 		super.setControl(main);
 	}
    
@@ -145,7 +146,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 				newLegs.add(leg1);
 				leg1.setStartDate(p.getStartDate());
 				leg1.setEndDate(p.getEndDate());
-				leg1.setId("1");
+				leg1.setId("1"); //$NON-NLS-1$
 				leg1.setPatrol(p);
 				p.setLegs(newLegs);
 			}

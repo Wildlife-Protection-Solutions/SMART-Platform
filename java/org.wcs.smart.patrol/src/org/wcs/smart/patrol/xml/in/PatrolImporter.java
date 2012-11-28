@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.xml.in;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -48,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
@@ -63,6 +65,9 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolImporter {
 	
+	private static final String IMPORTING_PATROL_TASKNAME = Messages.PatrolImporter_Progress_TaskName;
+
+
 	/**
 	 * Imports patrol data from the given file.
 	 * 
@@ -74,10 +79,10 @@ public class PatrolImporter {
 		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
-			monitor.beginTask("Importing Patrol", 4);
+			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 4);
 			return importXmlToPatrol(file, monitor);
 		}else{
-			monitor.beginTask("Importing Patrol", 3);
+			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 3);
 			return importPatrolFromFile(file, monitor);
 		}
 	}
@@ -94,17 +99,17 @@ public class PatrolImporter {
 		
 		PatrolType ptype = null;
 		//unzip 
-		monitor.subTask("Processing zip file.");
+		monitor.subTask(Messages.PatrolImporter_Progress_ProcessingFile);
 		File directory = unzip(zipFile);
 		if (directory == null || !directory.isDirectory()){
-			throw new Exception ("Error unzipping file " + zipFile.getAbsoluteFile());
+			throw new Exception (MessageFormat.format(Messages.PatrolImporter_Error_UnzipError, new Object[]{ zipFile.getAbsoluteFile()}));
 		}
 		monitor.worked(1);
 		
 		//file xml file
 		String[] files = directory.list();
 		
-		monitor.subTask("Reading xml file.");
+		monitor.subTask(Messages.PatrolImporter_Progress_ReadingFile);
 		for (int i = 0; i < files.length; i ++){
 			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 			if (f.isFile()){
@@ -129,19 +134,19 @@ public class PatrolImporter {
 			try{
 				FileUtils.deleteDirectory(directory);
 			}catch (Exception ex){
-				SmartPatrolPlugIn.log("Error deleting temporary directory", ex);
+				SmartPatrolPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
-			throw new Exception ("Patrol xml file not found in zip file.");
+			throw new Exception (Messages.PatrolImporter_Error_XmlFileNotFound);
 		}
 		monitor.worked(1);
 		
 		Patrol p = convertAndSave(ptype, directory, monitor);
 		
-		monitor.subTask("Removing temporary files.");
+		monitor.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
 		try{
 			FileUtils.deleteDirectory(directory);
 		}catch (Exception ex){
-			SmartPatrolPlugIn.log("Error deleting temporary directory", ex);
+			SmartPatrolPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 		}
 		return p;
 		
@@ -157,14 +162,14 @@ public class PatrolImporter {
 		PatrolType ptype = null;
 		FileInputStream in = new FileInputStream(xmlFile);
 		try{
-			monitor.subTask("Reading XML");
+			monitor.subTask(Messages.PatrolImporter_Progress_ReadingXml);
 			ptype = PatrolXmlManager.readDataModel(in);
 			monitor.worked(1);
 		}finally{
 			in.close();
 		}
 		if (ptype == null){
-			throw new Exception("Error reading xml patrol.  Please ensure valid patrol xml file.");
+			throw new Exception(Messages.PatrolImporter_Error_ReadingPatrolXmlFile);
 		}
 		return convertAndSave(ptype, null, monitor);
 	}
@@ -188,10 +193,10 @@ public class PatrolImporter {
 			throws Exception {
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try{
-			monitor.subTask("Validating");
+			monitor.subTask(Messages.PatrolImporter_Progress_Validating);
 			//check if a patrol in the database with the given patorl id already exists
 			if (xmlPatrol.getId() != null){
-				Criteria c = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("id", xmlPatrol.getId())).setProjection(Projections.rowCount());
+				Criteria c = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("id", xmlPatrol.getId())).setProjection(Projections.rowCount()); //$NON-NLS-1$ //$NON-NLS-2$
 				Long cnt = (Long)c.uniqueResult();
 				if (cnt > 0){
 					final boolean[] cont = new boolean[]{true};
@@ -200,9 +205,10 @@ public class PatrolImporter {
 
 						@Override
 						public void run() {
-							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Import Patrol", 
-									null, "The database already contains a patrol with the id '" + pid + "' provided in the file.  If you continue a new patrol with a new " +
-											"id will be generated, potentially duplicating data.\n\nDo you want to continue with the import?", MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_ImportPatrol_DialogTitle, 
+									null,
+									MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, new Object[]{pid}),
+									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
 							if (ret == 1){
 								//do not import
@@ -219,7 +225,7 @@ public class PatrolImporter {
 					
 				}
 			}		
-			monitor.subTask("Converting");
+			monitor.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
 			XmlToPatrolConverter converter = new XmlToPatrolConverter();
 			converter.fromXml(xmlPatrol, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 			monitor.worked(1);
@@ -238,8 +244,8 @@ public class PatrolImporter {
 					public void run() {
 						ConfirmInputDialog dialog = new ConfirmInputDialog(
 								Display.getDefault().getActiveShell(),
-								"Patrol Import",
-								"Some data could not be imported.  The following list identifies the problems the occurred while importing the patrol data.  If you continue the data identified below will not be imported.  Would you like to continue with the import?",
+								Messages.PatrolImporter_PatrolImport_ErrorDialogTitle,
+								Messages.PatrolImporter_PatrolImport_ErrorMessage,
 								message, null);
 						if (dialog.open() != ConfirmInputDialog.OK){
 							cont[0] = false;
@@ -254,7 +260,7 @@ public class PatrolImporter {
 			}
 			Patrol imported = converter.getImportedPatrol();
 			
-			monitor.subTask("Saving");
+			monitor.subTask(Messages.PatrolImporter_Progress_Saving);
 			if (!PatrolHibernateManager.savePatrol(imported, session, true)){
 				imported = null;
 			}

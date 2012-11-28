@@ -36,6 +36,7 @@ import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
 
 /**
@@ -49,6 +50,10 @@ public class GPSBabel {
 
 	
 	
+	private static final String ERROR_MSG_COULD_NOT_IMPORT = Messages.GPSBabel_Error_CouldNotImport;
+
+	private static final String ERROR_MSG_PROCESS_TOLONG = Messages.GPSBabel_Error_ProcessTerminatedTooLong;
+
 	/**
 	 * GPS Babel program location
 	 */
@@ -57,7 +62,7 @@ public class GPSBabel {
 	/**
 	 * GPS Babel arguments for getting format list
 	 */
-	private static final String FORMAT_ARGS = " -\"^3\"";
+	private static final String FORMAT_ARGS = " -\"^3\""; //$NON-NLS-1$
 
 	/**
 	 * GPS Bable process timeout
@@ -90,7 +95,7 @@ public class GPSBabel {
 	public static HashMap<String, String> getDeviceOptions() throws IOException {
 		final HashMap<String, String> options = new HashMap<String, String>();
 
-		CommandLine cmdLine = CommandLine.parse("\"" + getGpsBabelLocation() + "\"" + FORMAT_ARGS);
+		CommandLine cmdLine = CommandLine.parse("\"" + getGpsBabelLocation() + "\"" + FORMAT_ARGS); //$NON-NLS-1$ //$NON-NLS-2$
 		DefaultExecutor exec = new DefaultExecutor();
 
 		exec.setStreamHandler(new ExecuteStreamHandler() {
@@ -101,7 +106,7 @@ public class GPSBabel {
 				try {
 					inputReader.close();
 				} catch (IOException e) {
-					SmartPatrolPlugIn.log("Error reading GPS Babel device options", e);
+					SmartPatrolPlugIn.log(Messages.GPSBabel_Error_ReadingBabelOps, e);
 				}
 			}
 
@@ -109,9 +114,9 @@ public class GPSBabel {
 			public void start() throws IOException {
 				String line = null;
 				while ((line = inputReader.readLine()) != null) {
-					String bits[] = line.split("\t");
-					if (bits[0].trim().toLowerCase().equals("serial")) {
-						if (bits[1].trim().toLowerCase().matches("r.r...")) {
+					String bits[] = line.split("\t"); //$NON-NLS-1$
+					if (bits[0].trim().toLowerCase().equals("serial")) { //$NON-NLS-1$
+						if (bits[1].trim().toLowerCase().matches("r.r...")) { //$NON-NLS-1$
 							options.put(bits[2], bits[4]);
 						}
 					}
@@ -156,27 +161,27 @@ public class GPSBabel {
 	public static File getData(String deviceType, Set<GPSDataImport.ImportType> types) throws IOException{
 		
 		//create temporary file
-		File file = File.createTempFile("smart_import", null);
+		File file = File.createTempFile("smart_import", null); //$NON-NLS-1$
 		
 		//CommandLine cmdLine = CommandLine.parse(getGpsBabelLocation());
 		CommandLine cmdLine = new CommandLine(getGpsBabelLocation());
 		if (types.contains(GPSDataImport.ImportType.WAYPOINT)){
-			cmdLine.addArgument("-w");
+			cmdLine.addArgument("-w"); //$NON-NLS-1$
 		}
 		if (types.contains(GPSDataImport.ImportType.TRACK)){
-			cmdLine.addArgument("-t");
+			cmdLine.addArgument("-t"); //$NON-NLS-1$
 		}
 		
-		cmdLine.addArgument("-i");
+		cmdLine.addArgument("-i"); //$NON-NLS-1$
 		cmdLine.addArgument(deviceType);
 		
-		cmdLine.addArgument("-f");
-		cmdLine.addArgument("usb:");
-		cmdLine.addArgument("-o");
-		cmdLine.addArgument("gpx,gpxver=1.1");
-		cmdLine.addArgument("-F");
+		cmdLine.addArgument("-f"); //$NON-NLS-1$
+		cmdLine.addArgument("usb:"); //$NON-NLS-1$
+		cmdLine.addArgument("-o"); //$NON-NLS-1$
+		cmdLine.addArgument("gpx,gpxver=1.1"); //$NON-NLS-1$
+		cmdLine.addArgument("-F"); //$NON-NLS-1$
 		cmdLine.addArgument(file.getAbsolutePath());
-		SmartPatrolPlugIn.logInfo("Running: " + cmdLine.toString());
+		SmartPatrolPlugIn.logInfo("Running: " + cmdLine.toString()); //$NON-NLS-1$
 		
 		DefaultExecutor exec = new DefaultExecutor();
 		// 2 minute timeout
@@ -187,28 +192,28 @@ public class GPSBabel {
 			exitValue = exec.execute(cmdLine);
 		}catch (Exception ex){
 			if (exec.isFailure(exitValue) && watchdog.killedProcess()){
-				throw new IllegalStateException("Process termined because it was taking to long. ");
+				throw new IllegalStateException(ERROR_MSG_PROCESS_TOLONG);
 			}
-			throw new RuntimeException("Could not import GPS data from device. " + ex.getMessage() , ex);
+			throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getMessage() , ex);
 		}
 
 		if (!file.exists()){
 			//try com1 port
 			cmdLine = CommandLine.parse(getGpsBabelLocation());
 			if (types.contains(GPSDataImport.ImportType.WAYPOINT)){
-				cmdLine.addArgument("-w");
+				cmdLine.addArgument("-w"); //$NON-NLS-1$
 			}
 			if (types.contains(GPSDataImport.ImportType.TRACK)){
-				cmdLine.addArgument("-t");
+				cmdLine.addArgument("-t"); //$NON-NLS-1$
 			}
-			cmdLine.addArgument("-i");
+			cmdLine.addArgument("-i"); //$NON-NLS-1$
 			cmdLine.addArgument(deviceType);
 			
-			cmdLine.addArgument("-f");
-			cmdLine.addArgument("COM1");
-			cmdLine.addArgument("-o");
-			cmdLine.addArgument("gpx,gpxver=1.1");
-			cmdLine.addArgument("-F");
+			cmdLine.addArgument("-f"); //$NON-NLS-1$
+			cmdLine.addArgument("COM1"); //$NON-NLS-1$
+			cmdLine.addArgument("-o"); //$NON-NLS-1$
+			cmdLine.addArgument("gpx,gpxver=1.1"); //$NON-NLS-1$
+			cmdLine.addArgument("-F"); //$NON-NLS-1$
 			cmdLine.addArgument(file.getAbsolutePath());
 			
 			exec = new DefaultExecutor();
@@ -219,9 +224,9 @@ public class GPSBabel {
 				exitValue = exec.execute(cmdLine);
 			}catch (Exception ex){
 				if (exec.isFailure(exitValue) && watchdog.killedProcess()){
-					throw new IllegalStateException("Process termined because it was taking to long.");
+					throw new IllegalStateException(ERROR_MSG_PROCESS_TOLONG);
 				}
-				throw new RuntimeException("Could not import GPS data from device. " + ex.getMessage() , ex);
+				throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getMessage() , ex);
 			}
 			
 			if (!file.exists()){

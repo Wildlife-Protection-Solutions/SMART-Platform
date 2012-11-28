@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Track;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -64,7 +65,7 @@ public class TrackPointDialog extends TitleAreaDialog {
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
-		super.setMessage("View all trackpoints");
+		super.setMessage(Messages.TrackPointDialog_DialogMessage);
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -84,10 +85,10 @@ public class TrackPointDialog extends TitleAreaDialog {
 				if (element instanceof Coordinate){
 					return String.valueOf(((Coordinate)element).x);
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		});
-		column.getColumn().setText("X");
+		column.getColumn().setText(Messages.TrackPointDialog_XColumnName);
 		column.getColumn().setResizable(true);
 		column.getColumn().setMoveable(false);
 		column.getColumn().setWidth(200);
@@ -99,10 +100,10 @@ public class TrackPointDialog extends TitleAreaDialog {
 				if (element instanceof Coordinate){
 					return String.valueOf(((Coordinate)element).y);
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		});
-		column.getColumn().setText("Y");
+		column.getColumn().setText(Messages.TrackPointDialog_YColumnName);
 		column.getColumn().setResizable(true);
 		column.getColumn().setMoveable(false);
 		column.getColumn().setWidth(200);
@@ -114,17 +115,17 @@ public class TrackPointDialog extends TitleAreaDialog {
 					Date d = new Date( (long) ((Coordinate)element).z );
 					return DateFormat.getDateTimeInstance().format(d);
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		});
-		column.getColumn().setText("Z");
+		column.getColumn().setText(Messages.TrackPointDialog_ZColumnName);
 		column.getColumn().setResizable(true);
 		column.getColumn().setMoveable(false);
 		column.getColumn().setWidth(200);
 		
 		trackviewer.setInput(track.getLineString().getCoordinates());
 		
-		getShell().setText("Track Points");
+		getShell().setText(Messages.TrackPointDialog_DialogTitle);
 		
 		return main;
 		

@@ -96,7 +96,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	@Override
 	public void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(attribute.getName() + ":");
+		lbl.setText(attribute.getName() + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbViewer = new ComboViewer(new Combo(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY));
@@ -139,7 +139,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		List<Object> items = new ArrayList<Object>();
 		items.addAll(this.attribute.getActiveListItems());
 		if (!attribute.getIsRequired()){
-			items.add(0, "");
+			items.add(0, ""); //$NON-NLS-1$
 		}
 		cmbViewer.setInput(items.toArray(new Object[items.size()]));
 		
@@ -201,7 +201,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	@Override
 	public void setValue(Object x){
 		if (x != null & !(x instanceof AttributeListItem)){
-			throw new IllegalStateException("Invalid value");
+			throw new IllegalStateException("Invalid value"); //$NON-NLS-1$
 		}
 		this.originalValue = (AttributeListItem)x;
 		if (originalValue == null){

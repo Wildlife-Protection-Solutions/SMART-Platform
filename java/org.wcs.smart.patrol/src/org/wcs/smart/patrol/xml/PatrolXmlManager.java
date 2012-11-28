@@ -40,9 +40,9 @@ import org.wcs.smart.patrol.xml.model.PatrolType;
  * @since 1.0.0
  */
 public class PatrolXmlManager {
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.patrol.xml.model";
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.patrol.xml.model"; //$NON-NLS-1$
 	
-	public static final String ATTACHMENT_DIR_NAME = "attachments";
+	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
 	
 	/**
 	 * Reads patrol data from an xml file.

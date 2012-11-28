@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Wizard page for selecting GPX file to import and
@@ -55,7 +58,7 @@ public class ImportGpxWizardPage extends WizardPage {
 	/**
 	 * 
 	 */
-	public static final String PAGE_NAME = "Import Waypoints and Tracks From GPX File";
+	public static final String PAGE_NAME = Messages.ImportGpxWizardPage_PageName;
 
 	private Button opSelect;
 	private Button opDate;
@@ -102,7 +105,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Files:");
+		lbl.setText(Messages.ImportGpxWizardPage_FilesLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 		
 		lstFiles = new ListViewer(center, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -119,15 +122,15 @@ public class ImportGpxWizardPage extends WizardPage {
 		buttons.setLayout(gl);		
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
 		btnAdd = new Button(buttons, SWT.PUSH);
-		btnAdd.setText("Add");
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN );
 				
-				fd.setFilterExtensions(new String[]{"*.gpx", "*.*"});
-				fd.setFilterNames(new String[]{"GPX files (*.gpx)", "All Files (*.*)"});
+				fd.setFilterExtensions(new String[]{"*.gpx", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[]{Messages.ImportGpxWizardPage_GPXFileFilterName, Messages.ImportGpxWizardPage_AllFilesFilterName});
 				
 				String x = fd.open();
 				if (x != null){
@@ -144,7 +147,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		});
 		
 		btnRemove = new Button(buttons, SWT.PUSH);
-		btnRemove.setText("Remove");
+		btnRemove.setText(Messages.ImportGpxWizardPage_RemoveButtonText);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -165,7 +168,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		
 		this.importAll = true;
 		opAll = new Button(ops, SWT.RADIO);
-		opAll.setText("Import All (and assign to correct day)");
+		opAll.setText(Messages.ImportGpxWizardPage_ImportAllOp);
 		opAll.setSelection(true);
 		opAll.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -176,7 +179,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		});
 		
 		opDate = new Button(ops, SWT.RADIO);
-		opDate.setText("Import Only " + ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s for " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate()) );
+		opDate.setText(MessageFormat.format(Messages.ImportGpxWizardPage_ImportSingleDayOp, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}) );
 		opDate.setSelection(false);
 		opDate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -187,7 +190,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		});
 		
 		opSelect = new Button(ops, SWT.RADIO);
-		opSelect.setText("Select which " + ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s to import for " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate()));
+		opSelect.setText(MessageFormat.format(Messages.ImportGpxWizardPage_ImportSelectionOp, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
 		opSelect.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -197,7 +200,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		});
 		setPageComplete(false);
 		
-		super.setMessage("Select the location where you wish to import " +((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s from.");
+		super.setMessage(MessageFormat.format(Messages.ImportGpxWizardPage_PageMessage, new Object[]{ ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() }));
 		super.setControl(comp);
 	}
 	

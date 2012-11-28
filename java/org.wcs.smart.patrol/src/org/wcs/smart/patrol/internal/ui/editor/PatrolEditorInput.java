@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -28,6 +29,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
@@ -137,7 +139,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {	
-		return "Patrol_" + id;
+		return Messages.PatrolEditorInput_EditorNamePrefix + "_" + id; //$NON-NLS-1$
 	}
 
 	/**
@@ -153,7 +155,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return "Edit patrol data for patrol " + id;
+		return MessageFormat.format(Messages.PatrolEditorInput_Editor_Tooltip, new Object[]{ id});
 	}
 
 	public int hashCode() {

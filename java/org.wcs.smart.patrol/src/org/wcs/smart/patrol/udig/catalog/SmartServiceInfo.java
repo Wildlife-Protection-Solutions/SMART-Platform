@@ -25,6 +25,7 @@ import net.refractions.udig.catalog.IServiceInfo;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Smart service information.
@@ -34,10 +35,10 @@ import org.wcs.smart.SmartPlugIn;
 public class SmartServiceInfo extends IServiceInfo{
 
 	public SmartServiceInfo(PatrolService service){
-		this.description = "Connects to a patrol waypoints and track geometries.";
+		this.description = Messages.SmartServiceInfo_PatrolService_Description;
 		this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		this.keywords = new String[]{"Conservation Area", "SMART", "Patrol", "Waypoint", "Track"};
-		this.title = "SMART Patrol " + service.getPatrolID();
+		this.keywords = new String[]{Messages.SmartServiceInfo_PatrolService_Keyword6, Messages.SmartServiceInfo_PatrolService_Keyword1, Messages.SmartServiceInfo_PatrolService_Keyword2, Messages.SmartServiceInfo_PatrolService_Keyword3, Messages.SmartServiceInfo_PatrolService_Keyword4};
+		this.title = Messages.SmartServiceInfo_PatrolService_Keyword5 + service.getPatrolID();
 	}
 	
 }

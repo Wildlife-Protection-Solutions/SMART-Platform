@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.xml.export;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
@@ -37,6 +39,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -94,7 +97,7 @@ public class PatrolExportDialog extends TitleAreaDialog {
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button b = createButton(parent, IDialogConstants.OK_ID, "Export", true);
+		Button b = createButton(parent, IDialogConstants.OK_ID, Messages.PatrolExportDialog_Export_Button, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 
@@ -110,7 +113,7 @@ public class PatrolExportDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(3, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Destination File:");
+		lbl.setText(Messages.PatrolExportDialog_FileLabel);
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtFile.addModifyListener(new ModifyListener() {
@@ -123,27 +126,27 @@ public class PatrolExportDialog extends TitleAreaDialog {
 			}
 		});
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.PatrolExportDialog_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(PatrolExportDialog.this
 						.getShell(), SWT.SAVE);
 				if (!btnIncludeAttachments.getSelection()) {
-					fd.setFilterExtensions(new String[] { "*.xml", "*.*" });
-					fd.setFilterNames(new String[] { "xml (*.xml)",
-							"All Files (*.*)" });
+					fd.setFilterExtensions(new String[] { "*.xml", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
+					fd.setFilterNames(new String[] { Messages.PatrolExportDialog_XMLFilterName,
+							Messages.PatrolExportDialog_AllFileFilterName });
 				} else {
-					fd.setFilterExtensions(new String[] { "*.zip", "*.*" });
-					fd.setFilterNames(new String[] { "zip (*.zip)",
-							"All Files (*.*)" });
+					fd.setFilterExtensions(new String[] { "*.zip", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
+					fd.setFilterNames(new String[] { Messages.PatrolExportDialog_ZipFileFilterName,
+							Messages.PatrolExportDialog_AllFileFilterName });
 				}
 				fd.setFilterPath(txtFile.getText());
 				if (txtFile.getText().length() == 0) {
 					if (btnIncludeAttachments.getSelection()) {
-						fd.setFileName(patrol.getId() + ".zip");
+						fd.setFileName(patrol.getId() + ".zip"); //$NON-NLS-1$
 					} else {
-						fd.setFileName(patrol.getId() + ".xml");
+						fd.setFileName(patrol.getId() + ".xml"); //$NON-NLS-1$
 					}
 				} else {
 					fd.setFileName(txtFile.getText());
@@ -157,7 +160,7 @@ public class PatrolExportDialog extends TitleAreaDialog {
 		});
 
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("Include Attachments*:");
+		lbl.setText(Messages.PatrolExportDialog_IncludeAttachmentsLabel + "*:");  //$NON-NLS-1$
 		btnIncludeAttachments = new Button(main, SWT.CHECK);
 		btnIncludeAttachments.setSelection(true);
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
@@ -167,9 +170,9 @@ public class PatrolExportDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent e) {
 				if (txtFile.getText().length() > 0) {
 					int index = txtFile.getText().lastIndexOf('.');
-					String extension = ".xml";
+					String extension = ".xml"; //$NON-NLS-1$
 					if (btnIncludeAttachments.getSelection()) {
-						extension = ".zip";
+						extension = ".zip"; //$NON-NLS-1$
 					}
 					if (index > 0) {
 						txtFile.setText(txtFile.getText().substring(0, index)
@@ -185,10 +188,10 @@ public class PatrolExportDialog extends TitleAreaDialog {
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd.widthHint = lbl.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		lbl.setLayoutData(gd);
-		lbl.setText("*If attachments are included a zip file will be generated that includes the patrol and attachments.  Otherwise only xml file is exported.");
+		lbl.setText("*" + Messages.PatrolExportDialog_AttachmentInfoLabel); //$NON-NLS-1$
 
-		setMessage("Export patrol '" + patrol.getId() + "' to xml file");
-		getShell().setText("Export Patrol");
+		setMessage(MessageFormat.format(Messages.PatrolExportDialog_DialogMessage, new Object[]{patrol.getId()}));
+		getShell().setText(Messages.PatrolExportDialog_DialogTitle);
 		return composite;
 
 	}

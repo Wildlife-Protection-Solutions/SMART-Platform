@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -55,6 +56,7 @@ import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolOptions;
@@ -74,8 +76,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolEditor"; //$NON-NLS-1$
 
-	public static final DecimalFormat REST_TIME_FORMATTER = new DecimalFormat("00.00");
-	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##");
+	private static final String SAVE_PATROL_JOB_NAME = Messages.PatrolEditor_SavePatrol_JobName;
+	
+	public static final DecimalFormat REST_TIME_FORMATTER = new DecimalFormat("00.00"); //$NON-NLS-1$
+	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
 	
 	private Patrol patrol = null;
 	private PatrolOptions ops = null;
@@ -151,7 +155,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		//analyst users can never edit
 		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
-			return "Insufficient User Privledges";
+			return Messages.PatrolEditor_EditError_InsufficientPrivledges;
 		}
 		
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){
@@ -164,7 +168,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			if (patrol.getStartDate().after(d)){
 				return null;
 			}else{
-				return "Patrol is older than " + ops.getEditTime() + " days" ;
+				return MessageFormat.format(Messages.PatrolEditor_EditError_PatrolToOld, new Object[]{ops.getEditTime() }) ;
 			}
 		}else{
 			return null;
@@ -192,7 +196,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 	public void updatePartName(){
 		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-		super.setPartName("Patrol " + input.getPatrolId());
+		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + input.getPatrolId());
 		PatrolEventManager manager = PatrolEventManager.getInstance();
 		manager.patrolChanged(PatrolEventManager.PATROL_ID, patrol);
 	}
@@ -200,7 +204,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	@Override
 	protected void createPages() {
 		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-		super.setPartName("Patrol " + input.getPatrolId());
+		super.setPartName(input.getName());
 		showBusy(true);
 		try {
 			
@@ -208,12 +212,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			summaryEditor = new PatrolSummaryEditor(this);
 			int i = addPage(summaryEditor, getEditorInput());
-			setPageText(i, "Summary");
+			setPageText(i, Messages.PatrolEditor_PatrolSummaryPageName);
 			createDayPages();
 			
 			mapPage = new PatrolMapPageEditor(PatrolEditor.this);
 			int mapIndex = addPage(mapPage, getEditorInput());
-			setPageText(mapIndex, "Map");
+			setPageText(mapIndex, Messages.PatrolEditor_PatrolMapPageName);
 			showBusy(false);
 		} catch (final Throwable t) {
 			PatrolEditor.this.getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
@@ -222,14 +226,14 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							try {
 								PatrolEditor.this.dispose();
 								PatrolEditor.this.getSite().getPage().closeEditor(PatrolEditor.this, false);
-								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) {
-									SmartPatrolPlugIn.displayLog("Patrol editor could not be created.  Please try closing existing open editors and try again.\n" + t.getMessage(), t);
+								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
+									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_NoMoreHandlers + t.getMessage(), t);
 								} else {
-									SmartPatrolPlugIn.displayLog("Error occurred while loading editor. "+ t.getMessage(), t);
+									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_Other+ t.getMessage(), t);
 								}
 							} catch (Exception ex) {
 								//TODO: Should we fail the program here??
-								SmartPatrolPlugIn.log("Failure",ex);
+								SmartPatrolPlugIn.log("Failure",ex); //$NON-NLS-1$
 							}
 
 						}
@@ -271,7 +275,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}
 
 		} catch (Exception ex) {
-			SmartPatrolPlugIn.displayLog("Error loading editor", ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_ErrorCreatingDayPages, ex);
 		}
 	}
 	
@@ -303,7 +307,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 	
 	public void delete(final Collection<Waypoint> waypoints) {
-		Job saveJob = new Job("Save Patrol Job") {
+		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session saveSession = HibernateManager
@@ -318,7 +322,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					if (saveSession.getTransaction().isActive()){
 						saveSession.getTransaction().rollback();
 					}
-					SmartPatrolPlugIn.displayLog("Error deleting patrol waypoints.  You should close the patrol, re-open it and make your changes again.\n\n" + ex.getMessage(), ex);
+					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getMessage(), ex);
 				}finally{
 					
 					saveSession.close();
@@ -335,7 +339,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		for (int i = 0; i < getPageCount(); i ++){
 			getEditor(i).doSave(new NullProgressMonitor());
 		}
-		Job saveJob = new Job("Save Patrol Job") {
+		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session saveSession = HibernateManager
@@ -356,7 +360,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					if (saveSession.getTransaction().isActive()){
 						saveSession.getTransaction().rollback();
 					}
-					SmartPatrolPlugIn.displayLog("Error saving patrol.  You should close the patrol, re-open it and make your changes again.\n\n" + ex.getMessage(), ex);
+					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getMessage(), ex);
 				}finally{
 					saveSession.close();
 				}
@@ -375,7 +379,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		for (int i = 0; i < getPageCount(); i ++){
 			getEditor(i).doSave(monitor);
 		}
-		Job saveJob = new Job("Save Patrol Job") {
+		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
@@ -462,7 +466,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		private Collection<Waypoint> waypoints;
 
 		public SaveWaypointJob() {
-			super("Save Waypoints");
+			super(Messages.PatrolEditor_SaveWaypoints_JobName);
 		}
 
 		public void setWaypoints(Collection<Waypoint> points) {
@@ -506,7 +510,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 				SmartPatrolPlugIn
 						.displayLog(
-								"Could not save changes.  Please close patrol and re-open it before proceeding. \n\n"
+								Messages.PatrolEditor_Error_SavingWaypoints
 										+ ex.getMessage(), ex);
 			} finally {
 				saveSession.close();

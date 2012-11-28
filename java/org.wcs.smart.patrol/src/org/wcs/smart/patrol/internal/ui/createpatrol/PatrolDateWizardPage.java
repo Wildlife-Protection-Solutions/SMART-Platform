@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
@@ -43,7 +44,7 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 	 * @param pageName
 	 */
 	protected PatrolDateWizardPage() {
-		super("Patrol Date Range");
+		super(Messages.PatrolDateWizardPage_PageName);
 		
 	}
 
@@ -73,7 +74,7 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 			}
 		});
 		
-		setMessage("Select the start and end dates for the patrol.");
+		setMessage(Messages.PatrolDateWizardPage_PageMessage);
 		super.setControl(main);
 		
 	}

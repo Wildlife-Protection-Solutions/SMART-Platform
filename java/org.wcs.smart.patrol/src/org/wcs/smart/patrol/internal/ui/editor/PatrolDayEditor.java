@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +49,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Waypoint;
@@ -73,7 +75,7 @@ public class PatrolDayEditor extends EditorPart {
 	private ScrolledForm frmSummary; 
 	
 	public PatrolDayEditor(PatrolEditor editor) {
-		super.setPartName("");
+		super.setPartName(""); //$NON-NLS-1$
 		this.editor = editor;
 		
 	}
@@ -109,15 +111,14 @@ public class PatrolDayEditor extends EditorPart {
 			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
 			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 			lblImage.setImage(x);
-			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE);
-			lblWarning.setText("This patrol cannot be modified: " + canEdit + ". Please contact administrator if editing is required.");
-			
+			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
+			lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol, new Object[]{canEdit})) ;
 		}
 		
-		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE");
-		StringBuilder text = new StringBuilder("Patrol Day: ");
+		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
+		StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_5);
 		text.append(dayFormat.format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
-		text.append(", ");
+		text.append(", "); //$NON-NLS-1$
 		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
 		frmSummary.setText(text.toString());
 		frmSummary.getBody().setLayout(new GridLayout(1, false));
@@ -143,11 +144,11 @@ public class PatrolDayEditor extends EditorPart {
 			}
 			
 			if (plds.size() == 0){
-				Label lbl = toolkit.createLabel(frmSummary.getBody(), "", SWT.WRAP);
+				Label lbl = toolkit.createLabel(frmSummary.getBody(), "", SWT.WRAP); //$NON-NLS-1$
 				GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 				gd.widthHint =lbl.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				lbl.setLayoutData(gd);
-				lbl.setText("Error locating data.  Please ensure that the patrol legs dates are correctly defined for the patrol.  The last day must have at least one leg that is greater than one second in length.");
+				lbl.setText(Messages.PatrolDayEditor_Error_LoadingPatrolData);
 				
 			}else if (plds.size() == 1){
 				children = new PatrolLegDayInputComposite[1];
@@ -192,7 +193,7 @@ public class PatrolDayEditor extends EditorPart {
 						}
 					});
 					
-					sec.setText("Leg: " + pld.getPatrolLeg().getId());
+					sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
 					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this);
 					Composite comp2 = comp.createComposite(sec, toolkit);
 					comp.setData(pld);

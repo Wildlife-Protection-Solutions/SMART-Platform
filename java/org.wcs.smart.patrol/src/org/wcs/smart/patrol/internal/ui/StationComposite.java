@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -82,7 +83,7 @@ public class StationComposite extends PatrolItemComposite{
 		
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Station: ");
+		lbl.setText(Messages.StationComposite_Station_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		stationList = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -105,7 +106,7 @@ public class StationComposite extends PatrolItemComposite{
 	public void setValues(Patrol p, Session session) {
 		List<? extends Object> stations = HibernateManager.getActiveStations(p.getConservationArea(), session);
 
-		String none = "(None)";
+		String none = Messages.StationComposite_NoStation_Label;
 		List<Object> stns = new ArrayList<Object>();
 		stns.add(none);
 		if (stations != null){
@@ -140,7 +141,7 @@ public class StationComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Station";
+		return Messages.StationComposite_Title;
 	}
 	
 	

@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -43,7 +44,7 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	 * 
 	 */
 	protected PatrolObjectiveWizardPage() {
-		super("Patrol Objective");
+		super(Messages.PatrolObjectiveWizardPage_PageTitle);
 		
 	}
 
@@ -54,7 +55,7 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		objectiveComp = new ObjectiveComposite();
-		setMessage("Enter the patrol objective.");
+		setMessage(Messages.PatrolObjectiveWizardPage_PageMessage);
 		super.setControl(objectiveComp.createComponent(parent, SWT.NONE));
 	}
 	

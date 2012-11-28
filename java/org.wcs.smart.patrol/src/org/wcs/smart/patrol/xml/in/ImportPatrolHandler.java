@@ -23,7 +23,7 @@ package org.wcs.smart.patrol.xml.in;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -43,6 +43,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective;
@@ -55,6 +56,9 @@ import org.wcs.smart.patrol.model.Patrol;
  * @since 1.0.0
  */
 public class ImportPatrolHandler extends AbstractHandler {
+
+	private static final String PATROL_NOT_IMPORTED_ERROR_MSG = Messages.ImportPatrolHandler_PatrolNotImported_Error;
+
 
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
@@ -76,8 +80,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 			File file = new File(files.get(0));
 			if (!file.exists()) {
 				MessageDialog.openError(Display.getCurrent().getActiveShell(),
-						"Error", "The location " + file.toString()
-								+ " cannot be found. ");
+						Messages.ImportPatrolHandler_ErrorDialog_Title, MessageFormat.format(Messages.ImportPatrolHandler_Error_DirectoryNotFound,  new Object[]{file.toString()}));
 				return null;
 			}			
 			importFile(activeWorkbench, file);
@@ -111,12 +114,12 @@ public class ImportPatrolHandler extends AbstractHandler {
 					});
 					
 					
-					monitor.beginTask("Loading Patrols", files.size());
+					monitor.beginTask(Messages.ImportPatrolHandler_Progress_LoadingPatrols, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
 					for (int i = 0; i < files.size(); i ++){
 						File file = new File(files.get(i));
-						monitor.subTask("Processing " + file.toString());
+						monitor.subTask(Messages.ImportPatrolHandler_Progress_ProcessingFile + file.toString());
 						monitor.worked(1);
 						if (file.isDirectory()) continue;
 						try{
@@ -125,13 +128,13 @@ public class ImportPatrolHandler extends AbstractHandler {
 								PatrolEventManager.getInstance().patrolAdded(p);
 							}
 						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog("File " + file.toString() + " not imported: " + ex.getMessage(), ex);
+							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ImportPatrolHandler_Error_FileNotImported, new Object[]{file.toString()}) + ex.getMessage(), ex);
 						}
 						if (monitor.isCanceled()){
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), "Cancelled", "The import has been cancelled.  All patrols loaded to this point will remain in the database.");									
+									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportPatrolHandler_Cancelled_DialogTitle, Messages.ImportPatrolHandler_Cancelled_DialogMessage);									
 								}
 							});
 							
@@ -142,7 +145,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 			});
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
-					"Patrol not imported. " + e.getMessage(), e);
+					PATROL_NOT_IMPORTED_ERROR_MSG + e.getMessage(), e);
 		}
 	}
 	
@@ -180,7 +183,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 														PatrolEditor.ID);
 									} catch (Exception ex) {
 										SmartPatrolPlugIn
-												.log("Error loading imported patrol.",
+												.log("Error loading imported patrol.", //$NON-NLS-1$
 														ex);
 									}
 								}
@@ -192,7 +195,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPatrolPlugIn.displayLog("Patrol not imported. "+ e.getMessage(), e);
+								SmartPatrolPlugIn.displayLog(PATROL_NOT_IMPORTED_ERROR_MSG+ e.getMessage(), e);
 							}});
 					}
 
@@ -200,7 +203,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 			});
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
-					"Patrol not imported. " + e.getMessage(), e);
+					PATROL_NOT_IMPORTED_ERROR_MSG + e.getMessage(), e);
 		}
 	}
 }

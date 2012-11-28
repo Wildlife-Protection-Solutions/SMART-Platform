@@ -55,9 +55,9 @@ public class PatrolGeoResource extends IGeoResource {
 		URL serviceIdentifer = service.getIdentifier();
 		
 		try{
-			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER);
+			this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		 } catch (MalformedURLException e) {
-             throw new IllegalArgumentException("The service URL must not contain a #", e);
+             throw new IllegalArgumentException("The service URL must not contain a #", e); //$NON-NLS-1$
          }
 		
 	}

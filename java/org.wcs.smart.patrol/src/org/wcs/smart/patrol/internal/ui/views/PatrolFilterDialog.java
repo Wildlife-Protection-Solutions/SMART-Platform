@@ -52,6 +52,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.util.SmartUtils;
 
@@ -112,7 +113,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Patrol View Filter");
+		shell.setText(Messages.PatrolFilterDialog_DialogTitle);
 	}
 	
 	@Override
@@ -124,8 +125,8 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, APPLY_ID, "Apply", false);
-		createButton(parent, DEFAULTS_ID, "Reset", false);
+		createButton(parent, APPLY_ID, Messages.PatrolFilterDialog_Apply_Button, false);
+		createButton(parent, DEFAULTS_ID, Messages.PatrolFilterDialog_Reset_Button, false);
 		super.createButtonsForButtonBar(parent);		
 	}
 	
@@ -241,7 +242,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
-		setMessage("Filter the patrols shown in the Patrol List View.");
+		setMessage(Messages.PatrolFilterDialog_DialogMessage);
 		
 		Session session = HibernateManager.openSession();
 
@@ -250,13 +251,13 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-			Composite dateFilterExpComp = createGroupComposite("Patrol Dates", composite);
+			Composite dateFilterExpComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolDatesGroupLabel, composite);
 			createDateFilter(dateFilterExpComp);
 
-			Composite patrolType = createGroupComposite("Patrol Type", composite);
+			Composite patrolType = createGroupComposite(Messages.PatrolFilterDialog_PatrolTypesGroupLabel, composite);
 			createPatrolType(session, patrolType);
 
-			Composite patrolIdComp = createGroupComposite("Patrol Id", composite);
+			Composite patrolIdComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolIdGroupLabel, composite);
 			createIdFilter(patrolIdComp);
 			
 			updateValues();
@@ -277,10 +278,10 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		patrolTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnIncludeAllTypes = new Button(patrolTypeComp, SWT.RADIO);
-		btnIncludeAllTypes.setText("Include All Patrol Type");
+		btnIncludeAllTypes.setText(Messages.PatrolFilterDialog_OpIncludeAllTypesLabel);
 		
 		btnFilterTypes = new Button(patrolTypeComp, SWT.RADIO);
-		btnFilterTypes.setText("Filter Patrol Types:");
+		btnFilterTypes.setText(Messages.PatrolFilterDialog_OpFilterTypesLabel);
 		
 		patrolTypeTableViewer = CheckboxTableViewer.newCheckList(patrolTypeComp, SWT.BORDER | SWT.FULL_SELECTION);
 		patrolTypeTableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));		
@@ -325,7 +326,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		dateComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		btnIncludeAllDate = new Button(dateComp, SWT.RADIO);
-		btnIncludeAllDate.setText("Include All Dates");
+		btnIncludeAllDate.setText(Messages.PatrolFilterDialog_OpIncludeAllDatesLabel);
 		btnIncludeAllDate.addListener(SWT.Selection, validateListener);
 		btnIncludeAllDate.addListener(SWT.Selection, new Listener() {
 			@Override
@@ -337,7 +338,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 			}
 		});
 		btnFilterDate = new Button(dateComp, SWT.RADIO);
-		btnFilterDate.setText("Filter Dates:");
+		btnFilterDate.setText(Messages.PatrolFilterDialog_OpFilterDatesLabel);
 		btnFilterDate.addListener(SWT.Selection, validateListener);
 		btnFilterDate.addListener(SWT.Selection, new Listener() {
 			@Override
@@ -380,13 +381,13 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		});
 		dateViewer.getCombo().addListener(SWT.Modify, validateListener );
 		lblStartDateBetween = new Label(comp, SWT.NONE);
-		lblStartDateBetween.setText("Contains Date Between");
+		lblStartDateBetween.setText(Messages.PatrolFilterDialog_OpContainDatesLabel_A);
 		
 		
 		dtStart = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
 		dtStart.addListener(SWT.Selection, validateListener );
 		lblStartDateAnd = new Label(comp, SWT.NONE);
-		lblStartDateAnd.setText(" and ");
+		lblStartDateAnd.setText(Messages.PatrolFilterDialog_OpContainDatesLabel_B);
 		dtEnd = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
 		dtEnd.addListener(SWT.Selection, validateListener );
 		
@@ -410,12 +411,12 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		if (btnFilterDate.getSelection()){
 			IStructuredSelection dateSelection = (IStructuredSelection) this.dateViewer.getSelection();
 			if (dateSelection == null || dateSelection.isEmpty()){
-				setErrorMessage("Date option must be selected");
+				setErrorMessage(Messages.PatrolFilterDialog_Error_DateMustBeSelected);
 				return;
 			}
 			if (dateSelection.getFirstElement().equals(PatrolViewFilter.DateFilter.CUSTOM)){
 				if (SmartUtils.getDate(dtStart).after(SmartUtils.getDate(dtEnd))){
-					setErrorMessage("End date must be after start date");
+					setErrorMessage(Messages.PatrolFilterDialog_Error_EndDateBeforeStart);
 				}
 			}
 		}
@@ -430,17 +431,17 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		idComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		btnIncludeAllIds = new Button(idComp, SWT.RADIO);
-		btnIncludeAllIds.setText("Include All Patrol Id");
+		btnIncludeAllIds.setText(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
 		
 		btnFilterIds = new Button(idComp, SWT.RADIO);
-		btnFilterIds.setText("Filter Patrol Id:");
+		btnFilterIds.setText(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
 	
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		comp.setLayout(new GridLayout(3, false));
 		lblPatrolId = new Label(comp, SWT.NONE);
-		lblPatrolId.setText("Patrol Id ");
+		lblPatrolId.setText(Messages.PatrolFilterDialog_PatrolIdLabel);
 		
 		pidComparatorViewer = new ComboViewer(comp, SWT.READ_ONLY);
 		pidComparatorViewer.setContentProvider(ArrayContentProvider.getInstance());

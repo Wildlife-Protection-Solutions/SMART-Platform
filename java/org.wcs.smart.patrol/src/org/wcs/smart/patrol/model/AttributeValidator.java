@@ -1,11 +1,17 @@
 package org.wcs.smart.patrol.model;
 
+import java.text.MessageFormat;
+
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.patrol.internal.Messages;
 
 public class AttributeValidator {
+
+	private static final String INVALID_ATT_VALUE_ERROR_MSG = Messages.AttributeValidator_InvalidAttributeValue;
+	private static final String REQUIRED_ERROR_MSG = Messages.AttributeValidator_ValueRequired;
 
 	/**
 	 * Validates the given value for the given attribute
@@ -26,35 +32,33 @@ public class AttributeValidator {
 		}else if (attribute.getType() == AttributeType.TREE){
 			return validateTree(attribute, value);
 		}
-		throw new IllegalStateException("Attribute type not supported.");
+		throw new IllegalStateException("Attribute type not supported."); //$NON-NLS-1$
 	}
 	
 	public static String validateBooean(Attribute attribute, Object value){
-
-
 		if (attribute.getIsRequired() && value == null){
-			return "A value for the attribute " + attribute.getName() + " must be provided.";
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
 		}
 		return null;
 	}
 	
 	public static String validateNumeric(Attribute attribute, Object value){
 		if (value != null && !(value instanceof Double)){
-			return "Invalid attribute value for attribute " + attribute.getName();
+			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
 		}
 	
 		if (attribute.getIsRequired() && value == null){
-			return "A value for the attribute " + attribute.getName() + " must be provided.";
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
 		}
 		if (value != null ){
 			if (attribute.getMinValue() != null){
 				if ((Double)value < attribute.getMinValue()){
-					return attribute.getName() + " must be greater than " + attribute.getMinValue();
+					return MessageFormat.format(Messages.AttributeValidator_ValueToSmall, new Object[]{attribute.getName(),attribute.getMinValue()});
 				}
 			}
 			if (attribute.getMaxValue() != null){
 				if ((Double)value > attribute.getMaxValue()){
-					return attribute.getName() + " must be less than " + attribute.getMaxValue();
+					return MessageFormat.format(Messages.AttributeValidator_ValueToBig, new Object[]{attribute.getName(),attribute.getMaxValue()});
 				}
 			}
 		}
@@ -62,15 +66,18 @@ public class AttributeValidator {
 	}
 	public static String validateString(Attribute attribute, Object value){
 		if (value != null && !(value instanceof String)){
-			return "Invalid attribute value for attribute " + attribute.getName();
+			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
 		}
 	
 		if (attribute.getIsRequired() && value == null){
-			return "A value for the attribute " + attribute.getName() + " must be provided.";
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
 		}
 		if ((String)value != null && attribute.getRegex() != null && attribute.getRegex().length() > 0){
 			if (!((String)value).matches(attribute.getRegex())){
-				return "The value '" + ((String)value) + "' for attribute " + attribute.getName() + " does not match the required expression '" + attribute.getRegex() + "'";
+				return MessageFormat.format(Messages.AttributeValidator_RegexMatchFailed, new Object[]{
+				((String)value),
+				attribute.getName(),
+				attribute.getRegex()});
 			}
 		}
 		return null;
@@ -78,22 +85,22 @@ public class AttributeValidator {
 	
 	public static String validateList(Attribute attribute, Object value){
 		if (value != null && !(value instanceof AttributeListItem)){
-			return "Invalid attribute value for attribute " + attribute.getName();
+			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
 		}
 	
 		if (attribute.getIsRequired() && value == null){
-			return "A value for the attribute " + attribute.getName() + " must be provided.";
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
 		}
 		return null;
 	}
 	
 	public static String validateTree(Attribute attribute, Object value){
 		if (value != null && !(value instanceof AttributeTreeNode)){
-			return "Invalid attribute value for attribute " + attribute.getName();
+			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
 		}
 	
 		if (attribute.getIsRequired() && value == null){
-			return "A value for the attribute " + attribute.getName() + " must be provided.";
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
 		}
 		return null;
 	}
