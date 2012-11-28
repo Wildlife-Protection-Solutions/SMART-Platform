@@ -33,6 +33,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective;
 
@@ -57,7 +58,7 @@ public class NewPatrolHandler extends AbstractHandler {
 							HandlerUtil.getActiveWorkbenchWindow(event));
 		} catch (WorkbenchException e) {
 			SmartPatrolPlugIn
-					.displayLog("Error loading patrol perspective.", e);
+					.displayLog(Messages.NewPatrolHandler_ErrorLoadingPerspective, e);
 		}
 
 		//Show Create Patrol Wizard
@@ -70,7 +71,7 @@ public class NewPatrolHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName("Loading Wizard");
+					monitor.setTaskName(Messages.NewPatrolHandler_Progress_DisplayingWizard);
 					dialog = new WizardDialog(
 							HandlerUtil.getActiveShell(event), wizard);
 
@@ -78,7 +79,7 @@ public class NewPatrolHandler extends AbstractHandler {
 			});
 		} catch (Exception ex) {
 			dialog = null;
-			SmartPatrolPlugIn.displayLog("Error loading new patrol wizard. "
+			SmartPatrolPlugIn.displayLog(Messages.NewPatrolHandler_Error_LoadingWizard
 					+ ex.getMessage(), ex);
 		}
 		if (dialog != null) {

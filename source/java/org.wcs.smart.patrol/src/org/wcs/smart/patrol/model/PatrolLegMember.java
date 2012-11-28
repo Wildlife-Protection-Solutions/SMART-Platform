@@ -114,15 +114,14 @@ public class PatrolLegMember {
 	
 	@Embeddable
 	private static class PatrolLegMemberPk implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private Employee member;
 		private PatrolLeg leg;
 		
 		public PatrolLegMemberPk(){
-			
-		}
-		public PatrolLegMemberPk(Employee member, PatrolLeg leg){
-			this.member = member;
-			this.leg = leg;
 		}
 		
 		@ManyToOne(fetch = FetchType.LAZY)

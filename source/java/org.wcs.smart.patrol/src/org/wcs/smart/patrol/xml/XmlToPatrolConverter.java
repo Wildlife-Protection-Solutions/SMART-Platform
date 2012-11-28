@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.xml;
 import java.io.File;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -135,10 +137,14 @@ public class XmlToPatrolConverter {
 		}
 //		patrol.setObjectiveRating(xml.getObjective().getRating());
 		if (xml.getMandate() != null){
-			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate");
+			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate"); //$NON-NLS-1$
 			if (m == null){
 				//ERROR
-				throw new Exception("The patrol mandate " + xml.getMandate().getValue() + " [" + xml.getMandate().getLanguageCode() + "] could not be found for the current conservation area. ");
+				throw new Exception(
+						MessageFormat.format(
+								Messages.XmlToPatrolConverter_Error_MandateNotFound,
+								new Object[]{xml.getMandate().getValue(), xml.getMandate().getLanguageCode()})
+								);
 			}else{
 				patrol.setMandate(m);
 			}
@@ -146,18 +152,19 @@ public class XmlToPatrolConverter {
 			patrol.setMandate(null);
 		}
 		if (xml.getStation() != null){
-			Station station = (Station) findValue(xml.getStation().getLanguageCode(), xml.getStation().getValue(), "Station");
+			Station station = (Station) findValue(xml.getStation().getLanguageCode(), xml.getStation().getValue(), "Station"); //$NON-NLS-1$
 			if (station == null){
-				warnings.add("Station " + xml.getStation().getValue()+ " [" + xml.getStation().getLanguageCode() + "] could not be found.  The station will not be specified.");			
+				
+				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_StationNoFound, new Object[]{xml.getStation().getValue(),xml.getStation().getLanguageCode()}));			
 			}else{
 				patrol.setStation(station);
 			}
 		}
 		
 		if (xml.getTeam() != null){
-			Team team = (Team) findValue(xml.getTeam().getLanguageCode(), xml.getTeam().getValue(), "Team");
+			Team team = (Team) findValue(xml.getTeam().getLanguageCode(), xml.getTeam().getValue(), "Team"); //$NON-NLS-1$
 			if (team == null){
-				warnings.add("Team " + xml.getTeam().getValue()+ " [" + xml.getTeam().getLanguageCode() + "] could not be found.  The team will not be specified.");
+				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_TemNotFound, new Object[]{xml.getTeam().getValue(),xml.getTeam().getLanguageCode()}));
 			}else{
 				patrol.setTeam(team);
 			}
@@ -180,7 +187,8 @@ public class XmlToPatrolConverter {
 				(PatrolTransportType)findTransportationValue(xml.getTransportType().getLanguageCode(), xml.getTransportType().getValue(), patrol.getPatrolType());
 				
 		if (ttype == null){
-			throw new Exception("Patrol transportation type " + xml.getTransportType().getValue() + " [" + xml.getTransportType().getLanguageCode() + "] could not be found.  Please ensure this transportation type exists.");
+			throw new Exception(MessageFormat.format(
+				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode()}));
 		}
 		boolean found = false;
 		
@@ -195,7 +203,8 @@ public class XmlToPatrolConverter {
 			}
 		}
 		if (!found){
-			throw new Exception("Invalid patrol transportation type " + xml.getTransportType().getValue() + " [" + xml.getTransportType().getLanguageCode() + "] for patrol type " + patrol.getPatrolType().getGuiName() + ".  Ensure the transportation type exists for the given patrol type in the database.");
+			throw new Exception(MessageFormat.format(
+					Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), patrol.getPatrolType().getGuiName()}));
 		}
 		leg.setType(ttype);
 		
@@ -206,13 +215,24 @@ public class XmlToPatrolConverter {
 			if (e == null){
 				e = findEmployeeById(member);
 				if (e != null){
-					warnings.add("Employee with id " + member.getEmployeeId() + " has a different name in the imported data [" + member.getGivenName() + " " + member.getFamilyName() + "] from the name in SMART [" + e.getGivenName() + " " + e.getFamilyName() + "]");
+					warnings.add(MessageFormat.format(
+							Messages.XmlToPatrolConverter_Warning_EmployeeNameDifferent,
+							new Object[]{member.getEmployeeId(), member.getGivenName() + " " + member.getFamilyName(),e.getGivenName() + " " + e.getFamilyName()}) //$NON-NLS-1$ //$NON-NLS-2$
+						);
+							
+							
 				}else{
 					e = findEmployeeByName(member);
 					if (e == null){
-						warnings.add("Employee " + member.getGivenName() + " " + member.getFamilyName() + " (" + member.getEmployeeId() +") could not be found.  The employee will not be imported.");
+						warnings.add(MessageFormat.format(
+								Messages.XmlToPatrolConverter_Warning_EmployeeNotFound,
+								new Object[]{member.getGivenName() + " " + member.getFamilyName() + " ("+ member.getEmployeeId() + ")"} //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						));
 					}else{					
-						warnings.add("Employee " + member.getGivenName() + " " + member.getFamilyName() + " with id '" + member.getEmployeeId() +"' could not be found.  Employee " + e.getGivenName() + " " + e.getFamilyName() + " with id '" + e.getId() + "' will be used.");
+						
+						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_EmployeeIdDifferent,
+								new Object[]{member.getGivenName() + " " + member.getFamilyName() + " ("+ member.getEmployeeId() + ")", e.getGivenName() + " " + e.getFamilyName() + " (" + e.getId() + ")"} //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+						));
 					}
 				}
 			}
@@ -274,7 +294,9 @@ public class XmlToPatrolConverter {
 					WaypointAttachment att = new WaypointAttachment();
 					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
 					if (!f.exists()){
-						warnings.add("Attachment : " + filename + " will not be imported.  File not found '" + f.getAbsolutePath() + "'");
+						warnings.add(MessageFormat.format(
+								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, new Object[]{ filename, f.getAbsolutePath()}));
+								
 					}else{
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
@@ -303,7 +325,9 @@ public class XmlToPatrolConverter {
 		ob.setWaypoint(parent);
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
-			warnings.add("Observation category " + xml.getCategoryKey() + " for waypoint " + parent.getId() + " on " + DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime()) + " could not be found. These observations will not be imported.");
+			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_CategoryNotFound,
+					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime()) }) //$NON-NLS-1$
+					);
 			return null;
 		}else{
 			ob.setCategory(cat);
@@ -313,7 +337,11 @@ public class XmlToPatrolConverter {
 				if (attribute != null){
 					ob.getAttributes().add(attribute);
 				}else{
-					warnings.add("Not all data imported for waypoint " + parent.getId() + " on " + DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime()) + ". See previous errors");		
+					warnings.add(MessageFormat.format(
+						Messages.XmlToPatrolConverter_Warning_NotAllDataImported, new Object[]{
+							parent.getId(),DateFormat.getDateInstance().format(parent.getPatrolLegDay().getDate()) + " " + DateFormat.getTimeInstance().format(parent.getTime())}) //$NON-NLS-1$
+					);
+					
 				}
 			}
 		}
@@ -327,7 +355,8 @@ public class XmlToPatrolConverter {
 		
 		Attribute dmAttribute = findAttribute(type.getAttributeKey(), parent.getCategory());
 		if (dmAttribute == null){
-			warnings.add("Attribute: " + type.getAttributeKey() + " could not be found for category " + parent.getCategory().getHkey() + ".  Attribute information will not be imported.");
+			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_AttributeNotFound,
+					new Object[]{type.getAttributeKey(), parent.getCategory().getHkey()}));
 			return null;
 		}else{
 			attribute.setAttribute(dmAttribute);
@@ -340,36 +369,36 @@ public class XmlToPatrolConverter {
 				
 			}else if (dmAttribute.getType() == AttributeType.NUMERIC){
 				if (type.getDValue() == null){
-					warnings.add("Attribute: " + type.getAttributeKey() + " has no double value. Attribute information will not be imported.");
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoDoubleValue, new Object[]{type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setNumberValue(type.getDValue());
 			}else if (dmAttribute.getType() == AttributeType.TEXT){
 				if (type.getSValue() == null){
-					warnings.add("Attribute: " + type.getAttributeKey() + " has no string value. Attribute information will not be imported.");
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoStringValue, new Object[]{type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setStringValue(type.getSValue());	
 				
 			}else if (dmAttribute.getType() == AttributeType.LIST){
 				if (type.getItemKey() == null){
-					warnings.add("Attribute: " + type.getAttributeKey() + " has no value. Attribute information will not be imported.");
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoListValue, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
 				AttributeListItem item = findAttributeListItem(type.getItemKey(), dmAttribute);
 				if (item == null){
-					warnings.add("No list item with key " + type.getItemKey() + " for attribute: " + type.getAttributeKey() + ". Attribute information will not be imported.");
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_ListItemNotFound, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}	
 				attribute.setAttributeListItem(item);
 			}else if (dmAttribute.getType() == AttributeType.TREE){
 				if (type.getItemKey() == null){
-					warnings.add("Attribute: " + type.getAttributeKey() + " has no value. Attribute information will not be imported.");
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoTreeItem, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
 				AttributeTreeNode item = findAttributeTreeItem(type.getItemKey(), dmAttribute);
 				if (item == null){
-					warnings.add("No attribute tree item with key " + type.getItemKey() + " for attribute: " + type.getAttributeKey() + ". Attribute information will not be imported.");
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_TreeItemNotFound, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setAttributeTreeNode(item);
@@ -381,7 +410,7 @@ public class XmlToPatrolConverter {
 	}
 
 	private AttributeTreeNode findAttributeTreeItem(String key, Attribute attribute){
-		String bits[] = key.split("\\.");
+		String bits[] = key.split("\\."); //$NON-NLS-1$
 		
 		List<AttributeTreeNode> nodes = attribute.getTree();
 		AttributeTreeNode nd = null;
@@ -414,16 +443,16 @@ public class XmlToPatrolConverter {
 			
 	}
 	private Attribute findAttribute(String key, Category category){
-		String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key";
+		String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
 		Query query = session.createQuery(sql);
-		query.setParameter("key", key);
-		query.setParameter("ca", ca);
+		query.setParameter("key", key); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List results = query.list();
+		List<?> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			throw new IllegalStateException("There should never be more than one attribute with the same key. Please review the data model.");
+			throw new IllegalStateException(Messages.XmlToPatrolConverter_Error_DuplicateAttributes);
 		}else{
 			Attribute att = (Attribute) results.get(0);
 			//ensure attribute exists for category
@@ -454,15 +483,15 @@ public class XmlToPatrolConverter {
 	}
 	
 	private Category findCategory(String key){
-		String[] bits = key.split("\\.");
-		String sql = "FROM Category WHERE conservationArea = :ca and keyid = :key";
+		String[] bits = key.split("\\."); //$NON-NLS-1$
+		String sql = "FROM Category WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
 		Query query = session.createQuery(sql);
-		query.setParameter("key", bits[bits.length - 1]);
-		query.setParameter("ca", ca);
+		query.setParameter("key", bits[bits.length - 1]); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List results = query.list();
+		List<?> results = query.list();
 		Category found = null;
-		for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 			Category options = (Category) iterator.next();
 			if (options.getHkey().equals(key)){
 				found = options;
@@ -488,18 +517,18 @@ public class XmlToPatrolConverter {
 	
 	private SimpleListItem findValue(String langCode, String value, String objectType){
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca ";
+		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		Query query = session.createQuery(sql);
-		query.setParameter("cd", langCode);
-		query.setParameter("value", value);
-		query.setParameter("ca", ca);
+		query.setParameter("cd", langCode); //$NON-NLS-1$
+		query.setParameter("value", value); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List results = query.list();
+		List<?> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			warnings.add("Multiple options found for " + objectType + ". Using the first value found.");
+			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_MultipleOptionsFound, new Object[]{objectType}));
 			return (SimpleListItem)results.get(0);
 		}else{
 			return (SimpleListItem)results.get(0);
@@ -508,21 +537,21 @@ public class XmlToPatrolConverter {
 	
 	private SimpleListItem findTransportationValue(String langCode, String value, org.wcs.smart.patrol.model.PatrolType.Type type){
 		
-		String sql = "SELECT c FROM Language a, Label b, PatrolTransportType c WHERE b.id.language = a.uuid " +
-				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca and " +
-				"c.patrolType = :patrolType";
+		String sql = "SELECT c FROM Language a, Label b, PatrolTransportType c WHERE b.id.language = a.uuid " + //$NON-NLS-1$
+				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca and " + //$NON-NLS-1$
+				"c.patrolType = :patrolType"; //$NON-NLS-1$
 		
 		Query query = session.createQuery(sql);
-		query.setParameter("cd", langCode);
-		query.setParameter("value", value);
-		query.setParameter("ca", ca);
-		query.setParameter("patrolType", type);
+		query.setParameter("cd", langCode); //$NON-NLS-1$
+		query.setParameter("value", value); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
+		query.setParameter("patrolType", type); //$NON-NLS-1$
 		
-		List results = query.list();
+		List<?> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			warnings.add("Multiple options found for PatrolTransportType. Using the first value found.");
+			warnings.add(Messages.XmlToPatrolConverter_Warning_MultipleTransportTypeOptionsFound);
 			return (SimpleListItem)results.get(0);
 		}else{
 			return (SimpleListItem)results.get(0);

@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -42,6 +43,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.WptType;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
 
@@ -52,6 +54,12 @@ import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
  */
 public class ImportGpsDataWizard extends Wizard implements IPageChangingListener{
 
+	
+	public static final String CREATE_FROM_WAYPOINTS = "CreateFromWaypoints"; //$NON-NLS-1$
+
+	private static final String GPX_FILE_ERROR = Messages.ImportGpsDataWizard_GPXFileImportError;
+	private static final String GPS_DEVICE_ERROR = Messages.ImportGpsDataWizard_GPSDeviceImportError;
+	private static final String IMPORT_DIALOG_TITLE = Messages.ImportGpsDataWizard_ImportDialog_Title;
 	
 	private GPSDataImport.ImportType type ;
 	
@@ -68,7 +76,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	 * Creates a new wizard.
 	 */
 	public ImportGpsDataWizard(Date currentDay, GPSDataImport.ImportType type) {
-		setWindowTitle("Import " + type.guiName + " Data");
+		setWindowTitle(MessageFormat.format(Messages.ImportGpsDataWizard_DialogTitle, new Object[]{type.guiName}));
 		this.currentDay = currentDay;
 		this.type = type;
 		super.setForcePreviousAndNextButtons(true);
@@ -158,7 +166,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog("Could not import data from pgx file. " + ex.getMessage(), ex);
+				SmartPatrolPlugIn.displayLog(GPX_FILE_ERROR + ex.getMessage(), ex);
 				return false;
 			}
 		}else if (lastPage instanceof ImportGPSWizardPage ){
@@ -183,7 +191,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							Display.getDefault().syncExec(new Runnable() {
 								@Override
 								public void run() {
-									SmartPatrolPlugIn.displayLog("Could not import data from gps device. " + ex.getMessage(), ex);
+									SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
 								}
 							});
 							
@@ -191,7 +199,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog("Could not import data from gps device. " + ex.getMessage(), ex);
+				SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
 				return false;
 			}
 		
@@ -206,11 +214,11 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			
 		}else if (lastPage instanceof ImportFromWaypointWizardPage){
 			allData = ((ImportFromWaypointWizardPage)lastPage).importAll();
-			importedData = "CreateFromWaypoints";
+			importedData = CREATE_FROM_WAYPOINTS;
 		}
 		
 		if (importedData  == null || (importedData instanceof Collection &&  ((Collection)importedData).size() == 0 )){
-			MessageDialog.openWarning(getShell(), "Import", "No " + this.type.guiName + " were found to import. This could be due to date formats or other GPS issues.  Try importing all " + this.type + " and selecting desired waypoints.");
+			MessageDialog.openWarning(getShell(), IMPORT_DIALOG_TITLE, MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new Object[]{this.type.guiName, this.type }));
 			return false;
 		}
 		return true;
@@ -259,7 +267,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 				}catch (Exception ex){
-					SmartPatrolPlugIn.displayLog("Could not import data from GPX file", ex);
+					SmartPatrolPlugIn.displayLog("Could not import data from GPX file", ex); //$NON-NLS-1$
 					event.doit = false;
 				}
 				
@@ -273,7 +281,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							InterruptedException {
 						File f = null;
 						try{
-							monitor.setTaskName("Importing Data from GPS Device");
+							monitor.setTaskName(Messages.ImportGpsDataWizard_Progress_ImportingGPS);
 							f = GPSBabel.getData(deviceType, Collections.singleton(type));
 							if (type == ImportType.WAYPOINT){
 								allWaypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(f.getAbsolutePath()), monitor);
@@ -284,7 +292,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							Display.getDefault().syncExec(new Runnable(){
 								@Override
 								public void run() {
-									SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
+									SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
 								}});
 							
 						}finally{
@@ -299,7 +307,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 										Display.getDefault().syncExec(new Runnable(){
 											@Override
 											public void run() {
-												SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
+												SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
 											}});
 									}});
 							}
@@ -307,7 +315,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 				}catch (Exception ex){
-					SmartPatrolPlugIn.displayLog("Could not import data from GPS Device. \n" + ex.getMessage(), ex);
+					SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
 					event.doit = false;
 				}
 				
@@ -316,7 +324,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			if (allWaypoints == null){
 				event.doit = false;
 			}else if (allWaypoints.size() == 0){
-				MessageDialog.openInformation(getShell(), "Import", "No " + type.guiName + "s were found.  Ensure you have selected the correct file or device and try again.");
+				MessageDialog.openInformation(getShell(), IMPORT_DIALOG_TITLE, MessageFormat.format(Messages.ImportGpsDataWizard_File_WarningNoneFound, new Object[]{ type.guiName }));
 				event.doit = false;
 			}else{
 				((ImportWpSelectWizardPage)event.getTargetPage()).setWaypoints(allWaypoints);

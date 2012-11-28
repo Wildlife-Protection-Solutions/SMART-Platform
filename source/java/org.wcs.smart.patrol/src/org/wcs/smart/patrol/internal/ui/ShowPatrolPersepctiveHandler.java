@@ -6,6 +6,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective;
 
 /**
@@ -26,7 +27,7 @@ public class ShowPatrolPersepctiveHandler extends AbstractHandler {
 							HandlerUtil.getActiveWorkbenchWindow(event));
 		} catch (WorkbenchException e) {
 			SmartPatrolPlugIn
-					.displayLog("Error loading patrol perspective.", e);
+					.displayLog(Messages.ShowPatrolPersepctiveHandler_Error_LoadingPatrolPerspective, e);
 		}
 		return null;
 	}

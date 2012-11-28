@@ -47,6 +47,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -62,7 +63,7 @@ public class Patrol {
 	/**
 	 * Text to identify patrol id as auto-generated
 	 */
-	public static final String AUTO_GENERATE_TEXT = "system-generated";
+	public static final String AUTO_GENERATE_TEXT = Messages.Patrol_SystemGenerateId_Name;
 
 	/**
 	 * Absolute maximum length of patrol in days
@@ -251,7 +252,7 @@ public class Patrol {
 		}
 		
 		PatrolLeg pl = new PatrolLeg();
-		pl.setId((this.legs.size() + 1) + "");
+		pl.setId(String.valueOf((this.legs.size() + 1)));
 		pl.setPatrol(this);
 		pl.setStartDate(getStartDate());
 		pl.setEndDate(getEndDate());
@@ -319,7 +320,7 @@ public class Patrol {
 	 */
 	@Transient
 	public String getPatrolDatastorePath(){
-		return "Patrol" + File.separator + SmartUtils.getDirectoryPath(uuid);
+		return "Patrol" + File.separator + SmartUtils.getDirectoryPath(uuid); //$NON-NLS-1$
 	}
 
 

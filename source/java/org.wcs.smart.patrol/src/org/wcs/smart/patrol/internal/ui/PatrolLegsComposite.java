@@ -72,7 +72,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolLegsComposite extends PatrolItemComposite{
 
-	private static final DateFormat DATE_FORMATTER = DateFormat.getDateInstance(DateFormat.MEDIUM);
+	private DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
 	
 	private static final String START_INFO_LABEL = Messages.PatrolLegsComposite_PatrolStart_Label;
 	private static final String END_INFO_LABEL = Messages.PatrolLegsComposite_PatrolEnd_Label;
@@ -128,7 +128,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					if (dialog.open() == Window.OK){
 						patrolStartDate = dialog.getStartDate();
 						patrolEndDate = dialog.getEndDate();
-						lblDateInfo.setText(START_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 						fireChangeListeners();
 					}
 				}
@@ -332,7 +332,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		this.patrolStartDate = (Date)patrol.getStartDate().clone();
 		this.patrolEndDate = (Date)patrol.getEndDate().clone();
 		
-		lblDateInfo.setText(START_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + DATE_FORMATTER.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		patrolLegViewer.showPilotColum(patrol.hasPilot());
 		
 	}

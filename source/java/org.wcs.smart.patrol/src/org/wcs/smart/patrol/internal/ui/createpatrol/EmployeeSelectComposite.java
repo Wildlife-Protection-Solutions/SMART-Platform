@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Composite to select employees.  This composite
@@ -105,12 +106,12 @@ public class EmployeeSelectComposite extends Composite{
 		setLayout(new GridLayout(3, false));
 		
 		Label lbl = new Label(this, SWT.NONE);
-		lbl.setText("All Employees:");
+		lbl.setText(Messages.EmployeeSelectComposite_AddEmployee_Label);
 		
 		new Label(this, SWT.NONE);
 		
 		lbl = new Label(this, SWT.NONE);
-		lbl.setText("Selected Employees:");
+		lbl.setText(Messages.EmployeeSelectComposite_SelectedEmployees_Label);
 		
 		employeeListViewer = new TableViewer(this, SWT.MULTI | SWT.BORDER);
 		employeeListViewer.setContentProvider(new ObservableListContentProvider());
@@ -123,7 +124,7 @@ public class EmployeeSelectComposite extends Composite{
 		btnComposite.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 		
 		Button btnAdd = new Button(btnComposite, SWT.PUSH);
-		btnAdd.setText("Add ->");
+		btnAdd.setText(Messages.EmployeeSelectComposite_Add_Button);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -132,7 +133,7 @@ public class EmployeeSelectComposite extends Composite{
 			
 		});
 		Button btnRemove = new Button(btnComposite, SWT.PUSH);
-		btnRemove.setText("<- Remove");
+		btnRemove.setText(Messages.EmployeeSelectComposite_Remove_Button);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -153,7 +154,7 @@ public class EmployeeSelectComposite extends Composite{
 	 * selected employees.
 	 */
 	private void addEmployees(){
-		Iterator items = ((IStructuredSelection)employeeListViewer.getSelection()).iterator();
+		Iterator<?> items = ((IStructuredSelection)employeeListViewer.getSelection()).iterator();
 		while(items.hasNext()){
 			Employee next = (Employee)items.next();
 			allEmployees.remove(next);
@@ -169,7 +170,7 @@ public class EmployeeSelectComposite extends Composite{
 	 * list of all employees.
 	 */
 	private void removeEmployees(){
-		Iterator items = ((IStructuredSelection)selectedEmployeeListViewer.getSelection()).iterator();
+		Iterator<?> items = ((IStructuredSelection)selectedEmployeeListViewer.getSelection()).iterator();
 		while(items.hasNext()){
 			Employee next = (Employee)items.next();
 			allEmployees.add(next);

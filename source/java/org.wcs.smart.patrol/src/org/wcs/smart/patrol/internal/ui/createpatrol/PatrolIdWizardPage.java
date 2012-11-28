@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolIdComposite;
 import org.wcs.smart.patrol.model.Patrol;
@@ -41,7 +42,7 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	/**
 	 */
 	protected PatrolIdWizardPage() {
-		super("Patrol ID");
+		super(Messages.PatrolIdWizardPage_PageName);
 
 	}
 
@@ -55,7 +56,7 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 		patrolIdComp = new PatrolIdComposite();
 		
 		patrolIdComp.addChangeListener(this);
-		setMessage("Set the patrol ID below. If you wish, you may use the default value that had been automatically generated.");
+		setMessage(Messages.PatrolIdWizardPage_PageMessage);
 		super.setControl(patrolIdComp.createComponent(parent, SWT.NONE));
 		
 	}

@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,8 +47,10 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachment;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for displaying attachments associated 
@@ -84,7 +87,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lblAttachments = new Label(main, SWT.NONE);
-		lblAttachments.setText("Attachments:");
+		lblAttachments.setText(Messages.AttachmentDialog_Attachments_Label);
 		lblAttachments.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		tblAttachments = new TableViewer(main, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -114,7 +117,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 		buttonPanel.setLayout(new GridLayout(1, false));
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, false, false));
 		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
-		btnAdd.setText("Add");
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -128,7 +131,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 				for (int i = 0; i < fd.getFileNames().length; i ++){
 					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
 					if (!f.exists()){
-						SmartPatrolPlugIn.displayLog("The selected file does not exist: '" + f.getAbsolutePath() + "'", null);
+						SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.AttachmentDialog_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
 						return;
 					}
 					WaypointAttachment wpa = new WaypointAttachment();
@@ -141,13 +144,13 @@ public class AttachmentDialog extends TitleAreaDialog {
 		});
 		
 		btnRemove = new Button(buttonPanel, SWT.PUSH);
-		btnRemove.setText("Delete");
+		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
-				for (Iterator iterator = sel.iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 					WaypointAttachment type = (WaypointAttachment) iterator.next();
 					attachments.remove(type);
 				}
@@ -157,7 +160,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 		btnRemove.setEnabled(false);
 		
 		btnOpen = new Button(buttonPanel, SWT.PUSH);
-		btnOpen.setText("Open");
+		btnOpen.setText(Messages.AttachmentDialog_Button_Open);
 		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -176,8 +179,8 @@ public class AttachmentDialog extends TitleAreaDialog {
 		tblAttachments.setInput(this.attachments);
 		tblAttachments.refresh();
 		
-		setMessage("List of attachments associated with this waypoint.");
-		getShell().setText("Waypoint Attachments");
+		setMessage(Messages.AttachmentDialog_DialogMessage);
+		getShell().setText(Messages.AttachmentDialog_DialogTitle);
 		return composite; 
 	}
 
@@ -185,6 +188,7 @@ public class AttachmentDialog extends TitleAreaDialog {
 	/**
 	 * @return all attachments selected by the user
 	 */
+	@SuppressWarnings("unchecked")
 	public List<WaypointAttachment> getAttchments(){
 		return this.attachments;
 	}

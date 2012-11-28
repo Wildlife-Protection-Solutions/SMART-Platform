@@ -244,7 +244,7 @@ public class MandateComboBoxCellEditor extends CellEditor {
 			comboBox.removeAll();
 			for (int i = 0; i < values.length; i++) {
 				if (values[i] == null){
-					comboBox.add("");
+					comboBox.add(""); //$NON-NLS-1$
 				}else{
 					comboBox.add(values[i].findName(langViewer.getCurrentSelection()), i);
 				}

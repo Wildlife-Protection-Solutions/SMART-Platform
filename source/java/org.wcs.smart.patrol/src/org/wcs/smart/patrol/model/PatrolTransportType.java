@@ -32,6 +32,7 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Class to represent a sub-transportation 
@@ -44,7 +45,7 @@ import org.wcs.smart.ca.SimpleListItem;
 @Table(name = "smart.patrol_transport")
 public class PatrolTransportType extends SimpleListItem{
 
-	public static final String NAME = "Transport Type";
+	public static final String NAME = Messages.PatrolTransportType_Name;
 	
 	private boolean isActive = true;
 	private ConservationArea ca;

@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
 
@@ -82,7 +83,7 @@ public class TeamComposite extends PatrolItemComposite{
 		
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Team: ");
+		lbl.setText(Messages.TeamComposite_TeamLabel);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		teamList = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -109,11 +110,11 @@ public class TeamComposite extends PatrolItemComposite{
 			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Could not load teams.", ex);
+			SmartPatrolPlugIn.displayLog(Messages.TeamComposite_Error_CouldNotLoadTeams, ex);
 			session.close();
 		}
 		
-		String none = "(None)";
+		String none = Messages.TeamComposite_NoTeam_Label;
 		List<Object> stns = new ArrayList<Object>();
 		stns.add(none);
 		if (teams != null){
@@ -148,7 +149,7 @@ public class TeamComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Patrol Team";
+		return Messages.TeamComposite_Title;
 	}
 	
 	

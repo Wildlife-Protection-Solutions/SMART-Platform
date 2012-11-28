@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -54,10 +55,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -72,6 +73,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 
+	private static final String INVALID_NAME_DIALOG_TITLE = Messages.PatrolMandatePropertyPage_InvalidName_DialogTitle;
 	private LanguageViewer cmbLanguage;
 	private TableViewer tableViewer;
 	private MandateSorter sorter ; 
@@ -103,7 +105,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * Creates new page
 	 */
 	public PatrolMandatePropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Patrol Mandate");
+		super(Display.getCurrent().getActiveShell(), Messages.PatrolMandatePropertyPage_Dialog_Title);
 	}
 
 	@Override
@@ -131,7 +133,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
-		lblNewLabel.setText("Language:");
+		lblNewLabel.setText(Messages.PatrolMandatePropertyPage_Language_Label);
 
 		cmbLanguage = new LanguageViewer(container, SWT.NONE, ca);
 	
@@ -179,7 +181,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		Button btnAdd = new Button(composite, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,
 				1, 1));
-		btnAdd.setText("Add");
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -211,7 +213,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
-		setMessage("Manage the list of mandates associated with a patrol.");
+		setMessage(Messages.PatrolMandatePropertyPage_Dialog_Message);
 		return container;
 	}
 
@@ -240,7 +242,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				s.getTransaction().rollback();
 			}
 			SmartPatrolPlugIn.displayLog(
-					"Error saving patrol mandate updates. " + ex.getMessage(),
+					Messages.PatrolMandatePropertyPage_Error_SavingUpdates + ex.getMessage(),
 					ex);
 		}
 		return false;
@@ -253,7 +255,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		PatrolMandate mandate = new PatrolMandate();
 		mandate.setConservationArea(ca);
 		mandate.setIsActive(true);
-		updateLangValue(Column.NAME, mandate, "New Patrol Mandate");
+		updateLangValue(Column.NAME, mandate, Messages.PatrolMandatePropertyPage_DefaultNewMandateName);
 		mandates.add(mandate);
 		
 		tableViewer.refresh();
@@ -277,7 +279,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 				
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Could not delete mandate: " + mandate.getName(), ex);
+			SmartPatrolPlugIn.displayLog( 
+					MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_DeletingMandate, new Object[]{mandate.getName()}), ex);
 		}	
 		
 		tableViewer.refresh();
@@ -307,7 +310,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		if (type == Column.NAME) {
 			return mnd.findName(cmbLanguage.getCurrentSelection());
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -329,7 +332,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					} 
 					if(matches > 0){
 						//invalid name, don't update it.
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Invalid Mandate, it cannot be a duplicate.");
+						MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, Messages.PatrolMandatePropertyPage_Error_DuplicateMandate);
 						setChangesMade(false);
 					}else{					
 						mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
@@ -337,7 +340,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					}
 				}else{
 					//invalid value, show error 
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Invalid Name", "Name must not be blank, nor contain characters other than " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, 
+							MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_InvalidMandateName, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 					setChangesMade(false);
 				}
 				

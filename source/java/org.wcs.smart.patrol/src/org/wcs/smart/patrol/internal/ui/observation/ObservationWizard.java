@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.observation;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
@@ -76,7 +78,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @param wp Waypoint to gather observations for
 	 */
 	public ObservationWizard(Waypoint wp){
-		setWindowTitle("Waypoint Observations - Waypoint Id: " + wp.getId());
+		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{wp.getId()}));
 		
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
@@ -359,7 +361,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
      */
     public boolean performCancel() {
     	if (isModified){
-    		if (!MessageDialog.openQuestion(getShell(), "Confirmation", "All entries/modifications you have made will be lost.  Are you sure you want to cancel?")){
+    		if (!MessageDialog.openQuestion(getShell(), Messages.ObservationWizard_ConfirmCancel_DialogTitle, Messages.ObservationWizard_ConfirmCancel_DialogMessage)){
     			return false;
     		}
     	}

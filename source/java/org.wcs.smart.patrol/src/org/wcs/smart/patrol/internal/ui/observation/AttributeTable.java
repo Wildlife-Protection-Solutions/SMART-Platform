@@ -215,12 +215,12 @@ public class AttributeTable {
 				if (att != null) {
 					if (attribute.getType() == AttributeType.TEXT) {
 						if (att.getStringValue() == null) {
-							return "";
+							return ""; //$NON-NLS-1$
 						}
 						return att.getStringValue();
 					} else if (attribute.getType() == AttributeType.BOOLEAN) {
 						if (att.getNumberValue() == null) {
-							return "";
+							return ""; //$NON-NLS-1$
 						}
 						if (att.getNumberValue() < 0.5) {
 							return Attribute.BOOLEAN_FALSE_LABEL;
@@ -229,92 +229,26 @@ public class AttributeTable {
 						}
 					} else if (attribute.getType() == AttributeType.NUMERIC) {
 						if (att.getNumberValue() == null) {
-							return "";
+							return ""; //$NON-NLS-1$
 						}
 						return String.valueOf(att.getNumberValue());
 					} else if (attribute.getType() == AttributeType.LIST) {
 						if (att.getAttributeListItem() == null) {
-							return "";
+							return ""; //$NON-NLS-1$
 						}
 						return att.getAttributeListItem().getName();
 					} else if (attribute.getType() == AttributeType.TREE) {
 						if (att.getAttributeTreeNode() == null) {
-							return "";
+							return ""; //$NON-NLS-1$
 						}
 						return att.getAttributeTreeNode().getName();
 					}
 				}
 				
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 	}
-//	static class AttributeTableLabelProvider extends ColumnLabelProvider {
-//		
-//		private Attribute attribute;
-//		private WaypointObservation editingObservation = null;
-//
-//		public AttributeTableLabelProvider(Attribute attribute) {
-//			this.attribute = attribute;
-//		}
-//		public void setEditingObservation(WaypointObservation ob){
-//			this.editingObservation = ob;
-//		}
-//
-//		/**
-//		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-//		 */
-//		@Override
-//		public Color getBackground(Object element) {
-//			if (this.editingObservation != null && this.editingObservation == element){
-//				return Display.getDefault().getSystemColor(SWT.COLOR_RED);
-//			}
-//			return null;
-//		}
-//
-//		@Override
-//		public String getText(Object element) {
-//			if (element instanceof WaypointObservation) {
-//				WaypointObservation observation = (WaypointObservation) element;
-//				WaypointObservationAttribute att = observation.findAttribute(attribute);
-//				
-//				if (att != null) {
-//					if (this.attribute.getType() == AttributeType.TEXT) {
-//						if (att.getStringValue() == null) {
-//							return "";
-//						}
-//						return att.getStringValue();
-//					} else if (this.attribute.getType() == AttributeType.BOOLEAN) {
-//						if (att.getNumberValue() == null) {
-//							return "";
-//						}
-//						if (att.getNumberValue() < 0.5) {
-//							return Attribute.BOOLEAN_FALSE_LABEL;
-//						} else {
-//							return Attribute.BOOLEAN_TRUE_LABEL;
-//						}
-//					} else if (this.attribute.getType() == AttributeType.NUMERIC) {
-//						if (att.getNumberValue() == null) {
-//							return "";
-//						}
-//						return String.valueOf(att.getNumberValue());
-//					} else if (this.attribute.getType() == AttributeType.LIST) {
-//						if (att.getAttributeListItem() == null) {
-//							return "";
-//						}
-//						return att.getAttributeListItem().getName();
-//					} else if (this.attribute.getType() == AttributeType.TREE) {
-//						if (att.getAttributeTreeNode() == null) {
-//							return "";
-//						}
-//						return att.getAttributeTreeNode().getName();
-//					}
-//				}
-//				return "";
-//			}
-//			return super.getText(element);
-//		}
-//	}
 
 }

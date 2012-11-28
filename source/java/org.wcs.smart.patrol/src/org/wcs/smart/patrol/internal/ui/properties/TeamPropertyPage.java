@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +65,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -89,9 +91,6 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private WritableList teams = null;
 	private HashSet<Team> toDelete = new HashSet<Team>();
 	private PatrolMandate[] mandates = null;
-
-	public static Color gray = null;
-	public static Color black = null;
 	
 	private UUIDGenerator uuidGenerator; //for generating uuids for description field
 	
@@ -117,7 +116,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param title
 	 */
 	public TeamPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Patrol Teams");
+		super(Display.getCurrent().getActiveShell(), Messages.TeamPropertyPage_Dialog_Title);
 		
 		/* get mandates */
 		getSession().beginTransaction();
@@ -128,7 +127,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			getSession().getTransaction().rollback();
 			getSession().close();
-			SmartPatrolPlugIn.displayLog("Could not load patrol mandates.", ex);
+			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingMandates, ex);
 			return;
 		}
 		ms.add(0, null);
@@ -155,16 +154,12 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		
-		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
-		
 		getSession().beginTransaction();
 		try{
 			teams = new WritableList(PatrolHibernateManager.getTeams(ca, getSession()), Team.class);
 			getSession().getTransaction().rollback();
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Error loading patrol teams.", ex);
+			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingTeams, ex);
 			getSession().close();
 		}
 		
@@ -175,7 +170,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
-		lblNewLabel.setText("Language:");
+		lblNewLabel.setText(Messages.TeamPropertyPage_Language_Label);
 
 		languageViewer = new LanguageViewer(container, SWT.NONE, ca);
 	
@@ -222,7 +217,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		Button btnAdd = new Button(composite, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,
 				1, 1));
-		btnAdd.setText("Add");
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -255,7 +250,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
-		setMessage("Manage the list of patrol teams.");
+		setMessage(Messages.TeamPropertyPage_Dialog_Message);
 		return container;
 	}
 	
@@ -277,7 +272,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 				
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), "Could not delete team: " + team.getName(), ex);
+			SmartPlugIn.displayLog(getShell(),
+					MessageFormat.format(Messages.TeamPropertyPage_Error_DeletingTeam, new Object[]{team.getName()}), ex);
 		}
 		tableViewer.refresh();
 	}
@@ -318,7 +314,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return true;
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(
-					"Error saving team updates. " + ex.getMessage(),
+					Messages.TeamPropertyPage_Error_SavingUpdates + ex.getMessage(),
 					ex);
 		}
 		return false;
@@ -329,8 +325,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		team.setConservationArea(ca);
 		team.setIsActive(true);
 		team.setMandate(null);
-		updateValue(Column.NAME, team, "New Team");
-		updateValue(Column.DESCRIPTION, team, "New Team Description");
+		updateValue(Column.NAME, team, Messages.TeamPropertyPage_DefaultNewTeamName);
+		updateValue(Column.DESCRIPTION, team, Messages.TeamPropertyPage_DefaultNewTeamDescription);
 		
 		teams.add(team);
 		
@@ -358,11 +354,11 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return mnd.findDescription(languageViewer.getCurrentSelection());
 		}else if (type == Column.MANDATE){
 			if (mnd.getMandate() == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return mnd.getMandate().findName(languageViewer.getCurrentSelection());
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -518,9 +514,9 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		 
 		public Color getForeground(Object element){
 			 if (((Team)element).getIsActive()){
-				 return TeamPropertyPage.black;
+				 return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 			 }else{
-				 return TeamPropertyPage.gray;
+				 return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
 			 }
 		 }
 		

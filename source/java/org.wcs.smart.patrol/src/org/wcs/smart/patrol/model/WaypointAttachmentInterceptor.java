@@ -27,6 +27,7 @@ import java.io.Serializable;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -40,6 +41,12 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class WaypointAttachmentInterceptor extends EmptyInterceptor{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 
 	/**
 	 * When a waypoint is deleted it also deletes the file on disk.
@@ -80,16 +87,16 @@ public class WaypointAttachmentInterceptor extends EmptyInterceptor{
     			File to = new File(f.getAbsoluteFile() + File.separator + attachment.getFilename());
     			int counter = 1;
     			while(to.exists()){
-    				String name = (counter++) + "_" + attachment.getFilename();
+    				String name = (counter++) + "_" + attachment.getFilename(); //$NON-NLS-1$
     				to = new File(f.getAbsoluteFile() + File.separator + name);
     			}
     			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
-    				throw new RuntimeException("Patrol modifications could not be saved because attachment could not be copied.  Ensure write permissions to directory or remove attachment.");
+    				throw new RuntimeException(Messages.WaypointAttachmentInterceptor_Error_SavingPatrolModifications);
     			}else{
     				//state is what is written to db and should be updated
     				attachment.setFilename(to.getName());
     				for (int i = 0; i < propertyNames.length;i++){
-    					if (propertyNames[i].equals("filename")){
+    					if (propertyNames[i].equals("filename")){ //$NON-NLS-1$
     						state[i] = to.getName();
     					}
     				}

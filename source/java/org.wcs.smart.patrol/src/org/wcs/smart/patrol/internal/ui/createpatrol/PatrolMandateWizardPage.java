@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolMandateComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -43,7 +44,7 @@ public class PatrolMandateWizardPage extends NewPatrolWizardPage {
 	 * @param pageName
 	 */
 	protected PatrolMandateWizardPage() {
-		super("Patrol Mandate");
+		super(Messages.PatrolMandateWizardPage_PageName);
 		
 	}
 
@@ -62,7 +63,7 @@ public class PatrolMandateWizardPage extends NewPatrolWizardPage {
 		mandateComp.createComponent(main, SWT.NONE);
 	
 		
-		setMessage("Select the patrol mandate");
+		setMessage(Messages.PatrolMandateWizardPage_PageMessage);
 		super.setControl(main);
 	}
 	

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -61,7 +62,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param title
 	 */
 	public PatrolOptionsPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), "Patrol Options");
+		super(Display.getCurrent().getActiveShell(), Messages.PatrolOptionsPropertyPage_DialogTitle);
 		
 		patrolOption = PatrolHibernateManager.getPatrolOptions(ca, getSession());
 	}
@@ -81,12 +82,12 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Group g = new Group(container, SWT.NONE);
-		g.setText("Distance and Direction");
+		g.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_OpLabel);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(g, SWT.WRAP);
-		lbl.setText("Allow users to additionally record the Distance and Direction of each waypoint.  These values will be added to the patrol observation table.");
+		lbl.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)lbl.getLayoutData()).widthHint = 350;
 		
@@ -100,18 +101,18 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		lbl = new Label(g, SWT.NONE);
-		lbl.setText("Record Distance and Direction");
+		lbl.setText(Messages.PatrolOptionsPropertyPage_RecordDistanceDirectory_Op);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		lbl = new Label(container, SWT.NONE);  //spacer
 		
 		g = new Group(container, SWT.NONE);
-		g.setText("Edit Options");
+		g.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_Label);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		lbl = new Label(g, SWT.WRAP);
-		lbl.setText("Number of days after which the patrol data are no longer editable.  A value of -1 specifies that the patrol data will always be editable.");
+		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)lbl.getLayoutData()).widthHint = 350;
 		
@@ -131,12 +132,12 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 					cdEditTime.hide();
 				}catch (Exception ex){
 					cdEditTime.show();
-					cdEditTime.setDescriptionText("Invalid integer");
+					cdEditTime.setDescriptionText(Messages.PatrolOptionsPropertyPage_Error_InvalidInteger);
 				}
 			}
 		});
 		lbl = new Label(g, SWT.NONE);
-		lbl.setText("Days");
+		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DaysLabel);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		//init values
@@ -145,11 +146,11 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 			if (patrolOption.getEditTime() != null){
 				txtEditTime.setText(patrolOption.getEditTime().toString());
 			}else{
-				txtEditTime.setText("-1");
+				txtEditTime.setText("-1"); //$NON-NLS-1$
 			}
 		}
 		
-		setMessage("Manage patrol options.");
+		setMessage(Messages.PatrolOptionsPropertyPage_DialogMessage);
 		setChangesMade(false);
 		return container;
 	}
@@ -178,11 +179,11 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		try{
 			edittime = Integer.parseInt(txtEditTime.getText());
 		}catch (NumberFormatException ex){
-			SmartPatrolPlugIn.displayLog("Invalid edit time.  Must be an integer.", ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTimeNotInteger, ex);
 			return false;
 		}
 		if (edittime < -1){
-			SmartPatrolPlugIn.displayLog("Edit time must be >= -1", null);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_EditTime, null);
 			return false;
 		}
 		patrolOption.setEditTime(edittime);
@@ -197,7 +198,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog("Could not save updates to patrol options. " + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getMessage(), ex);
 		}
 		return false;
 	}

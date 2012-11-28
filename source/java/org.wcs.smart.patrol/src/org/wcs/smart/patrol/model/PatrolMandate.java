@@ -30,6 +30,7 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Patrol mandate
@@ -41,7 +42,7 @@ import org.wcs.smart.ca.SimpleListItem;
 @Table(name = "smart.patrol_mandate")
 public class PatrolMandate extends SimpleListItem{
 
-	public static final String NAME = "Mandate";
+	public static final String NAME = Messages.PatrolMandate_MandateName;
 
 	public static final Integer MAX_NAME_LENGTH = 64;
 	

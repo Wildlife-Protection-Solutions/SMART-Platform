@@ -8,14 +8,15 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
          <menu
                id="org.wcs.smart.menu.patrol"
-               label="Patrol"
-               mnemonic="P">
+               label="%patrol.menu.label"
+               mnemonic="%patrol.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
                   icon="images/icons/etool16/patrol_add.png"
-                  label="Create New Patrol"
-                  mnemonic="C"
-                  style="push">
+                  label="%patrol.newpatrol.command.label"
+                  mnemonic="%patrol.newpatrol.command.mnemonic"
+                  style="push"
+                  tooltip="%patrol.newpatrol.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -37,9 +38,10 @@
             <command
                   commandId="org.wcs.smart.patrol.importPatrol"
                   icon="images/icons/etool16/patrol_import.png"
-                  label="Import Patrols ..."
-                  mnemonic="I"
-                  style="push">
+                  label="%patrol.importpatrols.command.label"
+                  mnemonic="%patrol.importpatrols.command.mnemonic"
+                  style="push"
+                  tooltip="%patrol.importpatrols.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -61,9 +63,10 @@
             <command
                   commandId="org.wcs.smart.patrol.exportPatrol"
                   icon="images/icons/etool16/patrol_export.png"
-                  label="Export Patrols ..."
-                  mnemonic="x"
-                  style="push">
+                  label="%patrol.export.command.label"
+                  mnemonic="%patrol.export.command.mnemonic"
+                  style="push"
+                  tooltip="%patrol.export.command.tooltip">
             </command>
             <separator
                   name="org.wcs.smart.patrol.separator1"
@@ -72,9 +75,10 @@
             <command
                   commandId="org.wcs.smart.patrol.patrolOptions"
                   icon="images/icons/etool16/patrol_option.png"
-                  label="Patrol Options ..."
-                  mnemonic="O"
-                  style="push">
+                  label="%patrol.options.command.label"
+                  mnemonic="%patro.options.command.mnemonic"
+                  style="push"
+                  tooltip="%patrol.options.command.tooltip">
                <visibleWhen
                      checkEnabled="true">
                   <test
@@ -87,9 +91,10 @@
             <command
                   commandId="org.wcs.smart.patrol.patrolMandate"
                   icon="images/icons/etool16/patrol_mandate.png"
-                  label="Patrol Mandates ..."
-                  mnemonic="M"
-                  style="push">
+                  label="%patrol.mandates.command.label"
+                  mnemonic="%patrol.mandates.command.mnemonic"
+                  style="push"
+                  tooltip="%patrol.mandates.command.tooltip">
                <visibleWhen
                      checkEnabled="true">
                   <test
@@ -102,9 +107,10 @@
             <command
                   commandId="org.wcs.smart.patrol.patrolTypes"
                   icon="images/icons/etool16/patrol.png"
-                  label="Patrol Types ..."
-                  mnemonic="T"
-                  style="push">
+                  label="%patro.types.command.label"
+                  mnemonic="%patro.types.command.mnemonic"
+                  style="push"
+                  tooltip="%patro.types.command.tooltip">
                <visibleWhen
                      checkEnabled="true">
                   <test
@@ -117,9 +123,10 @@
             <command
                   commandId="org.wcs.smart.patrol.teamList"
                   icon="images/icons/etool16/patrol_team.png"
-                  label="Patrol Teams ..."
-                  mnemonic="e"
-                  style="push">
+                  label="%patrols.teams.command.label"
+                  mnemonic="%patrols.teams.command.mnemonic"
+                  style="push"
+                  tooltip="%patrols.teams.command.tooltip">
                <visibleWhen
                      checkEnabled="true">
                   <test
@@ -137,9 +144,10 @@
          <command
                commandId="org.wcs.smart.patrol.PatrolPerspective"
                icon="images/icons/etool16/patrol.png"
-               label="Show Patrol Perspective"
-               mnemonic="p"
-               style="push">
+               label="%showpatrolperspective.command.label"
+               mnemonic="%showpatrolperspectivecommand.mnemonic"
+               style="push"
+               tooltip="%showpatrolperspectivecommand.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -158,9 +166,10 @@
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
                   icon="images/icons/etool16/patrol_add.png"
-                  label="Create New Patrol"
-                  mnemonic="C"
-                  style="push">
+                  label="%patroltoolbar.newpatrol.command.label"
+                  mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
+                  style="push"
+                  tooltip="%patroltoolbar.newpatrol.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -187,10 +196,10 @@
          <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
                icon="images/icons/etool16/patrol_delete.png"
-               label="Delete Patrol"
-               mnemonic="d"
+               label="%patrollist.delete.command.label"
+               mnemonic="%patrollist.delete.command.mnemonic"
                style="push"
-               tooltip="delete the current selected patrol">
+               tooltip="%patrollist.delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -212,8 +221,9 @@
          <command
                commandId="org.wcs.smart.patrol.view.ShowPatrolFilter"
                icon="images/icons/etool16/patrol_filter.png"
+               label="%patrollist.filter.command.label"
                style="push"
-               tooltip="Filter the patrols displayed in this list">
+               tooltip="%patrollist.filter.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -222,10 +232,10 @@
          <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
                icon="images/icons/etool16/patrol_delete.png"
-               label="Delete Patrol"
-               mnemonic="d"
+               label="%popup.delete.command.label"
+               mnemonic="%popup.delete.command.mnemonic"
                style="push"
-               tooltip="delete this patrol">
+               tooltip="%popup.delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -255,8 +265,9 @@
          <command
                commandId="org.eclipse.ui.file.export"
                id="x"
-               label="Export Map"
-               style="push">
+               label="%file.exportmap.command.label"
+               style="push"
+               tooltip="%file.exportmap.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -277,45 +288,43 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.patrol.patrolMandate"
-            name="Show Patrol Mandate List">
+            name="%mandates.command.name">
       </command>
       <command
             id="org.wcs.smart.patrol.patrolTypes"
-            name="Show Patrol Type List">
+            name="%types.command.name">
       </command>
       <command
             id="org.wcs.smart.patrol.patrolOptions"
-            name="Show Patrol Options ">
+            name="%options.command.name">
       </command>
       <command
             id="org.wcs.smart.patrol.teamList"
-            name="Show Team List">
+            name="%teams.command.name">
       </command>
       <command
             id="org.wcs.smart.patrol.newPatrol"
-            name="Create New Patrol">
+            name="%newpatrol.command.name">
       </command>
       <command
             id="org.wcs.smart.patrol.PatrolPerspective"
-            name="Show Patrol Perspective">
+            name="%showperspective.command.name">
       </command>
       <command
             id="org.wcs.smart.patrol.exportPatrol"
-            name="Export Patrol">
+            name="%exportpatrol.command.name">
       </command>
       <command
             id="org.wcs.smart.patrol.importPatrol"
-            name="Import Patrol">
+            name="%importpatrol.command.name">
       </command>
       <command
-            description="displays the patrol filter dialog"
             id="org.wcs.smart.patrol.view.ShowPatrolFilter"
-            name="Show Patrol Filter">
+            name="%patrolfilter.command.name">
       </command>
       <command
-            description="Deletes the current selected patrol"
             id="org.wcs.smart.patrol.view.DeletePatrol"
-            name="Delete Patrol">
+            name="%deletepatrol.command.name">
       </command>
    </extension>
    <extension
@@ -523,7 +532,7 @@
             class="org.wcs.smart.patrol.internal.ui.views.PatrolListView"
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
-            name="Patrol List View"
+            name="%patrollist.view.name"
             restorable="false">
       </view>
    </extension>
@@ -533,7 +542,7 @@
             class="org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective"
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.PatrolPerspective"
-            name="Patrol Perspective">
+            name="%patrol.perspective.name">
       </perspective>
    </extension>
    <extension
@@ -542,23 +551,23 @@
             class="org.wcs.smart.patrol.internal.ui.editor.PatrolEditor"
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolEditor"
-            name="Patrol Editor">
+            name="%patrol.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor"
             id="org.wcs.smart.patrol.ui.PatrolSummaryEditor"
-            name="Patrol Summary Editor">
+            name="%patrolsummary.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditor"
             id="org.wcs.smart.patrol.ui.PatrolDayEditor"
-            name="Patrol Day Editor">
+            name="%patrolday.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.patrol.internal.ui.editor.PatrolMapPageEditor"
             default="false"
             id="org.wcs.smart.patrol.ui.PatrolMapEditor"
-            name="Patrol Map Editor">
+            name="%patrolmap.editor.name">
       </editor>
    </extension>
    <extension

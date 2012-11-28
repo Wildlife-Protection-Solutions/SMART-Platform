@@ -53,14 +53,14 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private String thisType;
 	private Iterator<?> fIterator;
 	
-	private static SimpleDateFormat trackDt = new SimpleDateFormat("MMMddyyyy");  //$NON-NLS-1$
+	private SimpleDateFormat trackDt = new SimpleDateFormat("MMMddyyyy");  //$NON-NLS-1$
 	private static GeometryFactory gf = new GeometryFactory();
 	
 	public PatrolFeatureReader(Patrol patrol,
 			String type, SimpleFeatureType ftype) {
 		this.ftype = ftype;
 		this.thisType = type;
-		
+	
 		if (type.equals(PatrolDataSource.WAYPOINT_TYPE)){
 			List<Waypoint> pnts = new ArrayList<Waypoint>();
 			for (PatrolLeg l : patrol.getLegs()){

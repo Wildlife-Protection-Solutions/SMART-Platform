@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -42,6 +41,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Call to represent the patrol type.
@@ -65,7 +65,7 @@ public class PatrolType {
 	 * @since 1.0.0
 	 */
 	public enum Type {
-		GROUND("Ground"), MARINE("Marine"), AIR("Air");
+		GROUND(Messages.PatrolType_GroundName), MARINE(Messages.PatrolType_MarineName), AIR(Messages.PatrolType_AirName);
 		
 		private String guiName;
 		Type(String guiName){
@@ -178,15 +178,14 @@ public class PatrolType {
 	 */
 	@Embeddable
 	private static class PatrolTypePk implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private ConservationArea ca;
 		private PatrolType.Type pt;
 
 		public PatrolTypePk(){
-			
-		}
-		public PatrolTypePk(ConservationArea ca, PatrolType.Type pt){
-			this.ca = ca;
-			this.pt = pt;
 		}
 		
 		@ManyToOne(fetch = FetchType.LAZY)

@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -32,6 +33,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.patrol.internal.Messages;
 
 /**
  * Wizard page shown when user chooses to import tracks
@@ -45,7 +47,7 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 	/**
 	 * 
 	 */
-	public static final String PAGE_NAME = "Create Tracks from Waypoints";
+	public static final String PAGE_NAME = Messages.ImportFromWaypointWizardPage_PageName;
 
 	private Button opDate;
 	private Button opAll;
@@ -90,7 +92,7 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 		
 		this.importAll = true;
 		opAll = new Button(ops, SWT.RADIO);
-		opAll.setText("Generate from waypoints for all days.");
+		opAll.setText(Messages.ImportFromWaypointWizardPage_OpGenerateAllTracks);
 		opAll.setSelection(true);
 		opAll.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -101,7 +103,9 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 		});
 		
 		opDate = new Button(ops, SWT.RADIO);
-		opDate.setText("Generate from waypoint for only " + ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s for " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate()) );
+		opDate.setText(MessageFormat.format(
+			Messages.ImportFromWaypointWizardPage_OpGenerateDayTracks,
+			new Object[]{DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
 		opDate.setSelection(false);
 		opDate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -112,7 +116,7 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 		});
 		
 		updateComplete();
-		super.setMessage("Select the tracks you wish to generate " +((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() + "s from.");
+		super.setMessage(Messages.ImportFromWaypointWizardPage_PageMessage);
 		super.setControl(comp);
 	}
 	

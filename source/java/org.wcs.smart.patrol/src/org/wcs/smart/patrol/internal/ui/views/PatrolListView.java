@@ -46,7 +46,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -61,6 +60,7 @@ import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -74,7 +74,7 @@ import org.wcs.smart.patrol.model.PatrolType;
  */
 public class PatrolListView extends ViewPart {
 
-	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView";
+	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView"; //$NON-NLS-1$
 	private TableViewer patrolListViewer;
 	private PatrolViewFilter filter = new PatrolViewFilter();
 	
@@ -117,18 +117,18 @@ public class PatrolListView extends ViewPart {
 	/*
 	 * Job that updates the patrol list based on the current filter
 	 */
-	private Job updateJob = new Job("Update Patrol List") {
+	private Job updateJob = new Job(Messages.PatrolListView_UpdatePatrolJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("Loading Patrols", 1);
+			monitor.beginTask(Messages.PatrolListView_Progress_LoadingPatrols, 1);
 			Session s = PatrolHibernateManager.openSession();
 			s.beginTransaction();
 			try{
 				Query query = filter.buildQuery(s);
-				List results = query.list();
+				List<?> results = query.list();
 				final PatrolEditorInput[] input = new PatrolEditorInput[results.size()];
 				int i = 0;
-				for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 					Object[] data = (Object[]) iterator.next();					
 					input[i++] = new PatrolEditorInput((byte[])data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3], (Date)data[4]);
 				}
@@ -215,13 +215,13 @@ public class PatrolListView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof PatrolEditorInput){
-					return ((PatrolEditorInput)element).getPatrolId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getStartDate()) + "  - " + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getEndDate()) + " ]";
+					return ((PatrolEditorInput)element).getPatrolId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getStartDate()) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getEndDate()) + " ]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				return super.getText(element);
 			}
 		});
 		patrolListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		patrolListViewer.setInput(new Object[]{"Loading..."});
+		patrolListViewer.setInput(new Object[]{Messages.PatrolListView_LoadingLabel});
 		patrolListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		updateContent();
 		
@@ -235,11 +235,10 @@ public class PatrolListView extends ViewPart {
 			public void doubleClick(DoubleClickEvent event) {
 				PatrolEditorInput p = (PatrolEditorInput)((IStructuredSelection)patrolListViewer.getSelection()).getFirstElement();
 				if (p != null){
-					IEditorPart openedPage  = null;
 					IWorkbenchPage page = null;
 					try {
 						page = getSite().getPage();
-						openedPage = page.openEditor(p, PatrolEditor.ID);						
+						page.openEditor(p, PatrolEditor.ID);						
 					} catch (Throwable t) {
 						SmartPatrolPlugIn.displayLog(t.getMessage(), t);
 					}

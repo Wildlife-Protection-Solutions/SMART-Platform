@@ -187,20 +187,19 @@ public class WaypointObservationAttribute {
 		}else if (type == AttributeType.TREE){
 			return getAttributeTreeNode();
 		}
-		throw new IllegalStateException("Invalid attribute type");
+		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}
 	
 	@Embeddable
 	private static class WaypointObservationAttributePk implements Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private WaypointObservation observation;
 		private Attribute attribute;
 		
 		public WaypointObservationAttributePk(){
-			
-		}
-		public WaypointObservationAttributePk(WaypointObservation observation, Attribute attribute){
-			this.observation = observation;
-			this.attribute = attribute;
 		}
 		
 		@ManyToOne(fetch = FetchType.LAZY)

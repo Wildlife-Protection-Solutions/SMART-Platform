@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolSaveException;
@@ -126,7 +127,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			try{
 				item.updatePatrol(patrol);
 			}catch (PatrolSaveException ex){
-				MessageDialog.openError(getShell(), "Error", ex.getMessage());
+				MessageDialog.openError(getShell(), Messages.EditPatrolItemDialog_Error_DialotTitle, ex.getMessage());
 				return false;
 			}
 			if (PatrolHibernateManager.savePatrol(patrol, s, false)){
@@ -136,7 +137,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			//s.saveOrUpdate(patrol);
 			return false;
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Could not save changed to patrol. " + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}

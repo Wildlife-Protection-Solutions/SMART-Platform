@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -53,7 +54,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	 * 
 	 */
 	protected PatrolMemberWizardPage() {
-		super("Patrol Members");
+		super(Messages.PatrolMemberWizardPage_PageName);
 		
 	}
 
@@ -76,7 +77,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Select members that participated in the patrol:");
+		lbl.setText(Messages.PatrolMemberWizardPage_SelectEmployees_Label);
 		
 		members = new EmployeeSelectComposite(main, SWT.NONE);
 		members.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -86,7 +87,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 			public void listChanged(List<Employee> newEmployees) {
 				if (newEmployees.size() == 0){
 					setPageComplete(false);
-					setErrorMessage("At least one employee must be selected");
+					setErrorMessage(Messages.PatrolMemberWizardPage_Error_NoEmployees);
 				}else{
 					setPageComplete(true);
 					setErrorMessage(null);
@@ -96,7 +97,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		});
 		
 		setErrorMessage(null);
-		setMessage("Select the members who participated in this patrol.  Select all members even if the patrol split into multiple groups.  At least one member must be selected.");
+		setMessage(Messages.PatrolMemberWizardPage_PageMessage);
 		super.setControl(main);
 	}
 	

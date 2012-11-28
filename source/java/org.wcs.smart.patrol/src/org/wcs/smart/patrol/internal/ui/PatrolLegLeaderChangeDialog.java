@@ -56,7 +56,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 
-	private static final DateFormat DATE_TIME_FORMATTER = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+	private DateFormat dateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	private PatrolLeg existingLeg;
 	private PatrolLeg newLeg;
 	
@@ -195,12 +195,12 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		if (newStart.before(existingLeg.getStartDate())){
 			setErrorMessage(MessageFormat.format(
 					Messages.PatrolLegLeaderChangeDialog_Error_StartDateAfterStart,
-					new Object[]{ DATE_TIME_FORMATTER.format(existingLeg.getStartDate())}) );
+					new Object[]{ dateTimeFormatter.format(existingLeg.getStartDate())}) );
 			return;
 		}else if (newStart.after(existingLeg.getEndDate())){
 			setErrorMessage(MessageFormat.format(
 					Messages.PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd,
-					new Object[]{ DATE_TIME_FORMATTER.format(existingLeg.getEndDate()) }));
+					new Object[]{ dateTimeFormatter.format(existingLeg.getEndDate()) }));
 			return;
 		}
 

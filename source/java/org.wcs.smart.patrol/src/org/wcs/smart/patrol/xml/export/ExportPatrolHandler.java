@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.xml.export;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -39,6 +40,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
 
@@ -55,6 +57,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ExportPatrolHandler extends AbstractHandler {
 
+	private static final String EXPORT_DIALOGTITLE = Messages.ExportPatrolHandler_ExportDialog_Title;
+
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
@@ -68,14 +72,14 @@ public class ExportPatrolHandler extends AbstractHandler {
 		}
 		final List<byte[]> patrols = dialog.getPatrolUuids();
 		if (patrols.size() == 0) {
-			MessageDialog.openInformation(shell, "Export", "Nothing to export.");
+			MessageDialog.openInformation(shell, EXPORT_DIALOGTITLE, Messages.ExportPatrolHandler_Error_NothingToExport);
 			return null;
 		}
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
 
 		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(shell,"Export","The directory '" + dir.getAbsolutePath() + "' does not exist and will be created.  Do you want to continue?")) {
+			if (!MessageDialog.openQuestion(shell,EXPORT_DIALOGTITLE,MessageFormat.format(Messages.ExportPatrolHandler_Warning_DirNotExist, new Object[]{dir.getAbsolutePath()}))) {
 				return null;
 			}
 		}
@@ -86,13 +90,13 @@ public class ExportPatrolHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Exporting patrols", patrols.size());
+					monitor.beginTask(Messages.ExportPatrolHandler_Progress_ExportingPatrols, patrols.size());
 					int exportCnt = 0;
 					for (int i = 0; i < patrols.size(); i++) {
 
 						byte[] puuid = patrols.get(i);
 						try {
-							monitor.subTask("Loading Patrol: "+ SmartUtils.encodeHex(puuid));
+							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_LoadingPatrol,new Object[]{ SmartUtils.encodeHex(puuid)}));
 							Patrol p = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
@@ -100,35 +104,33 @@ public class ExportPatrolHandler extends AbstractHandler {
 								p = (Patrol) s.load(Patrol.class, puuid);
 								p.getId();
 							} catch (Exception ex) {
-								displayLogError("Patrol could not be found.  Skipping id '"+ SmartUtils.encodeHex(puuid) + "'", ex);
+								displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
 								s.close();
 							}
 
-							monitor.subTask("Exporting Patrol: " + SmartUtils.encodeHex(puuid));
+							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ SmartUtils.encodeHex(puuid)}));
 
 							File outFile = PatrolExporter.getOutputFile(
-									new File(dir, p.getId() + ".xml").toString(),
+									new File(dir, p.getId() + ".xml").toString(), //$NON-NLS-1$
 									includeAtt);
 							PatrolExporter.exportPatrol(p, outFile, includeAtt,
 									monitor);
 							exportCnt++;
 						} catch (Exception ex) {
-							displayLogError("Error exporting patrol.  Skipping id '"+ SmartUtils.encodeHex(puuid) + "'.\n\n" + ex.getMessage(), ex);
+							displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{SmartUtils.encodeHex(puuid)}) + ex.getMessage(), ex);
 						}
 					}
 
-					displayInfo("Export Complete.", exportCnt
-							+ " patrols exported to '" + dir.toString() + "'");
-
+					displayInfo(Messages.ExportPatrolHandler_ExportComplete_DialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage, new Object[]{exportCnt,dir.toString()}));
 				}
 
 			});
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
-					"Could not export the patrols. " + e.getMessage(), e);
+					Messages.ExportPatrolHandler_ExportErrorMessage + e.getMessage(), e);
 		}
 
 		return null;

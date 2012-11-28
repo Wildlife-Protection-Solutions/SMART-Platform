@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
@@ -63,7 +64,7 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 	public EditPatrolDateLegsDialog(Shell parent, 
 			Date startDate, Date endDate){
 		
-		super(parent, "Modify Patrol Dates");
+		super(parent, Messages.EditPatrolDateLegsDialog_Title);
 		item = new DateComposite();
 		this.startDate = startDate;
 		this.endDate = endDate;

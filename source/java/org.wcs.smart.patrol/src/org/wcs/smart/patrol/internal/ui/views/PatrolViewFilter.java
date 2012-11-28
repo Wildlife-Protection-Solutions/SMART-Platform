@@ -27,6 +27,7 @@ import java.util.Date;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
@@ -54,8 +55,8 @@ public class PatrolViewFilter {
 	 * @since 1.0.0
 	 */
 	public enum StringComparison{
-		EQUALS("Equals"),
-		CONTAINS("Contains");
+		EQUALS(Messages.PatrolViewFilter_EqualsLabel),
+		CONTAINS(Messages.PatrolViewFilter_ContainsLabel);
 		
 		private String guiName;
 		private StringComparison(String guiName){
@@ -70,11 +71,11 @@ public class PatrolViewFilter {
 	 * Date filters
 	 */
 	public enum DateFilter{
-		LAST_30_DAYS("Last 30 Days"),
-		LAST_60_DAYS("Last 60 Days"),
-		YEAR_TO_DATE("Year To Date"),
-		MONTH_TO_DATE("Month To Date"),
-		CUSTOM("Custom...");
+		LAST_30_DAYS(Messages.PatrolViewFilter_Last30DaysOp),
+		LAST_60_DAYS(Messages.PatrolViewFilter_Last60DaysOp),
+		YEAR_TO_DATE(Messages.PatrolViewFilter_YearToDateOp),
+		MONTH_TO_DATE(Messages.PatrolViewFilter_MonthToDayOp),
+		CUSTOM(Messages.PatrolViewFilter_CustomDatesOp);
 		
 		private String guiName;
 		
@@ -179,62 +180,62 @@ public class PatrolViewFilter {
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate, p.endDate ");
-		str.append("FROM Patrol p ");
-		str.append("WHERE p.conservationArea = :ca " );
+		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate, p.endDate "); //$NON-NLS-1$
+		str.append("FROM Patrol p "); //$NON-NLS-1$
+		str.append("WHERE p.conservationArea = :ca " ); //$NON-NLS-1$
 	
 		boolean and = true;
 		boolean or = false;
 		if (types != null && types.length > 0){
 			if (and ){
-				str.append(" AND (");
+				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
 			}
 			or = true;
-			str.append(" p.patrolType IN (:pt) ");
+			str.append(" p.patrolType IN (:pt) "); //$NON-NLS-1$
 		}
 		if (stringComparator != null && patrolIdFilter != null){
 			if (and){
-				str.append(" AND (");
+				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
 			}
 			if (or){
-				str.append(" AND ");
+				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			str.append(" lower(p.id) like :pid ");
+			str.append(" lower(p.id) like :pid "); //$NON-NLS-1$
 			
 		}
 		if (dateFilter != null){
 			if (and){
-				str.append(" AND (");
+				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
 			}
 			if (or){
-				str.append(" AND ");
+				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
 			if (dateFilter != DateFilter.CUSTOM){
-				str.append(" p.endDate >= :date1 ");
+				str.append(" p.endDate >= :date1 "); //$NON-NLS-1$
 			}else{
-				str.append(" ( p.endDate > :date1 and p.startDate < :date2 ) ");
+				str.append(" ( p.endDate > :date1 and p.startDate < :date2 ) "); //$NON-NLS-1$
 			}
 		}
 		if (!and){
-			str.append(")");
+			str.append(")"); //$NON-NLS-1$
 		}
 		
-		str.append("ORDER BY p.id desc");
+		str.append("ORDER BY p.id desc"); //$NON-NLS-1$
 		
-		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea());
+		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (types != null && types.length > 0){
-			query.setParameterList("pt", this.types);
+			query.setParameterList("pt", this.types); //$NON-NLS-1$
 		}
 		if (stringComparator != null && patrolIdFilter != null){
 			if (stringComparator == StringComparison.CONTAINS){
-				query.setParameter("pid", "%" + this.patrolIdFilter.toLowerCase() + "%");
+				query.setParameter("pid", "%" + this.patrolIdFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
-				query.setParameter("pid", this.patrolIdFilter.toLowerCase());
+				query.setParameter("pid", this.patrolIdFilter.toLowerCase()); //$NON-NLS-1$
 			}
 		}
 		if (dateFilter != null) {
@@ -242,22 +243,22 @@ public class PatrolViewFilter {
 			if (dateFilter == DateFilter.LAST_30_DAYS) {
 				Calendar cal = Calendar.getInstance();
 				cal.add(Calendar.DAY_OF_MONTH, -30);
-				query.setParameter("date1", cal.getTime());
+				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.LAST_60_DAYS) {
 				Calendar cal = Calendar.getInstance();
 				cal.add(Calendar.DAY_OF_MONTH, -60);
-				query.setParameter("date1", cal.getTime());
+				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.YEAR_TO_DATE) {
 				Calendar cal = Calendar.getInstance();
 				cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
-				query.setParameter("date1", cal.getTime());
+				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.MONTH_TO_DATE) {
 				Calendar cal = Calendar.getInstance();
 				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
-				query.setParameter("date1", cal.getTime());
+				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.CUSTOM) {
-				query.setParameter("date1", startDate);
-				query.setParameter("date2", endDate);
+				query.setParameter("date1", startDate); //$NON-NLS-1$
+				query.setParameter("date2", endDate); //$NON-NLS-1$
 			}
 
 		}

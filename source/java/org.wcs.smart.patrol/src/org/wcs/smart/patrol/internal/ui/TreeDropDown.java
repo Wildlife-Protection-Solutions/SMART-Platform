@@ -251,7 +251,7 @@ public class TreeDropDown{
 	 */
 	public String getText(){
 		if (filterText == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		return this.filterText;
 	}

@@ -113,7 +113,7 @@ public class Track {
 			try {
 				this.ls = (LineString)reader.read(geom);
 			} catch (ParseException e) {
-				SmartPatrolPlugIn.log("Could not convert wkb to linestring object.", e);
+				SmartPatrolPlugIn.log("Could not convert wkb to linestring object.", e); //$NON-NLS-1$
 			}
 		}
 		return this.ls;
