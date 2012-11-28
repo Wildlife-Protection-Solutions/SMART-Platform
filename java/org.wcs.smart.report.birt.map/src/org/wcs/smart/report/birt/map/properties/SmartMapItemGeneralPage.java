@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.properties;
+package org.wcs.smart.report.birt.map.properties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,6 @@ import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.Sec
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.TextSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
-import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.ReportItemHandle;
 import org.eclipse.birt.report.model.api.elements.ReportDesignConstants;
 import org.eclipse.swt.SWT;
@@ -42,9 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.birt.map.SmartMapItem;
-
-import com.google.protobuf.GeneratedMessage.ExtendableBuilder;
+import org.wcs.smart.report.birt.map.SmartMapItem;
 
 /**
  * Smart map item general properties page.

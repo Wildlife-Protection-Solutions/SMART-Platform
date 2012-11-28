@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.properties;
+package org.wcs.smart.report.birt.map.properties;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -29,8 +29,6 @@ import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.render.RenderPackage;
 import net.refractions.udig.project.internal.render.ViewportModel;
-import net.refractions.udig.project.render.IViewportModelListener;
-import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
@@ -64,10 +62,11 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.birt.map.tools.PanTool;
-import org.wcs.smart.birt.map.tools.ZoomExtentTool;
-import org.wcs.smart.birt.map.tools.ZoomTool;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.report.birt.map.internal.Messages;
+import org.wcs.smart.report.birt.map.tools.PanTool;
+import org.wcs.smart.report.birt.map.tools.ZoomExtentTool;
+import org.wcs.smart.report.birt.map.tools.ZoomTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
@@ -143,7 +142,7 @@ public class MapDialog extends Dialog implements MapPart{
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 	    map = (Map) ProjectFactory.eINSTANCE.createMap();
-        map.setName("Smart Map");
+        map.setName(Messages.MapDialog_MapName);
         viewer.setMap(map);
         
         
@@ -176,9 +175,9 @@ public class MapDialog extends Dialog implements MapPart{
 
 		tools.selectTool(PanTool.ID);
 		
-		getShell().setText("Set Map Bounds");
+		getShell().setText(Messages.MapDialog_DialogTitle);
 		super.getShell().addListener(SWT.Resize, new Listener(){
-			Job j = new Job("resize"){
+			Job j = new Job(Messages.MapDialog_ResizeJobName){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					map.getRenderManager().refresh(null);
@@ -206,7 +205,7 @@ public class MapDialog extends Dialog implements MapPart{
 		infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,
 				2, 1));
 		lblCoordinates = new Label(infoArea, SWT.NONE);
-		lblCoordinates.setText("Coordinates");
+		lblCoordinates.setText(Messages.MapDialog_CoordinatesLabel);
 		lblCoordinates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false));
 		lblCoordinates.setAlignment(SWT.RIGHT);
@@ -239,7 +238,7 @@ public class MapDialog extends Dialog implements MapPart{
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(
 								getShell(),
-								"Error setting map projection.\n\n"
+								Messages.MapDialog_Error_SettingMapProjection
 										+ ex.getMessage(), ex);
 					}
 				}
@@ -272,7 +271,7 @@ public class MapDialog extends Dialog implements MapPart{
 						Coordinate c = map.getViewportModelInternal()
 								.pixelToWorld(event.x, event.y);
 						lblCoordinates
-								.setText(format(c.x) + ", " + format(c.y));
+								.setText(format(c.x) + ", " + format(c.y)); //$NON-NLS-1$
 						// see CursorPosition Tool
 					}
 
@@ -299,7 +298,7 @@ public class MapDialog extends Dialog implements MapPart{
 	
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Set Bounds",
+		createButton(parent, IDialogConstants.OK_ID, Messages.MapDialog_SetBounds_Button,
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);

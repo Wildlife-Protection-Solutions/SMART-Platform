@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.properties;
+package org.wcs.smart.report.birt.map.properties;
 
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.report.birt.map.internal.Messages;
 
 /**
  * Combo input dialog that lets users choose
@@ -62,7 +63,7 @@ public class DatasetComobInputDialog extends Dialog {
 	/**
 	 * The input value; null by default.
 	 */
-	private OdaDataSetHandle value = null;//$NON-NLS-1$
+	private OdaDataSetHandle value = null;
 
 	/**
 	 * Ok button widget.
@@ -274,7 +275,7 @@ public class DatasetComobInputDialog extends Dialog {
 	protected void validateInput() {
 		String errorMsg = null;
 		if (combo.getSelection().isEmpty()){
-			errorMsg = "Please select a dataset.";
+			errorMsg = Messages.DatasetComobInputDialog_Error_NoDataset;
 		}
 	
 		// Bug 16256: important not to treat "" (blank error) the same as null

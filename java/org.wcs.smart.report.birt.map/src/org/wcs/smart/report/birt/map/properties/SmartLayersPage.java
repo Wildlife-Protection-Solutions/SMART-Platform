@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.properties;
+package org.wcs.smart.report.birt.map.properties;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -75,14 +75,16 @@ import org.geotools.styling.Rule;
 import org.geotools.styling.Style;
 import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
-import org.wcs.smart.birt.map.BirtMapUtils;
-import org.wcs.smart.birt.map.SmartMapItem;
-import org.wcs.smart.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.report.birt.map.BirtMapUtils;
+import org.wcs.smart.report.birt.map.SmartMapItem;
+import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
+import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 /**
  * A birt property tab for displaying map options
@@ -93,7 +95,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
-	public static final String PAGE_KEY = "MapLayers";
+	private static final String ERROR_DIALOG_TITLE = Messages.SmartLayersPage_ErrorDialog_Title;
+	public static final String PAGE_KEY = "MapLayers"; //$NON-NLS-1$
 	protected FormToolkit toolkit;
 
 	private Composite contentpane;
@@ -149,7 +152,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	 */
 	private void createLayers(Composite contentpane){
 
-		Label l = toolkit.createLabel(contentpane, "Map Layers:");
+		Label l = toolkit.createLabel(contentpane, Messages.SmartLayersPage_MapLayersLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		tblLayers = new TableViewer(contentpane, SWT.FULL_SELECTION | SWT.MULTI);
@@ -163,7 +166,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		//dataset column
 		final TableViewerColumn col1 = new TableViewerColumn(tblLayers, SWT.DEFAULT);
-		col1.getColumn().setText("Report Dataset");
+		col1.getColumn().setText(Messages.SmartLayersPage_ReportDataset_ColumnName);
 		col1.getColumn().setWidth(200);
 		col1.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -173,7 +176,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 					if (ld.handle != null){
 						return ld.handle.getDisplayName();
 					}else{
-						return "[ERROR] [Query Not Found]" ;
+						return Messages.SmartLayersPage_Error_QueryNotFound ;
 					}
 				}
 				return super.getText(element);
@@ -182,7 +185,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		//name column
 		final TableViewerColumn col2 = new TableViewerColumn(tblLayers, SWT.DEFAULT);
-		col2.getColumn().setText("Layer Name");
+		col2.getColumn().setText(Messages.SmartLayersPage_LayerName_ColumnHeader);
 		col2.getColumn().setWidth(200);
 		final ColumnLabelProvider col2Lp = new ColumnLabelProvider() {
 			@Override
@@ -222,18 +225,18 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		//style column 
 		final TableViewerColumn col3 = new TableViewerColumn(tblLayers, SWT.DEFAULT);
-		col3.getColumn().setText("Style");
+		col3.getColumn().setText(Messages.SmartLayersPage_Style_ColumnHeader);
 		col3.getColumn().setWidth(200);
 		ColumnLabelProvider col3Provider = new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof LayerDefinition){
 					if (((LayerDefinition) element).style == null){
-						return "default";
+						return Messages.SmartLayersPage_DefaultStyleLabel;
 					}else if (getImage(element) == null){
 						return ((LayerDefinition) element).style;
 					}
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -294,20 +297,20 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		
-		Button btnAdd = toolkit.createButton(btnPanel, "Add", SWT.PUSH);
+		Button btnAdd = toolkit.createButton(btnPanel, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				OdaDataSetHandle[] handles = getHandles(true);
 				if (handles.length == 0){
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Error", "There are no report data sets that can be added to the map. ");
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), ERROR_DIALOG_TITLE, Messages.SmartLayersPage_Error_NoDatasets);
 					return;
 				}
 				DatasetComobInputDialog dialog = new DatasetComobInputDialog(
 					Display.getDefault().getActiveShell(),
-					"Add Layer",
-					"Select the dataset to add to the map",
+					Messages.SmartLayersPage_AddLayer_DialogTitle,
+					Messages.SmartLayersPage_AddLayer_DialogMessage,
 					handles);
 				
 				if (dialog.open() != Window.OK){
@@ -326,7 +329,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		});
 		
 		
-		Button btnRemove = toolkit.createButton(btnPanel, "Remove", SWT.PUSH);
+		Button btnRemove = toolkit.createButton(btnPanel, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -336,7 +339,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			}
 		});
 		
-		Button btnUp = toolkit.createButton(btnPanel, "Move Up", SWT.PUSH);
+		Button btnUp = toolkit.createButton(btnPanel, Messages.SmartLayersPage_MoveUpButton, SWT.PUSH);
 		btnUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnUp.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -357,7 +360,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				}
 			}
 		});
-		Button btnDown = toolkit.createButton(btnPanel, "Move Down", SWT.PUSH);
+		Button btnDown = toolkit.createButton(btnPanel, Messages.SmartLayersPage_MoveDownButton, SWT.PUSH);
 		btnDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDown.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -391,14 +394,14 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		bm.setLayout(layout);
 		bm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		toolkit.createLabel(bm, "Map Bounds:");
+		toolkit.createLabel(bm, Messages.SmartLayersPage_MapBoundsLabel);
 		
-		txtBounds = toolkit.createText(bm, "");
+		txtBounds = toolkit.createText(bm, ""); //$NON-NLS-1$
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 		gd.widthHint = 200;
 		txtBounds.setLayoutData(gd);
 		
-		toolkit.createLabel(bm, "CRS:");
+		toolkit.createLabel(bm, Messages.SmartLayersPage_CRSLabel);
 		txtSrid = toolkit.createText(bm, Area.AREA_CRS.getName().getCode());
 		txtSrid.setEditable(false);
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
@@ -406,7 +409,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		txtSrid.setLayoutData(gd);
 		
 
-		Hyperlink btnSetBounds = toolkit.createHyperlink(bm, "Set Bounds", SWT.NONE);
+		Hyperlink btnSetBounds = toolkit.createHyperlink(bm, Messages.SmartLayersPage_SetBoundsLink, SWT.NONE);
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 		gd.heightHint = 20;
 		btnSetBounds.setLayoutData(gd);
@@ -427,7 +430,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		});
 		
 		
-		Hyperlink btnClearBounds = toolkit.createHyperlink(bm, "Clear", SWT.NONE);
+		Hyperlink btnClearBounds = toolkit.createHyperlink(bm, Messages.SmartLayersPage_ClearBoundsLink, SWT.NONE);
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 		btnClearBounds.setLayoutData(gd);
 		btnClearBounds.addHyperlinkListener(new HyperlinkAdapter() {
@@ -447,7 +450,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		Composite bm = toolkit.createComposite(parent);
 		bm.setLayout(new GridLayout(2, false));
 		bm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		toolkit.createLabel(bm, "Basemap:");
+		toolkit.createLabel(bm, Messages.SmartLayersPage_BasemapLabel);
 		
 		basemapCombo = new ComboViewer(bm, SWT.READ_ONLY | SWT.DROP_DOWN);
 		basemapCombo.setLabelProvider(new BasemapLabelProvider());
@@ -464,7 +467,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		try {
 			maps = HibernateManager.getBasemaps(session);
 			BasemapDefinition defaultdef = new BasemapDefinition();
-			defaultdef.setName("(none)");
+			defaultdef.setName(Messages.SmartLayersPage_NoBasemapLabel);
 			maps.add(defaultdef);
 		} finally {
 			if (session.getTransaction().isActive()) {
@@ -539,7 +542,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			}
 		} catch (Exception ex) {
 			SmartMapItemPlugIn.displayLog(
-					"Could not set property." + ex.getMessage(), ex);
+					Messages.SmartLayersPage_Error_SettingMapProperty + ex.getMessage(), ex);
 		}
 	}
 	
@@ -571,7 +574,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				itemHandle = (ExtendedItemHandle) element;
 				mapItem = (SmartMapItem) itemHandle.getReportItem();
 			}catch (Exception ex){
-				SmartMapItemPlugIn.displayLog("Could not set map input. " + ex.getMessage(), ex);
+				SmartMapItemPlugIn.displayLog(Messages.SmartLayersPage_Error_settingMap + ex.getMessage(), ex);
 				return;
 			}
 			
@@ -593,7 +596,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 					}else if (def.handle != null){
 						def.name = def.handle.getName();
 					}else{
-						def.name = "[ERROR]";
+						def.name = Messages.SmartLayersPage_MapLayerNameErrorLabel; 
 					}
 					if (mapItem.getLayerStyles() != null){
 						def.style = mapItem.getLayerStyles().get(i);
@@ -637,7 +640,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			}else{
 				List<OdaDataSetHandle> thisHandles = new ArrayList<OdaDataSetHandle>();
 				for (int i = 0; i < handles.length; i ++){
-					QueryType qt = QueryType.valueOf(handles[i].getQueryText().split(":")[0]);
+					QueryType qt = QueryType.valueOf(handles[i].getQueryText().split(":")[0]); //$NON-NLS-1$
 					if (qt != QueryType.SUMMARY){
 						thisHandles.add(handles[i]);
 					}
@@ -670,11 +673,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		basemapCombo.setSelection(new StructuredSelection(selection));
 		
 		if (mapItem.getMapBounds() == null){
-			txtBounds.setText("(map extents)");
+			txtBounds.setText(Messages.SmartLayersPage_MapExtentsBoundsLabel);
 		}else{
 			ReferencedEnvelope env = mapItem.getMapBounds();
 			txtSrid.setText(env.getCoordinateReferenceSystem().getName().getCode());
-			txtBounds.setText("(" + env.getMinX() + "," + env.getMinY() + "),(" + env.getMaxX() + "," + env.getMaxY() + ")");
+			txtBounds.setText("(" + env.getMinX() + "," + env.getMinY() + "),(" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 	}

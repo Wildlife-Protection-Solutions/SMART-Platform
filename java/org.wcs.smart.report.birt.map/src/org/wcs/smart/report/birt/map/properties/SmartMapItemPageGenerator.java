@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.properties;
+package org.wcs.smart.report.birt.map.properties;
 
 import java.util.List;
 

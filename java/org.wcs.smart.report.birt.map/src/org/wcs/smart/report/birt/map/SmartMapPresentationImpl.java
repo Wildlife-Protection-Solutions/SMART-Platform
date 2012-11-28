@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map;
+package org.wcs.smart.report.birt.map;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -68,6 +68,8 @@ import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.query.parser.filter.DateFilter;
+import org.wcs.smart.report.SmartReportParameters;
+import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -88,7 +90,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 		try {
 			mapItem = (SmartMapItem) modelHandle.getReportItem();
 		} catch (ExtendedElementException e) {
-			SmartMapItemPlugIn.displayLog("Error creating map:" + e.getMessage(), e);
+			SmartMapItemPlugIn.displayLog(Messages.SmartMapPresentationImpl_ErrorCreatingMap + e.getMessage(), e);
 		}
 	}
 
@@ -144,8 +146,8 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 
 				if (mapqueries != null){
 					for (int i = 0; i < mapqueries.size(); i++) {
-						byte[] quuid = SmartUtils.decodeHex(mapqueries.get(i).split(":")[1]);
-						QueryType qtype = QueryType.valueOf(mapqueries.get(i).split(":")[0]);
+						byte[] quuid = SmartUtils.decodeHex(mapqueries.get(i).split(":")[1]); //$NON-NLS-1$
+						QueryType qtype = QueryType.valueOf(mapqueries.get(i).split(":")[0]); //$NON-NLS-1$
 						
 						Query q = QueryHibernateManager.findQuery(session,quuid, qtype);
 						GeoSmart layer = new GeoSmart();
@@ -169,8 +171,8 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			// create date filter
 			DateFilter dateFilter = new DateFilter(
 					DateFilter.DATE_FIELD_OP.WAYPOINT, DATE_FILTER_OP.CUSTOM,
-					(Date) context.getParameterValue("Start Date"),
-					(Date) context.getParameterValue("End Date"));
+					(Date) context.getParameterValue(SmartReportParameters.PARAM_START_DATE_KEY),
+					(Date) context.getParameterValue(SmartReportParameters.PARAM_END_DATE_KEY));
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 			for (GeoSmart layer : layers) {
 				IService qs = QueryServiceFactory.generateQueryService(layer.dbQuery);
@@ -273,7 +275,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 					baos.toByteArray());
 			return bis;
 		} catch (Exception ex) {
-			SmartMapItemPlugIn.displayLog("Error generating map; " + ex.getMessage(), ex);
+			SmartMapItemPlugIn.displayLog(Messages.SmartMapPresentationImpl_ErrorRenderingMap + ex.getMessage(), ex);
 			return null;
 		}
 	}

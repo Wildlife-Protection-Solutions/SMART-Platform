@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map;
+package org.wcs.smart.report.birt.map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.report.ReportEventManager;
+import org.wcs.smart.report.birt.map.internal.Messages;
 
 
 /**
@@ -125,7 +126,7 @@ public class SmartMapItemPlugIn  extends AbstractUIPlugin {
 			@Override
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
-						"Error", message);
+						Messages.SmartMapItemPlugIn_ErrorDialogTitle, message);
 			}
 		});
 

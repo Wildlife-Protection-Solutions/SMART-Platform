@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map.properties;
+package org.wcs.smart.report.birt.map.properties;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -48,13 +48,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
-import org.wcs.smart.birt.map.BirtMapUtils;
-import org.wcs.smart.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.report.birt.map.BirtMapUtils;
+import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
+import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -91,7 +92,7 @@ public class StyleCellEditor extends DialogCellEditor {
 			
 			final Object style = mapLayer.style != null ? BirtMapUtils.mementoToStyle(mapLayer.style) : null;
 
-			Job j = new Job("create map with layer") {
+			Job j = new Job(Messages.StyleCellEditor_CreateMapLayerJobName) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -103,8 +104,8 @@ public class StyleCellEditor extends DialogCellEditor {
 						Query q = null;
 						try {
 							q = QueryHibernateManager.findQuery(session,
-									SmartUtils.decodeHex(ds.getQueryText().split(":")[1]),
-									QueryType.valueOf(ds.getQueryText().split(":")[0]));
+									SmartUtils.decodeHex(ds.getQueryText().split(":")[1]), //$NON-NLS-1$
+									QueryType.valueOf(ds.getQueryText().split(":")[0])); //$NON-NLS-1$
 						} finally {
 							session.getTransaction().commit();
 							session.close();
@@ -129,7 +130,7 @@ public class StyleCellEditor extends DialogCellEditor {
 									.put(SLDContent.ID, lstyle);
 						}
 					} catch (Exception ex) {
-						SmartMapItemPlugIn.displayLog("Could not create style editor: " + ex.getMessage(), ex);
+						SmartMapItemPlugIn.displayLog(Messages.StyleCellEditor_Error_CouldNotCreateStyleEditor + ex.getMessage(), ex);
 					}
 					return Status.OK_STATUS;
 				}
@@ -155,7 +156,7 @@ public class StyleCellEditor extends DialogCellEditor {
             memento.save(writer);
 	        return writer.toString();
 		} catch (Exception ex) {
-			SmartMapItemPlugIn.displayLog("Could not open style dialog. " + ex.getMessage(), ex);
+			SmartMapItemPlugIn.displayLog(Messages.StyleCellEditor_Error_CouldNotOpenStyleDialog + ex.getMessage(), ex);
 		}
 		return null;
 	}

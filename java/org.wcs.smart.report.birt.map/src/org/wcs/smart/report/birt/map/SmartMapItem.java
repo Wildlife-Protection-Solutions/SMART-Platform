@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map;
+package org.wcs.smart.report.birt.map;
 
 import java.util.List;
 
@@ -30,6 +30,7 @@ import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.report.birt.map.internal.Messages;
 
 /**
  * A Smart map report item.
@@ -41,57 +42,57 @@ public class SmartMapItem extends ReportItem {
 	/**
 	 * Smart query dataset ids
 	 */
-	public static final String SMART_QUERY_ID = "org.wcs.smart.data.oda.smart.smartQueryDataset";
+	public static final String SMART_QUERY_ID = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
 	
 	/**
 	 * Smart map item extension name
 	 */
-	public static final String EXTENSION_NAME = "Smart Map";
+	public static final String EXTENSION_NAME = Messages.SmartMapItem_MapName;
 
 	/**
 	 * Basemap option property
 	 */
-	public static final String SMART_BASEMAP_PROP = "org.wcs.smart.birt.map.basemap";
+	public static final String SMART_BASEMAP_PROP = "org.wcs.smart.birt.map.basemap"; //$NON-NLS-1$
 	
 	/**
 	 * List of layers; layers are represented by
 	 * the hex encoded uuid of the query they represent
 	 */
-	public static final String SMART_LAYER_PROP = "org.wcs.smart.birt.map.layers";
+	public static final String SMART_LAYER_PROP = "org.wcs.smart.birt.map.layers"; //$NON-NLS-1$
 	/**
 	 * List of layer names
 	 */
-	public static final String SMART_LAYERNAME_PROP = "org.wcs.smart.birt.map.layerNames";
+	public static final String SMART_LAYERNAME_PROP = "org.wcs.smart.birt.map.layerNames"; //$NON-NLS-1$
 	/**
 	 * List of layer styles; encoded as SLD xmlstring
 	 */
-	public static final String SMART_LAYERSTYLE_PROP = "org.wcs.smart.birt.map.layerStyles";
+	public static final String SMART_LAYERSTYLE_PROP = "org.wcs.smart.birt.map.layerStyles"; //$NON-NLS-1$
 	
 	/**
 	 * xmin map bounds property
 	 */
-	public static final String SMART_BOUNDS_XMIN_PROP = "org.wcs.smart.report.birt.map.bounds.xmin";
+	public static final String SMART_BOUNDS_XMIN_PROP = "org.wcs.smart.report.birt.map.bounds.xmin"; //$NON-NLS-1$
 	
 	/**
 	 * xmax map bounds property
 	 */
-	public static final String SMART_BOUNDS_XMAX_PROP = "org.wcs.smart.report.birt.map.bounds.xmax";
+	public static final String SMART_BOUNDS_XMAX_PROP = "org.wcs.smart.report.birt.map.bounds.xmax"; //$NON-NLS-1$
 	/**
 	 * ymin map bounds property
 	 */
-	public static final String SMART_BOUNDS_YMIN_PROP = "org.wcs.smart.report.birt.map.bounds.ymin";
+	public static final String SMART_BOUNDS_YMIN_PROP = "org.wcs.smart.report.birt.map.bounds.ymin"; //$NON-NLS-1$
 	/**
 	 * ymax map bounds property
 	 */
-	public static final String SMART_BOUNDS_YMAX_PROP = "org.wcs.smart.report.birt.map.bounds.ymax";
+	public static final String SMART_BOUNDS_YMAX_PROP = "org.wcs.smart.report.birt.map.bounds.ymax"; //$NON-NLS-1$
 	/**
 	 * srid map bounds property
 	 */
-	public static final String SMART_BOUNDS_SRID_PROP = "org.wcs.smart.report.birt.map.bounds.srid";
+	public static final String SMART_BOUNDS_SRID_PROP = "org.wcs.smart.report.birt.map.bounds.srid"; //$NON-NLS-1$
 	/**
 	 * map bounds property group
 	 */
-	public static final String SMART_BOUNDS_GROUP = "org.wcs.smart.report.birt.map.bounds";
+	public static final String SMART_BOUNDS_GROUP = "org.wcs.smart.report.birt.map.bounds"; //$NON-NLS-1$
 	
 	private ExtendedItemHandle handle;
 
@@ -104,7 +105,7 @@ public class SmartMapItem extends ReportItem {
 		DimensionValue dm = (DimensionValue)handle.getWidth().getValue();
 		if (dm == null || dm.getMeasure() == 0){
 			try{
-				handle.setWidth("50px");
+				handle.setWidth("50px"); //$NON-NLS-1$
 			}catch (Exception ex){
 				ex.printStackTrace();
 			}
@@ -112,7 +113,7 @@ public class SmartMapItem extends ReportItem {
 		dm = (DimensionValue)handle.getHeight().getValue();
 		if (dm == null || dm.getMeasure() == 0){
 			try{
-				handle.setHeight("50px");
+				handle.setHeight("50px"); //$NON-NLS-1$
 			}catch (Exception ex){}
 		}
 	}
@@ -193,7 +194,7 @@ public class SmartMapItem extends ReportItem {
 		try{
 			crs = CRS.parseWKT(handle.getStringProperty(SMART_BOUNDS_SRID_PROP));
 		}catch (Exception ex){
-			SmartMapItemPlugIn.log("Could not parse crs for report. " + srs, ex);
+			SmartMapItemPlugIn.log(Messages.SmartMapItem_CouldNotParseCrs + srs, ex);
 			return null;
 		}
 		

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.birt.map;
+package org.wcs.smart.report.birt.map;
 
 import java.util.ArrayList;
 import java.util.HashMap;
