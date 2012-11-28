@@ -51,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
@@ -155,7 +156,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 					for (Iterator<?> iterator = paramGroups.iterator(); iterator.hasNext();) {
 						Object type = (Object) iterator.next();
 						if (type instanceof ParameterGroupHandle){
-							if (((ParameterGroupHandle) type).getName().equals(SmartDateParameterComponent.GROUP_PARAMETER_NAME)){
+							if (((ParameterGroupHandle) type).getName().equals(SmartReportParameters.PARAM_DATEGROUP_NAME)){
 								param = (ParameterGroupHandle)type;
 								break;
 							}

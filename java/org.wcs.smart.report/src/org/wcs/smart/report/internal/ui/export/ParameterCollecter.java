@@ -35,6 +35,7 @@ import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.internal.ui.viewer.parameter.BooleanParameterComponent;
 import org.wcs.smart.report.internal.ui.viewer.parameter.DateParameterComponent;
 import org.wcs.smart.report.internal.ui.viewer.parameter.GroupedReportParameters;
@@ -158,7 +159,7 @@ public class ParameterCollecter {
 				IParameterGroupDefn def = (IParameterGroupDefn)paramPart;
 				GroupedReportParameters groupedComponent = new GroupedReportParameters(def);
 				
-				if (def.getName().equals(SmartDateParameterComponent.GROUP_PARAMETER_NAME)){
+				if (def.getName().equals(SmartReportParameters.PARAM_DATEGROUP_NAME)){
 					SmartDateParameterComponent part = new SmartDateParameterComponent(def);
 					groupedComponent.addComponent(part);
 				}else{

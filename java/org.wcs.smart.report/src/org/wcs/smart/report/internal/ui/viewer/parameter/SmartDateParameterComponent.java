@@ -49,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -59,10 +60,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartDateParameterComponent implements IBirtParameterComponent{
 
-
-	public static final String GROUP_PARAMETER_NAME = "Report Dates";
-	public static final String START_DATE_NAME = "Start Date";
-	public static final String END_DATE_NAME = "End Date";
 	
 	private DateTime startPicker = null;
 	private DateTime endPicker = null;
@@ -111,7 +108,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		startPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
 		
 		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
-		String x = settings.get(START_DATE_NAME);
+		String x = settings.get(SmartReportParameters.PARAM_START_DATE_KEY);
 		if (x != null){
 			try{
 				Date d = sdf.parse(x);
@@ -126,7 +123,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		lblEnd = new Label(param, SWT.NONE);
 		lblEnd.setText("End Date:");
 		endPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
-		x = settings.get(END_DATE_NAME);
+		x = settings.get(SmartReportParameters.PARAM_END_DATE_KEY);
 		if (x != null){
 			try{
 				Date d = sdf.parse(x);
@@ -193,10 +190,10 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		java.sql.Date dates[] = op.getDates();
 		if (dates == null){
 			if (op == DATE_FILTER_OP.CUSTOM){
-				params.put(START_DATE_NAME, new java.sql.Date(SmartUtils.getDate(startPicker).getTime()));
-				params.put(END_DATE_NAME, new java.sql.Date(SmartUtils.getDate(endPicker).getTime()));	
+				params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(SmartUtils.getDate(startPicker).getTime()));
+				params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date(SmartUtils.getDate(endPicker).getTime()));	
 			}else if (op == DATE_FILTER_OP.ALL){
-				params.put(START_DATE_NAME, new java.sql.Date(-2208998272375l));	//JAN 01 1900  
+				params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(-2208998272375l));	//JAN 01 1900  
 				
 				Session session = HibernateManager.openSession();
 				try{
@@ -210,7 +207,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 					if (data != null && data.size() >= 1 && data.get(0) != null){
 						startdate = (java.sql.Timestamp)data.get(0);
 					}
-					params.put(START_DATE_NAME, new java.sql.Date(startdate.getTime()));	//JAN 01 1900  
+					params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(startdate.getTime()));	//JAN 01 1900  
 				}catch (Exception ex){					
 					ReportPlugIn.log("Error retriving earliest data date for report paraemeters", ex);
 				}finally{
@@ -220,17 +217,17 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 					session.close();
 				}
 				//today + one day
-				params.put(END_DATE_NAME, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
+				params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
 			}else{
 				throw new UnsupportedOperationException("CDate file " + op.guiName + " not supported for reports.");
 			}
 			
 		}else if (dates.length == 1){
-			params.put(START_DATE_NAME, dates[0]);
-			params.put(END_DATE_NAME, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything
+			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
+			params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything
 		}else if (dates.length == 2){
-			params.put(START_DATE_NAME, dates[0]);
-			params.put(END_DATE_NAME, dates[1]);
+			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
+			params.put(SmartReportParameters.PARAM_END_DATE_KEY, dates[1]);
 		}
 		params.put("org.wcs.smart.report.parameter.dateOp", op.toString());
 		return params;
