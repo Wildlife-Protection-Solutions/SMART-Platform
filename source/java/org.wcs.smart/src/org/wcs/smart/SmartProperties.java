@@ -36,7 +36,7 @@ public class SmartProperties {
 
 	private static final String SMART_PROPERTIES = "properties/smart.properties"; //$NON-NLS-1$
 	
-	private static final String IUCN_DATAMODEL_FILE = "properties/IUCN_Threats.xml"; //$NON-NLS-1$
+	private static final String DEFAULT_DATAMODEL_FILE = "properties/datamodel.xml"; //$NON-NLS-1$
 
 	/**
 	 * Database location key
@@ -66,7 +66,7 @@ public class SmartProperties {
 	}
 	
 	public static InputStream getIucnDataModelFile(){
-		return SmartApp.class.getClassLoader().getResourceAsStream(IUCN_DATAMODEL_FILE);
+		return SmartApp.class.getClassLoader().getResourceAsStream(DEFAULT_DATAMODEL_FILE);
 	}
 	
 	private void readProperties(){
