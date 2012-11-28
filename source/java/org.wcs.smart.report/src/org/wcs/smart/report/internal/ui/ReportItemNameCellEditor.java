@@ -32,6 +32,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 
@@ -70,7 +71,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 			return;
 		}
 		
-		Job j = new Job("Update Name") {
+		Job j = new Job(Messages.ReportItemNameCellEditor_UpdateFolderJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -84,7 +85,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 				} catch (Exception ex) {
 					session.getTransaction().rollback();
 					ReportPlugIn.displayLog(
-							"Could not save changes to folder name. "
+							Messages.ReportItemNameCellEditor_Error_CouldNotSaveReport
 									+ ex.getMessage(), ex);
 				} finally {
 					session.close();
@@ -105,7 +106,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 			return;
 		}
 		
-		Job j = new Job("Update Name") {
+		Job j = new Job(Messages.ReportItemNameCellEditor_UpdateReportJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -121,7 +122,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 				} catch (Exception ex) {
 					session.getTransaction().rollback();
 					ReportPlugIn.displayLog(
-							"Could not save changes to folder name. "
+							Messages.ReportItemNameCellEditor_Error_CouldNoSaveFolder
 									+ ex.getMessage(), ex);
 				} finally {
 					session.close();
@@ -139,7 +140,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 		}else if (element instanceof Report){
 			return ((Report) element).getName();
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override

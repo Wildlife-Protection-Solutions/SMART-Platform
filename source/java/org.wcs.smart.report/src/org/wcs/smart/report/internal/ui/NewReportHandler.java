@@ -52,7 +52,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.SmartReportParameters;
-import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
@@ -84,7 +84,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 			// TODO: I don't think we need to throw ane xception here - perhaps
 			// just
 			// an error dialog instead.
-			throw new IllegalStateException("SMART Library does not exist.");
+			throw new IllegalStateException(Messages.NewReportHandler_Error_NoLibrary);
 		}
 
 		// display dialog
@@ -114,7 +114,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 		report.setFolder(parentFolder);
 
 		//save report
-		Job createReportJob = new Job("Creating Report...") {
+		Job createReportJob = new Job(Messages.NewReportHandler_Progress_CreatingReport) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				File reportFile = null;
@@ -133,7 +133,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 					if (hsession != null){
 						hsession.getTransaction().rollback();
 					}
-					ReportPlugIn.displayLog("Could not create report. " + ex.getMessage(), ex);
+					ReportPlugIn.displayLog(Messages.NewReportHandler_Error_CouldNotCreateReport + ex.getMessage(), ex);
 					return Status.OK_STATUS;
 				}finally{
 					if (hsession != null){
@@ -195,14 +195,14 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 						library.close();
 					}catch (Exception ex){
 						ReportPlugIn.displayLog(
-								"Could not close library file: " + ex.getMessage(), ex);
+								Messages.NewReportHandler_Error_CouldNotCloseLibrary + ex.getMessage(), ex);
 					}
 					
 					rdh.save();
 					rdh.close();
 				} catch (Exception ex) {
 					ReportPlugIn.displayLog(
-							"Error creating report file: " + ex.getMessage(), ex);
+							Messages.NewReportHandler_Error_CreatingReport + ex.getMessage(), ex);
 					canEdit = false;
 				}
 

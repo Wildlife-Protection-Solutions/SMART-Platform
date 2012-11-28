@@ -28,6 +28,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 
 /**
@@ -45,7 +46,7 @@ public class EditLibraryHandler extends AbstractHandler {
 			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
 					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
 		} catch (Exception ex) {
-			ReportPlugIn.displayLog("Error loading Smart Report Library for editing. " + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getMessage(), ex);
 		}		
 		return null;
 	}

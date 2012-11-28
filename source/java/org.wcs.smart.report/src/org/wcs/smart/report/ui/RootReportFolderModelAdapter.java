@@ -103,33 +103,33 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 			if (root.isShared()){
 				List<?> kidFolders = s
 						.createCriteria(ReportFolder.class)
-						.add(Restrictions.isNull("parentFolder"))
-						.add(Restrictions.isNull("employee"))
-						.add(Restrictions.eq("conservationArea",
+						.add(Restrictions.isNull("parentFolder")) //$NON-NLS-1$
+						.add(Restrictions.isNull("employee")) //$NON-NLS-1$
+						.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
 								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidFolders);
 				List<?> kidQueries = s
 						.createCriteria(Report.class)
-						.add(Restrictions.isNull("folder"))
-						.add(Restrictions.eq("shared", true))
-						.add(Restrictions.eq("conservationArea",
+						.add(Restrictions.isNull("folder")) //$NON-NLS-1$
+						.add(Restrictions.eq("shared", true)) //$NON-NLS-1$
+						.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
 								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidQueries);
 			}else{
 				List<?> kidFolders = s
 						.createCriteria(ReportFolder.class)
-						.add(Restrictions.isNull("parentFolder"))
-						.add(Restrictions.eq("employee",
+						.add(Restrictions.isNull("parentFolder")) //$NON-NLS-1$
+						.add(Restrictions.eq("employee",  //$NON-NLS-1$
 								SmartDB.getCurrentEmployee()))
-						.add(Restrictions.eq("conservationArea",
+						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
 								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidFolders);
 				List<?> kidQueries = s
 						.createCriteria(Report.class)
-						.add(Restrictions.isNull("folder"))
-						.add(Restrictions.eq("shared", false))
-						.add(Restrictions.eq("owner",SmartDB.getCurrentEmployee()))
-						.add(Restrictions.eq("conservationArea", 
+						.add(Restrictions.isNull("folder"))  //$NON-NLS-1$
+						.add(Restrictions.eq("shared", false))  //$NON-NLS-1$
+						.add(Restrictions.eq("owner",SmartDB.getCurrentEmployee()))  //$NON-NLS-1$
+						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
 								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidQueries);
 			}

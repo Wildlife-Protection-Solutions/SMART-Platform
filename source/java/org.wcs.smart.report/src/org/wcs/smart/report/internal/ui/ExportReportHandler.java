@@ -39,6 +39,7 @@ import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.IReportExporter;
 import org.wcs.smart.report.export.internal.ExportReportEngine;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ExportReportDialog;
 import org.wcs.smart.report.model.Report;
 /**
@@ -50,6 +51,8 @@ import org.wcs.smart.report.model.Report;
  * @since 1.0.0
  */
 public class ExportReportHandler extends AbstractHandler implements IHandler {
+
+	private static final String ERROR_MSG = Messages.ExportReportHandler_ExportError;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -102,14 +105,14 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 			try {
 				ExportReportEngine.exportReports(selectedReports, outputDir, outputFormat);
 			} catch (Exception e) {
-				ReportPlugIn.displayLog("Error exporting reports." + e.getMessage(), e);
+				ReportPlugIn.displayLog(ERROR_MSG + e.getMessage(), e);
 			}
 		}else if (format.getExporter() instanceof IReportExporter){
 			IReportExporter exporter = (IReportExporter) format.getExporter();
 			try {
 				ExportReportEngine.exportReports(selectedReports, outputDir, exporter);
 			} catch (Exception e) {
-				ReportPlugIn.displayLog("Error exporting reports." + e.getMessage(), e);
+				ReportPlugIn.displayLog(ERROR_MSG + e.getMessage(), e);
 			}
 		}
 		

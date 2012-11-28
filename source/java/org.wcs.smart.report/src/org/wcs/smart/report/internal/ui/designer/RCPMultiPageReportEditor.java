@@ -38,7 +38,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbenchPartConstants;
 import org.eclipse.ui.PartInitException;
@@ -50,8 +49,8 @@ import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.SmartReportParameters;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.CreateReportDialog;
-import org.wcs.smart.report.internal.ui.viewer.parameter.SmartDateParameterComponent;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -107,7 +106,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 				
 				if (handle.getExtensionID().startsWith(ReportManager.SMART_DATASOURCE_ID)
 					 && ne.getOldName() == null 
-					 && ne.getNewName().startsWith("Data Set")
+					 && ne.getNewName().startsWith("Data Set") //$NON-NLS-1$
 					&& !ds.getDisplayName().equals(ne.getNewName())){
 				
 					try{
@@ -130,7 +129,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 							OdaDataSetParameter parameter = (OdaDataSetParameter) iterator.next();
 							if (parameter.getName().equals(SmartReportParameters.PARAM_START_DATE_KEY) || 
 									parameter.getName().equals(SmartReportParameters.PARAM_END_DATE_KEY)){
-								parameter.setDefaultValue("");
+								parameter.setDefaultValue(""); //$NON-NLS-1$
 								parameter.setParamName(parameter.getName());
 							}
 						}
@@ -174,7 +173,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			ReportPlugIn.displayLog("Could not save report: " + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_Error_SavingReport + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}
@@ -201,14 +200,14 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 	public void doSaveAs() {
 		
 		if (!(super.getEditorInput() instanceof SmartReportEditorInput)){
-			MessageDialog.openError(getSite().getShell(), "Error", "Cannot perform save-as on non Smart Reports");
+			MessageDialog.openError(getSite().getShell(), Messages.RCPMultiPageReportEditor_Error_DialogTitle, Messages.RCPMultiPageReportEditor_SaveAsError_NonSmart);
 			return;
 		}
 		//get save name/location
 		final Report report = ((SmartReportEditorInput) super.getEditorInput())
 				.getReport();
 		final CreateReportDialog dialog = new CreateReportDialog(getSite()
-				.getShell(), report.getFolder(), "Copy of " + report.getName(), true);
+				.getShell(), report.getFolder(), Messages.RCPMultiPageReportEditor_CopyOfLabel + report.getName(), true);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return;
 		}
@@ -252,7 +251,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 						s.getTransaction().commit();
 					} catch (Exception ex) {
 						s.getTransaction().rollback();
-						ReportPlugIn.displayLog("Error Saving copy of report to the database." + ex.getMessage(), ex);
+						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveAsError + ex.getMessage(), ex);
 						return;
 					} finally {
 						if (s != null) {
@@ -274,7 +273,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 						}
 					});
 					}catch (Exception ex){
-						ReportPlugIn.displayLog("Error creating report file. " + ex.getMessage(), ex);
+						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_createFileError + ex.getMessage(), ex);
 						return;
 					}
 					
@@ -291,7 +290,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 				}
 			});
 		} catch (Exception ex) {
-			ReportPlugIn.displayLog("Error Saving copy of report." + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveError + ex.getMessage(), ex);
 		}
 	}
 

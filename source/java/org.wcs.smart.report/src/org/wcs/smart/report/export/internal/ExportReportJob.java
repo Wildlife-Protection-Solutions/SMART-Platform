@@ -22,6 +22,7 @@
 package org.wcs.smart.report.export.internal;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IReportExporter;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -52,7 +54,7 @@ public class ExportReportJob extends Job {
 	 * @param reportParams report parameters
 	 */
 	public ExportReportJob(Report report, File file, IReportExporter exporter, HashMap<String, Object> reportParams){
-		super("Export Report: " + report.getName());
+		super(MessageFormat.format(Messages.ExportReportJob_ExportReportJobName, new Object[]{ report.getName()}));
 		
 		this.report = report;
 		this.outputFile = file;
@@ -69,8 +71,8 @@ public class ExportReportJob extends Job {
 		try {
 			exporter.exportReport(outputFile, report, reportParameters, monitor);
 		} catch (Exception e) {
-			ReportPlugIn.log("Error exporting report", e);
-			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, "Error exporting report. " + e.getMessage() );
+			ReportPlugIn.log("Error exporting report", e); //$NON-NLS-1$
+			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, Messages.ExportReportJob_ErrorExportingReport + e.getMessage() );
 		}
 		return Status.OK_STATUS;
 	}

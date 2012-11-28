@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.report.internal.Messages;
 
 /**
  * Dialog for collection report parameters.
@@ -50,8 +51,8 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class ReportParameterDialog extends TitleAreaDialog {
 	
-	public static String SIMPLE_DATE_FORMAT = "yyyy-MM-dd G hh:mm:ss z"; 
-	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.report.parameters");
+	public static String SIMPLE_DATE_FORMAT = "yyyy-MM-dd G hh:mm:ss z";  //$NON-NLS-1$
+	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.report.parameters"); //$NON-NLS-1$
 	
 	private List<IBirtParameterComponent> params = new ArrayList<IBirtParameterComponent>();
 	private HashMap<String, Object> values = null;
@@ -71,7 +72,7 @@ public class ReportParameterDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Continue",
+		createButton(parent, IDialogConstants.OK_ID, Messages.ReportParameterDialog_ContinueButton,
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
@@ -94,8 +95,8 @@ public class ReportParameterDialog extends TitleAreaDialog {
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
 		
-		super.getShell().setText("Report Parameters");
-		setMessage("Enter the required report parameters.");
+		super.getShell().setText(Messages.ReportParameterDialog_DialogTitle);
+		setMessage(Messages.ReportParameterDialog_DialogMessage);
 		
 		return comp;
 	}

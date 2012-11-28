@@ -72,8 +72,8 @@ public class ReportViewerPerspective  implements IPerspectiveFactory {
 		
 		layout.addView(ReportListView.ID, IPageLayout.LEFT, (float)0.26, editorArea);
 		
-		IFolderLayout reportsArea = layout.createFolder("reportsArea", IPageLayout.RIGHT, 0.26f, ReportListView.ID);
-		reportsArea.addPlaceholder(ReportView.ID + ":*");
+		IFolderLayout reportsArea = layout.createFolder("reportsArea", IPageLayout.RIGHT, 0.26f, ReportListView.ID); //$NON-NLS-1$
+		reportsArea.addPlaceholder(ReportView.ID + ":*"); //$NON-NLS-1$
 		
 	}
 }

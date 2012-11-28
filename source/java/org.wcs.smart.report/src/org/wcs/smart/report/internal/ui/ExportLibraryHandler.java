@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.util.ZipUtil;
 
@@ -48,14 +49,16 @@ import org.wcs.smart.util.ZipUtil;
  */
 public class ExportLibraryHandler extends AbstractHandler {
 
+	private static final String ERROR_MSG = Messages.ExportLibraryHandler_Error_ExportingLibrary;
+
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		
 		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event));
-		fd.setFilterNames(new String[]{"Zip (*.zip)", "*.*"});
-		fd.setFilterExtensions(new String[]{"*.zip", "*.*"});
-		fd.setText("Export Location");
-		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_ReportLibrary.zip");
+		fd.setFilterNames(new String[]{Messages.ExportLibraryHandler_ZipFilterName, Messages.ExportLibraryHandler_AllFilesFilterName});
+		fd.setFilterExtensions(new String[]{"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setText(Messages.ExportLibraryHandler_LocationLabel);
+		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_ReportLibrary.zip"); //$NON-NLS-1$
 		fd.setOverwrite(true);
 		final String exportFile = fd.open();
 		if (exportFile == null){
@@ -75,15 +78,15 @@ public class ExportLibraryHandler extends AbstractHandler {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Export", "Library exported successfully");		
+							MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.ExportLibraryHandler_ExportDialogTitle, Messages.ExportLibraryHandler_ExportOk);		
 						}});
 				} catch (IOException ex) {
-					ReportPlugIn.displayLog("Error exporting reports library: " + ex.getMessage(), ex);
+					ReportPlugIn.displayLog(ERROR_MSG + ex.getMessage(), ex);
 				}	
 			}
 		});
 		}catch (Exception ex){
-			ReportPlugIn.displayLog("Error exporting reports library", ex);
+			ReportPlugIn.displayLog(ERROR_MSG, ex);
 		}
 		return null;
 	}

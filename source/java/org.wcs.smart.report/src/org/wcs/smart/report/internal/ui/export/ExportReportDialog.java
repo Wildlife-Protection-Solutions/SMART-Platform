@@ -22,6 +22,7 @@
 package org.wcs.smart.report.internal.ui.export;
 
 import java.io.File;
+import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -49,6 +50,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.internal.ExportReportEngine;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -60,11 +62,13 @@ import org.wcs.smart.report.model.Report;
  * @since 1.0.0
  */
 public class ExportReportDialog extends TitleAreaDialog {
-	private static final String FORMAT_SETTING = "Format";
+	private static final String EXPORT_DIALOGITTLE = Messages.ExportReportDialog_ExportDialogTitle;
 
-	private static final String DIRECTORY_SETTING = "Directory";
+	private static final String FORMAT_SETTING = "Format"; //$NON-NLS-1$
 
-	private static IDialogSettings settings = new DialogSettings("org.wcs.smart.report.exportdialog");
+	private static final String DIRECTORY_SETTING = "Directory"; //$NON-NLS-1$
+
+	private static IDialogSettings settings = new DialogSettings("org.wcs.smart.report.exportdialog"); //$NON-NLS-1$
 	
 	private String fileName;
 	private IExportFormat emitter;
@@ -105,7 +109,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, "Export",
+		createButton(parent, IDialogConstants.OK_ID, Messages.ExportReportDialog_ExportButton,
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
@@ -118,11 +122,11 @@ public class ExportReportDialog extends TitleAreaDialog {
 	@Override
 	protected Composite createDialogArea(Composite parent) {
 		if (!multipleFiles){
-			getShell().setText("Export Report: " + this.report.getName());
+			getShell().setText(Messages.ExportReportDialog_DialogTitleA + this.report.getName());
 		}else{
-			getShell().setText("Export Reports");
+			getShell().setText(Messages.ExportReportDialog_DialogTitleB);
 		}
-		setMessage("Select the export location and format.");
+		setMessage(Messages.ExportReportDialog_DialogMessage);
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		
@@ -130,7 +134,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText("Export Format:");
+		lbl.setText(Messages.ExportReportDialog_FormatLabel);
 		
 		cmbEmitters = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbEmitters.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -138,7 +142,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 		cmbEmitters.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object object){
-				return ((IExportFormat)object).getName() + " (." + ((IExportFormat)object).getFileExtension() + ")";
+				return ((IExportFormat)object).getName() + " (." + ((IExportFormat)object).getFileExtension() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		});
 		IExportFormat[] formats= ExportReportEngine.getSupportedExportFormats();
@@ -159,7 +163,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 								return;
 							txtFileName.setText(filename.substring(0,
 									filename.lastIndexOf('.'))
-									+ "."
+									+ "." //$NON-NLS-1$
 									+ ((IExportFormat) selection
 											.getFirstElement())
 											.getFileExtension());
@@ -170,15 +174,15 @@ public class ExportReportDialog extends TitleAreaDialog {
 		
 		lbl = new Label(comp, SWT.NONE);
 		if (this.multipleFiles){
-			lbl.setText("Output Directory:");
+			lbl.setText(Messages.ExportReportDialog_OutputDirectoryLabel);
 		}else{
-			lbl.setText("Output File:");
+			lbl.setText(Messages.ExportReportDialog_OutputFileLabel);
 		}
 		
 		txtFileName = new Text(comp, SWT.BORDER);
 		txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		Button btnBrowse = new Button(comp, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.ExportReportDialog_BrowseButton);
 
 		String x = settings.get(FORMAT_SETTING);
 		IExportFormat defaultExport = formats[0];
@@ -202,11 +206,11 @@ public class ExportReportDialog extends TitleAreaDialog {
 		}else{
 			x = settings.get(DIRECTORY_SETTING);
 			if (x == null){
-				x = "";
+				x = ""; //$NON-NLS-1$
 			}else{
 				x += File.separator;
-			}
-			x += report.getName().replaceAll("[^a-zA-Z0-9]", "") + "." +  defaultExport.getFileExtension(); 
+			}			
+			x += ExportReportEngine.getOutputFileName(report, null, defaultExport.getFileExtension()).getName(); 
 			txtFileName.setText(x);
 			addFileListner(btnBrowse);
 		}
@@ -221,8 +225,8 @@ public class ExportReportDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog dd = new DirectoryDialog(getShell());
-				dd.setMessage("Select directory to place exported report(s).");
-				dd.setText("Export Directory");
+				dd.setMessage(Messages.ExportReportDialog_DirectoryDialogMessage);
+				dd.setText(Messages.ExportReportDialog_DirectoryDialogTitle);
 				dd.setFilterPath(txtFileName.getText());
 				String dir = dd.open();
 				if (dir != null){
@@ -242,8 +246,8 @@ public class ExportReportDialog extends TitleAreaDialog {
 				fd.setFileName(txtFileName.getText());
 				
 				IExportFormat info = (IExportFormat) ((IStructuredSelection)cmbEmitters.getSelection()).getFirstElement();
-				fd.setFilterExtensions(new String[]{"*." + info.getFileExtension(), "*.*"});
-				fd.setFilterNames(new String[]{info.getName() + " (*." + info.getFileExtension() + ")", "All Files (*.*)"});
+				fd.setFilterExtensions(new String[]{"*." + info.getFileExtension(), "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[]{info.getName() + " (*." + info.getFileExtension() + ")", Messages.ExportReportDialog_AllFilesFilterName}); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				String dir = fd.open();
 				if (dir != null){
@@ -261,20 +265,23 @@ public class ExportReportDialog extends TitleAreaDialog {
 		File dir = new File(txtFileName.getText());
 		if (multipleFiles){
 			if (!dir.isDirectory()){
-				MessageDialog.openError(getShell(), "Error", "Invalid directory.");
+				MessageDialog.openError(getShell(), Messages.ExportReportDialog_Error_DialogTitle, Messages.ExportReportDialog_InvalidDir);
 			}
 			if (!dir.exists()){
-				if (!MessageDialog.openConfirm(getShell(), "Export", "The directory " + txtFileName.getText() + " does not exist and will be created.  Are you sure you want to continue?")){
+				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
+						MessageFormat.format(Messages.ExportReportDialog_DirDoesNotExist, new Object[]{txtFileName.getText()}))){
 					return;
 				}
 			}else{
-				if (!MessageDialog.openConfirm(getShell(), "Export", "The files in the directory " + txtFileName.getText() + " may be overwritten.  Are you sure you want to continue?")){
+				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
+						MessageFormat.format(Messages.ExportReportDialog_DirOverwirtten, new Object[]{txtFileName.getText()}))){
 					return;
 				}
 			}
 		}else {
 			if (dir.exists()){
-				if (!MessageDialog.openConfirm(getShell(), "Export", "The file " + txtFileName.getText() + " exists and will be overwritten.  Are you sure you want to continue?")){
+				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
+					MessageFormat.format(Messages.ExportReportDialog_FileOverwritten, new Object[]{txtFileName.getText()}))){
 					return;
 				}
 			}

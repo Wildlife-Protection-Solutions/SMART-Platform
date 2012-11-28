@@ -40,23 +40,23 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 	/**
 	 * if the selection can be renamed
 	 */
-	public static final String RENAME = "rename";
+	public static final String RENAME = "rename"; //$NON-NLS-1$
 	/**
 	 * if the selection can be deleted
 	 */
-	public static final String DELETE = "delete";
+	public static final String DELETE = "delete"; //$NON-NLS-1$
 	/**
 	 * if the selection can be modified (editing report; not renaming) 
 	 */
-	public static final String EDIT = "edit";
+	public static final String EDIT = "edit"; //$NON-NLS-1$
 	/**
 	 * if the selection can have a child folder added to it
 	 */
-	public static final String NEWFOLDER = "newfolder";
+	public static final String NEWFOLDER = "newfolder"; //$NON-NLS-1$
 	/**
 	 * if the selection can be modified (editing report; not renaming) 
 	 */
-	public static final String EXPORT = "export";
+	public static final String EXPORT = "export"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new property tester

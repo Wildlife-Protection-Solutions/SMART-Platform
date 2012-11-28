@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.internal.Messages;
 
 /**
  * Numeric parameter component.
@@ -99,7 +100,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 		param.setLayout(gl);
 		
 		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText(getDisplayText() + ": ");
+		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
 		
 		inputValue = new Text(param, SWT.SINGLE | SWT.BORDER);
 		inputValue.addVerifyListener(new VerifyListener(){
@@ -127,7 +128,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 		try{
 			return validator.validate(inputValue.getText());
 		}catch (Exception ex){
-			ReportPlugIn.log("Error converting parameter value." + ex.getMessage(), ex);
+			ReportPlugIn.log(Messages.NumberParameterComponent_ConversionError + ex.getMessage(), ex);
 			return null;
 		}
 	}

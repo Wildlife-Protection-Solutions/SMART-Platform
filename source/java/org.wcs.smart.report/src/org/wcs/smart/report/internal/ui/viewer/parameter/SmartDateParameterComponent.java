@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -50,6 +51,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.SmartReportParameters;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -89,7 +91,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		param.setLayout(gl);
 		
 		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText("Date Range: ");
+		lbl.setText(Messages.SmartDateParameterComponent_DateRangeLabel);
 		
 		cmbDatesOps = new ComboViewer(param, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbDatesOps.setContentProvider(ArrayContentProvider.getInstance());
@@ -104,7 +106,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		});
 		cmbDatesOps.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		lblStart = new Label(param, SWT.NONE);
-		lblStart.setText("Start Date:");
+		lblStart.setText(Messages.SmartDateParameterComponent_StartDateLabel);
 		startPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
 		
 		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
@@ -121,7 +123,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		}
 		
 		lblEnd = new Label(param, SWT.NONE);
-		lblEnd.setText("End Date:");
+		lblEnd.setText(Messages.SmartDateParameterComponent_EndDateLabel);
 		endPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
 		x = settings.get(SmartReportParameters.PARAM_END_DATE_KEY);
 		if (x != null){
@@ -167,7 +169,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 		
 		cmbDatesOps.setInput(DATE_FILTER_OP.values());
 		
-		x = settings.get("org.wcs.smart.report.parameter.dateOp");
+		x = settings.get("org.wcs.smart.report.parameter.dateOp"); //$NON-NLS-1$
 		if (x != null){
 			cmbDatesOps.setSelection(new StructuredSelection(DATE_FILTER_OP.valueOf(x)));
 		}else{
@@ -199,9 +201,9 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 				try{
 					session.beginTransaction();
 				
-					String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca";
+					String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
 					Query q = session.createQuery(hql);
-					q.setParameter("ca", SmartDB.getCurrentConservationArea());
+					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 					List<?> data = q.list();
 					Date startdate = null;
 					if (data != null && data.size() >= 1 && data.get(0) != null){
@@ -209,7 +211,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 					}
 					params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(startdate.getTime()));	//JAN 01 1900  
 				}catch (Exception ex){					
-					ReportPlugIn.log("Error retriving earliest data date for report paraemeters", ex);
+					ReportPlugIn.log(Messages.SmartDateParameterComponent_EarliestDateError, ex);
 				}finally{
 					if (session.getTransaction().isActive()){
 						session.getTransaction().commit();
@@ -219,7 +221,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 				//today + one day
 				params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything	
 			}else{
-				throw new UnsupportedOperationException("CDate file " + op.guiName + " not supported for reports.");
+				throw new UnsupportedOperationException(MessageFormat.format(Messages.SmartDateParameterComponent_DateFilterNotSupported, new Object[]{op.guiName}));
 			}
 			
 		}else if (dates.length == 1){
@@ -229,7 +231,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
 			params.put(SmartReportParameters.PARAM_END_DATE_KEY, dates[1]);
 		}
-		params.put("org.wcs.smart.report.parameter.dateOp", op.toString());
+		params.put("org.wcs.smart.report.parameter.dateOp", op.toString()); //$NON-NLS-1$
 		return params;
 	}
 

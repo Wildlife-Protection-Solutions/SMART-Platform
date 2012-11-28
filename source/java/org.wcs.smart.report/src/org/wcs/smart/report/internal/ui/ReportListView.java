@@ -52,6 +52,7 @@ import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
@@ -68,7 +69,7 @@ import org.wcs.smart.report.ui.ReportLabelProvider;
  */
 public class ReportListView extends ViewPart {
 
-	public static final String ID = "org.wcs.smart.report.ReportListView";
+	public static final String ID = "org.wcs.smart.report.ReportListView"; //$NON-NLS-1$
 
 	
 	private TreeViewer reportList;
@@ -218,10 +219,10 @@ public class ReportListView extends ViewPart {
 		reportList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		reportList.setContentProvider(new ReportContentProvider());
 		reportList.setLabelProvider(new ReportLabelProvider());
-		reportList.setInput("Loading");
+		reportList.setInput(Messages.ReportListView_LoadingLabel);
 		
 		reportList.setCellEditors(new CellEditor[] { new TextCellEditor(reportList.getTree()) });
-		reportList.setColumnProperties(new String[] { "col1" });
+		reportList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
 		reportList.setCellModifier(new ReportItemNameCellEditor());
 		
 		//TODO: add support for multi-selection

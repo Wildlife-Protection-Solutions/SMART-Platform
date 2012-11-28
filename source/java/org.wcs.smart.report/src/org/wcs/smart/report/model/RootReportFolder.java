@@ -23,6 +23,7 @@ package org.wcs.smart.report.model;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.report.internal.Messages;
 
 /**
  * A root folder in the report tree.
@@ -34,11 +35,11 @@ public class RootReportFolder implements IAdaptable{
 	/**
 	 * Conservation area root folder
 	 */
-	public static final RootReportFolder CA_ROOT_FOLDER = new RootReportFolder("Conservation Area Reports", true);
+	public static final RootReportFolder CA_ROOT_FOLDER = new RootReportFolder(Messages.RootReportFolder_CaRootReportFolderName, true);
 	/**
 	 * User root folder
 	 */
-	public static final RootReportFolder USER_ROOT_FOLDER = new RootReportFolder("My Reports", false);
+	public static final RootReportFolder USER_ROOT_FOLDER = new RootReportFolder(Messages.RootReportFolder_UserRootReportFolderName, false);
 	
 	private String name;
 	private boolean isShared = false;
