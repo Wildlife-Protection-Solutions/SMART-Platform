@@ -305,7 +305,19 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			inlist.append("'" + key.getKey() + "',");
 		}
 		sql.append("FROM ");
+		boolean on = false;
+		if (dateFilter != null && (dateFilter.getDateFieldOption() == DateFilter.DATE_FIELD_OP.PATROL_END || dateFilter.getDateFieldOption() == DateFilter.DATE_FIELD_OP.PATROL_START ) ){
+			sql.append(tableNames.get(Patrol.class) + " as " + tablePrefix.get(Patrol.class));
+			sql.append(" join ");
+			sql.append(tableNames.get(PatrolLeg.class) + " as " + tablePrefix.get(PatrolLeg.class));
+	 		sql.append(" ON " +tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid");
+	 		sql.append(" join ");
+			on = true;
+		}
 		sql.append(tableNames.get(PatrolLegDay.class) + " as " + tablePrefix.get(PatrolLegDay.class));
+		if (on){
+			sql.append(" ON " + tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid = " + tablePrefix.get(PatrolLeg.class) + ".uuid");
+		}
 		sql.append(" join ");
 		sql.append(tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class));
 		sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = " + tablePrefix.get(Waypoint.class) + ".leg_day_uuid ");

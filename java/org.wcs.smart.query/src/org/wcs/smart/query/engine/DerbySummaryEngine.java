@@ -180,6 +180,11 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 							}
 						}
 					}
+					if (!needsObservation){
+						if (query.getQueryDefinition().getQueryFilter().hasAttributeFilter() || query.getQueryDefinition().getQueryFilter().hasCategoryFilter()){
+							needsObservation = true;
+						}
+					}
 					
 					populateTemporaryTable(qFilter, query.getDateFilter(), query.getConservationAreaFilterAsFilter(), false,c, needsObservation);
 					monitor.worked(1);

@@ -128,6 +128,13 @@ public class DateFilter implements IFilter {
 		return this.dateFilter;
 	}
 	
+	/**
+	 * @return the date field option represented by this date filter
+	 */
+	public DateFilter.DATE_FIELD_OP getDateFieldOption(){
+		return this.dateField;
+	}
+	
 	
 	/**
 	 * Determine start and end date of date filter  
@@ -214,5 +221,5 @@ public class DateFilter implements IFilter {
 	public List<IFilter> getChildren() {
 		return null;
 	}
-
+	
 }
