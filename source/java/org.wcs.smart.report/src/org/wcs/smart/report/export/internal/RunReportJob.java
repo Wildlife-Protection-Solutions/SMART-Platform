@@ -23,6 +23,8 @@ package org.wcs.smart.report.export.internal;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
@@ -90,7 +92,9 @@ public class RunReportJob extends Job {
 
 			IRunAndRenderTask task = engine.createRunAndRenderTask(design);
 			IRenderOption options = new RenderOption();
+			
 			FileOutputStream fout = new FileOutputStream(outputFile);
+			
 			options.setOutputStream(fout);
 			options.setEmitterID(info.getID());
 			options.setOption(HTMLRenderOption.IMAGE_DIRECTROY,
