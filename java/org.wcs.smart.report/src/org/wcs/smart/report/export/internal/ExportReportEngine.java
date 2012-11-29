@@ -208,7 +208,7 @@ public class ExportReportEngine {
 		String f = report.getFilename();
 		int index = f.lastIndexOf('.');
 		if (index > 0){
-			f = f.substring(0, index+1);
+			f = f.substring(0, index);
 		}
 		//String filename = report.getName().replaceAll("[^\\p{L&}\\p{Nd}]", ""); ;  //$NON-NLS-1$ //$NON-NLS-2$
 		if (directory != null){

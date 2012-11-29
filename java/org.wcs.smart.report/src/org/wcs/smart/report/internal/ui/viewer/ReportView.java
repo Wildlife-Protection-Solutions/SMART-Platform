@@ -23,6 +23,7 @@ package org.wcs.smart.report.internal.ui.viewer;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -99,7 +100,12 @@ public class ReportView extends ViewPart implements IReportListener{
 				browser.getDisplay().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						browser.setText(bos.toString());
+						try {
+							browser.setText(bos.toString("UTF8")); //$NON-NLS-1$
+						} catch (UnsupportedEncodingException e) {
+							throw new IllegalStateException(Messages.ReportView_UTF8NotSupported);
+						}
+						
 
 					}});
 		} catch (Exception e) {

@@ -94,10 +94,11 @@ public class ReportDefintionExporter implements IReportExporter {
 			//add report info file
 			monitor.subTask(Messages.ReportDefintionExporter_Progress_ReportInfo);
 			
-			File reportInfo = File.createTempFile(ExportReportEngine.getOutputFileName(report, null, ".rpt").getName(),""); //$NON-NLS-1$ //$NON-NLS-2$
+			String filename = ExportReportEngine.getOutputFileName(report, null, "rpt").getName(); //$NON-NLS-1$
+			File reportInfo = File.createTempFile(filename,".tmp"); //$NON-NLS-1$ 
 			try{
 				writeReportInfo(reportInfo, report);
-				addFile(reportInfo, reportInfo.getName(), zout);
+				addFile(reportInfo, filename, zout);
 			}finally{
 				reportInfo.delete();
 			}
