@@ -125,7 +125,7 @@
    <extension
          point="org.eclipse.birt.report.engine.reportitemPresentation">
       <reportItem
-            class="org.wcs.smart.birt.map.SmartMapPresentationImpl "
+            class="org.wcs.smart.report.birt.map.SmartMapPresentationImpl "
             name="%birt.reportitem.smartmap.name">
       </reportItem>
    </extension>
