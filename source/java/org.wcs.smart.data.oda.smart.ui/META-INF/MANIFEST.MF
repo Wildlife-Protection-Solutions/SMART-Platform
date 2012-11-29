@@ -4,7 +4,6 @@ Bundle-Name: %plugin.name
 Bundle-SymbolicName: org.wcs.smart.data.oda.smart.ui; singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.wcs.smart.data.oda.smart.ui.Activator
-Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.datatools.connectivity.oda.design.ui;bundle-version="[3.2.0,4.0.0)",
