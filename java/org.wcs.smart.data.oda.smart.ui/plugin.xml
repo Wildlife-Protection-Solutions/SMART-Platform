@@ -7,17 +7,17 @@
       <newWizard
             name="%newwizard.name"
             icon="icons/new_oda_dswiz.ico"
-            profile="%oda.data.source.id"
+            profile="org.wcs.smart.data.oda.smart"
             description="%newwizard.description"
             class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.NewDataSourceWizard"
-            id="%oda.data.source.id">
+            id="org.wcs.smart.data.oda.smart">
       </newWizard>
    </extension>
    <extension
          point="org.eclipse.datatools.connectivity.ui.connectionProfileImage">
       <profileImage
             icon="icons/profile.gif"
-            profileID="%oda.data.source.id">
+            profileID="org.wcs.smart.data.oda.smart">
       </profileImage>
    </extension>
    <extension
@@ -25,7 +25,7 @@
       <page
             name="%profile.propertypage.name"
             class="org.eclipse.datatools.connectivity.oda.design.ui.pages.impl.DefaultDataSourcePropertyPage"
-            id="%oda.data.source.id">
+            id="org.wcs.smart.data.oda.smart">
          <enabledWhen>
             <instanceof
                   value="org.eclipse.datatools.connectivity.IConnectionProfile">
@@ -33,14 +33,14 @@
          </enabledWhen>
          <filter
                name="org.eclipse.datatools.profile.property.id"
-               value="%oda.data.source.id">
+               value="org.wcs.smart.data.oda.smart">
          </filter>
       </page>
    </extension>
    <extension
          point="org.eclipse.datatools.connectivity.oda.design.ui.dataSource">
       <dataSourceUI
-            id="%oda.data.source.id">
+            id="org.wcs.smart.data.oda.smart">
          <newDataSourceWizard
                pageClass="org.eclipse.datatools.connectivity.oda.design.ui.pages.impl.DefaultDataSourceWizardPage"
                includesProgressMonitor="false"
@@ -54,10 +54,10 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="New Smart Table Dataset">
+               windowTitle="%wizard.dataset.tables.page.title">
          </dataSetWizard>
          <dataSetPage
-               displayName="New Smart Table Dataset"
+               displayName="%wizard.dataset.tables.page1.displayName"
                icon="icons/datasetpage.ico"
                id="org.wcs.smart.data.ods.smart.smartTable.page1"
                path="/"
@@ -71,10 +71,10 @@
             id="org.wcs.smart.data.oda.smart.smartQueryDataset">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="New Query Dataset">
+               windowTitle="%wizard.dataset.query.page.title">
          </dataSetWizard>
          <dataSetPage
-               displayName="New Query Dataset"
+               displayName="%wizard.dataset.query.page1.displayName"
                icon="icons/datasetpage.ico"
                id="org.wcs.smart.data.ods.smart.smartQuery.page1"
                path="/"
