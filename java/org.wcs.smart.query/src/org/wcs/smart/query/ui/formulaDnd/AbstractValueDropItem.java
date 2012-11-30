@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 
 /**
@@ -45,6 +46,8 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
  */
 public abstract class AbstractValueDropItem extends DropItem {
 
+	private static final String PER_LABEL = Messages.AbstractValueDropItem_RateofChangePerLabel;
+	
 	protected PatrolValueOption encounterRatio;
 	private Font smallerFont;
 	private Composite main;
@@ -94,7 +97,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getValueText());
 		if (encounterRatio != null){
-			sb.append( " per ");
+			sb.append( " " + PER_LABEL + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(encounterRatio.getGuiName());
 		}
 		
@@ -138,7 +141,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 		sb.append(getValueQueryPart());
 		
 		if (encounterRatio != null){
-			sb.append("/patrol:sum:");
+			sb.append("/patrol:sum:"); //$NON-NLS-1$
 			sb.append(encounterRatio.getKeyPart());
 		}
 		return sb.toString();
@@ -159,16 +162,16 @@ public abstract class AbstractValueDropItem extends DropItem {
 			main.setLayout(new GridLayout(1, false));
 			
 			Label lbl = new Label(main, SWT.NONE);
-			lbl.setText(" per ");
+			lbl.setText( " " + PER_LABEL + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			initDrag(lbl);
 			
 			Label lbl2 = new Label(main, SWT.NONE);
 			lbl2.setText( formatStringForLabel(encounterRatio.getGuiName()));
 			
-			createRateLink(main, "Change Rate...");
+			createRateLink(main, Messages.AbstractValueDropItem_ChangeRankLink);
 		}else{
 			main.setLayout(new GridLayout(2, false));
-			createRateLink(main, "Compute Rate...");
+			createRateLink(main, Messages.AbstractValueDropItem_ComputeRateLink);
 		}
 		
 		main.layout();

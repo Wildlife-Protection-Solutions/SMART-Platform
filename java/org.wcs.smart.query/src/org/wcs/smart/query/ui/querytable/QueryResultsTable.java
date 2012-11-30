@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
@@ -45,6 +46,7 @@ import org.wcs.smart.query.model.observation.QueryColumn;
  */
 public class QueryResultsTable {
 
+	private static final String INITQUERYTABLE_JOBNAME = Messages.QueryResultsTable_InitQueryResultsTableJobName;
 	private TableViewer table;
 	private QueryTableViewerColumn[] tableViewerColumns;
 
@@ -73,7 +75,7 @@ public class QueryResultsTable {
 			//columns already created
 			return;
 		}
-		Job job = new Job("Initialize query results table."){
+		Job job = new Job(INITQUERYTABLE_JOBNAME){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// in display thread update table
@@ -96,7 +98,7 @@ public class QueryResultsTable {
 			//columns already created
 			return;
 		}
-		Job job = new Job("Initialize query results table."){
+		Job job = new Job(INITQUERYTABLE_JOBNAME){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// in display thread update table

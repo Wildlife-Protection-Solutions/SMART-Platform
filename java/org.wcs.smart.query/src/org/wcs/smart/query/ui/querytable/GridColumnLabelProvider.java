@@ -51,7 +51,7 @@ public class GridColumnLabelProvider extends ColumnLabelProvider {
 		if (element instanceof GridResultItem) {
 			Object value = column.getValue((GridResultItem) element);
 			if (value == null) {
-				return "";
+				return ""; //$NON-NLS-1$
 			} else {
 				return value.toString();
 			}

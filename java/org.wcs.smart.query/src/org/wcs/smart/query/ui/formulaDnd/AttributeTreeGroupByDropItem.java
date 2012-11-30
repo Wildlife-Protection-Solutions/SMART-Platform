@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 
 /**
@@ -119,7 +120,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		}else if (!attribute.equals(dropItem.attribute)){
 			return false;
 		}
-		if (dropItem.level != this.level){
+		if (dropItem.level.intValue() != this.level.intValue()){
 			return false;
 		}
 		for (ListItem item : dropItem.filters){
@@ -150,7 +151,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 			session.getTransaction().rollback();
 			session.close();
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Error loading items for list.", ex);
+			QueryPlugIn.displayLog(Messages.AttributeTreeGroupByDropItem_ErrorLoadingTreeItems, ex);
 			session.close();
 		}
 		return items;
@@ -175,24 +176,24 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(attribute.getName());
-		sb.append(" - Level ");
+		sb.append(" - " + Messages.AttributeTreeGroupByDropItem_TreeLevelLabel + Messages.AttributeTreeGroupByDropItem_2); //$NON-NLS-1$
 		sb.append(this.level);
 		
 		if (category != null){
-			sb.append(" (");
+			sb.append(" ("); //$NON-NLS-1$
 			sb.append(category.getFullCategoryName());
-			sb.append(")");
+			sb.append(")"); //$NON-NLS-1$
 		}
-		sb.append("\n");
+		sb.append("\n"); //$NON-NLS-1$
 		int cnt = 0;
 		if (filters != null) {
 			for (ListItem it : filters) {
 				if (cnt >= 3) {
-					sb.append("...");
+					sb.append("..."); //$NON-NLS-1$
 					break;
 				}
-				sb.append("   " + it.getName());
-				sb.append("\n");
+				sb.append("   " + it.getName()); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
 				cnt++;
 			}
 		}
@@ -206,22 +207,22 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		if (category != null) {
-			sb.append("category:");
+			sb.append("category:"); //$NON-NLS-1$
 			sb.append(category.getHkey());
-			sb.append(":");
+			sb.append(":"); //$NON-NLS-1$
 		}
-		sb.append("attribute:");
+		sb.append("attribute:"); //$NON-NLS-1$
 		sb.append(attribute.getType().typeKey);
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		sb.append(attribute.getKeyId());
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		sb.append(level);
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		if (filters != null) {
 			for (int i = 0; i < filters.size(); i++) {
 				sb.append(filters.get(i).getKey());
 				if (i < filters.size() - 1) {
-					sb.append(":");
+					sb.append(":"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -293,7 +294,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
 		link.setUnderlined(true);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("Filters...");
+		link.setText(Messages.AttributeTreeGroupByDropItem_FiltersLink);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -328,7 +329,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.AttributeTreeGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -348,10 +349,10 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
 		if (filters == null){
-			tipStr.append(" All");
+			tipStr.append(Messages.AttributeTreeGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filters){
-				tipStr.append("'" + item.getName() + "'" + "\n");
+				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		toolTip.setMessage(tipStr.toString());

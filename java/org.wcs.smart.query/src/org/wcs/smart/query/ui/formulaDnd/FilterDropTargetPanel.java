@@ -128,7 +128,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 			if (item instanceof DropItem){
 				DropItem it = (DropItem)item;
 				query.append(it.asQueryPart());
-				query.append(" ");
+				query.append(" "); //$NON-NLS-1$
 			}
 		}
 		return query.toString();

@@ -50,6 +50,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.map.udig.RasterService;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
@@ -71,7 +72,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	/*
 	 * Job for adding Raster layer to map
 	 */
-	private Job addLayerJob = new Job("Add Query Raster Layers") {
+	private Job addLayerJob = new Job(Messages.GriddedResultsMapEditorPage_AddLayersJobeName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -91,7 +92,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	    			rasterService = new RasterService(query);
 	    			rasterService.getReader(monitor);	//this will create the raster
 	    			if (rasterService.getMessage() != null){
-	    				QueryPlugIn.displayLog("Error creating map raster layer.\n\n" + rasterService.getMessage().getMessage(), rasterService.getMessage());
+	    				QueryPlugIn.displayLog(Messages.GriddedResultsMapEditorPage_ErrorCreatingRaster + rasterService.getMessage().getMessage(), rasterService.getMessage());
 	    				return Status.OK_STATUS;
 	    			}
 	    		}
@@ -103,7 +104,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 				
 			} catch (Exception e) {
 				
-				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, "Error loading pages", e);
+				return new Status(IStatus.ERROR, Messages.GriddedResultsMapEditorPage_UnknownLabel, IStatus.ERROR, Messages.GriddedResultsMapEditorPage_LoadingErrorMessage, e);
 			}
 			return Status.OK_STATUS;
 		}
@@ -139,7 +140,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job("Raster Refresh Job"){
+    private Job refreshJob = new Job(Messages.GriddedResultsMapEditorPage_RefreshJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (rasterService != null){
@@ -161,7 +162,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 					rasterService.refresh(null);
 					addLayerJob.schedule();				
 				} catch (Exception ex) {
-					String message = "Could create map raster layer. \n\n" + ex.getMessage();
+					String message = Messages.GriddedResultsMapEditorPage_Error_CreatingMapRaster + ex.getMessage();
 					QueryPlugIn.displayLog(message, ex);
 				}
 			}
@@ -198,7 +199,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		if (!(input instanceof QueryInput)){
-			throw new RuntimeException("Invalid editor input.");
+			throw new RuntimeException("Invalid editor input."); //$NON-NLS-1$
 		}
 		super.init(site, input);
 		
@@ -266,7 +267,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
     	if (firstRun){
     		//set crs of map to crs of query
     		//only do this on the first run;
-    		Job setCrs = new Job("Set CRS"){
+    		Job setCrs = new Job(Messages.GriddedResultsMapEditorPage_SetCrsJobName){
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -278,7 +279,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 					}
 					}catch (Exception ex){
 						// we will just log these
-						QueryPlugIn.log("Error setting initial CRS for Query. " + ex.getMessage(), ex);
+						QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_ErrorSettingCrs + ex.getMessage(), ex);
 					}
 					return Status.OK_STATUS;
 				}
@@ -293,7 +294,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
     				parentEditor.getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							if ( MessageDialog.openQuestion(parentEditor.getSite().getShell(), "Coordinate Reference System", "The map coordinate reference system does not match the query coordinate reference system.  Would you like to update the map coordinate reference system to match the query?")){
+							if ( MessageDialog.openQuestion(parentEditor.getSite().getShell(), Messages.GriddedResultsMapEditorPage_CRS_DialogTitle, Messages.GriddedResultsMapEditorPage_CRS_DialogMessage)){
 		    					ChangeCRSCommand crs = new ChangeCRSCommand(querycrs);
 								getMap().sendCommandASync(crs);
 		    				}
@@ -301,7 +302,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
     				
     			}
     		}catch (Exception ex){
-    			QueryPlugIn.log("Could not check CRS of query. " + ex.getMessage(), ex);
+    			QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_Error_CheckingCrs + ex.getMessage(), ex);
     		}
     		
     	}

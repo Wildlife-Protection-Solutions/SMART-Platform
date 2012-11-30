@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.filter.Operator;
 
@@ -68,7 +69,7 @@ public class PatrolIdDropItem  extends DropItem{
 	/*
 	 * job to load all patrol ids
 	 */
-	private Job loadPIdJob = new Job("Loading Patrol Ids"){
+	private Job loadPIdJob = new Job(Messages.PatrolIdDropItem_LoadIdsJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (value.isDisposed()){
@@ -105,7 +106,7 @@ public class PatrolIdDropItem  extends DropItem{
 		//super(parent, target);
 		assert option == PatrolQueryOption.ID;
 		this.text = option.getGuiName();
-		this.key = "patrol:" + option.getKey();
+		this.key = "patrol:" + option.getKey(); //$NON-NLS-1$
 	}
 
 	/**
@@ -113,7 +114,7 @@ public class PatrolIdDropItem  extends DropItem{
 	 */
 	@Override
 	public String getText() {
-		return this.text + " " + Operator.STRING_OPS[operators.getSelectionIndex()].getGuiValue() + " " ;//+ value.getText() ;
+		return this.text + " " + Operator.STRING_OPS[operators.getSelectionIndex()].getGuiValue() + " " ;//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -121,7 +122,7 @@ public class PatrolIdDropItem  extends DropItem{
 	 */
 	@Override
 	public String asQueryPart() {
-		return this.key + " " +  Operator.STRING_OPS[operators.getSelectionIndex()].asSmartValue() + " \"" + value.getText() + "\"";
+		return this.key + " " +  Operator.STRING_OPS[operators.getSelectionIndex()].asSmartValue() + " \"" + value.getText() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**

@@ -72,7 +72,7 @@ public class GridTiffImageExporter implements IQueryExporter {
 		if (sourceFile == null || !sourceFile.exists()){
 			throw new Exception(Messages.GridTiffImageExporter_QueryError, 
 					new Exception(
-					MessageFormat.format(Messages.GridTiffImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-2$
+					MessageFormat.format(Messages.GridTiffImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-1$
 		}
 
 		

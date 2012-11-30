@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _SmartQuery_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/query", "SmartQuery");
+    private final static QName _SmartQuery_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/query", "SmartQuery"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.query.xml.model

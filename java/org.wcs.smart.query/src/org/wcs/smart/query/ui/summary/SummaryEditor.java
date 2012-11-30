@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.summary;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -49,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.SummaryQuery;
@@ -68,7 +71,7 @@ import org.wcs.smart.query.ui.definition.QueryDefView;
  */
 public class SummaryEditor extends EditorPart implements IQueryEditor {
 
-	public static final String ID = "org.wcs.smart.query.ui.SummaryEditor";
+	public static final String ID = "org.wcs.smart.query.ui.SummaryEditor"; //$NON-NLS-1$
 
 	private SummaryQuery query;
 
@@ -105,7 +108,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		}
 	};
 
-	private Job loadQueryLoad = new Job("Load Query Job") {
+	private Job loadQueryLoad = new Job(Messages.SummaryEditor_LoadQueryJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			 QueryInput input = (QueryInput)SummaryEditor.this.getEditorInput();
@@ -129,7 +132,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 				});
 				 
 			 }catch (Exception ex){
-				 QueryPlugIn.log("Could not load query " + input.getName(), ex);
+				 QueryPlugIn.log(MessageFormat.format(Messages.SummaryEditor_ErrorLoadingQuery, new Object[]{input.getName()}), ex);
 			 }finally{
 				 session.getTransaction().rollback();
 				 session.close();
@@ -197,7 +200,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			loadQueryLoad.join(); // wait for the query loading job if
 									// applicable
 		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog("Could not load query." + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorParsingQuery + e.getMessage(), e);
 		}
 
 		return this.query;
@@ -225,8 +228,8 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 
 		if (!getQuery().isValid()) {
 			MessageDialog
-					.openError(getSite().getShell(), "Error",
-							"Query invalid.  Please fix query definition and try again.");
+					.openError(getSite().getShell(), Messages.SummaryEditor_ErrorDialogTitle,
+							Messages.SummaryEditor_QueryError);
 			return;
 		}
 
@@ -236,7 +239,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		// run query
 		final IProgressMonitor mymonitor = resultsArea.createProgressMonitor();
 
-		Job runQueryJob = new Job("Running query: " + getQuery().getName()) {
+		Job runQueryJob = new Job(Messages.SummaryEditor_RunQueryJobName + getQuery().getName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -249,7 +252,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 							.getQueryResults(mymonitor));
 
 				} catch (Exception ex) {
-					QueryPlugIn.displayLog("Could not execute query.", ex);
+					QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorRunningQuery, ex);
 					// resultsArea.updateAndShowTable(new
 					// ArrayList<QueryResultItem>());
 				}
@@ -391,7 +394,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		dateFilterComposite.adapt(toolkit);
 		dateFilterComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, "summary properties...",SWT.NONE);
+		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.SummaryEditor_PropertiesLabel,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		editQueryProp.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -415,7 +418,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	}
 
 	private void createNameHeader(Composite main) {
-		compQueryName = new QueryHeaderComposite(main, "Summary:", 
+		compQueryName = new QueryHeaderComposite(main, Messages.SummaryEditor_SummaryQueryLabel, 
 				toolkit, frmSummaryArea.getFont(), 
 				frmSummaryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

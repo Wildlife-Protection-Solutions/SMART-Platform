@@ -41,6 +41,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
@@ -91,20 +92,20 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	@Override
 	public String asQueryPart() {
 		StringBuilder queryPart = new StringBuilder();
-		queryPart.append("patrol:");
+		queryPart.append("patrol:"); //$NON-NLS-1$
 		queryPart.append(groupBy.getKey());
-		queryPart.append(":");
+		queryPart.append(":"); //$NON-NLS-1$
 		if (filteredValues.size() > 0){
 			for (int i = 0; i < filteredValues.size(); i ++){
 				if (groupBy.getType() == PatrolQueryOptionType.UUID){
 					queryPart.append(  SmartUtils.encodeHex( filteredValues.get(i).getUuid())  );
 				}else{
-					queryPart.append("\"");
+					queryPart.append("\""); //$NON-NLS-1$
 					queryPart.append(   filteredValues.get(i).getKey() );
-					queryPart.append("\"");
+					queryPart.append("\""); //$NON-NLS-1$
 				}
 				if (i != filteredValues.size() -1){
-					queryPart.append(":");
+					queryPart.append(":"); //$NON-NLS-1$
 				}
 				
 			}
@@ -145,7 +146,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
 		link.setUnderlined(true);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("Filters...");
+		link.setText(Messages.PatrolGroupByDropItem_FiltersLabel);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -172,7 +173,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.PatrolGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -192,10 +193,10 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
 		if (filteredValues == null){
-			tipStr.append(" All");
+			tipStr.append(Messages.PatrolGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filteredValues){
-				tipStr.append("'" + item.getName() + "'" + "\n");
+				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		toolTip.setMessage(tipStr.toString());
@@ -243,7 +244,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){
-			QueryPlugIn.displayLog("Error loading items for list.", ex);
+			QueryPlugIn.displayLog(Messages.PatrolGroupByDropItem_Error_LoadingListItems, ex);
 			s.close();
 		}
 		Collections.sort(items);

@@ -62,7 +62,7 @@ public class DateGroupByDropItem extends DropItem implements IGroupByDropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		return "date:" + dateOption.getKey();
+		return "date:" + dateOption.getKey(); //$NON-NLS-1$
 	}
 
 	/**

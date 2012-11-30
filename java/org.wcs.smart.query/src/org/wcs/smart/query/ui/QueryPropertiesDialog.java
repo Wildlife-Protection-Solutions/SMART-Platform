@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
@@ -131,8 +132,8 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
-		getShell().setText("Query Properties");
-		setMessage("Select the query properties.");
+		getShell().setText(Messages.QueryPropertiesDialog_DialogTitle);
+		setMessage(Messages.QueryPropertiesDialog_DialogMessage);
 		
 		ScrolledComposite scroll = new ScrolledComposite(parent,  SWT.V_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -146,7 +147,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lblName = new Label(main, SWT.NONE);
-		lblName.setText("Query Name:");
+		lblName.setText(Messages.QueryPropertiesDialog_QueryNameLabel);
 		lblName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtName = new Text(main, SWT.BORDER);
@@ -160,7 +161,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		});
 		
 		Label lblOwner = new Label(main, SWT.NONE);
-		lblOwner.setText("Creator:");
+		lblOwner.setText(Messages.QueryPropertiesDialog_CreatorLabel);
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(query.getOwner().getLabel());
 		
@@ -168,7 +169,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		for(AbstractQueryPropertyProvider prop: props){
 			if (prop.isValid(query.getType())){
 				Label lblProp = new Label(main, SWT.NONE);
-				lblProp.setText(prop.getName()+": ");
+				lblProp.setText(prop.getName()+": "); //$NON-NLS-1$
 				lblProp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 				
 				Label lblText = new Label(main, SWT.WRAP);
@@ -192,7 +193,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 
 	private void createObservationQueryOptions(Composite main) {
 		Label lblTableColumns = new Label(main, SWT.NONE);
-		lblTableColumns.setText("Output Columns:");
+		lblTableColumns.setText(Messages.QueryPropertiesDialog_ColumnsLabel);
 		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		createColumnTable(main);
@@ -205,7 +206,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		hyperlinkComposite.setLayout(new GridLayout(3, false));
 		
 		Link selectAll = new Link(hyperlinkComposite, SWT.NONE);
-		selectAll.setText("<a>Select All</a>");
+		selectAll.setText("<a>" + Messages.QueryPropertiesDialog_SelectAllLabel + "</a>");  //$NON-NLS-1$//$NON-NLS-2$
 		selectAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -218,7 +219,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		gd.heightHint = selectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		lbl.setLayoutData(gd);
 		Link deselectAll = new Link(hyperlinkComposite, SWT.NONE);
-		deselectAll.setText("<a>De-Select All</a>");
+		deselectAll.setText("<a>" + Messages.QueryPropertiesDialog_DeSelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		deselectAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

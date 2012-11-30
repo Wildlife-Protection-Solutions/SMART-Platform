@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
@@ -40,6 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * A header composite that contains a
@@ -53,6 +56,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  * @since 1.0.0
  */
 public class QueryHeaderComposite extends Composite {
+
+	private static final String ID_LABEL = Messages.QueryHeaderComposite_IdFieldLabel;
 
 	private static final int MAX_NAME_LENGTH = 1024;
 	
@@ -83,9 +88,9 @@ public class QueryHeaderComposite extends Composite {
 		this.id = id;
 		lblName.setText(this.name);
 		if (this.id != null){
-			lblId.setText("Id: " + this.id);
+			lblId.setText(ID_LABEL + this.id);
 		}else{
-			lblId.setText("Id: ");
+			lblId.setText(ID_LABEL);
 		}
 		super.layout();
 	}
@@ -110,10 +115,10 @@ public class QueryHeaderComposite extends Composite {
 
 			}
 		});
-		lblName = toolkit.createLabel(it, "");
-		txtName = toolkit.createText(it, "");
+		lblName = toolkit.createLabel(it, ""); //$NON-NLS-1$
+		txtName = toolkit.createText(it, ""); //$NON-NLS-1$
 		
-		lblId = toolkit.createLabel(this, "");
+		lblId = toolkit.createLabel(this, ""); //$NON-NLS-1$
 		lblId.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		txtName.setVisible(false);
 
@@ -189,7 +194,8 @@ public class QueryHeaderComposite extends Composite {
 	
 	private boolean validateName(String name){
 		if (name.length() > MAX_NAME_LENGTH){
-			MessageDialog.openError(getShell(), "Name too long", "Maximum name length is " + MAX_NAME_LENGTH + " characters.");
+			MessageDialog.openError(getShell(), Messages.QueryHeaderComposite_NameToLongDialogTitle,
+					MessageFormat.format(Messages.QueryHeaderComposite_NameToLongMsg, new Object[]{MAX_NAME_LENGTH}));
 			return false;
 		}
 		return true;

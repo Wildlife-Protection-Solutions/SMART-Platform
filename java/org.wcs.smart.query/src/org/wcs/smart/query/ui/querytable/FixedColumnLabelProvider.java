@@ -25,6 +25,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.model.observation.QueryColumn.ColumnType;
@@ -69,18 +70,18 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 	private static String asString(Object value, ColumnType type) {
 		if (type == ColumnType.BOOLEAN) {
 			if ((Boolean) value) {
-				return "Yes";
+				return Messages.FixedColumnLabelProvider_BooleanPatrolAttribute_TrueLabel;
 			} else {
-				return "No";
+				return Messages.FixedColumnLabelProvider_BooleanPatrolAttribute_FalseLabel;
 			}
 		} else if (type == ColumnType.DATE) {
 			if ((Date)value == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return DateFormat.getDateInstance().format((Date) value);
 		} else if (type == ColumnType.TIME) {
 			if ((Date)value == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return DateFormat.getTimeInstance().format((Date) value);
 		} else if (type == ColumnType.STRING) {
@@ -96,7 +97,7 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 				return String.valueOf((Integer) value);
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 
 	}
 }

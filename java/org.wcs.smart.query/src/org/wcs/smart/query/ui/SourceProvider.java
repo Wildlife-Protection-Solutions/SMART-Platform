@@ -48,10 +48,10 @@ public class SourceProvider extends AbstractSourceProvider {
 		FILTER_ITEM, SUMMARY_ITEM, GRIDDED_ITEM
 	}
 	
-	public final static String SELECTED_FILTERS = "org.wcs.smart.query.ui.filteradd";
-	public final static String QUERY_VALID = "org.wcs.smart.query.ui.queryvalid";
-	public final static String QUERY_ERROR_MESSAGE = "org.wcs.smart.query.ui.queryerrormessage";
-	public final static String QUERY_DROP_TYPE = "org.wcs.smart.query.ui.querybuildertype";
+	public final static String SELECTED_FILTERS = "org.wcs.smart.query.ui.filteradd"; //$NON-NLS-1$
+	public final static String QUERY_VALID = "org.wcs.smart.query.ui.queryvalid"; //$NON-NLS-1$
+	public final static String QUERY_ERROR_MESSAGE = "org.wcs.smart.query.ui.queryerrormessage"; //$NON-NLS-1$
+	public final static String QUERY_DROP_TYPE = "org.wcs.smart.query.ui.querybuildertype"; //$NON-NLS-1$
 
 	HashMap<String, Object> data = new HashMap<String, Object>();
 	

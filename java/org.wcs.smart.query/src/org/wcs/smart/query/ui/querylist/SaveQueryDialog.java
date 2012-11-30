@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -37,9 +39,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.QueryFolderTreeComposite;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for saving queries.  Asks for the folder
@@ -76,7 +80,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button btnOk = createButton(parent, IDialogConstants.OK_ID, "Save",
+		Button btnOk = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT,
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
@@ -102,11 +106,11 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
-		getShell().setText("Save Query");
+		getShell().setText(Messages.SaveQueryDialog_DialogTitle);
 		if (this.includeName){
-			setMessage("Select the new query name and location to save query.");
+			setMessage(Messages.SaveQueryDialog_NewDialogMessage);
 		}else{
-			setMessage("Select location to save the query '" + queryName + "'");
+			setMessage(MessageFormat.format(Messages.SaveQueryDialog_DialogMessage, new Object[]{ queryName }));
 		}
 		
 		Composite main = new Composite(parent, SWT.NONE);
@@ -116,7 +120,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 		
 		if (this.includeName){
 			 Label lbl = new Label(main, SWT.NONE);
-			 lbl.setText("Query Name:" );
+			 lbl.setText(Messages.SaveQueryDialog_NameLabel );
 			 
 			 txtName = new Text(main, SWT.BORDER);
 			 txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -130,7 +134,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 			});
 			 
 			 lbl = new Label(main, SWT.NONE);
-			 lbl.setText("Save Location:" );
+			 lbl.setText(Messages.SaveQueryDialog_LocationLabel );
 			 lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
 		
@@ -156,7 +160,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 		boolean ok = true;
 		setErrorMessage(null);
 		if (queryName.trim().length() == 0){
-			setErrorMessage("Query name must not be blank.");
+			setErrorMessage(Messages.SaveQueryDialog_InvalidName);
 			ok = false;
 		}
 		if(treeComp.getSelection().isEmpty()){

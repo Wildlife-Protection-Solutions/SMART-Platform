@@ -54,7 +54,7 @@ public class AreaDropItem extends DropItem {
 	 */
 	@Override
 	public String getText() {
-		return area.getType().getGuiName() + " = " + area.getId();
+		return area.getType().getGuiName() + " = " + area.getId(); //$NON-NLS-1$
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class AreaDropItem extends DropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		return "area:" + geomType.getKey() + ":" + area.getType().name() + ":" + area.getKeyId();
+		return "area:" + geomType.getKey() + ":" + area.getType().name() + ":" + area.getKeyId();  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class AreaDropItem extends DropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText( formatStringForLabel(area.getId() + " [" + area.getType().getGuiName() + "]"));
+		lbl.setText( formatStringForLabel(area.getId() + " [" + area.getType().getGuiName() + "]"));  //$NON-NLS-1$//$NON-NLS-2$
 		initDrag(lbl);
 
 	}

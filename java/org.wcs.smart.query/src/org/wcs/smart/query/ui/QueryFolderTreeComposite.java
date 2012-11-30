@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.querylist.AddFolderHandler;
 import org.wcs.smart.query.ui.querylist.NameCellEditor;
@@ -112,7 +113,7 @@ public class QueryFolderTreeComposite extends Composite{
 		});
 	
 		tblViewer.setCellEditors(new CellEditor[] { new TextCellEditor(tblViewer.getTree()) });
-		tblViewer.setColumnProperties(new String[] { "col1" });
+		tblViewer.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
 		tblViewer.setCellModifier(new NameCellEditor(tblViewer));
 		
 		new TreeViewerFocusCellManager(tblViewer, new FocusCellOwnerDrawHighlighter(tblViewer));
@@ -128,7 +129,7 @@ public class QueryFolderTreeComposite extends Composite{
 
 		
 		btnAddFolder = new Button(this, SWT.NONE);
-		btnAddFolder.setText("Create New Folder");
+		btnAddFolder.setText(Messages.QueryFolderTreeComposite_AddFolderButton);
 		btnAddFolder.setEnabled(false);
 		btnAddFolder.addSelectionListener(new SelectionAdapter() {
 			@Override

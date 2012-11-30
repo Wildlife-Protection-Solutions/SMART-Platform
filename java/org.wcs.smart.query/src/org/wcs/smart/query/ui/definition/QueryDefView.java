@@ -41,6 +41,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
@@ -61,7 +62,7 @@ public class QueryDefView extends ViewPart {
 	/**
 	 * View identifier
 	 */
-	public static final String ID = "org.wcs.smart.query.ui.QueryDefView";
+	public static final String ID = "org.wcs.smart.query.ui.QueryDefView"; //$NON-NLS-1$
 	
 	private Query current = null;	
 
@@ -121,7 +122,7 @@ public class QueryDefView extends ViewPart {
 					setQuery(null);	
 				}
 			}catch (Exception ex){
-				QueryPlugIn.displayLog("Error closing part: " + ex.getMessage(), ex);
+				QueryPlugIn.displayLog(Messages.QueryDefView_CloseError + ex.getMessage(), ex);
 			}
 		}
 		
@@ -238,7 +239,7 @@ public class QueryDefView extends ViewPart {
 					return;
 				
 				
-				if (sourceName == SourceProvider.SELECTED_FILTERS) {
+				if (sourceName.equals(SourceProvider.SELECTED_FILTERS)) {
 					QueryDropType dropType = (QueryDropType)provider.getCurrentState().get(SourceProvider.QUERY_DROP_TYPE);
 					IStructuredSelection selection = (IStructuredSelection) sourceValue;
 					boolean fireEvent = false;

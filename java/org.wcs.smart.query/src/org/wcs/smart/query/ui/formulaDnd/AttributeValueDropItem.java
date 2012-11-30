@@ -94,7 +94,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 		}
 		sb.append(attribute.getName());
 		if (category != null){
-			sb.append(" (" + category.getName() + ") ");
+			sb.append(" (" + category.getName() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return sb.toString();
 	}
@@ -106,16 +106,16 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		if (category != null){
-			sb.append("category:");
-			sb.append(category.getHkey() + ":");
+			sb.append("category:"); //$NON-NLS-1$
+			sb.append(category.getHkey() + ":"); //$NON-NLS-1$
 		}
-		sb.append("attribute:");
+		sb.append("attribute:"); //$NON-NLS-1$
 		sb.append(attribute.getType().typeKey);
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		if (selectedAggregation != null){
 			sb.append(selectedAggregation.getName());
 		}
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		sb.append(attribute.getKeyId());
 	
 		return sb.toString();
@@ -206,7 +206,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 		StringBuilder sb = new StringBuilder();
 		sb.append(attribute.getName());
 		if (category != null){
-			sb.append(" (" + category.getName() + ") ");
+			sb.append(" (" + category.getName() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		lblText.setText( formatStringForLabel(sb.toString()));
 		

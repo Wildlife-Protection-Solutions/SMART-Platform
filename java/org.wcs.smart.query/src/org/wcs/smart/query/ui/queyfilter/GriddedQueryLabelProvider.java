@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.query.ui.queyfilter;
 
+import java.text.MessageFormat;
+
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
@@ -70,7 +73,7 @@ public class GriddedQueryLabelProvider extends QueryFilterLabelProvider {
 				return ((AttributeTreeNode)obj.getObject()).getName();
 			}else if (obj.getObject() instanceof Category){
 				if (obj.isValue()){
-					return "Count '" + ((Category)obj.getObject()).getName() + "' ";
+					return MessageFormat.format(Messages.GriddedQueryLabelProvider_CountCategoryLabel,new Object[]{((Category)obj.getObject()).getName()});
 				}else{
 					return ((Category)obj.getObject()).getName();
 				}

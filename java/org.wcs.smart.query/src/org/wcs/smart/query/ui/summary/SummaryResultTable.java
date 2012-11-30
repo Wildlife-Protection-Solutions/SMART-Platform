@@ -100,7 +100,7 @@ public class SummaryResultTable extends Composite {
 		if (toolkit == null){
 			lblSpacer = new Label(this, SWT.NONE);
 		}else{
-			lblSpacer = toolkit.createLabel(this, "");
+			lblSpacer = toolkit.createLabel(this, ""); //$NON-NLS-1$
 		}
 		lblSpacer.setVisible(false);
 		lblSpacer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -366,7 +366,7 @@ public class SummaryResultTable extends Composite {
 			Double[] data = (Double[])element;
 			Object value = data[columnIndex];
 			if (value == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}else if (value instanceof Double){
 				return  String.valueOf((Double)value);
 			}else{

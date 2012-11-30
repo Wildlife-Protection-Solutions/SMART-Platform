@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui.export;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -34,6 +35,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.export.IQueryExporter;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -42,6 +44,10 @@ import org.wcs.smart.query.model.Query;
  * @since 1.0.0
  */
 public class ExportQueryWizard extends Wizard implements IPageChangingListener{
+
+	private static final String EXPORT_FAILED_MGS = Messages.ExportQueryWizard_ExportFailedError;
+
+	private static final String EXPORT_DIALOGTITLE = Messages.ExportQueryWizard_ExportDialogTitle;
 
 	private Query query;
 
@@ -57,7 +63,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * @param queryName the query name
 	 */
 	public ExportQueryWizard(Query query) {
-		setWindowTitle("Export the current query.");
+		setWindowTitle(Messages.ExportQueryWizard_WindowTitle);
 		this.query = query;
 	}
 
@@ -117,7 +123,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 						
 						File outputFile = page2.getFile();
 						if (outputFile.exists()){
-							if (!MessageDialog.openConfirm(getShell(), "Overwrite?", "The file \"" + outputFile.toString() + "\" exists.  Are you sure you want to overwrite?")){
+							if (!MessageDialog.openConfirm(getShell(), 
+									Messages.ExportQueryWizard_OverwriteDialogTitle, 
+									MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMessage, new Object[]{outputFile.toString()}))){
 								hasError = true;
 								return;
 							}
@@ -129,22 +137,22 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 						
 						if (monitor.isCanceled()){
 							MessageDialog.openInformation(
-									Display.getDefault().getActiveShell(), "Export",
-									"Export cancelled.");
+									Display.getDefault().getActiveShell(), EXPORT_DIALOGTITLE,
+									Messages.ExportQueryWizard_ExportCancelled_DialogMessage);
 						}else{
 							MessageDialog.openInformation(
-								Display.getDefault().getActiveShell(), "Export",
-								"Query results exported successfully.");
+								Display.getDefault().getActiveShell(), EXPORT_DIALOGTITLE,
+								Messages.ExportQueryWizard_ExportOk_DialogMessage);
 						}
 					} catch (Exception e) {
 						QueryPlugIn.displayLog(
-								"Export failed: " + e.getMessage(), e);
+								EXPORT_FAILED_MGS + e.getMessage(), e);
 						hasError = true;
 					}
 				}
 			});
 		} catch (Exception e) {
-			QueryPlugIn.displayLog("Export failed: " + e.getMessage(), e);
+			QueryPlugIn.displayLog(EXPORT_FAILED_MGS + e.getMessage(), e);
 		}
 		return !hasError;
 	}

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
@@ -92,13 +93,13 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 		panel = new SummaryValueGroupByPanel();
 		Composite pnl = panel.createComposite(tabs,parentView);
 		item1.setControl(pnl);
-		item1.setText("Group By and Values");	
+		item1.setText(Messages.SummaryQueryDefinitionComposite_GroupByValuesSectionHeader);	
 		pnl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		TabItem item2 = new TabItem(tabs, SWT.NONE);
 		filterPanel = new FilterDropTargetPanel(parentView);
 		item2.setControl( filterPanel.createComposite(tabs) );
-		item2.setText("Filter");
+		item2.setText(Messages.SummaryQueryDefinitionComposite_FilterSectionHeader);
 		
 		tabs.addSelectionListener(new SelectionAdapter() {			
 			@Override
@@ -129,7 +130,7 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public String validate() {
-		String query = panel.getQueryString() + "|" + filterPanel.getQueryString();
+		String query = panel.getQueryString() + "|" + filterPanel.getQueryString(); //$NON-NLS-1$
 		boolean isvalid = true;
 		SumQueryDefinition def = null;
 		String error = null;
@@ -150,7 +151,7 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 		
 		if (isvalid && def.getValuePart().getValueItems().size() == 0){
 			isvalid = false;
-			error = "At least one value must be selected.";
+			error = Messages.SummaryQueryDefinitionComposite_NoValueError;
 		}
 		if (isvalid){
 			String temp = SummaryQuery.validateQueryParts(def);

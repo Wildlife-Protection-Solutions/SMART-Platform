@@ -57,7 +57,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	 */
 	@Override
 	public String getValueQueryPart() {
-		return ("patrol:sum:" + item.getKeyPart());
+		return ("patrol:sum:" + item.getKeyPart()); //$NON-NLS-1$
 	}
 
 

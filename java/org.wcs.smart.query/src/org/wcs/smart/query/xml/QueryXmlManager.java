@@ -41,7 +41,7 @@ import org.wcs.smart.query.xml.model.Query;
  * @since 1.0.0
  */
 public class QueryXmlManager {
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.query.xml.model";
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.query.xml.model"; //$NON-NLS-1$
 		
 	/**
 	 * Reads query data from an xml file.

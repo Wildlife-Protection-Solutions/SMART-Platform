@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.ListDropTargetPanel;
@@ -84,9 +85,9 @@ public class SummaryValueGroupByPanel {
 		lblValues.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON));
 		
 		lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setText("Values");
+		lblValues.setText(Messages.SummaryValueGroupByPanel_ValuesSectionHeader);
 		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblValues.setToolTipText("Add values to compute here from the 'Value Options' section of the Query Filters tree.");
+		lblValues.setToolTipText(Messages.SummaryValueGroupByPanel_ValuesSectionTooltip);
 		
 		Composite leftInner = new Composite(left, SWT.NONE);
 		gl = new GridLayout(2, false);
@@ -95,9 +96,9 @@ public class SummaryValueGroupByPanel {
 		lblGroupBys.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.GROUPBY_ICON));
 		
 		lblGroupBys = new Label(leftInner, SWT.NONE);
-		lblGroupBys.setText("Group Bys");
+		lblGroupBys.setText(Messages.SummaryValueGroupByPanel_GroupBySectionHeader);
 		lblGroupBys.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblGroupBys.setToolTipText("Add items to group by here from the 'Group By Options' section of the Query Filters tree.");
+		lblGroupBys.setToolTipText(Messages.SummaryValueGroupByPanel_GroupBySectionTooltip);
 		createInnerGroupByComposite(left, view);
 		
 		lstValues = new ListDropTargetPanel(view, false);
@@ -139,9 +140,9 @@ public class SummaryValueGroupByPanel {
 		lblImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.COLUMN_HEADER_ICON));
 		
 		Label lblColumnHeaders = new Label(rightInner, SWT.NONE);
-		lblColumnHeaders.setText("Column Headers");
+		lblColumnHeaders.setText(Messages.SummaryValueGroupByPanel_ColumnHeadersHeader);
 		lblColumnHeaders.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblColumnHeaders.setToolTipText("These items will be table column headers.");
+		lblColumnHeaders.setToolTipText(Messages.SummaryValueGroupByPanel_ColumnHeadersTooltip);
 		
 		Composite leftInner = new Composite(left, SWT.NONE);
 		gl = new GridLayout(2, false);
@@ -151,9 +152,9 @@ public class SummaryValueGroupByPanel {
 		lblImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.ROW_HEADER_ICON));
 		
 		Label lblRowHeaders = new Label(leftInner, SWT.NONE);
-		lblRowHeaders.setText("Row Headers");
+		lblRowHeaders.setText(Messages.SummaryValueGroupByPanel_RowHeadersHeader);
 		lblRowHeaders.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblRowHeaders.setToolTipText("These items will be table row headers");
+		lblRowHeaders.setToolTipText(Messages.SummaryValueGroupByPanel_RowHeadersTooltip);
 		
 		lstRowGroupBy = new ListDropTargetPanel(view, true);
 		Composite comp = lstRowGroupBy.createComposite(left);
@@ -172,7 +173,7 @@ public class SummaryValueGroupByPanel {
 	 * @return the query string
 	 */
 	public String getQueryString(){
-		return  lstValues.getQueryString() + "|" + lstRowGroupBy.getQueryString() + "|" + lstColumnGroupBy.getQueryString() ;
+		return  lstValues.getQueryString() + "|" + lstRowGroupBy.getQueryString() + "|" + lstColumnGroupBy.getQueryString() ; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**

@@ -73,6 +73,7 @@ public class Tile {
 	 */
 	@Override
 	public boolean equals(Object other) {
+		if (other == null) return false;
 		if (getClass() == other.getClass()) {
 			return ((Tile) other).xid == this.xid
 					&& ((Tile) other).yid == this.yid;

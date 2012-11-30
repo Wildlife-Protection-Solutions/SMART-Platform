@@ -30,9 +30,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.IQueryEditor;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
  * Handler for the export query button.

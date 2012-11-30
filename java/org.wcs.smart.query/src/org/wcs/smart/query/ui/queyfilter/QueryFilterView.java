@@ -61,6 +61,7 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider;
@@ -79,7 +80,9 @@ import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
  */
 public class QueryFilterView extends ViewPart {
 
-	public static final String ID ="org.wcs.smart.query.ui.QueryFilter";
+	private static final String LOADING_TEXT = Messages.QueryFilterView_LoadingLabel;
+
+	public static final String ID ="org.wcs.smart.query.ui.QueryFilter"; //$NON-NLS-1$
 	
 	private TreeViewer filterTreeViewer;
 	private TreeViewer summaryTreeViewer;
@@ -98,9 +101,9 @@ public class QueryFilterView extends ViewPart {
 	private IDataModelListener dataModelChangeListener = new IDataModelListener() {
 		@Override
 		public void modified() {
-			filterTreeViewer.setInput("Loading");
-			summaryTreeViewer.setInput("Loading");
-			griddedTreeViewer.setInput("Loading");
+			filterTreeViewer.setInput(LOADING_TEXT);
+			summaryTreeViewer.setInput(LOADING_TEXT);
+			griddedTreeViewer.setInput(LOADING_TEXT);
 			initialize();
 		}
 	};
@@ -130,7 +133,7 @@ public class QueryFilterView extends ViewPart {
 	 * filter options
 	 */
 	private void initialize(){
-		Job j = new Job("initialize query filter tree"){
+		Job j = new Job(Messages.QueryFilterView_InitTreeJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final HashMap<QueryFilterContentProvider.RootNodeType, Object> input = new HashMap<QueryFilterContentProvider.RootNodeType, Object>();
@@ -271,7 +274,7 @@ public class QueryFilterView extends ViewPart {
 			}
 		});
 		filterTreeViewer.setAutoExpandLevel(2);
-		filterTreeViewer.setInput("Loading...");
+		filterTreeViewer.setInput(LOADING_TEXT);
 		
 		fTree = new FilteredTree(summaryComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
 		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
@@ -286,7 +289,7 @@ public class QueryFilterView extends ViewPart {
 			}
 		});
 		summaryTreeViewer.setAutoExpandLevel(2);
-		summaryTreeViewer.setInput("Loading...");
+		summaryTreeViewer.setInput(LOADING_TEXT);
 		
 		fTree = new FilteredTree(griddedComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
 		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
@@ -301,12 +304,12 @@ public class QueryFilterView extends ViewPart {
 			}
 		});
 		griddedTreeViewer.setAutoExpandLevel(2);
-		griddedTreeViewer.setInput("Loading...");
+		griddedTreeViewer.setInput(LOADING_TEXT);
 		
 
 		
 		Button btnAdd = new Button(outer, SWT.PUSH);
-		btnAdd.setText("Add to Query");
+		btnAdd.setText(Messages.QueryFilterView_AddToQueryButton);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

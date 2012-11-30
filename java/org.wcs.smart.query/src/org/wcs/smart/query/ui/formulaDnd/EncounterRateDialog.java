@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 
 /**
@@ -43,6 +44,7 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
  */
 public class EncounterRateDialog extends TitleAreaDialog{
 
+	private static final String ENCOUNTER_RATE = Messages.EncounterRateDialog_EncounterRateLabel;
 	private Composite main = null;
 	private ComboViewer viewer;
 	
@@ -69,7 +71,7 @@ public class EncounterRateDialog extends TitleAreaDialog{
 	protected void buttonPressed(int buttonId) {
 		if(buttonId == IDialogConstants.OK_ID){
 			if (viewer.getSelection().isEmpty()){
-				MessageDialog.openError(getShell(), "Error", "At least one item must be selected.");
+				MessageDialog.openError(getShell(), Messages.EncounterRateDialog_ErrorDialogTitle, Messages.EncounterRateDialog_Error_NoSelection);
 				return;
 			}
 			selectedRate = (PatrolValueOption) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
@@ -114,9 +116,9 @@ public class EncounterRateDialog extends TitleAreaDialog{
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		viewer.getCombo().select(0);
 		
-		setMessage("Select the encounter rate to compute");
-		setTitle("Encounter Rate");
-		getShell().setText("Encounter Rate");
+		setMessage(Messages.EncounterRateDialog_DialogMessage);
+		setTitle(ENCOUNTER_RATE);
+		getShell().setText(ENCOUNTER_RATE);
 		return main;
 		
 	}

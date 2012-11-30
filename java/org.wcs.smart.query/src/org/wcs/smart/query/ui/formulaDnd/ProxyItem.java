@@ -69,7 +69,7 @@ public class ProxyItem extends DropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 		
@@ -109,7 +109,7 @@ public class ProxyItem extends DropItem {
 		
 		
 		lbl = new Label(inner, SWT.NONE);
-		lbl.setText("");
+		lbl.setText(""); //$NON-NLS-1$
 		lbl.setVisible(false);
 		
 		return main;

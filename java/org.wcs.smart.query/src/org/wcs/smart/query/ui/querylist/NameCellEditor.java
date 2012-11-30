@@ -35,6 +35,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
@@ -95,7 +96,7 @@ public class NameCellEditor implements ICellModifier {
 			return;
 		}
 		
-		Job j = new Job("Update Query Name") {
+		Job j = new Job(Messages.NameCellEditor_UpdateQueryNameJob) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -113,7 +114,7 @@ public class NameCellEditor implements ICellModifier {
 						session.getTransaction().rollback();
 					}
 					QueryPlugIn.displayLog(
-							"Could not save changes to query name. "
+							Messages.NameCellEditor_CouldNotSaveQueryName
 									+ ex.getMessage(), ex);
 				} finally {
 					session.close();
@@ -135,7 +136,7 @@ public class NameCellEditor implements ICellModifier {
 			return;
 		}
 		
-		Job j = new Job("Update Query Folder Name") {
+		Job j = new Job(Messages.NameCellEditor_UpdateFolderNameJob) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -152,7 +153,7 @@ public class NameCellEditor implements ICellModifier {
 						session.getTransaction().rollback();
 					}
 					QueryPlugIn.displayLog(
-							"Could not save changes to folder name. "
+							Messages.NameCellEditor_CouldNotSaveFolderNameChange
 									+ ex.getMessage(), ex);
 				} finally {
 					session.close();

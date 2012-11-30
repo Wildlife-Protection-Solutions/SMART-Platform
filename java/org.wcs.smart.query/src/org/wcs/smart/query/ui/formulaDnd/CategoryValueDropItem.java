@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * A drop item for a category value item.
@@ -36,6 +37,7 @@ import org.wcs.smart.ca.datamodel.Category;
  */
 public class CategoryValueDropItem extends AbstractValueDropItem {
 
+	private static final String COUNT_LABEL = Messages.CategoryValueDropItem_CountLabel;
 	private Category category = null;
 
 	public CategoryValueDropItem(Category category) {
@@ -47,7 +49,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 	 */
 	@Override
 	public String getValueText() {
-		return "Count " + category.getFullCategoryName();
+		return COUNT_LABEL + " " + category.getFullCategoryName(); //$NON-NLS-1$
 	}
 
 	/**
@@ -56,7 +58,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 	@Override
 	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("category:sum:");
+		sb.append("category:sum:"); //$NON-NLS-1$
 		sb.append(category.getHkey());
 		return sb.toString();
 	}
@@ -82,7 +84,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 
 		Label lblText = new Label(main, SWT.NONE);
 		StringBuilder sb = new StringBuilder();
-		sb.append("Count " + category.getFullCategoryName());
+		sb.append(COUNT_LABEL + " " + category.getFullCategoryName()); //$NON-NLS-1$
 		lblText.setText( formatStringForLabel(sb.toString()));
 
 		initDrag(main);

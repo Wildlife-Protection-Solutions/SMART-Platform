@@ -108,7 +108,7 @@ public class BooleanOpDropItem extends DropItem {
 		operator.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (currentSelection  != operators[operator.getSelectionIndex()].asSql()){
+				if (!currentSelection.equals(operators[operator.getSelectionIndex()].asSql())){
 					currentSelection = operators[operator.getSelectionIndex()].asSql();
 					queryChanged();
 				}

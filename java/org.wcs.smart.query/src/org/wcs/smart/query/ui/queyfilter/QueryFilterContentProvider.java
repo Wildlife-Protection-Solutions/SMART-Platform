@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.queyfilter;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,6 +48,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
@@ -60,6 +62,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  */
 public class QueryFilterContentProvider implements ITreeContentProvider {
 
+	private static final String LOADING_TEXT = Messages.QueryFilterContentProvider_LoadingLabel;
 	//data model 
 	private DataModel dataModel = null;
 	private DataModelContentProvider provider;
@@ -79,8 +82,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Data model children items
 	 */
 	enum DataModelItem{
-		CATEGORIES("Categories"),
-		ATTRIBUTES("Attributes");
+		CATEGORIES(Messages.QueryFilterContentProvider_CategoriesLabel),
+		ATTRIBUTES(Messages.QueryFilterContentProvider_AttributeLabel);
 		
 		String guiName;
 		DataModelItem(String guiName){
@@ -92,8 +95,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Other item children
 	 */
 	public enum OtherItems{
-		BRACKETS(" (   ) "),
-		NOT (" NOT ");
+		BRACKETS(Messages.QueryFilterContentProvider_BracketsLabel),
+		NOT (Messages.QueryFilterContentProvider_NotLabel);
 		
 		String guiName;
 		OtherItems(String guiName){
@@ -105,10 +108,10 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * Root node children
 	 */
 	enum RootNodeType  {
-		PATROL_FILTERS("Patrol Filters"),
-		DATA_MODEL_FILTERS("Data Model Filters"),
-		AREA_FILTERS("Area Filters"),
-		OTHER_ITEMS("Operators");
+		PATROL_FILTERS(Messages.QueryFilterContentProvider_PatrolFiltersLabel),
+		DATA_MODEL_FILTERS(Messages.QueryFilterContentProvider_DataModelFiltersLabel),
+		AREA_FILTERS(Messages.QueryFilterContentProvider_AreaFiltersLabel),
+		OTHER_ITEMS(Messages.QueryFilterContentProvider_OperatoresLabel);
 		
 		private String name;
 		private RootNodeType( String name){
@@ -158,7 +161,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			dataModel = null;
 		}else{
 			if (newInput != null && !(newInput instanceof Map)){
-				throw new IllegalArgumentException("new input must be map");
+				throw new IllegalArgumentException("new input must be map"); //$NON-NLS-1$
 			}
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
@@ -174,7 +177,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (dataModel == null && patrolOptions == null){
-			return new String[]{"Loading"};
+			return new String[]{LOADING_TEXT};
 		}
 		return roots;
 	}
@@ -194,7 +197,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 				return areas.get(at);
 			} else {
 				loadAreas(at);
-				return new String[] { "Loading..." };
+				return new String[] { LOADING_TEXT };
 			}
 		}else if (parentElement instanceof DataModelItem){
 			if (parentElement == DataModelItem.CATEGORIES){
@@ -227,7 +230,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	 * @param at
 	 */
 	private void loadAreas(final Area.AreaType at) {
-		Job j = new Job("Loading " + at.getGuiName() + " items") {
+		Job j = new Job(MessageFormat.format(Messages.QueryFilterContentProvider_LoadingItemsJobName, new Object[]{at.getGuiName()})) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session session = HibernateManager.openSession();
@@ -237,9 +240,9 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 					List<Area> items = session
 							.createCriteria(Area.class)
 							.add(Restrictions.eq(
-									"conservationArea",
+									"conservationArea", //$NON-NLS-1$
 									SmartDB.getCurrentConservationArea()))
-							.add(Restrictions.eq("type", at)).list();
+							.add(Restrictions.eq("type", at)).list(); //$NON-NLS-1$
 					areas.put(at, items.toArray(new Area[items.size()]));
 					session.getTransaction().commit();
 					Display.getDefault().asyncExec(new Runnable() {

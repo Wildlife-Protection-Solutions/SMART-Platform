@@ -36,6 +36,7 @@ import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
@@ -57,7 +58,7 @@ public class SavedQueryTree {
 	
 	private List<ISourceChangedListener> listeners = new ArrayList<ISourceChangedListener>();
 	
-	private Job loadQueriesJob = new Job("Load Queries and Folders"){
+	private Job loadQueriesJob = new Job(Messages.SavedQueryTree_LoadingJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
@@ -66,7 +67,7 @@ public class SavedQueryTree {
 				folders = QueryHibernateManager.getQueryFolders(s, true);
 				queries = QueryHibernateManager.getQueryProxies(s);
 			}catch (Exception ex){
-				QueryPlugIn.displayLog("Error loading saved queries. " + ex.getMessage(), ex);
+				QueryPlugIn.displayLog(Messages.SavedQueryTree_ErrorLoadingQueries + ex.getMessage(), ex);
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
@@ -201,7 +202,7 @@ public class SavedQueryTree {
 			try{
 				loadQueriesJob.join();
 			}catch (Exception ex){
-				QueryPlugIn.displayLog("Could not load queries and folders", ex);
+				QueryPlugIn.displayLog(Messages.SavedQueryTree_CouldNotLoadQueries, ex);
 			}
 		}
 	}
