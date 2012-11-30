@@ -41,7 +41,7 @@ public class QueryPerspective implements IPerspectiveFactory {
 	/**
 	 * Query Perspective identifier.
 	 */
-	public static final String ID = "org.wcs.smart.query.SmartQueryPerspective";
+	public static final String ID = "org.wcs.smart.query.SmartQueryPerspective"; //$NON-NLS-1$
 	
 	/**
 	 * @see org.eclipse.ui.IPerspectiveFactory#createInitialLayout(org.eclipse.ui.IPageLayout)
@@ -53,12 +53,12 @@ public class QueryPerspective implements IPerspectiveFactory {
 		layout.addView(QueryListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
 		
 		//right side - filters and layer manager
-		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.query.queryFolder1", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA);
+		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.query.queryFolder1", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder1.addView(QueryFilterView.ID);
-		folder1.addView("net.refractions.udig.project.ui.layerManager");
+		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
 		
 		//bottom query and info view
-		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.8f, IPageLayout.ID_EDITOR_AREA);
+		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder2.addView(QueryDefView.ID);
 		folder2.addPlaceholder(InfoView2.VIEW_ID);
 

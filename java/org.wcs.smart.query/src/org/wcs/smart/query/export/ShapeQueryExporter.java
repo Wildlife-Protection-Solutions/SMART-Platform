@@ -34,6 +34,7 @@ import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.indexed.IndexedShapefileDataStore;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryResultItemFeature;
 import org.wcs.smart.query.model.Query;
@@ -67,7 +68,7 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 	protected void init() throws Exception {
 		URL shpFileURL = URLUtils.fileToURL(this.outputFile);
         shapefile = new IndexedShapefileDataStore(shpFileURL);
-		SimpleFeatureType type = DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE,QueryDataSource.getFeatureSchemaDef(this.queryColumns));
+		SimpleFeatureType type = DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE,QueryDataSource.getFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
 		shapefile.createSchema(type);
 		features = new ArrayList<SimpleFeature>();
 	}
@@ -94,17 +95,17 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 	
 	@Override
 	public String getId(){
-		return "org.wcs.smart.query.export.observation.shp";
+		return "org.wcs.smart.query.export.observation.shp"; //$NON-NLS-1$
 	}
 	
 	@Override
 	public String getName() {
-		return "Shapefile";
+		return Messages.ShapeQueryExporter_ExporterName;
 	}
 
 	@Override
 	public String getDefaultExtension() {
-		return "shp";
+		return "shp"; //$NON-NLS-1$
 	}
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Smart query data source factor.  
@@ -41,7 +42,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	/**
 	 * query uuid parameter
 	 */
-	public static final Param QUERY_UUID = new Param("queryuuid", byte[].class, "Query", true); 
+	public static final Param QUERY_UUID = new Param("queryuuid", byte[].class, Messages.QueryDataSourceFactory_queryUuidParameterName, true);  //$NON-NLS-1$
 	  
 	/**
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -59,7 +60,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "Smart query results";
+		return Messages.QueryDataSourceFactory_Description;
 	}
 
 	/**
@@ -67,7 +68,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Smart Query";
+		return Messages.QueryDataSourceFactory_DisplayName;
 	}
 
 	/**
@@ -101,19 +102,6 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
-		//TODO: implement this
-//		Session session = HibernateManager.openSession();
-//		Patrol patrol = null;
-//		try{
-//			patrol = (Patrol)session.load(Patrol.class, ((byte[])params.get(PATROL_UUID.key)));	
-//		
-//		}finally{
-//			session.close();
-//		}
-//		if (patrol == null ){
-//			throw new IOException("Unable to read patrol data source.");
-//		}
-//		return new QueryDataSource(patrol);
 		return null;
 	}
 
@@ -123,7 +111,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException("This is a read-only data store.");
+		throw new UnsupportedOperationException(Messages.QueryDataSourceFactory_ReadOnlyError);
 	}
 
 }

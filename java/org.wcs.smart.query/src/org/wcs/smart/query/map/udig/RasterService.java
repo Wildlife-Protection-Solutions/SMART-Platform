@@ -54,6 +54,7 @@ import org.geotools.geometry.Envelope2D;
 import org.geotools.styling.Style;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.grids.Grid;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridQueryResultMetadata;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.util.SmartUtils;
@@ -72,7 +73,10 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public class RasterService extends AbstractRasterService {
-    /** <code>URL_PARAM</code> field */
+
+	public static final String GRIDDED_TYPE = "Gridded";  //$NON-NLS-1$
+	
+	/** <code>URL_PARAM</code> field */
     public final static String URL_PARAM = "URL"; //$NON-NLS-1$
 
 	private static GeoTiffFormatFactorySpi factory = null;
@@ -89,7 +93,7 @@ public class RasterService extends AbstractRasterService {
 	 * @throws RasterServiceException 
 	 */
 	public RasterService(final GriddedQuery query){
-		super(buildUrl(query.getUuid()),"geotiff", getFactory());
+		super(buildUrl(query.getUuid()),"geotiff", getFactory()); //$NON-NLS-1$
 		this.query = query;		
 		
 		rasterFileName = query.getRasterFileName().getAbsolutePath();
@@ -101,7 +105,7 @@ public class RasterService extends AbstractRasterService {
 	 * @return
 	 */
 	private static URL buildUrl(byte[] queryId){
-		String url = "smart://smartdb/query/";
+		String url = "smart://smartdb/query/"; //$NON-NLS-1$
 		if (queryId == null){
 			url += System.nanoTime();
 		}else{
@@ -110,7 +114,7 @@ public class RasterService extends AbstractRasterService {
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Exception ex){
-			QueryPlugIn.log("Error creating url: " + ex.getMessage(), ex);
+			QueryPlugIn.log(Messages.RasterService_urlError + ex.getMessage(), ex);
 			return null;
 		}
 	}
@@ -193,10 +197,10 @@ public class RasterService extends AbstractRasterService {
 			protected AbstractRasterGeoResourceInfo createInfo(
 					IProgressMonitor monitor) throws IOException {
 				if (info == null){
-					info = new AbstractRasterGeoResourceInfo(this, "grid analysis", "tif", "tiff"){
+					info = new AbstractRasterGeoResourceInfo(this, Messages.RasterService_keyword1, Messages.RasterService_keywork2, Messages.RasterService_keyword3){
 						 @Override
 						 public String getTitle() {
-							 return query.getName() + " [" + query.getId() + "]";
+							 return query.getName() + " [" + query.getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 						 }
 					};
 				}
@@ -213,40 +217,40 @@ public class RasterService extends AbstractRasterService {
 				}
 				
 				
-				String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-						+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;"
-						+ "&lt;sld:StyledLayerDescriptor xmlns=&quot;http://www.opengis.net/sld&quot; xmlns:sld=&quot;http://www.opengis.net/sld&quot; xmlns:ogc=&quot;http://www.opengis.net/ogc&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; version=&quot;1.0.0&quot;&gt;"
-						+ "&lt;sld:UserLayer&gt; "
-						+ "&lt;sld:LayerFeatureConstraints&gt; "
-						+ "&lt;sld:FeatureTypeConstraint/&gt; "
-						+ "&lt;/sld:LayerFeatureConstraints&gt; "
-						+ "&lt;sld:UserStyle&gt; "
-						+ "&lt;sld:Name&gt;000051&lt;/sld:Name&gt; "
-						+ "&lt;sld:Title/&gt; &lt;sld:FeatureTypeStyle&gt; "
-						+ "&lt;sld:Name&gt;name&lt;/sld:Name&gt; &lt;sld:Rule&gt; "
-						+ "&lt;sld:RasterSymbolizer&gt; &lt;sld:Geometry&gt; "
-						+ "&lt;ogc:PropertyName&gt;grid&lt;/ogc:PropertyName&gt; "
-						+ "&lt;/sld:Geometry&gt; &lt;sld:ColorMap&gt; "
-						+ "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;0.0&quot; quantity=&quot;-9999&quot;/&gt; "
-						+ "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;0.0&quot; quantity=&quot;-9999&quot;/&gt; ";
+				String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" //$NON-NLS-1$
+						+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;" //$NON-NLS-1$
+						+ "&lt;sld:StyledLayerDescriptor xmlns=&quot;http://www.opengis.net/sld&quot; xmlns:sld=&quot;http://www.opengis.net/sld&quot; xmlns:ogc=&quot;http://www.opengis.net/ogc&quot; xmlns:gml=&quot;http://www.opengis.net/gml&quot; version=&quot;1.0.0&quot;&gt;" //$NON-NLS-1$
+						+ "&lt;sld:UserLayer&gt; " //$NON-NLS-1$
+						+ "&lt;sld:LayerFeatureConstraints&gt; " //$NON-NLS-1$
+						+ "&lt;sld:FeatureTypeConstraint/&gt; " //$NON-NLS-1$
+						+ "&lt;/sld:LayerFeatureConstraints&gt; " //$NON-NLS-1$
+						+ "&lt;sld:UserStyle&gt; " //$NON-NLS-1$
+						+ "&lt;sld:Name&gt;000051&lt;/sld:Name&gt; " //$NON-NLS-1$
+						+ "&lt;sld:Title/&gt; &lt;sld:FeatureTypeStyle&gt; " //$NON-NLS-1$
+						+ "&lt;sld:Name&gt;name&lt;/sld:Name&gt; &lt;sld:Rule&gt; " //$NON-NLS-1$
+						+ "&lt;sld:RasterSymbolizer&gt; &lt;sld:Geometry&gt; " //$NON-NLS-1$
+						+ "&lt;ogc:PropertyName&gt;grid&lt;/ogc:PropertyName&gt; " //$NON-NLS-1$
+						+ "&lt;/sld:Geometry&gt; &lt;sld:ColorMap&gt; " //$NON-NLS-1$
+						+ "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;0.0&quot; quantity=&quot;-9999&quot;/&gt; " //$NON-NLS-1$
+						+ "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;0.0&quot; quantity=&quot;-9999&quot;/&gt; "; //$NON-NLS-1$
 				if (minValue == 0){
 						sld +=
-						  "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;1.0&quot; quantity=&quot;-9998&quot;/&gt; "
-						+ "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;1.0&quot; quantity=&quot;0&quot;/&gt; "
-						+ "&lt;sld:ColorMapEntry color=&quot;#FFECEC&quot; opacity=&quot;1.0&quot; quantity=&quot;0.0000001";
+						  "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;1.0&quot; quantity=&quot;-9998&quot;/&gt; " //$NON-NLS-1$
+						+ "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;1.0&quot; quantity=&quot;0&quot;/&gt; " //$NON-NLS-1$
+						+ "&lt;sld:ColorMapEntry color=&quot;#FFECEC&quot; opacity=&quot;1.0&quot; quantity=&quot;0.0000001"; //$NON-NLS-1$
 				}else{
-					sld +="&lt;sld:ColorMapEntry color=&quot;#FFECEC&quot; opacity=&quot;1.0&quot; quantity=&quot;" + minValue;
+					sld +="&lt;sld:ColorMapEntry color=&quot;#FFECEC&quot; opacity=&quot;1.0&quot; quantity=&quot;" + minValue; //$NON-NLS-1$
 				}
-				sld += "&quot;/&gt; &lt;sld:ColorMapEntry color=&quot;#FF0000&quot; opacity=&quot;1.0&quot; quantity=&quot;"
+				sld += "&quot;/&gt; &lt;sld:ColorMapEntry color=&quot;#FF0000&quot; opacity=&quot;1.0&quot; quantity=&quot;" //$NON-NLS-1$
 						+ maxValue
-						+ "&quot;/&gt; &lt;/sld:ColorMap&gt; &lt;/sld:RasterSymbolizer&gt; &lt;/sld:Rule&gt; &lt;/sld:FeatureTypeStyle&gt; &lt;/sld:UserStyle&gt; &lt;/sld:UserLayer&gt;&lt;/sld:StyledLayerDescriptor&gt;</styleEntry>";
+						+ "&quot;/&gt; &lt;/sld:ColorMap&gt; &lt;/sld:RasterSymbolizer&gt; &lt;/sld:Rule&gt; &lt;/sld:FeatureTypeStyle&gt; &lt;/sld:UserStyle&gt; &lt;/sld:UserLayer&gt;&lt;/sld:StyledLayerDescriptor&gt;</styleEntry>"; //$NON-NLS-1$
 				try {
 					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
 					SLDContent c = new SLDContent();
 	 				Style style = (Style)c.load(memento);
 					 return style;
 				} catch (Exception ex) {
-					QueryPlugIn.displayLog("Could not parse raster style", ex);
+					QueryPlugIn.displayLog(Messages.RasterService_InvalidRasterStyle, ex);
 					return null;
 				}
  				
@@ -275,7 +279,7 @@ public class RasterService extends AbstractRasterService {
         	}
         	
         	if (this.rasterFile == null){
-        		this.message = new Exception("query not run.");
+        		this.message = new Exception(Messages.RasterService_QueryNotRunErr);
         		return null;
         	}
         	
@@ -367,7 +371,7 @@ public class RasterService extends AbstractRasterService {
     				resolve.dispose(subProgressMonitor);
     				subProgressMonitor.done();
     			} catch (Throwable e) {
-    				QueryPlugIn.log("Could not dispose query Service", e);
+    				QueryPlugIn.log("Could not dispose query service.", e); //$NON-NLS-1$
     			}
     		}
     		geoResources = null;
@@ -384,14 +388,14 @@ public class RasterService extends AbstractRasterService {
 		File tempDirectory = QueryPlugIn.getDefault().getQueryTempDirectory();
 		if(tempDirectory.exists()){
 			if(this.rasterFile != null && this.rasterFile.exists()){
-				final String[] fullName = this.rasterFile.getName().split("[.]");				
+				final String[] fullName = this.rasterFile.getName().split("[.]");				 //$NON-NLS-1$
 				final String namePrefix = fullName[0];
 
 				// remove the tiff file
 				if( !this.rasterFile.delete()){
 					//TODO: this is a serious problem as we won't be
 					//able to regenerate this file
-					QueryPlugIn.log("cannot delete the file " + this.rasterFile.toString() , null);
+					QueryPlugIn.log("cannot delete the file " + this.rasterFile.toString() , null); //$NON-NLS-1$
 				}
 
 				String[] toDelete = tempDirectory.list(new FilenameFilter() {					
@@ -408,7 +412,7 @@ public class RasterService extends AbstractRasterService {
 				for (int i = 0; i < toDelete.length; i ++){
 					File f = new File(tempDirectory, toDelete[i]);
 					if( !f.delete()){
-						QueryPlugIn.log("cannot delete the file.  Should delete on shutdown " + f.toString(), null);
+						QueryPlugIn.log("cannot delete the file.  Should delete on shutdown " + f.toString(), null); //$NON-NLS-1$
 					}
 				}
 				
@@ -423,7 +427,7 @@ public class RasterService extends AbstractRasterService {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 		try {
-			monitor.beginTask("Creating Service Info", 2);
+			monitor.beginTask(Messages.RasterService_Progress_CreatingInfo, 2);
 			monitor.worked(1);
 			return new AbstractRasterServiceInfo(this, "geotiff", "tiff", "tif"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		} finally {

@@ -66,17 +66,17 @@ public class AttributeInfo {
 	public String getColumn() {
 		switch (this.type) {
 		case LIST:
-			return "list_element_uuid";
+			return "list_element_uuid"; //$NON-NLS-1$
 		case TREE:
-			return "tree_element_uuid";
+			return "tree_element_uuid"; //$NON-NLS-1$
 		case NUMERIC:
-			return "number_value";
+			return "number_value"; //$NON-NLS-1$
 		case BOOLEAN:
-			return "number_value";
+			return "number_value"; //$NON-NLS-1$
 		case TEXT:
-			return "string_value";
+			return "string_value"; //$NON-NLS-1$
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override

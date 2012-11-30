@@ -25,9 +25,11 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -70,7 +72,7 @@ public class QueryImporter {
 		QueryType qt = q.getQuery();
 		IQueryImporter importer = getQueryImporter(qt);
 		if (importer == null){
-			throw new Exception("Could not import query of type " + qt.getQueryType());
+			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType, new Object[]{ qt.getQueryType()}));
 		}
 		
 		org.wcs.smart.query.model.Query importedQuery = importer.importQuery(qt);

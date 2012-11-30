@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.filter;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.filter.AttributeFilter;
@@ -87,7 +89,7 @@ public class FilterValidator {
 			
 		}else if (filter instanceof CategoryFilter){
 			String catId = ((CategoryFilter)filter).asString();
-			String cathkey = catId.split(":")[1];
+			String cathkey = catId.split(":")[1]; //$NON-NLS-1$
 			validateCategory(cathkey, session);
 		}else if (filter instanceof PatrolFilter){
 			PatrolQueryOption op = ((PatrolFilter) filter).getPatrolOption();
@@ -99,16 +101,23 @@ public class FilterValidator {
 				}else{
 					UuidItemType item = uuidLookup.get(  ((PatrolFilter)filter).getValue()  );
 					if (item == null){
-						throw new Exception("Could not resolve patrol filter : " + filter.asString());
+						throw new Exception(
+								MessageFormat.format(
+								Messages.FilterValidator_PatrolFilterError, new Object[]{ filter.asString()}));
 					}
 					if (SimpleListItem.class.isAssignableFrom(op.getSourceClass())){
 						
 						SimpleListItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), session, warnings);
 						
 						if (it == null){
-							throw new Exception("Could not resolve patrol filter : " + filter.asString() + ".  Could not find a value for " + op.getSourceClass().getSimpleName() + " that matches '" + item.getValue().get(0) + "'");
+							throw new Exception(MessageFormat.format(
+									Messages.FilterValidator_PatrolFilter_ValueMatchingError,
+									new Object[]{filter.asString(), op.getSourceClass().getSimpleName(), item.getValue().get(0)}));
+							
 						}else{
-							warnings.add("The unique identifier for " + op.getGuiName() + " filter does not match any idnetifiers in the database.  However the name '" + item.getValue().get(0) + "' was matched and will be used in the query instead." );
+							warnings.add(MessageFormat.format(Messages.FilterValidator_PatrolFilter_UnqiueIdMatchingError,
+									new Object[]{op.getGuiName(), item.getValue().get(0)}));
+							
 							//update uuid
 							((PatrolFilter)filter).setValue(SmartUtils.encodeHex(it.getUuid()));
 						}
@@ -118,10 +127,15 @@ public class FilterValidator {
 						if (e != null){
 							((PatrolFilter)filter).setValue(SmartUtils.encodeHex(e.getUuid()));
 						}else{
-							throw new Exception("Could not resolve patrol filter : " + filter.asString() + ".  Could not find a matching employee with value '" + item.getValue().get(0) + " " + item.getValue().get(1) + " [" + item.getId() + "] ");	
+							throw new Exception(
+									MessageFormat.format(Messages.FilterValidator_PatrolFilter_EmployeeError,
+											new Object[]{filter.asString(), 
+											item.getValue().get(0) + " "+ item.getValue().get(1) + " [" + item.getId() + "] "}));	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 					}else{
-						throw new Exception("Could not resolve patrol filter : " + filter.asString());
+						new Exception(
+								MessageFormat.format(
+								Messages.FilterValidator_PatrolFilterErrorB, new Object[]{ filter.asString()}));
 					}
 				}
 				
@@ -155,19 +169,25 @@ public class FilterValidator {
 	public static Employee findEmployee(String employeeId, String givenName, String familyName, Session session, List<String> warnings){
 		Employee e = HibernateManager.findEmployeeByIdAndName(employeeId, givenName, familyName, SmartDB.getCurrentConservationArea(), session);
 		if (e != null){
-			warnings.add("The unique identifier for Employee " + givenName + " " + familyName + "[" + employeeId + "] did not match the database unique identifier. However an employee with the same name and identifier was found and will be used in the query.");
+			warnings.add(MessageFormat.format(
+					Messages.FilterValidator_Employee_DifferentUniqueId,
+					new Object[]{e.getLabel()}));
 			return e;
 		}
 		
 		e = HibernateManager.findEmployeeById(employeeId, SmartDB.getCurrentConservationArea(), session);
 		if (e != null){
-			warnings.add("The unique identifier for Employee " + givenName + " " + familyName + "[" + employeeId + "] did not match the database unique identifier. However an employee with the same identifier but a different name '" + e.getGivenName() + " " + e.getFamilyName() + "' was found and will be used in the query.");
+			warnings.add(MessageFormat.format(
+					Messages.FilterValidator_EmployeeDifferentName,
+					new Object[]{givenName + " " + familyName + "[" + employeeId + "]", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					e.getGivenName() + " " + e.getFamilyName()})); //$NON-NLS-1$
 			return e;
 		}
 		
 		e = HibernateManager.findEmployeeByName(givenName, familyName, SmartDB.getCurrentConservationArea(), session);
 		if (e != null){
-			warnings.add("The unique identifier for Employee " + givenName + " " + familyName + "[" + employeeId + "] did not match the database unique identifier. However employee with the same name but a different identifier '" + e.getId() + "' was found and will be used in the query.");
+			warnings.add(MessageFormat.format(Messages.FilterValidator_EmployeeDifferentId,
+					new Object[]{givenName + " " + familyName + "[" + employeeId + "]", e.getId()})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return e;
 		}
 		
@@ -193,18 +213,18 @@ public class FilterValidator {
 	 */
 	public static SimpleListItem findValue(String langCode, String value, String objectType, Session session, List<String> warnings){
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca ";
+		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		org.hibernate.Query query = session.createQuery(sql);
-		query.setParameter("cd", langCode);
-		query.setParameter("value", value);
-		query.setParameter("ca", SmartDB.getCurrentConservationArea());
+		query.setParameter("cd", langCode); //$NON-NLS-1$
+		query.setParameter("value", value); //$NON-NLS-1$
+		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		
 		List<?> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			warnings.add("Multiple options found for " + objectType + " for value '" + value + "'. The first value found will be used.");
+			warnings.add(MessageFormat.format(Messages.FilterValidator_MultipleImportOptions, new Object[]{objectType, value}));
 			return (SimpleListItem)results.get(0);
 		}else{
 			return (SimpleListItem)results.get(0);
@@ -219,13 +239,13 @@ public class FilterValidator {
 	 * @throws Exception
 	 */
 	public static void validateCategory(String hkey, Session session) throws Exception{
-		String hql = " FROM Category Where conservationArea = :ca and hkey = :key";
+		String hql = " FROM Category Where conservationArea = :ca and hkey = :key"; //$NON-NLS-1$
 		org.hibernate.Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", hkey);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("key", hkey); //$NON-NLS-1$
 		
 		if (q.list().size() != 1){
-			throw new Exception ("Could not find Category with key '" + hkey + "' in datamodel. ");
+			throw new Exception (MessageFormat.format(Messages.FilterValidator_CategoryNotFound, new Object[]{hkey}));
 		}
 	}
 	/**
@@ -235,13 +255,13 @@ public class FilterValidator {
 	 * @throws Exception
 	 */
 	public static void validateAttribute(String key, Session session) throws Exception{
-		String hql = " FROM Attribute Where conservationArea = :ca and keyId = :key";
+		String hql = " FROM Attribute Where conservationArea = :ca and keyId = :key"; //$NON-NLS-1$
 		org.hibernate.Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", key);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("key", key); //$NON-NLS-1$
 		
 		if (q.list().size() != 1){
-			throw new Exception ("Could not find Attribute with key '" + key + "' in datamodel. ");
+			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeNotFound, new Object[]{key}));
 		}
 	}
 	
@@ -255,16 +275,16 @@ public class FilterValidator {
 	public static void validateAttributeListItem(String key, String attributeKey, Session session) throws Exception{
 		
 		Query q = session
-				.createQuery(" From AttributeListItem ali join ali.attribute as a "+
-						"where a.conservationArea = :ca and ali.keyId = :key and "+
-						"a.keyId = :attributeKey");
+				.createQuery(" From AttributeListItem ali join ali.attribute as a "+ //$NON-NLS-1$
+						"where a.conservationArea = :ca and ali.keyId = :key and "+ //$NON-NLS-1$
+						"a.keyId = :attributeKey"); //$NON-NLS-1$
 		
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", key);
-		q.setParameter("attributeKey", attributeKey);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("key", key); //$NON-NLS-1$
+		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
 			
 		if (q.list().size() != 1){
-			throw new Exception ("Could not find Attribute List Item with key '" + key + "' in datamodel. ");
+			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeListItemNotFound, new Object[]{key}));
 		}
 	}
 	
@@ -277,15 +297,15 @@ public class FilterValidator {
 	 * @throws Exception
 	 */
 	public static void validateAttributeTreeNode(String key, String attributeKey, Session session) throws Exception{
-		String hql = " FROM AttributeTreeNode ai join ai.attribute a " +
-				"Where a.conservationArea = :ca and ai.hkey = :hkey and a.keyId = :attributeKey";
+		String hql = " FROM AttributeTreeNode ai join ai.attribute a " +  //$NON-NLS-1$
+				"Where a.conservationArea = :ca and ai.hkey = :hkey and a.keyId = :attributeKey";  //$NON-NLS-1$
 		org.hibernate.Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("hkey", key);
-		q.setParameter("attributeKey", attributeKey);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("hkey", key); //$NON-NLS-1$
+		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
 		
 		if (q.list().size() != 1){
-			throw new Exception ("Could not find Attribute Tree Node with key '" + key + "' in datamodel. ");
+			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeTreeNodeNotFound, new Object[]{key}));
 		}
 	}
 	

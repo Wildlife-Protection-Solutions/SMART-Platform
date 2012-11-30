@@ -22,6 +22,7 @@
 package org.wcs.smart.query.parser.internal.summary;
 
 import org.hibernate.Session;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
@@ -33,6 +34,8 @@ import org.wcs.smart.query.ui.formulaDnd.DropItem;
  * @since 1.0.0
  */
 public class CombinedValueItem implements IValueItem {
+
+	private static final String PER_LABEL = Messages.CombinedValueItem_PER_LABEL;
 
 	/**
 	 * Creates a new combined value item from two
@@ -80,7 +83,7 @@ public class CombinedValueItem implements IValueItem {
 	 */
 	@Override
 	public String asString() {
-		return part1.asString() + "/" + part2.asString();
+		return part1.asString() + "/" + part2.asString(); //$NON-NLS-1$
 	}
 
 	/**
@@ -90,7 +93,7 @@ public class CombinedValueItem implements IValueItem {
 	public String getName(Session session) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(part1.getName(session));
-		sb.append(" per ");
+		sb.append(" " + PER_LABEL + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(part2.getName(session));
 		return sb.toString();
 	}
@@ -101,7 +104,7 @@ public class CombinedValueItem implements IValueItem {
 	public String getFullName(Session session){
 		StringBuilder sb = new StringBuilder();
 		sb.append(part1.getFullName(session));
-		sb.append(" per ");
+		sb.append(" " + PER_LABEL + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(part2.getFullName(session));
 		return sb.toString();
 	}

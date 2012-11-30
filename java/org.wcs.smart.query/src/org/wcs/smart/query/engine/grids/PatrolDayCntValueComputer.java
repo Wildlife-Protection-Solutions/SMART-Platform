@@ -50,7 +50,7 @@ public class PatrolDayCntValueComputer implements IValueComputer<HashSet<Object>
 		byte[] pid = (byte[]) data[0];
 		Date day = (Date)data[1];
 		
-		String key = SmartUtils.encodeHex(pid) + "_" + day.getTime();
+		String key = SmartUtils.encodeHex(pid) + "_" + day.getTime(); //$NON-NLS-1$
 		d.add(key);
 		
 		return d;

@@ -28,6 +28,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
@@ -54,9 +55,9 @@ public class DateFilter implements IFilter {
 	 * @since 1.0.0
 	 */
 	public static enum DATE_FIELD_OP{
-		WAYPOINT("Waypoint Date", "patrol:waypointdate", "patrol_day"),	
-		PATROL_START("Patrol Start", "patrol:startdate", "start_date"),
-		PATROL_END("Patrol End", "patrol:enddate", "end_date");
+		WAYPOINT(Messages.DateFilter_WaypointOp, "patrol:waypointdate", "patrol_day"),	 //$NON-NLS-2$ //$NON-NLS-1$
+		PATROL_START(Messages.DateFilter_StartDateOp, "patrol:startdate", "start_date"), //$NON-NLS-2$ //$NON-NLS-1$
+		PATROL_END(Messages.DateFilter_EndDateOp, "patrol:enddate", "end_date"); //$NON-NLS-2$ //$NON-NLS-1$
 			
 		public String guiName;
 		public String key;
@@ -94,11 +95,11 @@ public class DateFilter implements IFilter {
 	 */
 	@Override
 	public String asString() {
-		String str = dateField.key + " " + dateFilter.key;
+		String str = dateField.key + " " + dateFilter.key; //$NON-NLS-1$
 		if (startDate != null){
-			str += " " + startDate.toString();
+			str += " " + startDate.toString(); //$NON-NLS-1$
 		}else if (endDate != null){
-			str += " " + endDate.toString();
+			str += " " + endDate.toString(); //$NON-NLS-1$
 		}
 		return str;
 	}
@@ -108,7 +109,7 @@ public class DateFilter implements IFilter {
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		String tablePrefix = "";
+		String tablePrefix = ""; //$NON-NLS-1$
 		if (this.dateField == DATE_FIELD_OP.PATROL_END || this.dateField == DATE_FIELD_OP.PATROL_START){
 			tablePrefix = tableMapping.get(Patrol.class);
 		}else if (this.dateField == DATE_FIELD_OP.WAYPOINT){
@@ -117,7 +118,7 @@ public class DateFilter implements IFilter {
 			assert false;
 			//error
 		}
-		String field = tablePrefix + "." + dateField.columnName;
+		String field = tablePrefix + "." + dateField.columnName; //$NON-NLS-1$
 		return asSql(field);
 	}
 	
@@ -155,19 +156,19 @@ public class DateFilter implements IFilter {
 	
 	private String asSql(String field){
 		java.sql.Date[] bits = getDates(); 
-		String f = "";
+		String f = ""; //$NON-NLS-1$
 		if (bits == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		if (bits.length == 1){
-			f = " ( " +field + " >= '" + bits[0].toString() + "' ) ";
+			f = " ( " +field + " >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && (
 				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_MONTH || 
 				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_YEAR ||
 				dateFilter == PatrolQueryOptions.DATE_FILTER_OP.LAST_QUARTER)){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) ";
+			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) ";
+			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		return f;

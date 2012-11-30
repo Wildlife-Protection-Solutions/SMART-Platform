@@ -39,6 +39,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -62,10 +63,10 @@ public abstract class Query {
 	//if you add another query type you must update
 	//the queryInput constructor
 	public enum QueryType{
-		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, "Observation Query", ObservationQuery.class),
-		SUMMARY("SummaryQuery", SummaryEditor.ID, "Summary Query", SummaryQuery.class),
-		GRIDDED("GriddedQuery", GriddedEditor.ID,  "Gridded Query", GriddedQuery.class),
-		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, "Patorl Query", PatrolQuery.class);
+		OBSERVATION("ObservationQuery", QueryResultsEditor.ID, Messages.Query_ObservationQueryName, ObservationQuery.class), //$NON-NLS-1$
+		SUMMARY("SummaryQuery", SummaryEditor.ID, Messages.Query_SummaryQueryName, SummaryQuery.class), //$NON-NLS-1$
+		GRIDDED("GriddedQuery", GriddedEditor.ID,  Messages.Query_GriddedQueryName, GriddedQuery.class), //$NON-NLS-1$
+		PATROL("PatrolQuery", PatrolQueryResultsEditor.ID, Messages.Query_PatrolQueryName, PatrolQuery.class); //$NON-NLS-1$
 		
 		private String objectName;
 		private String editorId;
@@ -125,7 +126,7 @@ public abstract class Query {
 	
 	
 	public Query(){
-		name = "<No Name >";
+		name = Messages.Query_DefaultQueryName;
 		conservationArea = SmartDB.getCurrentConservationArea();
 		owner =  SmartDB.getCurrentEmployee();
 		ownerFolder = null;

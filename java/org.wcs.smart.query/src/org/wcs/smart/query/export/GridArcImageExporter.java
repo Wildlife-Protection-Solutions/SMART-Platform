@@ -22,12 +22,14 @@
 package org.wcs.smart.query.export;
 
 import java.io.File;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.gce.arcgrid.ArcGridWriter;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.opengis.coverage.grid.GridCoverage;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 
@@ -43,17 +45,17 @@ public class GridArcImageExporter implements IQueryExporter {
 
 	@Override
 	public String getId() {
-		return "org.wcs.smart.query.export.GridArcImageExporter";
+		return "org.wcs.smart.query.export.GridArcImageExporter"; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getName() {
-		return "Arc Ascii Grid Exporter";
+		return Messages.GridArcImageExporter_ExporterName;
 	}
 
 	@Override
 	public String getDefaultExtension() {
-		return "asc";
+		return "asc"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -67,7 +69,9 @@ public class GridArcImageExporter implements IQueryExporter {
 		
 		File sourceFile = ((GriddedQuery)query).getLastRasterFile();
 		if (sourceFile == null || !sourceFile.exists()){
-			throw new Exception("Query could not be exported.  Please run the query and try again.", new Exception("File: " + (sourceFile == null ? "NULL" : sourceFile.toString()) + " not found."));
+			throw new Exception(Messages.GridArcImageExporter_ExportError, 
+					new Exception(
+							MessageFormat.format(Messages.GridArcImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-2$
 		}
 
 		

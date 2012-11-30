@@ -46,7 +46,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	 * @param type the type of the attribute column
 	 */
 	public AttributeQueryColumn(String name, String attributeId, AttributeType type){
-		super(name, "attribute:" + attributeId, null);
+		super(name, "attribute:" + attributeId, null); //$NON-NLS-1$
 		this.attributeKey = attributeId;
 		ColumnType ctype = ColumnType.STRING;
 		if (type == AttributeType.NUMERIC ){
@@ -67,7 +67,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	 */
 	public AttributeQueryColumn(String name, String key, ColumnType type){
 		super(name, key, type);
-		this.attributeKey = key.split(":")[1];
+		this.attributeKey = key.split(":")[1]; //$NON-NLS-1$
 	}
 
 
@@ -80,7 +80,7 @@ public class AttributeQueryColumn extends QueryColumn {
 			QueryResultItem item = (QueryResultItem) queryResultItem;
 			return item.getAttributeValue(attributeKey);
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 

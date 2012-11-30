@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.filter;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
@@ -115,16 +117,16 @@ public class AttributeFilter implements IFilter {
 	private AttributeFilter(String attributeIdentifier){
 		this.fullIdentifier = attributeIdentifier;
 		
-		String[] bits = this.fullIdentifier.split(":");
-		if (bits[1].equals("b")){
+		String[] bits = this.fullIdentifier.split(":"); //$NON-NLS-1$
+		if (bits[1].equals("b")){ //$NON-NLS-1$
 			this.attributeType = AttributeType.BOOLEAN;
-		}else if (bits[1].equals("n")){ 
+		}else if (bits[1].equals("n")){  //$NON-NLS-1$
 			this.attributeType = AttributeType.NUMERIC;
-		}else if (bits[1].equals("t")){
+		}else if (bits[1].equals("t")){ //$NON-NLS-1$
 			this.attributeType = AttributeType.TREE;
-		}else if (bits[1].equals("s")){
+		}else if (bits[1].equals("s")){ //$NON-NLS-1$
 			this.attributeType = AttributeType.TEXT;
-		}else if (bits[1].equals("l")){
+		}else if (bits[1].equals("l")){ //$NON-NLS-1$
 			this.attributeType = AttributeType.LIST;
 		}
 		attributeKey = bits[2];
@@ -175,13 +177,13 @@ public class AttributeFilter implements IFilter {
 		if (attributeType == AttributeType.BOOLEAN){
 			return fullIdentifier;
 		}else if (attributeType == AttributeType.NUMERIC){
-			return fullIdentifier + " " + op.asSmartValue() + " " + ((Double)value1).toString();
+			return fullIdentifier + " " + op.asSmartValue() + " " + ((Double)value1).toString();  //$NON-NLS-1$  //$NON-NLS-2$
 		}else if (attributeType == AttributeType.TEXT){
-			return fullIdentifier + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";
+			return fullIdentifier + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$ 
 		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
-			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);
+			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	@Override
@@ -189,37 +191,37 @@ public class AttributeFilter implements IFilter {
 		
 		String attprefix = tableMapping.get(Attribute.class);
 		if (attprefix == null){
-			throw new IllegalStateException("Attribute prefix could not be determined.");
+			throw new IllegalStateException(Messages.AttributeFilter_InvalidAttributePrefix);
 		}
 		String attObprefix = tableMapping.get(WaypointObservationAttribute.class);
 		if (attObprefix == null){
-			throw new IllegalStateException("Waypoint Observation Attribute prefix could not be determined.");
+			throw new IllegalStateException(Messages.AttributeFilter_InvalidWaypointObservationPrefix);
 		}
 
 		if (attributeType == AttributeType.BOOLEAN){
-			return " (qa." + attributeKey + " > 0.5 ) ";			
+			return " (qa." + attributeKey + " > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
 		}else if (attributeType == AttributeType.NUMERIC){
-			return " (qa." + attributeKey + " " + op.asSql() + " " + String.valueOf((Double)value1) + ") ";
+			return " (qa." + attributeKey + " " + op.asSql() + " " + String.valueOf((Double)value1) + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}else if (attributeType == AttributeType.TEXT){
-			String queryStr = "";
+			String queryStr = ""; //$NON-NLS-1$
 			//TODO: look into escape % & _ as these are wild card characters
 			// SELECT a FROM tabA WHERE a LIKE '%=_' ESCAPE '='  (must specify escape character)
 			String val = (String)value1;
-			val = val.replaceAll("'", "''");
+			val = val.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			if (op == Operator.STR_CONTAINS || op == Operator.STR_NOTCONTAINS){
-				queryStr = "( LOWER(qa." + attributeKey + ") " + op.asSql() + " '%" + val.toLowerCase() + "%' )";	
+				queryStr = "( LOWER(qa." + attributeKey + ") " + op.asSql() + " '%" + val.toLowerCase() + "%' )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 			}else if (op == Operator.STR_EQUALS){
-				queryStr = "( LOWER(qa." + attributeKey + ") " + op.asSql() + " '" + val.toLowerCase() + "' )";
+				queryStr = "( LOWER(qa." + attributeKey + ") " + op.asSql() + " '" + val.toLowerCase() + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return queryStr;
 		}else if (attributeType == AttributeType.LIST ){
-			return "( qa."+ attributeKey  + " " + op.asSql() + " '" + (String)value1 + "' )";
+			return "( qa."+ attributeKey  + " " + op.asSql() + " '" + (String)value1 + "' )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}else if (attributeType == AttributeType.TREE){
 //			return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') ";
-			return "( qa." + attributeKey + " >= '" + (String)value1 + "' and qa." + attributeKey + "<'" + ((String)value1).substring(0,  ((String)value1).length() -1) + "/')";
+			return "( qa." + attributeKey + " >= '" + (String)value1 + "' and qa." + attributeKey + "<'" + ((String)value1).substring(0,  ((String)value1).length() -1) + "/')";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -296,7 +298,7 @@ public class AttributeFilter implements IFilter {
 	public Attribute getAttribute(Session session) throws Exception{
 		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
 		if (att == null){
-			throw new Exception("Query formula could not be parsed from the database.  Attribute " + attributeKey + " could not be found.");
+			throw new Exception(MessageFormat.format(Messages.AttributeFilter_AttributeNotFound, new Object[]{attributeKey}));
 		}
 		return att;
 	}

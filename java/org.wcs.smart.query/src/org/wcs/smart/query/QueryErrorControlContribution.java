@@ -34,6 +34,7 @@ import org.eclipse.ui.ISourceProviderListener;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.SourceProvider;
 
 /**
@@ -102,7 +103,6 @@ public class QueryErrorControlContribution extends
 		lblErrorImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.EXCLAMATION_ICON));
 		lblError = new Label(main, SWT.NONE);
 		lblError.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblError.setText("Query error");
 		main.setVisible(false);
 		
 		initValues();
@@ -126,10 +126,10 @@ public class QueryErrorControlContribution extends
 				if (tip != null) {
 					lblError.setToolTipText(tip);
 				} else {
-					lblError.setToolTipText("");
+					lblError.setToolTipText(""); //$NON-NLS-1$
 				}
 			}
-			lblError.setText("Query error");
+			lblError.setText(Messages.QueryErrorControlContribution_QueryErrorText);
 			main.layout();
 		} else {
 			main.setVisible(false);

@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -78,14 +79,14 @@ public abstract class SimpleQuery extends Query {
 	 */
 	public SimpleQuery(){
 		super();
-		setName("<No Name Query>");
+		setName(Messages.SimpleQuery_DefaultQueryName);
 		caFilter = new ConservationAreaFilter();
 		if (SmartDB.getCurrentConservationArea() != null){
 			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
 		}
 		
 		dateFilter = null;
-		strQueryFilter = "";
+		strQueryFilter = ""; //$NON-NLS-1$
 	}
 	
 	/**
@@ -149,7 +150,7 @@ public abstract class SimpleQuery extends Query {
 			try{
 				queryFilter = parseQueryFilter();
 			} catch (Exception ex) {
-				QueryPlugIn.displayLog("Could not parse query.", ex);
+				QueryPlugIn.displayLog(Messages.SimpleQuery_ParseError, ex);
 			}
 		}
 		return queryFilter;	

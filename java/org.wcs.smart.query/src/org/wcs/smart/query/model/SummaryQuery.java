@@ -23,6 +23,7 @@ package org.wcs.smart.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbySummaryEngine;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -92,7 +94,7 @@ public class SummaryQuery extends Query {
 	 */
 	public SummaryQuery(){
 		super();
-		setName("<No Name Summary>");
+		setName(Messages.SummaryQuery_DefaultQueryName);
 		caFilter = new ConservationAreaFilter();
 		if (SmartDB.getCurrentConservationArea() != null){
 			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
@@ -107,7 +109,7 @@ public class SummaryQuery extends Query {
 			try{
 				query = parseQuery();
 			} catch (Exception ex) {
-				QueryPlugIn.displayLog("Could not parse query.", ex);
+				QueryPlugIn.displayLog(Messages.SummaryQuery_ParseError, ex);
 			}
 		}
 		return query;	
@@ -421,10 +423,11 @@ public class SummaryQuery extends Query {
 						if (groupBy instanceof PatrolGroupBy){
 							Class<?> source = ((PatrolGroupBy)groupBy).getOption().getPatrolAttributeClass();
 							if (source.equals(PatrolLeg.class) || source.equals(PatrolLegMember.class)){
-								return "The value " + pIt.getOption().getGuiName() + " cannot be grouped by " + ((PatrolGroupBy)groupBy).getOption().getGuiName();
+								return MessageFormat.format(
+										Messages.SummaryQuery_GroupByError1 , new Object[]{pIt.getOption().getGuiName(), ((PatrolGroupBy)groupBy).getOption().getGuiName()});
 							}
 						}else if (groupBy instanceof DateGroupBy){
-							return "The value " + pIt.getOption().getGuiName() + " cannot be grouped by date";
+							return MessageFormat.format(Messages.SummaryQuery_GroupByError2, new Object[]{pIt.getOption().getGuiName()});
 						}
 					}
 				}else if (pIt.getOption() == PatrolValueOption.MAN_DAYS ||
@@ -434,7 +437,8 @@ public class SummaryQuery extends Query {
 					for (IGroupBy groupBy : groupBys){
 						if (groupBy instanceof PatrolGroupBy){
 							if (((PatrolGroupBy)groupBy).getOption() == PatrolQueryOption.EMPLOYEE){
-								return "The value " + pIt.getOption().getGuiName() + " cannot be grouped by " + ((PatrolGroupBy)groupBy).getOption().getGuiName();
+								return MessageFormat.format(
+										Messages.SummaryQuery_GroupByError3 , new Object[]{pIt.getOption().getGuiName(), ((PatrolGroupBy)groupBy).getOption().getGuiName()});
 							}
 						}
 					}

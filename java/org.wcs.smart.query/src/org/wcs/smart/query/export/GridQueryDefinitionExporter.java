@@ -54,12 +54,12 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 			throws Exception {
 		
 		QueryPart defPart = new QueryPart();
-		defPart.setKey("definition");
+		defPart.setKey("definition"); //$NON-NLS-1$
 		defPart.setValue( ((GriddedQuery)query).getQueryDefinition().asQuery() );
 		xmlQuery.getQueryPart().add(defPart);
 
 		QueryPart crsPart = new QueryPart();
-		crsPart.setKey("crs");
+		crsPart.setKey("crs"); //$NON-NLS-1$
 		crsPart.setValue(((GriddedQuery)query).getCrsDefinition());
 		xmlQuery.getQueryPart().add(crsPart);
 	}

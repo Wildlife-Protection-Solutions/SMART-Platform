@@ -95,7 +95,7 @@ public class SummaryResultKey {
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < groupByKeys.length; i ++){
-			sb.append(groupByKeys[i] +  " _ ");
+			sb.append(groupByKeys[i] +  " _ "); //$NON-NLS-1$
 		}
 		sb.append(valueKey);
 		return sb.toString();

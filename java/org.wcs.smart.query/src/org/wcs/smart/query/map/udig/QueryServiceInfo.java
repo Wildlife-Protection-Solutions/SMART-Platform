@@ -25,6 +25,7 @@ import net.refractions.udig.catalog.IServiceInfo;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Smart service information.
@@ -34,10 +35,10 @@ import org.wcs.smart.query.QueryPlugIn;
 public class QueryServiceInfo extends IServiceInfo{
 
 	public QueryServiceInfo(QueryService service){
-		this.description = "Connects to a smart query.";
+		this.description = Messages.QueryServiceInfo_Description;
 		this.icon = JFaceResources.getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
-		this.keywords = new String[]{"Conservation Area", "SMART", "Query", "Waypoint", "Patrol", "Track"};
-		this.title = "SMART Query " + service.getQuery().getName();
+		this.keywords = new String[]{Messages.QueryServiceInfo_Keyword1, Messages.QueryServiceInfo_Keyword2, Messages.QueryServiceInfo_Keyword3, Messages.QueryServiceInfo_Keyword4, Messages.QueryServiceInfo_Keyword5, Messages.QueryServiceInfo_Keyword6};
+		this.title = Messages.QueryServiceInfo_ServiceName + service.getQuery().getName();
 	}
 	
 }

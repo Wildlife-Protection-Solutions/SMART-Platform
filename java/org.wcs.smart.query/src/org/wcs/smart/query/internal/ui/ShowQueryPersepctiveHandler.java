@@ -28,6 +28,7 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryInput;
 
 /**
@@ -66,14 +67,14 @@ public class ShowQueryPersepctiveHandler extends AbstractHandler {
 							CreateQueryHandler h = new CreateQueryHandler();
 							h.execute(event);
 						}catch (Exception ex){
-							QueryPlugIn.log("error opening new query", ex);
+							QueryPlugIn.log("error opening new query", ex); //$NON-NLS-1$
 						}
 					}
 				});
 			}
 			
 		} catch (WorkbenchException e) {
-			QueryPlugIn.displayLog("Error loading Query perspective.", e);
+			QueryPlugIn.displayLog(Messages.ShowQueryPersepctiveHandler_QueryPerspectiveError, e);
 		}
 		return null;
 	}

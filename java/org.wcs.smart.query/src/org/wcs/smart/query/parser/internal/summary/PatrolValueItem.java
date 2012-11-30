@@ -59,7 +59,7 @@ public class PatrolValueItem implements IValueItem {
 	 */
 	public PatrolValueItem(String key){
 		this.key = key;
-		String[] bits = key.split(":");
+		String[] bits = key.split(":"); //$NON-NLS-1$
 		patrolOp = PatrolQueryOptions.findPatrolValueItem(bits[2]);
 		this.aggregation = bits[1];		
 	}

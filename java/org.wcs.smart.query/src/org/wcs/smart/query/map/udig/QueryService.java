@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.geotools.data.DataStore;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.map.geotools.GriddedDataSource;
 import org.wcs.smart.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
@@ -62,7 +61,7 @@ public class QueryService extends IService {
 	/**
 	 * The query service id
 	 */
-	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.queryService";
+	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.queryService"; //$NON-NLS-1$
 	
 	private Map<String, Serializable> params;
 	private URL url;	
@@ -183,7 +182,7 @@ public class QueryService extends IService {
 					}else if (query instanceof PatrolQuery){
 						members.add(new QueryGeoResource(this, PatrolQueryDataSource.PATROL_TYPE));
 					}else if (query instanceof GriddedQuery){
-						members.add(new QueryGeoResource(this, GriddedDataSource.GRIDDED_TYPE));
+						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
 				}
 			}
@@ -225,7 +224,7 @@ public class QueryService extends IService {
                 resolve.dispose(subProgressMonitor);
                 subProgressMonitor.done();
             } catch (Throwable e) {
-            	QueryPlugIn.log("Could not dispose query Service", e);
+            	QueryPlugIn.log("Could not dispose query Service", e); //$NON-NLS-1$
             }
         }
         if (this.ds != null){

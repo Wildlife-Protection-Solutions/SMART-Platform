@@ -83,7 +83,7 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 		
 		for (QueryPart part : qt.getQueryPart()) {
 			
-			if (part.getKey().equals("definition")) {
+			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
 					
 					summaryQuery.setQuery(part.getValue());

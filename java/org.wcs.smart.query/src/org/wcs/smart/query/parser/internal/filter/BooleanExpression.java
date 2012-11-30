@@ -79,7 +79,7 @@ public class BooleanExpression implements IFilter{
 	 */
 	@Override
 	public String asString(){
-		return e1.asString() + " " + op.asSql() + " " +e2.asString() ;
+		return e1.asString() + " " + op.asSql() + " " +e2.asString() ; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	
@@ -88,7 +88,7 @@ public class BooleanExpression implements IFilter{
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
-		return e1.asSql(tableMapping) + " " + op.asSql() + " " + e2.asSql(tableMapping);
+		return e1.asSql(tableMapping) + " " + op.asSql() + " " + e2.asSql(tableMapping); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**	

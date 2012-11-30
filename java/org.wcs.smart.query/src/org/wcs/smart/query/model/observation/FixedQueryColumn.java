@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.observation;
 
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryResultItem;
 
@@ -40,30 +41,30 @@ public class FixedQueryColumn extends QueryColumn {
 	 * The defined fixed columns.
 	 */
 	public enum FixedColumns{
-		PATROL_ID("Patrol ID", ColumnType.STRING, "patrol:id"),
-		PATROL_TYPE("Type", ColumnType.STRING, "patrol:type"),
-		PATROL_START_DATE("Patrol Start Date", ColumnType.DATE, "patrol:startdate"),
-		PATROL_END_DATE("Patrol End Date", ColumnType.DATE, "patrol:enddate"),
-		PATROL_STATION("Station", ColumnType.STRING, "patrol:station"),
-		PATROL_TEAM("Team", ColumnType.STRING, "patrol:team"),
-		PATROL_OBJETIVE("Objective", ColumnType.STRING,"patrol:objective"),
+		PATROL_ID(Messages.FixedQueryColumn_PatrolIdColumnName, ColumnType.STRING, "patrol:id"), //$NON-NLS-1$
+		PATROL_TYPE(Messages.FixedQueryColumn_TypeColumnName, ColumnType.STRING, "patrol:type"), //$NON-NLS-1$
+		PATROL_START_DATE(Messages.FixedQueryColumn_PatrolStartDateColumnName, ColumnType.DATE, "patrol:startdate"), //$NON-NLS-1$
+		PATROL_END_DATE(Messages.FixedQueryColumn_PatrolEndDateColumnName, ColumnType.DATE, "patrol:enddate"), //$NON-NLS-1$
+		PATROL_STATION(Messages.FixedQueryColumn_StationColumnName, ColumnType.STRING, "patrol:station"), //$NON-NLS-1$
+		PATROL_TEAM(Messages.FixedQueryColumn_TeamColumnName, ColumnType.STRING, "patrol:team"), //$NON-NLS-1$
+		PATROL_OBJETIVE(Messages.FixedQueryColumn_ObjectiveColumnName, ColumnType.STRING,"patrol:objective"), //$NON-NLS-1$
 //		PATROL_RATING("Objective Rating", ColumnType.INTEGER,"patrol:rating"),
-		PATROL_MANDATE("Mandate", ColumnType.STRING,"patrol:mandate"),
-		PATROL_ARMED("Armed", ColumnType.BOOLEAN,"patrol:armed"),
-		PATROL_LEG_ID("Patrol Leg Id", ColumnType.STRING, "patrol:legid"),
-		PATROL_LEG_LEADER("Leader", ColumnType.STRING, "patrol:leader"),
-		PATROL_LEG_PILOT("Pilot", ColumnType.STRING, "patrol:pilot"),
-		PATROL_LEG_START_DATE("Patrol Leg Start Date", ColumnType.DATE, "patrolleg:startdate"),
-		PATROL_LEG_END_DATE("Patrol Leg End Date", ColumnType.DATE, "patrolleg:enddate"),
-		TRANSPORT_TYPE("Patrol Transport Type", ColumnType.STRING,"patrol:transporttype"),
-		WAYPOINT_ID("Waypoint Id", ColumnType.INTEGER,"waypoint:id"),
-		WAYPOINT_DATE("Waypoint Date", ColumnType.DATE,"waypoint:date"),
-		WAYPOINT_TIME("Waypoint Time", ColumnType.TIME,"waypoint:time"),
-		WAYPOINT_X("X", ColumnType.NUMBER,"waypoint:x"),
-		WAYPOINT_Y("Y", ColumnType.NUMBER, "waypoint:y"),
-		WAYPOINT_DIRECTION("Direction", ColumnType.NUMBER,"waypoint:direction"),
-		WAYPOINT_DISTANCE("Distance", ColumnType.NUMBER,"waypoint:distance"),
-		WAYPOINT_COMMENT("Comment", ColumnType.STRING,"waypoint:comment");
+		PATROL_MANDATE(Messages.FixedQueryColumn_MandateColumnName, ColumnType.STRING,"patrol:mandate"), //$NON-NLS-1$
+		PATROL_ARMED(Messages.FixedQueryColumn_ArmedColumnName, ColumnType.BOOLEAN,"patrol:armed"), //$NON-NLS-1$
+		PATROL_LEG_ID(Messages.FixedQueryColumn_LegIdColumnName, ColumnType.STRING, "patrol:legid"), //$NON-NLS-1$
+		PATROL_LEG_LEADER(Messages.FixedQueryColumn_LeaderColumnName, ColumnType.STRING, "patrol:leader"), //$NON-NLS-1$
+		PATROL_LEG_PILOT(Messages.FixedQueryColumn_PilotColumnName, ColumnType.STRING, "patrol:pilot"), //$NON-NLS-1$
+		PATROL_LEG_START_DATE(Messages.FixedQueryColumn_LegStartDateColumnName, ColumnType.DATE, "patrolleg:startdate"), //$NON-NLS-1$
+		PATROL_LEG_END_DATE(Messages.FixedQueryColumn_LegEndDateColumnName, ColumnType.DATE, "patrolleg:enddate"), //$NON-NLS-1$
+		TRANSPORT_TYPE(Messages.FixedQueryColumn_TransportColumnName, ColumnType.STRING,"patrol:transporttype"), //$NON-NLS-1$
+		WAYPOINT_ID(Messages.FixedQueryColumn_WaypointIdColumnName, ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
+		WAYPOINT_DATE(Messages.FixedQueryColumn_WaypointDateColumnName, ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
+		WAYPOINT_TIME(Messages.FixedQueryColumn_WaypointTimeColumnName, ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
+		WAYPOINT_X(Messages.FixedQueryColumn_xColumnName, ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
+		WAYPOINT_Y(Messages.FixedQueryColumn_yColumnName, ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
+		WAYPOINT_DIRECTION(Messages.FixedQueryColumn_DirectionColumnName, ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
+		WAYPOINT_DISTANCE(Messages.FixedQueryColumn_DistanceColumnName, ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
+		WAYPOINT_COMMENT(Messages.FixedQueryColumn_CommentColumnName, ColumnType.STRING,"waypoint:comment"); //$NON-NLS-1$
 		
 		private String guiName;
 		private ColumnType type;
@@ -150,7 +151,7 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getWaypointY();
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	/**

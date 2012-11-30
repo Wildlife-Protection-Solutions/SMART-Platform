@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
@@ -47,6 +49,8 @@ import org.wcs.smart.util.SmartUtils;
 public class PatrolGroupBy implements IGroupBy {
 
 	
+	private static final String COULDNOTRESOLVE_ERRMSG = Messages.PatrolGroupBy_CouldNotResolveFilter;
+
 	/**
 	 * Creates a new patrol group by option
 	 * @param key patrol group by key of the form
@@ -69,7 +73,7 @@ public class PatrolGroupBy implements IGroupBy {
 	 * @param key patrol group by item key of the format "patrol:key:<uuid>:<uuid>..."
 	 */
 	public PatrolGroupBy(String key){
-		String[] bits = key.split(":");
+		String[] bits = key.split(":"); //$NON-NLS-1$
 		option = PatrolQueryOptions.findPatrolQueryOption(bits[1]);
 		if (bits.length > 2){
 			items = new String[bits.length - 2];
@@ -90,7 +94,7 @@ public class PatrolGroupBy implements IGroupBy {
 	 */
 	public String getKeyPart(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("patrol:");
+		sb.append("patrol:"); //$NON-NLS-1$
 		sb.append(option.getKey());
 		return sb.toString();
 	}
@@ -102,18 +106,18 @@ public class PatrolGroupBy implements IGroupBy {
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getKeyPart());
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		if (items != null) {
 			for (int i = 0; i < items.length; i++) {
 				if (option.getType() == PatrolQueryOptionType.STRING){
-					sb.append("\"");
+					sb.append("\""); //$NON-NLS-1$
 					sb.append(items[i]);
-					sb.append("\"");
+					sb.append("\""); //$NON-NLS-1$
 				}else{
 					sb.append(items[i]);
 				}
 				if (i < items.length - 1) {
-					sb.append(":");
+					sb.append(":"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -171,7 +175,7 @@ public class PatrolGroupBy implements IGroupBy {
 				it.initializeData(initItems);
 			}
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Could not parse query." + ex.getMessage(),
+			QueryPlugIn.displayLog(Messages.PatrolGroupBy_CouldNotParse + ex.getMessage(),
 					ex);
 		}
 		return it;
@@ -205,24 +209,22 @@ public class PatrolGroupBy implements IGroupBy {
 					if (SimpleListItem.class.isAssignableFrom(option.getSourceClass())) {
 						UuidItemType item = uuidLookup.get(items[i]);
 						if (item == null) {
-							throw new Exception("Could not resolve patrol filter: "+ asString() + ".");
+							throw new Exception(MessageFormat.format(
+									COULDNOTRESOLVE_ERRMSG, new Object[]{asString()}));
 						}
 						SimpleListItem it = FilterValidator.findValue(langCode, item.getValue().get(0), option.getSourceClass().getSimpleName(), session, warnings);
 						if (it == null) {
 							throw new Exception(
-									"Could not resolve patrol filter : "
-											+ asString()
-											+ ".  Could not find a value for "
-											+ option.getSourceClass()
-													.getSimpleName()
-											+ " that matches '"
-											+ item.getValue().get(0) + "'");
+									MessageFormat.format(
+											Messages.PatrolGroupBy_Error_NoMatchingValue,
+											new Object[]{asString(), option.getSourceClass().getSimpleName(),item.getValue().get(0) }));
 						} else {
-							warnings.add("The unique identifier for "
-									+ option.getGuiName()
-									+ " filter does not match any idnetifiers in the database.  However the name '"
-									+ item.getValue().get(0)
-									+ "' was matched and will be used in the query instead.");
+							warnings.add(
+									MessageFormat.format(
+											Messages.PatrolGroupBy_Error_NotUniqueId,
+											new Object[]{option.getGuiName(), item.getValue().get(0) }));
+									
+									
 							// update uuid
 							items[i] = SmartUtils.encodeHex(it.getUuid());
 						}
@@ -230,9 +232,8 @@ public class PatrolGroupBy implements IGroupBy {
 							.getSourceClass())) {
 						UuidItemType item = uuidLookup.get(items[i]);
 						if (item == null) {
-							throw new Exception(
-									"Could not resolve patrol filter: "
-											+ asString() + ".");
+							throw new Exception(MessageFormat.format(
+									COULDNOTRESOLVE_ERRMSG, new Object[]{asString()}));
 						}
 						// lookup employee
 						Employee e = FilterValidator.findEmployee(item.getId(),
@@ -242,17 +243,13 @@ public class PatrolGroupBy implements IGroupBy {
 							items[i] = SmartUtils.encodeHex(e.getUuid());
 						} else {
 							throw new Exception(
-									"Could not resolve patrol filter : "
-											+ asString()
-											+ ".  Could not find a matching employee with value '"
-											+ item.getValue().get(0) + " "
-											+ item.getValue().get(1) + " ["
-											+ item.getId() + "] ");
+									MessageFormat.format(
+									Messages.PatrolGroupBy_Error_NoEmployee,
+									new Object[]{asString(),item.getValue().get(0) + " " + item.getValue().get(1) + " [" + item.getId() + "] "})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 					} else {
-						throw new Exception(
-								"Could not resolve patrol filter : "
-										+ asString());
+						throw new Exception(MessageFormat.format(
+								COULDNOTRESOLVE_ERRMSG, new Object[]{asString()}));
 					}
 				}
 			}

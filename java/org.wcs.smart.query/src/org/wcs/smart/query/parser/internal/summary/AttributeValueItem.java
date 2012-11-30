@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -30,6 +31,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
@@ -81,17 +83,17 @@ public class AttributeValueItem implements IValueItem {
 	public AttributeValueItem(String key, boolean includeCategory){
 		this.key = key;
 		if (includeCategory){
-			String[] bits = key.split(":");
-			if(!bits[3].equals("n")){
-				throw new IllegalStateException("Cannot create attribute value items from non-numeric attributes");
+			String[] bits = key.split(":"); //$NON-NLS-1$
+			if(!bits[3].equals("n")){ //$NON-NLS-1$
+				throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);
 			}
 			this.categoryKey = bits[1];
 			this.attributeKey = bits[5];
 			this.aggregationKey = bits[4];
 		}else{
-			String[] bits = key.split(":");
-			if(!bits[1].equals("n")){
-				throw new IllegalStateException("Cannot create attribute value items from non-numeric attributes");
+			String[] bits = key.split(":"); //$NON-NLS-1$
+			if(!bits[1].equals("n")){ //$NON-NLS-1$
+				throw new IllegalStateException(Messages.AttributeValueItem_InvalidKey);
 			}
 			this.attributeKey = bits[3];
 			this.aggregationKey = bits[2];
@@ -129,19 +131,19 @@ public class AttributeValueItem implements IValueItem {
 		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
 		
 		if (att == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		StringBuilder name = new StringBuilder();
 		name.append(getAggregation().getGuiName());
-		name.append(" ");
+		name.append(" "); //$NON-NLS-1$
 		name.append(att.getName());
 		
 		if (categoryKey != null){
 			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
 			if (cat != null){
-				name.append( " (" + cat.getName() + ")");
+				name.append( " (" + cat.getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				name.append(" (not found) ");
+				name.append(" (not found) "); //$NON-NLS-1$
 			}
 		}
 		return name.toString();
@@ -153,19 +155,19 @@ public class AttributeValueItem implements IValueItem {
 	public String getFullName(Session session){
 		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
 		if (att == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		StringBuilder name = new StringBuilder();
 		name.append(getAggregation().getGuiName());
-		name.append(" ");
+		name.append(" "); //$NON-NLS-1$
 		name.append(att.getName());
 		
 		if (categoryKey != null){
 			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
 			if (cat != null){
-				name.append( " (" + cat.getFullCategoryName() + ")");
+				name.append( " (" + cat.getFullCategoryName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				name.append(" (not found) ");
+				name.append(" (not found) "); //$NON-NLS-1$
 			}
 		}
 		return name.toString();
@@ -245,7 +247,7 @@ public class AttributeValueItem implements IValueItem {
 				}
 			}
 			if (!found){
-				throw new Exception("Aggregation : " + aggregationKey + " not supported.");
+				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AggNoSupported, new Object[]{ aggregationKey }));
 			}
 		}
 	}

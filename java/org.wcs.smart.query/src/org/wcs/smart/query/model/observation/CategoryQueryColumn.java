@@ -46,7 +46,7 @@ public class CategoryQueryColumn extends QueryColumn{
 	 * @param level the level in the data model this column represents
 	 */
 	public CategoryQueryColumn(String name, int level){
-		super(name, "category:" + level, ColumnType.STRING);
+		super(name, "category:" + level, ColumnType.STRING); //$NON-NLS-1$
 		this.level = level;
 	}
 	
@@ -60,18 +60,18 @@ public class CategoryQueryColumn extends QueryColumn{
 			QueryResultItem item = (QueryResultItem) queryResultItem;
 			return getItemValue(item, level);
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	private static String getItemValue(QueryResultItem item, int level) {
 		String[] items = item.getCategories();
 		if (items == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		if (level < items.length){
 			return items[level];
 		}else{
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 

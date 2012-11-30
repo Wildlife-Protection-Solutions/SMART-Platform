@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 
 /**
@@ -77,7 +78,7 @@ public class QueryTypeDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Query Type:");
+		lbl.setText(Messages.QueryTypeDialog_QueryTypeLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		Composite option = new Composite(main, SWT.NONE);
@@ -94,9 +95,9 @@ public class QueryTypeDialog extends TitleAreaDialog {
 			}
 		}
 		
-		setTitle("Query Type");
-		setMessage("Select the type of query you want to create.");
-		getShell().setText("New Query");
+		setTitle(Messages.QueryTypeDialog_Title);
+		setMessage(Messages.QueryTypeDialog_Message);
+		getShell().setText(Messages.QueryTypeDialog_DialogText);
 		return composite;
 	}
 	
@@ -107,7 +108,7 @@ public class QueryTypeDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Create", true);
+		createButton(parent, IDialogConstants.OK_ID, Messages.QueryTypeDialog_CreateButton, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
 		getButton(IDialogConstants.OK_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);

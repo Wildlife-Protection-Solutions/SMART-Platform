@@ -67,7 +67,7 @@ public class GroupByPart {
 			IGroupBy it = (IGroupBy) iterator.next();
 			sb.append(it.asString());
 			if (iterator.hasNext()) {
-				sb.append(",");
+				sb.append(","); //$NON-NLS-1$
 			}
 		}
 		return sb.toString();

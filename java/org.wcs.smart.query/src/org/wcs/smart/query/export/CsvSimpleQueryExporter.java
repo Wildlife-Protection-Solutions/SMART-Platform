@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
@@ -87,7 +88,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 			if(temp != null){
 				data[i] = temp.toString();
 			}else{
-				data[i] = "";
+				data[i] = ""; //$NON-NLS-1$
 			}
 		}
 		writer.writeNext(data);
@@ -95,7 +96,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 
 	@Override
 	public String getId(){
-		return "org.wcs.smart.query.export.simple.csv";
+		return "org.wcs.smart.query.export.simple.csv"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -103,7 +104,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 	 */
 	@Override
 	public String getName() {
-		return "Comma Separated Values";
+		return Messages.CsvSimpleQueryExporter_CSV_ExpoterName;
 	}
 
 	/**
@@ -111,7 +112,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 	 */
 	@Override
 	public String getDefaultExtension() {
-		return "csv";
+		return "csv"; //$NON-NLS-1$
 	}
 
 

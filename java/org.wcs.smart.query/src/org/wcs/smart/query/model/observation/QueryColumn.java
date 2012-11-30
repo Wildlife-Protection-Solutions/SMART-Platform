@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IResultItem;
 
 /**
@@ -54,12 +55,12 @@ public abstract class QueryColumn implements Cloneable{
 	 * Possible column types
 	 */
 	public enum ColumnType{
-		INTEGER("Integer", java.sql.Types.INTEGER),
-		NUMBER("Double", java.sql.Types.DOUBLE),
-		STRING("String", java.sql.Types.VARCHAR),
-		BOOLEAN("Integer", java.sql.Types.BOOLEAN),
-		DATE("Date", java.sql.Types.DATE),
-		TIME("Date", java.sql.Types.TIME);
+		INTEGER("Integer", java.sql.Types.INTEGER), //$NON-NLS-1$
+		NUMBER("Double", java.sql.Types.DOUBLE), //$NON-NLS-1$
+		STRING("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		BOOLEAN("Integer", java.sql.Types.BOOLEAN), //$NON-NLS-1$
+		DATE("Date", java.sql.Types.DATE), //$NON-NLS-1$
+		TIME("Date", java.sql.Types.TIME); //$NON-NLS-1$
 		
 		public String geotoolsType;
 		public int sqlType;
@@ -195,7 +196,7 @@ public abstract class QueryColumn implements Cloneable{
 			return cloneColumns(queryColumns);
 		}
 		
-		Job j = new Job("load observation query columns"){
+		Job j = new Job(Messages.QueryColumn_LoadingObservationColumnJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -234,7 +235,7 @@ public abstract class QueryColumn implements Cloneable{
 					}
 
 					for (int i = 0; i < numCategory; i++) {
-						cols.add(new CategoryQueryColumn("Observation Category  " + i, i));
+						cols.add(new CategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader + i, i));
 					}
 					
 					//sort attributes alphabetically
@@ -283,7 +284,7 @@ public abstract class QueryColumn implements Cloneable{
 			return cloneColumns(patrolQueryColumns);
 		}
 		
-		Job j = new Job("load patrol query columns"){
+		Job j = new Job(Messages.QueryColumn_LoadingPatrolColumnJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

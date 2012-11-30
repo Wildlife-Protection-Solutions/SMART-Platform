@@ -39,6 +39,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -51,189 +52,189 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	/**
 	 * Location for raster query files to be placed
 	 */
-	private static final String QUERY_TEMP_FOLDER = "query_temp";
+	private static final String QUERY_TEMP_FOLDER = "query_temp"; //$NON-NLS-1$
 	
 	/**
 	 * The small 8x8 delete icon
 	 */
-	public static final String DELETE_MINI_ICON = "org.wcs.smart.query.deleteminiicon";
+	public static final String DELETE_MINI_ICON = "org.wcs.smart.query.deleteminiicon"; //$NON-NLS-1$
 	
 	/**
 	 * The main query icon
 	 */
-	public static final String QUERY_ICON = "org.wcs.smart.query.queryicon";
+	public static final String QUERY_ICON = "org.wcs.smart.query.queryicon"; //$NON-NLS-1$
 	
 	/**
 	 * The query folder
 	 */
-	public static final String FOLDER_ICON = "org.wcs.smart.query.folder";
+	public static final String FOLDER_ICON = "org.wcs.smart.query.folder"; //$NON-NLS-1$
 	
 	/**
 	 * The waypoint query
 	 */
-	public static final String WAYPOINT_QUERY_ICON = "org.wcs.smart.query.waypointquery";
+	public static final String WAYPOINT_QUERY_ICON = "org.wcs.smart.query.waypointquery"; //$NON-NLS-1$
 	
 	/**
 	 * The patrol query
 	 */
-	public static final String PATROL_QUERY_ICON = "org.wcs.smart.query.patrolquery";
+	public static final String PATROL_QUERY_ICON = "org.wcs.smart.query.patrolquery"; //$NON-NLS-1$
 
 	/**
 	 * The summary query
 	 */
-	public static final String SUMMARY_QUERY_ICON = "org.wcs.smart.query.summaryquery";
+	public static final String SUMMARY_QUERY_ICON = "org.wcs.smart.query.summaryquery"; //$NON-NLS-1$
 	
 
 	/**
 	 * The gridded query
 	 */
-	public static final String GRIDDED_SUMMARY_QUERY_ICON = "org.wcs.smart.query.griddedquery";
+	public static final String GRIDDED_SUMMARY_QUERY_ICON = "org.wcs.smart.query.griddedquery"; //$NON-NLS-1$
 	
 	/**
 	 * The calendar
 	 */
-	public static final String CALENDAR_ICON = "org.wcs.smart.query.calendar";
+	public static final String CALENDAR_ICON = "org.wcs.smart.query.calendar"; //$NON-NLS-1$
 	
 	/**
 	 * The calendar day icon
 	 */
-	public static final String CALENDAR_DAY_ICON = "org.wcs.smart.query.calendarday";
+	public static final String CALENDAR_DAY_ICON = "org.wcs.smart.query.calendarday"; //$NON-NLS-1$
 	
 	/**
 	 * The calendar week icon
 	 */
-	public static final String CALENDAR_WEEK_ICON = "org.wcs.smart.query.calendarweek";
+	public static final String CALENDAR_WEEK_ICON = "org.wcs.smart.query.calendarweek"; //$NON-NLS-1$
 	
 	/**
 	 * The calendar month icon
 	 */
-	public static final String CALENDAR_MONTH_ICON = "org.wcs.smart.query.calendarmonth";
+	public static final String CALENDAR_MONTH_ICON = "org.wcs.smart.query.calendarmonth"; //$NON-NLS-1$
 	
 	/**
 	 * The calendar year icon
 	 */
-	public static final String CALENDAR_YEAR_ICON = "org.wcs.smart.query.calendaryear";
+	public static final String CALENDAR_YEAR_ICON = "org.wcs.smart.query.calendaryear"; //$NON-NLS-1$
 	
 	/**
 	 * The group by icon
 	 */
-	public static final String GROUPBY_ICON = "org.wcs.smart.query.groupby";
+	public static final String GROUPBY_ICON = "org.wcs.smart.query.groupby"; //$NON-NLS-1$
 	
 	/**
 	 * The value icon
 	 */
-	public static final String VALUE_ICON = "org.wcs.smart.query.value";
+	public static final String VALUE_ICON = "org.wcs.smart.query.value"; //$NON-NLS-1$
 	
 	/**
 	 * The value distance icon
 	 */
-	public static final String VALUE_DISTANCE_ICON = "org.wcs.smart.query.valuedistance";
+	public static final String VALUE_DISTANCE_ICON = "org.wcs.smart.query.valuedistance"; //$NON-NLS-1$
 	
 	/**
 	 * The value num days icon
 	 */
-	public static final String VALUE_NUM_DAYS_ICON = "org.wcs.smart.query.valuenumdays";
+	public static final String VALUE_NUM_DAYS_ICON = "org.wcs.smart.query.valuenumdays"; //$NON-NLS-1$
 	
 	/**
 	 * The value number of employees icon
 	 */
-	public static final String VALUE_NUM_EMPLOYEES_ICON = "org.wcs.smart.query.valuenumemployees";
+	public static final String VALUE_NUM_EMPLOYEES_ICON = "org.wcs.smart.query.valuenumemployees"; //$NON-NLS-1$
 	/**
 	 * The value number of number of hours icon
 	 */
-	public static final String VALUE_NUM_HOURS_ICON = "org.wcs.smart.query.valuenumhours";
+	public static final String VALUE_NUM_HOURS_ICON = "org.wcs.smart.query.valuenumhours"; //$NON-NLS-1$
 	/**
 	 * The value number of nights icon
 	 */
-	public static final String VALUE_NUM_NIGHTS_ICON = "org.wcs.smart.query.valuenumnights";
+	public static final String VALUE_NUM_NIGHTS_ICON = Messages.QueryPlugIn_15;
 	/**
 	 * The value number of patrols icon
 	 */
-	public static final String VALUE_NUM_PATROLS_ICON = "org.wcs.smart.query.valuenumpatrols";
+	public static final String VALUE_NUM_PATROLS_ICON = "org.wcs.smart.query.valuenumpatrols"; //$NON-NLS-1$
 	
 	/**
 	 * Person days icons
 	 */
-	public static final String VALUE_PERSON_DAYS_ICON = "org.wcs.smart.query.valuepersondays";
+	public static final String VALUE_PERSON_DAYS_ICON = "org.wcs.smart.query.valuepersondays"; //$NON-NLS-1$
 	
 	/**
 	 * Person hours icons
 	 */
-	public static final String VALUE_PERSON_HOURS_ICON = "org.wcs.smart.query.valuepersonhours";
+	public static final String VALUE_PERSON_HOURS_ICON = "org.wcs.smart.query.valuepersonhours"; //$NON-NLS-1$
 	
 	
 	/**
 	 * Exclamation
 	 */
-	public static final String EXCLAMATION_ICON = "org.wcs.smart.query.exclamation";
+	public static final String EXCLAMATION_ICON = "org.wcs.smart.query.exclamation"; //$NON-NLS-1$
 	
 	/**
 	 * Row Header
 	 */
-	public static final String ROW_HEADER_ICON = "org.wcs.smart.query.rowheader";
+	public static final String ROW_HEADER_ICON = "org.wcs.smart.query.rowheader"; //$NON-NLS-1$
 	
 	/**
 	 * Column Header
 	 */
-	public static final String COLUMN_HEADER_ICON = "org.wcs.smart.query.columheader";
+	public static final String COLUMN_HEADER_ICON = "org.wcs.smart.query.columheader"; //$NON-NLS-1$
 	
 	/**
 	 * Area Filter Icon
 	 */
-	public static final String AREA_FILTER_ICON = "org.wcs.smart.query.areafilter";
+	public static final String AREA_FILTER_ICON = "org.wcs.smart.query.areafilter"; //$NON-NLS-1$
 	
 	
 	/**
 	 * Area Polygon Filter Icon
 	 */
-	public static final String AREA_POLYGON_FILTER_ICON = "org.wcs.smart.query.areapolyfilter";
+	public static final String AREA_POLYGON_FILTER_ICON = "org.wcs.smart.query.areapolyfilter"; //$NON-NLS-1$
 
 	/**
 	 * Grid ICon
 	 */
-	public static final String GRID_ICON = "org.wcs.smart.query.grid";
+	public static final String GRID_ICON = "org.wcs.smart.query.grid"; //$NON-NLS-1$
 	
 	/**
 	 * Query property extension id
 	 */
-	private static final String QUERY_PROPERTY_EXTENSION_ID = "org.wcs.smart.query.property";
+	private static final String QUERY_PROPERTY_EXTENSION_ID = "org.wcs.smart.query.property"; //$NON-NLS-1$
 	/*
 	 * Load images
 	 */
 	static {
-		addImage("images/icons/obj16/delete.png",DELETE_MINI_ICON);
+		addImage("images/icons/obj16/delete.png",DELETE_MINI_ICON); //$NON-NLS-1$
 		
-		addImage("images/icons/obj16/querypatrol.gif",QUERY_ICON);
-		addImage("images/icons/obj16/summary_query.png",SUMMARY_QUERY_ICON);
-		addImage("images/icons/obj16/folder.png",FOLDER_ICON);
-		addImage("images/icons/obj16/waypoint_query.png",WAYPOINT_QUERY_ICON);	
-		addImage("images/icons/obj16/patrol_query.png",PATROL_QUERY_ICON);
-		addImage("images/icons/obj16/gridded_query.png", GRIDDED_SUMMARY_QUERY_ICON);
-		addImage("images/icons/obj16/grid.png", GRID_ICON);
+		addImage("images/icons/obj16/querypatrol.gif",QUERY_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/summary_query.png",SUMMARY_QUERY_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/folder.png",FOLDER_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/waypoint_query.png",WAYPOINT_QUERY_ICON);	 //$NON-NLS-1$
+		addImage("images/icons/obj16/patrol_query.png",PATROL_QUERY_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/gridded_query.png", GRIDDED_SUMMARY_QUERY_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/grid.png", GRID_ICON); //$NON-NLS-1$
 		
-		addImage("images/icons/obj16/calendar.png",CALENDAR_ICON);
-		addImage("images/icons/obj16/calendar_day.png",CALENDAR_DAY_ICON);
-		addImage("images/icons/obj16/calendar_week.png",CALENDAR_WEEK_ICON);
-		addImage("images/icons/obj16/calendar_month.png",CALENDAR_MONTH_ICON);
+		addImage("images/icons/obj16/calendar.png",CALENDAR_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/calendar_day.png",CALENDAR_DAY_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/calendar_week.png",CALENDAR_WEEK_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/calendar_month.png",CALENDAR_MONTH_ICON); //$NON-NLS-1$
 			
-		addImage("images/icons/obj16/calendar_year.png",CALENDAR_YEAR_ICON);
-		addImage("images/icons/obj16/group_by.png",GROUPBY_ICON);
-		addImage("images/icons/obj16/values.png",VALUE_ICON);
+		addImage("images/icons/obj16/calendar_year.png",CALENDAR_YEAR_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/group_by.png",GROUPBY_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/values.png",VALUE_ICON); //$NON-NLS-1$
 		
-		addImage("images/icons/obj16/value_distance.png",VALUE_DISTANCE_ICON);
-		addImage("images/icons/obj16/value_numDays.png",VALUE_NUM_DAYS_ICON);
-		addImage("images/icons/obj16/value_numEmployees.png",VALUE_NUM_EMPLOYEES_ICON);
-		addImage("images/icons/obj16/value_numHours.png",VALUE_NUM_HOURS_ICON);
-		addImage("images/icons/obj16/value_numNights.png",VALUE_NUM_NIGHTS_ICON);
-		addImage("images/icons/obj16/value_numPatrol.png",VALUE_NUM_PATROLS_ICON);
-		addImage("images/icons/obj16/value_personDays.png",VALUE_PERSON_DAYS_ICON);
-		addImage("images/icons/obj16/value_personHours.png",VALUE_PERSON_HOURS_ICON);
-		addImage("images/icons/obj16/exclamation.png",EXCLAMATION_ICON);
-		addImage("images/icons/obj16/row_header.png",ROW_HEADER_ICON);
-		addImage("images/icons/obj16/column_header.png",COLUMN_HEADER_ICON);
+		addImage("images/icons/obj16/value_distance.png",VALUE_DISTANCE_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/value_numDays.png",VALUE_NUM_DAYS_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/value_numEmployees.png",VALUE_NUM_EMPLOYEES_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/value_numHours.png",VALUE_NUM_HOURS_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/value_numNights.png",VALUE_NUM_NIGHTS_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/value_numPatrol.png",VALUE_NUM_PATROLS_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/value_personDays.png",VALUE_PERSON_DAYS_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/value_personHours.png",VALUE_PERSON_HOURS_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/exclamation.png",EXCLAMATION_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/row_header.png",ROW_HEADER_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/column_header.png",COLUMN_HEADER_ICON); //$NON-NLS-1$
 		
-		addImage("images/icons/obj16/area_filter.png",AREA_FILTER_ICON);
-		addImage("images/icons/obj16/area_polygon.png",AREA_POLYGON_FILTER_ICON);	
+		addImage("images/icons/obj16/area_filter.png",AREA_FILTER_ICON); //$NON-NLS-1$
+		addImage("images/icons/obj16/area_polygon.png",AREA_POLYGON_FILTER_ICON);	 //$NON-NLS-1$
 	}
 	
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
@@ -273,7 +274,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	
 
 		//empty query temp directory
-		Job j = new Job("Cleaning queries directory"){
+		Job j = new Job(Messages.QueryPlugIn_QueryCleanUpJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -342,7 +343,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.QueryPlugIn_Error_DialogTitle, message);
 			}});
 	}
 	
@@ -359,8 +360,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(QUERY_PROPERTY_EXTENSION_ID);
 			try {
 				for (IConfigurationElement e : config) {
-					AbstractQueryPropertyProvider prop = (AbstractQueryPropertyProvider) e.createExecutableExtension("propertyProvider");
-					prop.setName(e.getAttribute("propertyName"));
+					AbstractQueryPropertyProvider prop = (AbstractQueryPropertyProvider) e.createExecutableExtension("propertyProvider"); //$NON-NLS-1$
+					prop.setName(e.getAttribute("propertyName")); //$NON-NLS-1$
 					propertyProviders.add( prop);
 				}
 			}catch (Exception ex){

@@ -67,7 +67,7 @@ public class BracketFilter implements IFilter{
 	 */
 	@Override
 	public String asString(){
-		return "(" + filter.asString() + ")";
+		return "(" + filter.asString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class BracketFilter implements IFilter{
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
-		return "(" + filter.asSql(tableMapping) + ")";
+		return "(" + filter.asSql(tableMapping) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	

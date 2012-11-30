@@ -55,9 +55,9 @@ public class CategoryAttributeFilter implements IFilter{
 	 * 
 	 */
 	public static CategoryAttributeFilter createStringFilter(String catAttributeIdentifier, Operator op, String value){
-		String bits[] = catAttributeIdentifier.split(":");
-		String catPart = bits[0] + ":" + bits[1];
-		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4];
+		String bits[] = catAttributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		value = SmartUtils.stripQuotes(value);
 		
@@ -75,9 +75,9 @@ public class CategoryAttributeFilter implements IFilter{
 	 * @return
 	 */
 	public static CategoryAttributeFilter createValueFilter(String catAttributeIdentifier, Operator op, Double value){
-		String bits[] = catAttributeIdentifier.split(":");
-		String catPart = bits[0] + ":" + bits[1];
-		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4];
+		String bits[] = catAttributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		CategoryFilter cat = CategoryFilter.createFilter(catPart);
 		AttributeFilter att = AttributeFilter.createValueFilter(attPart, op, value);
@@ -91,9 +91,9 @@ public class CategoryAttributeFilter implements IFilter{
 	 * @return
 	 */
 	public static CategoryAttributeFilter createBooleanFilter(String catAtributeIdentifier){
-		String bits[] = catAtributeIdentifier.split(":");
-		String catPart = bits[0] + ":" + bits[1];
-		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4];
+		String bits[] = catAtributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		CategoryFilter cat = CategoryFilter.createFilter(catPart);
 		AttributeFilter att = AttributeFilter.createBooleanFilter(attPart);
@@ -109,9 +109,9 @@ public class CategoryAttributeFilter implements IFilter{
 	 * @return
 	 */
 	public static CategoryAttributeFilter createListItemFilter(String catAtributeIdentifier, Operator op, String attributeItemKey){
-		String bits[] = catAtributeIdentifier.split(":");
-		String catPart = bits[0] + ":" + bits[1];
-		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4];
+		String bits[] = catAtributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		CategoryFilter cat = CategoryFilter.createFilter(catPart);
 		AttributeFilter att = AttributeFilter.createListItemFilter(attPart, op, attributeItemKey);
@@ -126,9 +126,9 @@ public class CategoryAttributeFilter implements IFilter{
 	 * @return
 	 */
 	public static CategoryAttributeFilter createTreeItemFilter(String catAtributeIdentifier, Operator op, String attributeItemKey){
-		String bits[] = catAtributeIdentifier.split(":");
-		String catPart = bits[0] + ":" + bits[1];
-		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4];
+		String bits[] = catAtributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		CategoryFilter cat = CategoryFilter.createFilter(catPart);
 		AttributeFilter att = AttributeFilter.createTreeItemFilter(attPart, op, attributeItemKey);
@@ -147,7 +147,7 @@ public class CategoryAttributeFilter implements IFilter{
 	 */
 	@Override
 	public String asString() {
-		return categoryFilter.asString() + ":" + attributeFilter.asString();
+		return categoryFilter.asString() + ":" + attributeFilter.asString(); //$NON-NLS-1$
 	}
 
 
@@ -156,7 +156,7 @@ public class CategoryAttributeFilter implements IFilter{
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		return "( " + categoryFilter.asSql( tableMapping ) + Operator.AND.asSql() + attributeFilter.asSql(tableMapping) + " )";
+		return "( " + categoryFilter.asSql( tableMapping ) + Operator.AND.asSql() + attributeFilter.asSql(tableMapping) + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 

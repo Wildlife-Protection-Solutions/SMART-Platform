@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.parser.internal.filter;
 
+import org.wcs.smart.query.internal.Messages;
+
 /**
  * Filter expression operator
  * 
@@ -32,52 +34,52 @@ public class Operator {
 	/**
 	 * Equals (=) operator 
 	 */
-	public static Operator EQUALS = new Operator("=", "=", "=");
+	public static Operator EQUALS = new Operator(Messages.Operator_Equals, "=", "="); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * Less Than (<) operator 
 	 */
-	public static Operator LESSTHAN = new Operator("<", "<", "<");
+	public static Operator LESSTHAN = new Operator(Messages.Operator_LessThan, "<", "<"); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * Less Than Equals (<=) operator 
 	 */
-	public static Operator LESSTHANEQUALS = new Operator("<=", "<=", "<=");
+	public static Operator LESSTHANEQUALS = new Operator(Messages.Operator_LessThanEqual, "<=", "<="); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * Great Than (>) operator 
 	 */
-	public static Operator GREATERTHAN = new Operator(">", ">", ">");
+	public static Operator GREATERTHAN = new Operator(Messages.Operator_GreaterThan, ">", ">"); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * Great Than Equals (>=) operator 
 	 */
-	public static Operator GREATERTHANEQUALS = new Operator(">=", ">=", ">=");
+	public static Operator GREATERTHANEQUALS = new Operator(Messages.Operator_GreaterThanEqual, ">=", ">="); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * Not Equals (!=) operator 
 	 */
-	public static Operator NOTEQUALS = new Operator("!=", "<>", "!=");
+	public static Operator NOTEQUALS = new Operator(Messages.Operator_NotEqual, "<>", "!="); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * String like operator 
 	 */
-	public static Operator STR_EQUALS = new Operator("equals", "=", "equals");
+	public static Operator STR_EQUALS = new Operator(Messages.Operator_StrEquals, "=", "equals"); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * String contains operator 
 	 */
-	public static Operator STR_CONTAINS = new Operator("contains", "like", "contains");
+	public static Operator STR_CONTAINS = new Operator(Messages.Operator_StrContains, "like", "contains"); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * String not contains operator
 	 */
-	public static Operator STR_NOTCONTAINS = new Operator("not contains", "not like", "notcontains");
+	public static Operator STR_NOTCONTAINS = new Operator(Messages.Operator_StrNotContains, "not like", "notcontains"); //$NON-NLS-2$ //$NON-NLS-1$
 	
 	/**
 	 * Boolean and operator
 	 */
-	public static Operator AND = new Operator("AND", "AND", "and");
+	public static Operator AND = new Operator(Messages.Operator_AND, "AND", "and"); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * Boolean or operator
 	 */
-	public static Operator OR = new Operator("OR", "OR", "or");
+	public static Operator OR = new Operator(Messages.Operator_OR, "OR", "or"); //$NON-NLS-2$ //$NON-NLS-1$
 	/**
 	 * Boolean not operator
 	 */
-	public static Operator NOT = new Operator("NOT", "NOT", "not");
+	public static Operator NOT = new Operator(Messages.Operator_NOT, "NOT", "not"); //$NON-NLS-2$ //$NON-NLS-1$
 
 	/**
 	 * Valid numeric operators
@@ -108,7 +110,7 @@ public class Operator {
 				return NUMERIC_OPS[i];
 			}
 		}
-		if (value.equalsIgnoreCase("<>")){
+		if (value.equalsIgnoreCase("<>")){ //$NON-NLS-1$
 			return NOTEQUALS;
 		}
 		for (int i = 0; i < BOOLEANS_OPS.length; i ++){

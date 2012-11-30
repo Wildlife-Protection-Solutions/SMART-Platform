@@ -22,6 +22,7 @@
 package org.wcs.smart.query.parser.internal.summary;
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,6 +33,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
@@ -58,10 +60,11 @@ public class DateGroupBy implements IGroupBy {
 	 * @param key the date group by key
 	 */
 	public DateGroupBy(String key){
-		String opPart = key.split(":")[1];		
+		String opPart = key.split(":")[1];		 //$NON-NLS-1$
 		this.op = PatrolQueryOptions.findDateGroupByOption(opPart);
 		if (this.op == null){
-			throw new IllegalStateException("Date group by " + opPart + " not supported.");
+			throw new IllegalStateException(MessageFormat.format(
+					Messages.DateGroupBy_GroupByNoSupported, new Object[]{opPart}));
 		}
 	}
 	
@@ -69,7 +72,7 @@ public class DateGroupBy implements IGroupBy {
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getKeyPart()
 	 */
 	public String getKeyPart(){
-		return "date:" + op.getKey();
+		return "date:" + op.getKey(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -123,12 +126,12 @@ public class DateGroupBy implements IGroupBy {
 		Date startdate = new Date();
 		Date enddate = new Date();
 		if (df == null){
-			throw new IllegalStateException("Invalid date filter.");
+			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		}else{
 			if (df.getDateFilterOption() == PatrolQueryOptions.DATE_FILTER_OP.ALL){
-				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca";
+				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
 				Query q = session.createQuery(hql);
-				q.setParameter("ca", SmartDB.getCurrentConservationArea());
+				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null){
 					startdate = (java.sql.Timestamp)data.get(0);
@@ -162,7 +165,7 @@ public class DateGroupBy implements IGroupBy {
 			cals.set(Calendar.DAY_OF_MONTH, 1);
 			cale.set(Calendar.DAY_OF_MONTH, cale.getActualMaximum(Calendar.DAY_OF_MONTH));
 			while(cals.before(cale)){
-				String key = (cals.get(Calendar.MONTH)+1) + "/" +cals.get(Calendar.YEAR);
+				String key = (cals.get(Calendar.MONTH)+1) + "/" +cals.get(Calendar.YEAR); //$NON-NLS-1$
 				items.add(new ListItem(null, key,key));
 				cals.add(Calendar.MONTH, 1);
 			}

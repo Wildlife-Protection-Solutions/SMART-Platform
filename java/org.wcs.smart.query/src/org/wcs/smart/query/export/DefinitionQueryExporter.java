@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.query.xml.QueryXmlManager;
@@ -48,7 +49,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public abstract class DefinitionQueryExporter implements IQueryExporter {
 
-	public static final String QUERY_DEFINTION_EXPORTER_ID = "org.wcs.smart.query.export.definition";
+	public static final String QUERY_DEFINTION_EXPORTER_ID = "org.wcs.smart.query.export.definition"; //$NON-NLS-1$
 
 	@Override
 	public String getId(){
@@ -60,7 +61,7 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 	 */
 	@Override
 	public String getName() {
-		return "Query Definition";
+		return Messages.DefinitionQueryExporter_ExporterName;
 	}
 
 	/**
@@ -68,7 +69,7 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 	 */
 	@Override
 	public String getDefaultExtension() {
-		return "xml";
+		return "xml"; //$NON-NLS-1$
 	}
 
 
