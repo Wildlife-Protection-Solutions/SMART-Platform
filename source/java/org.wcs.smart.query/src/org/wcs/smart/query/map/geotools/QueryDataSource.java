@@ -32,6 +32,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
@@ -46,7 +47,7 @@ public class QueryDataSource extends AbstractDataStore{
 	/**
 	 * waypoint query data source
 	 */
-	public static final String WAYPOINT_TYPE = "Waypoint";
+	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	
 	private ObservationQuery query;
 	
@@ -99,7 +100,7 @@ public class QueryDataSource extends AbstractDataStore{
 					type = createWaypointSchema();
 				} 
 			}catch(SchemaException ex){
-				throw new IOException("Schema could not be generated. " + ex.getMessage(), ex);
+				throw new IOException(Messages.QueryDataSource_SchemaError + ex.getMessage(), ex);
 			}
 			schemas.put(typeName, type);
 		}
@@ -114,7 +115,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(query.getQueryColumns()));
+		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
 		return type;
 	}
 	
@@ -123,26 +124,26 @@ public class QueryDataSource extends AbstractDataStore{
 		
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("fid:String");
+		sb.append("fid:String"); //$NON-NLS-1$
 		HashSet<String> names = new HashSet<String>();
 		for (int i = 0; i < columns.size(); i++){
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 			String name = columns.get(i).getName();
-			name = name.replaceAll(" ", "_");
-			name = name.replaceAll("[^a-zA-Z0-9_]", "");
+			name = name.replaceAll(" ", "_");  //$NON-NLS-1$//$NON-NLS-2$
+			name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			String tempname = name;
 			int cnt = 1;
 			while(names.contains(tempname)){
-				tempname = name +"_" + cnt;
+				tempname = name + "_" + cnt; //$NON-NLS-1$
 				cnt++;
 			}
 			
 			sb.append(tempname);
-			sb.append(":");
+			sb.append(":"); //$NON-NLS-1$
 			sb.append(columns.get(i).getType().geotoolsType);
 		}
-		sb.append(",geom:Point:srid=4326");
+		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
 		
 		return sb.toString();
 		

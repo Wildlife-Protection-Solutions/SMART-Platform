@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.SummaryQuery;
@@ -76,7 +77,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 		SummaryQuery sumQuery = (SummaryQuery)query;
 		SummaryQueryResult results = sumQuery.getLastResults();
 		if (results == null){
-			throw new Exception("You must run the query before you can export the results.");
+			throw new Exception(Messages.CsvSummaryExporter_QueryNotRun);
 		}
 		
 		//column headers
@@ -85,7 +86,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 			String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
 		
 			for (int j = 0; j < results.getRowHeaders().size(); j ++){
-				data[j] = "";
+				data[j] = ""; //$NON-NLS-1$
 			}
 			for (int k = 0; k < results.getColumnHeaderValues()[i].length; k ++){
 				data[k + results.getRowHeaders().size()]= results.getColumnHeaderValues()[i][k].getName();
@@ -97,7 +98,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 		//value headers
 		String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
 		for (int j = 0; j < results.getRowHeaders().size(); j ++){
-			data[j] = "";
+			data[j] = ""; //$NON-NLS-1$
 		}
 		for (int k = 0; k < results.getValueHeaders().size(); k ++){
 			data[k + results.getRowHeaders().size()]= results.getValueHeaders().get(k).getName();
@@ -126,7 +127,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 	
 	@Override
 	public String getId(){
-		return "org.wcs.smart.query.export.summary.csv";
+		return "org.wcs.smart.query.export.summary.csv"; //$NON-NLS-1$
 	}
 
 	/**
@@ -134,7 +135,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 	 */
 	@Override
 	public String getName() {
-		return "Comma Separated Values";
+		return Messages.CsvSummaryExporter_CSV_ExporterName;
 	}
 
 	/**
@@ -142,7 +143,7 @@ public class CsvSummaryExporter implements IQueryExporter {
 	 */
 	@Override
 	public String getDefaultExtension() {
-		return "csv";
+		return "csv"; //$NON-NLS-1$
 	}
 
 }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.query.internal.Messages;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geomgraph.Edge;
@@ -38,7 +39,7 @@ import com.vividsolutions.jts.geomgraph.Edge;
 public class Grid {
 
 	public static final int MAX_GRID_CELLS = 1000*1000;
-	public static final Exception GRID_TO_BIG_EXCEPTION = new Exception("Grid too large.  Increase the grid size.");
+	public static final Exception GRID_TO_BIG_EXCEPTION = new Exception(Messages.Grid_GridToLargeError);
 	
 	private double EPSILON = 0.0000000001;
 	
@@ -183,11 +184,11 @@ public class Grid {
 	 */
 	public void printGrid(int width, int height){
 		for (double i = originX; i <= width*cellSize + originX; i += cellSize){
-			System.out.println("LINESTRING(" + i + " " + originY + "," + i + " " + (originY + height * cellSize) + ")");
+			System.out.println("LINESTRING(" + i + " " + originY + "," + i + " " + (originY + height * cellSize) + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		
 		for (double i = originY; i <= height * cellSize + originY; i += cellSize){
-			System.out.println("LINESTRING(" + originX + " " + i + "," + (originX + width * cellSize) + " " + i + ")");
+			System.out.println("LINESTRING(" + originX + " " + i + "," + (originX + width * cellSize) + " " + i + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 	}
 }

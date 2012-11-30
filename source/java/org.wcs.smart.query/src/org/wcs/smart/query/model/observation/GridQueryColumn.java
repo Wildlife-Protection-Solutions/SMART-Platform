@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.observation;
 
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IResultItem;
 
@@ -41,9 +42,9 @@ public class GridQueryColumn extends QueryColumn{
 	 * The defined fixed columns.
 	 */
 	public enum GridColumns{
-		TILE_X("Tile X ID", ColumnType.INTEGER,"tile_x"),
-		TILE_Y("Tile Y ID", ColumnType.INTEGER, "tile_y"),
-		VALUE("Value", ColumnType.NUMBER,"value");
+		TILE_X(Messages.GridQueryColumn_TileXIdColumnName, ColumnType.INTEGER,"tile_x"), //$NON-NLS-1$
+		TILE_Y(Messages.GridQueryColumn_TileYIdColumnName, ColumnType.INTEGER, "tile_y"), //$NON-NLS-1$
+		VALUE(Messages.GridQueryColumn_ValueColumnName, ColumnType.NUMBER,"value"); //$NON-NLS-1$
 		
 		private String guiName;
 		private ColumnType type;
@@ -84,7 +85,7 @@ public class GridQueryColumn extends QueryColumn{
 				return ((GridResultItem) item).getValue();
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 

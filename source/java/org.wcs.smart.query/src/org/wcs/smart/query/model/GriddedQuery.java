@@ -42,6 +42,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyGridEngine;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
@@ -93,7 +94,7 @@ public class GriddedQuery extends Query {
 	 */
 	public GriddedQuery(){
 		super();
-		setName("<No Name Gridded Summary>");
+		setName(Messages.GriddedQuery_DefaultQueryName);
 		caFilter = new ConservationAreaFilter();
 		if (SmartDB.getCurrentConservationArea() != null){
 			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
@@ -397,7 +398,7 @@ public class GriddedQuery extends Query {
 		//TODO: validation on the query string and/or definition
 		//return the error if there is on, null if it's ok.
 		if (getQueryDefinition() != null && getQueryDefinition().getGridSize() <= 0){
-			return "Invalid Grid Size";
+			return Messages.GriddedQuery_InvalidGridSize;
 		}
 		return null;
 	}
@@ -459,7 +460,7 @@ public class GriddedQuery extends Query {
 			try{
 				query = parseQuery();
 			} catch (Exception ex) {
-				QueryPlugIn.displayLog("Could not parse query.", ex);
+				QueryPlugIn.displayLog(Messages.GriddedQuery_ParseError, ex);
 			}
 		}
 		return query;
@@ -540,13 +541,13 @@ public class GriddedQuery extends Query {
 			fName = String.valueOf(System.nanoTime());
 		} else {
 			// ensure filename is unique for each raster service created
-			fName = SmartUtils.encodeHex(getUuid()) + "_"
+			fName = SmartUtils.encodeHex(getUuid()) + "_" //$NON-NLS-1$
 					+ String.valueOf(System.nanoTime());
 		}
 
 		StringBuilder pathBuilder = new StringBuilder(50);
 		pathBuilder.append(dir.getAbsolutePath()).append(File.separator)
-				.append(fName).append(".tiff");
+				.append(fName).append(".tiff"); //$NON-NLS-1$
 		
 		lastRasterFile = new File(pathBuilder.toString());
 		return lastRasterFile;

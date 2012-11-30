@@ -67,7 +67,7 @@ public class NotExpression implements IFilter {
 	 */
 	@Override
 	public String asString() {
-		return "NOT " + filter.asString();
+		return "NOT " + filter.asString(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -75,7 +75,7 @@ public class NotExpression implements IFilter {
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
-		return "NOT ( " + filter.asSql(tableMapping) + ")";
+		return "NOT ( " + filter.asSql(tableMapping) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**

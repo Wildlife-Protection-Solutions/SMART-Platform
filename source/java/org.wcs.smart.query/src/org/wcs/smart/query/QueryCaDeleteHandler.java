@@ -26,6 +26,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Conservation area delete handler for queries and folders
@@ -45,45 +46,45 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
-		monitor.subTask("Deleting Observation Queries");
+		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingObservationQueries);
 		deleteObservationQueries(ca, session);
-		monitor.subTask("Deleting Summary Queries");
+		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingSummaryQueries);
 		deleteSummaryQueries(ca, session);
-		monitor.subTask("Deleting Patrol Queries");
+		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingPatrolQueries);
 		deletePatrolQueries(ca, session);
-		monitor.subTask("Deleting Gridded Queries");
+		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingGriddedQueries);
 		deleteGriddedQueries(ca, session);		
-		monitor.subTask("Deleting Query Folders");
+		monitor.subTask(Messages.QueryCaDeleteHandler_Progress_DeletingQueryFolders);
 		deleteQueryFolders(ca, session);		
 	}
 
 	private void deleteObservationQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from ObservationQuery where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from ObservationQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteSummaryQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from SummaryQuery where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from SummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deletePatrolQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from PatrolQuery where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from PatrolQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteGriddedQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from GriddedQuery where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from GriddedQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteQueryFolders(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from QueryFolder where conservationArea = :ca");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("delete from QueryFolder where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	

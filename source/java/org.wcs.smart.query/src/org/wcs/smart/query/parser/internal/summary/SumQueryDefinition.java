@@ -94,6 +94,6 @@ public class SumQueryDefinition {
 	 * @return the string representation of the query
 	 */
 	public String asQuery(){
-		return valuePart.asString() + "|" + rowGroupBy.asString() + "|" + colGroupBy.asString() + "|" + (queryFilter == null ? "" : queryFilter.asString());
+		return valuePart.asString() + "|" + rowGroupBy.asString() + "|" + colGroupBy.asString() + "|" + (queryFilter == null ? "" : queryFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 }

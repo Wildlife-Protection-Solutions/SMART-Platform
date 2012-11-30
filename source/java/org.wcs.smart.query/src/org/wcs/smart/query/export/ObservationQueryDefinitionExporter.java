@@ -60,13 +60,13 @@ public class ObservationQueryDefinitionExporter extends DefinitionQueryExporter 
 	@Override
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery) throws Exception {
 		QueryPart defPart = new QueryPart();
-		defPart.setKey("definition");
+		defPart.setKey("definition"); //$NON-NLS-1$
 		defPart.setValue( ((SimpleQuery)query).getQueryFilter() );
 		xmlQuery.getQueryPart().add(defPart);
 		
 		
 		defPart = new QueryPart();
-		defPart.setKey("columns");
+		defPart.setKey("columns"); //$NON-NLS-1$
 		defPart.setValue( ((SimpleQuery)query).getVisibleColumns() );
 		xmlQuery.getQueryPart().add(defPart);
 				

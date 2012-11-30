@@ -83,7 +83,7 @@ public class GridQueryDefinition {
 	 * @return the string representation of the query
 	 */
 	public String asQuery(){
-		return valueItem.asString() + "|" + gridSize.toString() + "|" + (queryFilter == null ? "" : queryFilter.asString());
+		return valueItem.asString() + "|" + gridSize.toString() + "|" + (queryFilter == null ? "" : queryFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 }

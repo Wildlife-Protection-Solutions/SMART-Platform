@@ -39,9 +39,9 @@ import org.wcs.smart.query.model.QueryInput;
  */
 public class QueryFolderEditablePropertyTester extends PropertyTester {
 
-	public static final String NEWFOLDER_OP = "newfolder";
-	public static final String DELETE_OP = "delete";
-	public static final String RENAME_OP = "rename";
+	public static final String NEWFOLDER_OP = "newfolder"; //$NON-NLS-1$
+	public static final String DELETE_OP = "delete"; //$NON-NLS-1$
+	public static final String RENAME_OP = "rename"; //$NON-NLS-1$
 
 	public QueryFolderEditablePropertyTester() {
 	}

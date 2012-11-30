@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.filter;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.formulaDnd.AreaDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
@@ -48,7 +50,7 @@ public class AreaFilter implements IFilter {
 	 * should be applied to. 
 	 */
 	public enum AreaFilterGeometryType{
-		WAYPOINT("wp"), TRACK("t");
+		WAYPOINT("wp"), TRACK("t");  //$NON-NLS-1$  //$NON-NLS-2$
 		
 		String key;
 		AreaFilterGeometryType(String key){
@@ -67,7 +69,7 @@ public class AreaFilter implements IFilter {
 	 * @return
 	 */
 	public static AreaFilter createFilter(String key){
-		String[] bits = key.split(":");
+		String[] bits = key.split(":");  //$NON-NLS-1$
 		AreaFilterGeometryType geomType = null;
 		if (bits[1].equalsIgnoreCase(AreaFilterGeometryType.WAYPOINT.key)){
 			geomType = AreaFilterGeometryType.WAYPOINT;
@@ -98,7 +100,7 @@ public class AreaFilter implements IFilter {
 	 */
 	@Override
 	public String asString() {
-		return "area:" +geomType.key + ":" + type + ":" + key;
+		return "area:" +geomType.key + ":" + type + ":" + key;  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 	}
 
 	/**
@@ -129,16 +131,16 @@ public class AreaFilter implements IFilter {
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
 		StringBuilder sb = new StringBuilder();
 		if (geomType == AreaFilterGeometryType.WAYPOINT){
-			sb.append("smart.pointinpolygon(" );
-			sb.append(tableMapping.get(Waypoint.class) + ".x, ");
-			sb.append(tableMapping.get(Waypoint.class) + ".y, ");
-			sb.append(  type.name() + "_" + key + ".geom");
-			sb.append(")");
+			sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
+			sb.append(tableMapping.get(Waypoint.class) + ".x, ");  //$NON-NLS-1$
+			sb.append(tableMapping.get(Waypoint.class) + ".y, ");  //$NON-NLS-1$
+			sb.append(  type.name() + "_" + key + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(")");  //$NON-NLS-1$
 		}else if (geomType == AreaFilterGeometryType.TRACK){
-			sb.append("smart.intersects(");
-			sb.append(tableMapping.get(Track.class) + ".geometry, ");
-			sb.append(type.name() + "_" + key + ".geom");
-			sb.append(")");
+			sb.append("smart.intersects(");  //$NON-NLS-1$
+			sb.append(tableMapping.get(Track.class) + ".geometry, ");  //$NON-NLS-1$
+			sb.append(type.name() + "_" + key + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(")");  //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
@@ -179,9 +181,11 @@ public class AreaFilter implements IFilter {
 	 */
 	private Area loadArea(Session session){
 		@SuppressWarnings("unchecked")
-		List<Area> areas = session.createCriteria(Area.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("type", this.type)).add(Restrictions.eq("keyId", this.key)).list();
+		List<Area> areas = session.createCriteria(Area.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("type", this.type)).add(Restrictions.eq("keyId", this.key)).list(); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 		if (areas.size() == 0){
-			throw new IllegalStateException("Could not find area filter for type " + this.type.getGuiName() + " and key " +this.key);
+			throw new IllegalStateException(
+					MessageFormat.format(
+							Messages.AreaFilter_InvalidAreaKey, new Object[]{this.type.getGuiName(), this.key}));
 		}else{
 			return areas.get(0);
 		}

@@ -58,7 +58,7 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 		
 		for (QueryPart part : qt.getQueryPart()) {
 			
-			if (part.getKey().equalsIgnoreCase("definition")) {
+			if (part.getKey().equalsIgnoreCase("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
 					
 					griddedQuery.setQuery(part.getValue());
@@ -81,7 +81,7 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 						session.close();
 					}
 				}
-			}else if (part.getKey().equalsIgnoreCase("crs")){
+			}else if (part.getKey().equalsIgnoreCase("crs")){ //$NON-NLS-1$
 				griddedQuery.setCrsDefinition(part.getValue());
 			}
 		}

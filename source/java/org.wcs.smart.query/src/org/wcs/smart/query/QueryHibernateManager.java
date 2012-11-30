@@ -22,6 +22,7 @@
 package org.wcs.smart.query;
 
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
@@ -55,17 +57,17 @@ public class QueryHibernateManager {
 	/**
 	 * 
 	 */
-	public static final String MY_QUERIES_NAME = "My Queries";
+	public static final String MY_QUERIES_NAME = Messages.QueryHibernateManager_MyQueryFolderName;
 	/**
 	 * 
 	 */
-	public static final String CONSERVATION_AREA_QUERIES_NAME = "Conservation Area Queries";
+	public static final String CONSERVATION_AREA_QUERIES_NAME = Messages.QueryHibernateManager_CaQueryFolderName;
 	
 	public static final byte[] CA_QUERY_KEY = new byte[]{1};
 	public static final byte[] USER_QUERY_KEY = new byte[]{2};
 	
 	
-	private static NumberFormat QUERY_ID_FORMATTER = new DecimalFormat("000000");
+	private static NumberFormat QUERY_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
 	
 	
 	/**
@@ -83,20 +85,20 @@ public class QueryHibernateManager {
 	 * @return the newly generated query id
 	 */
 	public static String generateQueryId(Session session){
-		Query a = session.createQuery("select max(id) from ObservationQuery where conservationArea = :ca");
-		a.setParameter("ca", SmartDB.getCurrentConservationArea());
+		Query a = session.createQuery("select max(id) from ObservationQuery where conservationArea = :ca"); //$NON-NLS-1$
+		a.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> dataa = a.list();
 		
-		Query b = session.createQuery("select max(id) from SummaryQuery where conservationArea = :ca ");
-		b.setParameter("ca", SmartDB.getCurrentConservationArea());
+		Query b = session.createQuery("select max(id) from SummaryQuery where conservationArea = :ca "); //$NON-NLS-1$
+		b.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> datab = b.list();
 		
-		Query c = session.createQuery("select max(id) from PatrolQuery where conservationArea = :ca ");
-		c.setParameter("ca", SmartDB.getCurrentConservationArea());
+		Query c = session.createQuery("select max(id) from PatrolQuery where conservationArea = :ca "); //$NON-NLS-1$
+		c.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> datac = c.list();
 		
-		Query d = session.createQuery("select max(id) from GriddedQuery where conservationArea = :ca ");
-		d.setParameter("ca", SmartDB.getCurrentConservationArea());
+		Query d = session.createQuery("select max(id) from GriddedQuery where conservationArea = :ca "); //$NON-NLS-1$
+		d.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> datad = d.list();
 
 		int valuea = 1;
@@ -126,9 +128,9 @@ public class QueryHibernateManager {
 	 * @return all patrol ids for the current conservation area
 	 */
 	public static List<String> getPatrolIds(Session session){
-		String hql = "Select id FROM Patrol WHERE conservationArea = :ca";
+		String hql = "Select id FROM Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
 		Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<String> data = q.list();
 		return data;
@@ -168,16 +170,16 @@ public class QueryHibernateManager {
 		if (includeCaFolder){
 			@SuppressWarnings("unchecked")
 			List<QueryFolder> rootFolders = session.createCriteria(QueryFolder.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.add(Restrictions.isNull("employee"))
-					.add(Restrictions.isNull("parentFolder")).list();
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.isNull("employee")) //$NON-NLS-1$
+					.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
 						caRootFolder.setChildren(rootFolders);
 		}
 			@SuppressWarnings("unchecked")
 		List<QueryFolder> userFolders = session.createCriteria(QueryFolder.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("employee", SmartDB.getCurrentEmployee()))
-				.add(Restrictions.isNull("parentFolder")).list();
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("employee", SmartDB.getCurrentEmployee())) //$NON-NLS-1$
+				.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
 			
 		userRootFolder.setChildren(userFolders);
 
@@ -198,14 +200,14 @@ public class QueryHibernateManager {
 		for (int i = 0; i < QueryType.values().length; i++) {
 
 			Query hquery = session
-					.createQuery("SELECT a.uuid, a.name, a.folder.uuid, a.isShared, a.id "
-							+ "FROM "
+					.createQuery("SELECT a.uuid, a.name, a.folder.uuid, a.isShared, a.id " //$NON-NLS-1$
+							+ "FROM " //$NON-NLS-1$
 							+ QueryType.values()[i].getObjectName()
-							+ " a "
-							+ "WHERE a.conservationArea = :ca "
-							+ "and (a.isShared ='true' or a.owner= :user)");
-			hquery.setParameter("ca", SmartDB.getCurrentConservationArea());
-			hquery.setParameter("user", SmartDB.getCurrentEmployee());
+							+ " a " //$NON-NLS-1$
+							+ "WHERE a.conservationArea = :ca " //$NON-NLS-1$
+							+ "and (a.isShared ='true' or a.owner= :user)"); //$NON-NLS-1$
+			hquery.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+			hquery.setParameter("user", SmartDB.getCurrentEmployee()); //$NON-NLS-1$
 
 			List<?> results = hquery.list();
 			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
@@ -247,9 +249,9 @@ public class QueryHibernateManager {
 	 * @return attribute loaded from the database or <code>null</code> if attribute not found
 	 */
 	public static Attribute getAttribute(Session session, String attributeKey){
-		Query q = session.createQuery("From Attribute where conservationArea = :ca and keyid = :key");
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", attributeKey);
+		Query q = session.createQuery("From Attribute where conservationArea = :ca and keyid = :key"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("key", attributeKey); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Attribute> results = q.list();
 		if (results.size() != 1 ){
@@ -270,10 +272,10 @@ public class QueryHibernateManager {
 	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
 	 */
 	public static AttributeListItem getAttributeListItem(Session session, String attributeKey, String attributeListItem){
-		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey");
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", attributeListItem);
-		q.setParameter("attributeKey", attributeKey);
+		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("key", attributeListItem); //$NON-NLS-1$
+		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<AttributeListItem> results = q.list();
 		if (results.size() != 1 ){
@@ -292,10 +294,10 @@ public class QueryHibernateManager {
 	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
 	 */
 	public static AttributeTreeNode getAttributeTreeNode(Session session, String attributeKey, String attributeTreeHKey){
-		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute");
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", attributeTreeHKey);
-		q.setParameter("attribute", attributeKey);
+		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("key", attributeTreeHKey); //$NON-NLS-1$
+		q.setParameter("attribute", attributeKey); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<AttributeTreeNode> results = q.list();
 		if (results.size() != 1 ){
@@ -316,7 +318,7 @@ public class QueryHibernateManager {
 	 * @throws Exception
 	 */
 	public static ListItem getPatrolMandate(Session session, String value)throws Exception{
-		return getListItem(session, "PatrolMandate", value);
+		return getListItem(session, "PatrolMandate", value); //$NON-NLS-1$
 	}
 	
 	/**
@@ -327,7 +329,7 @@ public class QueryHibernateManager {
 	 * @throws Exception
 	 */
 	public static ListItem getStation(Session session, String value)throws Exception{
-		return getListItem(session, "Station", value);
+		return getListItem(session, "Station", value); //$NON-NLS-1$
 	}
 	
 	/**
@@ -338,7 +340,7 @@ public class QueryHibernateManager {
 	 * @throws Exception
 	 */
 	public static ListItem getTeam(Session session, String value)throws Exception{
-		return getListItem(session, "Team", value);
+		return getListItem(session, "Team", value); //$NON-NLS-1$
 	}
 	
 	/**
@@ -349,7 +351,7 @@ public class QueryHibernateManager {
 	 * @throws Exception
 	 */
 	public static ListItem getTransportType(Session session, String value)throws Exception{
-		return getListItem(session, "PatrolTransportType", value);
+		return getListItem(session, "PatrolTransportType", value); //$NON-NLS-1$
 	}
 	
 	/**
@@ -362,15 +364,15 @@ public class QueryHibernateManager {
 	 * @throws Exception
 	 */
 	private static ListItem getListItem(Session session, String clazz, String value)throws Exception{
-		Query q = session.createQuery("SELECT uuid, name FROM " + clazz + " WHERE uuid =:uuid");
-		q.setParameter("uuid", SmartUtils.decodeHex(value));
+		Query q = session.createQuery("SELECT uuid, name FROM " + clazz + " WHERE uuid =:uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("uuid", SmartUtils.decodeHex(value)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1){
 			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
 		}else{
-			QueryPlugIn.log("Error loading " + clazz + " value '" + value + "' for query.", null);
-			return new ListItem("");
+			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadError, new Object[]{clazz, value}), null);
+			return new ListItem(""); //$NON-NLS-1$
 		}
 	}
 	
@@ -382,17 +384,17 @@ public class QueryHibernateManager {
 	 * @throws Exception
 	 */
 	public static ListItem getEmployee(Session session, String value) throws Exception{
-		Query q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid");
+		Query q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid"); //$NON-NLS-1$
 		
-		q.setParameter("uuid", SmartUtils.decodeHex(value));
+		q.setParameter("uuid", SmartUtils.decodeHex(value)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1){
 			Object[] d = results.get(0);
-			return new ListItem( (byte[])d[0], (String) d[1] + " " + (String)d[2] + " [" + (String)d[3] + "]");
+			return new ListItem( (byte[])d[0], (String) d[1] + " " + (String)d[2] + " [" + (String)d[3] + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else{
-			QueryPlugIn.log("Error loading employee value '" + value + "' for query.", null);
-			return new ListItem("");
+			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadEmployeeError, new Object[]{value}), null);
+			return new ListItem(""); //$NON-NLS-1$
 		}
 	}
 	
@@ -404,9 +406,9 @@ public class QueryHibernateManager {
 	 * @return cateogyr object or <code>null</code> if not loaded
 	 */
 	public static Category getCategory(Session session, String categoryKey){
-		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key");
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("key", categoryKey);
+		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("key", categoryKey); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Category> results = q.list();
 		if (results.size() != 1 ){
@@ -426,10 +428,10 @@ public class QueryHibernateManager {
 	 * @return
 	 */
 	public static List<Category> getCategories(Session session, int level){
-		String query = "FROM Category WHERE conservationArea = :ca AND smart.hkeyLength(hkey) = :level";
+		String query = "FROM Category WHERE conservationArea = :ca AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
 		Query q = session.createQuery(query);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
-		q.setParameter("level", level);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("level", level); //$NON-NLS-1$
 		
 		List<Category> cats = q.list();
 		return cats;
@@ -444,11 +446,11 @@ public class QueryHibernateManager {
 	 * @return
 	 */
 	public static List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level, boolean active){
-		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level and isActive = :active";
+		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level and isActive = :active"; //$NON-NLS-1$
 		Query q = session.createQuery(query);
-		q.setParameter("uuid", uuid);
-		q.setParameter("level", level);
-		q.setParameter("active", active);
+		q.setParameter("uuid", uuid); //$NON-NLS-1$
+		q.setParameter("level", level); //$NON-NLS-1$
+		q.setParameter("active", active); //$NON-NLS-1$
 		
 		List<AttributeTreeNode> nodes = q.list();
 		return nodes;
@@ -488,7 +490,7 @@ public class QueryHibernateManager {
 			s.getTransaction().commit();
 
 		}catch (Exception ex){
-			QueryPlugIn.displayLog("Could not save query: " + ex.getMessage(), ex);
+			QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			if (newQuery){
 				query.setUuid(null);
@@ -542,11 +544,11 @@ public class QueryHibernateManager {
 		
 		
 		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
-		String hsql = "FROM " + queryType.getHibernateClass().getSimpleName() + " WHERE conservationArea = :ca and name=:name and (isShared = 'true' or (isShared = 'false' and owner = :employee))";
+		String hsql = "FROM " + queryType.getHibernateClass().getSimpleName() + " WHERE conservationArea = :ca and name=:name and (isShared = 'true' or (isShared = 'false' and owner = :employee))"; //$NON-NLS-1$ //$NON-NLS-2$
 		Query query = session.createQuery(hsql);
-		query.setParameter("ca", SmartDB.getCurrentConservationArea());
-		query.setParameter("employee", SmartDB.getCurrentEmployee());
-		query.setParameter("name", queryName);
+		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		query.setParameter("employee", SmartDB.getCurrentEmployee()); //$NON-NLS-1$
+		query.setParameter("name", queryName); //$NON-NLS-1$
 		queries.addAll(query.list());
 				
 		return queries;

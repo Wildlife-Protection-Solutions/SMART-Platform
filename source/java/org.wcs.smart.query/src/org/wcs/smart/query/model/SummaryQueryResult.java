@@ -265,7 +265,7 @@ public class SummaryQueryResult {
 				if (header.getIdentifier() == null){
 					rowBys[index++] = header.getKey();
 				}else{
-					rowBys[index++] = header.getKey() + ":" + header.getIdentifier();
+					rowBys[index++] = header.getKey() + ":" + header.getIdentifier(); //$NON-NLS-1$
 				}
 			}
 				
@@ -283,7 +283,7 @@ public class SummaryQueryResult {
 					if (header.getIdentifier() == null){
 						groupBys[index++] = header.getKey();
 					}else{
-						groupBys[index++] = header.getKey() + ":" + header.getIdentifier();
+						groupBys[index++] = header.getKey() + ":" + header.getIdentifier(); //$NON-NLS-1$
 					}
 				}
 				for (int i = 0; i < rowBys.length; i ++){

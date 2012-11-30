@@ -54,6 +54,7 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
@@ -74,16 +75,16 @@ public class PatrolQueryOptions {
 	 * @since 1.0.0
 	 */
 	public static enum DATE_FILTER_OP{
-		LAST_30_DAYS("Last 30 Days", "last30days"),
-		LAST_60_DAYS("Last 60 Days", "last60days"),
-		MONTH_TO_DATE("Month to Date", "monthtodate"),
-		LAST_MONTH("Last Month", "lastmonth"),
-		CURRENT_QUARTER("Current Quarter", "currentquarter"),
-		LAST_QUARTER("Last Quarter", "lastquarter"),
-		YEAR_TO_DATE("Year to Date", "yeartodate"),
-		LAST_YEAR("Last Year", "lastyear"),
-		ALL("All Dates", "alldates"),
-		CUSTOM("Custom ...", "custom");
+		LAST_30_DAYS(Messages.PatrolQueryOptions_DateOp_Last30, "last30days"), //$NON-NLS-1$
+		LAST_60_DAYS(Messages.PatrolQueryOptions_DateOpLast60, "last60days"), //$NON-NLS-1$
+		MONTH_TO_DATE(Messages.PatrolQueryOptions_DateOpCurrentMonth, "monthtodate"), //$NON-NLS-1$
+		LAST_MONTH(Messages.PatrolQueryOptions_DateOpLastMonth, "lastmonth"), //$NON-NLS-1$
+		CURRENT_QUARTER(Messages.PatrolQueryOptions_DateOpCurrentQuarter, "currentquarter"), //$NON-NLS-1$
+		LAST_QUARTER(Messages.PatrolQueryOptions_DateOpLastQuarter, "lastquarter"), //$NON-NLS-1$
+		YEAR_TO_DATE(Messages.PatrolQueryOptions_DateOpYearToDate, "yeartodate"), //$NON-NLS-1$
+		LAST_YEAR(Messages.PatrolQueryOptions_DateOpLastYear, "lastyear"), //$NON-NLS-1$
+		ALL(Messages.PatrolQueryOptions_DateOpAll, "alldates"), //$NON-NLS-1$
+		CUSTOM(Messages.PatrolQueryOptions_DateOpCustom, "custom"); //$NON-NLS-1$
 		
 		public String guiName;
 		public String key;
@@ -245,14 +246,14 @@ public class PatrolQueryOptions {
 	 * @since 1.0.0
 	 */
 	public enum PatrolValueOption{
-		NUM_PATROLS("Number of Patrols", "numpatrols", Patrol.class),
-		NUM_DAYS("Number of Days", "numdays", Patrol.class),
-		NUM_NIGHTS("Number of Nights", "numnights", Patrol.class),
-		DISTANCE("Distance (km)", "distance", Track.class),
-		NUM_HOURS("Number of Hours", "numhours", PatrolLegDay.class),
-		NUM_MEMBERS("Number of Employees", "nummembers", PatrolLegMember.class),
-		MAN_HOURS("Person - Hours", "manhours", PatrolLegDay.class),
-		MAN_DAYS("Person - Days", "mandays", Patrol.class);
+		NUM_PATROLS(Messages.PatrolQueryOptions_ValueOpNumPatrols, "numpatrols", Patrol.class), //$NON-NLS-1$
+		NUM_DAYS(Messages.PatrolQueryOptions_ValueOpNumberDays, "numdays", Patrol.class), //$NON-NLS-1$
+		NUM_NIGHTS(Messages.PatrolQueryOptions_ValueOpNumberNights, "numnights", Patrol.class), //$NON-NLS-1$
+		DISTANCE(Messages.PatrolQueryOptions_ValueOpDistance, "distance", Track.class), //$NON-NLS-1$
+		NUM_HOURS(Messages.PatrolQueryOptions_ValueOpNumberHours, "numhours", PatrolLegDay.class), //$NON-NLS-1$
+		NUM_MEMBERS(Messages.PatrolQueryOptions_ValueOpNumEmployees, "nummembers", PatrolLegMember.class), //$NON-NLS-1$
+		MAN_HOURS(Messages.PatrolQueryOptions_ValueOpPersonHrs, "manhours", PatrolLegDay.class), //$NON-NLS-1$
+		MAN_DAYS(Messages.PatrolQueryOptions_ValueOpPersonDays, "mandays", Patrol.class); //$NON-NLS-1$
 		
 		String key;		//unique key
 		String guiName; //display name
@@ -389,25 +390,25 @@ public class PatrolQueryOptions {
 	 */
 	public enum PatrolQueryOption{
 		
-		ID("Patrol ID", "id", "id", Patrol.class, Patrol.class, PatrolQueryOptionType.STRING),
+		ID(Messages.PatrolQueryOptions_QueryOpId, "id", "id", Patrol.class, Patrol.class, PatrolQueryOptionType.STRING), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		ARMED("Armed", "armed", "is_armed", Patrol.class, null, PatrolQueryOptionType.BOOLEAN),
+		ARMED(Messages.PatrolQueryOptions_QueryOpArmed, "armed", "is_armed", Patrol.class, null, PatrolQueryOptionType.BOOLEAN), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		STATION("Station", "station", "station_uuid", Patrol.class, Station.class, PatrolQueryOptionType.UUID),
+		STATION(Messages.PatrolQueryOptions_QueryOpStation, "station", "station_uuid", Patrol.class, Station.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		TEAM("Team", "team", "team_uuid", Patrol.class, Team.class, PatrolQueryOptionType.UUID),
+		TEAM(Messages.PatrolQueryOptions_QueryOpTeam, "team", "team_uuid", Patrol.class, Team.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		EMPLOYEE("Patrol Member", "member", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID),
+		EMPLOYEE(Messages.PatrolQueryOptions_QueryOpMember, "member", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		LEADER("Patrol Leader", "leader", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID),
+		LEADER(Messages.PatrolQueryOptions_QueryOpLeader, "leader", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		PILOT("Patrol Pilot", "pilot", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID),
+		PILOT(Messages.PatrolQueryOptions_QueryOpPilot, "pilot", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		MANDATE("Mandate", "mandate", "mandate_uuid", Patrol.class, PatrolMandate.class, PatrolQueryOptionType.UUID),
+		MANDATE(Messages.PatrolQueryOptions_QueryOpMandate, "mandate", "mandate_uuid", Patrol.class, PatrolMandate.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		PATROL_TYPE("Patrol Type", "patroltype", "patrol_type", Patrol.class, null, PatrolQueryOptionType.STRING),
+		PATROL_TYPE(Messages.PatrolQueryOptions_QueryOpType, "patroltype", "patrol_type", Patrol.class, null, PatrolQueryOptionType.STRING), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		PATROL_TRANSPORT_TYPE("Transport Type", "transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID);
+		PATROL_TRANSPORT_TYPE(Messages.PatrolQueryOptions_QueryOpTransportType, "transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		
 		private String key;			//unique identifier key
@@ -531,7 +532,7 @@ public class PatrolQueryOptions {
 		 * @return
 		 */
 		public Object getObject(Session session, byte[] uuid){
-			List<?> data = session.createCriteria(sourceClazz).add(Restrictions.eq("uuid", uuid)).list();
+			List<?> data = session.createCriteria(sourceClazz).add(Restrictions.eq("uuid", uuid)).list(); //$NON-NLS-1$
 			if (data.size() == 0){
 				return null; //nothing found
 			}else if (data.size() > 1){
@@ -559,11 +560,11 @@ public class PatrolQueryOptions {
 					}
 				} catch (Exception ex) {
 					QueryPlugIn.log(
-							"Could not get values for given patrol filer."
+							Messages.PatrolQueryOptions_ErrorInvalidPatrolFilterValue
 									+ ex.getMessage(), ex);
 					return results;
 				}
-				List<?> data = session.createCriteria(sourceClazz).add(Restrictions.in("uuid", uuidkeys)).list();
+				List<?> data = session.createCriteria(sourceClazz).add(Restrictions.in("uuid", uuidkeys)).list(); //$NON-NLS-1$
 				
 				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 					Object object = (Object) iterator.next();
@@ -577,7 +578,7 @@ public class PatrolQueryOptions {
 				
 			}else if (type == PatrolQueryOptionType.STRING){
 				if (this == ID){
-					List<?> data = session.createCriteria(sourceClazz).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.in(columnName, keys)).list();
+					List<?> data = session.createCriteria(sourceClazz).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.in(columnName, keys)).list(); //$NON-NLS-1$
 					for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 						Object object = (Object) iterator.next();
 						if (object instanceof Patrol){
@@ -652,10 +653,10 @@ public class PatrolQueryOptions {
 	 */
 	public enum DateGroupByOption{
 		
-		DAY("Day", "day"),
+		DAY(Messages.PatrolQueryOptions_DateGroupByOpDay, "day"), //$NON-NLS-1$
 	//	WEEK("Week", "week"),
-		MONTH("Month", "month"),
-		YEAR("Year", "year");
+		MONTH(Messages.PatrolQueryOptions_DateGroupByOpMonth, "month"), //$NON-NLS-1$
+		YEAR(Messages.PatrolQueryOptions_DateGroupByOpYear, "year"); //$NON-NLS-1$
 		
 		private String key;
 		private String guiName;

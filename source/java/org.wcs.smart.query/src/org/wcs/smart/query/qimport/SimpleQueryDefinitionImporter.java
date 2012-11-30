@@ -23,12 +23,14 @@ package org.wcs.smart.query.qimport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.ObservationQuery;
@@ -80,7 +82,7 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
 			wq = new PatrolQuery();
 		}else{
-			throw new Exception("Invalid patrol type for simple query importer: " + qt.getQueryType());
+			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
 		}
 		
 		wq.setName(qt.getName());
@@ -90,10 +92,10 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 			uuidLookup.put(type.getUuid(), type);
 		}
 		
-		String strQueryFilter = "";
-		String strColumnFilter = "";
+		String strQueryFilter = ""; //$NON-NLS-1$
+		String strColumnFilter = ""; //$NON-NLS-1$
 		for (QueryPart part : qt.getQueryPart()) {
-			if (part.getKey().equals("definition")) {
+			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
 					InputStream is = new ByteArrayInputStream(part.getValue()
 							.getBytes());
@@ -113,7 +115,7 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 					}
 					strQueryFilter = queryFilter.asString();
 				}
-			}else if (part.getKey().equals("columns")){
+			}else if (part.getKey().equals("columns")){ //$NON-NLS-1$
 				strColumnFilter = part.getValue();
 			}
 		}

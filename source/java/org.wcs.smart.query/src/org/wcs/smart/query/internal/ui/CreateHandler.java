@@ -29,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
 
@@ -54,7 +55,7 @@ public class CreateHandler extends AbstractHandler {
 			
 		} catch (WorkbenchException e) {
 			QueryPlugIn
-					.displayLog("Error loading query perspective.", e);
+					.displayLog(Messages.CreateHandler_QueryPerspectiveError, e);
 		}
 		return null;
 	}
@@ -73,7 +74,7 @@ public class CreateHandler extends AbstractHandler {
 				QueryPlugIn.displayLog(t.getMessage(), t);
 			}
 		} catch (Exception e) {
-			QueryPlugIn.displayLog("Error loading query editor.", e);
+			QueryPlugIn.displayLog(Messages.CreateHandler_QueryEditorError, e);
 		}
 	}
 

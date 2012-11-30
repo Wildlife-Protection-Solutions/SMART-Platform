@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.filter;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
@@ -73,14 +75,14 @@ public class CategoryFilter implements IFilter {
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		String keyPart = categoryIdentifier.split(":")[1];
+		String keyPart = categoryIdentifier.split(":")[1]; //$NON-NLS-1$
 		
 		String prefix = tableMapping.get(Category.class);
 		if (prefix == null){
-			throw new IllegalStateException("Category prefix could not be determined.");
+			throw new IllegalStateException(Messages.CategoryFilter_InvalidPrefix);
 		}
 		
-		return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') ";
+		return "( " + prefix + ".hkey >= '" + keyPart + "' and " + prefix + ".hkey < '" + keyPart.substring(0,  keyPart.length() -1) + "/') "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ 
 	}
 	
 	
@@ -133,10 +135,10 @@ public class CategoryFilter implements IFilter {
 	 * @throws Exception
 	 */
 	public Category getCategory(Session session) throws Exception{
-		String keyPart = categoryIdentifier.split(":")[1];
+		String keyPart = categoryIdentifier.split(":")[1]; //$NON-NLS-1$
 		Category cat = QueryHibernateManager.getCategory(session, keyPart);
 		if (cat == null){
-			throw new Exception("Query formula could not be parsed from the database.  Category " + keyPart + " could not be found.");
+			throw new Exception(MessageFormat.format(Messages.CategoryFilter_CategoryNotFound, new Object[]{keyPart}));
 		}
 		return cat;
 	}

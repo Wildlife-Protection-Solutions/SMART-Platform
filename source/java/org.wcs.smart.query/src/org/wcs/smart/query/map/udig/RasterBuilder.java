@@ -118,7 +118,7 @@ final class RasterBuilder {
 	 * @param envelop an envelope sets as EPSG:4326 is expected
 	 */
 	public void setEnvelope(Envelope2D envelop){
-		assert envelop.getCoordinateReferenceSystem().getName().equals("EPSG:4326");
+		assert envelop.getCoordinateReferenceSystem().getName().equals("EPSG:4326"); //$NON-NLS-1$
 		this.envelope = envelop;
 	}
 	
@@ -158,7 +158,7 @@ final class RasterBuilder {
 			raster = createRaster();
 
 			File out = new File(fileName);
-			RenderedOp op = JAI.create("filestore",raster,out.getCanonicalPath(),"TIFF");
+			RenderedOp op = JAI.create("filestore",raster,out.getCanonicalPath(),"TIFF"); //$NON-NLS-1$ //$NON-NLS-2$
 			op.dispose();
 
 			String baseFile = out.getCanonicalPath().substring(0,  out.getCanonicalPath().lastIndexOf('.'));
@@ -185,14 +185,14 @@ final class RasterBuilder {
 	 */
 	private void createWorldFile(final String baseFile,
 			double gridSize, double xmin, double ymax) throws IOException {
-		final File prjFile = new File(new StringBuffer(baseFile).append(".tfw")
+		final File prjFile = new File(new StringBuffer(baseFile).append(".tfw") //$NON-NLS-1$
 				.toString());
 		BufferedWriter out = new BufferedWriter(new FileWriter(prjFile));
 		out.write(String.valueOf(gridSize));
 		out.write(SmartUtils.LINE_SEPARATOR);
-		out.write("0");
+		out.write("0"); //$NON-NLS-1$
 		out.write(SmartUtils.LINE_SEPARATOR);
-		out.write("0");
+		out.write("0"); //$NON-NLS-1$
 		out.write(SmartUtils.LINE_SEPARATOR);
 		out.write(String.valueOf(-gridSize));
 		out.write(SmartUtils.LINE_SEPARATOR);
@@ -214,7 +214,7 @@ final class RasterBuilder {
 			final CoordinateReferenceSystem coordinateReferenceSystem)
 	
 			throws IOException {
-		final File prjFile = new File(new StringBuffer(baseFile).append(".prj")
+		final File prjFile = new File(new StringBuffer(baseFile).append(".prj") //$NON-NLS-1$
 				.toString());
 		BufferedWriter out = new BufferedWriter(new FileWriter(prjFile));
 		out.write(coordinateReferenceSystem.toWKT());

@@ -73,7 +73,7 @@ public class ObservationQuery extends SimpleQuery{
 		for (QueryColumn col : queryColumns){
 			if (col.isVisible() ){
 				sb.append(col.getKey());
-				sb.append(",");
+				sb.append(","); //$NON-NLS-1$
 			}else{
 				all = false;
 			}
@@ -110,7 +110,7 @@ public class ObservationQuery extends SimpleQuery{
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;
 		if (visibleTableColumnKeys != null){
-			String[] bits = visibleTableColumnKeys.split(",");
+			String[] bits = visibleTableColumnKeys.split(","); //$NON-NLS-1$
 			visible = new HashSet<String>();
 			for (int i = 0; i < bits.length; i ++){
 				visible.add(bits[i]);

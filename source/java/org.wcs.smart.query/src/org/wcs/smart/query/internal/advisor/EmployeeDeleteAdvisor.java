@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.query.internal.advisor;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
 
@@ -46,7 +49,7 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Employee)){
-			return "Object not of type Employee. Can not delete.";
+			return Messages.EmployeeDeleteAdvisor_InvalidTypeError;
 		}
 		Employee e = (Employee)object;
 		if (e.getUuid() == null){
@@ -54,15 +57,15 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		}
 		for (int i = 0; i < QueryType.values().length; i++){
 			QueryType qt = QueryType.values()[i];
-			Long cnt = (Long) session.createCriteria(qt.getHibernateClass()).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult();
+			Long cnt = (Long) session.createCriteria(qt.getHibernateClass()).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 			if (cnt > 0){
-				return "The employee " + e.getLabel() + " owns " + cnt + " saved " + qt.getUiName() + " queries.  These queries removed before the employee can be remove.";
+				return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsQueries, new Object[]{ e.getLabel(), cnt ,qt.getUiName()});
 			}
 		}
 	
-		Long cnt = (Long) session.createCriteria(QueryFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult();
+		Long cnt = (Long) session.createCriteria(QueryFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return "The employee " + e.getLabel() + " has " + cnt + " query folders.  These folders must be deleted before the employee can be removed.";
+			return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsFolders, new Object[]{ e.getLabel(), cnt});
 		}
 		return null;
 	}

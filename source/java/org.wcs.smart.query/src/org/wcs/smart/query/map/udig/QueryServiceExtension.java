@@ -39,12 +39,12 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class QueryServiceExtension implements ServiceExtension {
-    public static final String KEY = "org.wcs.smart.udig.catalog.SmartQueryService";
+    public static final String KEY = "org.wcs.smart.udig.catalog.SmartQueryService"; //$NON-NLS-1$
    
     /**
      * Service parameter conservation area uuid key
      */
-    public static final String QUERY_UUID_KEY = "queryuuid";
+    public static final String QUERY_UUID_KEY = "queryuuid"; //$NON-NLS-1$
    
 	
     /**
@@ -103,7 +103,7 @@ public class QueryServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		String url = "smart://smartdb/query/";
+		String url = "smart://smartdb/query/"; //$NON-NLS-1$
 		if (params.get(QUERY_UUID_KEY) == null || !(params.get(QUERY_UUID_KEY) instanceof byte[])){
 			url += System.nanoTime();
 		}else{

@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.query.map.geotools;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
@@ -61,7 +63,7 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createObservationFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime();
+		data[0] = it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (int i = 0; i < columns.size(); i ++){
 			Object x =  columns.get(i).getValue(it);
@@ -95,7 +97,7 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createTrackFeature(QueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getPatrolId() + "." + System.nanoTime();
+		data[0] = it.getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
 		
 		for (int i = 0; i < columns.size(); i ++){
 			Object x =  columns.get(i).getValue(it);
@@ -122,7 +124,7 @@ public class QueryResultItemFeature {
 				data[data.length - 1] = gf.createMultiLineString(lss);
 			} catch (ParseException e) {
 				data[data.length - 1] = gf.createLineString((Coordinate[]) null);
-				QueryPlugIn.log("Error parsing geometry for patrol " + it.getPatrolId(), e);
+				QueryPlugIn.log(MessageFormat.format(Messages.QueryResultItemFeature_GeomParseError, new Object[]{it.getPatrolId()}), e);
 			}
 		}
 

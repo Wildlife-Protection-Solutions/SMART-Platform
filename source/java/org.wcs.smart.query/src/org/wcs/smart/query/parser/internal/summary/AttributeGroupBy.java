@@ -96,7 +96,7 @@ public class AttributeGroupBy implements IGroupBy {
 	 * @param key
 	 */
 	protected AttributeGroupBy(String key, boolean includeCategory){
-		String bits[] = key.split(":");
+		String bits[] = key.split(":"); //$NON-NLS-1$
 		int attIndex = 0;
 		if (includeCategory){
 			attIndex += 2;
@@ -154,16 +154,16 @@ public class AttributeGroupBy implements IGroupBy {
 	public String getKeyPart(){
 		StringBuilder sb = new StringBuilder();
 		if (categoryHkey != null){
-			sb.append("category:");
+			sb.append("category:"); //$NON-NLS-1$
 			sb.append(categoryHkey);
-			sb.append(":");
+			sb.append(":"); //$NON-NLS-1$
 		}
-		sb.append("attribute:");
+		sb.append("attribute:"); //$NON-NLS-1$
 		sb.append(attributeType.typeKey);
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		sb.append(attributeKey);
 		if (attributeType == AttributeType.TREE){
-			sb.append(":");
+			sb.append(":"); //$NON-NLS-1$
 			sb.append(treeLevel);
 		}
 		return sb.toString();
@@ -176,12 +176,12 @@ public class AttributeGroupBy implements IGroupBy {
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getKeyPart());
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		if (filterHkeys != null){
 			for (int i =0; i < filterHkeys.length; i ++){
 				sb.append(filterHkeys[i]);
 				if (i < filterHkeys.length-1){
-					sb.append(":");
+					sb.append(":"); //$NON-NLS-1$
 				}
 			}
 		}

@@ -39,6 +39,7 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Georesource for a smart waypoint query.
@@ -64,10 +65,10 @@ public class QueryGeoResource extends IGeoResource {
 		
 		try{
 			if (serviceIdentifer != null){
-				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER);
+				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 			}
 		 } catch (MalformedURLException e) {
-             throw new IllegalArgumentException("The service URL must not contain a #", e);
+             throw new IllegalArgumentException(Messages.QueryGeoResource_ServiceError, e);
          }	
 	}
 
@@ -149,7 +150,7 @@ public class QueryGeoResource extends IGeoResource {
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {
-				QueryPlugIn.log("Query waypoint data source not created", null);
+				QueryPlugIn.log(Messages.QueryGeoResource_Error_NoDatasource, null);
 				return null;
 			}
 		}

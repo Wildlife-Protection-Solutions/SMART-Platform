@@ -29,6 +29,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -52,14 +53,14 @@ public class ConservationAreaFilter implements IFilter {
 	public static ConservationAreaFilter parseFilter(String caFilterAsString) {
 		ConservationAreaFilter filter = new ConservationAreaFilter();
 		try {
-			String[] bits = caFilterAsString.split(",");
+			String[] bits = caFilterAsString.split(","); //$NON-NLS-1$
 			for (int i = 0; i < bits.length; i++) {
 				filter.addConservationArea(SmartUtils.decodeHex(bits[i]));
 
 			}
 		} catch (Exception ex) {
 			throw new IllegalStateException(
-					"Could not parse conservation area filter.", ex);
+					Messages.ConservationAreaFilter_InvalidCaFilter, ex);
 		}
 		return filter;
 	}
@@ -99,7 +100,7 @@ public class ConservationAreaFilter implements IFilter {
 //		sb.append("(");
 		for (int i = 0; i < filters.size(); i ++){
 			if (i != 0){
-				sb.append(" , ");
+				sb.append(" , "); //$NON-NLS-1$
 			}
 			sb.append( SmartUtils.encodeHex( filters.get(i) ) );
 		}			
@@ -126,16 +127,16 @@ public class ConservationAreaFilter implements IFilter {
 	 */
 	public String asSql(String caClassPrefix) {
 		if (filters.size() == 0){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(caClassPrefix);
-		sb.append(".ca_uuid IN (");
+		sb.append(".ca_uuid IN ("); //$NON-NLS-1$
 		for (int i = 0; i < filters.size(); i++) {
 			String uuid = SmartUtils.encodeHex(filters.get(i));
-			sb.append("x'" + uuid + "'");
+			sb.append("x'" + uuid + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}
 

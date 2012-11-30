@@ -70,7 +70,7 @@ public class SummaryQueryDefinitionExporter extends DefinitionQueryExporter {
 		}
 		
 		QueryPart defPart = new QueryPart();
-		defPart.setKey("definition");
+		defPart.setKey("definition"); //$NON-NLS-1$
 		defPart.setValue( summary.getQuery() );
 		
 		xmlQuery.getQueryPart().add(defPart);

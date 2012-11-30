@@ -22,6 +22,7 @@
 package org.wcs.smart.query.map.udig;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import net.refractions.udig.catalog.IGeoResourceInfo;
 
@@ -34,6 +35,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.query.internal.Messages;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -69,7 +71,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			}, null);
 			this.bounds = env;
 		} catch (IOException e) {
-			SmartPlugIn.log("Could not determine bounds for smart resource : " + resource.getDataType(), e);
+			SmartPlugIn.log(MessageFormat.format(Messages.QueryGeoResourceInfo_BoundsError, new Object[]{resource.getDataType()}), e);
 		}
 	}
 }

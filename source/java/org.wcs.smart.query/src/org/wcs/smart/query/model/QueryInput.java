@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -28,6 +29,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 
 /**
@@ -172,7 +174,7 @@ public class QueryInput implements IEditorInput {
 	@Override
 	public String getName() {
 		if (queryName == null){
-			return "New Query";
+			return Messages.QueryInput_NullQueryName;
 		}else{
 			return queryName;
 		}
@@ -192,9 +194,9 @@ public class QueryInput implements IEditorInput {
 	@Override
 	public String getToolTipText() {
 		if (queryName == null){
-			return "Smart Query Editor";
+			return Messages.QueryInput_EditorNameNoQuery;
 		}else{
-			return "Smart Query Editor - " + queryName;
+			return MessageFormat.format(Messages.QueryInput_EditorNameQuery, new Object[]{queryName});
 		}
 	}
 	

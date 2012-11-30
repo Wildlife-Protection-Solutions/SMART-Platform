@@ -33,6 +33,7 @@ package org.wcs.smart.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +61,7 @@ import org.wcs.smart.query.engine.grids.PatrolCntValueComputer;
 import org.wcs.smart.query.engine.grids.PatrolDayCntValueComputer;
 import org.wcs.smart.query.engine.grids.PatrolExistsCellMerger;
 import org.wcs.smart.query.engine.grids.Tile;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -77,8 +79,8 @@ import com.vividsolutions.jts.io.WKBReader;
 public class DerbyGridEngine extends DerbyQueryEngine2{
 	private List<GridResultItem> myResults;
 	
-	protected static final String QUERY_GRID_TEMP_TABLE_PREFIX = "grid_intermediate_";
-	protected String gridTempTable = "";	
+	protected static final String QUERY_GRID_TEMP_TABLE_PREFIX = "grid_intermediate_"; //$NON-NLS-1$
+	protected String gridTempTable = "";	 //$NON-NLS-1$
 
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
@@ -102,10 +104,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask("Running Query.", 4);
+				monitor.beginTask(Messages.DerbyGridEngine_Progress_RunningQuery, 4);
 
 				try {
-					monitor.subTask("Creating observation table");
+					monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
 					IFilter qFilter = query.getFilter();
 					if (qFilter == null){
 						return;
@@ -124,7 +126,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 						needsObservation = true;
 					}
 					
-					monitor.subTask("Creating temporary table");
+					monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingTempTable);
 					createTemporaryTable(c);
 
 					monitor.worked(1);
@@ -132,7 +134,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 						return;
 					}
 					
-					monitor.subTask("Populating results table");
+					monitor.subTask(Messages.DerbyGridEngine_Progress_PopulatingResults);
 					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c, needsObservation);
 					monitor.worked(1);
 
@@ -140,7 +142,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 						return;
 					}
 					
-					monitor.subTask("Calculating Grid Values");
+					monitor.subTask(Messages.DerbyGridEngine_Progress_CalculatingGridValue);
 					
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					
@@ -170,21 +172,21 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		
 		StringBuilder sql = new StringBuilder();
 //		sql.append("SELECT min(\"X\") as minx, min(\"Y\") as miny FROM " + queryTempTable);
-		sql.append("SELECT min(w_x) as minx, min(w_y) as miny  FROM (");
-		sql.append(" SELECT ");
+		sql.append("SELECT min(w_x) as minx, min(w_y) as miny  FROM ("); //$NON-NLS-1$
+		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append(SelectClause(true));
-		sql.append(" FROM ");
+		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(FromClause(true));
-		sql.append(" WHERE ");
+		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(WhereClause(true));
-		sql.append(" UNION ");
-		sql.append(" SELECT ");
+		sql.append(" UNION "); //$NON-NLS-1$
+		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append(SelectClause(false));
-		sql.append(" FROM ");
+		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(FromClause(false));
-		sql.append(" WHERE ");
+		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(WhereClause(false));
-		sql.append(" ) as foo");
+		sql.append(" ) as foo"); //$NON-NLS-1$
 
 		
 		QueryPlugIn.logSql(sql.toString());
@@ -192,8 +194,8 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		double minx=0;
 		double miny=0;
 		if(rs.next()){
-			minx = rs.getDouble("minx");
-			miny = rs.getDouble("miny");
+			minx = rs.getDouble("minx"); //$NON-NLS-1$
+			miny = rs.getDouble("miny"); //$NON-NLS-1$
 		}
 		
 		double[] both = new double[2];
@@ -218,7 +220,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
-		String strAgg ="";
+		String strAgg =""; //$NON-NLS-1$
 		ResultSet rs;
 
 		if (value instanceof CombinedValueItem){
@@ -264,84 +266,84 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			double size = gridDef.getCellSize();
 			
 			StringBuilder sql = new StringBuilder();
-			sql.append("SELECT " + strAgg + "(number_value) as value, tile_id");
-			sql.append(" FROM (");
-			sql.append("SELECT ");
-			sql.append(" number_value,  ");
-			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id");
-			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
-			sql.append(" JOIN " + queryTempTable 
-				+ " on " + tablePrefix.get(WaypointObservation.class)
-				+ ".uuid = "
+			sql.append("SELECT " + strAgg + "(number_value) as value, tile_id"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" FROM ("); //$NON-NLS-1$
+			sql.append("SELECT "); //$NON-NLS-1$
+			sql.append(" number_value,  "); //$NON-NLS-1$
+			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
+			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN " + queryTempTable  //$NON-NLS-1$
+				+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$
+				+ ".uuid = " //$NON-NLS-1$
 				+ queryTempTable
-				+ ".ob_uuid");
-			sql.append(" JOIN " + tableNames.get(WaypointObservationAttribute.class) + " as " + tablePrefix.get(WaypointObservationAttribute.class) 
-				+ " on " + tablePrefix.get(WaypointObservation.class)
-				+ ".uuid = "
+				+ ".ob_uuid"); //$NON-NLS-1$
+			sql.append(" JOIN " + tableNames.get(WaypointObservationAttribute.class) + " as " + tablePrefix.get(WaypointObservationAttribute.class)  //$NON-NLS-1$ //$NON-NLS-2$
+				+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$
+				+ ".uuid = " //$NON-NLS-1$
 				+ tablePrefix.get(WaypointObservationAttribute.class)
-				+ ".observation_uuid");
-			sql.append(" JOIN " + tableNames.get(Attribute.class) + " as " + tablePrefix.get(Attribute.class) 
-					+ " on " + tablePrefix.get(WaypointObservationAttribute.class)
-					+ ".attribute_uuid = "
+				+ ".observation_uuid"); //$NON-NLS-1$
+			sql.append(" JOIN " + tableNames.get(Attribute.class) + " as " + tablePrefix.get(Attribute.class)  //$NON-NLS-1$ //$NON-NLS-2$
+					+ " on " + tablePrefix.get(WaypointObservationAttribute.class) //$NON-NLS-1$
+					+ ".attribute_uuid = " //$NON-NLS-1$
 					+ tablePrefix.get(Attribute.class)
-					+ ".uuid"
-					+ " AND keyid = '" + key + "'");
-			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class) 
-				+ " on " + tablePrefix.get(Waypoint.class)
-				+ ".uuid = "
+					+ ".uuid" //$NON-NLS-1$
+					+ " AND keyid = '" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class)  //$NON-NLS-1$ //$NON-NLS-2$
+				+ " on " + tablePrefix.get(Waypoint.class) //$NON-NLS-1$
+				+ ".uuid = " //$NON-NLS-1$
 				+ queryTempTable
-				+ ".wp_uuid");
-			sql.append(") as foo group by tile_id");
+				+ ".wp_uuid"); //$NON-NLS-1$
+			sql.append(") as foo group by tile_id"); //$NON-NLS-1$
 		
 			QueryPlugIn.logSql(sql.toString());
 			rs = c.createStatement().executeQuery(sql.toString());
 		}else if(value instanceof CategoryValueItem){
 			CategoryValueItem tmp = (CategoryValueItem)value;
-			strAgg = "count";
+			strAgg = "count"; //$NON-NLS-1$
 			String hkey = tmp.getCategoryHKey();
-			String hkey_max = hkey.substring(0,(hkey.length()-1)) + "/";
+			String hkey_max = hkey.substring(0,(hkey.length()-1)) + "/"; //$NON-NLS-1$
 					
 			double minX = gridDef.getOriginX();
 			double minY = gridDef.getOriginY();
 			double size = gridDef.getCellSize();
 			StringBuilder sql = new StringBuilder();
-			sql.append("SELECT ");
-			sql.append(strAgg + "(keyid) as value,tile_id");
-			sql.append(" FROM (");
-			sql.append("SELECT keyid, ");
-			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id");
-			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class));
-			sql.append(" JOIN " + queryTempTable 
-				+ " on " + tablePrefix.get(WaypointObservation.class)
-				+ ".uuid = "
+			sql.append("SELECT "); //$NON-NLS-1$
+			sql.append(strAgg + "(keyid) as value,tile_id"); //$NON-NLS-1$
+			sql.append(" FROM ("); //$NON-NLS-1$
+			sql.append("SELECT keyid, "); //$NON-NLS-1$
+			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
+			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN " + queryTempTable  //$NON-NLS-1$
+				+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$
+				+ ".uuid = " //$NON-NLS-1$
 				+ queryTempTable
-				+ ".ob_uuid");
-			sql.append(" JOIN " + tableNames.get(Category.class) + " as " + tablePrefix.get(Category.class) 
-				+ " on " + tablePrefix.get(WaypointObservation.class)
-				+ ".category_uuid = "
+				+ ".ob_uuid"); //$NON-NLS-1$
+			sql.append(" JOIN " + tableNames.get(Category.class) + " as " + tablePrefix.get(Category.class)  //$NON-NLS-1$ //$NON-NLS-2$
+				+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$
+				+ ".category_uuid = " //$NON-NLS-1$
 				+ tablePrefix.get(Category.class)
-				+ ".uuid"
-				+ " AND Hkey >= '" + hkey + "' AND Hkey < '" + hkey_max + "'");
+				+ ".uuid" //$NON-NLS-1$
+				+ " AND Hkey >= '" + hkey + "' AND Hkey < '" + hkey_max + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			
 //			WHERE ( c.hkey >= 'threat.residentialcommercialdevelopment.' and c.hkey < 'threat.residentialcommercialdevelopment/') 
 			
-			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class) 
-				+ " on " + tablePrefix.get(Waypoint.class)
-				+ ".uuid = "
+			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class)  //$NON-NLS-1$ //$NON-NLS-2$
+				+ " on " + tablePrefix.get(Waypoint.class) //$NON-NLS-1$
+				+ ".uuid = " //$NON-NLS-1$
 				+ queryTempTable
-				+ ".wp_uuid");
+				+ ".wp_uuid"); //$NON-NLS-1$
 			//sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
 			//sql.append(" group by tile_id");
-			sql.append(") as foo ");
-			sql.append(" group by ");
-			sql.append("tile_id");
+			sql.append(") as foo "); //$NON-NLS-1$
+			sql.append(" group by "); //$NON-NLS-1$
+			sql.append("tile_id"); //$NON-NLS-1$
 		
 			QueryPlugIn.logSql(sql.toString());
 			rs = c.createStatement().executeQuery(sql.toString());
 			
 		
 		}else{
-			throw new SQLException("Not an Attribute or Category Selected");	
+			throw new SQLException(Messages.DerbyGridEngine_Error_GridValueNotSupported);	
 		}
 		
 		try {
@@ -349,12 +351,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			while (rs.next()) {
 				GridResultItem it = new GridResultItem();
 				
-				String tid = rs.getString("TILE_ID");
-				String[] tileids = tid.split("_");
+				String tid = rs.getString("TILE_ID"); //$NON-NLS-1$
+				String[] tileids = tid.split("_"); //$NON-NLS-1$
 				
 				it.setTileX(Long.parseLong(tileids[0]));
 				it.setTileY(Long.parseLong(tileids[1]));
-				it.setValue(rs.getDouble("value"));
+				it.setValue(rs.getDouble("value")); //$NON-NLS-1$
 				
 				items.put(tid, it);
 				if (items.size() > Grid.MAX_GRID_CELLS){
@@ -365,12 +367,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			//value 0 to display otherwise we keep the count value
 			List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef);
 			for (GridResultItem it : patrolLocations){
-				if (items.get(it.getTileX() + "_" + it.getTileY()) == null){
+				if (items.get(it.getTileX() + "_" + it.getTileY()) == null){ //$NON-NLS-1$
 					GridResultItem newitem = new GridResultItem();
 					newitem.setTileX(it.getTileX());
 					newitem.setTileY(it.getTileY());
 					newitem.setValue(0);
-					items.put(it.getTileX() + "_" + it.getTileY(), newitem);
+					items.put(it.getTileX() + "_" + it.getTileY(), newitem); //$NON-NLS-1$
 				}
 			}
 			ArrayList<GridResultItem> list = new ArrayList<GridResultItem>();
@@ -403,59 +405,60 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			DistanceValueComputer valueComputer = new DistanceValueComputer();
 			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
 		}else if (item.getOption() == PatrolValueOption.NUM_DAYS){	
-			dataField = new String[]{"p_uuid", "pld_patrol_day"};
+			dataField = new String[]{"p_uuid", "pld_patrol_day"}; //$NON-NLS-1$ //$NON-NLS-2$
 			PatrolCntCellMerger cellMerger = new PatrolCntCellMerger();
 			PatrolDayCntValueComputer valueComputer = new PatrolDayCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 		}else if (item.getOption() == PatrolValueOption.NUM_PATROLS){
-			dataField = new String[]{"p_uuid"};
+			dataField = new String[]{"p_uuid"}; //$NON-NLS-1$
 			PatrolCntCellMerger cellMerger = new PatrolCntCellMerger();
 			PatrolCntValueComputer valueComputer = new PatrolCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 			
 		}else{
-			throw new UnsupportedOperationException("Patrol value option " + item.getOption().getGuiName() + " not supported for grid analysis.");
+			throw new UnsupportedOperationException(
+					MessageFormat.format(Messages.DerbyGridEngine_Error_PatrolValueNotSupported, new Object[]{item.getOption().getGuiName()}));
 		}
 		return computePatrolTrack(c, engine, dataField);
 	}
 	
 	private List<GridResultItem> computePatrolTrack(Connection c, GridAnalysisEngine<?> engine, String[] dataField) throws Exception{
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom ");
+		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom "); //$NON-NLS-1$ //$NON-NLS-2$
 		if (dataField != null){
 			for (int i = 0; i < dataField.length; i ++){
 				//additional data required for rasterization
-				sql.append(", tmp." + dataField[i] + " as dataField_" + i);
+				sql.append(", tmp." + dataField[i] + " as dataField_" + i); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
-		sql.append(" FROM ");
-		sql.append(tableNames.get(Track.class) + " " + tablePrefix.get(Track.class));
-		sql.append(", (");
-		sql.append("SELECT distinct pld_uuid ");
+		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(tableNames.get(Track.class) + " " + tablePrefix.get(Track.class)); //$NON-NLS-1$
+		sql.append(", ("); //$NON-NLS-1$
+		sql.append("SELECT distinct pld_uuid "); //$NON-NLS-1$
 		if (dataField != null){
 			//additional data required for rasterization
 			for (int i = 0; i < dataField.length; i ++){
-				sql.append(", " + dataField[i]);
+				sql.append(", " + dataField[i]); //$NON-NLS-1$
 			}
 		}
-		sql.append(" from " );
+		sql.append(" from " ); //$NON-NLS-1$
 		sql.append(queryTempTable);
-		sql.append(") tmp ");
-		sql.append("WHERE " );
-		sql.append(tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = ");
-		sql.append("tmp.pld_uuid");
+		sql.append(") tmp "); //$NON-NLS-1$
+		sql.append("WHERE " ); //$NON-NLS-1$
+		sql.append(tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = "); //$NON-NLS-1$
+		sql.append("tmp.pld_uuid"); //$NON-NLS-1$
 
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		WKBReader reader = new WKBReader();
 		
 		while(rs.next()){
-			byte[] bytes = rs.getBytes("geom");
+			byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
 			Object[] data = null;
 			if (dataField != null){
 				data = new Object[dataField.length];
 				for (int i = 0; i < dataField.length; i++){
-					data[i] = rs.getObject("dataField_"+i);
+					data[i] = rs.getObject("dataField_"+i); //$NON-NLS-1$
 				}
 			}
 			if (bytes != null){
@@ -470,7 +473,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				try{
 					engine.rasterizeLinestring(ls);
 				}catch (Exception ex){
-					QueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex);
+					QueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
 					throw ex;
 				}
 			}
@@ -499,7 +502,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 */
 	protected void dropTemporaryGridTable(Connection c) throws SQLException {
 		try {
-			String sql = "DROP TABLE " + gridTempTable;
+			String sql = "DROP TABLE " + gridTempTable; //$NON-NLS-1$
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		} catch (Exception ex) {

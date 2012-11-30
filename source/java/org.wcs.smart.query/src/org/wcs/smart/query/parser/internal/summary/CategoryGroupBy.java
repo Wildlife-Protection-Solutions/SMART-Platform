@@ -66,7 +66,7 @@ public class CategoryGroupBy implements IGroupBy {
 	 * @param key
 	 */
 	protected CategoryGroupBy(String key){
-		String bits[] = key.split(":");
+		String bits[] = key.split(":"); //$NON-NLS-1$
 //		this.categoryHkey = bits[1];
 		this.treeLevel = Integer.parseInt(bits[1]);
 		if (bits.length - 2 > 0){
@@ -83,7 +83,7 @@ public class CategoryGroupBy implements IGroupBy {
 	 */
 	public String getKeyPart(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("category:");
+		sb.append("category:"); //$NON-NLS-1$
 //		sb.append(categoryHkey);
 		sb.append(treeLevel);
 		return sb.toString();
@@ -96,12 +96,12 @@ public class CategoryGroupBy implements IGroupBy {
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getKeyPart());
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		if (filterHkeys != null){
 			for (int i =0; i < filterHkeys.length; i ++){
 				sb.append(filterHkeys[i]);
 				if (i < filterHkeys.length-1){
-					sb.append(":");
+					sb.append(":"); //$NON-NLS-1$
 				}
 			}
 		}

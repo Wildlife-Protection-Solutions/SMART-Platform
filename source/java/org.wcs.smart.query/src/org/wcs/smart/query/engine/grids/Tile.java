@@ -122,12 +122,12 @@ public class Tile {
 		double ymax = g.getOriginY() + g.getCellSize() * (yid + 1);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("POLYGON((");
-		sb.append(xmin + " " + ymin + ",");
-		sb.append(xmax + " " + ymin + ",");
-		sb.append(xmax + " " + ymax + ",");
-		sb.append(xmin + " " + ymax + ",");
-		sb.append(xmin + " " + ymin + "))");
+		sb.append("POLYGON(("); //$NON-NLS-1$
+		sb.append(xmin + " " + ymin + ","); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(xmax + " " + ymin + ","); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(xmax + " " + ymax + ","); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(xmin + " " + ymax + ","); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(xmin + " " + ymin + "))"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		System.out.println(sb.toString());
 	}

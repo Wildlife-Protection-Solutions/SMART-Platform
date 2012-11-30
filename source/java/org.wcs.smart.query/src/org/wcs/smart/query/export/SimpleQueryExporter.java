@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
@@ -52,16 +53,16 @@ public abstract class SimpleQueryExporter {
 	 */
 	public boolean export(IProgressMonitor monitor) throws Exception{
 		if (data == null) {
-			throw new Exception("Query needs to be run before it can be exported.");
+			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);
 		}
 		
-		monitor.beginTask("Export File", data.size() + 2);
+		monitor.beginTask(Messages.SimpleQueryExporter_Progress_ExportingFile, data.size() + 2);
 		try {
-			monitor.subTask("Initializing Query Writer");
+			monitor.subTask(Messages.SimpleQueryExporter_Progress_InitializingWriter);
 			init();
 			monitor.worked(1);
 
-			monitor.subTask("Writing Data");
+			monitor.subTask(Messages.SimpleQueryExporter_Progress_WritingData);
 			for (QueryResultItem it : data) {
 				writeRow(it);
 				monitor.worked(1);
@@ -70,14 +71,14 @@ public abstract class SimpleQueryExporter {
 				}
 			}
 
-			monitor.subTask("Finishing Query Writer ");
+			monitor.subTask(Messages.SimpleQueryExporter_Progress_CleanUp);
 			finish();
 			monitor.worked(1);
 
 			monitor.done();
 			return true;
 		} catch (Exception ex) {
-			throw new Exception("Export failed: " + ex.getMessage(), ex);
+			throw new Exception(Messages.SimpleQueryExporter_Error_ExportFailed + ex.getMessage(), ex);
 		}
 	}
 	

@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
@@ -38,6 +41,8 @@ import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
  */
 public class CategoryValueItem implements IValueItem {
 
+
+	private static final String COUNT_LABEL = Messages.CategoryValueItem_CountLabel;
 
 	/**
 	 * Creates a new category value item of the form
@@ -60,7 +65,7 @@ public class CategoryValueItem implements IValueItem {
 	 */
 	public CategoryValueItem(String key){
 		this.key = key;
-		this.categoryHkey = key.split(":")[2];
+		this.categoryHkey = key.split(":")[2]; //$NON-NLS-1$
 	}
 	
 	/**
@@ -85,7 +90,7 @@ public class CategoryValueItem implements IValueItem {
 		if (c == null){
 			return this.key;
 		}
-		return "Count " +  c.getName();
+		return MessageFormat.format(COUNT_LABEL, new Object[]{c.getName()});
 	}
 
 	/**
@@ -96,7 +101,7 @@ public class CategoryValueItem implements IValueItem {
 		if (c == null){
 			return this.key;
 		}
-		return "Count " +  c.getFullCategoryName();
+		return MessageFormat.format(COUNT_LABEL, new Object[]{c.getFullCategoryName()});
 	}
 	
 	/**
