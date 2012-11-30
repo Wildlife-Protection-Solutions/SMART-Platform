@@ -32,6 +32,7 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SummaryQueryResult;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
 
@@ -101,7 +102,7 @@ public class SummaryResultsArea extends Composite{
 		Composite main = toolkit.createComposite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		
-		runQueryLink = toolkit.createHyperlink(main, "Run Summary...", SWT.NONE);
+		runQueryLink = toolkit.createHyperlink(main, Messages.SummaryResultsArea_RunSummaryLink, SWT.NONE);
 		runQueryLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {

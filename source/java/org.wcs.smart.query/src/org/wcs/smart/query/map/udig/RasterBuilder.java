@@ -118,7 +118,6 @@ final class RasterBuilder {
 	 * @param envelop an envelope sets as EPSG:4326 is expected
 	 */
 	public void setEnvelope(Envelope2D envelop){
-		assert envelop.getCoordinateReferenceSystem().getName().equals("EPSG:4326"); //$NON-NLS-1$
 		this.envelope = envelop;
 	}
 	

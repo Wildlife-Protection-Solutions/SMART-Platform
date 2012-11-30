@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.export.IQueryExporter;
 import org.wcs.smart.query.export.QueryExportEngine;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Query page for the query export wizard
@@ -53,7 +54,7 @@ public class ExportQueryTypePage extends WizardPage {
 	 * @param pageName
 	 */
 	protected ExportQueryTypePage() {
-		super("Export type format");
+		super(Messages.ExportQueryTypePage_PageName);
 	}
 
 	
@@ -67,7 +68,7 @@ public class ExportQueryTypePage extends WizardPage {
 		
 		main.setLayout(new GridLayout(1, false));
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Select the export format: ");
+		lbl.setText(Messages.ExportQueryTypePage_SelectFormatLabel);
 		
 		outputOptions = new TableViewer(main, SWT.BORDER | SWT.SINGLE );
 		outputOptions.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -75,7 +76,7 @@ public class ExportQueryTypePage extends WizardPage {
 		outputOptions.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof IQueryExporter){
-					return ((IQueryExporter) element).getName() + " (*." + ((IQueryExporter) element).getDefaultExtension() + ")";
+					return ((IQueryExporter) element).getName() + " (*." + ((IQueryExporter) element).getDefaultExtension() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
@@ -99,7 +100,7 @@ public class ExportQueryTypePage extends WizardPage {
 				
 			}
 		});
-		setMessage("Select the export format");
+		setMessage(Messages.ExportQueryTypePage_DialogMessage);
 		setControl(main);
 		setPageComplete(false);
 	}

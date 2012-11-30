@@ -42,6 +42,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.map.udig.QueryService;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -63,7 +64,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	/*
 	 * Job for adding query layer to map
 	 */
-	private Job addLayerJob = new Job("Add Query Layers") {
+	private Job addLayerJob = new Job(Messages.QueryMapPageEditor_AddLayerJobName) {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -82,7 +83,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 				};
 	    		getMap().getViewportModel().addViewportModelListener(initListener);
 			} catch (IOException e) {
-				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, "Error loading pages", e);
+				return new Status(IStatus.ERROR, Messages.QueryMapPageEditor_UnknownStatus, IStatus.ERROR, Messages.QueryMapPageEditor_ErrorLoadingPages, e);
 			}
 			return Status.OK_STATUS;
 		}
@@ -92,7 +93,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job("Patrol Refresh Job"){
+    private Job refreshJob = new Job(Messages.QueryMapPageEditor_RefreshJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (queryService != null){
@@ -114,7 +115,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 					}
 				
 				} catch (IOException e) {
-					SmartPatrolPlugIn.log("Error refreshing patrol service.", e);
+					SmartPatrolPlugIn.log(Messages.QueryMapPageEditor_ErrorRefreshing, e);
 				}
 			}
 			//clear selection
@@ -150,7 +151,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		if (!(input instanceof QueryInput)){
-			throw new RuntimeException("Invalid editor input.");
+			throw new RuntimeException("Invalid editor input."); //$NON-NLS-1$
 		}
 		super.init(site, input);
 	}

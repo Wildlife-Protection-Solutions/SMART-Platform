@@ -79,6 +79,14 @@ public abstract class QueryColumn implements Cloneable{
 	private ColumnType type;
 	private boolean isVisible = true;
 	
+	private static QueryColumn[] queryColumns = null;
+	private static QueryColumn[] patrolQueryColumns = null;
+	private static QueryColumn[] gridQueryColumns = null;
+	
+	private static final Object GRIDLOCK = new Object();
+	private static final Object PATROLLOCK = new Object();
+	private static final Object WAYPOINTLOCK = new Object();
+	
 	/**
 	 * Creates a new query column 
 	 * @param name the column name as displayed to the user
@@ -178,9 +186,6 @@ public abstract class QueryColumn implements Cloneable{
 	public abstract QueryColumn clone();
 	
 	
-	private static QueryColumn[] queryColumns = null;
-	private static QueryColumn[] patrolQueryColumns = null;
-	private static QueryColumn[] gridQueryColumns = null;
 	
 	/**
 	 * 
@@ -195,8 +200,13 @@ public abstract class QueryColumn implements Cloneable{
 		if (queryColumns != null){
 			return cloneColumns(queryColumns);
 		}
+		synchronized (WAYPOINTLOCK) {
+			if (queryColumns != null){
+				return cloneColumns(queryColumns);
+			}	
 		
-		Job j = new Job(Messages.QueryColumn_LoadingObservationColumnJobName){
+		
+			Job j = new Job(Messages.QueryColumn_LoadingObservationColumnJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -260,12 +270,13 @@ public abstract class QueryColumn implements Cloneable{
 				}
 				return Status.OK_STATUS;
 			}
-		};
-		j.schedule();
-		try{
-			j.join();
-		}catch (Exception ex){
-			throw new IllegalStateException(ex);
+			};
+			j.schedule();
+			try{
+				j.join();
+			}catch (Exception ex){
+				throw new IllegalStateException(ex);
+			}
 		}
 		
 		return  cloneColumns(queryColumns);
@@ -283,46 +294,51 @@ public abstract class QueryColumn implements Cloneable{
 		if (patrolQueryColumns != null){
 			return cloneColumns(patrolQueryColumns);
 		}
-		
-		Job j = new Job(Messages.QueryColumn_LoadingPatrolColumnJobName){
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				//load from the database 
-				Session session = HibernateManager.openSession();
-				
-				try {
-					ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
-				
-					for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
-						FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
-						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
-									item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
-									item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
-									item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
-									item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
-									item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
-									item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
-									item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME){
-							// do nothing, don't want these columns for patrol queries
-						}else{
-							cols.add(new FixedQueryColumn(item));
-						}
-					}
-
-					patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
-				
-				} finally {
-					session.close();
-				}
-				return Status.OK_STATUS;
+		synchronized (PATROLLOCK) {
+			if (patrolQueryColumns != null){
+				return cloneColumns(patrolQueryColumns);
 			}
-		};
-		j.schedule();
-		try{
-			j.join();
-		}catch (Exception ex){
-			throw new IllegalStateException(ex);
+			
+			Job j = new Job(Messages.QueryColumn_LoadingPatrolColumnJobName){
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					//load from the database 
+					Session session = HibernateManager.openSession();
+					
+					try {
+						ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+					
+						for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+							FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+							if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
+										item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
+										item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
+										item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
+										item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
+										item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
+										item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
+										item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME){
+								// do nothing, don't want these columns for patrol queries
+							}else{
+								cols.add(new FixedQueryColumn(item));
+							}
+						}
+
+						patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+					
+					} finally {
+						session.close();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+			try{
+				j.join();
+			}catch (Exception ex){
+				throw new IllegalStateException(ex);
+			}
 		}
 		
 		return  cloneColumns(patrolQueryColumns);
@@ -353,14 +369,21 @@ public abstract class QueryColumn implements Cloneable{
 		return maxDepth + 1;
 	}
 	
+	
 	public static QueryColumn[] getGridColumns() {
 		if (gridQueryColumns != null){
 			return cloneColumns(gridQueryColumns);
 		}
-		gridQueryColumns = new QueryColumn[GridQueryColumn.GridColumns.values().length];	
-		for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
-			GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
-			gridQueryColumns[i] = new GridQueryColumn(item); 
+		synchronized (GRIDLOCK) {
+			if (gridQueryColumns != null){
+				return cloneColumns(gridQueryColumns);
+			}	
+			QueryColumn[] tmp = new QueryColumn[GridQueryColumn.GridColumns.values().length];	
+			for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
+				GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
+				tmp[i] = new GridQueryColumn(item); 
+			}
+			gridQueryColumns  = tmp;
 		}
 		return cloneColumns(gridQueryColumns);
 	}

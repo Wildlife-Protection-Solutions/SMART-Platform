@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -128,7 +129,7 @@ public class QueryDateFilterComposite extends Composite {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		lblDateFilter = new Label(main, SWT.NONE);
-		lblDateFilter.setText("Date:");
+		lblDateFilter.setText(Messages.QueryDateFilterComposite_DateLabel);
 		
 		cmbDateField = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbDateField.setContentProvider(ArrayContentProvider.getInstance());
@@ -168,7 +169,7 @@ public class QueryDateFilterComposite extends Composite {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				
-				lbl1.setText("");
+				lbl1.setText(""); //$NON-NLS-1$
 				
 				DATE_FILTER_OP filter = (DATE_FILTER_OP) ((IStructuredSelection)cmbFilterOptions.getSelection()).getFirstElement();
 				setCustom(filter == DATE_FILTER_OP.CUSTOM);
@@ -176,28 +177,28 @@ public class QueryDateFilterComposite extends Composite {
 				if (bits != null){
 					if (filter == DATE_FILTER_OP.MONTH_TO_DATE || 
 							filter == DATE_FILTER_OP.LAST_MONTH){ 
-						DateFormat formatter = new SimpleDateFormat("MMM yyyy");
-						lbl1.setText( "[" + formatter.format( bits[0] ) + "]");
+						DateFormat formatter = new SimpleDateFormat("MMM yyyy"); //$NON-NLS-1$
+						lbl1.setText( "[" + formatter.format( bits[0] ) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 					}else if (filter == DATE_FILTER_OP.YEAR_TO_DATE ||
 							filter == DATE_FILTER_OP.LAST_YEAR){
-						DateFormat formatter = new SimpleDateFormat("yyyy");
-						lbl1.setText( "[" + formatter.format( bits[0] ) + "]");
+						DateFormat formatter = new SimpleDateFormat("yyyy"); //$NON-NLS-1$
+						lbl1.setText( "[" + formatter.format( bits[0] ) + "]");  //$NON-NLS-1$//$NON-NLS-2$
 					}else if (bits.length == 1){
 						DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
-						lbl1.setText( "[" + formatter.format( bits[0] ) + " - today]");
+						lbl1.setText( "[" + formatter.format( bits[0] ) + " - " + Messages.QueryDateFilterComposite_TodayLabel + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}else if (bits.length == 2){
 						DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
-						lbl1.setText( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]");
+						lbl1.setText( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
 				main.layout();
 			}
 		});
 		lbl1 = new Label(main, SWT.NONE);
-		lbl1.setText("Between");
+		lbl1.setText(Messages.QueryDateFilterComposite_BetweenLabel);
 		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
 		lbl2 = new Label(main, SWT.NONE);
-		lbl2.setText("And");
+		lbl2.setText(Messages.QueryDateFilterComposite_AndLabel);
 		dtEnd = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
 
 		cmbFilterOptions.setSelection(new StructuredSelection(DATE_FILTER_OP.values()[0]));
@@ -215,7 +216,7 @@ public class QueryDateFilterComposite extends Composite {
 		dtStart.setVisible(isCustom);
 		lbl2.setVisible(isCustom);
 		if (isCustom){
-			lbl1.setText("Between");
+			lbl1.setText(Messages.QueryDateFilterComposite_BetweenLabel2);
 		}
 	}
 	

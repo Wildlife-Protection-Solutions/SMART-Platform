@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;

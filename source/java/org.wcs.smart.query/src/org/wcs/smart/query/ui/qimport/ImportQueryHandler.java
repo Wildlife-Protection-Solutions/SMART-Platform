@@ -28,6 +28,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.internal.ui.QueryPerspective;
 
 /**
@@ -56,7 +57,7 @@ public class ImportQueryHandler extends AbstractHandler {
 			
 		} catch (WorkbenchException e) {
 			QueryPlugIn
-					.displayLog("Error loading query perspective.", e);
+					.displayLog(Messages.ImportQueryHandler_ErrorOpeningPerspective, e);
 		}
 		
 		ImportQueryWizard wizard = new ImportQueryWizard();

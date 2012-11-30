@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 
 /**
@@ -99,7 +100,7 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 	protected void buttonPressed(int buttonId) {
 		if(buttonId == IDialogConstants.OK_ID){
 			if (viewer.getCheckedElements().length == 0){
-				MessageDialog.openError(getShell(), "Error", "At least one item must be selected.");
+				MessageDialog.openError(getShell(), Messages.GroupByFilterDialog_ErrorDialogTitle, Messages.GroupByFilterDialog_Error_NoSelection);
 				return;
 			}
 		}
@@ -152,7 +153,7 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 			}
 		});
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		viewer.setInput(new String[]{"Loading...."});
+		viewer.setInput(new String[]{Messages.GroupByFilterDialog_LoadingLabel});
 		viewer.getControl().setEnabled(false);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)viewer.getControl().getLayoutData()).heightHint = 300;
@@ -182,7 +183,7 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 		links.setLayout(gl);
 		
 		Link lnkSelectAll = new Link(links,SWT.NONE);
-		lnkSelectAll.setText("<a>Select All</a>");
+		lnkSelectAll.setText("<a>" + Messages.GroupByFilterDialog_SelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkSelectAll.addListener (SWT.Selection, new Listener () {
 			public void handleEvent(Event event) {
 				viewer.setAllChecked(true);
@@ -193,14 +194,14 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 		gd.heightHint = lnkSelectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		lbl.setLayoutData(gd);
 		Link lnkDeSelectAll = new Link(links,SWT.NONE);
-		lnkDeSelectAll.setText("<a>De-Select All</a>");
+		lnkDeSelectAll.setText("<a>" + Messages.GroupByFilterDialog_DeSelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkDeSelectAll.addListener (SWT.Selection, new Listener () {
 			public void handleEvent(Event event) {
 				viewer.setAllChecked(false);
 			}
 		});
 		
-		getInputJob = new Job("Loading list items.") {
+		getInputJob = new Job(Messages.GroupByFilterDialog_LoadingJobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				allItems = dropItem.getListItem();
@@ -240,9 +241,10 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 			}
 		});
 		
-		setMessage("Select the items to include");
-		setTitle("Group By Filters");
-		getShell().setText("Group By Filter");
+		setMessage(Messages.GroupByFilterDialog_DialogMessage);
+		String title = Messages.GroupByFilterDialog_DialogTitle;
+		setTitle(title);
+		getShell().setText(title);
 		return main;
 		
 	}

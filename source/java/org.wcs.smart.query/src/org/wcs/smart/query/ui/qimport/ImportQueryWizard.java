@@ -46,14 +46,11 @@ import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.qimport.QueryImporter;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.summary.SummaryEditor;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -74,7 +71,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 	 *
 	 */
 	public ImportQueryWizard() {
-		setWindowTitle("Import a query defintion");
+		setWindowTitle(Messages.ImportQueryWizard_Title);
 	}
 
 	/**
@@ -123,8 +120,8 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 							
 							ConfirmInputDialog dialog = new ConfirmInputDialog(
 									getContainer().getShell(),
-									"Query Import",
-									"Some query filters did not exactly match items in the database.  However for these items, similar items were found. The modifications are outlined below.  Would you like to continue with the import?",
+									Messages.ImportQueryWizard_Confirm_DialogTitle,
+									Messages.ImportQueryWizard_Confirm_DialogMessage,
 									sb.toString(), null);
 							if (dialog.open() != ConfirmInputDialog.OK){
 								return;
@@ -158,13 +155,13 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						QueryInput qi = new QueryInput(query);
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, query.getType().getEditorId());
 					}catch (Exception ex){
-						QueryPlugIn.displayLog("Could not import query. " + ex.getMessage(), ex);
+						QueryPlugIn.displayLog(Messages.ImportQueryWizard_CouldNotImportError + ex.getMessage(), ex);
 					}
 					
 				}
 			});
 		} catch (Exception e) {
-			QueryPlugIn.displayLog("Import failed: " + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.ImportQueryWizard_ImportFailed + e.getMessage(), e);
 		}
 		return !hasError;
 	}

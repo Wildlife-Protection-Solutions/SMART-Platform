@@ -45,6 +45,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 
 /**
@@ -72,7 +73,7 @@ public class AttributeListGroupByDropItem extends DropItem implements
 	 */
 	public AttributeListGroupByDropItem(Attribute attribute){
 		if (attribute.getType() != AttributeType.LIST){
-			throw new IllegalStateException("Cannot create an attribute list drop item for a non-list attribute");
+			throw new IllegalStateException("Cannot create an attribute list drop item for a non-list attribute"); //$NON-NLS-1$
 		}
 		this.attribute = attribute;
 	}
@@ -104,7 +105,7 @@ public class AttributeListGroupByDropItem extends DropItem implements
 			session.getTransaction().rollback();
 			session.close();
 		}catch (Exception ex){
-			QueryPlugIn.displayLog("Error loading items for list.", ex);
+			QueryPlugIn.displayLog(Messages.AttributeListGroupByDropItem_ErrorLoadingListItems, ex);
 			session.close();
 		}
 		return items;
@@ -137,20 +138,20 @@ public class AttributeListGroupByDropItem extends DropItem implements
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		if (category != null){
-			sb.append("category:");
+			sb.append("category:"); //$NON-NLS-1$
 			sb.append(category.getHkey());
-			sb.append(":");
+			sb.append(":"); //$NON-NLS-1$
 		}
-		sb.append("attribute:");
+		sb.append("attribute:"); //$NON-NLS-1$
 		sb.append(attribute.getType().typeKey);
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		sb.append(attribute.getKeyId());
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		if (filters != null){
 			for (int i =0; i < filters.size(); i ++){
 				sb.append(filters.get(i).getKey());
 				if (i < filters.size()-1){
-					sb.append(":");	
+					sb.append(":");	 //$NON-NLS-1$
 				}
 			}
 		}
@@ -207,7 +208,7 @@ public class AttributeListGroupByDropItem extends DropItem implements
 		
 		Label lbl = new Label(comp, SWT.NONE);
 		if (category != null){
-			lbl.setText(formatStringForLabel(attribute.getName() + " (" + category.getFullCategoryName() + ")"));
+			lbl.setText(formatStringForLabel(attribute.getName() + " (" + category.getFullCategoryName() + ")")); //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
 			lbl.setText(formatStringForLabel(attribute.getName()));
 		}
@@ -216,7 +217,7 @@ public class AttributeListGroupByDropItem extends DropItem implements
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
 		link.setUnderlined(true);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("Filters...");
+		link.setText(Messages.AttributeListGroupByDropItem_FiltersLinkLabel);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -247,7 +248,7 @@ public class AttributeListGroupByDropItem extends DropItem implements
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.AttributeListGroupByDropItem_IncludedTooltip);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -267,10 +268,10 @@ public class AttributeListGroupByDropItem extends DropItem implements
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
 		if (filters == null){
-			tipStr.append(" All");
+			tipStr.append(Messages.AttributeListGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filters){
-				tipStr.append("'" + item.getName() + "'" + "\n");
+				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		toolTip.setMessage(tipStr.toString());

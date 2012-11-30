@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -87,19 +88,19 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	private DateGroupByOption[] dateGroupByOptions = null;
 	
 	
-	/**
-	 * Data model children items
-	 */
-	enum DataModelItem{
-		CATEGORIES("Categories"),
-		ATTRIBUTES("Attributes");
-		
-		String guiName;
-		
-		DataModelItem(String guiName){
-			this.guiName = guiName;
-		}
-	}
+//	/**
+//	 * Data model children items
+//	 */
+//	enum DataModelItem{
+//		CATEGORIES("Categories"),
+//		ATTRIBUTES("Attributes");
+//		
+//		String guiName;
+//		
+//		DataModelItem(String guiName){
+//			this.guiName = guiName;
+//		}
+//	}
 	
 	
 	
@@ -107,12 +108,12 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	 * Root node children
 	 */
 	enum NodeType  {
-		VALUE_NODE("Value Options"),
-		PATROL_VALUES("Patrol Values"),
-		PATROL_DATE_GROUPBYS("Date"),
-		DATAMODEL_VALUES("Data Model Values"),
-		DATAMODEL_VALUE_CATEGORY("Categories"),
-		DATAMODEL_VALUE_ATTRIBUTES("Attributes");		
+		VALUE_NODE(Messages.GriddedQueryContentProvider_ValueOptionsLabel),
+		PATROL_VALUES(Messages.GriddedQueryContentProvider_PatrolValuesLabel),
+		PATROL_DATE_GROUPBYS(Messages.GriddedQueryContentProvider_DateLabel),
+		DATAMODEL_VALUES(Messages.GriddedQueryContentProvider_DataModelValuesLabel),
+		DATAMODEL_VALUE_CATEGORY(Messages.GriddedQueryContentProvider_CategoriesLabel),
+		DATAMODEL_VALUE_ATTRIBUTES(Messages.GriddedQueryContentProvider_AttributesLabel);		
 		
 		private String name;
 		
@@ -159,7 +160,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 			dateGroupByOptions = null;
 		}else{
 			if (newInput != null && !(newInput instanceof Map)){
-				throw new IllegalArgumentException("new input must be map");
+				throw new IllegalArgumentException("new input must be map"); //$NON-NLS-1$
 			}
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			gridValueOptions = (PatrolValueOption[])in.get(NodeType.PATROL_VALUES);
@@ -180,7 +181,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 			patrolRatioOptions == null &&
 			dataModel == null &&
 			dateGroupByOptions == null){
-			return new String[]{"Loading"};
+			return new String[]{Messages.GriddedQueryContentProvider_LoadingText};
 		}
 		return new Object[]{valueNode};
 	}
@@ -203,7 +204,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	private Object[] getAttributeTreeChildren(final SummaryDmObject parent){
 	
 		final List<AttributeTreeNode> kids = new ArrayList<AttributeTreeNode>();
-		Job j = new Job("loading tree children"){
+		Job j = new Job(Messages.GriddedQueryContentProvider_loadingtreeJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -221,6 +222,8 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						s.update(parent.getObject());
 						nodes =  ((AttributeTreeNode)parent.getObject()).getChildren() ;
+					}else{
+						throw new IllegalStateException("Parent node not an attribute tree."); //$NON-NLS-1$
 					}
 					for (AttributeTreeNode node : nodes){
 						if (node.getIsActive()){
@@ -229,7 +232,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 					}
 					s.getTransaction().rollback();
 				}catch (Exception ex){
-					QueryPlugIn.log("Could not load tree children:" + ex.getMessage(), ex);
+					QueryPlugIn.log(Messages.GriddedQueryContentProvider_ErrorLoadingTree + ex.getMessage(), ex);
 				}finally{
 					s.close();
 				}
@@ -241,7 +244,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		try{
 			j.join();
 		}catch (Exception ex){
-			QueryPlugIn.log("Could not load tree children:" + ex.getMessage(), ex);
+			QueryPlugIn.log(Messages.GriddedQueryContentProvider_ErrorLoadingTree + ex.getMessage(), ex);
 			return null;
 		}
 		
@@ -343,12 +346,12 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		}else if (element instanceof PatrolValueOption){
 			return patrolValueNode;
 		//}else if (parentElement instanceof AREA FITLER){
-		}else if (element instanceof DataModelItem){
-			Object parent = getParent(element);
-			if (parent instanceof RootNode){
-				return dataModelValueNode;
-			}
-			return null;
+//		}else if (element instanceof DataModelItem){
+//			Object parent = getParent(element);
+//			if (parent instanceof RootNode){
+//				return dataModelValueNode;
+//			}
+//			return null;
 		}else if (element instanceof SummaryDmObject){
 			//assume data model
 			return provider.getParent( ((SummaryDmObject)element).getObject() );	
@@ -369,8 +372,8 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 			return false;
 		}else if (element instanceof PatrolValueOption){
 			return false;
-		}else if (element instanceof DataModelItem){
-			return false;
+//		}else if (element instanceof DataModelItem){
+//			return false;
 		//}else if (parentElement instanceof AREA FITLER){
 		}else if (element instanceof SummaryDmObject){
 			if (!((SummaryDmObject) element).isValue()){

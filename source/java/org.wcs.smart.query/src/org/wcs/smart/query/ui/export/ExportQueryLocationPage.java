@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.export.IQueryExporter;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Query wizard page to select the output file format.
@@ -54,7 +55,7 @@ public class ExportQueryLocationPage extends WizardPage {
 	 * Creates a new query wizard page.
 	 */
 	protected ExportQueryLocationPage() {
-		super("Destination Location");
+		super(Messages.ExportQueryLocationPage_PageName);
 	}
 
 	/**
@@ -63,15 +64,15 @@ public class ExportQueryLocationPage extends WizardPage {
 	public void initValues(){
 		String location = lastDir;
 		if (location == null){
-			location = System.getProperty("user.home");
+			location = System.getProperty("user.home"); //$NON-NLS-1$
 		}
 		
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		IQueryExporter exporter = wizard.getQueryExporter();
 		
-		String initFile = location + File.separator + wizard.getQueryName() + "." ;
+		String initFile = location + File.separator + wizard.getQueryName() + "." ; //$NON-NLS-1$
 		if (exporter == null){
-			initFile += ".txt";
+			initFile += ".txt"; //$NON-NLS-1$
 		}else{
 			initFile += exporter.getDefaultExtension();
 		}
@@ -88,7 +89,7 @@ public class ExportQueryLocationPage extends WizardPage {
 		main.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Destination File:");
+		lbl.setText(Messages.ExportQueryLocationPage_FileLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		txtFile = new Text(main, SWT.BORDER);
@@ -104,7 +105,7 @@ public class ExportQueryLocationPage extends WizardPage {
 		});		
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.ExportQueryLocationPage_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -113,8 +114,8 @@ public class ExportQueryLocationPage extends WizardPage {
 				String ext = ((ExportQueryWizard)getWizard()).getQueryExporter().getDefaultExtension();
 				String name= ((ExportQueryWizard)getWizard()).getQueryExporter().getName();
 				
-				String[] extensions = new String[]{"*." + ext, "*.*"};
-				String[] names = new String[]{name + " (*." + ext + ")", "All Files (*.*)"};
+				String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
+				String[] names = new String[]{name + " (*." + ext + ")", Messages.ExportQueryLocationPage_AllFilesFilterName}; //$NON-NLS-1$ //$NON-NLS-2$
 				
 				fd.setFilterExtensions(extensions);
 				fd.setFilterNames(names);
@@ -128,7 +129,7 @@ public class ExportQueryLocationPage extends WizardPage {
 				}
 			}
 		});
-		setMessage("Select the export destination");
+		setMessage(Messages.ExportQueryLocationPage_DialogMessage);
 		setPageComplete(false);
 		setControl(main);
 	}

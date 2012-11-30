@@ -47,7 +47,7 @@ public class BooleanPatrolDropItem extends DropItem {
 	public BooleanPatrolDropItem(PatrolQueryOption filter) {
 		//super(parent, target);
 		this.text = filter.getGuiName();
-		this.key = "patrol:" + filter.getKey();
+		this.key = "patrol:" + filter.getKey(); //$NON-NLS-1$
 	}
 
 	/**

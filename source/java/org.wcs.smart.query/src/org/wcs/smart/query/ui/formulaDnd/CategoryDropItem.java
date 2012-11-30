@@ -50,7 +50,7 @@ public class CategoryDropItem extends DropItem {
 		//super(parent, target);
 		
 		this.text = category.getFullCategoryName();
-		this.key = "category:" + category.getHkey();
+		this.key = "category:" + category.getHkey(); //$NON-NLS-1$
 		
 	}
 

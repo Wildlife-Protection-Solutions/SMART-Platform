@@ -31,13 +31,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.ui.gridded.GriddedEditor;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor;
-import org.wcs.smart.query.ui.summary.SummaryEditor;
-
 /**
  * Command handler for adding a new folder to 
  * the query list view.

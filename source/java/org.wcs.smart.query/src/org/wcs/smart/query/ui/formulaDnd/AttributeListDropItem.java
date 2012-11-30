@@ -48,6 +48,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 
 /**
@@ -72,7 +73,7 @@ public class AttributeListDropItem extends DropItem{
 	/*
 	 * Job to load the attribute list options
 	 */
-	private Job loadItemsJobs = new Job("Loading List Items"){
+	private Job loadItemsJobs = new Job(Messages.AttributeListDropItem_LoadingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -82,7 +83,7 @@ public class AttributeListDropItem extends DropItem{
 			s.beginTransaction();
 			try{
 				@SuppressWarnings("unchecked")
-				List<AttributeListItem> litems = s.createCriteria(AttributeListItem.class).add(Restrictions.eq("attribute", attribute)).list();
+				List<AttributeListItem> litems = s.createCriteria(AttributeListItem.class).add(Restrictions.eq("attribute", attribute)).list(); //$NON-NLS-1$
 				for (AttributeListItem item : litems){
 					if (item.getIsActive()){
 						items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
@@ -115,8 +116,8 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	public AttributeListDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
-		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
+		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";  //$NON-NLS-1$//$NON-NLS-2$
 		this.attribute = att.getAttribute();
 	}
 
@@ -129,7 +130,7 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	public AttributeListDropItem(Attribute att) {
 		//super(parent, panel);
-		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId();
+		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 		this.text = att.getName() ;
 		this.attribute = att;
 	}
@@ -162,7 +163,7 @@ public class AttributeListDropItem extends DropItem{
 	 */
 	@Override
 	public String getText() {
-		return this.text + " = " + listViewer.getCombo().getText();
+		return this.text + " = " + listViewer.getCombo().getText(); //$NON-NLS-1$
 	}
 
 	/**
@@ -171,7 +172,7 @@ public class AttributeListDropItem extends DropItem{
 	@Override
 	public String asQueryPart() {
 		StringBuilder query = new StringBuilder(this.key);
-		query.append(" = ");
+		query.append(" = "); //$NON-NLS-1$
 		
 		ListItem it = null;
 		if (currentSelection != null){
@@ -224,13 +225,13 @@ public class AttributeListDropItem extends DropItem{
 				currentSelection = newSelection;
 			}
 		});
-		listViewer.setInput(new ListItem[]{new ListItem("Loading")});
+		listViewer.setInput(new ListItem[]{new ListItem(Messages.AttributeListDropItem_LoadingLabel)});
 		
 		initDrag(main);
 		initDrag(lblAttribute);
 		
 		
-		lblAttribute.setText(formatStringForLabel(this.text + " = "));
+		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
 		loadItemsJobs.schedule();
 	}
 	

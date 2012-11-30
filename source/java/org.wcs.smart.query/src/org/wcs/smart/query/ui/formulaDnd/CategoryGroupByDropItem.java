@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 
 /**
@@ -95,7 +96,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){
-			QueryPlugIn.displayLog("Error loading items for list.", ex);
+			QueryPlugIn.displayLog(Messages.CategoryGroupByDropItem_ErrorLoadingCategoryName, ex);
 			s.close();
 		}
 		return items;		
@@ -146,15 +147,15 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 //		return parentCategory.getFullCategoryName();
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append ("Categories - Level " + this.level + "\n");
+		sb.append (Messages.CategoryGroupByDropItem_CategoriesLabel + " - " + Messages.CategoryGroupByDropItem_TreeLevelLabel + " " + this.level + "\n");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		int cnt = 0;
 		for (ListItem it : filters){
 			if (cnt >= 3){
-				sb.append("...");
+				sb.append("..."); //$NON-NLS-1$
 				break;
 			}
-			sb.append("   " + it.getName());
-			sb.append("\n");
+			sb.append("   " + it.getName()); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
 			cnt ++;
 		}
 //		return "Categories @ Level " + this.level;
@@ -167,15 +168,15 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("category:");
+		sb.append("category:"); //$NON-NLS-1$
 //		sb.append(parentCategory.getHkey());
 		sb.append(level);
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		if (filters != null){
 			for (int i =0; i < filters.size(); i ++){
 				sb.append(filters.get(i).getKey());
 				if (i < filters.size()-1){
-					sb.append(":");
+					sb.append(":"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -249,7 +250,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
 		link.setUnderlined(true);
 		link.setForeground( parent.getShell().getDisplay().getSystemColor(SWT.COLOR_BLUE) );
-		link.setText("Filters...");
+		link.setText(Messages.CategoryGroupByDropItem_FiltersLabel);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -284,7 +285,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 		});
 		
 		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
-		toolTip.setText("Included:");
+		toolTip.setText(Messages.CategoryGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
@@ -304,10 +305,10 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
 		if (filters == null){
-			tipStr.append(" All");
+			tipStr.append(Messages.CategoryGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filters){
-				tipStr.append("'" + item.getName() + "'" + "\n");
+				tipStr.append("'" + item.getName() + "'" + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		toolTip.setMessage(tipStr.toString());

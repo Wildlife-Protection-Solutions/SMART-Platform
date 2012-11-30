@@ -73,7 +73,7 @@ public class QueryListLabelProvider extends LabelProvider {
 		if (element instanceof QueryFolder){
 			return ((QueryFolder) element).getName() ;
 		}else if (element instanceof QueryInput){
-			return ((QueryInput) element).getName() + " [" + ((QueryInput)element).getId() + "]";
+			return ((QueryInput) element).getName() + " [" + ((QueryInput)element).getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.getText(element);
 	}

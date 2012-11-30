@@ -53,6 +53,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.ListDropTargetPanel;
@@ -75,7 +76,7 @@ public class GriddedValuePanel {
 	private Label lblUnits;
 	private QueryDefView parentView;
 	
-	private Job loadProjections = new Job("load projections"){
+	private Job loadProjections = new Job(Messages.GriddedValuePanel_LoadProjsJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -176,7 +177,7 @@ public class GriddedValuePanel {
 			lstProjections.setSelection(new StructuredSelection(defaultP));
 			lstProjections.refresh();
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog("Error parsing projection information. "
+			QueryPlugIn.displayLog(Messages.GriddedValuePanel_ProjectionParseError
 					+ ex.getMessage(), ex);
 		}
 	}
@@ -219,9 +220,9 @@ public class GriddedValuePanel {
 		lblGridDef.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.GRID_ICON));
 		
 		Label lblDef = new Label(leftInner, SWT.NONE);
-		lblDef.setText("Grid Definition");
+		lblDef.setText(Messages.GriddedValuePanel_GridDefLabel);
 		lblDef.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblDef.setToolTipText("Define the grid here.");
+		lblDef.setToolTipText(Messages.GriddedValuePanel_GridDefTooltip);
 		
 		Composite leftMain = new Composite(left, SWT.NONE);
 		leftMain.setLayout(new GridLayout(3, false));
@@ -250,9 +251,9 @@ public class GriddedValuePanel {
 		lblValues.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON));
 		
 		lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setText("Grid Value");
+		lblValues.setText(Messages.GriddedValuePanel_GridValueLabel);
 		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblValues.setToolTipText("Add values to compute here from the 'Value Options' section of the Query Filters tree.");
+		lblValues.setToolTipText(Messages.GriddedValuePanel_GridValueTooltip);
 		
 		lstValues = new ListDropTargetPanel(parentView, false);
 		Composite comp = lstValues.createComposite(right);
@@ -263,19 +264,19 @@ public class GriddedValuePanel {
 
 	private void createOrigin(Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Grid Origin:");
+		lbl.setText(Messages.GriddedValuePanel_GridOriginLabel);
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		lbl = new Label(parent, SWT.NONE);
-		lbl.setText("(0, 0)");
+		lbl.setText("(0, 0)"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2,1));
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
 	}
 	private void createGridSize(Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Grid Size:");
+		lbl.setText(Messages.GriddedValuePanel_GridSizeLabel);
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
@@ -284,7 +285,7 @@ public class GriddedValuePanel {
 		((GridData)txtGridSize.getLayoutData()).widthHint = 150;
 		
 		txtGridSize.setTextLimit(6);
-		txtGridSize.setText("1");
+		txtGridSize.setText("1"); //$NON-NLS-1$
 		txtGridSize.addListener(SWT.Modify, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
@@ -296,7 +297,7 @@ public class GriddedValuePanel {
 		
 		
 		lblUnits = new Label(parent, SWT.NONE);
-		lblUnits.setText("unknown");
+		lblUnits.setText(Messages.GriddedValuePanel_UnknownUnitsLabel);
 		lblUnits.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
 		
@@ -304,7 +305,7 @@ public class GriddedValuePanel {
 	private void createProjection(Composite parent){
 		
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Projection:");
+		lbl.setText(Messages.GriddedValuePanel_ProjectionsLabel);
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
@@ -312,23 +313,20 @@ public class GriddedValuePanel {
 		lstProjections.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2,1));
 		lstProjections.setLabelProvider(ProjectionLabelProvider.getInstance());
 		lstProjections.setContentProvider(ArrayContentProvider.getInstance());
-		lstProjections.setInput(new String[]{"Loading"});
+		lstProjections.setInput(new String[]{Messages.GriddedValuePanel_LoadingLabel});
 		lstProjections.addSelectionChangedListener(new ISelectionChangedListener() {			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (!lstProjections.getSelection().isEmpty()){
 					Object o = ((IStructuredSelection)lstProjections.getSelection()).getFirstElement();
+					lblUnits.setText(Messages.GriddedValuePanel_UknownProjectionLabel);
 					if (o instanceof Projection){
 						try{
 							//assume units of all axis are the same
 							Unit<?> units = ((Projection)o).getCrs().getCoordinateSystem().getAxis(0).getUnit();
 							lblUnits.setText(units.toString());
-						}catch (Exception ex){
-							lblUnits.setText("unknown");	
+						}catch (Exception ex){	
 						}
-						
-					}else{
-						lblUnits.setText("unknown");
 					}
 					
 					if (isInitializing) return;

@@ -69,8 +69,8 @@ public class AttributeDropItem extends DropItem{
 	public AttributeDropItem(CategoryAttribute att) {
 		//super(parent, target);
 		this.type = att.getAttribute().getType();
-		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";		
-		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey +":" + att.getAttribute().getKeyId();
+		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";		 //$NON-NLS-1$ //$NON-NLS-2$
+		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey +":" + att.getAttribute().getKeyId();  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	/**
@@ -84,7 +84,7 @@ public class AttributeDropItem extends DropItem{
 		//super(parent, target);
 		this.type = att.getType();
 		this.text = att.getName();
-		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId();
+		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**
@@ -110,7 +110,7 @@ public class AttributeDropItem extends DropItem{
 	@Override
 	public String getText() {
 		if (operators != null){
-			return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " " ;//+ value.getText() ;
+			return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " " ;//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
 			return this.text;
 		}
@@ -125,19 +125,19 @@ public class AttributeDropItem extends DropItem{
 		StringBuilder querypart = new StringBuilder();
 		if (type == AttributeType.NUMERIC){
 			querypart.append (this.key);
-			querypart.append( " ");
+			querypart.append( " "); //$NON-NLS-1$
 			querypart.append(Operator.NUMERIC_OPS[operators.getSelectionIndex()].asSmartValue());
-			querypart.append(" ");
+			querypart.append(" "); //$NON-NLS-1$
 			querypart.append(value.getText());
 			
 		}else if (type == AttributeType.TEXT){
 			querypart.append (this.key);
-			querypart.append( " ");
+			querypart.append( " "); //$NON-NLS-1$
 			
 			querypart.append(Operator.STRING_OPS[operators.getSelectionIndex()].asSmartValue());
-			querypart.append(" \"");
+			querypart.append(" \""); //$NON-NLS-1$
 			querypart.append(value.getText());
-			querypart.append("\"");
+			querypart.append("\""); //$NON-NLS-1$
 		}else if (type == AttributeType.BOOLEAN){
 			querypart.append(this.key);
 		}

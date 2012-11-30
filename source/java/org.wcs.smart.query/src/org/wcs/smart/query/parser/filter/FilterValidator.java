@@ -133,7 +133,7 @@ public class FilterValidator {
 											item.getValue().get(0) + " "+ item.getValue().get(1) + " [" + item.getId() + "] "}));	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 					}else{
-						new Exception(
+						throw new Exception(
 								MessageFormat.format(
 								Messages.FilterValidator_PatrolFilterErrorB, new Object[]{ filter.asString()}));
 					}

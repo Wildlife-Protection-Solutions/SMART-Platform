@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -182,7 +183,7 @@ public abstract class DropItem {
 		createComposite(inner);
 		
 		Label lblX = new Label(inner, SWT.NONE);
-		lblX.setToolTipText("delete item");
+		lblX.setToolTipText(Messages.DropItem_deleteitemTooltip);
 		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
 		lblX.setImage(JFaceResources.getImage(QueryPlugIn.DELETE_MINI_ICON));
 		lblX.addMouseListener(new MouseAdapter() {

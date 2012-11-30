@@ -64,9 +64,9 @@ public class BracketDropItem extends DropItem {
 	@Override
 	public String getText() {
 		if (order == BracketType.OPEN){
-			return "(";
+			return "("; //$NON-NLS-1$
 		}else{
-			return ")";
+			return ")"; //$NON-NLS-1$
 		}
 	}
 

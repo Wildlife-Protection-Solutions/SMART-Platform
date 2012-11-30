@@ -52,10 +52,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.query.IQueryFolderListener;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.IQueryEditor;
-import org.wcs.smart.query.ui.observation.QueryResultsEditor;
-import org.wcs.smart.query.ui.summary.SummaryEditor;
 
 /**
  * View that displays saved queries to the user.
@@ -65,7 +64,7 @@ import org.wcs.smart.query.ui.summary.SummaryEditor;
  */
 public class QueryListView extends ViewPart {
 
-	public static final String ID = "org.wcs.smart.query.QueryListView";
+	public static final String ID = "org.wcs.smart.query.QueryListView"; //$NON-NLS-1$
 
 	
 	private TreeViewer queryList;
@@ -134,7 +133,7 @@ public class QueryListView extends ViewPart {
 		}
 	};
 	
-	private Job loadQueriesJob = new Job("Load Queries"){
+	private Job loadQueriesJob = new Job(Messages.QueryListView_LoadQueryJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
@@ -189,7 +188,7 @@ public class QueryListView extends ViewPart {
 		});
 		
 		queryList.setCellEditors(new CellEditor[] { new TextCellEditor(queryList.getTree()) });
-		queryList.setColumnProperties(new String[] { "col1" });
+		queryList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
 		queryList.setCellModifier(new NameCellEditor(queryList));
 		focusCellManager = new TreeViewerFocusCellManager(queryList, new MultiFocusCellOwnerDrawHighlighter(queryList));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
@@ -205,7 +204,7 @@ public class QueryListView extends ViewPart {
 		};		
 		TreeViewerEditor.create(queryList, actSupport, ColumnViewerEditor.DEFAULT);
 
-		queryList.setInput("Loading...");
+		queryList.setInput(Messages.QueryListView_LoadingLabel);
 
 		
 		/* add right click context menu */

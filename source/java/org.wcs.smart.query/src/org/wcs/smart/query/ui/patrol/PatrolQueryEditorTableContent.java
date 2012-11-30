@@ -40,6 +40,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
@@ -179,7 +180,7 @@ public class PatrolQueryEditorTableContent {
 	}
 		
 	private void createNameHeader(Composite main) {
-		compQueryName = new QueryHeaderComposite(main,"Patrol Query:", 
+		compQueryName = new QueryHeaderComposite(main,Messages.PatrolQueryEditorTableContent_PatrolQueryLabel, 
 				toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compQueryName.addListener(SWT.Selection, new Listener(){
@@ -236,7 +237,7 @@ public class PatrolQueryEditorTableContent {
 		dateComposite.adapt(toolkit);
 		
 		
-		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, "query properties...",SWT.NONE);
+		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.PatrolQueryEditorTableContent_QueryPropertiesLabel,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		editQueryProp.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -276,8 +277,8 @@ public class PatrolQueryEditorTableContent {
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		comp.setLayout(layout);
-		toolkit.createLabel(comp,  "Number of Records:");
-		lblNumResults = toolkit.createLabel(comp, "N/A");
+		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberofRecordsLabel);
+		lblNumResults = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
 		
 		resultsTable = new PatrolResultsTable();
 
@@ -300,7 +301,7 @@ public class PatrolQueryEditorTableContent {
 		Composite main = toolkit.createComposite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		
-		runQueryLink = toolkit.createHyperlink(main, "Run Query...", SWT.NONE);
+		runQueryLink = toolkit.createHyperlink(main, Messages.PatrolQueryEditorTableContent_RunQueryLink, SWT.NONE);
 		runQueryLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {

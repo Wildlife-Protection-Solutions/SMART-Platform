@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.model.patrol.PatrolQuery;
@@ -75,7 +76,7 @@ public class PatrolResultsTable {
 			//columns already created
 			return;
 		}
-		Job job = new Job("Initialize query results table."){
+		Job job = new Job(Messages.PatrolResultsTable_InitTableJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// in display thread update table

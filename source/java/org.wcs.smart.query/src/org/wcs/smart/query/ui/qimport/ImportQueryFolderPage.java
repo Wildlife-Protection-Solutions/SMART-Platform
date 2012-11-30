@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.QueryFolderTreeComposite;
 
@@ -49,7 +50,7 @@ public class ImportQueryFolderPage extends WizardPage {
 	 * Creates a new query wizard page.
 	 */
 	protected ImportQueryFolderPage() {
-		super("Destination Location");
+		super(Messages.ImportQueryFolderPage_PageName);
 	}
 
 	/**
@@ -68,7 +69,7 @@ public class ImportQueryFolderPage extends WizardPage {
 		main.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Destination Folder:");
+		lbl.setText(Messages.ImportQueryFolderPage_FolderLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		folderTree= new QueryFolderTreeComposite(main,QueryHibernateManager.canModifyCaQueries());
@@ -80,7 +81,7 @@ public class ImportQueryFolderPage extends WizardPage {
 			}
 		});
 		
-		setMessage("Select import destination.");
+		setMessage(Messages.ImportQueryFolderPage_PageMessage);
 		setPageComplete(false);
 		setControl(main);
 	}

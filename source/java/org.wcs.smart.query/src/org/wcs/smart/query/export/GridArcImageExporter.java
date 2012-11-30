@@ -71,7 +71,7 @@ public class GridArcImageExporter implements IQueryExporter {
 		if (sourceFile == null || !sourceFile.exists()){
 			throw new Exception(Messages.GridArcImageExporter_ExportError, 
 					new Exception(
-							MessageFormat.format(Messages.GridArcImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-2$
+							MessageFormat.format(Messages.GridArcImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-1$
 		}
 
 		

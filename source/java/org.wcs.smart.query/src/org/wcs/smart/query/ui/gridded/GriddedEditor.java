@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.gridded;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
@@ -65,7 +67,7 @@ import org.wcs.smart.query.ui.querytable.QueryResultsTable;
  */
 public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdaptable, IQueryEditor {
 
-	public static final String ID = "org.wcs.smart.query.ui.GriddedEditor";
+	public static final String ID = "org.wcs.smart.query.ui.GriddedEditor"; //$NON-NLS-1$
 
 	private GriddedQuery query;
 
@@ -108,7 +110,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 	};
 	
 	
-	private Job loadQueryLoad = new Job("Load Query Job"){
+	private Job loadQueryLoad = new Job(Messages.GriddedEditor_LoadQueryJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			QueryInput input = (QueryInput) GriddedEditor.this.getEditorInput();
@@ -122,7 +124,8 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 				query.generateDropItems(session);
 
 			}catch (Exception ex){
-				QueryPlugIn.displayLog("Could not parse query: " + input.getName()+ ".\n\n" + ex.getMessage(), ex);
+				QueryPlugIn.displayLog(
+						MessageFormat.format(Messages.GriddedEditor_ErrorParsingQuery, new Object[]{input.getName()}) + ex.getMessage(), ex);
 			}finally{
 				session.getTransaction().commit(); 
 				session.close();
@@ -202,7 +205,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog("Could not load query." + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.GriddedEditor_ErrorLoadingQuery + e.getMessage(), e);
 		}
 		
 		return this.query;
@@ -239,17 +242,17 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		try {
 			resultPage = new GriddedTableResultsPage(this);
 			addPage(0, resultPage, input);
-			setPageText(0, "Tabular Results");
+			setPageText(0, Messages.GriddedEditor_TableResultsTabName);
 			if (this.query != null && this.query.getUuid() == null){
 				resultPage.setQuery();
 			}
 			
 			mapPage = new GriddedResultsMapEditorPage(this);
 			addPage(1, mapPage, input);
-			setPageText(1, "Mapped Results");
+			setPageText(1, Messages.GriddedEditor_MappedResultsTabName);
 			
 		} catch (final Throwable t) {
-			QueryPlugIn.log("Could not open query editor", t);
+			QueryPlugIn.log(Messages.GriddedEditor_Error_CouldNotOpen, t);
 		}finally{
 			showBusy(false);
 		}
@@ -263,7 +266,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		getQueryInternal().setDateFilter(resultPage.getDateFilter());
 		
 		if (!getQuery().isValid()){
-			MessageDialog.openError(getSite().getShell(), "Error", "Query invalid.  Please fix query definition and try again.");
+			MessageDialog.openError(getSite().getShell(), Messages.GriddedEditor_Error_DialogTitle, Messages.GriddedEditor_InvalidQuery_DialogMessage);
 			return;
 		}
 		
@@ -273,7 +276,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		//run query
 		final IProgressMonitor mymonitor = resultPage.createProgressMonitor();
 		final boolean isFirstRun = this.firstRun;
-		Job runQueryJob = new Job("Running query: " + this.query.getName()) {
+		Job runQueryJob = new Job(Messages.GriddedEditor_RunQueryJob + this.query.getName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -282,7 +285,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 					
 					resultPage.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
-					String message = "Could not execute query. \n\n";
+					String message = "Could not execute query." + "\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 					if (ex.getCause() != null){
 						message += ex.getCause().getMessage();
 					}else{

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
@@ -93,13 +94,13 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		panel = new GriddedValuePanel();
 		Composite pnl = panel.createComposite(tabs,parentView);
 		item1.setControl(pnl);
-		item1.setText("Grid and Value Definitions");	
+		item1.setText(Messages.GriddedQueryDefinitionComposite_GridValueDefinitionSectionHeader);	
 		pnl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		TabItem item2 = new TabItem(tabs, SWT.NONE);
 		filterPanel = new FilterDropTargetPanel(parentView);
 		item2.setControl( filterPanel.createComposite(tabs) );
-		item2.setText("Filter");
+		item2.setText(Messages.GriddedQueryDefinitionComposite_FilterSectionHeader);
 	
 		tabs.addSelectionListener(new SelectionAdapter() {			
 			@Override
@@ -131,7 +132,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	public String validate() {
 		if (isInitializing) return null; //still initializing ; do not validate
 		
-		String query = "";
+		String query = ""; //$NON-NLS-1$
 		boolean isvalid = true;
 		GridQueryDefinition def = null;
 		String error = null;
@@ -141,11 +142,11 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			crs = panel.getCrs();
 		}catch (Exception ex){
 			isvalid = false;
-			error = "Could not determine query projection. " + ex.getMessage();
+			error = Messages.GriddedQueryDefinitionComposite_ProjectionError + ex.getMessage();
 		}
 		if (isvalid){
 			try{
-				query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ;
+				query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ; //$NON-NLS-1$ //$NON-NLS-2$
 			}catch (Exception ex){
 				isvalid = false;
 				error = ex.getMessage();
@@ -170,20 +171,21 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		
 		if (isvalid && def != null && def.getValuePart() == null){
 			isvalid = false;
-			error = "Exactly one value must be selected.";
+			error = Messages.GriddedQueryDefinitionComposite_NoSelectionError;
 		}
 		if (isvalid){
 			if (panel.getGridSize() <= 0){
 				isvalid = false;
-				error = "Grid size must be greater than 0";
+				error = Messages.GriddedQueryDefinitionComposite_InvalidGridSizeERror;
 			}
 		}
-
-		try{
-			((GriddedQuery)parentView.getQuery()).setCoordinateReferenceSystem(crs);
-		}catch (Exception ex){
-			isvalid = false;
-			error = "Invalid coordinate reference system. " + ex.getMessage();
+		if (isvalid){
+			try{
+				((GriddedQuery)parentView.getQuery()).setCoordinateReferenceSystem(crs);
+			}catch (Exception ex){
+				isvalid = false;
+				error = Messages.GriddedQueryDefinitionComposite_InvalidProjectionError + ex.getMessage();
+			}
 		}
 		provider.setQueryValue(isvalid, error);
 		if (parentView.getQuery() != null){

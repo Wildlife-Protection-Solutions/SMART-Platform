@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Query wizard page to select the import file .
@@ -51,7 +52,7 @@ public class ImportQueryFilePage extends WizardPage {
 	 * Creates a new query wizard page.
 	 */
 	protected ImportQueryFilePage() {
-		super("Destination Location");
+		super(Messages.ImportQueryFilePage_PageTitle);
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class ImportQueryFilePage extends WizardPage {
 		main.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Query Definition File:");
+		lbl.setText(Messages.ImportQueryFilePage_FileLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		txtFile = new Text(main, SWT.BORDER);
@@ -75,7 +76,7 @@ public class ImportQueryFilePage extends WizardPage {
 				File f = new File(txtFile.getText());
 				
 				if (!f.exists()){
-					setErrorMessage("File does not exist.");
+					setErrorMessage(Messages.ImportQueryFilePage_FileNotFoundError);
 					setPageComplete(false);
 				}else{
 					setPageComplete(true);
@@ -85,15 +86,15 @@ public class ImportQueryFilePage extends WizardPage {
 		});		
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.ImportQueryFilePage_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(ImportQueryFilePage.this.getShell(), SWT.OPEN);
 				
 				
-				String[] extensions = new String[]{"*.xml", "*.*"};
-				String[] names = new String[]{"XML (*.xml)", "All Files (*.*)"};
+				String[] extensions = new String[]{"*.xml", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
+				String[] names = new String[]{Messages.ImportQueryFilePage_xmlFilterName, Messages.ImportQueryFilePage_AllFilesFilterName};
 				
 				fd.setFilterExtensions(extensions);
 				fd.setFilterNames(names);
@@ -106,7 +107,7 @@ public class ImportQueryFilePage extends WizardPage {
 				}
 			}
 		});
-		setMessage("Select the query definition file ");
+		setMessage(Messages.ImportQueryFilePage_PageMessage);
 		setPageComplete(false);
 		setControl(main);
 	}

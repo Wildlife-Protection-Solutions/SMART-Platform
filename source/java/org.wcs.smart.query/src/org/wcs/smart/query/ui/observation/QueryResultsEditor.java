@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.observation;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
@@ -64,7 +66,7 @@ import org.wcs.smart.query.ui.querytable.QueryResultsTable;
  */
 public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, IQueryEditor, IAdaptable{
 
-	public static final String ID = "org.wcs.smart.query.ui.QueryResultsEditor"; 
+	public static final String ID = "org.wcs.smart.query.ui.QueryResultsEditor";  //$NON-NLS-1$
 
 	private ObservationQuery query;
 	private QueryResultsTablePage page1;
@@ -103,7 +105,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	};
 	
 	
-	private Job loadQueryLoad = new Job("Load Query Job"){
+	private Job loadQueryLoad = new Job(Messages.QueryResultsEditor_LoadQueryJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			QueryInput input = (QueryInput) QueryResultsEditor.this.getEditorInput();
@@ -116,7 +118,8 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 				query.getDropItems();
 				query.generateDropItems(session);
 			}catch (Exception ex){
-				QueryPlugIn.displayLog("Could not parse query: " + input.getName()+ ".\n\n" + ex.getMessage(), ex);
+				QueryPlugIn.displayLog(MessageFormat.format(
+						Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getMessage(), ex);
 			}finally{
 				session.getTransaction().rollback();
 				session.close();
@@ -188,7 +191,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog("Could not load query." + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.QueryResultsEditor_Error_CouldNotLoad + e.getMessage(), e);
 		}
 		
 		return this.query;
@@ -232,17 +235,17 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		try {
 			page1 = new QueryResultsTablePage(this);
 			addPage(0, page1, input);
-			setPageText(0, "Tabular Results");
+			setPageText(0, Messages.QueryResultsEditor_TableResultsTabName);
 			if (this.query != null && this.query.getUuid() == null){
 				page1.setQuery();
 			}
 			
 			page2 = new QueryMapPageEditor(this);
 			addPage(1, page2, input);
-			setPageText(1, "Mapped Results");
+			setPageText(1, Messages.QueryResultsEditor_MappedResultsTabName);
 			
 		} catch (final Throwable t) {
-			QueryPlugIn.log("Could not open query editor", t);
+			QueryPlugIn.log("Could not open query editor", t); //$NON-NLS-1$
 		}finally{
 			showBusy(false);
 		}
@@ -256,7 +259,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		((ObservationQuery)getQuery()).setDateFilter(page1.getDateFilter());
 		
 		if (!getQuery().isValid()){
-			MessageDialog.openError(getSite().getShell(), "Error", "Query invalid.  Please fix query definition and try again.");
+			MessageDialog.openError(getSite().getShell(), Messages.QueryResultsEditor_Error_DialogTitle, Messages.QueryResultsEditor_InvalidQueryError);
 			return;
 		}
 		
@@ -265,7 +268,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		
 		//run query
 		final IProgressMonitor mymonitor = page1.createProgressMonitor();
-		Job runQueryJob = new Job("Running query: " + this.query.getName()) {
+		Job runQueryJob = new Job(Messages.QueryResultsEditor_RunQueryJobName + this.query.getName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -273,7 +276,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 					List<QueryResultItem> results = query.getQueryResults(mymonitor);
 					page1.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
-					QueryPlugIn.displayLog("Could not execute query.", ex);
+					QueryPlugIn.displayLog(Messages.QueryResultsEditor_ErrorRunningQuery, ex);
 					page1.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
 				}
 				page2.refresh();

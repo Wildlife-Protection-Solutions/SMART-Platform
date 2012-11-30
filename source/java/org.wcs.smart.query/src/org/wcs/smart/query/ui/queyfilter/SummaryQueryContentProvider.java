@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -62,6 +63,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
  */
 public class SummaryQueryContentProvider  implements ITreeContentProvider {
 
+	private static final String LOADING_TEXT = Messages.SummaryQueryContentProvider_LoadingText;
 	//data model 
 	private DataModel dataModel = null;
 	private DataModelContentProvider provider;
@@ -89,39 +91,22 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	private PatrolValueOption[] patrolValueOptions = null;
 	private PatrolQueryOption[] patrolGroupByOption = null;
 	private DateGroupByOption[] dateGroupByOptions = null;
-	
-	
-	/**
-	 * Data model children items
-	 */
-	enum DataModelItem{
-		CATEGORIES("Categories"),
-		ATTRIBUTES("Attributes");
-		
-		String guiName;
-		
-		DataModelItem(String guiName){
-			this.guiName = guiName;
-		}
-	}
-	
-	
-	
+
 	/**
 	 * Root node children
 	 */
 	enum NodeType  {
-		VALUE_NODE("Value Options"),
-		GROUP_BY_NODE("Group By Options"),
-		PATROL_VALUES("Patrol Values"),
-		PATROL_GROUPBYS("Patrol Group Bys"),
-		PATROL_DATE_GROUPBYS("Date"),
-		DATAMODEL_VALUES("Data Model Values"),
-		DATAMODEL_GROUPBYS("Data Model Group Bys"),
-		DATAMODEL_VALUE_CATEGORY("Categories & Attribute"),
-		DATAMODEL_VALUE_ATTRIBUTES("Attributes"),
-		DATAMODEL_GROUPBY_CATEGORY("Categories & Attribute"),
-		DATAMODEL_GROUPBY_ATTRIBUTES("Attributes");		
+		VALUE_NODE(Messages.SummaryQueryContentProvider_ValueOpsLabel),
+		GROUP_BY_NODE(Messages.SummaryQueryContentProvider_GroupByOpLabel),
+		PATROL_VALUES(Messages.SummaryQueryContentProvider_PatrolValuesLabel),
+		PATROL_GROUPBYS(Messages.SummaryQueryContentProvider_PatrolGroupByLabel),
+		PATROL_DATE_GROUPBYS(Messages.SummaryQueryContentProvider_DateLabel),
+		DATAMODEL_VALUES(Messages.SummaryQueryContentProvider_DataModelValuesLabel),
+		DATAMODEL_GROUPBYS(Messages.SummaryQueryContentProvider_DataModelGroupByLabel),
+		DATAMODEL_VALUE_CATEGORY(Messages.SummaryQueryContentProvider_ValueCategoriesAttributesLabel),
+		DATAMODEL_VALUE_ATTRIBUTES(Messages.SummaryQueryContentProvider_DataModelAttributeLabel),
+		DATAMODEL_GROUPBY_CATEGORY(Messages.SummaryQueryContentProvider_GroupByCategoryAttributeLabel),
+		DATAMODEL_GROUPBY_ATTRIBUTES(Messages.SummaryQueryContentProvider_DataModelGroupByAttributesLabel);		
 		
 		private String name;
 		
@@ -168,7 +153,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			dateGroupByOptions = null;
 		}else{
 			if (newInput != null && !(newInput instanceof Map)){
-				throw new IllegalArgumentException("new input must be map");
+				throw new IllegalArgumentException("new input must be map"); //$NON-NLS-1$
 			}
 			Map<?, ?> in = (Map<?, ?>)newInput;
 			this.dataModel = (DataModel)in.get(NodeType.GROUP_BY_NODE);
@@ -188,7 +173,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			patrolGroupByOption == null &&
 			dataModel == null &&
 			dateGroupByOptions == null){
-			return new String[]{"Loading"};
+			return new String[]{LOADING_TEXT};
 		}
 		
 		return new Object[]{groupByNode, valueNode};
@@ -213,7 +198,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	private Object[] getAttributeTreeChildren(final SummaryDmObject parent){
 	
 		final List<AttributeTreeNode> kids = new ArrayList<AttributeTreeNode>();
-		Job j = new Job("loading tree children"){
+		Job j = new Job(Messages.SummaryQueryContentProvider_LoadingTreeJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -235,7 +220,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					kids.addAll(nodes);					
 					s.getTransaction().rollback();
 				}catch (Exception ex){
-					QueryPlugIn.log("Could not load tree children:" + ex.getMessage(), ex);
+					QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsA + ex.getMessage(), ex);
 				}finally{
 					s.close();
 				}
@@ -247,7 +232,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		try{
 			j.join();
 		}catch (Exception ex){
-			QueryPlugIn.log("Could not load tree children:" + ex.getMessage(), ex);
+			QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsB + ex.getMessage(), ex);
 			return null;
 		}
 		
@@ -358,16 +343,6 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		}else if (element instanceof PatrolValueOption){
 			return patrolValueNode;
 		//}else if (parentElement instanceof AREA FITLER){
-		}else if (element instanceof DataModelItem){
-			Object parent = getParent(element);
-			if (parent instanceof RootNode){
-				if (((RootNode)parent).type == NodeType.VALUE_NODE){
-					return dataModelValueNode;
-				}else{
-					return dataModelGroupByNode;
-				}
-			}
-			return null;
 		}else if (element instanceof SummaryDmObject){
 			//assume data model
 			return provider.getParent( ((SummaryDmObject)element).getObject() );	
@@ -388,8 +363,8 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			return false;
 		}else if (element instanceof PatrolValueOption){
 			return false;
-		}else if (element instanceof DataModelItem){
-			return false;
+//		}else if (element instanceof DataModelItem){
+//			return false;
 		//}else if (parentElement instanceof AREA FITLER){
 		}else if (element instanceof SummaryDmObject){
 			if (!((SummaryDmObject) element).isValue()){
@@ -497,7 +472,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
-					if (att.getType() == AttributeType.LIST |
+					if (att.getType() == AttributeType.LIST ||
 						att.getType() == AttributeType.TREE){
 						results[cnt++] = new SummaryDmObject(att, false);
 					}

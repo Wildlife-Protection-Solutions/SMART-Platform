@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
+import java.text.MessageFormat;
 import java.util.Iterator;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -38,6 +39,7 @@ import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
@@ -81,7 +83,10 @@ public class DeleteItemHandler extends AbstractHandler {
 	
 	
 	private void deleteQuery(QueryInput o, ExecutionEvent event) {
-		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Delete Query", "Are you sure you want to delete the query '" + o.getName() + " [" + o.getId() + "]'?  This action cannot be undone.")){
+		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
+				Messages.DeleteItemHandler_Confirm_DialogTitle, 
+				MessageFormat.format(
+						Messages.DeleteItemHandler_ConfirmMessage,  new Object[]{ o.getName() + " [" + o.getId() + "]"}))){ //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		//need to save and refresh query list view
@@ -89,17 +94,17 @@ public class DeleteItemHandler extends AbstractHandler {
 		s.beginTransaction();
 		try{
 			Query query = QueryHibernateManager.findQuery(s, o.getUuid(), o.getType());
-			if (query == null) throw new Exception("Query not found.");
+			if (query == null) throw new Exception(Messages.DeleteItemHandler_ErrorQueryNotFound);
 			
 			if (!QueryEventManager.getInstance().fireBeforeDeleteListeners(query, s)){
 				return;
 			}
 			
-			org.hibernate.Query q = s.createQuery("DELETE from " + o.getType().getObjectName() + " WHERE uuid = :uuid");
-			q.setParameter("uuid", o.getUuid());
+			org.hibernate.Query q = s.createQuery("DELETE from " + o.getType().getObjectName() + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+			q.setParameter("uuid", o.getUuid()); //$NON-NLS-1$
 			int deleted = q.executeUpdate();
 			if (deleted != 1){
-				QueryPlugIn.log("Could not delete query: '" + o.getName() + "'.  Nothing removed from database.", null);
+				QueryPlugIn.log(MessageFormat.format(Messages.DeleteItemHandler_ErrorDeletingQuery, new Object[]{ o.getName()}), null);
 				s.getTransaction().rollback();
 				return;
 			}else{
@@ -107,7 +112,8 @@ public class DeleteItemHandler extends AbstractHandler {
 			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QueryPlugIn.log("Could not delete query: '" + o.getName() + "'", ex);
+			QueryPlugIn.log(MessageFormat.format(
+				Messages.DeleteItemHandler_ErrorDeletingQueryB, new Object[]{ o.getName()}) + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -127,18 +133,18 @@ public class DeleteItemHandler extends AbstractHandler {
 			}
 		} catch (Exception ex) {
 			QueryPlugIn.displayLog(
-					"Could not close editor. " + ex.getMessage(), ex);
+					Messages.DeleteItemHandler_ErrorClosingEditor + ex.getMessage(), ex);
 		}
 		
 	}
 	private void deleteFolder(QueryFolder folder, ITreeContentProvider provider) {
 		
 		if (folder.getChildren() != null && folder.getChildren().size() > 0){
-			QueryPlugIn.displayLog("Cannot delete a folder with children elements.  Please remove the children elements first.", null);
+			QueryPlugIn.displayLog(Messages.DeleteItemHandler_CannotDeleteItemWithKids, null);
 			return;
 		}
 		if (provider.hasChildren(folder) ){
-			QueryPlugIn.displayLog("Cannot delete a folder with children elements.  Please remove the children elements first.", null);
+			QueryPlugIn.displayLog(Messages.DeleteItemHandler_CannotDeleteItemWithKids, null);
 			return;
 		}
 			
@@ -158,7 +164,9 @@ public class DeleteItemHandler extends AbstractHandler {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QueryPlugIn.log("Could not delete folder: '" + folder.getName() + "'", ex);
+			QueryPlugIn.log(
+					MessageFormat.format(
+							Messages.DeleteItemHandler_ErrorDeleteFolder, new Object[]{folder.getName()}), ex);
 		}finally{
 			s.close();
 		}

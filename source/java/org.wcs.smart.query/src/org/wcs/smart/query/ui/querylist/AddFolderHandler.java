@@ -37,6 +37,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 
 /**
@@ -85,7 +86,7 @@ public class AddFolderHandler extends AbstractHandler {
 		Label lbl = new Label();
 		lbl.setElement(newFolder);
 		lbl.setLanguage(SmartDB.getCurrentLanguage());
-		lbl.setValue("New Folder");
+		lbl.setValue(Messages.AddFolderHandler_DefaultNewFolderName);
 		newFolder.setNames(new HashSet<Label>());
 		newFolder.getNames().add(lbl);
 		newFolder.setName(lbl.getValue());
@@ -98,7 +99,7 @@ public class AddFolderHandler extends AbstractHandler {
 			s.save(lbl);
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			QueryPlugIn.displayLog("Could not add folder: " + ex.getMessage(), ex);
+			QueryPlugIn.displayLog(Messages.AddFolderHandler_CouldNotAddFolderError + ex.getMessage(), ex);
 			return null;
 		}finally{
 			s.close();

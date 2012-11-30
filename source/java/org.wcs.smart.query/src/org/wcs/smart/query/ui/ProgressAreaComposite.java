@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * A composite that contains a progress area for
@@ -82,7 +84,7 @@ public class ProgressAreaComposite extends Composite {
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		lblStatus = new Label(outer, SWT.NONE);
-		lblStatus.setText("");
+		lblStatus.setText(""); //$NON-NLS-1$
 		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 		// main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -90,12 +92,12 @@ public class ProgressAreaComposite extends Composite {
 		progresBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 		btnCancel = new Button(outer, SWT.NONE);
-		btnCancel.setText("Cancel");
+		btnCancel.setText(IDialogConstants.CANCEL_LABEL);
 		btnCancel.setEnabled(true);
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				lblStatus.setText("Cancelling Query.  This may take some time.");
+				lblStatus.setText(Messages.ProgressAreaComposite_QueryCancelledMsg);
 				internalMonitor.setCanceled(true);
 			}
 		});
@@ -114,7 +116,7 @@ public class ProgressAreaComposite extends Composite {
 	 * Updates the state of the progress area to a cancelled state.
 	 */
 	public void showCancelled(){
-		lblStatus.setText("Query Cancelled");
+		lblStatus.setText(Messages.ProgressAreaComposite_QueryCancelledStatus);
 		progresBar.setEnabled(false);
 		btnCancel.setEnabled(false);
 	}
@@ -161,7 +163,7 @@ public class ProgressAreaComposite extends Composite {
 							if (lblStatus.isDisposed()){
 								return;
 							}
-							lblStatus.setText(taskName + " - " + name);
+							lblStatus.setText(taskName + " - " + name); //$NON-NLS-1$
 						}
 					});
 				}

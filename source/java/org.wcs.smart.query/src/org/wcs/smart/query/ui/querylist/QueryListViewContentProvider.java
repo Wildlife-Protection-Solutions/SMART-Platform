@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryInput;
@@ -87,7 +88,7 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (folders == null){
-			return new String[]{"Loading..."};
+			return new String[]{Messages.QueryListViewContentProvider_LoadingLabel};
 		}
 		return folders.toArray();
 	}

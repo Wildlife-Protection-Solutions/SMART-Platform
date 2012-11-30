@@ -40,6 +40,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -176,7 +177,7 @@ public class GriddedTableContent {
 	}
 		
 	private void createNameHeader(Composite main) {
-		compQueryName = new QueryHeaderComposite(main,"Query:", 
+		compQueryName = new QueryHeaderComposite(main,Messages.GriddedTableContent_QueryLabel, 
 				toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compQueryName.addListener(SWT.Selection, new Listener(){
@@ -232,7 +233,7 @@ public class GriddedTableContent {
 		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		dateComposite.adapt(toolkit);
 		
-		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, "query properties...",SWT.NONE);
+		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.GriddedTableContent_QueryProperties,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		editQueryProp.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -272,8 +273,8 @@ public class GriddedTableContent {
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		comp.setLayout(layout);
-		toolkit.createLabel(comp,  "Number of Records:");
-		lblNumResults = toolkit.createLabel(comp, "N/A");
+		toolkit.createLabel(comp,  Messages.GriddedTableContent_NumberofRecordsLabel);
+		lblNumResults = toolkit.createLabel(comp, Messages.GriddedTableContent_NaLabel);
 		
 		resultsTable = new QueryResultsTable();
 
@@ -296,7 +297,7 @@ public class GriddedTableContent {
 		Composite main = toolkit.createComposite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		
-		runQueryLink = toolkit.createHyperlink(main, "Run Query...", SWT.NONE);
+		runQueryLink = toolkit.createHyperlink(main, Messages.GriddedTableContent_RunQueryLink, SWT.NONE);
 		runQueryLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {

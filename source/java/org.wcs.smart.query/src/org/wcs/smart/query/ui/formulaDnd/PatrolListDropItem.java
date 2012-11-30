@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.util.SmartUtils;
@@ -71,7 +72,7 @@ public class PatrolListDropItem extends DropItem{
 	/*
 	 * job for loading options
 	 */
-	private Job loadItemsJobs = new Job("Loading List Items"){
+	private Job loadItemsJobs = new Job(Messages.PatrolListDropItem_LoadingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -91,7 +92,7 @@ public class PatrolListDropItem extends DropItem{
 						}
 					}});
 			}catch (Exception ex){
-				QueryPlugIn.displayLog("Error loading items for list.", ex);
+				QueryPlugIn.displayLog(Messages.PatrolListDropItem_ErrorLoadingItems, ex);
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
@@ -109,9 +110,7 @@ public class PatrolListDropItem extends DropItem{
 	 * @param option patrol filter option
 	 */
 	public PatrolListDropItem(PatrolQueryOption option) {
-		//super(parent, target);
-
-		this.keyPart = "patrol:" + option.getKey();
+		this.keyPart = "patrol:" + option.getKey(); //$NON-NLS-1$
 		this.text = option.getGuiName();
 		this.option = option;
 	}
@@ -131,13 +130,13 @@ public class PatrolListDropItem extends DropItem{
 	@Override
 	public String getText() {
 		StringBuilder sb = new StringBuilder(this.text);
-		sb.append(" = ");
+		sb.append(" = "); //$NON-NLS-1$
 		if (listViewer.getSelection() != null){
 			ListItem it = (ListItem)((IStructuredSelection)listViewer.getSelection()).getFirstElement();
 			if (it != null){
-				sb.append("\"");
+				sb.append("\""); //$NON-NLS-1$
 				sb.append(it.getName());
-				sb.append("\"");
+				sb.append("\""); //$NON-NLS-1$
 			}
 		}
 		return sb.toString();
@@ -149,7 +148,7 @@ public class PatrolListDropItem extends DropItem{
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder(this.keyPart);
-		sb.append(" equals ");
+		sb.append(Messages.PatrolListDropItem_EqualsLabel);
 		ListItem it = null;
 		
 		
@@ -159,7 +158,7 @@ public class PatrolListDropItem extends DropItem{
 			it = (ListItem)((IStructuredSelection)listViewer.getSelection()).getFirstElement();
 		}
 		if (it != null){
-			sb.append("\"");
+			sb.append("\""); //$NON-NLS-1$
 			if (option == PatrolQueryOption.PATROL_TYPE){
 				sb.append(it.getKey().toUpperCase());
 			}else{
@@ -167,7 +166,7 @@ public class PatrolListDropItem extends DropItem{
 					sb.append( SmartUtils.encodeHex(it.getUuid()));
 				}
 			}
-			sb.append("\"");
+			sb.append("\""); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
@@ -213,12 +212,12 @@ public class PatrolListDropItem extends DropItem{
 			}
 		});
 		
-		listViewer.setInput(new ListItem[]{new ListItem(null, "Loading")});
+		listViewer.setInput(new ListItem[]{new ListItem(null, Messages.PatrolListDropItem_LoadingLabel)});
 		
 		initDrag(main);
 		initDrag(lbl);
 
-		lbl.setText( formatStringForLabel(this.text + " = "));	
+		lbl.setText( formatStringForLabel(this.text + " = "));	 //$NON-NLS-1$
 		loadItemsJobs.schedule();
 	}
 

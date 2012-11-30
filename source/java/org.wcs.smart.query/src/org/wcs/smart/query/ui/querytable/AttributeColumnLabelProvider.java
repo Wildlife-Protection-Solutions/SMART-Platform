@@ -49,7 +49,7 @@ public class AttributeColumnLabelProvider extends ColumnLabelProvider {
 		if (element instanceof QueryResultItem) {
 			Object value = column.getValue((QueryResultItem) element);
 			if (value == null) {
-				return "";
+				return ""; //$NON-NLS-1$
 			} else {
 				return value.toString();
 			}

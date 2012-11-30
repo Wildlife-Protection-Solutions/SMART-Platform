@@ -46,6 +46,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * Attribute tree drop item
@@ -70,7 +71,7 @@ public class AttributeTreeDropItem extends DropItem{
 	/*
 	 * Job to load the attribute list options
 	 */
-	private Job loadItemsJobs = new Job("Loading List Items"){
+	private Job loadItemsJobs = new Job(Messages.AttributeTreeDropItem_LoadingListItemJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -85,7 +86,7 @@ public class AttributeTreeDropItem extends DropItem{
 					}
 				}
 			}catch(Exception ex){
-				QueryPlugIn.log("Could not initialize attribute tree items", ex);
+				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
@@ -112,8 +113,8 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	public AttributeTreeDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId();
-		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";
+		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		this.attribute = att.getAttribute();
 	}
 	
@@ -125,7 +126,7 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	public AttributeTreeDropItem(Attribute att) {
 		//super(parent, panel);
-		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId();
+		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 		this.text = att.getName() ;
 		this.attribute = att;
 	}
@@ -159,7 +160,7 @@ public class AttributeTreeDropItem extends DropItem{
 	 */
 	@Override
 	public String getText() {
-		return this.text + " = " + (currentSelection == null ? "" : currentSelection.getHkey());
+		return this.text + " = " + (currentSelection == null ? "" : currentSelection.getHkey()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -168,7 +169,7 @@ public class AttributeTreeDropItem extends DropItem{
 	@Override
 	public String asQueryPart() {
 		StringBuilder query = new StringBuilder(this.key);
-		query.append(" = ");
+		query.append(" = "); //$NON-NLS-1$
 
 		if (currentSelection != null){
 			query.append(currentSelection.getHkey());
@@ -210,7 +211,7 @@ public class AttributeTreeDropItem extends DropItem{
 		lblitem.setFont(smallerFont2);
 		
 		btnEdit = new Button(t, SWT.PUSH);
-		btnEdit.setText("...");
+		btnEdit.setText("..."); //$NON-NLS-1$
 		fd = (btnEdit.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 2);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -226,7 +227,7 @@ public class AttributeTreeDropItem extends DropItem{
 				try {
 					loadItemsJobs.join();
 				} catch (InterruptedException ex) {
-					QueryPlugIn.log("error waiting for load items job", ex);
+					QueryPlugIn.log("error waiting for load items job", ex); //$NON-NLS-1$
 				}
 				 TreeDropDownViewer treeviewer = getTreeEditor();
 				 if (treeviewer == null){
@@ -245,7 +246,7 @@ public class AttributeTreeDropItem extends DropItem{
 							if (currentSelection != null){
 								lblitem.setText( formatStringForLabel(currentSelection.getName()));
 							}else{
-								lblitem.setText("");
+								lblitem.setText(""); //$NON-NLS-1$
 							}
 						}
 						AttributeTreeDropItem.this.targetPanel.layout();
@@ -259,10 +260,10 @@ public class AttributeTreeDropItem extends DropItem{
 		if (currentSelection != null){
 			lblitem.setText( formatStringForLabel(currentSelection.getName()));
 		}else{
-			lblitem.setText("");
+			lblitem.setText(""); //$NON-NLS-1$
 		}
 		
-		lblAttribute.setText(formatStringForLabel(this.text + " = "));
+		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
 		loadItemsJobs.schedule();
 	}
 	
