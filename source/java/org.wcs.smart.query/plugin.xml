@@ -10,7 +10,7 @@
             class="org.wcs.smart.query.ui.definition.QueryDefView"
             icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.ui.QueryDefView"
-            name="Smart Query Definition"
+            name="%querydef.view.name"
             restorable="true">
       </view>
       <view
@@ -18,14 +18,14 @@
             class="org.wcs.smart.query.ui.queyfilter.QueryFilterView"
             icon="images/icons/view16/query_filter_op.png"
             id="org.wcs.smart.query.ui.QueryFilter"
-            name="Query Filter"
+            name="%queryfilter.view.name"
             restorable="false">
       </view>
       <view
             class="org.wcs.smart.query.ui.querylist.QueryListView"
             icon="images/icons/view16/query_list.png"
             id="org.wcs.smart.query.QueryListView"
-            name="Saved Queries/Summaries"
+            name="%querylist.view.name"
             restorable="true">
       </view>
    </extension>
@@ -36,28 +36,28 @@
             default="false"
             icon="images/icons/view16/waypoint_query.png"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
-            name="Query Editor">
+            name="%observationqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.query.ui.summary.SummaryEditor"
             default="false"
             icon="images/icons/view16/summary_query.png"
             id="org.wcs.smart.query.ui.SummaryEditor"
-            name="Summary Editor">
+            name="%summaryqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.query.ui.patrol.PatrolQueryResultsEditor"
             default="false"
             icon="images/icons/obj16/patrol_query.png"
             id="org.wcs.smart.query.ui.PatrolQueryResultsEditor"
-            name="Patrol Query">
+            name="%patrolqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.query.ui.gridded.GriddedEditor"
             default="false"
             icon="images/icons/obj16/gridded_query.png"
             id="org.wcs.smart.query.ui.GriddedEditor"
-            name="Gridded Summary">
+            name="%griddedqueryeditor.editor.name">
       </editor>
    </extension>
    <extension
@@ -66,7 +66,7 @@
             class="org.wcs.smart.query.internal.ui.QueryPerspective"
             icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.SmartQueryPerspective"
-            name="Smart Query Perspective">
+            name="%query.perspective.name">
       </perspective>
    </extension>
    <extension
@@ -77,9 +77,9 @@
          <command
                commandId="org.wcs.smart.query.QueryPerspective"
                icon="images/icons/view16/querypatrol.gif"
-               label="Show Query Perspective"
-               mnemonic="Q"
-               style="push">
+               label="%perspectivetoolbar.showquery.command.label"
+               style="push"
+               tooltip="%perspectivetoolbar.showquery.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -109,10 +109,9 @@
                id="org.wcs.smart.query.queryToolbar">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
-                  label="Create Query"
-                  mnemonic="Q"
+                  label="%queryToolbar.createquery.command.label"
                   style="pulldown"
-                  tooltip="Create a new query">
+                  tooltip="%queryToolbar.createquery.command.toolbar">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -125,9 +124,9 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.exportQuery"
-                  label="Export Query"
+                  label="%queryToolbar.exportquery.command.label"
                   style="push"
-                  tooltip="Export the current query/summary">
+                  tooltip="%queryToolbar.exportquery.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -144,10 +143,8 @@
             </separator>
             <command
                   commandId="org.eclipse.ui.file.save"
-                  id="org.wcs.smart.query.save.toolbar"
-                  label="Save Query"
-                  mnemonic="S"
-                  tooltip="Saves the query or summary">
+                  label="%queryToolbar.savequery.command.label"
+                  tooltip="%queryToolbar.savequery.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -160,9 +157,8 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save Query"
-                  mnemonic="e"
-                  tooltip="Save a copy of the query/summary">
+                  label="%queryToolbar.saveasquery.command.label"
+                  tooltip="%queryToolbar.saveasquery.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -180,9 +176,8 @@
             locationURI="toolbar:org.wcs.smart.query.ui.QueryDefView">
          <command
                commandId="org.eclipse.ui.file.save"
-               label="Save"
-               mnemonic="S"
-               tooltip="Save the query">
+               label="%querydefview.toolbar.save.command.label"
+               tooltip="%querydefview.toolbar.save.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -197,13 +192,14 @@
                commandId="org.wcs.smart.query.clearQueryDefinition"
                icon="images/icons/etool16/clear.png"
                style="push"
-               tooltip="Clear the query">
+               tooltip="%querydefview.toolbar.clear.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.query.runQuery"
                icon="images/icons/etool16/bullet_go.png"
-               label="Run Current Query"
-               style="push">
+               label="%querydefview.toolbar.run.command.label"
+               style="push"
+               tooltip="%querydefview.toolbar.run.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -212,9 +208,10 @@
          <command
                commandId="org.wcs.smart.query.AddFolder"
                icon="images/icons/etool16/folder_add.png"
-               label="New Folder..."
+               label="%querylistview.popup.newfolder.command.label"
+               mnemonic="%querylistview.popup.newfolder.command.mnemonic"
                style="push"
-               tooltip="adds a sub folder ">
+               tooltip="%querylistview.popup.newfolder.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -232,9 +229,10 @@
          </command>
          <command
                commandId="org.wcs.smart.query.openQuery"
-               label="Open Query"
+               label="%querylistview.popup.openquery.command.label"
+               mnemonic="%querylistview.popup.openquery.command.mnemonic"
                style="push"
-               tooltip="Opens the query for running/editing.">
+               tooltip="%querylistview.popup.openquery.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <iterate>
@@ -250,9 +248,10 @@
          </separator>
          <command
                commandId="org.wcs.smart.query.renameFolder"
-               label="Rename..."
+               label="%querylistview.popup.rename.command.label"
+               mnemonic="%querylistview.popup.rename.command.mnemonic"
                style="push"
-               tooltip="rename the folder">
+               tooltip="%querylistview.popup.rename.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -274,9 +273,10 @@
          </separator>
          <command
                commandId="org.wcs.smart.query.DeleteItem"
-               label="Delete"
+               label="%querylistview.popup.delete.command.label"
+               mnemonic="%querylistview.popup.delete.command.mnemonic"
                style="push"
-               tooltip="Delete the selected item">
+               tooltip="%querylistview.popup.delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -298,38 +298,39 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.patrol">
          <menu
                id="org.wcs.smart.menu.query"
-               label="Query"
-               mnemonic="Q">
+               label="%menu.query.label"
+               mnemonic="%menu.query.mnemonic">
             <menu
                   icon="images/icons/etool16/addquery.png"
-                  label="New Query">
+                  label="%menu.query.menu.newquery.name"
+                  mnemonic="%menu.query.menu.newquery.mnemonic">
                <command
                      commandId="org.wcs.smart.query.createQuery"
-                     label="New Observation Query ..."
-                     mnemonic="Q"
+                     label="%menu.query.menu.newquery.newobservationquery.command.label"
+                     mnemonic="%menu.query.menu.newquery.newobservationquery.command.mnemonic"
                      style="push"
-                     tooltip="Create a new observation query">
+                     tooltip="%menu.query.menu.newquery.newobservationquery.command.tooltip">
                </command>
                <command
                      commandId="org.wcs.smart.query.createPatrolQuery"
-                     label="New Patrol Query ..."
-                     mnemonic="P"
+                     label="%menu.query.menu.newquery.newpatrolquery.command.label"
+                     mnemonic="%menu.query.menu.newquery.newpatrolquery.command.mnemonic"
                      style="push"
-                     tooltip="Create a new patrol query">
+                     tooltip="%menu.query.menu.newquery.newpatrolquery.command.tooltip">
                </command>
                <command
                      commandId="org.wcs.smart.query.createSummary"
-                     label="New Summary Query ..."
-                     mnemonic="S"
+                     label="%menu.query.menu.newquery.newsummaryquery.command.label"
+                     mnemonic="%menu.query.menu.newquery.newsummaryquery.command.mnemonic"
                      style="push"
-                     tooltip="Creates a new summary.">
+                     tooltip="%menu.query.menu.newquery.newsummaryquery.command.tooltip">
                </command>
                <command
                      commandId="org.wcs.smart.query.createGriddedSummary"
-                     label="New Grid Summary Query ..."
-                     mnemonic="g"
+                     label="%menu.query.menu.newquery.newgridquery.command.label"
+                     mnemonic="%menu.query.menu.newquery.newgridquery.command.mnemonic"
                      style="push"
-                     tooltip="Create a new gridded summary query">
+                     tooltip="%menu.query.menu.newquery.newgridquery.command.tooltip">
                </command>
             </menu>
             <separator
@@ -338,18 +339,18 @@
             </separator>
             <command
                   commandId="org.wcs.smart.query.exportQuery"
-                  label="Export Query ..."
-                  mnemonic="x"
+                  label="%menu.query.exportquery.command.label"
+                  mnemonic="%menu.query.exportquery.command.mnemonic"
                   style="push"
-                  tooltip="Exports the current query or summary">
+                  tooltip="%menu.query.exportquery.command.tooltip">
             </command>
             <command
                   commandId="org.wcs.smart.query.importQuery"
                   icon="images/icons/etool16/importquery.png"
-                  label="Import Query ..."
-                  mnemonic="i"
+                  label="%menu.query.importquery.command.label"
+                  mnemonic="%menu.query.importquery.command.mnemonic"
                   style="push"
-                  tooltip="Imports a query or summary definition file">
+                  tooltip="%menu.query.importquery.command.tooltip">
             </command>
             <separator
                   name="org.wcs.smart.query.separator1"
@@ -357,16 +358,15 @@
             </separator>
             <command
                   commandId="org.eclipse.ui.file.save"
-                  id="org.wcs.smart.query.save.toolbar"
-                  label="Save"
-                  mnemonic="S"
-                  tooltip="Save the query">
+                  label="%menu.query.savequery.command.label"
+                  mnemonic="%menu.query.savequery.command.mnemonic"
+                  tooltip="%menu.query.savequery.command.tooltip">
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save As ..."
-                  mnemonic="e"
-                  tooltip="Save as a new query">
+                  label="%menu.query.saveasquery.command.label"
+                  mnemonic="%menu.query.saveasquery.command.mnemonic"
+                  tooltip="%menu.query.saveasquery.command.tooltip">
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -399,10 +399,9 @@
          </separator>
          <command
                commandId="org.eclipse.ui.file.save"
-               id="org.wcs.smart.query.save.toolbar"
-               label="Save Query"
-               mnemonic="S"
-               tooltip="Save the query or summary">
+               label="%menu.file.command.save.label"
+               mnemonic="%menu.file.command.save.mnemonic"
+               tooltip="%menu.file.command.save.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -415,9 +414,9 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
-               label="Save Query As ..."
-               mnemonic="e"
-               tooltip="Saves a copy of the query/summary">
+               label="%menu.file.command.saveAs.label"
+               mnemonic="%menu.file.command.saveAs.mnemonic"
+               tooltip="%menu.file.command.saveAs.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -430,9 +429,10 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.export"
-               id="x"
-               label="Export Map"
-               style="push">
+               label="%menu.file.command.export.label"
+               mnemonic="%menu.file.command.export.mnemonic"
+               style="push"
+               tooltip="%menu.file.command.export.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -453,9 +453,9 @@
             locationURI="toolbar:org.wcs.smart.query.QueryListView">
          <command
                commandId="org.wcs.smart.query.DeleteItem"
-               label="Delete"
+               label="%querylist.toolbar.delete.command.label"
                style="push"
-               tooltip="Delete the selected item">
+               tooltip="%querylist.toolbar.delete.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -482,31 +482,27 @@
             locationURI="menu:org.wcs.smart.query.createUnknownQuery">
          <command
                commandId="org.wcs.smart.query.createQuery"
-               label="New Observation Query ..."
-               mnemonic="Q"
+               label="%querytoolbar.createquery.menu.newobservationquery.command.label"
                style="pulldown"
-               tooltip="Create a new observation query">
+               tooltip="%querytoolbar.createquery.menu.newobservationquery.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.query.createPatrolQuery"
-               label="New  Patrol Query ..."
-               mnemonic="P"
+               label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
                style="push"
-               tooltip="Create a new patrol query">
+               tooltip="%querytoolbar.createquery.menu.newpatrolquery.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.query.createSummary"
-               label="New Summary Query ..."
-               mnemonic="S"
+               label="%querytoolbar.createquery.menu.newsummaryquery.command.label"
                style="push"
-               tooltip="Creates a new summary query">
+               tooltip="%querytoolbar.createquery.menu.newsummaryquery.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.query.createGriddedSummary"
-               label="New Grid Summary ..."
-               mnemonic="g"
+               label="%querytoolbar.createquery.menu.newgridsummary.command.label"
                style="push"
-               tooltip="Create a new gridded summary query">
+               tooltip="%querytoolbar.createquery.menu.newgridsummary.command.tooltip">
          </command>
       </menuContribution>
    </extension>
@@ -545,60 +541,59 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.query.QueryPerspective"
-            name="Show Query Perspective">
+            name="%showqueryperspective.command.name">
       </command>
       <command
             id="org.wcs.smart.query.createQuery"
-            name="Create Query">
+            name="%createquery.command.name">
       </command>
       <command
-            description="Clear Query Definition"
             id="org.wcs.smart.query.clearQueryDefinition"
-            name="Clear">
+            name="%clearquerydef.command.name">
       </command>
       <command
             id="org.wcs.smart.query.runQuery"
-            name="Run Query">
+            name="%runquery.command.name">
       </command>
       <command
             id="org.wcs.smart.query.exportQuery"
-            name="Export Query">
+            name="%exportquery.command.name">
       </command>
       <command
             id="org.wcs.smart.query.DeleteItem"
-            name="Delete Query or Folder">
+            name="%deletequeryorfolder.command.name">
       </command>
       <command
             id="org.wcs.smart.query.AddFolder"
-            name="Add Sub-Folder">
+            name="%addsubfolder.command.name">
       </command>
       <command
             id="org.wcs.smart.query.renameFolder"
-            name="Rename Query Folder">
+            name="%renamequeryfolder.command.name">
       </command>
       <command
             id="org.wcs.smart.query.importQuery"
-            name="Import Query">
+            name="%importquery.command.name">
       </command>
       <command
             id="org.wcs.smart.query.createSummary"
-            name="Create Summary Query">
+            name="%createsummaryquery.command.name">
       </command>
       <command
             id="org.wcs.smart.query.createPatrolQuery"
-            name="Create Patrol Query">
+            name="%createpatrolquery.command.name">
       </command>
       <command
             id="org.wcs.smart.query.createGriddedSummary"
-            name="Create Gridded Summary Query">
+            name="%creategriddedquery.command.name">
       </command>
       <command
             id="org.wcs.smart.query.createUnknownQuery"
-            name="Create Unknown Query">
+            name="%createunknowquery.command.name">
       </command>
       <command
             id="org.wcs.smart.query.openQuery"
-            name="Open Query">
+            name="%openquery.command.name">
       </command>
    </extension>
    <extension
