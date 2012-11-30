@@ -236,7 +236,7 @@ public class EmployeeCsvImporter {
 			}
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			throw new Exception(Messages.EmployeeCsvImporter_Error_ParseError + ex.getMessage(), ex);
+			throw new Exception(Messages.EmployeeCsvImporter_Error_ParseError + ex.getLocalizedMessage(), ex);
 		}
 		return true;
 	}

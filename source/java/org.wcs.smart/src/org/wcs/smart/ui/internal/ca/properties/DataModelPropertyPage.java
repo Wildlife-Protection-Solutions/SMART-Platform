@@ -459,7 +459,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}catch (Exception ex2){}
 			currentTransaction = null;
 			s.close();
-			SmartPlugIn.displayLog(errorShell,Messages.DataModelPropertyPage_Error_SavingDataModel + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(errorShell,Messages.DataModelPropertyPage_Error_SavingDataModel + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		return true;
@@ -708,7 +708,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			try{
 				getSession().flush();
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Edit + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Edit + ex.getLocalizedMessage(), ex);
 			}
 			
 		}

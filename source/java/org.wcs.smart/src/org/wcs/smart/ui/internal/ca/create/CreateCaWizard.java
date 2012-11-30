@@ -87,7 +87,7 @@ public class CreateCaWizard extends Wizard {
 			HibernateManager.saveNewConservationArea(newCa);
 			completedOK = true;
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_Error_CreateCaError + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_Error_CreateCaError + ex.getLocalizedMessage(), ex);
 		}
 		
 		return completedOK;

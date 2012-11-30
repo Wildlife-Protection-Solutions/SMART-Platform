@@ -213,7 +213,7 @@ public abstract class InitializeDialog  extends Dialog {
 			handler.execute(shell);
 			shell.dispose();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_SystemRestore + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_SystemRestore + ex.getLocalizedMessage(), ex);
 		}
 	}
 	
@@ -226,7 +226,7 @@ public abstract class InitializeDialog  extends Dialog {
 			handler.execute(shell);
 			shell.dispose();
 		}catch(Exception ex){
-			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_ImportCa + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(shell, Messages.InitializeDialog_Error_ImportCa + ex.getLocalizedMessage(), ex);
 		}
 	}
 	

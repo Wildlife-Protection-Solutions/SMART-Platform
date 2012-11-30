@@ -168,7 +168,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		try{
 			currentTransaction.commit();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		currentTransaction = getSession().beginTransaction();

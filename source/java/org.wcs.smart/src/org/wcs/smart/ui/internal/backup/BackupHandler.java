@@ -112,7 +112,7 @@ public class BackupHandler extends AbstractHandler {
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					Messages.BackupHandler_Error_BackupError + ex.getMessage(), ex);
+					Messages.BackupHandler_Error_BackupError + ex.getLocalizedMessage(), ex);
 		}
 		
 		if (backupState == 1){

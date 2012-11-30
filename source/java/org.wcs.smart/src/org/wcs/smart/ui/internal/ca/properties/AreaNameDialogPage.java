@@ -115,7 +115,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			ConservationAreaManager.getInstance().fireAreaChanged(type);
 			getSession().beginTransaction();
 		}catch (Exception ex){
-			SmartPlugIn.log(Messages.AreaNameDialogPage_Error_Save + ex.getMessage(), ex);
+			SmartPlugIn.log(Messages.AreaNameDialogPage_Error_Save + ex.getLocalizedMessage(), ex);
 		}
 	}
 	

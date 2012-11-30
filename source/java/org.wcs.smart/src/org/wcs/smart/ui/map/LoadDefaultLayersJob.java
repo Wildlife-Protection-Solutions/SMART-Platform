@@ -139,7 +139,7 @@ public class LoadDefaultLayersJob extends Job{
     						ChangeCRSCommand cmd = new ChangeCRSCommand(crs);
     						map.sendCommandSync(cmd);
     					}catch(Exception ex){
-    						SmartPlugIn.log(Messages.LoadDefaultLayersJob_Error_ParsingCrs + ex.getMessage(), ex);
+    						SmartPlugIn.log(Messages.LoadDefaultLayersJob_Error_ParsingCrs + ex.getLocalizedMessage(), ex);
     					}
     				}
     				

@@ -89,14 +89,14 @@ public class ImportCaHandler {
 						CaImporter.importCa(f, monitor);
 						MessageDialog.openInformation(shell, Messages.ImportCaHandler_Complete_DialogTitle, Messages.ImportCaHandler_Complete_DialogMessage);		
 					}catch (final Exception ex){
-						SmartPlugIn.displayLog(shell,Messages.ImportCaHandler_ImportFailed_Message + ex.getMessage(), ex);		
+						SmartPlugIn.displayLog(shell,Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);		
 					}
 
 				}
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					Messages.ImportCaHandler_ImportFailed_Message + ex.getMessage(), ex);
+					Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);
 		}
 		return;
 	}

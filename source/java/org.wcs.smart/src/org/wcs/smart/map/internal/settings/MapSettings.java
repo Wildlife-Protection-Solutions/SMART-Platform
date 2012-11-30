@@ -601,7 +601,7 @@ public class MapSettings {
 				if (s.getTransaction().isActive()){
 					s.getTransaction().rollback();
 				}
-				SmartPlugIn.displayLog(null, Messages.MapSettings_Error_SaveBasemap + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(null, Messages.MapSettings_Error_SaveBasemap + ex.getLocalizedMessage(), ex);
 			}finally{
 				s.close();
 			}

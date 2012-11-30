@@ -185,7 +185,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			getSession().getTransaction().commit();
 			setChangesMade(false);
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		getSession().beginTransaction();

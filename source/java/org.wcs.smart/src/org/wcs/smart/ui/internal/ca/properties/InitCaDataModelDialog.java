@@ -361,7 +361,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			});
 			return true;
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(),Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(),Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getLocalizedMessage(), ex);
 	
 		}
 		return false;
