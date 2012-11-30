@@ -128,7 +128,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 		try{
 			return validator.validate(inputValue.getText());
 		}catch (Exception ex){
-			ReportPlugIn.log(Messages.NumberParameterComponent_ConversionError + ex.getMessage(), ex);
+			ReportPlugIn.log(Messages.NumberParameterComponent_ConversionError + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 	}

@@ -82,7 +82,7 @@ public class RunReportHandler extends AbstractHandler  {
 				return null;
 			}
 		}catch (Exception ex){
-			ReportPlugIn.displayLog(Messages.RunReportHandler_ParametersError  + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.RunReportHandler_ParametersError  + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 		

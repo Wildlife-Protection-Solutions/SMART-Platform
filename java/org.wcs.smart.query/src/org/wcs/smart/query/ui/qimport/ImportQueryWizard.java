@@ -155,13 +155,13 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						QueryInput qi = new QueryInput(query);
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(qi, query.getType().getEditorId());
 					}catch (Exception ex){
-						QueryPlugIn.displayLog(Messages.ImportQueryWizard_CouldNotImportError + ex.getMessage(), ex);
+						QueryPlugIn.displayLog(Messages.ImportQueryWizard_CouldNotImportError + ex.getLocalizedMessage(), ex);
 					}
 					
 				}
 			});
 		} catch (Exception e) {
-			QueryPlugIn.displayLog(Messages.ImportQueryWizard_ImportFailed + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.ImportQueryWizard_ImportFailed + e.getLocalizedMessage(), e);
 		}
 		return !hasError;
 	}

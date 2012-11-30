@@ -178,7 +178,7 @@ public class GriddedValuePanel {
 			lstProjections.refresh();
 		} catch (Exception ex) {
 			QueryPlugIn.displayLog(Messages.GriddedValuePanel_ProjectionParseError
-					+ ex.getMessage(), ex);
+					+ ex.getLocalizedMessage(), ex);
 		}
 	}
 

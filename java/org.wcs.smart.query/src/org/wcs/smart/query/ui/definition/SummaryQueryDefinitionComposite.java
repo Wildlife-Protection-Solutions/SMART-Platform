@@ -145,7 +145,7 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 			} catch (Throwable ex) {
 				// failed to parse query
 				isvalid = false;
-				error = ex.getMessage();
+				error = ex.getLocalizedMessage();
 			}
 		}
 		

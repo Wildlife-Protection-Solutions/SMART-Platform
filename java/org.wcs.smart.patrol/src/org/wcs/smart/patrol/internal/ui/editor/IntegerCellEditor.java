@@ -50,7 +50,7 @@ public class IntegerCellEditor  extends TextCellEditor {
 						Integer.parseInt(string);
 						return null;
 					} catch (NumberFormatException exception) {
-						return exception.getMessage();
+						return exception.getLocalizedMessage();
 					}
 				}
 			}

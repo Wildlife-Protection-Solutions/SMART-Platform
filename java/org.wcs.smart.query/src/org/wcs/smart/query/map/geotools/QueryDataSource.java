@@ -100,7 +100,7 @@ public class QueryDataSource extends AbstractDataStore{
 					type = createWaypointSchema();
 				} 
 			}catch(SchemaException ex){
-				throw new IOException(Messages.QueryDataSource_SchemaError + ex.getMessage(), ex);
+				throw new IOException(Messages.QueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
 			}
 			schemas.put(typeName, type);
 		}

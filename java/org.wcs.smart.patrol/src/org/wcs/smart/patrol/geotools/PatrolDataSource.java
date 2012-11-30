@@ -86,7 +86,7 @@ public class PatrolDataSource extends AbstractDataStore{
 					type = createTrackSchema();
 				}
 			}catch(SchemaException ex){
-				throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getMessage(), ex);
+				throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getLocalizedMessage(), ex);
 			}
 			schemas.put(typeName, type);
 		}

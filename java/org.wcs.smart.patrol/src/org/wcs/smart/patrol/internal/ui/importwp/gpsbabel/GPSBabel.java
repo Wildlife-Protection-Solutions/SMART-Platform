@@ -194,7 +194,7 @@ public class GPSBabel {
 			if (exec.isFailure(exitValue) && watchdog.killedProcess()){
 				throw new IllegalStateException(ERROR_MSG_PROCESS_TOLONG);
 			}
-			throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getMessage() , ex);
+			throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getLocalizedMessage() , ex);
 		}
 
 		if (!file.exists()){
@@ -226,7 +226,7 @@ public class GPSBabel {
 				if (exec.isFailure(exitValue) && watchdog.killedProcess()){
 					throw new IllegalStateException(ERROR_MSG_PROCESS_TOLONG);
 				}
-				throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getMessage() , ex);
+				throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getLocalizedMessage() , ex);
 			}
 			
 			if (!file.exists()){

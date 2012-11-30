@@ -117,7 +117,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		}catch(Exception ex){
 			session.getTransaction().rollback();
 			session.close();
-			SmartPlugIn.displayLog(null, Messages.EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees + ex.getMessage(), ex);			
+			SmartPlugIn.displayLog(null, Messages.EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees + ex.getLocalizedMessage(), ex);			
 		}
 		leaderPilotComp.setEmployeeList(empListComposite.getSelectedEmployees(),p);
 	}

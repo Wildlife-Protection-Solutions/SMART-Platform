@@ -106,7 +106,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 									.getCanonicalPath());
 		} catch (IOException e) {
 			displayLog(
-					Messages.ReportPlugIn_Error_InitializingParams+ e.getMessage(), e);
+					Messages.ReportPlugIn_Error_InitializingParams+ e.getLocalizedMessage(), e);
 		}
 	}
 

@@ -128,7 +128,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 								PatrolEventManager.getInstance().patrolAdded(p);
 							}
 						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ImportPatrolHandler_Error_FileNotImported, new Object[]{file.toString()}) + ex.getMessage(), ex);
+							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ImportPatrolHandler_Error_FileNotImported, new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex);
 						}
 						if (monitor.isCanceled()){
 							display.syncExec(new Runnable() {
@@ -145,7 +145,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 			});
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
-					PATROL_NOT_IMPORTED_ERROR_MSG + e.getMessage(), e);
+					PATROL_NOT_IMPORTED_ERROR_MSG + e.getLocalizedMessage(), e);
 		}
 	}
 	
@@ -195,7 +195,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPatrolPlugIn.displayLog(PATROL_NOT_IMPORTED_ERROR_MSG+ e.getMessage(), e);
+								SmartPatrolPlugIn.displayLog(PATROL_NOT_IMPORTED_ERROR_MSG+ e.getLocalizedMessage(), e);
 							}});
 					}
 
@@ -203,7 +203,7 @@ public class ImportPatrolHandler extends AbstractHandler {
 			});
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
-					PATROL_NOT_IMPORTED_ERROR_MSG + e.getMessage(), e);
+					PATROL_NOT_IMPORTED_ERROR_MSG + e.getLocalizedMessage(), e);
 		}
 	}
 }

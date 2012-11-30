@@ -198,7 +198,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 	}

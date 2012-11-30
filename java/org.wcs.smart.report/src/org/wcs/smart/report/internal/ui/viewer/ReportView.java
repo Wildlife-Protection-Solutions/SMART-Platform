@@ -109,7 +109,7 @@ public class ReportView extends ViewPart implements IReportListener{
 
 					}});
 		} catch (Exception e) {
-			ReportPlugIn.displayLog(REPORT_ERROR_MSG + e.getMessage(), e);
+			ReportPlugIn.displayLog(REPORT_ERROR_MSG + e.getLocalizedMessage(), e);
 		}			
 		return Status.OK_STATUS;
 	}};
@@ -171,7 +171,7 @@ public class ReportView extends ViewPart implements IReportListener{
 		try{
 			previewReport(refreshParameters);
 		}catch (Exception ex){
-			ReportPlugIn.log(REPORT_ERROR_MSG + ex.getMessage(), ex);
+			ReportPlugIn.log(REPORT_ERROR_MSG + ex.getLocalizedMessage(), ex);
 		}
 	}
 		
@@ -219,7 +219,7 @@ public class ReportView extends ViewPart implements IReportListener{
 				}
 			}catch (Exception ex){
 				String error = Messages.ReportView_Error_GatheringParams;
-				browser.setText(error+ ex.getMessage());
+				browser.setText(error+ ex.getLocalizedMessage());
 				ReportPlugIn.log(error, ex);
 				return;
 			}

@@ -80,7 +80,7 @@ public class NewPatrolHandler extends AbstractHandler {
 		} catch (Exception ex) {
 			dialog = null;
 			SmartPatrolPlugIn.displayLog(Messages.NewPatrolHandler_Error_LoadingWizard
-					+ ex.getMessage(), ex);
+					+ ex.getLocalizedMessage(), ex);
 		}
 		if (dialog != null) {
 			dialog.open();

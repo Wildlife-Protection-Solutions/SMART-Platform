@@ -120,7 +120,7 @@ public class ExportPatrolHandler extends AbstractHandler {
 									monitor);
 							exportCnt++;
 						} catch (Exception ex) {
-							displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{SmartUtils.encodeHex(puuid)}) + ex.getMessage(), ex);
+							displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{SmartUtils.encodeHex(puuid)}) + ex.getLocalizedMessage(), ex);
 						}
 					}
 
@@ -130,7 +130,7 @@ public class ExportPatrolHandler extends AbstractHandler {
 			});
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
-					Messages.ExportPatrolHandler_ExportErrorMessage + e.getMessage(), e);
+					Messages.ExportPatrolHandler_ExportErrorMessage + e.getLocalizedMessage(), e);
 		}
 
 		return null;

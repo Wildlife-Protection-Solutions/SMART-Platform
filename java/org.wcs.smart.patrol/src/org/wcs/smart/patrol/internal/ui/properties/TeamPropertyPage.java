@@ -314,7 +314,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return true;
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(
-					Messages.TeamPropertyPage_Error_SavingUpdates + ex.getMessage(),
+					Messages.TeamPropertyPage_Error_SavingUpdates + ex.getLocalizedMessage(),
 					ex);
 		}
 		return false;

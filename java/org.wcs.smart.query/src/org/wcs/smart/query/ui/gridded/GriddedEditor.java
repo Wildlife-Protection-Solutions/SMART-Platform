@@ -125,7 +125,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(
-						MessageFormat.format(Messages.GriddedEditor_ErrorParsingQuery, new Object[]{input.getName()}) + ex.getMessage(), ex);
+						MessageFormat.format(Messages.GriddedEditor_ErrorParsingQuery, new Object[]{input.getName()}) + ex.getLocalizedMessage(), ex);
 			}finally{
 				session.getTransaction().commit(); 
 				session.close();
@@ -205,7 +205,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog(Messages.GriddedEditor_ErrorLoadingQuery + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.GriddedEditor_ErrorLoadingQuery + e.getLocalizedMessage(), e);
 		}
 		
 		return this.query;
@@ -287,9 +287,9 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 				} catch (Exception ex) {
 					String message = "Could not execute query." + "\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 					if (ex.getCause() != null){
-						message += ex.getCause().getMessage();
+						message += ex.getCause().getLocalizedMessage();
 					}else{
-						message += ex.getMessage();
+						message += ex.getLocalizedMessage();
 					}
 					QueryPlugIn.displayLog(message, ex);
 					resultPage.updateAndShowTable(new ArrayList<GridResultItem>(), mymonitor);

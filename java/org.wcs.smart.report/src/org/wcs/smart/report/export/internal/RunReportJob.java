@@ -109,7 +109,7 @@ public class RunReportJob extends Job {
 
 		} catch (Exception e) {
 			ReportPlugIn.log("Error exporting report", e); //$NON-NLS-1$
-			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, Messages.RunReportJob_Error_RunningReport + e.getMessage() );
+			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, Messages.RunReportJob_Error_RunningReport + e.getLocalizedMessage() );
 		}
 		return Status.OK_STATUS;
 	}

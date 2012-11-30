@@ -68,7 +68,7 @@ public class OpenQueryHandler extends AbstractHandler {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, input.getType().getEditorId());	
 		} catch (Throwable t) {
-			QueryPlugIn.displayLog(t.getMessage(), t);
+			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
 	}
 

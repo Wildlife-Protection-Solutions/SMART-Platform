@@ -71,7 +71,7 @@ public class CreateHandler extends AbstractHandler {
 				page =  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 				page.openEditor(input, input.getType().getEditorId());						
 			} catch (Throwable t) {
-				QueryPlugIn.displayLog(t.getMessage(), t);
+				QueryPlugIn.displayLog(t.getLocalizedMessage(), t);
 			}
 		} catch (Exception e) {
 			QueryPlugIn.displayLog(Messages.CreateHandler_QueryEditorError, e);

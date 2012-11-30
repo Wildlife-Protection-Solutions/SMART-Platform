@@ -46,7 +46,7 @@ public class EditLibraryHandler extends AbstractHandler {
 			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
 					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
 		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
 		}		
 		return null;
 	}

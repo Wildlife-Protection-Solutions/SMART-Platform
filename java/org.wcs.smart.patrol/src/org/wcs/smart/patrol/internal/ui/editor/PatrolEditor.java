@@ -227,9 +227,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								PatrolEditor.this.dispose();
 								PatrolEditor.this.getSite().getPage().closeEditor(PatrolEditor.this, false);
 								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
-									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_NoMoreHandlers + t.getMessage(), t);
+									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_NoMoreHandlers + t.getLocalizedMessage(), t);
 								} else {
-									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_Other+ t.getMessage(), t);
+									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_Other+ t.getLocalizedMessage(), t);
 								}
 							} catch (Exception ex) {
 								//TODO: Should we fail the program here??
@@ -322,7 +322,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					if (saveSession.getTransaction().isActive()){
 						saveSession.getTransaction().rollback();
 					}
-					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getMessage(), ex);
+					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
 				}finally{
 					
 					saveSession.close();
@@ -360,7 +360,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					if (saveSession.getTransaction().isActive()){
 						saveSession.getTransaction().rollback();
 					}
-					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getMessage(), ex);
+					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
 				}finally{
 					saveSession.close();
 				}
@@ -511,7 +511,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				SmartPatrolPlugIn
 						.displayLog(
 								Messages.PatrolEditor_Error_SavingWaypoints
-										+ ex.getMessage(), ex);
+										+ ex.getLocalizedMessage(), ex);
 			} finally {
 				saveSession.close();
 			}

@@ -130,7 +130,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 			} catch (Throwable ex) {
 				// failed to parse query
 				isvalid = false;
-				error = ex.getMessage();
+				error = ex.getLocalizedMessage();
 			}
 		}
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)view.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);

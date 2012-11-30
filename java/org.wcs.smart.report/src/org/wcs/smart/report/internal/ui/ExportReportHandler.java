@@ -105,14 +105,14 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 			try {
 				ExportReportEngine.exportReports(selectedReports, outputDir, outputFormat);
 			} catch (Exception e) {
-				ReportPlugIn.displayLog(ERROR_MSG + e.getMessage(), e);
+				ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
 			}
 		}else if (format.getExporter() instanceof IReportExporter){
 			IReportExporter exporter = (IReportExporter) format.getExporter();
 			try {
 				ExportReportEngine.exportReports(selectedReports, outputDir, exporter);
 			} catch (Exception e) {
-				ReportPlugIn.displayLog(ERROR_MSG + e.getMessage(), e);
+				ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
 			}
 		}
 		

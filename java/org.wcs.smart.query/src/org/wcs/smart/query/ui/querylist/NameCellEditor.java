@@ -115,7 +115,7 @@ public class NameCellEditor implements ICellModifier {
 					}
 					QueryPlugIn.displayLog(
 							Messages.NameCellEditor_CouldNotSaveQueryName
-									+ ex.getMessage(), ex);
+									+ ex.getLocalizedMessage(), ex);
 				} finally {
 					session.close();
 				}
@@ -154,7 +154,7 @@ public class NameCellEditor implements ICellModifier {
 					}
 					QueryPlugIn.displayLog(
 							Messages.NameCellEditor_CouldNotSaveFolderNameChange
-									+ ex.getMessage(), ex);
+									+ ex.getLocalizedMessage(), ex);
 				} finally {
 					session.close();
 				}

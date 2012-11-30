@@ -240,7 +240,7 @@ public class PatrolListView extends ViewPart {
 						page = getSite().getPage();
 						page.openEditor(p, PatrolEditor.ID);						
 					} catch (Throwable t) {
-						SmartPatrolPlugIn.displayLog(t.getMessage(), t);
+						SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
 					}
 				}
 				

@@ -415,7 +415,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 			if (conn != null && conn.isOpen())
 				conn.close();
 		} catch (OdaException e) {
-			Activator.log(Messages.SmartTableDataSetWizardPage_Error_CouldNoClose + e.getMessage(), e);
+			Activator.log(Messages.SmartTableDataSetWizardPage_Error_CouldNoClose + e.getLocalizedMessage(), e);
 		}
 	}
 

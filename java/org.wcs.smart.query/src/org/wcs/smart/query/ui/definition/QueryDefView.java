@@ -122,7 +122,7 @@ public class QueryDefView extends ViewPart {
 					setQuery(null);	
 				}
 			}catch (Exception ex){
-				QueryPlugIn.displayLog(Messages.QueryDefView_CloseError + ex.getMessage(), ex);
+				QueryPlugIn.displayLog(Messages.QueryDefView_CloseError + ex.getLocalizedMessage(), ex);
 			}
 		}
 		

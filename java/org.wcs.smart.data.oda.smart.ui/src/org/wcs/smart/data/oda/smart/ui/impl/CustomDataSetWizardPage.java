@@ -468,7 +468,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 			if (conn != null && conn.isOpen())
 				conn.close();
 		} catch (OdaException e) {
-			Activator.log(Messages.CustomDataSetWizardPage_Error_CouldNotCloseConnection + e.getMessage(), e);
+			Activator.log(Messages.CustomDataSetWizardPage_Error_CouldNotCloseConnection + e.getLocalizedMessage(), e);
 		}
 	}
 
