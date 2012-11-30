@@ -261,7 +261,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<Agency> itr = agencies.iterator(); itr.hasNext();) {
 						Agency a = itr.next();
-						if( a != element && a.findName(cmbLanguage.getCurrentSelection()).compareTo(newName.trim())==0){
+						if( a != element && 
+								a.findName(cmbLanguage.getCurrentSelection()).equals(newName.trim())){
 							matches++;
 						}
 					} 
@@ -303,7 +304,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<Rank> itr = currentRankSet.iterator(); itr.hasNext();) {
 						Rank a = itr.next();
-						if( a != element && a.findName(cmbLanguage.getCurrentSelection()).compareTo(newName.trim())==0){
+						if( a != element && a.findName(cmbLanguage.getCurrentSelection()).equals(newName.trim())){
 							matches++;
 						}
 					} 

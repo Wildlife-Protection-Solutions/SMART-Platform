@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -561,7 +562,7 @@ public class EmployeeComposite extends Composite {
 			ViewerComparator comp = new ViewerComparator(new Comparator<String>() {
 			    @Override
 			    public int compare(String arg0, String arg1) {
-			        return arg0.compareTo(arg1);
+			        return Collator.getInstance().compare(arg0, arg1);
 			    }
 			});
 			cmbViewerRank.setComparator(comp); 

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
+import java.text.Collator;
 import java.util.Arrays;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -147,6 +148,6 @@ public class ListItem implements Comparable<ListItem>{
 		if (o == null){
 			return -1;
 		}
-		return name.compareTo(o.getName());
+		return Collator.getInstance().compare(name,o.getName());
 	}
 }

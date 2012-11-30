@@ -58,6 +58,8 @@ import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.data.oda.smart.ui.Activator;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 
+import com.ibm.icu.text.Collator;
+
 /**
  * Wizard table for smart birt table datasets
  * @author egouge
@@ -141,7 +143,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 			Collections.sort(tables, new Comparator<SmartBirtTable>(){
 				@Override
 				public int compare(SmartBirtTable t1, SmartBirtTable t2) {
-					return t1.getTableName().compareTo(t2.getTableName());
+					return Collator.getInstance().compare(t1.getTableName(),t2.getTableName());
 				}});
 			smartTables.setInput(tables.toArray(new SmartBirtTable[tables.size()]));
 		}catch (Exception ex){

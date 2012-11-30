@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.xml.in;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -109,7 +110,8 @@ public class ImportPatrolHandler extends AbstractHandler {
 							}else if (o1.length() > o2.length()){
 								return 1;
 							}
-							return o1.compareTo(o2);
+							
+							return Collator.getInstance().compare(o1,o2);
 						}
 					});
 					

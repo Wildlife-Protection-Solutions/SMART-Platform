@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
@@ -471,7 +472,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (s2 == null){
 			return 1;
 		}
-		return s1.compareTo(s2);
+		return Collator.getInstance().compare(s1, s2);
 	}
 	
 	/*
@@ -487,7 +488,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (s2 == null){
 			return 1;
 		}
-		return s1.compareTo(s2);
+		return Collator.getInstance().compare(s1, s2);
 	}
 	/**
 	 * Compares two employee objects by a given column.
@@ -501,8 +502,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private int compareValue(EmployeeColumn col, Employee e1, Employee e2){	
 		switch (col){
 			case ID: return compareString(e1.getId(),e2.getId());
-			case FAMILY_NAME: return e1.getFamilyName().compareTo(e2.getFamilyName());
-			case GIVEN_NAME: return e1.getGivenName().compareTo(e2.getGivenName()) ;	
+			case FAMILY_NAME: return Collator.getInstance().compare(e1.getFamilyName(),e2.getFamilyName());
+			case GIVEN_NAME: return Collator.getInstance().compare(e1.getGivenName(),e2.getGivenName()) ;	
 			case AGENCY: return compareString(e1.getAgency() == null ? null : e1.getAgency().getName(), e2.getAgency() == null ? null : e2.getAgency().getName());
 			case RANK:return compareString(e1.getAgency() == null ? null : e1.getAgency().getName(), e2.getRank() == null ? null : e2.getRank().getName());
 			case GENDER: return e1.getGender() == e2.getGender() ? 0 : (e1.getGender() > e2.getGender() ? 1 : -1);

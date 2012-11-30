@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.queyfilter;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -439,7 +440,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
 					public int compare(Attribute o1, Attribute o2) {
-						return o1.getName().compareTo(o2.getName());
+						return Collator.getInstance().compare(o1.getName(),o2.getName());
 					}
 				});
 				Object[] results = new Object[atts.size()];
@@ -466,7 +467,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
 					public int compare(Attribute o1, Attribute o2) {
-						return o1.getName().compareTo(o2.getName());
+						return Collator.getInstance().compare(o1.getName(),o2.getName());
 					}
 				});
 				Object[] results = new Object[atts.size()];

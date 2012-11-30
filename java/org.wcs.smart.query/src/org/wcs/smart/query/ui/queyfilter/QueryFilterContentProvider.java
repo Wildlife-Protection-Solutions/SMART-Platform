@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.queyfilter;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -211,7 +212,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
 					public int compare(Attribute o1, Attribute o2) {
-						return o1.getName().compareTo(o2.getName());
+						return Collator.getInstance().compare(o1.getName(),o2.getName());
 					}
 				});
 				return atts.toArray(new Attribute[atts.size()]);

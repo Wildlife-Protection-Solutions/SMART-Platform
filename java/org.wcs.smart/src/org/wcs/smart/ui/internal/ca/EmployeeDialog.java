@@ -192,7 +192,7 @@ public class EmployeeDialog extends Dialog {
 			
 			Transaction tx = session.beginTransaction();
 			try{
-				if (toUpdate.getId().compareTo(AUTO_GENERATE) == 0){
+				if (toUpdate.getId().equals(AUTO_GENERATE)){
 					//if they left the default "automatic", auto-generate an id for them
 					HibernateManager.generateEmployeeId(toUpdate, session);
 				}else if (toUpdate.getUuid() != null){

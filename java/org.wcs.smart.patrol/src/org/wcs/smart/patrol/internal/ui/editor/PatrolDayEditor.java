@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -167,7 +168,7 @@ public class PatrolDayEditor extends EditorPart {
 						}else if (o1.getStartTime().after(o2.getStartTime())){
 							return 1;
 						}else{
-							return o1.getPatrolLeg().getId().compareTo(o2.getPatrolLeg().getId());
+							return Collator.getInstance().compare(o1.getPatrolLeg().getId(),o2.getPatrolLeg().getId());
 						}
 					}});
 				children = new PatrolLegDayInputComposite[plds.size()];
