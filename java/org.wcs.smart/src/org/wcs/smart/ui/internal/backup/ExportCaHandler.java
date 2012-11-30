@@ -103,7 +103,7 @@ public class ExportCaHandler extends AbstractHandler {
 						shell.getDisplay().syncExec(new Runnable() {
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(shell, Messages.ExportCaHandler_Error_ExportFailedMessage + ex.getMessage(), ex);
+								SmartPlugIn.displayLog(shell, Messages.ExportCaHandler_Error_ExportFailedMessage + ex.getLocalizedMessage(), ex);
 							}
 						});
 					}
@@ -111,7 +111,7 @@ public class ExportCaHandler extends AbstractHandler {
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					Messages.ExportCaHandler_Error_ExportFailedMessage + ex.getMessage(), ex);
+					Messages.ExportCaHandler_Error_ExportFailedMessage + ex.getLocalizedMessage(), ex);
 		}
 	}
 	

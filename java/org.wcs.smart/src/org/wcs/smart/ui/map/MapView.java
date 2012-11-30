@@ -171,7 +171,7 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
 						map.sendCommandASync(command);
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getSite().getShell(), SmartMapEditorPart.ERROR_SETTING_MAP_PROJECTION + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(getSite().getShell(), SmartMapEditorPart.ERROR_SETTING_MAP_PROJECTION + ex.getLocalizedMessage(), ex);
 					}	
 				}
 			}

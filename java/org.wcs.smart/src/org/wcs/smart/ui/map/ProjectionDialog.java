@@ -114,7 +114,7 @@ public class ProjectionDialog extends TitleAreaDialog {
 
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(getShell(), Messages.ProjectionDialog_Error_LoadProjectionMessage + ex.getMessage(), ex);							
+							SmartPlugIn.displayLog(getShell(), Messages.ProjectionDialog_Error_LoadProjectionMessage + ex.getLocalizedMessage(), ex);							
 						}});
 					
 				}finally{

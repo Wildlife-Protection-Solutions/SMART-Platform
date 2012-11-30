@@ -146,7 +146,7 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 		}catch (Exception ex){
 			String err = Messages.EditProjectionDialog_Error_ParsingWKT;
 			SmartPlugIn.log(err, ex);
-			setErrorMessage(err + ex.getMessage());
+			setErrorMessage(err + ex.getLocalizedMessage());
 			return false;
 		}
 		return true;

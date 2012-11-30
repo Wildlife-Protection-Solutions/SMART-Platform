@@ -302,7 +302,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
 						getMap().sendCommandASync(command);
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getSite().getShell(), ERROR_SETTING_MAP_PROJECTION + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(getSite().getShell(), ERROR_SETTING_MAP_PROJECTION + ex.getLocalizedMessage(), ex);
 					}	
 				}
 			}

@@ -112,9 +112,9 @@ public class CaImporter {
 					HibernateManager.endSessionFactory(true);
 					restoreBackup(dbBackup);
 				}catch (Exception e){
-					throw new Exception(Messages.CaImporter_Error_ImportErrorBackupNoRestored + ex.getMessage() + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+					throw new Exception(Messages.CaImporter_Error_ImportErrorBackupNoRestored + ex.getLocalizedMessage(), e); //$NON-NLS-1$
 				}
-				throw new Exception(Messages.CaImporter_Error_SystemRestored + ex.getMessage(), ex);
+				throw new Exception(Messages.CaImporter_Error_SystemRestored + ex.getLocalizedMessage(), ex);
 			}
 			
 			try{

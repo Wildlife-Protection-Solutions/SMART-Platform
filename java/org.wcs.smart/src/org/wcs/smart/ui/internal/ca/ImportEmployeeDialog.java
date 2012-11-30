@@ -211,7 +211,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getMessage(), ex);
+							SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getLocalizedMessage(), ex);
 						}						
 					});
 							
@@ -222,7 +222,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 			}
 		});
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getLocalizedMessage(), ex);
 		}
 	}
 	

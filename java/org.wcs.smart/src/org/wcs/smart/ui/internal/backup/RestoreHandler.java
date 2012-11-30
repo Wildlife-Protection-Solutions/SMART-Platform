@@ -101,14 +101,14 @@ public class RestoreHandler {
 						DerbyRestoreEngine.restoreSystem(f, monitor);	
 						MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage);
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,Messages.RestoreHandler_ReportFailed_Message + ex.getMessage(), ex);
+						SmartPlugIn.displayLog(shell,Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
 					}
 				}
 				
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(shell,
-					Messages.RestoreHandler_ReportFailed_Message + ex.getMessage(), ex);
+					Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
 		}
 		return;
 	}

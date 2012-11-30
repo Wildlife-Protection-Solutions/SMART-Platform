@@ -217,7 +217,7 @@ public class ZipUtil {
 				}
 			}
 		} catch (IOException e) {
-			throw new Exception(Messages.ZipUtil_Error_UnzipFailed + e.getMessage(), e);
+			throw new Exception(Messages.ZipUtil_Error_UnzipFailed + e.getLocalizedMessage(), e);
 		} finally {
 			try {
 				archiveFile.close();

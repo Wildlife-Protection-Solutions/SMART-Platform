@@ -82,7 +82,6 @@ public class SmartDataSource extends AbstractDataStore{
 			return type;
 		} catch (SchemaException e) {
 			SmartPlugIn.log(e.getMessage(), e);
-			e.printStackTrace();
 		}
 		return null;
 	}
