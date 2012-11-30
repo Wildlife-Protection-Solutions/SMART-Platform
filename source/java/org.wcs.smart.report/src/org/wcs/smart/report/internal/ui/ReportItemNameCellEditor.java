@@ -86,7 +86,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 					session.getTransaction().rollback();
 					ReportPlugIn.displayLog(
 							Messages.ReportItemNameCellEditor_Error_CouldNotSaveReport
-									+ ex.getMessage(), ex);
+									+ ex.getLocalizedMessage(), ex);
 				} finally {
 					session.close();
 				}
@@ -123,7 +123,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 					session.getTransaction().rollback();
 					ReportPlugIn.displayLog(
 							Messages.ReportItemNameCellEditor_Error_CouldNoSaveFolder
-									+ ex.getMessage(), ex);
+									+ ex.getLocalizedMessage(), ex);
 				} finally {
 					session.close();
 				}

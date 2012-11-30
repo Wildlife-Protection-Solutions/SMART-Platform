@@ -102,7 +102,7 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 					type = createPatrolSchema();
 				} 
 			}catch(SchemaException ex){
-				throw new IOException(Messages.PatrolQueryDataSource_SchemaError + ex.getMessage(), ex);
+				throw new IOException(Messages.PatrolQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
 			}
 			schemas.put(typeName, type);
 		}

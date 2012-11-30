@@ -175,7 +175,7 @@ public class PatrolGroupBy implements IGroupBy {
 				it.initializeData(initItems);
 			}
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog(Messages.PatrolGroupBy_CouldNotParse + ex.getMessage(),
+			QueryPlugIn.displayLog(Messages.PatrolGroupBy_CouldNotParse + ex.getLocalizedMessage(),
 					ex);
 		}
 		return it;

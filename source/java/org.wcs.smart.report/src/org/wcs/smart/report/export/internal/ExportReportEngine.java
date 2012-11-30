@@ -166,7 +166,7 @@ public class ExportReportEngine {
 				return  null;
 			}
 		}catch (Exception ex){
-			ReportPlugIn.displayLog(Messages.ExportReportEngine_Error_GatheringParameters + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.ExportReportEngine_Error_GatheringParameters + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 		return params;

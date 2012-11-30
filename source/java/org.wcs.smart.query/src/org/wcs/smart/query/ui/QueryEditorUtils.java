@@ -229,7 +229,7 @@ public class QueryEditorUtils {
 				}
 			});
 		} catch (Exception ex) {
-			QueryPlugIn.displayLog(Messages.QueryEditorUtils_SaveQueryError + ex.getMessage(), ex);
+			QueryPlugIn.displayLog(Messages.QueryEditorUtils_SaveQueryError + ex.getLocalizedMessage(), ex);
 		}
 		return result[0];
 	}

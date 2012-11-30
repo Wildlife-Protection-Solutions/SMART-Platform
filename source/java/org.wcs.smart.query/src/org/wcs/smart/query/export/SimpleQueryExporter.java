@@ -77,7 +77,7 @@ public abstract class SimpleQueryExporter {
 			monitor.done();
 			return true;
 		} catch (Exception ex) {
-			throw new Exception(Messages.SimpleQueryExporter_Error_ExportFailed + ex.getMessage(), ex);
+			throw new Exception(Messages.SimpleQueryExporter_Error_ExportFailed + ex.getLocalizedMessage(), ex);
 		}
 	}
 	

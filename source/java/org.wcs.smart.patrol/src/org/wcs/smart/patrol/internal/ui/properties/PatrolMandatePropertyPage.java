@@ -242,7 +242,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				s.getTransaction().rollback();
 			}
 			SmartPatrolPlugIn.displayLog(
-					Messages.PatrolMandatePropertyPage_Error_SavingUpdates + ex.getMessage(),
+					Messages.PatrolMandatePropertyPage_Error_SavingUpdates + ex.getLocalizedMessage(),
 					ex);
 		}
 		return false;

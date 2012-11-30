@@ -173,7 +173,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_Error_SavingReport + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_Error_SavingReport + ex.getLocalizedMessage(), ex);
 		}finally{
 			s.close();
 		}
@@ -251,7 +251,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 						s.getTransaction().commit();
 					} catch (Exception ex) {
 						s.getTransaction().rollback();
-						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveAsError + ex.getMessage(), ex);
+						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveAsError + ex.getLocalizedMessage(), ex);
 						return;
 					} finally {
 						if (s != null) {
@@ -273,7 +273,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 						}
 					});
 					}catch (Exception ex){
-						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_createFileError + ex.getMessage(), ex);
+						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_createFileError + ex.getLocalizedMessage(), ex);
 						return;
 					}
 					
@@ -290,7 +290,7 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 				}
 			});
 		} catch (Exception ex) {
-			ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveError + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveError + ex.getLocalizedMessage(), ex);
 		}
 	}
 

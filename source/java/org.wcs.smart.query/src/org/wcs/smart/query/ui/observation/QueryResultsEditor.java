@@ -119,7 +119,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 				query.generateDropItems(session);
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(MessageFormat.format(
-						Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getMessage(), ex);
+						Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getLocalizedMessage(), ex);
 			}finally{
 				session.getTransaction().rollback();
 				session.close();
@@ -191,7 +191,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog(Messages.QueryResultsEditor_Error_CouldNotLoad + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.QueryResultsEditor_Error_CouldNotLoad + e.getLocalizedMessage(), e);
 		}
 		
 		return this.query;

@@ -200,7 +200,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			loadQueryLoad.join(); // wait for the query loading job if
 									// applicable
 		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorParsingQuery + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorParsingQuery + e.getLocalizedMessage(), e);
 		}
 
 		return this.query;

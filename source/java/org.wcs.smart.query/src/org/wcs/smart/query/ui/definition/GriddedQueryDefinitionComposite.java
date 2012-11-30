@@ -142,14 +142,14 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			crs = panel.getCrs();
 		}catch (Exception ex){
 			isvalid = false;
-			error = Messages.GriddedQueryDefinitionComposite_ProjectionError + ex.getMessage();
+			error = Messages.GriddedQueryDefinitionComposite_ProjectionError + ex.getLocalizedMessage();
 		}
 		if (isvalid){
 			try{
 				query = panel.getQueryString() + "|" + panel.getGridSize() + "|" + filterPanel.getQueryString() ; //$NON-NLS-1$ //$NON-NLS-2$
 			}catch (Exception ex){
 				isvalid = false;
-				error = ex.getMessage();
+				error = ex.getLocalizedMessage();
 			}
 		}
 		
@@ -165,7 +165,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 			} catch (Throwable ex) {
 				// failed to parse query
 				isvalid = false;
-				error = ex.getMessage();
+				error = ex.getLocalizedMessage();
 			}
 		}
 		
@@ -184,7 +184,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 				((GriddedQuery)parentView.getQuery()).setCoordinateReferenceSystem(crs);
 			}catch (Exception ex){
 				isvalid = false;
-				error = Messages.GriddedQueryDefinitionComposite_InvalidProjectionError + ex.getMessage();
+				error = Messages.GriddedQueryDefinitionComposite_InvalidProjectionError + ex.getLocalizedMessage();
 			}
 		}
 		provider.setQueryValue(isvalid, error);

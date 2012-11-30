@@ -72,7 +72,7 @@ public class ExportReportJob extends Job {
 			exporter.exportReport(outputFile, report, reportParameters, monitor);
 		} catch (Exception e) {
 			ReportPlugIn.log("Error exporting report", e); //$NON-NLS-1$
-			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, Messages.ExportReportJob_ErrorExportingReport + e.getMessage() );
+			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID, Messages.ExportReportJob_ErrorExportingReport + e.getLocalizedMessage() );
 		}
 		return Status.OK_STATUS;
 	}

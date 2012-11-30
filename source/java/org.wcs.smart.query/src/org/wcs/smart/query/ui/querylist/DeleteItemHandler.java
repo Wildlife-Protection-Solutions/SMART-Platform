@@ -113,7 +113,7 @@ public class DeleteItemHandler extends AbstractHandler {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			QueryPlugIn.log(MessageFormat.format(
-				Messages.DeleteItemHandler_ErrorDeletingQueryB, new Object[]{ o.getName()}) + ex.getMessage(), ex);
+				Messages.DeleteItemHandler_ErrorDeletingQueryB, new Object[]{ o.getName()}) + ex.getLocalizedMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -133,7 +133,7 @@ public class DeleteItemHandler extends AbstractHandler {
 			}
 		} catch (Exception ex) {
 			QueryPlugIn.displayLog(
-					Messages.DeleteItemHandler_ErrorClosingEditor + ex.getMessage(), ex);
+					Messages.DeleteItemHandler_ErrorClosingEditor + ex.getLocalizedMessage(), ex);
 		}
 		
 	}

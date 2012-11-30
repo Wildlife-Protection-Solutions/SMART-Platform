@@ -815,7 +815,7 @@ public class PatrolLegDayInputComposite {
 								
 							}
 						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+							SmartPatrolPlugIn.displayLog(ex.getLocalizedMessage(), ex);
 						}
 					}
 				}
@@ -823,7 +823,7 @@ public class PatrolLegDayInputComposite {
 		} catch (Exception ex) {
 			dialog = null;
 			SmartPatrolPlugIn.displayLog(Messages.PatrolLegDayInputComposite_ErrorImportTracksWizard
-					+ ex.getMessage(), ex);
+					+ ex.getLocalizedMessage(), ex);
 				}
 		
 	}
@@ -876,7 +876,7 @@ public class PatrolLegDayInputComposite {
 							}
 							
 						}catch (Exception ex){
-							SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+							SmartPatrolPlugIn.displayLog(ex.getLocalizedMessage(), ex);
 						}
 					}
 				}
@@ -884,7 +884,7 @@ public class PatrolLegDayInputComposite {
 		} catch (Exception ex) {
 			dialog = null;
 			SmartPatrolPlugIn.displayLog(Messages.PatrolLegDayInputComposite_ErrorImportWaypointWizard
-					+ ex.getMessage(), ex);
+					+ ex.getLocalizedMessage(), ex);
 				}
 		
 	}

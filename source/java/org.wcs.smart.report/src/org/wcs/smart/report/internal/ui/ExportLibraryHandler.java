@@ -81,7 +81,7 @@ public class ExportLibraryHandler extends AbstractHandler {
 							MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.ExportLibraryHandler_ExportDialogTitle, Messages.ExportLibraryHandler_ExportOk);		
 						}});
 				} catch (IOException ex) {
-					ReportPlugIn.displayLog(ERROR_MSG + ex.getMessage(), ex);
+					ReportPlugIn.displayLog(ERROR_MSG + ex.getLocalizedMessage(), ex);
 				}	
 			}
 		});

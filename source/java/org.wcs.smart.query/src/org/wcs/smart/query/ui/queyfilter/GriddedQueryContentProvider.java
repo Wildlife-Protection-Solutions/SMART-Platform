@@ -232,7 +232,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 					}
 					s.getTransaction().rollback();
 				}catch (Exception ex){
-					QueryPlugIn.log(Messages.GriddedQueryContentProvider_ErrorLoadingTree + ex.getMessage(), ex);
+					QueryPlugIn.log(Messages.GriddedQueryContentProvider_ErrorLoadingTree + ex.getLocalizedMessage(), ex);
 				}finally{
 					s.close();
 				}
@@ -244,7 +244,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		try{
 			j.join();
 		}catch (Exception ex){
-			QueryPlugIn.log(Messages.GriddedQueryContentProvider_ErrorLoadingTree + ex.getMessage(), ex);
+			QueryPlugIn.log(Messages.GriddedQueryContentProvider_ErrorLoadingTree + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 		

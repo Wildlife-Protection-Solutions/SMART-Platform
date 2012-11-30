@@ -71,7 +71,7 @@ public class DoubleCellEditor extends TextCellEditor {
 						Double.parseDouble(string);
 						return null;
 					} catch (NumberFormatException exception) {
-						return exception.getMessage();
+						return exception.getLocalizedMessage();
 					}
 				}
 			}

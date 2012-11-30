@@ -490,7 +490,7 @@ public class QueryHibernateManager {
 			s.getTransaction().commit();
 
 		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getMessage(), ex);
+			QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getLocalizedMessage(), ex);
 			s.getTransaction().rollback();
 			if (newQuery){
 				query.setUuid(null);

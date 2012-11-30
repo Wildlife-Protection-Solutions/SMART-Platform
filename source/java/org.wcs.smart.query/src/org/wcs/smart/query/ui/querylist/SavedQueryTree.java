@@ -67,7 +67,7 @@ public class SavedQueryTree {
 				folders = QueryHibernateManager.getQueryFolders(s, true);
 				queries = QueryHibernateManager.getQueryProxies(s);
 			}catch (Exception ex){
-				QueryPlugIn.displayLog(Messages.SavedQueryTree_ErrorLoadingQueries + ex.getMessage(), ex);
+				QueryPlugIn.displayLog(Messages.SavedQueryTree_ErrorLoadingQueries + ex.getLocalizedMessage(), ex);
 			}finally{
 				s.getTransaction().rollback();
 				s.close();

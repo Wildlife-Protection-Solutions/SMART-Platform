@@ -143,7 +143,7 @@ public class GPSDataImport {
 			type = (GpxType) ((JAXBElement<?>) o).getValue();
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(
-					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
+					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 		
@@ -351,7 +351,7 @@ public class GPSDataImport {
 			} catch (Exception ex) {
 				displayLog(MessageFormat.format(
 						Messages.GPSDataImport_WaypointError_CouldNotReadFile,
-						new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
+						new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
 				continue;
 			}
 		
@@ -396,7 +396,7 @@ public class GPSDataImport {
 				Object o = un.unmarshal(gpxFile);
 				type = (GpxType) ((JAXBElement<?>) o).getValue();
 			} catch (Exception ex) {
-				displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotRead, new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
+				displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotRead, new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
 				continue;
 			}
 

@@ -105,7 +105,7 @@ public class ReportQueryListener implements IQueryEventListener {
 			}
 		
 		}catch (Exception ex){
-			ReportPlugIn.displayLog(Messages.ReportQueryListener_QuerySaveError + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(Messages.ReportQueryListener_QuerySaveError + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 	}

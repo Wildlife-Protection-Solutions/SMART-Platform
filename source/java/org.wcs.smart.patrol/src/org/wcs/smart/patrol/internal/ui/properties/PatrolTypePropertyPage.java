@@ -533,7 +533,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 	}

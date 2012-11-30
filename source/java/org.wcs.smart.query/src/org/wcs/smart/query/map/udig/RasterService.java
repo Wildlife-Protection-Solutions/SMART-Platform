@@ -114,7 +114,7 @@ public class RasterService extends AbstractRasterService {
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Exception ex){
-			QueryPlugIn.log(Messages.RasterService_urlError + ex.getMessage(), ex);
+			QueryPlugIn.log(Messages.RasterService_urlError + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 	}

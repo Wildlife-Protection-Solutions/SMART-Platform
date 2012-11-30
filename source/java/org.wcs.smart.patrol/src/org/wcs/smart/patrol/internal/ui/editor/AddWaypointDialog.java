@@ -106,7 +106,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			newWaypoint.setX(p.getX());
 			newWaypoint.setY(p.getY());
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.AddWaypointDialog_Error_SavingWaypoint + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.AddWaypointDialog_Error_SavingWaypoint + ex.getLocalizedMessage(), ex);
 			return;
 		}
 		super.okPressed();
@@ -242,7 +242,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		try{
 			sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs(); 
 		}catch (Exception ex){
-			return Messages.AddWaypointDialog_Error_CouldNotParseCrs + ex.getMessage();
+			return Messages.AddWaypointDialog_Error_CouldNotParseCrs + ex.getLocalizedMessage();
 		}
 		
 		if (txtWaypointId.getText().trim().length() == 0){
@@ -277,7 +277,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			Point point = gf.createPoint(new Coordinate(x,y));
 			JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 		}catch (Exception ex){
-			return Messages.AddWaypointDialog_Error_InvalidXY + ex.getMessage();
+			return Messages.AddWaypointDialog_Error_InvalidXY + ex.getLocalizedMessage();
 		}
 		
 		return null;

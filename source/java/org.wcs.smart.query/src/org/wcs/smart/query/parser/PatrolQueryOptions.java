@@ -561,7 +561,7 @@ public class PatrolQueryOptions {
 				} catch (Exception ex) {
 					QueryPlugIn.log(
 							Messages.PatrolQueryOptions_ErrorInvalidPatrolFilterValue
-									+ ex.getMessage(), ex);
+									+ ex.getLocalizedMessage(), ex);
 					return results;
 				}
 				List<?> data = session.createCriteria(sourceClazz).add(Restrictions.in("uuid", uuidkeys)).list(); //$NON-NLS-1$

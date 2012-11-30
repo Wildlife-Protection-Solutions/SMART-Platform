@@ -124,7 +124,7 @@ public class DeleteReportItemHandler extends AbstractHandler implements IHandler
 						}
 					} catch (Exception ex) {
 						ReportPlugIn.displayLog(
-								MessageFormat.format(Messages.DeleteReportItemHandler_Delete_Error, new Object[]{name}) + ex.getMessage(), ex);
+								MessageFormat.format(Messages.DeleteReportItemHandler_Delete_Error, new Object[]{name}) + ex.getLocalizedMessage(), ex);
 					}
 				}
 

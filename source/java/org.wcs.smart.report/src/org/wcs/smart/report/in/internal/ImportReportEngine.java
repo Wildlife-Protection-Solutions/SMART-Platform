@@ -522,7 +522,7 @@ public class ImportReportEngine {
 					queryWarnings.addAll( qi.getWarnings());
 					return Status.OK_STATUS;
 				}catch (Exception ex){
-					return new Status(IStatus.ERROR, ReportPlugIn.PLUGIN_ID, IStatus.ERROR, ex.getMessage(), ex);
+					return new Status(IStatus.ERROR, ReportPlugIn.PLUGIN_ID, IStatus.ERROR, ex.getLocalizedMessage(), ex);
 				}
 			}};
 		j.schedule();

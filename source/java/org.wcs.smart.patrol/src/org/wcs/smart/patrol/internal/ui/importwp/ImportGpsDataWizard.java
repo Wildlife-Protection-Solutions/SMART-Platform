@@ -166,7 +166,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog(GPX_FILE_ERROR + ex.getMessage(), ex);
+				SmartPatrolPlugIn.displayLog(GPX_FILE_ERROR + ex.getLocalizedMessage(), ex);
 				return false;
 			}
 		}else if (lastPage instanceof ImportGPSWizardPage ){
@@ -191,7 +191,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							Display.getDefault().syncExec(new Runnable() {
 								@Override
 								public void run() {
-									SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
+									SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getLocalizedMessage(), ex);
 								}
 							});
 							
@@ -199,7 +199,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
+				SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getLocalizedMessage(), ex);
 				return false;
 			}
 		
@@ -292,7 +292,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							Display.getDefault().syncExec(new Runnable(){
 								@Override
 								public void run() {
-									SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
+									SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getLocalizedMessage(), ex);
 								}});
 							
 						}finally{
@@ -307,7 +307,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 										Display.getDefault().syncExec(new Runnable(){
 											@Override
 											public void run() {
-												SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
+												SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getLocalizedMessage(), ex);
 											}});
 									}});
 							}
@@ -315,7 +315,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 					}
 				});
 				}catch (Exception ex){
-					SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getMessage(), ex);
+					SmartPatrolPlugIn.displayLog(GPS_DEVICE_ERROR + ex.getLocalizedMessage(), ex);
 					event.doit = false;
 				}
 				

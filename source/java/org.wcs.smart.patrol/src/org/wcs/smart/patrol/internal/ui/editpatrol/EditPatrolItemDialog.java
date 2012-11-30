@@ -127,7 +127,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			try{
 				item.updatePatrol(patrol);
 			}catch (PatrolSaveException ex){
-				MessageDialog.openError(getShell(), Messages.EditPatrolItemDialog_Error_DialotTitle, ex.getMessage());
+				MessageDialog.openError(getShell(), Messages.EditPatrolItemDialog_Error_DialotTitle, ex.getLocalizedMessage());
 				return false;
 			}
 			if (PatrolHibernateManager.savePatrol(patrol, s, false)){
@@ -137,7 +137,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			//s.saveOrUpdate(patrol);
 			return false;
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getLocalizedMessage(), ex);
 		}finally{
 			s.close();
 		}

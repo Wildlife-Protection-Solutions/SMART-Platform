@@ -220,7 +220,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					kids.addAll(nodes);					
 					s.getTransaction().rollback();
 				}catch (Exception ex){
-					QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsA + ex.getMessage(), ex);
+					QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsA + ex.getLocalizedMessage(), ex);
 				}finally{
 					s.close();
 				}
@@ -232,7 +232,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		try{
 			j.join();
 		}catch (Exception ex){
-			QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsB + ex.getMessage(), ex);
+			QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsB + ex.getLocalizedMessage(), ex);
 			return null;
 		}
 		

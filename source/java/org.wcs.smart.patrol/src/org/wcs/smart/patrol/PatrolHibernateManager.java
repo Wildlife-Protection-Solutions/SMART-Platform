@@ -168,7 +168,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			s.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoLoadPatrolOptions + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoLoadPatrolOptions + ex.getLocalizedMessage(), ex);
 			
 		}
 		return null;
@@ -437,7 +437,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		}catch (Exception ex){
 			session.getTransaction().rollback();
 			session.close();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		return true;

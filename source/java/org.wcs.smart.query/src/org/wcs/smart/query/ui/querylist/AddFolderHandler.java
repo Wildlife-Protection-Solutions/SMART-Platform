@@ -99,7 +99,7 @@ public class AddFolderHandler extends AbstractHandler {
 			s.save(lbl);
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.AddFolderHandler_CouldNotAddFolderError + ex.getMessage(), ex);
+			QueryPlugIn.displayLog(Messages.AddFolderHandler_CouldNotAddFolderError + ex.getLocalizedMessage(), ex);
 			return null;
 		}finally{
 			s.close();

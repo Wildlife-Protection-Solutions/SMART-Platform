@@ -146,13 +146,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 						}
 					} catch (Exception e) {
 						QueryPlugIn.displayLog(
-								EXPORT_FAILED_MGS + e.getMessage(), e);
+								EXPORT_FAILED_MGS + e.getLocalizedMessage(), e);
 						hasError = true;
 					}
 				}
 			});
 		} catch (Exception e) {
-			QueryPlugIn.displayLog(EXPORT_FAILED_MGS + e.getMessage(), e);
+			QueryPlugIn.displayLog(EXPORT_FAILED_MGS + e.getLocalizedMessage(), e);
 		}
 		return !hasError;
 	}

@@ -78,13 +78,13 @@ public class ImportReportHandler extends AbstractHandler {
 								}});
 						}
 					}catch (Exception ex){
-						ReportPlugIn.displayLog(ERROR_MSG + ex.getMessage(), ex);
+						ReportPlugIn.displayLog(ERROR_MSG + ex.getLocalizedMessage(), ex);
 					}
 					
 				}
 			});
 		} catch (Exception ex) {
-			ReportPlugIn.displayLog(ERROR_MSG + ex.getMessage(), ex);
+			ReportPlugIn.displayLog(ERROR_MSG + ex.getLocalizedMessage(), ex);
 		}
 		
 		

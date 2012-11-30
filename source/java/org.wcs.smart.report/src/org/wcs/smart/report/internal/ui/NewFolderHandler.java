@@ -97,7 +97,7 @@ public class NewFolderHandler extends AbstractHandler implements IHandler {
 							s.saveOrUpdate(newFolder);
 							s.getTransaction().commit();
 						}catch (Exception ex){
-							ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getMessage(), ex);
+							ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getLocalizedMessage(), ex);
 							s.getTransaction().rollback();
 							return Status.OK_STATUS;
 						}finally{

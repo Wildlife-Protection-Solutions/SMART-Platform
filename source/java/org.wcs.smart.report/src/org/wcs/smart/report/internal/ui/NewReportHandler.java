@@ -133,7 +133,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 					if (hsession != null){
 						hsession.getTransaction().rollback();
 					}
-					ReportPlugIn.displayLog(Messages.NewReportHandler_Error_CouldNotCreateReport + ex.getMessage(), ex);
+					ReportPlugIn.displayLog(Messages.NewReportHandler_Error_CouldNotCreateReport + ex.getLocalizedMessage(), ex);
 					return Status.OK_STATUS;
 				}finally{
 					if (hsession != null){
@@ -195,14 +195,14 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 						library.close();
 					}catch (Exception ex){
 						ReportPlugIn.displayLog(
-								Messages.NewReportHandler_Error_CouldNotCloseLibrary + ex.getMessage(), ex);
+								Messages.NewReportHandler_Error_CouldNotCloseLibrary + ex.getLocalizedMessage(), ex);
 					}
 					
 					rdh.save();
 					rdh.close();
 				} catch (Exception ex) {
 					ReportPlugIn.displayLog(
-							Messages.NewReportHandler_Error_CreatingReport + ex.getMessage(), ex);
+							Messages.NewReportHandler_Error_CreatingReport + ex.getLocalizedMessage(), ex);
 					canEdit = false;
 				}
 

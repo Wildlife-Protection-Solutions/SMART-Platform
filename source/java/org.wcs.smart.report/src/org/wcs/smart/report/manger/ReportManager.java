@@ -179,7 +179,7 @@ public class ReportManager {
 				throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemoved + report.getFullReportFilename().toString());
 			}
 		}catch (Exception ex){
-			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemovedB + ex.getMessage(), ex);
+			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemovedB + ex.getLocalizedMessage(), ex);
 		}	
 	}
 	
@@ -254,7 +254,7 @@ public class ReportManager {
 		} catch (Exception ex) {
 			ReportPlugIn.displayLog(
 					Messages.ReportManager_ReportOk_OpenEerror
-							+ ex.getMessage(), ex);
+							+ ex.getLocalizedMessage(), ex);
 		}
 	}
 	
@@ -297,7 +297,7 @@ public class ReportManager {
 					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
 					((ReportView)view).setReport(report);
 				} catch (PartInitException e) {
-					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReport, new Object[]{report.getName()}) + e.getMessage(), e);
+					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReport, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);
 				}				
 			}});
 	}
@@ -315,7 +315,7 @@ public class ReportManager {
 					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
 					((ReportView)view).setReport(report, reportParameters);
 				} catch (PartInitException e) {
-					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReportA, new Object[]{report.getName()}) + e.getMessage(), e);
+					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReportA, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);
 				}				
 			}});
 	}

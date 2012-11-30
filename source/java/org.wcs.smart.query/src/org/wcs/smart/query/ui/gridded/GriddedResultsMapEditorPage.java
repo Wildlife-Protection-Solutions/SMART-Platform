@@ -162,7 +162,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 					rasterService.refresh(null);
 					addLayerJob.schedule();				
 				} catch (Exception ex) {
-					String message = Messages.GriddedResultsMapEditorPage_Error_CreatingMapRaster + ex.getMessage();
+					String message = Messages.GriddedResultsMapEditorPage_Error_CreatingMapRaster + ex.getLocalizedMessage();
 					QueryPlugIn.displayLog(message, ex);
 				}
 			}
@@ -279,7 +279,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 					}
 					}catch (Exception ex){
 						// we will just log these
-						QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_ErrorSettingCrs + ex.getMessage(), ex);
+						QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_ErrorSettingCrs + ex.getLocalizedMessage(), ex);
 					}
 					return Status.OK_STATUS;
 				}
@@ -302,7 +302,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
     				
     			}
     		}catch (Exception ex){
-    			QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_Error_CheckingCrs + ex.getMessage(), ex);
+    			QueryPlugIn.log(Messages.GriddedResultsMapEditorPage_Error_CheckingCrs + ex.getLocalizedMessage(), ex);
     		}
     		
     	}

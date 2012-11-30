@@ -121,7 +121,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				query.generateDropItems(session);
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(
-						MessageFormat.format(Messages.PatrolQueryResultsEditor_CouldNotParseQueryError, new Object[]{ input.getName() }) + ex.getMessage(), ex);
+						MessageFormat.format(Messages.PatrolQueryResultsEditor_CouldNotParseQueryError, new Object[]{ input.getName() }) + ex.getLocalizedMessage(), ex);
 								
 			}finally{
 				session.getTransaction().rollback();
@@ -195,7 +195,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_CouldNotLoadQueryError + e.getMessage(), e);
+			QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_CouldNotLoadQueryError + e.getLocalizedMessage(), e);
 		}
 		
 		return this.query;
