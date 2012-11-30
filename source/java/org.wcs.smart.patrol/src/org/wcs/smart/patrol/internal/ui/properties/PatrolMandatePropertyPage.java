@@ -326,7 +326,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<PatrolMandate> itr = mandates.iterator(); itr.hasNext();) {
 						PatrolMandate a = itr.next();
-						if( a != mnd && a.findName(cmbLanguage.getCurrentSelection()).compareTo(newValue.trim())==0){
+						if( a != mnd && a.findName(cmbLanguage.getCurrentSelection()).equals(newValue.trim())){
 							matches++;
 						}
 					} 

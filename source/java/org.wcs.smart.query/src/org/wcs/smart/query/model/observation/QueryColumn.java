@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.observation;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -254,7 +255,7 @@ public abstract class QueryColumn implements Cloneable{
 					Collections.sort(atts, new Comparator<Attribute>(){
 						@Override
 						public int compare(Attribute o1, Attribute o2) {
-							return o1.getName().compareTo(o2.getName());
+							return Collator.getInstance().compare(o1.getName(),o2.getName());
 						}});
 					
 					for (Attribute att : atts) {

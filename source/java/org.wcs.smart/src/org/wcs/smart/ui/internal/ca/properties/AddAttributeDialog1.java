@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -204,7 +205,9 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		Collections.sort(attributeList, new Comparator<Attribute>() {
 			@Override
 			public int compare(Attribute o1, Attribute o2) {
-				return o1.findName(defaultLang).compareTo(o2.findName(defaultLang));
+				String name1 = o1.findName(defaultLang);
+				String name2 = o2.findName(defaultLang);
+				return Collator.getInstance().compare(name1,  name2);
 			}
 		});
 		checkboxTableViewer.setInput(attributeList.toArray());

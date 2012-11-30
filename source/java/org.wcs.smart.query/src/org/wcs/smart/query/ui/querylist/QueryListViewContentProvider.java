@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -119,9 +120,9 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 					if (q1 & !q2) return -1;
 					if (!q2 & q2) return 1;
 					if (q1 && q2){
-						return ((QueryFolder)o1).getName().compareToIgnoreCase(((QueryFolder)o2).getName());
+						return Collator.getInstance().compare(((QueryFolder)o1).getName().toLowerCase(), ((QueryFolder)o2).getName().toLowerCase());
 					}else{
-						return ((QueryInput)o1).getName().compareToIgnoreCase(((QueryInput)o2).getName());
+						return Collator.getInstance().compare(((QueryInput)o1).getName().toLowerCase(), ((QueryInput)o2).getName().toLowerCase());
 					}
 				}
 			});

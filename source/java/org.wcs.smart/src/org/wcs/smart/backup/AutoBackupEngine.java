@@ -42,8 +42,6 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
-import com.ibm.icu.text.Collator;
-
 /**
  * Engine responsible for checking if the auto-backup is supposed to run,
  * then doing it.
@@ -151,8 +149,8 @@ public class AutoBackupEngine {
 
 		File dir = new File(properties.getProperty(PROP_BACKUP_LOCATION));
 		  for (File child : dir.listFiles()) {
-			  if (Collator.getInstance().equals(child.getName(), ".") || //$NON-NLS-1$
-					  Collator.getInstance().equals(child.getName(), "..")){ //$NON-NLS-1$
+			  if (child.getName().equals(".") || //$NON-NLS-1$
+					  child.getName().equals("..")){ //$NON-NLS-1$
 		      continue;  // Ignore the self and parent aliases.
 		    }
 		    if(child.lastModified() < cutoffDate.getTime() && child.getName().contains(BACKUP_FILENAME_PREFIX)){
