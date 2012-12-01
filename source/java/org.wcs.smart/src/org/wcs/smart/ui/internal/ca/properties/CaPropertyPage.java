@@ -21,8 +21,16 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -30,9 +38,11 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -45,6 +55,9 @@ import org.wcs.smart.util.SmartUtils;
 public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 
 	private CaInfoComposite caComposite = null;
+	
+	private WritableList languages = new WritableList();
+	private ListViewer lstLang;
 	
 	/**
 	 * Creates a new dialog
@@ -59,23 +72,50 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	protected Composite createContent(Composite parent) {
 		caComposite = new CaInfoComposite(parent,  SWT.NONE, ca);
 		
+		Label lbl;
+
+		
+		lbl = new Label(caComposite, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		lbl.setText("Supported Languages:");
+		
+		Composite langComp = new Composite(caComposite, SWT.NONE);
+		langComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		langComp.setLayout(new GridLayout(2, false));
+		
+		lstLang = new ListViewer(langComp, SWT.BORDER);
+		lstLang.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstLang.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				if (element instanceof Language){
+					return ((Language) element).getName() + " [" + ((Language)element).getCode() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				return ""; //$NON-NLS-1$
+			}
+		});
+		languages = new WritableList(ca.getLanguages(), Language.class);
+		lstLang.setContentProvider(new ObservableListContentProvider());
+		lstLang.setInput(languages);
+		
+		Composite btnComp = new Composite(langComp, SWT.NONE);
+		btnComp.setLayout(new GridLayout(1,false));
+		Button btnAdd = new Button(btnComp, SWT.PUSH);
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		final Button btnRemove = new Button(btnComp, SWT.PUSH);
+		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnRemove.setEnabled(false);
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		lstLang.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				btnRemove.setEnabled(!lstLang.getSelection().isEmpty());
+			}
+		});
+		
+		
 		Label lbl2 = new Label(caComposite, SWT.HORIZONTAL | SWT.SEPARATOR);
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,2,1));
-		
-		Label lbl = new Label(caComposite, SWT.NONE);
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1,1));
-		lbl.setText(Messages.CaPropertyPage_DefaultLanguage_Label);
-		
-		Text lblLang = new Text(caComposite, SWT.NONE);
-		lblLang.setEditable(false);
-		lblLang.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false,1,1));
-		String name = ca.getDefaultLanguage().getName();
-		if (name == null){
-			name = ca.getDefaultLanguage().getCode();
-		}else{
-			name = name + " (" + ca.getDefaultLanguage().getCode() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		lblLang.setText(name);
 		
 		
 		lbl = new Label(caComposite, SWT.NONE);
@@ -87,8 +127,8 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		txt.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false,1,1));
 		txt.setText(SmartUtils.getDirectoryPath(ca.getUuid()));
 		
+		
 		caComposite.addChangeListener(new CaInfoComposite.IChangeListener() {
-			
 			@Override
 			public void chageMade() {
 				CaPropertyPage.this.setChangesMade(true);
