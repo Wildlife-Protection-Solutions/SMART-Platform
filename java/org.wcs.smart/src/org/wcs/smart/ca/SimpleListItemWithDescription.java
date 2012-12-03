@@ -88,13 +88,16 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 //	// This fails;
 //	 @OneToMany(fetch = FetchType.LAZY)
 //	 @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
+	@SuppressWarnings("unchecked")
 	@Transient
 	public Set<DescriptionLabel> getDescriptions() {
 		if (this.descriptions == null) {
 			this.descriptions = new HashSet<DescriptionLabel>();
 			Session session = HibernateManager.openSession();
+			session.beginTransaction();
 			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", this.descuuid)); //$NON-NLS-1$
 			this.descriptions.addAll(c.list());
+			session.getTransaction().commit();
 		}
 		return this.descriptions;
 	}
@@ -108,16 +111,16 @@ public class SimpleListItemWithDescription extends SimpleListItem {
 	}
 
 	/**
-	 * Finds the description with the associated language
+	 * Finds the description with the associated language.  Returns null if
+	 * no description found.
 	 * 
 	 * @param lang
-	 * @return the description associated with the language; empty string if
-	 *         description not found
+	 * @return the description associated with the language; null if string not found
 	 */
-	public String findDescription(Language lang) {
+	public String findDescriptionNull(Language lang) {
 		DescriptionLabel x = findValue(getDescriptions(), lang);
 		if (x == null) {
-			return ""; //$NON-NLS-1$
+			return null;
 		} else {
 			return x.getValue();
 		}

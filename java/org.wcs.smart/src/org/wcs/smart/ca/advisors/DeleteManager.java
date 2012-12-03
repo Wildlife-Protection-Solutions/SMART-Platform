@@ -74,12 +74,23 @@ public class DeleteManager {
 				}
 			}
 		}
-		
-		for (IDeleteAdvisor advisor : items){
-			String error = advisor.canDelete(x, session);
-			if (error != null){
-				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, error);
-				return false;
+		boolean transaction = false;
+		if (!session.getTransaction().isActive()){
+			session.beginTransaction();
+			transaction = true;
+		}
+		try{
+			for (IDeleteAdvisor advisor : items){
+				String error = advisor.canDelete(x, session);
+				if (error != null){
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, error);
+					return false;
+				}
+			}
+		}finally{
+			//advisor are not to change the database state
+			if (transaction){
+				session.getTransaction().rollback();
 			}
 		}
 		return true;

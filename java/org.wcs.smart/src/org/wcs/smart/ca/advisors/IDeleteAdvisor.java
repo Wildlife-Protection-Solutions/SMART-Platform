@@ -28,6 +28,10 @@ import org.hibernate.Session;
  * objects.  Plugins can extend the deleteAdvisor extension point
  * and implement an IDeleteAdvisor to validate deletions.
  * 
+ * Plugsin should not change the state of the 
+ * database during this check.  They can only validate
+ * if the paricular item can be removed.
+ * 
  * @author Emily
  *
  */

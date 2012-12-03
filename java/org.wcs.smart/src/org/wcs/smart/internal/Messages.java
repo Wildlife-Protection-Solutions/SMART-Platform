@@ -192,10 +192,17 @@ public class Messages extends NLS {
 	public static String CaInfoComposite_Error_NoName;
 	public static String CaInfoComposite_IdLabel;
 	public static String CaInfoComposite_NameLabel;
+	public static String CaPropertyPage_ConfirmDialogMessage;
+	public static String CaPropertyPage_ConfirmDialogTitle;
 	public static String CaPropertyPage_DefaultLanguage_Label;
 	public static String CaPropertyPage_Dialog_Title;
 	public static String CaPropertyPage_DialogMessage;
+	public static String CaPropertyPage_Error_CannotRemoveAll;
+	public static String CaPropertyPage_Error_CannotRemoveDefault;
 	public static String CaPropertyPage_Error_SavingChanages;
+	public static String CaPropertyPage_ErrorDialogTitle;
+	public static String CaPropertyPage_LocaleToAddLabel;
+	public static String CaPropertyPage_SupportedLanguages_Label;
 	public static String CaPropertyPage_UniqueID_Label;
 	public static String CategoryDialogPage_DialogTitle;
 	public static String CategoryDialogPage_Edit_DialogTitle;

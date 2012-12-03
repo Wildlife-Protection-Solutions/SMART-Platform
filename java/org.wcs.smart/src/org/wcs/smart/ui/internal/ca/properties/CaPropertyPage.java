@@ -21,13 +21,26 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.Collator;
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Locale;
+
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -35,10 +48,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -53,6 +68,8 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
+
+	private static final String ERROR_DIALOGTITLE = Messages.CaPropertyPage_ErrorDialogTitle;
 
 	private CaInfoComposite caComposite = null;
 	
@@ -77,18 +94,18 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		lbl = new Label(caComposite, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		lbl.setText("Supported Languages:");
+		lbl.setText(Messages.CaPropertyPage_SupportedLanguages_Label);
 		
 		Composite langComp = new Composite(caComposite, SWT.NONE);
 		langComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		langComp.setLayout(new GridLayout(2, false));
 		
-		lstLang = new ListViewer(langComp, SWT.BORDER);
+		lstLang = new ListViewer(langComp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 		lstLang.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstLang.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof Language){
-					return ((Language) element).getName() + " [" + ((Language)element).getCode() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					return ((Language)element).getLabel();
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -102,10 +119,95 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		Button btnAdd = new Button(btnComp, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Locale[] ls = Locale.getAvailableLocales();
+				Arrays.sort(ls, new Comparator<Locale>() {
+					@Override
+					public int compare(Locale o1, Locale o2) {
+						if (o1.getDisplayLanguage().equals(o2.getDisplayLanguage())){
+							return Collator.getInstance().compare(o1.getDisplayCountry(), o2.getDisplayCountry());
+						}else{
+							return Collator.getInstance().compare(o1.getDisplayLanguage(), o2.getDisplayLanguage());
+						}
+					}
+				});
+				ListSelectionDialog lstSelection = new ListSelectionDialog(
+					getShell(), ls, ArrayContentProvider.getInstance(), 
+					new LabelProvider(){
+						public String getText(Object x){
+							if (x instanceof Locale){
+								Locale l = (Locale)x;
+								String name = l.getDisplayName();
+								name += " [" + l.getLanguage() ; //$NON-NLS-1$
+								if (!l.getCountry().isEmpty()){
+									name += "_" + l.getCountry(); //$NON-NLS-1$
+								}
+								name += "]"; //$NON-NLS-1$
+								return name;
+							}
+							return super.getText(x);
+						}
+					},
+					Messages.CaPropertyPage_LocaleToAddLabel);
+				if (lstSelection.open() == IDialogConstants.CANCEL_ID){
+					return ;
+				}
+				Object[] rs = lstSelection.getResult();
+				for (Object r : rs){
+					Language l = new Language();
+					l.setCa(SmartDB.getCurrentConservationArea());
+					l.setDefault(false);
+					String code = ((Locale)r).getLanguage();
+					if (!((Locale)r).getCountry().isEmpty()){
+						code += "_" + ((Locale)r).getCountry(); //$NON-NLS-1$
+					}
+					l.setCode(code.trim());
+					l.setName(((Locale)r).getDisplayName());
+					
+					languages.add(l);
+					setChangesMade(true);
+				}
+				lstLang.refresh();
+			
+			}
+			
+		});
+		
 		final Button btnRemove = new Button(btnComp, SWT.PUSH);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setEnabled(false);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		btnRemove.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (lstLang.getSelection().isEmpty()) return;
+				
+				boolean isChanged = false;
+				for (Iterator<?> iterator = ((IStructuredSelection)lstLang.getSelection()).iterator(); iterator.hasNext();) {
+					Language type = (Language) iterator.next();
+					if (type.isDefault()){
+						MessageDialog.openError(getShell(), ERROR_DIALOGTITLE, Messages.CaPropertyPage_Error_CannotRemoveDefault);
+					}else if (languages.size() == 1){
+						MessageDialog.openError(getShell(), ERROR_DIALOGTITLE, Messages.CaPropertyPage_Error_CannotRemoveAll);
+					}else{
+						
+						if (MessageDialog.openQuestion(getShell(), Messages.CaPropertyPage_ConfirmDialogTitle, 
+								MessageFormat.format(Messages.CaPropertyPage_ConfirmDialogMessage, new Object[]{type.getName()}) )){
+							languages.remove(type);
+							isChanged = true;
+						}
+					}	
+				}
+				lstLang.refresh();
+				if (isChanged){
+					setChangesMade(true);
+				}
+			}
+			
+		});
 		lstLang.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -150,8 +252,9 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		Session session = getSession();
 		Transaction tx = session.beginTransaction();
 		try{
-//			session.saveOrUpdate(ca);
 			caComposite.updateConservationArea(ca);
+			ca.getLanguages().clear();
+			ca.getLanguages().addAll(languages);
 			tx.commit();
 			setChangesMade(false);
 			return true;

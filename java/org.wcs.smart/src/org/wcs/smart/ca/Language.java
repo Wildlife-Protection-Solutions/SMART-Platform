@@ -30,6 +30,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -60,7 +61,7 @@ public class Language {
 		this.uuid = uuid;
 	}
 	public String getCode() {
-		return code;
+		return code.trim();
 	}
 	public void setCode(String code) {
 		this.code = code;
@@ -107,5 +108,18 @@ public class Language {
 			return Arrays.hashCode(uuid);
 		}
 		return super.hashCode();
+	}
+	
+	/**
+	 * Returns a common string to display the
+	 * language in the GUI.  Combines the
+	 * name with the code.
+	 * 
+	 * @return name and code
+	 * 
+	 */
+	@Transient
+	public String getLabel(){
+		return getName() + " [" + getCode() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

@@ -156,7 +156,12 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		Combo lblLanguage = cmbLanguage.getCombo();
 		lblLanguage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 2, 1));
-
+		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				tableViewer.refresh();
+			}
+		});
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
@@ -278,12 +283,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		final Station x = new Station();
 		x.setConservationArea(ca);
 		x.setIsActive(true);
-		
-		org.wcs.smart.ca.Label nameLabel = new org.wcs.smart.ca.Label();
-		nameLabel.setElement(x);
-		nameLabel.setLanguage(ca.getDefaultLanguage());
-		nameLabel.setValue(Messages.StationListPropertyPage_Default_NewStationName);
-		x.getNames().add(nameLabel);
+		x.updateName(ca.getDefaultLanguage(), Messages.StationListPropertyPage_Default_NewStationName);
+		x.setName(x.findName(ca.getDefaultLanguage()));
 
 		stations.add(x);
 		setChangesMade(true);
@@ -302,9 +303,17 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private String findLangValue(Column type, Station stn) {
 		Language lang = cmbLanguage.getCurrentSelection();
 		if (type == Column.NAME) {
-			return stn.findName(lang);
+			String value = stn.findNameNull(lang);
+			if (value == null){
+				value = stn.getName();
+			}
+			return value;
 		} else if (type == Column.DESCIPTION) {
-			return stn.findDescription(lang);
+			String value = stn.findDescriptionNull(lang);
+			if (value == null){
+				value = stn.getDescription();
+			}
+			return value;
 		}
 		return ""; //$NON-NLS-1$
 	}
