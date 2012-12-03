@@ -136,7 +136,13 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		lblNewLabel.setText(Messages.PatrolMandatePropertyPage_Language_Label);
 
 		cmbLanguage = new LanguageViewer(container, SWT.NONE, ca);
-	
+		cmbLanguage.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				tableViewer.refresh();
+			}
+		});
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
@@ -255,9 +261,10 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		PatrolMandate mandate = new PatrolMandate();
 		mandate.setConservationArea(ca);
 		mandate.setIsActive(true);
-		updateLangValue(Column.NAME, mandate, Messages.PatrolMandatePropertyPage_DefaultNewMandateName);
+		mandate.updateName(ca.getDefaultLanguage(), Messages.PatrolMandatePropertyPage_DefaultNewMandateName);
+		mandate.setName(mandate.findName(ca.getDefaultLanguage()));
 		mandates.add(mandate);
-		
+		setChangesMade(true);
 		tableViewer.refresh();
 	}
 	
@@ -308,7 +315,11 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	private String findLangValue(Column type, PatrolMandate mnd) {
 		if (type == Column.NAME) {
-			return mnd.findName(cmbLanguage.getCurrentSelection());
+			String name = mnd.findNameNull(cmbLanguage.getCurrentSelection());
+			if (name == null){
+				name = mnd.getName();
+			}
+			return name;
 		}
 		return ""; //$NON-NLS-1$
 	}

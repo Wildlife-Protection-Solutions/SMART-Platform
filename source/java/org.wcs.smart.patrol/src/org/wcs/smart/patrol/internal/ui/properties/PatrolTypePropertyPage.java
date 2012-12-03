@@ -143,7 +143,12 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		languageViewer = new LanguageViewer(container, SWT.NONE, ca);
 		languageViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
+		languageViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				transportTblViewer.refresh();
+			}
+		});
 		Label lblType = new Label(container, SWT.NONE);
 		lblType.setText(Messages.PatrolTypePropertyPage_TypesLabel);
 		lblType.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3,1));
@@ -276,7 +281,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				newPtt.setConservationArea(ca);
 				newPtt.setIsActive(true);
 				newPtt.setPatrolType(pt.getType());
-				newPtt.updateName(languageViewer.getCurrentSelection(), Messages.PatrolTypePropertyPage_DefaultTransportionTypeName);
+				newPtt.updateName(ca.getDefaultLanguage(), Messages.PatrolTypePropertyPage_DefaultTransportionTypeName);
+				newPtt.setName(newPtt.findName(ca.getDefaultLanguage()));
 				pt.getTransportTypes().add(newPtt);
 				transportTblViewer.refresh();
 				setChangesMade(true);
@@ -408,15 +414,21 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
 			layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
 			
-			viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			final ColumnLabelProvider lblProvider = new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
 					if (element instanceof PatrolTransportType){
-						return (((PatrolTransportType)element).findName(languageViewer.getCurrentSelection()));
+						String x = (((PatrolTransportType)element).findNameNull(languageViewer.getCurrentSelection()));
+						if (x == null){
+							x = (((PatrolTransportType)element).getName());
+						}
+						return x;
 					}
 					return super.getText(element);
 				}
-			});
+			};
+			
+			viewerColumn.setLabelProvider(lblProvider);
 			viewerColumn.setEditingSupport(new EditingSupport(viewer){
 
 				@Override
@@ -431,10 +443,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 
 				@Override
 				protected Object getValue(Object element) {
-					if (element instanceof PatrolTransportType){
-						return ((PatrolTransportType)element).findName(languageViewer.getCurrentSelection());
-					}
-					return null;
+					return lblProvider.getText(element);
 				}
 
 				@Override
