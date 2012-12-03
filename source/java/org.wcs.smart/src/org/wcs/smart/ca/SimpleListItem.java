@@ -112,13 +112,27 @@ public class SimpleListItem extends HasLabel {
 	 * @return the name for the language or an empty string
 	 */
 	public String findName(Language lang){
+		String x = findNameNull(lang);
+		if (x != null){
+			return x;
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	/**
+	 * Finds the name in a given language or returns null if not found
+	 * 
+	 * @param lang
+	 * @return the name for the language or null if not found
+	 */
+	public String findNameNull(Language lang){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
 			if (type.getLanguage().equals(lang)){
 				return type.getValue();
 			}
 		}
-		return ""; //$NON-NLS-1$
+		return null;
 	}
 	/**
 	 * Updates the name in of the given language.

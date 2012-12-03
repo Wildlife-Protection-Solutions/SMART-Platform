@@ -146,8 +146,7 @@ public class ConservationArea {
 	public void setLanguages(Set<Language> lang){
 		this.languages = lang;
 	}
-	
-	
+		
 	@Transient
 	public Language getDefaultLanguage(){
 		for(Language lang: this.languages){

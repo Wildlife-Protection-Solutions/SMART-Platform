@@ -60,6 +60,7 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
@@ -143,7 +144,15 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		Combo lblLanguage = cmbLanguage.getCombo();
 		lblLanguage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 3, 1));
-		
+		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				tblAgencies.refresh();
+				if (currentRankSet != null){
+					tblRank.refresh();
+				}
+			}
+		});
 		
 		/* Agency */
 		Label lblAgencies = new Label(container, SWT.NONE);
@@ -247,7 +256,14 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private String findAgencyValue(AgencyColumn col, Agency element){
 		if (col == AgencyColumn.NAME){
-			return element.findName(cmbLanguage.getCurrentSelection());
+			String x = element.findNameNull(cmbLanguage.getCurrentSelection());
+			if (x == null){
+				x = element.getName();
+				if (x == null){
+					return ""; //$NON-NLS-1$
+				}
+			}
+			return x;
 		}
 		return null;
 	}
@@ -256,7 +272,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private void updateAgencyValue(AgencyColumn col, Agency element, String newName){
 		if (col == AgencyColumn.NAME){
-			if (!findAgencyValue(col, element).equals(newName)){
+			String name = findAgencyValue(col, element);
+			if (name == null || !name.equals(newName)){
 				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
 					Integer matches = 0;
 					for (@SuppressWarnings("unchecked")	Iterator<Agency> itr = agencies.iterator(); itr.hasNext();) {
@@ -289,7 +306,14 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private String findRankValue(RankColumn col, Rank element){
 		if (col == RankColumn.NAME){
-			return element.findName(cmbLanguage.getCurrentSelection());
+			String x = element.findNameNull(cmbLanguage.getCurrentSelection());
+			if (x == null){
+				x = element.getName();
+				if (x == null){
+					return ""; //$NON-NLS-1$
+				}
+			}
+			return x;
 		}
 		return null;
 	}
@@ -298,7 +322,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private void updateRankValue(RankColumn col, Rank element, String newName){
 		if (col == RankColumn.NAME){
-			if (!findRankValue(col, element).equals(newName)){
+			String rank = findRankValue(col, element);
+			if (rank == null || !rank.equals(newName)){
 						
 				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Agency.MAX_AGENCY_LENGTH)){
 					Integer matches = 0;
@@ -486,10 +511,11 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		final Agency agency = new Agency();
 		org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
-		lbl.setLanguage(cmbLanguage.getCurrentSelection());
+		lbl.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		lbl.setValue(Messages.AgencyRankPropertyPage_DefaultAgencyName);
 		lbl.setElement(agency);
 		agency.getNames().add(lbl);
+		agency.setName(lbl.getValue());
 		agency.setConservationArea(ca);
 		agencies.add(agency);
 		
@@ -528,12 +554,12 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			
 			final Rank rank = new Rank();
 			org.wcs.smart.ca.Label lbl = new org.wcs.smart.ca.Label();
-			lbl.setLanguage(cmbLanguage.getCurrentSelection());
+			lbl.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			lbl.setValue(Messages.AgencyRankPropertyPage_DefaultRankName);
 			lbl.setElement(rank);
 			rank.getNames().add(lbl);
 			rank.setAgency(current);
-			
+			rank.setName(lbl.getValue());
 			current.getRanks().add(rank);
 		//	currentRankSet.add(rank);
 			
@@ -546,7 +572,6 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	}
 	private void deleteRank() {
 		Rank r =(Rank) ((IStructuredSelection)tblRank.getSelection()).getFirstElement();
-		
 		try{
 		
 			if (current != null){

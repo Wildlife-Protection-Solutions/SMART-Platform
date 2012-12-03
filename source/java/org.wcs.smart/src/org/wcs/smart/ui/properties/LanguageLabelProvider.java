@@ -28,13 +28,7 @@ public class LanguageLabelProvider extends LabelProvider {
 	
 	@Override
 	public String getText(Object element) {
-		String name = ((Language) element).getName();
-		if (name == null) {
-			name = ((Language) element).getCode();
-		} else {
-			name = name + " (" + ((Language) element).getCode() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return name;
+		return ((Language)element).getLabel();
 	}
 	
 }

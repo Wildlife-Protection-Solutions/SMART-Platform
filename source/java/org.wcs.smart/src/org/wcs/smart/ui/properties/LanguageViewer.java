@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -43,7 +44,7 @@ public class LanguageViewer extends ComboViewer {
 	 * @param style
 	 */
 	public LanguageViewer(Composite parent, int style, ConservationArea ca) {
-		super(parent, style);
+		super(parent, style | SWT.READ_ONLY);
 		
 		setContentProvider(ArrayContentProvider.getInstance());
 		setLabelProvider(new LanguageLabelProvider());

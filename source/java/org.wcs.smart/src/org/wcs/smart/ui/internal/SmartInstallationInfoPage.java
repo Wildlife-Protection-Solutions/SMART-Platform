@@ -1,6 +1,7 @@
 package org.wcs.smart.ui.internal;
 
 import java.io.File;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
@@ -11,6 +12,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.about.InstallationPage;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -69,11 +71,23 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		
 		
 		sb.append(Messages.SmartInstallationInfoPage_SystemLang_Label);
-		sb.append(Platform.getNL());
+		sb.append((new Locale(Platform.getNL())).getDisplayName());
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		sb.append(Messages.SmartInstallationInfoPage_DefaultLang_Label);
-		sb.append(SmartDB.getCurrentLanguage().getName() + " [" + SmartDB.getCurrentLanguage().getCode() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		Language defaultl = null;
+		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()){
+			if (l.isDefault()){
+				defaultl = l;
+				break;
+			}
+		}
+		if (defaultl == null){
+			sb.append("null"); //$NON-NLS-1$
+		}else{
+			sb.append(defaultl.getLabel());
+		}
+
+
 		txt.setText(sb.toString());
 	}
 
