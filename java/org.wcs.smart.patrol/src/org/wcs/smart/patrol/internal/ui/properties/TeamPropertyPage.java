@@ -62,6 +62,7 @@ import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.DescriptionLabel;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -173,6 +174,13 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		lblNewLabel.setText(Messages.TeamPropertyPage_Language_Label);
 
 		languageViewer = new LanguageViewer(container, SWT.NONE, ca);
+		languageViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		languageViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				tableViewer.refresh();
+			}
+		});
 	
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -325,11 +333,14 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		team.setConservationArea(ca);
 		team.setIsActive(true);
 		team.setMandate(null);
-		updateValue(Column.NAME, team, Messages.TeamPropertyPage_DefaultNewTeamName);
-		updateValue(Column.DESCRIPTION, team, Messages.TeamPropertyPage_DefaultNewTeamDescription);
+		
+		team.updateName(ca.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamName);
+		team.setName(team.findName(ca.getDefaultLanguage()));		
+		team.updateDescription(ca.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
+		team.setDescription(team.findDescriptionNull(ca.getDefaultLanguage()));
 		
 		teams.add(team);
-		
+		setChangesMade(true);
 		tableViewer.refresh();
 		
 	}
@@ -349,9 +360,17 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	private String findValue(Column type, Team mnd) {
 		if (type == Column.NAME) {
-			return mnd.findName(languageViewer.getCurrentSelection());
+			String x =  mnd.findNameNull(languageViewer.getCurrentSelection());
+			if (x == null){
+				x = mnd.getName();
+			}
+			return x;
 		}else if (type == Column.DESCRIPTION){
-			return mnd.findDescription(languageViewer.getCurrentSelection());
+			String x = mnd.findDescriptionNull(languageViewer.getCurrentSelection());
+			if (x == null){
+				x = mnd.getDescription();
+			}
+			return x;
 		}else if (type == Column.MANDATE){
 			if (mnd.getMandate() == null){
 				return ""; //$NON-NLS-1$
