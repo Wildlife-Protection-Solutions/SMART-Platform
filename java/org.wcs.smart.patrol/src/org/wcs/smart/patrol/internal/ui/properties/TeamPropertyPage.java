@@ -62,7 +62,6 @@ import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.DescriptionLabel;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
