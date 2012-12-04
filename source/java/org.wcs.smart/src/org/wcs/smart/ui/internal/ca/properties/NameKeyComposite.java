@@ -33,6 +33,7 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -75,7 +76,7 @@ public abstract class NameKeyComposite extends Composite {
 	
 	private String originalKey = null;
 	
-	private LanguageViewer langViewer = null;
+	protected LanguageViewer langViewer = null;
 	private Language currentSelection = null;
 	private HashMap<Language, String> values = null;
 	
@@ -91,9 +92,8 @@ public abstract class NameKeyComposite extends Composite {
 	 * Updates the data model object with the values
 	 * from the composite fields
 	 * @param dmObject object to update
-	 * @param defaultLang language being processed
 	 */
-	protected void updateFields(DmObject dmObject, Language defaultLang){
+	protected void updateFields(DmObject dmObject){
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
 			if (type.getValue() != null){
@@ -115,6 +115,7 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param defaultLang language
 	 */
 	protected void initFields(DmObject dmObject, Language defaultLang){
+		currentSelection = null;
 		values = new HashMap<Language, String>();
 		for (org.wcs.smart.ca.Label lbl : dmObject.getNames()){
 			values.put(lbl.getLanguage(), lbl.getValue());
@@ -130,10 +131,13 @@ public abstract class NameKeyComposite extends Composite {
 			if (x == null){
 				x = dmObject.getName();
 				if (x == null){
-					x = "";
+					x = ""; //$NON-NLS-1$
 				}
 			}
 			txtName.setText(x);
+		}
+		if (langViewer != null){
+			langViewer.setSelection(new StructuredSelection(defaultLang));
 		}
 		
 		
@@ -156,9 +160,9 @@ public abstract class NameKeyComposite extends Composite {
 				if (currentSelection.isDefault()){
 					String newKey = DataModel.generateKey(txtName.getText(), getSiblings());
 					txtKey.setText(newKey);
-					if (canEdit){
-						validate();
-					}
+				}
+				if (canEdit){
+					validate();
 				}
 			}
 			
@@ -170,11 +174,13 @@ public abstract class NameKeyComposite extends Composite {
 		/* Name */
 		if (canEdit) {
 			Label lbl = new Label(parent, SWT.NONE);
-			lbl.setText("Language:");
+			lbl.setText(Messages.NameKeyComposite_LanguageLabel);
 			langViewer = new LanguageViewer(parent, SWT.NONE,
 					SmartDB.getCurrentConservationArea());
-			langViewer.getCombo().setLayoutData(
-					new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+			
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
+			langViewer.getCombo().setLayoutData(gd);
+			
 			langViewer
 					.addSelectionChangedListener(new ISelectionChangedListener() {
 						@Override

@@ -69,7 +69,6 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
@@ -334,16 +333,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		catInfoPanel = new CategoryInfoPanel(infoInnerPanel, SWT.NONE, false, false, SmartDB.getCurrentConservationArea().getDefaultLanguage()) {
+		catInfoPanel = new CategoryInfoPanel(infoInnerPanel, SWT.NONE, false, false) {
 			@Override
 			protected List<Category> getSiblings() {
 				return null;
 			}
 		};
 		
-		attInfoPanel = new AttributeInfoPanel(infoInnerPanel, SWT.NONE, false,
-				false, SmartDB.getCurrentConservationArea()
-						.getDefaultLanguage(), getSession()) {
+		attInfoPanel = new AttributeInfoPanel(infoInnerPanel, SWT.NONE, false, false, getSession()) {
 			@Override
 			public Collection<Attribute> getSiblings() {
 				return null;
@@ -694,7 +691,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}else{
 				siblings = dataModel.getCategories();
 			}
-			CategoryDialogPage dd = new CategoryDialogPage(getShell(), (Category)o, siblings, ca.getDefaultLanguage());
+			CategoryDialogPage dd = new CategoryDialogPage(getShell(), (Category)o, siblings, getLanguage());
 			int ret = dd.open();
 			
 			if (ret == Window.CANCEL){
@@ -708,11 +705,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			if (usages.size() > 1){
 				MessageDialog.openWarning(getShell(), Messages.DataModelPropertyPage_ModifyWarning_DialogTitle, Messages.DataModelPropertyPage_ModifyWarning_DialogMessage);
 			}
-
 			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(),
 					((CategoryAttribute) o).getAttribute(),
 					((DataModel) viewer.getInput()).getAttributes(),
-					ca.getDefaultLanguage(), getSession());			
+					getLanguage(), getSession());			
 			//show new attribute dialog
 			int ret = d2.open();
 			if (ret == Window.CANCEL){
@@ -791,7 +787,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		if (o instanceof Category){
 			((StackLayout)infoInnerPanel.getLayout()).topControl = catInfoPanel;
-			catInfoPanel.setCategory((Category)o);
+			catInfoPanel.setCategory((Category)o, getLanguage());
 
 			btnAddAttribute.setEnabled( ((Category)o).getIsActive() );
 			btnAddCategory.setEnabled( ((Category)o).getIsActive() );
@@ -805,7 +801,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			btnDisableElement.setEnabled(true);
 		}else if (o instanceof CategoryAttribute){
-			attInfoPanel.setAttribute( ((CategoryAttribute)o).getAttribute() );
+			attInfoPanel.setAttribute( ((CategoryAttribute)o).getAttribute(), getLanguage() );
 			((StackLayout)infoInnerPanel.getLayout()).topControl = attInfoPanel;
 			btnAddCategory.setEnabled(false);
 			btnAddAttribute.setEnabled(false);

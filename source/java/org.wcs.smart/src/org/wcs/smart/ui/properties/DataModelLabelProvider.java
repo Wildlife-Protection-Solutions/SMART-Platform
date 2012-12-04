@@ -36,6 +36,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -167,6 +168,9 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 				String x = obj.findNameNull(currentLang);
 				if (x==null){
 					x = obj.getName();
+					if (x == null){
+						x = obj.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+					}
 				}
 				return x;
 			}else{

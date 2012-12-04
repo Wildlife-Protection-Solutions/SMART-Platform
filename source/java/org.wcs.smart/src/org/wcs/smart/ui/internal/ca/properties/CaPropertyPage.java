@@ -91,6 +91,15 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		Label lbl;
 
+		lbl = new Label(caComposite, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setText(Messages.CaPropertyPage_DefaultLanguageLabel);
+		
+		lbl = new Label(caComposite, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		((GridData)lbl.getLayoutData()).horizontalIndent = 8;
+		lbl.setText(ca.getDefaultLanguage().getLabel());
+		
 		
 		lbl = new Label(caComposite, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
@@ -111,6 +120,8 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		languages = new WritableList(ca.getLanguages(), Language.class);
+		languages.remove(ca.getDefaultLanguage());
+		
 		lstLang.setContentProvider(new ObservableListContentProvider());
 		lstLang.setInput(languages);
 		
@@ -160,13 +171,20 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 					Language l = new Language();
 					l.setCa(SmartDB.getCurrentConservationArea());
 					l.setDefault(false);
-					String code = ((Locale)r).getLanguage();
-					if (!((Locale)r).getCountry().isEmpty()){
-						code += "_" + ((Locale)r).getCountry(); //$NON-NLS-1$
-					}
-					l.setCode(code.trim());
+					l.setCode(SmartUtils.localeToString((Locale)r));
 					l.setName(((Locale)r).getDisplayName());
 					
+					boolean exists = false;
+					for (Object o : languages){
+						if (l.isSame((Language)o)){
+							exists = true;
+							break;
+						}
+					}
+					if (exists || ca.getDefaultLanguage().isSame(l)){
+						//already added
+						continue;
+					}
 					languages.add(l);
 					setChangesMade(true);
 				}
@@ -190,8 +208,6 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 					Language type = (Language) iterator.next();
 					if (type.isDefault()){
 						MessageDialog.openError(getShell(), ERROR_DIALOGTITLE, Messages.CaPropertyPage_Error_CannotRemoveDefault);
-					}else if (languages.size() == 1){
-						MessageDialog.openError(getShell(), ERROR_DIALOGTITLE, Messages.CaPropertyPage_Error_CannotRemoveAll);
 					}else{
 						
 						if (MessageDialog.openQuestion(getShell(), Messages.CaPropertyPage_ConfirmDialogTitle, 
@@ -214,7 +230,6 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 				btnRemove.setEnabled(!lstLang.getSelection().isEmpty());
 			}
 		});
-		
 		
 		Label lbl2 = new Label(caComposite, SWT.HORIZONTAL | SWT.SEPARATOR);
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,2,1));
@@ -253,7 +268,9 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		Transaction tx = session.beginTransaction();
 		try{
 			caComposite.updateConservationArea(ca);
+			Language def= ca.getDefaultLanguage();
 			ca.getLanguages().clear();
+			ca.getLanguages().add(def);
 			ca.getLanguages().addAll(languages);
 			tx.commit();
 			setChangesMade(false);
@@ -265,12 +282,5 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		}
 		return false;
 	}
-	
-	
-	
-//	@Override
-//	public void performDefaults(){
-//		super.performDefaults();
-//		caComposite.updateValues(ca);
-//	}
+
 }

@@ -56,11 +56,20 @@ import org.wcs.smart.ui.properties.AttributeTreeContentProvider.RootNode;
 		}
 		
 		/**
-		 * Update the language
-		 * @param lang new language
+		 * Update the display language
+		 * 
+		 * @param lang the new display language
 		 */
 		public void setLanguage(Language lang){
 			this.currentLang = lang;
+		}
+		
+		/**
+		 * 
+		 * @return the current display language
+		 */
+		public Language getLanguage(){
+			return this.currentLang;
 		}
 		
 		@Override

@@ -79,7 +79,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText(Messages.AddAttributeDialog2_DialogTitle);
+		
 	}
 	
 	@Override
@@ -108,7 +108,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 
 
 		attributePanel = new AttributeInfoPanel(composite, SWT.NONE, 
-				true, toUpdate.getKeyId() == null, defaultLang, this.currentSession){
+				true, toUpdate.getKeyId() == null, this.currentSession){
 			@Override
 			public Collection<Attribute> getSiblings() {
 				return siblings;
@@ -132,14 +132,16 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 			}
 		});
 		
-		attributePanel.setAttribute(toUpdate);
+		attributePanel.setAttribute(toUpdate, defaultLang);
 		
 		scrolled.setContent(composite);
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		if (toUpdate.getKeyId() == null){
+			getShell().setText(Messages.AddAttributeDialog2_DialogTitle);
 			setMessage(Messages.AddAttributeDialog2_New_DialogMessage);
 		}else{
+			getShell().setText(Messages.AddAttributeDialog2_EditAttribute_DialogTitle);
 			setMessage(Messages.AddAttributeDialog2_Edit_DialogMessage);
 		}
 		return composite;

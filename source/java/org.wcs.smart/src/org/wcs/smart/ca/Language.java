@@ -90,7 +90,6 @@ public class Language {
 		this.isDefault = isDefault;
 	}
 	
-	
 	@Override
 	public boolean equals(Object other){
 		if (other != null && other instanceof Language){
@@ -103,6 +102,17 @@ public class Language {
 		}
 		return false;
 	}
+	
+	/**
+	 * Two languages are considered the same
+	 * if they have the same code;
+	 * @param l
+	 * @return
+	 */
+	public boolean isSame(Language l){
+		return code.equals(l.getCode());
+	}
+	
 	public int hashCode(){
 		if (uuid != null){
 			return Arrays.hashCode(uuid);

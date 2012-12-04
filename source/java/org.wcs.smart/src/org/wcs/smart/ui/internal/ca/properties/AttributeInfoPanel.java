@@ -79,6 +79,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -114,6 +115,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	private ControlDecoration cdAttList;
 	private ControlDecoration cdAttTree;
 
+	private Language currentDisplayLang = null;
+	
 	private TableViewer lstAttributeList; 
 	private Button[] btnAggs;	//list of aggregation options
 	
@@ -122,7 +125,6 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	private Button btnDeleteListItem;
 	
 	private WritableList attributeList = new WritableList();
-	private Language lang;
 	
 	private AttributeTree attTree = null;
 	private Session currentSession = null;
@@ -134,16 +136,13 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * @param style composite style
 	 * @param canEdit <code>true</code> if the panel supports editing of the attributes; <code>false</code> if only viewable 
 	 * @param createNew <code>true</code> if a new attribute is being created, <code>false</code> if attribute is being updated
-	 * @param lang language being updated
 	 * @param currentSession can be null if panel not editable
 	 */
 	public AttributeInfoPanel(Composite parent, int style, 
-			boolean canEdit, boolean createNew, 
-			Language lang, Session currentSession) {
+			boolean canEdit, boolean createNew, Session currentSession) {
 		
 		super(parent, style);
 		
-		this.lang = lang;
 		this.currentSession = currentSession;
 		this.canEdit = canEdit;
 		setLayout(new GridLayout(3, false));
@@ -311,6 +310,13 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 			lstAttributeList.getTable().setEnabled(false);
 		}
 		if (canEdit){
+			langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					lstAttributeList.refresh();
+				}
+			});
+			
 			Composite buttonPanel = new Composite(listComposite, SWT.NONE);
 			buttonPanel.setLayout(new GridLayout(1, false));
 			buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
@@ -323,7 +329,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				public void widgetSelected(SelectionEvent e) {
 					AttributeListItem it = new AttributeListItem();
 					@SuppressWarnings("unchecked")
-					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, AttributeInfoPanel.this.lang);
+					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, 
+							SmartDB.getCurrentConservationArea().getDefaultLanguage());
 					int ret = dd.open();
 					if (ret == Window.CANCEL){
 						return;
@@ -344,7 +351,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					if (it == null) return;
 					@SuppressWarnings("unchecked")
-					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, AttributeInfoPanel.this.lang);
+					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, langViewer.getCurrentSelection());
 					int ret = dd.open();
 					if (ret == Window.CANCEL){
 						return;
@@ -374,7 +381,8 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				public void widgetSelected(SelectionEvent e){
 					final AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					boolean ret = MessageDialog.openConfirm(getShell(), Messages.AttributeInfoPanel_Delete_DialogTitle, 
-							MessageFormat.format(Messages.AttributeInfoPanel_Delete_DialogMessage, new Object[]{it.findName(AttributeInfoPanel.this.lang)}));
+							MessageFormat.format(Messages.AttributeInfoPanel_Delete_DialogMessage, 
+									new Object[]{it.findName(langViewer.getCurrentSelection())}));
 					if (!ret){
 						return;
 					}
@@ -478,7 +486,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		if (canEdit){
 			attTree = new AttributeTree();
-			Composite tree = attTree.createTree(treeComposite, lang);
+			Composite tree = attTree.createTree(treeComposite);
 			cdAttTree = createDecoration(tree);
 			attTree.setListener(new AttributeTreeChangeListener() {
 				@Override
@@ -486,6 +494,14 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					validate();	
 				}
 			});
+			langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					attTree.refresh(langViewer.getCurrentSelection());
+				}
+			});
+			attTree.refresh(langViewer.getCurrentSelection());
 		}
 
 		/*   Boolean Attribute Options */
@@ -617,9 +633,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	/**
 	 * Updates the fields with the values from the associated attribute
 	 * @param att attribute
+	 * @param language current display language
 	 */
-	public void setAttribute(Attribute att){
-		initFields(att, lang);
+	public void setAttribute(Attribute att, Language language){
+		initFields(att, language);
+		this.currentDisplayLang = language;
+		
 		chRequired.setSelection(att.getIsRequired());
 		
 		if (att.getType() != null) {
@@ -693,7 +712,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	 * @param att attribute to update
 	 */
 	public void updateAttribute(Attribute att){
-		updateFields(att, lang);
+		updateFields(att);
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
 		
@@ -777,7 +796,16 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		@Override
 		public String getText(Object element) {
 			AttributeListItem it = (AttributeListItem) element;
-			return it.findName(AttributeInfoPanel.this.lang) + " [" + it.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			Language lang = currentDisplayLang;
+			if (langViewer != null){
+				lang = langViewer.getCurrentSelection();
+			}
+			String name = it.findNameNull(lang);
+			if (name == null){
+				name = it.getName();
+			}
+			return name + " [" + it.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			
 
 		}
 

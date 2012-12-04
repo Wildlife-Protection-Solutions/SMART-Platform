@@ -30,6 +30,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.Locale;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
@@ -68,7 +70,7 @@ public class SmartUtils {
 		/**
 		 * Allows chars, digits, _ : & and spaces
 		 */
-		ALLOWED_CHARS_COMPLEX_REGEX(Messages.SmartUtils_ValidationMessage_3, "[^^\\p{L}\\p{M}\\p{Nd}- :_&]"); //$NON-NLS-1$
+		ALLOWED_CHARS_COMPLEX_REGEX(Messages.SmartUtils_ValidationMessage_3, "[^^\\p{L}\\p{M}\\p{Nd}- :_&']"); //$NON-NLS-1$
 		
 		public final String textDesc;
 		public final String regex;
@@ -344,26 +346,15 @@ public class SmartUtils {
 	}
 	
 	/**
-	 * Creates a new conservation area with default language
-	 * setup.  Has no name, id or any other values;
+	 * Creates a new conservation area with not name, id
+	 * languages or other values.
 	 * 
 	 * @return conservation area 
 	 */
 	public static ConservationArea createConservationArea(){
-		//create new CA with single default language
+		
 		ConservationArea newCa = new ConservationArea();
 		
-		Language lang = new Language();
-		lang.setCa(newCa);
-		String code = Platform.getNL();
-		lang.setCode(code);
-		lang.setName(SmartPlugIn.lookupLocaleName(code));
-		lang.setDefault(true);
-		
-		HashSet<Language> langs = new HashSet<Language>();
-		langs.add(lang);
-		
-		newCa.setLanguages(langs);
 		return newCa;
 	}
 	
@@ -517,5 +508,42 @@ public class SmartUtils {
 	 */
 	public static String formatStringForLabel(String text){
 		return text.replaceAll("&", "&&");  //$NON-NLS-1$//$NON-NLS-2$
+	}
+	
+	
+	/**
+	 * Converts a local string stored as lang_Country
+	 * to a Locale object.
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static Locale stringToLocale(String s)
+	{
+	    String l = "";
+	    String c = "";
+		StringTokenizer tempStringTokenizer = new StringTokenizer(s,"_"); //$NON-NLS-1$
+	    if(tempStringTokenizer.hasMoreTokens())
+	    	l = (String) tempStringTokenizer.nextElement();
+	    
+	    if(tempStringTokenizer.hasMoreTokens())
+	    	c = (String) tempStringTokenizer.nextElement();
+	    return new Locale(l,c);
+	}
+	
+	/**
+	 * Converts a local string stored as lang_Country
+	 * to a Locale object.
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String localeToString(Locale l)
+	{
+	    String key = l.getLanguage();
+	    if (!l.getCountry().isEmpty()){
+	    	key += "_" + l.getCountry();
+	    }
+	    return key.trim();
 	}
 }

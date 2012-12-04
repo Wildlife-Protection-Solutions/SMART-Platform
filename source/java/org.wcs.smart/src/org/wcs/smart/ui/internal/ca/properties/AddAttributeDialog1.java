@@ -219,7 +219,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		}
 
 		final AttributeInfoPanel attributeInfo = new AttributeInfoPanel(
-				compAddExisting, SWT.NONE, false, false, defaultLang, null) {
+				compAddExisting, SWT.NONE, false, false, null) {
 			@Override
 			public Collection<Attribute> getSiblings() {
 				return null;
@@ -235,7 +235,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 								.getSelection()).getFirstElement());
 						if (sel != null) {
 							attributeInfo.setVisible(true);
-							attributeInfo.setAttribute(sel);
+							attributeInfo.setAttribute(sel, defaultLang);
 						} else {
 							attributeInfo.setVisible(false);
 						}

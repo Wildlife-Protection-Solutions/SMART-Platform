@@ -62,6 +62,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
@@ -93,6 +94,11 @@ public class AttributeTree {
 			listener.treeModified();
 		}
 	}
+	
+	public void refresh(Language newLanguage){
+		((AttributeTreeLabelProvider)viewer.getLabelProvider()).setLanguage(newLanguage);
+		viewer.refresh();
+	}
 	/**
 	 * Sets the attribute input to the attribute tree
 	 * 
@@ -121,7 +127,7 @@ public class AttributeTree {
 	 * 
 	 * @return composite that describes the attribute tree
 	 */
-	public Composite createTree(Composite parent, final Language currentLanguage){
+	public Composite createTree(Composite parent){
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -151,7 +157,7 @@ public class AttributeTree {
 		//viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		viewer = fTree.getViewer();
 		viewer.setContentProvider(new AttributeTreeContentProvider( ));
-		viewer.setLabelProvider(new AttributeTreeLabelProvider(currentLanguage));
+		viewer.setLabelProvider(new AttributeTreeLabelProvider());
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		((GridData)viewer.getTree().getLayoutData()).heightHint = 80;
 		((GridData)viewer.getTree().getLayoutData()).widthHint = 100;
@@ -176,7 +182,7 @@ public class AttributeTree {
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				addItem(currentLanguage);
+				addItem(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			}
 		});
 
@@ -188,7 +194,7 @@ public class AttributeTree {
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				editItem(viewer, currentLanguage);
+				editItem(viewer, ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage() );
 			}
 		});
 		
@@ -259,7 +265,7 @@ public class AttributeTree {
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				deleteNodes(currentLanguage);	
+				deleteNodes();	
 			}
 		});
 		
@@ -299,14 +305,14 @@ public class AttributeTree {
 	
 	
 	
-	private void deleteNodes(Language currentLanguage) {
+	private void deleteNodes() {
 		StringBuilder itemsToDelete = new StringBuilder();
 		final ArrayList<AttributeTreeNode> toDelete = new ArrayList<AttributeTreeNode>();
-		
+		Language currentLang = ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage();
 		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof AttributeTreeNode){
-				itemsToDelete.append(((AttributeTreeNode) x).findName(currentLanguage) + ", "); //$NON-NLS-1$
+				itemsToDelete.append(((AttributeTreeNode) x).findName(currentLang) + ", "); //$NON-NLS-1$
 				toDelete.add(0, (AttributeTreeNode)x);
 			}
 		}

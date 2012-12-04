@@ -44,7 +44,6 @@ import org.wcs.smart.internal.Messages;
 public abstract class CategoryInfoPanel extends NameKeyComposite {
 
 	protected Button chMultiple;
-	protected Language lang;
 
 	/**
 	 * Creates a new category information panel
@@ -54,9 +53,8 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 	 * @param createNew if the current category is being modified or created 
 	 * @param lang
 	 */
-	public CategoryInfoPanel(Composite parent, int style, boolean canEdit, boolean createNew, Language lang) {
+	public CategoryInfoPanel(Composite parent, int style, boolean canEdit, boolean createNew) {
 		super(parent, style);
-		this.lang = lang;
 		setLayout(new GridLayout(3, false));
 		
 		createNameKeyFields(this, canEdit, createNew);
@@ -85,11 +83,13 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 	 * Updates the fields of the composite with the values
 	 * from the category.
 	 * @param c the category
+	 * @param language display language
 	 */
-	public void setCategory(Category c){
-		initFields(c, lang);
+	public void setCategory(Category c, Language language){
+		initFields(c, language);
 		chMultiple.setSelection(c.getIsMultiple());
 	}
+	
 	/**
 	 * Updates the given category with the fields
 	 * from the gui.
@@ -97,7 +97,7 @@ public abstract class CategoryInfoPanel extends NameKeyComposite {
 	 * @param c the category to update
 	 */
 	public void updateCategory(Category c){
-		updateFields(c, lang);
+		updateFields(c);
 		c.setIsMultiple(chMultiple.getSelection());
 	}
 	
