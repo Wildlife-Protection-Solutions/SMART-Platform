@@ -164,7 +164,11 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 		if (element instanceof DmObject){
 			DmObject obj = (DmObject)element;
 			if (currentLang != null){
-				return obj.findName(currentLang);
+				String x = obj.findNameNull(currentLang);
+				if (x==null){
+					x = obj.getName();
+				}
+				return x;
 			}else{
 				return obj.getName();
 			}

@@ -22,12 +22,17 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -46,7 +51,9 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.HkeyObject;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.MessageFormat;
@@ -68,6 +75,11 @@ public abstract class NameKeyComposite extends Composite {
 	
 	private String originalKey = null;
 	
+	private LanguageViewer langViewer = null;
+	private Language currentSelection = null;
+	private HashMap<Language, String> values = null;
+	
+	
 	/**
 	 * 
 	 */
@@ -82,7 +94,13 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param defaultLang language being processed
 	 */
 	protected void updateFields(DmObject dmObject, Language defaultLang){
-		dmObject.updateName(defaultLang, txtName.getText().trim());
+		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
+			Entry<Language, String> type = iterator.next();
+			if (type.getValue() != null){
+				dmObject.updateName(type.getKey(), type.getValue());
+			}
+		}
+		
 		dmObject.setKeyId(txtKey.getText());
 		if (dmObject instanceof HkeyObject){
 			((HkeyObject)dmObject).updateHkey();
@@ -97,13 +115,28 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param defaultLang language
 	 */
 	protected void initFields(DmObject dmObject, Language defaultLang){
+		values = new HashMap<Language, String>();
+		for (org.wcs.smart.ca.Label lbl : dmObject.getNames()){
+			values.put(lbl.getLanguage(), lbl.getValue());
+		}
+		
 		if (txtKey != null && dmObject.getKeyId() != null){
 			txtKey.setText(dmObject.getKeyId());
 			originalKey = dmObject.getKeyId();
 		}
+		
 		if (txtName != null ){
-			txtName.setText(dmObject.findName(defaultLang));
+			String x = dmObject.findNameNull(defaultLang);
+			if (x == null){
+				x = dmObject.getName();
+				if (x == null){
+					x = "";
+				}
+			}
+			txtName.setText(x);
 		}
+		
+		
 	}
 	/**
 	 * Creates name and key fields, adding them to the parent.
@@ -116,13 +149,16 @@ public abstract class NameKeyComposite extends Composite {
 	 * @param createNew <code>true</code> if a new object is being created or <code>false</code> if exisitng object being modified
 	 */
 	protected void createNameKeyFields(Composite parent, final boolean canEdit, boolean createNew){
+		values = new HashMap<Language, String>();
 		final KeyListener generateKeyListener = new KeyListener() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				String newKey = DataModel.generateKey(txtName.getText(), getSiblings());
-				txtKey.setText(newKey);
-				if (canEdit){
-					validate();
+				if (currentSelection.isDefault()){
+					String newKey = DataModel.generateKey(txtName.getText(), getSiblings());
+					txtKey.setText(newKey);
+					if (canEdit){
+						validate();
+					}
 				}
 			}
 			
@@ -132,6 +168,40 @@ public abstract class NameKeyComposite extends Composite {
 		};
 		
 		/* Name */
+		if (canEdit) {
+			Label lbl = new Label(parent, SWT.NONE);
+			lbl.setText("Language:");
+			langViewer = new LanguageViewer(parent, SWT.NONE,
+					SmartDB.getCurrentConservationArea());
+			langViewer.getCombo().setLayoutData(
+					new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+			langViewer
+					.addSelectionChangedListener(new ISelectionChangedListener() {
+						@Override
+						public void selectionChanged(SelectionChangedEvent event) {
+							if (currentSelection != null) {
+								if (txtName.getText().trim().isEmpty()){
+									if (!currentSelection.isDefault()){
+										//remove blank translations
+										values.remove(currentSelection);
+									}else{
+										values.put(currentSelection, txtName.getText());		
+									}
+								}else{
+									values.put(currentSelection, txtName.getText());
+								}
+								
+							}
+							currentSelection = langViewer.getCurrentSelection();
+							String s = values.get(currentSelection);
+							if (s == null){
+								s = ""; //$NON-NLS-1$
+							}
+							txtName.setText(s);
+						}
+					});
+			currentSelection = langViewer.getCurrentSelection();
+		}
 		Label lblNewLabel = new Label(parent, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblNewLabel.setText(Messages.NameKeyComposite_Name_Label);
@@ -230,6 +300,11 @@ public abstract class NameKeyComposite extends Composite {
 	protected boolean validate(){
 		boolean error = false;
 		
+		
+		if (currentSelection != null ){
+			values.put(currentSelection, txtName.getText());
+		}
+		
 		cdKey.hide();
 		cdTxt.hide();
 						
@@ -242,14 +317,20 @@ public abstract class NameKeyComposite extends Composite {
 			error = true;
 		}
 		
-		if (!SmartUtils.isSimpleString(txtName.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH)){
-			cdTxt.setDescriptionText(
-					MessageFormat.format(
-							Messages.NameKeyComposite_Error_InvalidName,
-							new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
-			cdTxt.show();
-			error = true;
+		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
+			Entry<Language, String> type = iterator.next();
+			
+			if (!SmartUtils.isSimpleString(type.getValue().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH)){
+				cdTxt.setDescriptionText(
+						MessageFormat.format(
+								Messages.NameKeyComposite_Error_InvalidName,
+								new Object[]{type.getKey().getName(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+				cdTxt.show();
+				error = true;
+			}	
+			
 		}
+		
 		return error;
 	}
 	/**
