@@ -78,6 +78,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.LanguageViewer;
 
 /**
  * Property page for modifying data model
@@ -107,7 +108,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private DataModel dataModel = null;
 	
 	private Transaction currentTransaction = null;
-	
+	private LanguageViewer cmbLanguage = null;
 	
 	/**
 	 * Creates new data model property page
@@ -182,8 +183,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * @return the current language the data model is dealing in
 	 */
 	private Language getLanguage(){
-		//TODO: implement language for this dialog
-		return SmartDB.getCurrentConservationArea().getDefaultLanguage();
+		return cmbLanguage.getCurrentSelection();
 	}
 	
 	/**
@@ -199,6 +199,20 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		SashForm comp = new SashForm(thisparent, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite leftPanel = new Composite(comp, SWT.NONE);
+		leftPanel.setLayout(new GridLayout(1, false));
+		
+		cmbLanguage = new LanguageViewer(leftPanel, SWT.DEFAULT, ca);
+		cmbLanguage.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				((DataModelLabelProvider)viewer.getLabelProvider()).setLanguage(getLanguage());
+				viewer.refresh();
+				
+			}
+		});
 		
 		/* left data tree */
 		PatternFilter patternFilter = new PatternFilter(){			
@@ -220,7 +234,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			
 		};
-		FilteredTree fTree = new FilteredTree(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
+		FilteredTree fTree = new FilteredTree(leftPanel, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
 		viewer = fTree.getViewer();
 		viewer.setContentProvider(new DataModelContentProvider());
 		viewer.setLabelProvider(new DataModelLabelProvider(getLanguage()));

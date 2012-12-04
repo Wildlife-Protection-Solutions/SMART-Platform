@@ -33,6 +33,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.Type;
@@ -126,13 +127,28 @@ public class DmObject extends HasLabel{
 	 * @return the name for the given language or empty string if name not found
 	 */
 	public String findName(Language lang){
+		String x= findNameNull(lang);
+		if (x != null){
+			return x;
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	/**
+	 * Finds the name in a given language. Returning null if not found.
+	 * 
+	 * @param lang
+	 * @return the name for the given language or null if name not found
+	 */
+	@Transient
+	public String findNameNull(Language lang){
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
 			if ( type.getLanguage().equals(lang) ){
 				return type.getValue();
 			}
 		}
-		return ""; //$NON-NLS-1$
+		return null;
 	}
 	
 	/**
