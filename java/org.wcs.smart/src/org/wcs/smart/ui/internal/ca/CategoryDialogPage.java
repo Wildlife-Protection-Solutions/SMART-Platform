@@ -90,7 +90,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
-		cip = new CategoryInfoPanel(composite, SWT.NONE, true, toUpdate.getKeyId() == null, defaultLang) {			
+		cip = new CategoryInfoPanel(composite, SWT.NONE, true, toUpdate.getKeyId() == null) {			
 			@Override
 			protected Collection<Category> getSiblings() {
 				return sibilings;
@@ -107,7 +107,7 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 		};
 		
 		cip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		cip.setCategory(toUpdate);
+		cip.setCategory(toUpdate, this.defaultLang);
 		
 		if (toUpdate.getKeyId() == null){
 			setMessage(Messages.CategoryDialogPage_New_DialogMessage);

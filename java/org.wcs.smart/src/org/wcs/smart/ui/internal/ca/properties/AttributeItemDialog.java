@@ -58,12 +58,12 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	 * @param parent
 	 * @param toUpdate the attribute list item to update
 	 * @param siblings list of sibling attribute list items
-	 * @param defaultLang current language
+	 * @param language current display language
 	 */
-	protected AttributeItemDialog(Shell parent, DmObject toUpdate, List<? extends DmObject> siblings, Language defaultLang) {
+	protected AttributeItemDialog(Shell parent, DmObject toUpdate, List<? extends DmObject> siblings, Language language) {
 		super(parent);
 		this.toUpdate = toUpdate;
-		this.lang = defaultLang;
+		this.lang = language;
 		this.siblings = siblings;
 	}
 	
@@ -115,7 +115,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			setReturnCode(OK);
-			comp.updateFields(toUpdate, lang);
+			comp.updateFields(toUpdate);
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			setReturnCode(CANCEL);
 		}

@@ -88,6 +88,7 @@ public class CaInfoComposite extends Composite {
 		GridData data = new GridData(SWT.RIGHT, SWT.CENTER, false,false, 1, 1);
 		lblIdentifier.setLayoutData(data);
 		lblIdentifier.setText(Messages.CaInfoComposite_IdLabel);
+		lblIdentifier.setToolTipText("Unique system identifier for the conservation area.");
 		
 		int indent = 8;
 		
@@ -102,6 +103,7 @@ public class CaInfoComposite extends Composite {
 		Label lblName = new Label(this, SWT.NONE);
 		lblName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false,1, 1));
 		lblName.setText(Messages.CaInfoComposite_NameLabel);
+		lblName.setToolTipText("Conservation area name");
 
 		
 		txtName = new Text(this, SWT.BORDER);
@@ -116,7 +118,8 @@ public class CaInfoComposite extends Composite {
 		lblDescription.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
 		lblDescription.setText(Messages.CaInfoComposite_DescriptionLabel);
-
+		lblDescription.setToolTipText("A brief description of the conservation area.");
+		
 		txtDescription = new Text(this, SWT.BORDER);
 		txtDescription.setText(""); //$NON-NLS-1$
 		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
@@ -129,6 +132,7 @@ public class CaInfoComposite extends Composite {
 		lblDesignation.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
 		lblDesignation.setText(Messages.CaInfoComposite_DesignationLabel);
+		lblDesignation.setToolTipText("Conservation area designation.");
 
 		txtDesignation = new Text(this, SWT.BORDER);
 		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);

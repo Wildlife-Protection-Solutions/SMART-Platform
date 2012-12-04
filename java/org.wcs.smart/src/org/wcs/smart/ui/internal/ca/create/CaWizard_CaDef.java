@@ -21,13 +21,30 @@
  */
 package org.wcs.smart.ui.internal.ca.create;
 
+import java.text.Collator;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Locale;
+
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * The first page of the create conservation 
@@ -42,6 +59,8 @@ public class CaWizard_CaDef extends CaWizardPage  {
 
 	/* ui fields */
 	private CaInfoComposite composite = null;
+	
+	private ComboViewer lstViewer ;
 	
 	/**
 	 * Create the wizard.
@@ -67,6 +86,66 @@ public class CaWizard_CaDef extends CaWizardPage  {
 				CaWizard_CaDef.this.validate();
 			}
 		});
+		
+		Label lblLang = new Label(composite, SWT.NONE);
+		lblLang.setText("Default Language:");
+		
+		lstViewer = new ComboViewer(composite,  SWT.DROP_DOWN | SWT.READ_ONLY);
+		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
+		Locale[] lls = Locale.getAvailableLocales();
+		Arrays.sort(lls, new Comparator<Locale>() {
+			@Override
+			public int compare(Locale o1, Locale o2) {
+				if (o1.getCountry().isEmpty() && !o2.getCountry().isEmpty()){
+					return -1;
+				}else if (!o1.getCountry().isEmpty() && o2.getCountry().isEmpty()){
+					return 1;
+				}
+				if (o1.getDisplayLanguage().equals(o2.getDisplayLanguage())){
+					return Collator.getInstance().compare(o1.getDisplayCountry(), o2.getDisplayCountry());
+				}else{
+					return Collator.getInstance().compare(o1.getDisplayLanguage(), o2.getDisplayLanguage());
+				}
+			}
+		});
+		lstViewer.setInput(lls);
+		lstViewer.setLabelProvider(new LabelProvider(){
+						public String getText(Object x){
+							if (x instanceof Locale){
+								Locale l = (Locale)x;
+								String name = l.getDisplayName();
+								name += " [" + l.getLanguage() ; //$NON-NLS-1$
+								if (!l.getCountry().isEmpty()){
+									name += "_" + l.getCountry(); //$NON-NLS-1$
+								}
+								name += "]"; //$NON-NLS-1$
+								return name;
+							}
+							return super.getText(x);
+						}
+					});
+		Locale l = SmartUtils.stringToLocale(Locale.getDefault().getLanguage());
+		if (l != null){
+			lstViewer.setSelection(new StructuredSelection(l));
+		}
+		lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+			}
+		});
+		
+		GridData data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
+		data.horizontalIndent = 8;
+		lstViewer.getControl().setLayoutData(data);
+		
+		new Label(composite, SWT.NONE);
+		Label lblDescription = new Label(composite, SWT.WRAP);
+		lblDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		((GridData)lblDescription.getLayoutData()).widthHint = 100;
+		((GridData)lblDescription.getLayoutData()).horizontalIndent = 8;
+		lblDescription.setText("The default language is the main language in which all conservation area specific data (data model etc.) must be supplied.  Additional languages can be added later.");
+		
 		setControl(composite);
 		
 		validate();
@@ -82,7 +161,9 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		if (!composite.isValid()){
 			isComplete = false;
 		}	
-		
+		if (lstViewer.getSelection().isEmpty()){
+			isComplete = false;
+		}
 		super.setPageComplete(isComplete);
 	}
 
@@ -93,6 +174,15 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	 */
 	public void updateConservationArea(ConservationArea ca) {
 		composite.updateConservationArea(ca);
+		
+		Language lang = new Language();
+		lang.setCa(ca);
+
+		Locale e = (Locale) ((IStructuredSelection)lstViewer.getSelection()).getFirstElement(); 
+		lang.setCode(SmartUtils.localeToString(e));
+		lang.setName(e.getDisplayName());
+		lang.setDefault(true);
+		ca.getLanguages().add(lang);
 	}
 	
 }

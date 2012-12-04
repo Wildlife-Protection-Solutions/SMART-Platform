@@ -16,6 +16,7 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog1_SelectAttribute_Label;
 	public static String AddAttributeDialog2_DialogTitle;
 	public static String AddAttributeDialog2_Edit_DialogMessage;
+	public static String AddAttributeDialog2_EditAttribute_DialogTitle;
 	public static String AddAttributeDialog2_New_DialogMessage;
 	public static String Agency_AgencyName;
 	public static String AgencyDeleteAdvisor_Error_AgencyReferenced;
@@ -195,9 +196,9 @@ public class Messages extends NLS {
 	public static String CaPropertyPage_ConfirmDialogMessage;
 	public static String CaPropertyPage_ConfirmDialogTitle;
 	public static String CaPropertyPage_DefaultLanguage_Label;
+	public static String CaPropertyPage_DefaultLanguageLabel;
 	public static String CaPropertyPage_Dialog_Title;
 	public static String CaPropertyPage_DialogMessage;
-	public static String CaPropertyPage_Error_CannotRemoveAll;
 	public static String CaPropertyPage_Error_CannotRemoveDefault;
 	public static String CaPropertyPage_Error_SavingChanages;
 	public static String CaPropertyPage_ErrorDialogTitle;
@@ -541,6 +542,7 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_Error_KeyNotEmpty;
 	public static String NameKeyComposite_Error_NameNotBlank;
 	public static String NameKeyComposite_Key_Label;
+	public static String NameKeyComposite_LanguageLabel;
 	public static String NameKeyComposite_Name_Label;
 	public static String ProjectionDialog_DialogMessage;
 	public static String ProjectionDialog_DialogTitle;

@@ -189,21 +189,5 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartPlugIn_Error_Dialog_Title, message);
 		System.exit(1);
 	}
-	
-	
-	public static String lookupLocaleName(String nl){
-		String[] bits = nl.split("_"); //$NON-NLS-1$
-		for (int i = 0; i < Locale.getAvailableLocales().length;i++){
-			Locale l  = Locale.getAvailableLocales()[i];
-			if (bits[0].equals(l.getLanguage()) && 
-					bits[1].equals(l.getCountry())){
-				return l.getDisplayName();
-			}
-		}
-		return null;
-		
-	}
-	
-	
 
 }
