@@ -161,6 +161,10 @@ public class StyleCellEditor extends DialogCellEditor {
 		return null;
 	}
 
+	@Override
+	public boolean dependsOnExternalFocusListener(){
+		return false;
+	}
 
 	/**
 	 * Updates the size of the widget
