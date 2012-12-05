@@ -49,7 +49,6 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -73,10 +72,7 @@ import org.wcs.smart.internal.Messages;
 public class FilterComposite extends Composite {
 	private Text txtFilter;
 	private Control clearButtonContro;
-	
-	private Color colorGray;
-	private Color colorBlack;
-	
+
 	private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
 	
 	private String initialText = Messages.FilterComposite_Default_SearchText;
@@ -140,9 +136,6 @@ public class FilterComposite extends Composite {
 		}
 		
 		super.setBackground(txtFilter.getBackground());
-
-		colorGray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		colorBlack = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		
 		txtFilter.addTraverseListener(new TraverseListener() {	
 			@Override
@@ -189,7 +182,7 @@ public class FilterComposite extends Composite {
 			public void modifyText(ModifyEvent e) {
 				filterJob.cancel();
 				filterJob.schedule(200);
-				txtFilter.setForeground(colorBlack);
+				txtFilter.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK));
 			}
 		});
 	
@@ -209,7 +202,7 @@ public class FilterComposite extends Composite {
 		}else{
 			txtFilter.setText(""); //$NON-NLS-1$
 		}
-		txtFilter.setForeground(colorGray);
+		txtFilter.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY));
 		txtFilter.setMessage(initialText);
 	}
 	
