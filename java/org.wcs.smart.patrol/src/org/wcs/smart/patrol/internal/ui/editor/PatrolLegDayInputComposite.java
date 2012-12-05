@@ -431,7 +431,18 @@ public class PatrolLegDayInputComposite {
 			}
 		});
 
-		observationHcomp.addPaintListener(new PaintListener() {
+		
+		
+//		Composite compTable = toolkit.createComposite(main);
+//		compTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		TableColumnLayout tableLayout = new TableColumnLayout();
+//		compTable.setLayout(tableLayout);
+
+		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		toolkit.adapt(observationTable.getTable());
+		setupObservationTable();
+		observationTable.getTable().addPaintListener(new PaintListener() {
+			
 			boolean called = false;
 			@Override
 			public void paintControl(PaintEvent e) {
@@ -442,15 +453,6 @@ public class PatrolLegDayInputComposite {
 			}
 		});
 		
-//		Composite compTable = toolkit.createComposite(main);
-//		compTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		TableColumnLayout tableLayout = new TableColumnLayout();
-//		compTable.setLayout(tableLayout);
-
-		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-		toolkit.adapt(observationTable.getTable());
-		setupObservationTable();
-
 		Composite buttonComp = toolkit.createComposite(mainComposite);
 		buttonComp.setLayout(new GridLayout(3, false));
 		btnAddWaypoint = toolkit.createButton(buttonComp, Messages.PatrolLegDayInputComposite_AddWaypoint_Button, SWT.PUSH);

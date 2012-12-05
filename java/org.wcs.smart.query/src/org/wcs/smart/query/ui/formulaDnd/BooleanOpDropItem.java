@@ -120,6 +120,7 @@ public class BooleanOpDropItem extends DropItem {
 			operator.setText( formatStringForLabel(currentSelection));
 		}else{
 			operator.select(0);
+			currentSelection = operators[operator.getSelectionIndex()].asSql();
 		}
 	}
 	

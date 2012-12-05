@@ -199,7 +199,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 			SummaryDmObject parent = ((SummaryDmObject)parentElement);
 			return getChildren(parent);
 		}
-		return null;
+		return new Object[]{};
 	}
 
 	private Object[] getAttributeTreeChildren(final SummaryDmObject parent){

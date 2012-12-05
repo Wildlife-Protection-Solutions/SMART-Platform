@@ -197,8 +197,8 @@ public class AttributeTreeDropItem extends DropItem{
 		Composite t = new Composite(main, SWT.BORDER);
 		gl = new GridLayout(2, false);
 		gl.horizontalSpacing = 5;
-		gl.verticalSpacing = 0;
-		gl.marginWidth = 2;
+		gl.verticalSpacing = 5;
+		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		t.setLayout(gl);
 		t.setBackground(Display.getDefault().getSystemColor( SWT.COLOR_WHITE ));
@@ -210,8 +210,8 @@ public class AttributeTreeDropItem extends DropItem{
 		smallerFont2 = new Font(Display.getCurrent(), fd);
 		lblitem.setFont(smallerFont2);
 		
-		btnEdit = new Button(t, SWT.PUSH);
-		btnEdit.setText("..."); //$NON-NLS-1$
+		btnEdit = new Button(t, SWT.DOWN | SWT.ARROW);
+		//btnEdit.setText("..."); //$NON-NLS-1$
 		fd = (btnEdit.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 2);
 		smallerFont = new Font(Display.getCurrent(), fd);

@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -72,6 +73,8 @@ public class TreeDropDown{
 	private WorkbenchJob refreshJob = null;	//job to search tree itmes
 
 	private Listener moveListener = null;
+	private Text filterTextBox = null;
+	
 	/**
 	 * Creates a new tree drop down viewer 
 	 * @param parent outer shell
@@ -130,7 +133,9 @@ public class TreeDropDown{
 		return this.treeViewer;
 	}
 
-	
+	public void setFilterTextBox(Text textBox){
+		this.filterTextBox = textBox;
+	}
 	/*
 	 * Creates the drop down tree control
 	 * @param parent
@@ -167,6 +172,9 @@ public class TreeDropDown{
 				if (e.keyCode == SWT.CR) {
 					fireSelection();
 					hide();
+				}else if (filterTextBox != null && (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS)){
+					filterTextBox.setFocus();
+					e.doit = false;
 				}
 			}
 		});

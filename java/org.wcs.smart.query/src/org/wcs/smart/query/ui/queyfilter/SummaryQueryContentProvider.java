@@ -193,7 +193,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			return getChildren(parent);
 			
 		}
-		return null;
+		return new Object[]{};
 	}
 
 	private Object[] getAttributeTreeChildren(final SummaryDmObject parent){

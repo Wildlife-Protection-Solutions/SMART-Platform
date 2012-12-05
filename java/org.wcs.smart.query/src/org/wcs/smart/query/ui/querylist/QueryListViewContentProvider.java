@@ -128,7 +128,7 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 			});
 			return children.toArray();
 		}
-		return null;
+		return new Object[]{};
 	}
 
 	/* (non-Javadoc)

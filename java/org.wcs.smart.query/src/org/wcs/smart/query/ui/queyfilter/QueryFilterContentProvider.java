@@ -218,7 +218,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 				return atts.toArray(new Attribute[atts.size()]);
 				
 			}
-			return null;
+			return new Object[]{};
 		}else{
 			//assume data model
 			return provider.getChildren(parentElement);

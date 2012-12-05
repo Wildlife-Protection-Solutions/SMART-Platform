@@ -43,7 +43,6 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -86,9 +85,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private WritableList patrolTypes = null;
 	private WritableList patrolTransportTypes = null;
-	
-	private static Color gray = null;
-	private static Color black = null;
+
 	private Button btnAddTransport;
 
 	/**
@@ -103,8 +100,6 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	public boolean  close(){
 		boolean canClose = super.close();
 		if (canClose){
-			gray.dispose();
-			black.dispose();
 			if (patrolTransportTypes != null){
 				patrolTransportTypes.dispose();
 			}
@@ -120,11 +115,6 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		
-		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
-		
-		
 		patrolTypes = new WritableList(PatrolHibernateManager.getPatrolTypes(ca,
 				getSession()), PatrolType.class);
 		getSession().beginTransaction();
