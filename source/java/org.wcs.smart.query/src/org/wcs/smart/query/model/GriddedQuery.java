@@ -300,6 +300,7 @@ public class GriddedQuery extends Query {
 		q.setDateFilter(getDateFilter());
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQuery(getQuery());
+		q.setCrsDefinition(getCrsDefinition());
 		return q;
 	}
 	
