@@ -59,7 +59,7 @@ public class SmartUtils {
 		/**
 		 * Allows only letters and digits (a-Z and 0-9)
 		 */
-		ALLOWED_CHARS_SIMPLE_REGEX(Messages.SmartUtils_ValidationMessage_1, "[^\\p{Letter}\\p{Mark}\\p{Nd}-]"),  //\p{L} - letters \p{Nd} - digits	is a digit zero through nine //$NON-NLS-1$
+		ALLOWED_CHARS_SIMPLE_REGEX(Messages.SmartUtils_ValidationMessage_1, "[^\\p{L}\\p{M}\\p{Nd}-]"),  //\p{L} - letters \p{Nd} - digits	is a digit zero through nine //$NON-NLS-1$
 		/**
 		 * Allows chars, digits, - _ and :
 		 */

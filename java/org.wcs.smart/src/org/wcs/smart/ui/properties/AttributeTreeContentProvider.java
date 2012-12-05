@@ -115,7 +115,7 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 		if (kids != null && kids.size() > 0){
 			return kids.toArray();
 		}
-		return null;
+		return new Object[]{};
 	}
 
 	/*

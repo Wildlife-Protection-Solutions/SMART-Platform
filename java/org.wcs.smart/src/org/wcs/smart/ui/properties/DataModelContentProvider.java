@@ -115,7 +115,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 				}
 				
 			}
-			return null;
+			return new Object[]{};
 		}else if (parentElement instanceof Category){
 			ArrayList<Object> children = new ArrayList<Object>();
 			Category category = ((Category)parentElement);
@@ -147,7 +147,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			return children.toArray();
 			
 		}
-		return null;
+		return new Object[]{};
 	}
 
 	/*

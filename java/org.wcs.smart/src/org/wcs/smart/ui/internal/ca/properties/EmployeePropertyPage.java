@@ -101,9 +101,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	/* agencies and rank lists */
 	private WritableList employees = null;
 	private List<Agency> agencies;
-	
-	private Color gray = null;
-	private Color black = null;
 	  
 	EmployeeViewSorter sorter = new EmployeeViewSorter();
 	
@@ -135,12 +132,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	
 	@Override
 	public boolean close(){
-		boolean canClose = super.close();
-		if (canClose){
-			black.dispose();
-			gray.dispose();
-		}
-		return canClose;
+		return super.close();
 	}
 	
 	@Override 
@@ -165,10 +157,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 
 	@Override
 	public Composite createContent(Composite parent) {
-		
-		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
-	
 		container = new Composite(parent, SWT.NULL);
 		container.setLayout(new GridLayout(2, false));
 		
@@ -689,9 +677,9 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		@Override
 		public Color getForeground(Object element) {
 			if (((Employee)element).getEndEmploymentDate() == null){
-				return EmployeePropertyPage.this.black;
+				return getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK);
 			} else {
-				return EmployeePropertyPage.this.gray;
+				return getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY);
 			}
 		}
 

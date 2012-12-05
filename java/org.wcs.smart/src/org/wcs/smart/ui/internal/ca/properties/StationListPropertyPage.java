@@ -312,6 +312,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			String value = stn.findDescriptionNull(lang);
 			if (value == null){
 				value = stn.getDescription();
+				if (value == null){
+					value = "";
+				}
 			}
 			return value;
 		}
