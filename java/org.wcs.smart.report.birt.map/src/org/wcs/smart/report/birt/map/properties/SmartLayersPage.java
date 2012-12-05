@@ -255,6 +255,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			}
 		};
 		col3.setLabelProvider(col3Provider);
+		
 		cellEditor = new StyleCellEditor(tblLayers.getTable(), col3Provider);
 		col3.setEditingSupport(new EditingSupport(col3.getViewer()) {
 
