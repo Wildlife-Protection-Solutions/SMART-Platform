@@ -36,7 +36,6 @@ import net.refractions.udig.catalog.IServiceInfo;
 import net.refractions.udig.ui.UDIGDisplaySafeLock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;

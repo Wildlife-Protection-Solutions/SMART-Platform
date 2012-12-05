@@ -29,7 +29,6 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -38,11 +37,9 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.DateTime;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -520,8 +517,8 @@ public class SmartUtils {
 	 */
 	public static Locale stringToLocale(String s)
 	{
-	    String l = "";
-	    String c = "";
+	    String l = ""; //$NON-NLS-1$
+	    String c = ""; //$NON-NLS-1$
 		StringTokenizer tempStringTokenizer = new StringTokenizer(s,"_"); //$NON-NLS-1$
 	    if(tempStringTokenizer.hasMoreTokens())
 	    	l = (String) tempStringTokenizer.nextElement();
@@ -542,7 +539,7 @@ public class SmartUtils {
 	{
 	    String key = l.getLanguage();
 	    if (!l.getCountry().isEmpty()){
-	    	key += "_" + l.getCountry();
+	    	key += "_" + l.getCountry(); //$NON-NLS-1$
 	    }
 	    return key.trim();
 	}

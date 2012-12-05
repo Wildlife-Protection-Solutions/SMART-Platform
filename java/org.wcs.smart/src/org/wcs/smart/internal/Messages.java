@@ -186,12 +186,16 @@ public class Messages extends NLS {
 	public static String CaImporter_Progress_ScanningTable;
 	public static String CaImporter_Progress_UnzippingFile;
 	public static String CaImporter_Progress_ValidatingCaImport;
+	public static String CaInfoComposite_Description_Tooltip;
 	public static String CaInfoComposite_DescriptionLabel;
+	public static String CaInfoComposite_Designation_Tooltip;
 	public static String CaInfoComposite_DesignationLabel;
 	public static String CaInfoComposite_Error_InvalidCharacters;
 	public static String CaInfoComposite_Error_NoId;
 	public static String CaInfoComposite_Error_NoName;
+	public static String CaInfoComposite_Id_tooltip;
 	public static String CaInfoComposite_IdLabel;
+	public static String CaInfoComposite_Name_Tooltip;
 	public static String CaInfoComposite_NameLabel;
 	public static String CaPropertyPage_ConfirmDialogMessage;
 	public static String CaPropertyPage_ConfirmDialogTitle;
@@ -213,6 +217,8 @@ public class Messages extends NLS {
 	public static String CategoryDMAdvisor_Error_NotCategory;
 	public static String CategoryInfoPanel_OpMultiple;
 	public static String CaWizard_CaDef_CaDef_PageName;
+	public static String CaWizard_CaDef_DefaultLangInfo;
+	public static String CaWizard_CaDef_DefaultLangLable;
 	public static String CaWizard_CaDef_PageDescription;
 	public static String CaWizard_CaDef_PageTitle;
 	public static String CaWizard_UserDef_PageDescription;
