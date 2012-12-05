@@ -527,7 +527,11 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 		@Override
 		public String getText(Object element) {
-			return findValue(column, (Team) element);
+			String x = findValue(column, (Team) element);
+			if (x == null){
+				return "";
+			}
+			return x;
 		}
 		 
 		public Color getForeground(Object element){

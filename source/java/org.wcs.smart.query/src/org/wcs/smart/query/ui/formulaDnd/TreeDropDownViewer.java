@@ -132,14 +132,14 @@ public class TreeDropDownViewer {
 		
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		attributeTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				fireSelection();
-				hide();
-			}
-		});
+//		attributeTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+//			
+//			@Override
+//			public void selectionChanged(SelectionChangedEvent event) {
+//				fireSelection();
+//				hide();
+//			}
+//		});
 		attributeTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override

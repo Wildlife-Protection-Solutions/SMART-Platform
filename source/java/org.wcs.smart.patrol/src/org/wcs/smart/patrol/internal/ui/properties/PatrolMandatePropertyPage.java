@@ -85,9 +85,6 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private WritableList mandates = null;
 	private HashSet<PatrolMandate> toDelete = new HashSet<PatrolMandate>();
 	
-	private static Color gray = null;
-	private static Color black = null;
-	
 	/*
 	 * columns in the station table
 	 */
@@ -119,11 +116,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		
-		gray = parent.getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		black = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
-		
-		
+
 		mandates = new WritableList(PatrolHibernateManager.getMandates(ca,
 				getSession()), PatrolMandate.class);
 		
@@ -441,9 +434,9 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		 
 		public Color getForeground(Object element){
 			 if (((PatrolMandate)element).getIsActive()){
-				 return PatrolMandatePropertyPage.black;
+				 return getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK);
 			 }else{
-				 return PatrolMandatePropertyPage.gray;
+				 return getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY);
 			 }
 		 }
 		

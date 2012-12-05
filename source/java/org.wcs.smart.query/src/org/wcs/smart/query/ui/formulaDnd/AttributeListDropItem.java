@@ -103,6 +103,7 @@ public class AttributeListDropItem extends DropItem{
 					if (currentSelection != null){
 						listViewer.setSelection(new StructuredSelection(currentSelection));
 					}
+					AttributeListDropItem.this.targetPanel.layout();
 				}});
 			return Status.OK_STATUS;
 		}};

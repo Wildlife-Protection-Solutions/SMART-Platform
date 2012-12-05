@@ -159,6 +159,7 @@ public class TreeAttributeField implements IAttributeField<AttributeTreeNode> {
 		tree.getTreeViewer().setLabelProvider(new AttributeTreeLabelProvider());
 		tree.getTreeViewer().setInput(attribute);
 		tree.getTreeViewer().expandToLevel(2);
+		tree.setFilterTextBox(txtText);
 
 		btnDownArrow = new Button(dropDownComposite, SWT.ARROW | SWT.DOWN);
 		btnDownArrow.addSelectionListener(new SelectionAdapter() {
