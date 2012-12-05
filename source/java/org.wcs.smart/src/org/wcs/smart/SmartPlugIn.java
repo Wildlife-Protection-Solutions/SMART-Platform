@@ -22,7 +22,6 @@
 package org.wcs.smart;
 
 import java.util.List;
-import java.util.Locale;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;

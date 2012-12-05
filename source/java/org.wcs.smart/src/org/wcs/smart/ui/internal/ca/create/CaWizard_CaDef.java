@@ -24,7 +24,6 @@ package org.wcs.smart.ui.internal.ca.create;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Locale;
 
 import org.eclipse.jface.resource.JFaceResources;
@@ -88,7 +87,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		});
 		
 		Label lblLang = new Label(composite, SWT.NONE);
-		lblLang.setText("Default Language:");
+		lblLang.setText(Messages.CaWizard_CaDef_DefaultLangLable);
 		
 		lstViewer = new ComboViewer(composite,  SWT.DROP_DOWN | SWT.READ_ONLY);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -144,7 +143,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		lblDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)lblDescription.getLayoutData()).widthHint = 100;
 		((GridData)lblDescription.getLayoutData()).horizontalIndent = 8;
-		lblDescription.setText("The default language is the main language in which all conservation area specific data (data model etc.) must be supplied.  Additional languages can be added later.");
+		lblDescription.setText(Messages.CaWizard_CaDef_DefaultLangInfo);
 		
 		setControl(composite);
 		
