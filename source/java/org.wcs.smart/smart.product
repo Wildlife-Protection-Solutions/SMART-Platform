@@ -52,6 +52,7 @@ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRES
    <features>
       <feature id="org.wcs.smart.smart_feature" version="1.0.0"/>
       <feature id="org.eclipse.rcp"/>
+      <feature id="org.wcs.smart.language_feature" version="1.0.0.qualifier"/>
    </features>
 
 

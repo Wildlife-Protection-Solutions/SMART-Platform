@@ -266,7 +266,7 @@ public class Messages extends NLS {
 	public static String PatrolDataSourceFactory_PatrolUuidParameterName;
 	public static String PatrolDateWizardPage_PageMessage;
 	public static String PatrolDateWizardPage_PageName;
-	public static String PatrolDayEditor_5;
+	public static String PatrolDayEditor_PatrolDayTitle;
 	public static String PatrolDayEditor_CanNotEditPatrol;
 	public static String PatrolDayEditor_Error_LoadingPatrolData;
 	public static String PatrolDayEditor_LegSectionNamePrefix;

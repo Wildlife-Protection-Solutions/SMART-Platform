@@ -20,7 +20,6 @@ public class Messages extends NLS {
 	public static String AttributeListGroupByDropItem_FiltersLinkLabel;
 	public static String AttributeListGroupByDropItem_IncludedTooltip;
 	public static String AttributeTreeDropItem_LoadingListItemJobName;
-	public static String AttributeTreeGroupByDropItem_2;
 	public static String AttributeTreeGroupByDropItem_AllLabel;
 	public static String AttributeTreeGroupByDropItem_ErrorLoadingTreeItems;
 	public static String AttributeTreeGroupByDropItem_FiltersLink;
@@ -479,8 +478,6 @@ public class Messages extends NLS {
 	public static String SummaryQuery_GroupByError3;
 	public static String SummaryQuery_ParseError;
 
-	public static String SummaryQueryContentProvider_AttributesLabel;
-	public static String SummaryQueryContentProvider_CategoriesLabel;
 	public static String SummaryQueryContentProvider_DataModelAttributeLabel;
 	public static String SummaryQueryContentProvider_DataModelGroupByAttributesLabel;
 	public static String SummaryQueryContentProvider_DataModelGroupByLabel;

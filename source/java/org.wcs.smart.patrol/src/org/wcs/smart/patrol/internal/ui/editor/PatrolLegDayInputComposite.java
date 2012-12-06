@@ -276,13 +276,16 @@ public class PatrolLegDayInputComposite {
 
 		Composite timeInfo = toolkit.createComposite(mainComposite);
 		timeInfo.setLayout(new GridLayout(4, false));
-		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 20;
-		// ((GridLayout)timeInfo.getLayout()).marginRight = 10;
+		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 15;
+		 ((GridLayout)timeInfo.getLayout()).marginWidth = 0;
+		 ((GridLayout)timeInfo.getLayout()).marginLeft = 5;
+		 ((GridLayout)timeInfo.getLayout()).marginHeight = 5;
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
-		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_StartTimeLabel);
 		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtStartTime);
@@ -307,6 +310,8 @@ public class PatrolLegDayInputComposite {
 
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_EndTimeLabel);
 		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtEndTime);
@@ -332,6 +337,8 @@ public class PatrolLegDayInputComposite {
 		
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_RestMinutesLabel);
 		restMinutes = toolkit.createText(c, "0"); //$NON-NLS-1$
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
@@ -373,6 +380,8 @@ public class PatrolLegDayInputComposite {
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalHoursPatrolled_Label);
 		lblTotalHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
 		okayFont = lblTotalHours.getFont();

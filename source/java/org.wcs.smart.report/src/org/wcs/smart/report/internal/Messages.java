@@ -148,9 +148,7 @@ public class Messages extends NLS {
 	public static String ReportQueryListener_BeforeSave_QueryUsedWarning;
 	public static String ReportQueryListener_QuerySaveError;
 	public static String ReportQueryListener_Warning_DialogTitle;
-	public static String ReportView_1;
-	public static String ReportView_2;
-	public static String ReportView_3;
+
 	public static String ReportView_CancelledReportMsg;
 	public static String ReportView_Error_GatheringParams;
 	public static String ReportView_PreviewReportJobName;
