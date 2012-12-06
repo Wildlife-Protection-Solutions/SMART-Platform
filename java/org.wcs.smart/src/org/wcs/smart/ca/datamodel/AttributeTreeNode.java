@@ -191,19 +191,19 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	 * @param parent the attribute tree parent node 
 	 * @return a cloned attribute tree node
 	 */
-	public AttributeTreeNode clone(ConservationArea newCa, ConservationArea oldCa, AttributeTreeNode parent, String defaultLang  ){
+	public AttributeTreeNode clone(ConservationArea newCa, ConservationArea oldCa, AttributeTreeNode parent, String defaultLang,  Attribute clonedAttribute  ){
 		AttributeTreeNode clone = new AttributeTreeNode();
 		clone.copyValues(this, newCa, oldCa, defaultLang);
 		clone.setIsActive(this.isActive);
 		
 		clone.setNodeOrder(this.getNodeOrder());
 		clone.setParent(parent);
-		clone.setAttribute(this.getAttribute());
+		clone.setAttribute(clonedAttribute);
 		
 		if (this.getChildren() != null){
 			clone.setChildren(new ArrayList<AttributeTreeNode>());
 			for (AttributeTreeNode node : this.getChildren()){
-				clone.getChildren().add(node.clone(newCa, oldCa, clone, defaultLang));
+				clone.getChildren().add(node.clone(newCa, oldCa, clone, defaultLang, clonedAttribute));
 			}
 		}
 		clone.updateHkey();

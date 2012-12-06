@@ -417,7 +417,7 @@ public class Attribute extends DmObject{
 			clone.rootTreeNodes = new ArrayList<AttributeTreeNode>();
 			for (Iterator<AttributeTreeNode> iterator = getTree().iterator(); iterator.hasNext();) {
 				AttributeTreeNode node = (AttributeTreeNode) iterator.next();
-				clone.rootTreeNodes.add(node.clone(newCa, this.ca, null,defaultLang));
+				clone.rootTreeNodes.add(node.clone(newCa, this.ca, null,defaultLang, clone));
 			}
 			
 		}

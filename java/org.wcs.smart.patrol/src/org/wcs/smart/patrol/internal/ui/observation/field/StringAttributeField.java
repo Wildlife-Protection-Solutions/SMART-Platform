@@ -104,10 +104,11 @@ public class StringAttributeField implements IAttributeField<String>{
 	@Override
 	public String validate() {
 		String error = AttributeValidator.validateAttribute(attribute, getValue());
-		cd.hide();
 		if (error != null){
 			cd.setDescriptionText(error);
 			cd.show();
+		}else{
+			cd.hide();
 		}
 		return error;
 	}

@@ -499,6 +499,10 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		protected boolean canEdit(Object element) {
 			return true;
 		}
+		
+		protected boolean dependsOnExternalFocusListener() {
+			return false;
+		}
 	}
 	
 	

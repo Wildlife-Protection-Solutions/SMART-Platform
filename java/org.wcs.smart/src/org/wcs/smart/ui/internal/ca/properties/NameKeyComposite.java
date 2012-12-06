@@ -306,13 +306,9 @@ public abstract class NameKeyComposite extends Composite {
 	protected boolean validate(){
 		boolean error = false;
 		
-		
 		if (currentSelection != null ){
 			values.put(currentSelection, txtName.getText());
 		}
-		
-		cdKey.hide();
-		cdTxt.hide();
 						
 		if (!SmartUtils.isSimpleString(txtKey.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_KEY_LENGTH)){
 			cdKey.setDescriptionText(
@@ -321,8 +317,11 @@ public abstract class NameKeyComposite extends Composite {
 							new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			cdKey.show();
 			error = true;
+		}else{
+			cdKey.hide();
 		}
 		
+		boolean hide = true;
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
 			
@@ -333,8 +332,12 @@ public abstract class NameKeyComposite extends Composite {
 								new Object[]{type.getKey().getName(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 				cdTxt.show();
 				error = true;
+				hide = false;
 			}	
 			
+		}
+		if (hide){
+			cdTxt.hide();
 		}
 		
 		return error;
