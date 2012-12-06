@@ -176,7 +176,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(attribute.getName());
-		sb.append(" - " + Messages.AttributeTreeGroupByDropItem_TreeLevelLabel + Messages.AttributeTreeGroupByDropItem_2); //$NON-NLS-1$
+		sb.append(" - " + Messages.AttributeTreeGroupByDropItem_TreeLevelLabel ); //$NON-NLS-1$
 		sb.append(this.level);
 		
 		if (category != null){

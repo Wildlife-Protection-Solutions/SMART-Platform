@@ -117,7 +117,8 @@ public class PatrolDayEditor extends EditorPart {
 		}
 		
 		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
-		StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_5);
+		StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_PatrolDayTitle);
+		text.append(" "); //$NON-NLS-1$
 		text.append(dayFormat.format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
 		text.append(", "); //$NON-NLS-1$
 		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));

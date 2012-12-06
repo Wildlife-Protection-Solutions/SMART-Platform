@@ -199,7 +199,6 @@ public class Messages extends NLS {
 	public static String CaInfoComposite_NameLabel;
 	public static String CaPropertyPage_ConfirmDialogMessage;
 	public static String CaPropertyPage_ConfirmDialogTitle;
-	public static String CaPropertyPage_DefaultLanguage_Label;
 	public static String CaPropertyPage_DefaultLanguageLabel;
 	public static String CaPropertyPage_Dialog_Title;
 	public static String CaPropertyPage_DialogMessage;
