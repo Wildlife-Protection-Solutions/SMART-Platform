@@ -293,29 +293,30 @@ public class AutoBackupDialog extends TitleAreaDialog {
 	 * @return <code>false</code> if not complete, <code>true</code> otherwise
 	 */
 	public boolean validate() {
-
-		ControlDecoration cds[] = { cdTimer, cdDeleteTimer, cdLoc};
-		for (int i = 0; i < cds.length; i++) {
-			cds[i].hide();
-		}
-		
 		boolean isComplete = true;
 		if ( ! isNumeric(days.getText()) ){
 			cdTimer.show();
 			cdTimer.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidNumberDays);
 			isComplete = false;
+		}else{
+			cdTimer.hide();
 		}
 		
 		if ( ! isNumeric(deleteDays.getText()) ){
 			cdDeleteTimer.show();
 			cdDeleteTimer.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidNumberDays);
 			isComplete = false;
+		}else{
+			cdDeleteTimer.hide();
+			
 		}
 		File f = new File(txtBackupDir.getText());
 		if (!f.exists()){
 			cdLoc.show();
 			cdLoc.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidDirectory);
 			isComplete = false;
+		}else{
+			cdLoc.hide();
 		}
 		Button x = getButton(OK);
 		if (x != null){

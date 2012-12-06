@@ -215,33 +215,22 @@ public class DmObject extends HasLabel{
 		
 		this.setNames(new HashSet<Label>());
 		
-			
-			
-		for (Language ll : oldCa.getLanguages()){
-			Language newLang = null;
-			for (Language lang : newCa.getLanguages()){
-				if (lang.getCode().equals(ll.getCode())){
-					newLang = lang;
-					break;
-				}
-			}
-			if (newLang != null){
-				String value = oldObject.findName(ll);
+		for (Label l : oldObject.getNames()){
+			if (l.getLanguage().getCode().equals(defaultLang)){
 				Label lblClone = new Label();
-				lblClone.setValue(value);
-				lblClone.setLanguage(newLang);
-				this.getNames().add(lblClone);
-				lblClone.setElement(this);
-			}
-					
-			if (defaultLang != null && defaultLang.equals(ll.getCode())){
-				//this label needs to be copy to default lang
-				String value = oldObject.findName(ll);
-				Label lblClone = new Label();
-				lblClone.setValue(value);
+				lblClone.setValue(l.getValue());
 				lblClone.setLanguage(newCa.getDefaultLanguage());
-				lblClone.setElement(  this );
+				lblClone.setElement(this);
 				this.getNames().add(lblClone);
+			}
+			for (Language lang : newCa.getLanguages()){
+				if (l.getLanguage().isSame(lang) ){
+					Label lblClone = new Label();
+					lblClone.setValue(l.getValue());
+					lblClone.setLanguage(lang);
+					lblClone.setElement(this);
+					this.getNames().add(lblClone);
+				}
 			}
 		}
 	}

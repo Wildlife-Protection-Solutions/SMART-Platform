@@ -132,8 +132,6 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		return PatrolEventManager.PATROL_ID;
 	}
 	public boolean validate() {
-
-		cdPatrolId.hide();
 		boolean isValid = true;
 		
 		if (! SmartUtils.isSimpleString(txtPatrolId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
@@ -142,6 +140,8 @@ public class PatrolIdComposite extends PatrolItemComposite {
 				MessageFormat.format(Messages.PatrolIdComposite_Error_InvalidId,
 						new Object[]{Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isValid = false;
+		}else{
+			cdPatrolId.hide();
 		}
 		return isValid;
 	}

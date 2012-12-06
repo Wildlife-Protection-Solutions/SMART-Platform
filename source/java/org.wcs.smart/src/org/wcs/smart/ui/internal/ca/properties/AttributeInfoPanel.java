@@ -535,19 +535,19 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	@Override
 	public boolean validate(){
 		boolean error = super.validate();
-		cdMaxValue.hide();
-		cdMinValue.hide();
-		cdAttList.hide();
-		if (cdAttTree != null){
-			cdAttTree.hide();
-		}
-		
+
 		Attribute.AttributeType type = (Attribute.AttributeType)(((IStructuredSelection)cmbType.getSelection()).getFirstElement());
 		if (type.equals(AttributeType.BOOLEAN)){
 			
 		}else if (type.equals(AttributeType.NUMERIC)){
+			if (cdAttTree != null){
+				cdAttTree.hide();
+			}
+			cdAttList.hide();
 			Double min = null;
 			Double max = null;
+			boolean maxer = false;
+			boolean miner = false;
 			if (txtMaxValue.getText().length() > 0){
 				try{
 					max = Double.valueOf(txtMaxValue.getText());
@@ -555,6 +555,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					error = true;
 					cdMaxValue.show();
 					cdMaxValue.setDescriptionText(Messages.AttributeInfoPanel_Error_InvalidMaxValue);
+					maxer = true;
 				}
 			}
 			if (txtMinValue.getText().length() > 0){
@@ -564,28 +565,54 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 					error = true;
 					cdMinValue.show();
 					cdMinValue.setDescriptionText(Messages.AttributeInfoPanel_Error_InvalidMinValue);
+					miner = true;
 				}
 			}
 			if (min != null && max != null && min > max){
 				cdMaxValue.show();
 				cdMaxValue.setDescriptionText(Messages.AttributeInfoPanel_Error_MaxValueToBig);
 				error = true;
+				maxer = true;
+			}
+			if (!maxer){
+				cdMaxValue.hide();
+			}
+			if (!miner){
+				cdMinValue.hide();
 			}
 		}else if (type.equals(AttributeType.TEXT)){
 			//TODO: validate regex expression
+			cdMinValue.hide();
+			cdMaxValue.hide();
+			if (cdAttTree != null){
+				cdAttTree.hide();
+			}
+			cdAttList.hide();
 		}else if (type.equals(AttributeType.LIST)){
+			if (cdAttTree != null){
+				cdAttTree.hide();
+			}
+			cdMinValue.hide();
+			cdMaxValue.hide();
+			
 			if (this.attributeList.size() == 0){
 				cdAttList.setDescriptionText(Messages.AttributeInfoPanel_Error_OneListItemRequired);
 				cdAttList.show();
 				error = false;
-				
+			}else{
+				cdAttList.hide();
 			}
 		}else if (type.equals(AttributeType.TREE)){
+			cdMinValue.hide();
+			cdMaxValue.hide();
+			cdAttList.hide();
 			if (this.attTree != null){
 				if (this.attTree.getAttribute().getTree() == null || this.attTree.getAttribute().getTree().size() == 0){
 					cdAttTree.setDescriptionText(Messages.AttributeInfoPanel_Error_OneTreeNodeRequired);
 					cdAttTree.show();
 					error = false;
+				}else{
+					cdAttTree.hide();
 				}
 			}
 		}

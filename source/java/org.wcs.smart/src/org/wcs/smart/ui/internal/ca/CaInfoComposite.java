@@ -166,7 +166,6 @@ public class CaInfoComposite extends Composite {
 	private void validate() {
 		isValid = true;
 		
-		cdIdentifier.hide();
 		if (txtIdentifier.getText().trim().isEmpty() || txtIdentifier.getText().length() > ConservationArea.MAX_ID_LENGTH) {
 			cdIdentifier.setDescriptionText(Messages.CaInfoComposite_Error_NoId );
 			cdIdentifier.show();
@@ -177,11 +176,16 @@ public class CaInfoComposite extends Composite {
 			cdIdentifier.show();
 			isValid = false;
 		}
-		cdName.hide();
+		if (isValid){
+			cdIdentifier.hide();
+		}
+		
 		if (txtName.getText().trim().isEmpty() || txtIdentifier.getText().length() > ConservationArea.MAX_NAME_LENGTH) {
 			cdName.setDescriptionText(Messages.CaInfoComposite_Error_NoName);
 			cdName.show();
 			isValid = false;
+		}else{
+			cdName.hide();
 		}
 		
 		for(IValidationListener listener : listeners){

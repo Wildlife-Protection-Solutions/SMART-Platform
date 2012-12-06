@@ -408,15 +408,6 @@ public class EmployeeComposite extends Composite {
 	 */
 	public boolean validate() {
 
-		ControlDecoration cds[] = { cdGiveName, cdFamilyName, cdStaffId, cdBirthDate, cdEmploymentStart, cdSmartId,
-				cdSmartPassword, cdSmartPassword2 };
-		for (int i = 0; i < cds.length; i++) {
-			cds[i].hide();
-		}
-		if (cdEmploymentEnd != null){
-			cdEmploymentEnd.hide();
-		}
-		
 		boolean isComplete = true;
 		if (txtGivenName.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(txtGivenName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
@@ -425,7 +416,10 @@ public class EmployeeComposite extends Composite {
 					.setDescriptionText(
 							MessageFormat.format(Messages.EmployeeComposite_Error_InvalidGivenName, new Object[]{Employee.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isComplete = false;
+		}else{
+			cdGiveName.hide();
 		}
+		
 		if (txtFamilyName.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(txtFamilyName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH)) {
 			cdFamilyName.show();
@@ -433,7 +427,10 @@ public class EmployeeComposite extends Composite {
 					.setDescriptionText(
 							MessageFormat.format(Messages.EmployeeComposite_Error_InvalidFamilyName, new Object[]{Employee.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isComplete = false;
+		}else{
+			cdFamilyName.hide();
 		}
+		
 		if (txtStaffId.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(txtStaffId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_ID_LENGTH)) {
 			cdStaffId.show();
@@ -442,7 +439,10 @@ public class EmployeeComposite extends Composite {
 							MessageFormat.format(Messages.EmployeeComposite_Error_EmployeeId,
 									new Object[]{Employee.MAX_NAME_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 			isComplete = false;
+		}else{
+			cdStaffId.hide();
 		}
+		
 		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
 		Calendar now = new GregorianCalendar(); 
 		Calendar min = new GregorianCalendar(now.get(Calendar.YEAR) - Employee.MIN_EMPLOYEE_AGE, now.get(Calendar.MONTH),now.get(Calendar.DATE));
@@ -455,7 +455,10 @@ public class EmployeeComposite extends Composite {
 							Messages.EmployeeComposite_Error_InvalidBirthDate,
 							new Object[]{Employee.MIN_EMPLOYEE_AGE} ));
 			isComplete = false;
+		}else{
+			cdBirthDate.hide();
 		}
+		
 		// test for startdate being at least Employee.MIN_EMPLOYEE_AGE since birthdate
 		min = new GregorianCalendar(dtBirthDate.getYear() + Employee.MIN_EMPLOYEE_AGE, dtBirthDate.getMonth(), dtBirthDate.getDay());
 		Calendar calStartDate = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay());
@@ -467,7 +470,11 @@ public class EmployeeComposite extends Composite {
 							Messages.EmployeeComposite_Error_InvalidStartDate ,
 							new Object[]{Employee.MIN_EMPLOYEE_AGE}));
 			isComplete = false;
+		}else{
+			cdEmploymentStart.hide();
 		}
+		
+		boolean hide = false;
 		if(dtEmploymentEnd != null && chNotActive.getSelection()){
 			//test for EmploymentEnd being before employment start
 			Calendar start = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay() );
@@ -477,7 +484,12 @@ public class EmployeeComposite extends Composite {
 				cdEmploymentEnd.setDescriptionText(Messages.EmployeeComposite_Error_InvalidEndDate);
 				isComplete = false;
 			}
+			hide = true;
 		}
+		if (hide && cdEmploymentEnd != null){
+			cdEmploymentEnd.hide();
+		}
+		
 		if (chSmartUser.getSelection()){
 			if (txtSmartId.getText().trim().isEmpty()
 					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH)) {
@@ -487,7 +499,11 @@ public class EmployeeComposite extends Composite {
 								Messages.EmployeeComposite_Error_InvalidUserId,
 								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc}));
 				isComplete = false;
+			}else{
+				cdSmartId.hide();
 			}
+			
+			hide = true;
 			if (txtSmartPassword.getText().trim().isEmpty()
 					|| ! SmartUtils.isSimpleString(txtSmartPassword.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_PASSWORD_LENGTH)) {
 				cdSmartPassword.show();
@@ -497,8 +513,8 @@ public class EmployeeComposite extends Composite {
 										Messages.EmployeeComposite_Error_InvalidPassword,
 										new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX.textDesc}));
 				isComplete = false;
+				hide = false;
 			}
-			
 			if (txtSmartPassword.getText().length()< Employee.MIN_SMART_PASSWORD_LENGTH){
 				cdSmartPassword.show();
 				cdSmartPassword
@@ -507,15 +523,29 @@ public class EmployeeComposite extends Composite {
 										Messages.EmployeeComposite_Error_InvalidPasswordLength,
 										new Object[]{Employee.MIN_SMART_PASSWORD_LENGTH}));
 				isComplete = false;
+				hide = false;
 			}
+			if (hide){
+				cdSmartPassword.hide();
+			}
+			
+			hide = true;
 			if (!txtSmartPassword.getText().equals(txtSmartPassword2.getText())) {
 				isComplete = false;
 				if (!txtSmartPassword.getText().trim().isEmpty()
 					|| !txtSmartPassword2.getText().trim().isEmpty()) {
 					cdSmartPassword2.show();
 					cdSmartPassword2.setDescriptionText(Messages.EmployeeComposite_Error_PasswordsDontMatch);	
+					hide = false;
 				}
 			}
+			if (hide){
+				cdSmartPassword2.hide();
+			}
+		}else{
+			cdSmartId.hide();
+			cdSmartPassword.hide();
+			cdSmartPassword2.hide();
 		}
 		return isComplete;
 	}

@@ -110,7 +110,7 @@ public class Language {
 	 * @return
 	 */
 	public boolean isSame(Language l){
-		return code.equals(l.getCode());
+		return getCode().equals(l.getCode());
 	}
 	
 	public int hashCode(){

@@ -236,9 +236,6 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 	 * Validates the current input
 	 */
 	private void validate(){
-		cdCurrentPassword.hide();
-		cdPassword1.hide();
-		cdPassword2.hide();
 		
 		boolean error = false;
 		
@@ -246,16 +243,22 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 			cdCurrentPassword.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterPass);
 			cdCurrentPassword.show();
 			error = true;
+		}else{
+			cdCurrentPassword.hide();
 		}
 		
 		if (txtPassword1.getText().length() == 0){
 			cdPassword1.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterNewPass);
 			cdPassword1.show();
 			error = true;
+		}else{
+			cdPassword1.hide();
 		}
+		boolean hide = true;
 		if (txtPassword2.getText().length() == 0){
 			cdPassword2.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_MustEnterNewPass2);
 			cdPassword2.show();
+			hide = false;
 			error = true;
 		}
 
@@ -263,8 +266,11 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 			cdPassword2.setDescriptionText(Messages.ChangeUserPasswordDialog_Error_PassNotSame);
 			cdPassword2.show();
 			error = true;
+			hide = false;
 		}
-		
+		if (hide){
+			cdPassword2.hide();
+		}
 		Button btn = getButton(IDialogConstants.OK_ID);
 		if (btn != null){
 			btn.setEnabled(!error);
