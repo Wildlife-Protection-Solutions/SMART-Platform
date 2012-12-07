@@ -46,6 +46,9 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
@@ -65,6 +68,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
@@ -82,6 +86,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	protected static final String QUERY_GRID_TEMP_TABLE_PREFIX = "grid_intermediate_"; //$NON-NLS-1$
 	protected String gridTempTable = "";	 //$NON-NLS-1$
 
+	private GriddedQuery query;
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -96,6 +101,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
+		this.query = query;
 		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
 		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
 		gridTempTable = QUERY_GRID_TEMP_TABLE_PREFIX + System.nanoTime();
@@ -122,7 +128,9 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 					boolean needsObservation = false;
 					if (query.getQueryDefinition().getValuePart().hasCategory() ||
-							query.getQueryDefinition().getValuePart().hasAttribute()){
+							query.getQueryDefinition().getValuePart().hasAttribute() ||
+							query.getFilter().hasCategoryFilter() || 
+							query.getFilter().hasAttributeFilter() ){
 						needsObservation = true;
 					}
 					
@@ -385,13 +393,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 	private List<GridResultItem> computePatrolExistance(Connection c, Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
-		String dataField[] = null;
 		
 		PatrolExistsCellMerger cellMerger = new PatrolExistsCellMerger();
 		ExistsValueComputer valueComputer = new ExistsValueComputer();
 		
 		engine = new GridAnalysisEngine<Boolean>(gridDef, cellMerger, valueComputer);
-		return computePatrolTrack(c, engine, dataField);
+		return computePatrolTrackNoFilter(c, engine);
 	}
 	
 	private List<GridResultItem> computePatrolValue(Connection c,
@@ -422,7 +429,9 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		return computePatrolTrack(c, engine, dataField);
 	}
 	
-	private List<GridResultItem> computePatrolTrack(Connection c, GridAnalysisEngine<?> engine, String[] dataField) throws Exception{
+	private List<GridResultItem> computePatrolTrack(Connection c, 
+			GridAnalysisEngine<?> engine, 
+			String[] dataField) throws Exception{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom "); //$NON-NLS-1$ //$NON-NLS-2$
 		if (dataField != null){
@@ -493,6 +502,70 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		
 	}
 
+	/**
+	 * Determines which grid cells have patrol tracks but
+	 * does not apply any filter filters except the date
+	 * and conservation area filter.
+	 * 
+	 * @param c
+	 * @param engine
+	 * @return
+	 * @throws Exception
+	 */
+	private List<GridResultItem> computePatrolTrackNoFilter(Connection c, 
+			GridAnalysisEngine<?> engine) throws Exception{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom "); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(tableNames.get(Track.class) + " " + tablePrefix.get(Track.class)); //$NON-NLS-1$
+		sql.append(" join " + tableNames.get(PatrolLegDay.class) + " " + tablePrefix.get(PatrolLegDay.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join " + tableNames.get(PatrolLeg.class) + " " + tablePrefix.get(PatrolLeg.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" on " + tablePrefix.get(PatrolLeg.class) + ".uuid = " + tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join " + tableNames.get(Patrol.class) + " " + tablePrefix.get(Patrol.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		DateFilter dateFilter = query.getDateFilter();
+		if (dateFilter != null ){
+			String dfilter = dateFilter.asSql(tablePrefix);
+			if (dfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(dfilter);
+			}
+		}
+		sql.append( " and "); //$NON-NLS-1$
+		sql.append(query.getConservationAreaFilter().asSql(tablePrefix));
+		
+		QueryPlugIn.logSql(sql.toString());
+		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		WKBReader reader = new WKBReader();
+		
+		while(rs.next()){
+			byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
+			if (bytes != null){
+				LineString ls = (LineString) reader.read(bytes);
+				try{
+					engine.rasterizeLinestring(ls);
+				}catch (Exception ex){
+					QueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
+					throw ex;
+				}
+			}
+		}
+		rs.close();
+		
+		List<GridResultItem> items = new ArrayList<GridResultItem>();
+		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
+			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
+			GridResultItem it = new GridResultItem();
+			it.setTileX(object.getKey().getXId()+1);
+			it.setTileY(object.getKey().getYId()+1);
+			it.setValue(object.getValue());
+			items.add(it);
+		}
+		return items;
+		
+	}
 
 	/**
 	 * Drop the created temporary tables.
