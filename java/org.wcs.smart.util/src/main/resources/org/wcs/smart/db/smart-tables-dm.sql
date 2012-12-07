@@ -3,14 +3,41 @@
 CREATE TABLE smart.dm_aggregation 
 (
 	name VARCHAR(10) NOT NULL,
-	gui_name VARCHAR(48) NOT NULL,
 	PRIMARY KEY (NAME)
 );
 
-INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'sum', 'Sum' );
-INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'min', 'Minimum');
-INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'max', 'Maximum');
-INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'avg', 'Average' );
+CREATE TABLE smart.dm_aggregation_i18n(
+	name VARCHAR(10) NOT NULL,
+	lang_code VARCHAR(5) NOT NULL,
+	gui_name VARCHAR(48) NOT NULL,
+	PRIMARY KEY(name, lang_code)
+);
+
+/* Create Foreign Keys */
+
+ALTER TABLE smart.dm_aggregation_i18n
+	ADD CONSTRAINT dm_aggregation_i18n_fk FOREIGN KEY (name)
+	REFERENCES smart.dm_aggregation (name)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
+
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'sum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'min');
+INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'max');
+INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'avg');
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'en', 'Sum' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'en', 'Minimum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'en', 'Maximum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'en', 'Average' );
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'fr', 'somme' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'fr', 'minimale');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'fr', 'maximale');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'fr', 'moyenne' );
+
 --INSERT INTO smart.dm_aggregation  (NAME, GUI_NAME) VALUES ( 'stdev', 'Standard Deviation' );
 
 CREATE TABLE smart.dm_attribute

@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
@@ -93,7 +94,7 @@ public class DataModel {
 					Session s = HibernateManager.openSession();
 					try{
 						s.beginTransaction();
-						aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).list(); //$NON-NLS-1$
+						aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list(); //$NON-NLS-1$
 						s.getTransaction().rollback();
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(null, Messages.DataModel_Error_LoadAggregations, ex);
