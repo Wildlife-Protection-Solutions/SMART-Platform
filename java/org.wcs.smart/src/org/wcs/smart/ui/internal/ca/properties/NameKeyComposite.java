@@ -329,7 +329,7 @@ public abstract class NameKeyComposite extends Composite {
 				cdTxt.setDescriptionText(
 						MessageFormat.format(
 								Messages.NameKeyComposite_Error_InvalidName,
-								new Object[]{type.getKey().getName(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+								new Object[]{type.getKey().getDisplayName(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
 				cdTxt.show();
 				error = true;
 				hide = false;
