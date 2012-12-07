@@ -22,6 +22,7 @@
 package org.wcs.smart.ca;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,6 +34,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Supported lanaguage.
@@ -46,10 +48,11 @@ public class Language {
 
 	private byte[] uuid;
 	private String code;
-	private String name;
 	private ConservationArea ca;
 	private boolean isDefault;
 	
+	@Transient
+	private Locale locale;
 
 	@Id
 	@GeneratedValue(generator="uuid")
@@ -65,12 +68,6 @@ public class Language {
 	}
 	public void setCode(String code) {
 		this.code = code;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
 	}
 	
 	@ManyToOne
@@ -123,13 +120,40 @@ public class Language {
 	/**
 	 * Returns a common string to display the
 	 * language in the GUI.  Combines the
-	 * name with the code.
+	 * locale display name with the code.
 	 * 
 	 * @return name and code
 	 * 
 	 */
 	@Transient
 	public String getLabel(){
-		return getName() + " [" + getCode() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		Locale l = getLocale();
+		if (l != null){
+			return l.getDisplayName() + " [" + getCode() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return getCode();
 	}
+	
+	@Transient
+	private Locale getLocale(){
+		if (locale == null){
+			locale = SmartUtils.stringToLocale(getCode());
+		}
+		return locale;
+	}
+	
+	/**
+	 * 
+	 * @return the locale display name of unique
+	 * code if no locale name found
+	 */
+	@Transient
+	public String getDisplayName(){
+		if (getLocale() != null){
+			return getLocale().getDisplayName();
+		}
+		return getCode();
+	}
+	
+	
 }

@@ -179,7 +179,6 @@ public class CaWizard_CaDef extends CaWizardPage  {
 
 		Locale e = (Locale) ((IStructuredSelection)lstViewer.getSelection()).getFirstElement(); 
 		lang.setCode(SmartUtils.localeToString(e));
-		lang.setName(e.getDisplayName());
 		lang.setDefault(true);
 		ca.getLanguages().add(lang);
 	}

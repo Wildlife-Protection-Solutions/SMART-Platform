@@ -172,7 +172,6 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 					l.setCa(SmartDB.getCurrentConservationArea());
 					l.setDefault(false);
 					l.setCode(SmartUtils.localeToString((Locale)r));
-					l.setName(((Locale)r).getDisplayName());
 					
 					boolean exists = false;
 					for (Object o : languages){
@@ -211,7 +210,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 					}else{
 						
 						if (MessageDialog.openQuestion(getShell(), Messages.CaPropertyPage_ConfirmDialogTitle, 
-								MessageFormat.format(Messages.CaPropertyPage_ConfirmDialogMessage, new Object[]{type.getName()}) )){
+								MessageFormat.format(Messages.CaPropertyPage_ConfirmDialogMessage, new Object[]{type.getDisplayName()}) )){
 							languages.remove(type);
 							isChanged = true;
 						}
