@@ -21,10 +21,24 @@
  */
 package org.wcs.smart.ca.datamodel;
 
-import javax.persistence.Column;
+import java.util.Locale;
+
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Data model value attribute aggregation options 
@@ -35,8 +49,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "smart.dm_aggregation")
 
-//@Cacheable
-//@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Aggregation {
 
 	/**
@@ -44,15 +58,14 @@ public class Aggregation {
 	 */
 	private String name = ""; //$NON-NLS-1$
 	
-	/**
-	 * name to display on gui
-	 */
-	private String guiName;
+	@Transient
+	private String guiName = null;
 	
 	/**
 	 * Creates new aggregation
 	 */
 	public Aggregation(){
+
 	}
 	
 	/**
@@ -74,21 +87,48 @@ public class Aggregation {
 		this.name = name;
 	}
 	
-	//TODO: should likely be internationalized
-	/**
-	 * 
-	 * @return the name to display on gui
-	 */
-	@Column(name = "gui_name")
-	public String getGuiName(){
-		return this.guiName;
-	}
-	/**
-	 * 
-	 * @param name the name to display on gui
-	 */
-	public void setGuiName(String name){
-		this.guiName = name;
+	@Transient
+	public synchronized String getGuiName(){
+		if (guiName != null){
+			return guiName;
+		}
+		
+		Job j = new Job(""){ //$NON-NLS-1$
+			public IStatus run(IProgressMonitor monitor){
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					AggregationLabel current = (AggregationLabel)s.get(AggregationLabel.class, new AggregationLabel.AggregationLabelPk(Aggregation.this.getName(),SmartUtils.localeToString(Locale.getDefault())));
+					if (current == null){
+						//look for just language match
+						current = (AggregationLabel)s.get(AggregationLabel.class, new AggregationLabel.AggregationLabelPk(Aggregation.this.getName(),Locale.getDefault().getLanguage()));
+					}
+					if (current != null){
+						guiName = current.getGuiName();
+					}	
+				}finally{
+					if (s.getTransaction().isActive()){
+						s.getTransaction().commit();
+					}
+					s.close();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException ex) {
+			SmartPlugIn.log("Error loading aggregation name", ex); //$NON-NLS-1$
+		}
+		
+		if (guiName == null){
+			guiName = name;
+		}
+		return guiName;
+		
+		
 	}
 	
 	/**
