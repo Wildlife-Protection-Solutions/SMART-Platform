@@ -52,7 +52,6 @@ CREATE TABLE smart.language
 	uuid CHAR(16) for bit data NOT NULL,
 	ca_uuid CHAR(16) for bit data NOT NULL,
 	code CHAR(5) NOT NULL,
-	name VARCHAR(64),
 	isdefault BOOLEAN default false not null,
 	PRIMARY KEY (UUID)
 );
