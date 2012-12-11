@@ -317,7 +317,7 @@ public class PatrolHibernateManager extends HibernateManager{
 				pt.setIsActive(true);
 				pt.setType(PatrolType.Type.values()[i]);
 
-				s.saveOrUpdate(pt);
+				s.save(pt);
 				types.add(pt);
 			}
 			s.getTransaction().commit();
