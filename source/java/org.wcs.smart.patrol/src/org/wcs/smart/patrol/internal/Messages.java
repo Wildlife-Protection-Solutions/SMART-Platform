@@ -61,6 +61,8 @@ public class Messages extends NLS {
 	public static String CategoryDMAdvisor_Error_InvalidObjectType;
 	public static String CommentComposite_Comments_Label;
 	public static String CommentComposite_Title;
+	public static String CommentWizardPage_PageMessage;
+	public static String CommentWizardPage_PageName;
 	public static String CreatePatrolWizard_Title;
 	public static String DateComposite_EndDate_Label;
 	public static String DateComposite_Error_EndAfterStart;

@@ -24,8 +24,8 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
-import org.wcs.smart.patrol.internal.ui.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
