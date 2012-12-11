@@ -168,9 +168,9 @@ public class AttachmentDialog extends TitleAreaDialog {
 				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
 				WaypointAttachment first = (WaypointAttachment) sel.getFirstElement();
 				if (first.getCopyFromLocation()!= null){
-					Program.launch(first.getCopyFromLocation().getAbsolutePath());
+					launch(first.getCopyFromLocation());
 				}else{
-					Program.launch(first.getFullFile().getAbsolutePath());
+					launch(first.getFullFile());
 				}
 			}
 		});
@@ -184,7 +184,13 @@ public class AttachmentDialog extends TitleAreaDialog {
 		return composite; 
 	}
 
-
+	private void launch(File file){
+		try{
+			Program.launch(file.getCanonicalPath());
+		}catch (Exception ex){
+			Program.launch(file.getAbsolutePath());
+		}
+	}
 	/**
 	 * @return all attachments selected by the user
 	 */
