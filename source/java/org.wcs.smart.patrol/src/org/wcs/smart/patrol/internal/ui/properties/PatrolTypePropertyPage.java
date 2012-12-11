@@ -521,8 +521,10 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			for (Iterator<?> iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
 				PatrolType type = (PatrolType) iterator.next();
 				s.saveOrUpdate(type);
-				for (PatrolTransportType tt : type.getTransportTypes()){
-					s.saveOrUpdate(tt);
+				if (type.getTransportTypes() != null){
+					for (PatrolTransportType tt : type.getTransportTypes()){
+						s.saveOrUpdate(tt);
+					}
 				}
 			}
 			s.getTransaction().commit();
