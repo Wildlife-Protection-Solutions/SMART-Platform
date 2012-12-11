@@ -411,14 +411,20 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			case FAMILY_NAME: return element.getFamilyName();
 			case GIVEN_NAME: return element.getGivenName();
 			case AGENCY:
+				Session s = getSession();
+				s.beginTransaction();
 				if (element.getAgency() == null){
 					return null;
 				}
+				s.getTransaction().commit();
 				return element.getAgency().getName();
-			case RANK: 
+			case RANK:
+				s = getSession();
+				s.beginTransaction();
 				if (element.getRank() == null){
 					return null;
 				}
+				s.getTransaction().commit();
 				return element.getRank().getName();
 			case GENDER: return String.valueOf(element.getGender());
 			case BIRTHDATE: return DateFormat.getDateInstance().format(element.getBirthDate());

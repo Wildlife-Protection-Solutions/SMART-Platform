@@ -170,9 +170,10 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		fileName = txtFile.getText();
 		skipHeader = btnSkipHeader.getSelection();
 		if (IDialogConstants.OK_ID == buttonId) {
-			setReturnCode(OK);
-			loadData();
-			close();
+			if (loadData()){
+				setReturnCode(OK);
+				close();
+			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			setReturnCode(CANCEL);
 			close();
@@ -182,7 +183,8 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 	/**
 	 * Loads employee data into the database.
 	 */
-	private void loadData(){
+	private boolean loadData(){
+		final boolean[] rcode = {false};
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try{
 		dialog.run(true, true, new IRunnableWithProgress() {
@@ -199,8 +201,10 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 						public void run() {
 							if(ok){
 								MessageDialog.openInformation(getShell(), Messages.ImportEmployeeDialog_InfoDialog_Title, Messages.ImportEmployeeDialog_SuccessMessage);
+								rcode[0] = true;
 							}else{
 								MessageDialog.openError(getShell(), Messages.ImportEmployeeDialog_InfoDialog_Title, Messages.ImportEmployeeDialog_FailureMessage);
+								rcode[0] = false;
 							}
 							
 						}
@@ -212,6 +216,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 						@Override
 						public void run() {
 							SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getLocalizedMessage(), ex);
+							rcode[0] = false;
 						}						
 					});
 							
@@ -223,7 +228,9 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		});
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getLocalizedMessage(), ex);
+			rcode[0] = false;
 		}
+		return rcode[0];
 	}
 	
 
