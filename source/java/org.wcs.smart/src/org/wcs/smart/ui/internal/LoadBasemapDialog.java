@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.ui.internal;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -48,6 +51,8 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
+
+import com.ibm.icu.text.Collator;
 
 /**
  * Dialog for selecting basemap
@@ -149,7 +154,15 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 					}
 					s.close();
 				}
+				Arrays.sort(data, new Comparator<Object>(){
+					@Override
+					public int compare(Object o1, Object o2) {
+						return Collator.getInstance().compare(
+								((BasemapDefinition)o1).getName(), 
+								((BasemapDefinition)o2).getName());
+					}});
 				final Object[] data1 = data;
+				
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
