@@ -72,8 +72,7 @@ import org.wcs.smart.util.SmartUtils;
 public class PatrolLegSplitDialog extends TitleAreaDialog{
 
 	private PatrolLeg existingLeg;
-	
-	
+
 	private DateTime startDate;
 	private DateTime startTime;
 	private Button opStart;

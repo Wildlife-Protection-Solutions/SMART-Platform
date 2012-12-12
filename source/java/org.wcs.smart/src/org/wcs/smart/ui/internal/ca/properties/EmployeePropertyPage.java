@@ -24,6 +24,8 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -271,7 +273,10 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	}
 
 	private void refreshEmployeeList(){
+		Session s = getSession();
+		s.beginTransaction();
 		employees = new WritableList(getSession().createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(), Employee.class); //$NON-NLS-1$
+		s.getTransaction().rollback();
 		
 		tblEmployee.setInput(employees);
 		tblEmployee.refresh();
@@ -283,6 +288,11 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (agencies == null){
 			getSession().beginTransaction();
 			agencies = HibernateManager.getAgencies(ca, getSession());
+			Collections.sort(agencies, new Comparator<Object>(){
+				@Override
+				public int compare(Object o1, Object o2) {
+					return Collator.getInstance().compare(((Agency)o1).getName(), ((Agency)o2).getName());
+			}});
 			getSession().getTransaction().rollback();
 		}
 		return agencies;

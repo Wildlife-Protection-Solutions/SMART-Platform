@@ -103,6 +103,7 @@ public class QueryErrorControlContribution extends
 		lblErrorImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.EXCLAMATION_ICON));
 		lblError = new Label(main, SWT.NONE);
 		lblError.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		lblError.setText(Messages.QueryErrorControlContribution_QueryErrorText);
 		main.setVisible(false);
 		
 		initValues();

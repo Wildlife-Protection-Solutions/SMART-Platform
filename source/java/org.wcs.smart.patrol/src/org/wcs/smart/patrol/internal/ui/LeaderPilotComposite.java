@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.eclipse.core.databinding.observable.list.ObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
@@ -135,25 +142,43 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	public void setValues(PatrolLeg patrolLeg, Session session) {
-		WritableList list = new WritableList(patrolLeg.getMembers(), PatrolLegMember.class);
-		patrolLeaderViewer.setInput(list);
+		List<PatrolLegMember> sortedList = new ArrayList<PatrolLegMember>();
+		sortedList.addAll(patrolLeg.getMembers());
+		Collections.sort(sortedList, new Comparator<PatrolLegMember>(){
+			@Override
+			public int compare(PatrolLegMember o1, PatrolLegMember o2) {
+				return Collator.getInstance().compare(o1.getMember().getLabel(), o2.getMember().getLabel());
+			}});
+		WritableList wr = new WritableList((Collection<PatrolLegMember>)sortedList, PatrolLegMember.class);
+		
+		patrolLeaderViewer.setInput(wr);
+
 		if (patrolLeg.getLeader() != null){
 			patrolLeaderViewer.setSelection(new StructuredSelection(patrolLeg.getLeader()));
 		}else{
-			patrolLeaderViewer.setSelection(new StructuredSelection(list.get(0)));
+			patrolLeaderViewer.setSelection(new StructuredSelection(sortedList.get(0)));
 		}
 
 		lblPilot.setVisible(patrolLeg.getPatrol().hasPilot());
 		patrolPilotViewer.getControl().setVisible(patrolLeg.getPatrol().hasPilot());
 		if (patrolLeg.getPatrol().hasPilot()){
-			patrolPilotViewer.setInput(list);
+			patrolPilotViewer.setInput(wr);
 			if (patrolLeg.getPilot() != null){
 				patrolPilotViewer.setSelection(new StructuredSelection(patrolLeg.getPilot()));
 			}else{
-				patrolPilotViewer.setSelection(new StructuredSelection(list.get(0)));
+				patrolPilotViewer.setSelection(new StructuredSelection(sortedList.get(0)));
 			}
 		}
 		validate();
+	}
+	
+	public void refresh(){
+		if (patrolLeaderViewer != null && !patrolLeaderViewer.getControl().isDisposed()){
+			patrolLeaderViewer.refresh();
+		}
+		if (patrolPilotViewer != null && !patrolPilotViewer.getControl().isDisposed()){
+			patrolPilotViewer.refresh();
+		}
 	}
 
 	/**
@@ -164,13 +189,14 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	 * @param patrol the patrol to select default values from
 	 */
 	public void setEmployeeList(ObservableList list, Patrol patrol){
-		//leader list 
+		//leader list
 		patrolLeaderViewer.setInput(list);		
 		if (patrol.getFirstLeg().getLeader() != null){
 			patrolLeaderViewer.setSelection(new StructuredSelection(patrol.getFirstLeg().getLeader().getMember()));
 		}else{
 			patrolLeaderViewer.setSelection(new StructuredSelection(list.get(0)));
 		}
+
 		//pilot list
 		lblPilot.setVisible(patrol.hasPilot());
 		patrolPilotViewer.getControl().setVisible(patrol.hasPilot());

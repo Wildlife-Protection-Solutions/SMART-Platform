@@ -148,7 +148,7 @@ public class PatrolListDropItem extends DropItem{
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder(this.keyPart);
-		sb.append(Messages.PatrolListDropItem_EqualsLabel);
+		sb.append(" equals "); //$NON-NLS-1$
 		ListItem it = null;
 		
 		

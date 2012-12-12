@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -105,14 +108,19 @@ public class StationComposite extends PatrolItemComposite{
 	 */
 	public void setValues(Patrol p, Session session) {
 		List<? extends Object> stations = HibernateManager.getActiveStations(p.getConservationArea(), session);
-
+		Collections.sort(stations, new Comparator<Object>(){
+			@Override
+			public int compare(Object o1, Object o2) {
+				return Collator.getInstance().compare(((Station)o1).getName(), ((Station)o2).getName());
+		}});
+		
 		String none = Messages.StationComposite_NoStation_Label;
 		List<Object> stns = new ArrayList<Object>();
 		stns.add(none);
 		if (stations != null){
 			stns.addAll(stations);
 		}
-
+		
 		stationList.setInput(stns.toArray());
 		if (p.getStation() != null){
 			stationList.setSelection(new StructuredSelection(p.getStation()));

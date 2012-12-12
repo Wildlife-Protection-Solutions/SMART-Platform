@@ -81,6 +81,7 @@ public class Messages extends NLS {
 	public static String EditPatrolItemDialog_Error_DialotTitle;
 	public static String EditPatrolLegDialog_AddEmployees_ToolTip;
 	public static String EditPatrolLegDialog_DialogMessage;
+	public static String EditPatrolLegDialog_DialogTitle;
 	public static String EditPatrolLegDialog_Error_EmptyId;
 	public static String EditPatrolLegDialog_Error_EndAfterPStart;
 	public static String EditPatrolLegDialog_Error_EndBeforePStart;

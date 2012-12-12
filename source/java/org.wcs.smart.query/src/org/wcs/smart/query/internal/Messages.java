@@ -259,7 +259,6 @@ public class Messages extends NLS {
 	public static String PatrolGroupByDropItem_FiltersLabel;
 	public static String PatrolGroupByDropItem_IncludedLabel;
 	public static String PatrolIdDropItem_LoadIdsJobName;
-	public static String PatrolListDropItem_EqualsLabel;
 	public static String PatrolListDropItem_ErrorLoadingItems;
 	public static String PatrolListDropItem_LoadingJobName;
 	public static String PatrolListDropItem_LoadingLabel;

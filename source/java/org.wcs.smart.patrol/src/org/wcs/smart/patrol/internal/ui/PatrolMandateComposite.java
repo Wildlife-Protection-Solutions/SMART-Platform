@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.Collator;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -110,7 +113,11 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 			return;
 		}
 
-		
+		Collections.sort(mandates, new Comparator<PatrolMandate>(){
+			@Override
+			public int compare(PatrolMandate o1, PatrolMandate o2) {
+				return Collator.getInstance().compare(o1.getName(), o2.getName());
+		}});
 		patrolMandateViewer.setInput(mandates.toArray());
 		if (mandates.size() > 0){
 			patrolMandateViewer.setSelection(new StructuredSelection(mandates.get(0)));

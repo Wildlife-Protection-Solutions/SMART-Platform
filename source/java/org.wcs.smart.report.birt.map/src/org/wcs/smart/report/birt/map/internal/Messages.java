@@ -35,7 +35,6 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_SetBoundsLink;
 	public static String SmartLayersPage_Style_ColumnHeader;
 	public static String SmartMapItem_CouldNotParseCrs;
-	public static String SmartMapItem_MapName;
 	public static String SmartMapItemImageUi_ErrorCreatingMapItem;
 	public static String SmartMapItemPlugIn_ErrorDialogTitle;
 	public static String SmartMapPresentationImpl_ErrorCreatingMap;
@@ -43,6 +42,8 @@ public class Messages extends NLS {
 	public static String StyleCellEditor_CreateMapLayerJobName;
 	public static String StyleCellEditor_Error_CouldNotCreateStyleEditor;
 	public static String StyleCellEditor_Error_CouldNotOpenStyleDialog;
+	public static String SmartMapItem_Name;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

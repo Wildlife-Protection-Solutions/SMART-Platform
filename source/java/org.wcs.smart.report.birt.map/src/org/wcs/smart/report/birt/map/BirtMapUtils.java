@@ -114,7 +114,7 @@ public class BirtMapUtils {
 	}
 	
 	/**
-	 * The width of the extendeditemhandle in pixels
+	 * The width of the extended item handle in pixels
 	 * @param handle
 	 * @param dpi
 	 * @return

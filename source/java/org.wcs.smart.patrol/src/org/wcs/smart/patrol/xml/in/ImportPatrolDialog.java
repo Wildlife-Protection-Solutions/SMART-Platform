@@ -59,8 +59,8 @@ import org.wcs.smart.patrol.internal.Messages;
  */
 public class ImportPatrolDialog  extends TitleAreaDialog {
 
-	private static final String[] FILTER_NAMES = new String[] { "*.zip;*.xml", "*.zip", "*.xml", "*.*" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	private static final String[] FILTER_EXTENSIONS = new String[] { Messages.ImportPatrolDialog_PatrolFilters_FilterName, Messages.ImportPatrolDialog_ZipFilter_FilterName, Messages.ImportPatrolDialog_XmlFilter_FilterName, Messages.ImportPatrolDialog_AllFiles_FilterName };
+	private static final String[] FILTER_EXTENSIONS = new String[] { "*.zip;*.xml", "*.zip", "*.xml", "*.*" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	private static final String[] FILTER_NAMES = new String[] { Messages.ImportPatrolDialog_PatrolFilters_FilterName, Messages.ImportPatrolDialog_ZipFilter_FilterName, Messages.ImportPatrolDialog_XmlFilter_FilterName, Messages.ImportPatrolDialog_AllFiles_FilterName };
 
 	private List<String> selectedFiles;
 	

@@ -5,7 +5,10 @@
          point="org.eclipse.birt.report.model.reportItemModel">
       <reportItem
             class="org.wcs.smart.report.birt.map.SmartMapFactory"
-            extensionName="Smart Map">
+            displayNameID="SmartMapItem.Name"
+            extendsFrom="ReportItem"
+            extensionName="org.wcs.smart.birt.map.SmartMap"
+            isNameRequired="true">
          <property
                allowExpression="false"
                defaultDisplayName="%mapitem.parameter.basemap.name"
@@ -106,7 +109,7 @@
    <extension
          point="org.eclipse.birt.report.designer.ui.reportitemUI">
       <model
-            extensionName="Smart Map">
+            extensionName="org.wcs.smart.birt.map.SmartMap">
       </model>
       <palette
             icon="images/icons/obj16/map.png"></palette>
@@ -126,7 +129,7 @@
          point="org.eclipse.birt.report.engine.reportitemPresentation">
       <reportItem
             class="org.wcs.smart.report.birt.map.SmartMapPresentationImpl "
-            name="%birt.reportitem.smartmap.name">
+            name="org.wcs.smart.report.birt.map">
       </reportItem>
    </extension>
    <extension

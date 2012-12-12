@@ -22,6 +22,7 @@
 package org.wcs.smart.hibernate;
 
 import java.io.File;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
 import org.geotools.referencing.CRS;
@@ -32,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Manages the smart database.
@@ -171,7 +173,13 @@ public class SmartDB {
 	 */
 	public static Language getCurrentLanguage(){
 		if (currentLanguage == null){
-			currentLanguage = HibernateManager.findLanguage(Platform.getNL(), getCurrentConservationArea());
+			Locale l = Locale.getDefault();
+			try{
+				l = SmartUtils.stringToLocale(Platform.getNL());
+			}catch (Exception ex){
+				//eatme
+			}
+			currentLanguage = HibernateManager.findLanguage(l, getCurrentConservationArea());
 		}
 		return currentLanguage;
 		
