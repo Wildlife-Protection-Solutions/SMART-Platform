@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.ca;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -131,10 +132,13 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		btnSkipHeader.setText(Messages.ImportEmployeeDialog_IncludeHaderOp);
 		btnSkipHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
-		Text txtinfo = new Text(main, SWT.NONE | SWT.READ_ONLY);
+		Text txtinfo = new Text(main, SWT.WRAP | SWT.READ_ONLY);
 		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
-		txtinfo.setText(Messages.ImportEmployeeDialog_CSVFormat_1
-				+ Messages.ImportEmployeeDialog_CSVFormat_2
+		((GridData)txtinfo.getLayoutData()).widthHint = 250;
+		txtinfo.setText(Messages.ImportEmployeeDialog_CSVFormat_1 + "\n" //$NON-NLS-1$
+				+ MessageFormat.format(
+						Messages.ImportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
+				+ "\n\n" //$NON-NLS-1$
 				+ Messages.ImportEmployeeDialog_CSVFormat_3);
 		
 		getShell().setText(Messages.ImportEmployeeDialog_DialogTitle);

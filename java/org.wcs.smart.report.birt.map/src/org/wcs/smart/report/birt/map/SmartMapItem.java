@@ -47,7 +47,7 @@ public class SmartMapItem extends ReportItem {
 	/**
 	 * Smart map item extension name
 	 */
-	public static final String EXTENSION_NAME = Messages.SmartMapItem_MapName;
+	public static final String EXTENSION_NAME = "org.wcs.smart.birt.map.SmartMap";  //$NON-NLS-1$
 
 	/**
 	 * Basemap option property

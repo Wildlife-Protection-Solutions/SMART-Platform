@@ -245,7 +245,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		setMessage(Messages.PatrolFilterDialog_DialogMessage);
 		
 		Session session = HibernateManager.openSession();
-
+		session.beginTransaction();
 		try {
 			Composite composite = new Composite((Composite) filter, SWT.NONE);
 			composite.setLayout(new GridLayout(1, false));
@@ -262,6 +262,7 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 			
 			updateValues();
 		} finally {
+			session.getTransaction().commit();
 			session.close();
 		}
 		

@@ -313,7 +313,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			if (value == null){
 				value = stn.getDescription();
 				if (value == null){
-					value = "";
+					value = ""; //$NON-NLS-1$
 				}
 			}
 			return value;
@@ -498,10 +498,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		@Override
 		protected boolean canEdit(Object element) {
 			return true;
-		}
-		
-		protected boolean dependsOnExternalFocusListener() {
-			return false;
 		}
 	}
 	

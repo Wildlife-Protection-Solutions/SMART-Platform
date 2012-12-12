@@ -37,6 +37,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeSelectComposite;
+import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeSelectComposite.IListChanged;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -120,6 +121,12 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 			SmartPlugIn.displayLog(null, Messages.EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees + ex.getLocalizedMessage(), ex);			
 		}
 		leaderPilotComp.setEmployeeList(empListComposite.getSelectedEmployees(),p);
+		empListComposite.addSelectionChangedListener(new IListChanged() {
+			@Override
+			public void listChanged(List<Employee> newEmployees) {
+				leaderPilotComp.refresh();
+			}
+		});
 	}
 	
 	/**

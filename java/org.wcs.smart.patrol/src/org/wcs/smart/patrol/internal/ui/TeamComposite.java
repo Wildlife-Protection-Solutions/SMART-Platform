@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -113,6 +116,11 @@ public class TeamComposite extends PatrolItemComposite{
 			SmartPatrolPlugIn.displayLog(Messages.TeamComposite_Error_CouldNotLoadTeams, ex);
 			session.close();
 		}
+		Collections.sort(teams, new Comparator<Object>(){
+			@Override
+			public int compare(Object o1, Object o2) {
+				return Collator.getInstance().compare(((Team)o1).getName(), ((Team)o2).getName());
+		}});
 		
 		String none = Messages.TeamComposite_NoTeam_Label;
 		List<Object> stns = new ArrayList<Object>();
@@ -120,7 +128,7 @@ public class TeamComposite extends PatrolItemComposite{
 		if (teams != null){
 			stns.addAll(teams);
 		}
-
+		
 		teamList.setInput(stns.toArray());
 		if (p.getTeam() != null){
 			teamList.setSelection(new StructuredSelection(p.getTeam()));

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -60,6 +61,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.TableInfo;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Hibernate manager to manage database connections.
@@ -73,19 +75,28 @@ public class HibernateManager extends SmartHibernateManager{
 	 * 
 	 * @return the language for the given code
 	 */
-	public static Language findLanguage(String code, ConservationArea ca){
+	public static Language findLanguage(Locale l, ConservationArea ca){
 		Session x = openSession();
 		Transaction tx = x.beginTransaction();
 		try {
-			List<?> results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", code)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+			//match language and country code
+			String fullCode = SmartUtils.localeToString(l);
+			List<?> results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", fullCode)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 			if (results.size() > 0){
 				return (Language)results.get(0);
-			}else{
-				results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("default", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-				if (results.size() > 0){
-					return (Language) results.get(0);
-				}
 			}
+			//match language only
+			results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", l.getLanguage())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+			if (results.size() > 0){
+				return (Language)results.get(0);
+			}
+			
+			//find default
+			results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("default", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+			if (results.size() > 0){
+				return (Language) results.get(0);
+			}
+			
 			return null;
 		}finally{
 			tx.rollback();

@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -355,7 +356,11 @@ public class EmployeeComposite extends Composite {
 
 				List<Rank> temp = new ArrayList<Rank>();
 				temp.addAll(ranks);
-
+				Collections.sort(temp, new Comparator<Rank>(){
+					@Override
+					public int compare(Rank o1, Rank o2) {
+						return Collator.getInstance().compare(o1.getName(), o2.getName());
+					}});
 				Rank none = new Rank();
 				none.setName(""); //$NON-NLS-1$
 				temp.add(0, none);

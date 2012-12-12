@@ -23,7 +23,10 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,8 +58,8 @@ public class EmployeeSelectComposite extends Composite{
 
 	
 	private EmployeeLabelProvider employeeLabelProvider = new EmployeeLabelProvider();
-	private WritableList selectedEmployees = new WritableList();
-	private WritableList allEmployees = new WritableList();
+	private ArrayList<Employee> selectedEmployees = null;
+	private ArrayList<Employee> allEmployees = null;
 
 	private TableViewer employeeListViewer;
 	private TableViewer selectedEmployeeListViewer;
@@ -160,6 +163,7 @@ public class EmployeeSelectComposite extends Composite{
 			allEmployees.remove(next);
 			selectedEmployees.add(next);
 		}
+		sortList(selectedEmployees);
 		employeeListViewer.refresh();
 		selectedEmployeeListViewer.refresh();
 		
@@ -176,6 +180,7 @@ public class EmployeeSelectComposite extends Composite{
 			allEmployees.add(next);
 			selectedEmployees.remove(next);
 		}
+		sortList(allEmployees);
 		employeeListViewer.refresh();
 		selectedEmployeeListViewer.refresh();
 		
@@ -187,21 +192,40 @@ public class EmployeeSelectComposite extends Composite{
 	 * @param current the list employees selected by defaul
 	 */
 	public void setEmployeeData(List<Employee> allEmployees, List<Employee> current){
-		selectedEmployees.clear();
-		this.allEmployees.clear();
 		
+		this.allEmployees = new ArrayList<Employee>();
 		this.allEmployees.addAll(allEmployees);
 		this.allEmployees.removeAll(current);
-		selectedEmployees.addAll(current);
+		sortList(this.allEmployees);
+		 
 		
+		this.selectedEmployees = new ArrayList<Employee>();
+		this.selectedEmployees.addAll(current);
+		sortList(this.selectedEmployees);
+		
+		employeeListViewer.setInput(new WritableList(this.allEmployees, Employee.class));
 		employeeListViewer.refresh();
+	
+		selectedEmployeeListViewer.setInput(new WritableList(this.selectedEmployees, Employee.class));
 		selectedEmployeeListViewer.refresh();
 		
 		fireChangeListeners();
 	}
+	
+	/**
+	 * Sorts the employee lists
+	 */
+	private void sortList(ArrayList<Employee> list){
+		Collections.sort(list,new Comparator<Employee>() {
+			@Override
+			public int compare(Employee e1, Employee e2) {
+				return Collator.getInstance().compare(e1.getLabel(), e2.getLabel());
+			}
+		});
+	}
 
 	public WritableList getSelectedEmployees(){
-		return this.selectedEmployees;
+		return (WritableList) this.selectedEmployeeListViewer.getInput();
 	}
 	
 	/**

@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.Collator;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -99,7 +102,11 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	 */
 	public void setValues(PatrolLeg patrolLeg, Session session) {
 		List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(patrolLeg.getPatrol().getConservationArea(), session, patrolLeg.getPatrol().getPatrolType());
-		
+		Collections.sort(types, new Comparator<PatrolTransportType>(){
+			@Override
+			public int compare(PatrolTransportType o1, PatrolTransportType o2) {
+				return Collator.getInstance().compare(o1.getName(), o2.getName());
+		}});
 		patrolTypeViewer.setInput(types.toArray());
 		if (types.size() > 0){
 			patrolTypeViewer.setSelection(new StructuredSelection(types.get(0)));

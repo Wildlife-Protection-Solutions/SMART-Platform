@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -342,7 +345,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			//multi-day patrol
 			isMulti = true;
 			employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-			lbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label);
+			lbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label,SWT.WRAP);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
 		
@@ -535,11 +538,20 @@ public class PatrolSummaryEditor extends EditorPart {
 					}
 				}
 			}
+			
+			
 			((EmployeeLabelProvider) employeeList.getLabelProvider())
 					.setLeaders(leaders);
 			((EmployeeLabelProvider) employeeList.getLabelProvider())
 					.setPilots(pilots);
-			employeeList.setInput(allEmployee.toArray());
+			
+			Employee[] employeeArray = allEmployee.toArray(new Employee[allEmployee.size()]);
+			Arrays.sort(employeeArray, new Comparator<Employee>(){
+				@Override
+				public int compare(Employee o1, Employee o2) {
+					return Collator.getInstance().compare(o1.getLabel(), o2.getLabel());
+				}});
+			employeeList.setInput(employeeArray);
 
 			txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
 					.format(patrol.getStartDate()));

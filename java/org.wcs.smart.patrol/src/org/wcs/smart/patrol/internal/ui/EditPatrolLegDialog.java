@@ -22,9 +22,13 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.sql.Time;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -81,8 +85,8 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	private Button opEnd;
 	private Button opEndCustom;
 	
-	private WritableList employeeList;
-	private WritableList employeeListA;
+	private ArrayList<Employee> employeeList;
+	private ArrayList<Employee> employeeListA;
 
 	private ComboViewer groupALeader;
 	private ComboViewer groupAPilot;
@@ -120,19 +124,29 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		return true;
 	}
 	
+	private void sortList(ArrayList<Employee> list){
+		Collections.sort(list, new Comparator<Employee>(){
+			@Override
+			public int compare(Employee o1, Employee o2) {
+				return Collator.getInstance().compare(o1.getLabel(), o2.getLabel());
+			}});
+	}
+	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Label lbl;
 		parent.setLayout(new GridLayout(1, false));
 		
-		employeeList = new WritableList();
+		employeeList = new ArrayList<Employee>();
 		employeeList.addAll(patrolMembers);
-		
-		employeeListA = new WritableList();
+		employeeListA = new ArrayList<Employee>();
 		for (PatrolLegMember member: editLeg.getMembers()){
 			employeeListA.add(member.getMember());
 			employeeList.remove(member.getMember());
 		}
+		sortList(employeeList);
+		sortList(employeeListA);
+		WritableList selectedEmployees = new WritableList(employeeListA, Employee.class);
 		
 		Composite patrolIdComp = new Composite(parent, SWT.NONE);
 		patrolIdComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -155,7 +169,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		emplList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		emplList.setLabelProvider(new EmployeeLabelProvider());
 		emplList.setContentProvider(new ObservableListContentProvider());
-		emplList.setInput(employeeList);
+		emplList.setInput(new WritableList(employeeList, Employee.class));
 		
 		Composite right = new Composite(compEmployees, SWT.NONE);
 		right.setLayout(new GridLayout(2, false));
@@ -167,18 +181,19 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		lbl.setText(Messages.EditPatrolLegDialog_Members_Label);
 		
-		createEmployeeButtonPanelAndTable(right, employeeListA, emplList);
+		createEmployeeButtonPanelAndTable(right, selectedEmployees, emplList);
 		
 		Composite leaderComp = new Composite(right, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
-		groupALeader = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupALeader_Label, employeeListA, editLeg.getLeader().getMember());
+		groupALeader = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupALeader_Label, selectedEmployees, editLeg.getLeader().getMember());
 		if (editLeg.getPatrol().hasPilot()){
-			groupAPilot = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupAPilot_Label, employeeListA, editLeg.getPilot().getMember());
+			groupAPilot = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupAPilot_Label, selectedEmployees, editLeg.getPilot().getMember());
 		}
 		
 		setMessage(Messages.EditPatrolLegDialog_DialogMessage);
+		getShell().setText(Messages.EditPatrolLegDialog_DialogTitle);
 		return parent;
 	}
 	
@@ -188,22 +203,22 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	private ComboViewer createLeaderPilot(Composite parent, String name, WritableList employeeList, Employee defaultValue){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(name);
-		ComboViewer cmbLeader = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbLeader.setLabelProvider(new EmployeeLabelProvider());
-		cmbLeader.setContentProvider(new ObservableListContentProvider());
-		cmbLeader.setInput(employeeList);
-		cmbLeader.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		ComboViewer cmb = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmb.setLabelProvider(new EmployeeLabelProvider());
+		cmb.setContentProvider(new ObservableListContentProvider());
+		cmb.setInput(employeeList);
+		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		cmbLeader.setSelection( new StructuredSelection(defaultValue));
+		cmb.setSelection( new StructuredSelection(defaultValue));
 		
-		return cmbLeader;
+		return cmb;
 	}
 
 
 	/*
 	 * Create table viewer for patrol members list
 	 */
-	private TableViewer createEmployeeButtonPanelAndTable(Composite parent, WritableList input, final TableViewer employeeTableViewer){
+	private TableViewer createEmployeeButtonPanelAndTable(Composite parent, WritableList list, final TableViewer employeeTableViewer){
 		
 		Composite btn = new Composite(parent, SWT.NONE);
 		btn.setLayout(new GridLayout(1, false));
@@ -220,7 +235,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		groupList.setLabelProvider(new EmployeeLabelProvider());
 		groupList.setContentProvider(new ObservableListContentProvider());
-		groupList.setInput(input);
+		groupList.setInput(list);
 		groupList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		btnAddA.addSelectionListener(new SelectionAdapter() {
@@ -228,10 +243,18 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			public void widgetSelected(SelectionEvent e) {
 				for (Iterator<?> iterator = ((IStructuredSelection)employeeTableViewer.getSelection()).iterator(); iterator.hasNext();) {
 					Employee type = (Employee) iterator.next();
-					((WritableList)employeeTableViewer.getInput()).remove(type);
-					((WritableList)groupList.getInput()).add(type);
+					employeeList.remove(type);
+					employeeListA.add(type);
+					
 				}
+				sortList(employeeListA);
 				
+				employeeTableViewer.refresh();
+				groupList.refresh();
+				groupALeader.refresh();
+				if (groupAPilot != null){
+					groupAPilot.refresh();
+				}
 				
 			}
 		});
@@ -240,11 +263,17 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			public void widgetSelected(SelectionEvent e) {
 				for (Iterator<?> iterator = ((IStructuredSelection)groupList.getSelection()).iterator(); iterator.hasNext();) {
 					Employee type = (Employee) iterator.next();
-					((WritableList)employeeTableViewer.getInput()).add(type);
-					((WritableList)groupList.getInput()).remove(type);
+					employeeList.add(type);
+					employeeListA.remove(type);
+					
 				}
-				
-				
+				sortList(employeeList);
+				employeeTableViewer.refresh();
+				groupList.refresh();
+				groupALeader.refresh();
+				if (groupAPilot != null){
+					groupAPilot.refresh();
+				}
 			}
 		});
 		return groupList;

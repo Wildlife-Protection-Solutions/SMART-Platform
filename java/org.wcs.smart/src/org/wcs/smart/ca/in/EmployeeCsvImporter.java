@@ -53,7 +53,7 @@ import com.ibm.icu.text.SimpleDateFormat;
  * @since 1.0.0
  */
 public class EmployeeCsvImporter {
-	private static final String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
+	public static final String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 
 	/* to export employees from derby in correct format:
 	 * 	SELECT ID || ',' || givenname ||',' || familyname || ',' || 
@@ -67,12 +67,12 @@ public class EmployeeCsvImporter {
 	/**
 	 * FEMALE key for CSV file format 
 	 */
-	private static final String FEMALE = Messages.EmployeeCsvImporter_Female_Export_Key;
+	public static final String FEMALE = Messages.EmployeeCsvImporter_Female_Export_Key;
 
 	/**
 	 * MALE key for CSV file format
 	 */
-	private static final String MALE = Messages.EmployeeCsvImporter_Male_Export_Key;
+	public static final String MALE = Messages.EmployeeCsvImporter_Male_Export_Key;
 
 	/**
 	 * Current conservation area agencies
