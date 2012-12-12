@@ -325,14 +325,18 @@ public class MapSettings {
 	    	for (LayerRegister basemapLayer : userMap.getLayerList()) {
 				LayerRegister foundSharedLayer = null;
 				for (ILayer mapLayer : currentMapLayers) {
-					
-					if(basemapLayer.getName().equals(mapLayer.getName())){
-						foundSharedLayer = basemapLayer;
-						if(layersToRemove != null){
-							layersToRemove.remove(mapLayer);
+					try{
+						if(basemapLayer.getURI().equals(mapLayer.getID().toURI())){
+							foundSharedLayer = basemapLayer;
+							if(layersToRemove != null){
+								layersToRemove.remove(mapLayer);
+							}
+							basemapLayers.add(mapLayer);
+							break;
+						
 						}
-						basemapLayers.add(mapLayer);
-						break;
+					}catch (Exception ex){
+						SmartPlugIn.log("restoring basemap", ex); //$NON-NLS-1$
 					}
 				}
 				if(foundSharedLayer == null){
@@ -371,12 +375,15 @@ public class MapSettings {
 	    List<Layer> orderedLayers = new ArrayList<Layer>();
 	    for (LayerRegister sharedLayer : userMap.getLayerList()) {
 	    	for (ILayer layer : basemapLayers) {	
-	    		if (layer.getName().equals(sharedLayer.getName())) {
-	    			//update visibility of layer
-	    			((Layer)layer).setVisible(sharedLayer.getVisible());
-	    			orderedLayers.add((Layer)layer);
-	    			break;
-	    		}
+	    		try{
+					if (layer.getID().toURI().equals(sharedLayer.getURI())){
+						((Layer)layer).setVisible(sharedLayer.getVisible());
+		    			orderedLayers.add((Layer)layer);
+						break;
+					}
+				}catch (Exception ex){
+					SmartPlugIn.log("restoring basemap", ex); //$NON-NLS-1$
+				}
 	    	}
 	    }
 	    //order layers 
@@ -395,9 +402,13 @@ public class MapSettings {
 		for (ILayer layer : basemapLayers) {
 			LayerRegister foundSettings = null;
 			for (LayerRegister sharedLayer : userMap.getLayerList()) {
-				if (layer.getName().equals(sharedLayer.getName())) {
-					foundSettings = sharedLayer;
-					break;
+				try{
+					if (layer.getID().toURI().equals(sharedLayer.getURI())){
+						foundSettings = sharedLayer;
+						break;
+					}
+				}catch (Exception ex){
+					SmartPlugIn.log("restoring basemap", ex); //$NON-NLS-1$
 				}
 			}
 			if (foundSettings != null && layer.getMap() != null) {
