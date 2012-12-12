@@ -22,11 +22,14 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.sql.Time;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -83,9 +86,13 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	private Button opEnd;
 	private Button opEndCustom;
 	
-	private WritableList employeeList;
-	private WritableList employeeListA;
-	private WritableList employeeListB;
+//	private WritableList employeeList;
+//	private WritableList employeeListA;
+//	private WritableList employeeListB;
+	
+	private ArrayList<Employee> employees;
+	private ArrayList<Employee> employeesA;
+	private ArrayList<Employee> employeesB;
 
 	private ComboViewer groupALeader;
 	private ComboViewer groupAPilot;
@@ -120,6 +127,14 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		return true;
 	}
 	
+	private void sortList(List<Employee> list){
+		Collections.sort(list, new Comparator<Employee>(){
+			@Override
+			public int compare(Employee arg0, Employee arg1) {
+				return Collator.getInstance().compare(arg0.getLabel(), arg1.getLabel());
+			}});
+	}
+	
 	/**
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
@@ -133,12 +148,14 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		setMessage(Messages.PatrolLegSplitDialog_Dialog_Message);
 		super.getShell().setText(Messages.PatrolLegSplitDialog_Dialog_Title);
 		
-		employeeList = new WritableList();
+		employees = new ArrayList<Employee>();
 		for (PatrolLegMember member: existingLeg.getMembers()){
-			employeeList.add(member.getMember());
+			employees.add(member.getMember());
 		}
-		employeeListA = new WritableList();
-		employeeListB = new WritableList();
+		sortList(employees);
+		employeesA = new ArrayList<Employee>();
+		employeesB = new ArrayList<Employee>();
+		
 		
 		Label lbl;
 		createStartTimeComposite(parent);
@@ -152,7 +169,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		emplList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		emplList.setLabelProvider(new EmployeeLabelProvider());
 		emplList.setContentProvider(new ObservableListContentProvider());
-		emplList.setInput(employeeList);
+		emplList.setInput(new WritableList(employees, Employee.class));
 		
 		Composite right = new Composite(compEmployees, SWT.NONE);
 		right.setLayout(new GridLayout(1, false));
@@ -177,15 +194,15 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		lbl = new Label(gA, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		lbl.setText(Messages.PatrolLegSplitDialog_GroupAMembers_Label);
-		createEmployeeButtonPanelAndTable(gA, employeeListA, emplList);
+		TableViewer groupAEmployees = createEmployeeButtonPanelAndTable(gA, employeesA, emplList);
 		
 		Composite leaderComp = new Composite(gA, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
-		groupALeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupALeader_Label, employeeListA);
+		groupALeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupALeader_Label, (WritableList)groupAEmployees.getInput());
 		if (existingLeg.getPatrol().hasPilot()){
-			groupAPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupAPilot_Label, employeeListA);
+			groupAPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupAPilot_Label, (WritableList)groupAEmployees.getInput());
 		}
 		sc.setMinSize(gA.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
@@ -205,14 +222,14 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		lbl.setText(Messages.PatrolLegSplitDialog_GroupBMembers_Label);
 		
-		createEmployeeButtonPanelAndTable(gB, employeeListB, emplList);
+		TableViewer groupBEmployees = createEmployeeButtonPanelAndTable(gB, employeesB, emplList);
 		
 		leaderComp = new Composite(gB, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		groupBLeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBLeader_Label, employeeListB);
+		groupBLeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBLeader_Label, (WritableList)groupBEmployees.getInput());
 		if (existingLeg.getPatrol().hasPilot()){
-			groupBPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBPilot_Label, employeeListB);
+			groupBPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBPilot_Label, (WritableList)groupBEmployees.getInput());
 		}
 		sc.setMinSize(gB.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
@@ -242,7 +259,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	/*
 	 * create an employee table and associated buttons
 	 */
-	private TableViewer createEmployeeButtonPanelAndTable(Composite parent, WritableList input, final TableViewer employeeTableViewer){
+	private TableViewer createEmployeeButtonPanelAndTable(Composite parent,final ArrayList<Employee> input, final TableViewer employeeTableViewer){
 		Composite btn = new Composite(parent, SWT.NONE);
 		btn.setLayout(new GridLayout(1, false));
 		btn.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -258,7 +275,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		groupList.setLabelProvider(new EmployeeLabelProvider());
 		groupList.setContentProvider(new ObservableListContentProvider());
-		groupList.setInput(input);
+		groupList.setInput(new WritableList(input, Employee.class));
 		groupList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		btnAddA.addSelectionListener(new SelectionAdapter() {
@@ -266,8 +283,19 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			public void widgetSelected(SelectionEvent e) {
 				for (Iterator<?> iterator = ((IStructuredSelection)employeeTableViewer.getSelection()).iterator(); iterator.hasNext();) {
 					Employee type = (Employee) iterator.next();
-					((WritableList)employeeTableViewer.getInput()).remove(type);
-					((WritableList)groupList.getInput()).add(type);
+					employees.remove(type);
+					input.add(type);
+				}
+				sortList(input);
+				employeeTableViewer.refresh();
+				groupList.refresh();
+				groupALeader.refresh();
+				groupBLeader.refresh();
+				if (groupAPilot != null){
+					groupAPilot.refresh();
+				}
+				if (groupBPilot != null){
+					groupBPilot.refresh();
 				}
 				validate();
 			}
@@ -277,8 +305,19 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			public void widgetSelected(SelectionEvent e) {
 				for (Iterator<?> iterator = ((IStructuredSelection)groupList.getSelection()).iterator(); iterator.hasNext();) {
 					Employee type = (Employee) iterator.next();
-					((WritableList)employeeTableViewer.getInput()).add(type);
-					((WritableList)groupList.getInput()).remove(type);
+					employees.add(type);
+					input.remove(type);
+				}
+				sortList(employees);
+				employeeTableViewer.refresh();
+				groupList.refresh();
+				groupALeader.refresh();
+				groupBLeader.refresh();
+				if (groupAPilot != null){
+					groupAPilot.refresh();
+				}
+				if (groupBPilot != null){
+					groupBPilot.refresh();
 				}
 				validate();
 			}
@@ -375,6 +414,12 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		startTime.setEnabled(false);
 		startTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		startTime.addSelectionListener(opAdapter);
+		startTime.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				validate();
+			}
+		});
 	}
 	
 	/*
@@ -426,6 +471,11 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		endTime.setEnabled(false);
 		
 		endTime.setTime(ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), ca.get(Calendar.SECOND));
+		endTime.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				validate();
+			}
+		});
 	}
 	
 	/*
@@ -444,10 +494,10 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 //		if (employeeList.size() > 0){
 //			return "All members must belong to Group A or Group B";
 //		}
-		if (employeeListA.size() == 0){
+		if (employeesA.size() == 0){
 			return Messages.PatrolLegSplitDialog_Error_GroupANoMembers;
 		}
-		if (employeeListB.size() == 0){
+		if (employeesB.size() == 0){
 			return Messages.PatrolLegSplitDialog_Error_GroupBNoMembers;
 		}
 		if (  ((IStructuredSelection)this.groupALeader.getSelection()).isEmpty() ){
@@ -571,7 +621,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		}	
 		
 		legA.setMembers(new ArrayList<PatrolLegMember>());
-		for (Iterator<?> iterator = this.employeeListA.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = this.employeesA.iterator(); iterator.hasNext();) {
 			Employee type = (Employee) iterator.next();
 			
 			PatrolLegMember member =new PatrolLegMember();
@@ -587,7 +637,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		}
 	
 		legB.setMembers(new ArrayList<PatrolLegMember>());
-		for (Iterator<?> iterator = this.employeeListB.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = this.employeesB.iterator(); iterator.hasNext();) {
 			Employee type = (Employee) iterator.next();
 			PatrolLegMember member = new PatrolLegMember();
 			member.setPatrolLeg(legB);
