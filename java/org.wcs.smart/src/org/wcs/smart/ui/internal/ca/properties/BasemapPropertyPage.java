@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -42,6 +44,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import com.ibm.icu.text.Collator;
 
 /**
  * Property page for displaying basemaps, picking a deafult
@@ -83,6 +87,13 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	private void loadData() {
 		getSession().beginTransaction();
 		List<?> data = HibernateManager.getBasemaps(getSession());
+		Collections.sort(data, new Comparator<Object>(){
+			@Override
+			public int compare(Object o1, Object o2) {
+				return Collator.getInstance().compare(
+						((BasemapDefinition)o1).getName(), 
+						((BasemapDefinition)o2).getName());
+			}});
 		basemaps = data.toArray(new BasemapDefinition[data.size()]);
 		lstBasemaps.setInput(basemaps);
 		if (basemaps.length > 0){

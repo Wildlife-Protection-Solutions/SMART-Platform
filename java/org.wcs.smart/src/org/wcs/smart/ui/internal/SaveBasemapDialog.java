@@ -22,6 +22,8 @@
 package org.wcs.smart.ui.internal;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,7 +47,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -53,6 +54,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.util.SmartUtils;
+
+import com.ibm.icu.text.Collator;
 
 /**
  * Dialog for saving basemaps.
@@ -181,16 +184,20 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					String query = "FROM BasemapDefinition WHERE conservationArea = :ca "; //$NON-NLS-1$
-					Query q = s.createQuery(query);
-					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					data = q.list().toArray();
+					data = HibernateManager.getBasemaps(s).toArray();
 				}finally{
 					if (s.getTransaction().isActive()){
 						s.getTransaction().commit();		
 					}
 					s.close();
 				}
+				Arrays.sort(data, new Comparator<Object>(){
+					@Override
+					public int compare(Object o1, Object o2) {
+						return Collator.getInstance().compare(
+								((BasemapDefinition)o1).getName(), 
+								((BasemapDefinition)o2).getName());
+					}});
 				final Object[] data1 = data;
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
