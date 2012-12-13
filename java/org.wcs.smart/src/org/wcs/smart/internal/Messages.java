@@ -593,6 +593,7 @@ public class Messages extends NLS {
 	public static String SaveBasemapDialog_OverwriteOp;
 	public static String SaveBasemapDialog_SaveButton;
 	public static String SaveBasemapDialog_Title;
+	public static String SaveMapHandler_JobName;
 	public static String SetBasemapTool_RestoreBasemap_JobName;
 	public static String ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel;
 	public static String ShowDataModelPropertyPageHandler_Progress_LoadingDataModel;

@@ -27,6 +27,9 @@ import java.io.FileFilter;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -185,6 +188,7 @@ public class MapSettings {
 			BrewerPalette colorPalette = map.getColorPalette();
 			ColourScheme colourScheme = map.getColourScheme();
 			String crs = map.getViewportModel().getCRS().toWKT();
+			
 			mapRegister = new MapRegister(uri, name, colorPalette, colourScheme,  layerRegisterList, crs);
 			
 		} catch (Exception e) {
@@ -205,12 +209,9 @@ public class MapSettings {
 		
 		List<LayerRegister> layerRegisterList= new LinkedList<LayerRegister>();  
 		synchronized(layerList){
-			
 			for (Layer layer : layerList) {
-
 				// saves the layers settings
 		        List<StyleRegister> styleRegisterList = new LinkedList<StyleRegister>();
-
 				final StyleBlackboard styleBlackboard = layer.getStyleBlackboard();
 		        List<StyleEntry> stylelackboardContent = styleBlackboard.getContent();
 		        synchronized(stylelackboardContent){
@@ -302,145 +303,177 @@ public class MapSettings {
 		if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
 			((RenderManagerImpl)currentMap.getRenderManager()).disableRendering();
 		}
-		 MapRegister userMap = null;
-		try{
-		List<ILayer> currentMapLayers = currentMap.getMapLayers();
-
-		//keep track of current basemap layers
-		List<ILayer> layersToRemove = (List<ILayer>) currentMap.getBlackboard().get(BASEMAP_BLACKBOARD_KEY);
-
-		//new basemap layers
-		List<ILayer> basemapLayers = new ArrayList<ILayer>();
 		
-		//get map definition selected
+		// get map definition selected
 		String jsonMap = this.baseMap.getMapDef();
-	    GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
+		GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues();
 		Gson gson = gsonBuilder.create();
-	    
-		userMap = gson.fromJson(jsonMap, MapRegister.class);
-		
-	    //determine which layers need to be added/removed
-	    List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-	    synchronized(currentMapLayers){
-	    	for (LayerRegister basemapLayer : userMap.getLayerList()) {
-				LayerRegister foundSharedLayer = null;
-				for (ILayer mapLayer : currentMapLayers) {
-					try{
-						if(basemapLayer.getURI().equals(mapLayer.getID().toURI())){
-							foundSharedLayer = basemapLayer;
-							if(layersToRemove != null){
-								layersToRemove.remove(mapLayer);
+		final MapRegister userMap = gson.fromJson(jsonMap, MapRegister.class);
+					
+		try {
+			List<ILayer> currentMapLayers = currentMap.getMapLayers();
+
+			// keep track of current basemap layers
+			@SuppressWarnings("unchecked")
+			List<ILayer> layersToRemove = (List<ILayer>) currentMap
+					.getBlackboard().get(BASEMAP_BLACKBOARD_KEY);
+
+			// new basemap layers
+			List<ILayer> basemapLayers = new ArrayList<ILayer>();
+
+			// determine which layers need to be added/removed
+			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
+			final HashMap<IGeoResource, LayerRegister> definitionMap = new HashMap<IGeoResource, LayerRegister>();
+
+			synchronized (currentMapLayers) {
+				for (LayerRegister basemapLayer : userMap.getLayerList()) {
+					boolean found = false;
+					for (ILayer mapLayer : currentMapLayers) {
+						try {
+							if (basemapLayer.getURI().equals(
+									mapLayer.getID().toURI())) {
+								found = true;
+								if (layersToRemove != null) {
+									layersToRemove.remove(mapLayer);
+								}
+								basemapLayers.add(mapLayer);
+								definitionMap.put(mapLayer.getGeoResource(), basemapLayer);
+								break;
+
 							}
-							basemapLayers.add(mapLayer);
-							break;
-						
+						} catch (Exception ex) {
+							SmartPlugIn.log("restoring basemap", ex); //$NON-NLS-1$
 						}
-					}catch (Exception ex){
-						SmartPlugIn.log("restoring basemap", ex); //$NON-NLS-1$
 					}
-				}
-				if(foundSharedLayer == null){
-					// the register layer is not found in the map, then it must be added
-					List<IGeoResource> resources = prepareLayers( currentMap, basemapLayer.getURI(), basemapLayer.getName());
-					if (resources != null){
-						toAdd.addAll(resources);
+					if (!found) {
+						// the register layer is not found in the map, then it
+						// must be added
+						List<IGeoResource> resources = prepareLayers(
+								currentMap, basemapLayer.getURI(),
+								basemapLayer.getName());
+						if (resources != null) {
+							toAdd.addAll(resources);
+							for (IGeoResource geo : resources) {
+								definitionMap.put(geo, basemapLayer);
+							}
+						}
 					}
 				}
 			}
-	    }
-	    
-	    //delete old basemaps layers that are not a part of the new basemap
-	    if (layersToRemove != null && layersToRemove.size() > 0){
-	    	for (Iterator<ILayer> iterator = layersToRemove.iterator(); iterator.hasNext();) {
-	    		ILayer layer = (ILayer) iterator.next();
-	    		if (layer.getMap() == null){
-	    			iterator.remove();
-	    		}
-			}
-	    	if (layersToRemove.size() > 0){
-	    		currentMap.sendCommandSync( new DeleteLayersCommand(layersToRemove.toArray(new ILayer[layersToRemove.size()]) ));
-	    	}
-	    }
-	    
-	    //add new basemap layers
-	    if (toAdd.size() > 0){
-            AddLayersCommand alCommand = new AddLayersCommand(toAdd, 0);
-            currentMap.sendCommandSync(alCommand);
-            List< ? extends ILayer> addedLayers = alCommand.getLayers();
-            
-	    	assert addedLayers.size() != 0;
-	    	basemapLayers.addAll(addedLayers);
-	    }
 
-	    List<Layer> orderedLayers = new ArrayList<Layer>();
-	    for (LayerRegister sharedLayer : userMap.getLayerList()) {
-	    	for (ILayer layer : basemapLayers) {	
-	    		try{
-					if (layer.getID().toURI().equals(sharedLayer.getURI())){
-						((Layer)layer).setVisible(sharedLayer.getVisible());
-		    			orderedLayers.add((Layer)layer);
-						break;
+			// delete old basemaps layers that are not a part of the new basemap
+			if (layersToRemove != null && layersToRemove.size() > 0) {
+				for (Iterator<ILayer> iterator = layersToRemove.iterator(); iterator
+						.hasNext();) {
+					ILayer layer = (ILayer) iterator.next();
+					if (layer.getMap() == null) {
+						iterator.remove();
 					}
-				}catch (Exception ex){
-					SmartPlugIn.log("restoring basemap", ex); //$NON-NLS-1$
 				}
-	    	}
-	    }
-	    //order layers 
-	    currentMap.getContextModel().eSetDeliver(false);
-	    currentMap.getLayersInternal().removeAll(orderedLayers);
-	    currentMap.getLayersInternal().addAll(0,orderedLayers);
-	    currentMap.getContextModel().eSetDeliver(true);
-	    
-		//update basemap layer settings
-	    ArrayList<ILayer> basemapCopy = new ArrayList<ILayer>(basemapLayers);
-		currentMap.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, basemapCopy);
-		
-		// updates the map with the user settings
-		updateMap(currentMap, userMap );
-
-		for (ILayer layer : basemapLayers) {
-			LayerRegister foundSettings = null;
-			for (LayerRegister sharedLayer : userMap.getLayerList()) {
-				try{
-					if (layer.getID().toURI().equals(sharedLayer.getURI())){
-						foundSettings = sharedLayer;
-						break;
-					}
-				}catch (Exception ex){
-					SmartPlugIn.log("restoring basemap", ex); //$NON-NLS-1$
+				if (layersToRemove.size() > 0) {
+					currentMap.sendCommandSync(new DeleteLayersCommand(
+							layersToRemove.toArray(new ILayer[layersToRemove
+									.size()])));
 				}
 			}
-			if (foundSettings != null && layer.getMap() != null) {
-				((Layer)layer).eSetDeliver(false);
-				updateLayer(((Layer)layer), foundSettings);
-				((Layer)layer).eSetDeliver(true);
-				((Layer)layer).eNotify(new ENotificationImpl((InternalEObject)layer, Notification.SET, ProjectPackage.LAYER__STYLE_BLACKBOARD,
-		                layer.getStyleBlackboard(), layer.getStyleBlackboard()));
-			}
-		}
-		
-	
 
-		//turn back on events
-		}finally{
+			// add new basemap layers
+			if (toAdd.size() > 0) {
+				AddLayersCommand alCommand = new AddLayersCommand(toAdd, 0);
+				currentMap.sendCommandSync(alCommand);
+				List<? extends ILayer> addedLayers = alCommand.getLayers();
+				assert addedLayers.size() != 0;
+				basemapLayers.addAll(addedLayers);
+				
+				//here we update our definitionmap as we use
+				//layer.getResource to do lookups later
+				//and layer.getResource returns a different resource
+				//than the georesource used to create the layer
+				//and currently in the definition map
+				for (ILayer l : addedLayers){
+					for (IGeoResource r : toAdd){
+						try{
+							IGeoResource fnd = (IGeoResource)l.getGeoResource().resolve(r.getClass(), null);
+							if (fnd != null && fnd == r){
+								definitionMap.put(l.getGeoResource(), definitionMap.get(r));
+								break;
+							}
+						}catch (Exception ex){}
+					}
+				}
+			}
+
+			List<Layer> orderedLayers = new ArrayList<Layer>();
+			for (ILayer l : basemapLayers) {
+				orderedLayers.add((Layer) l);
+			}
+			Collections.sort(orderedLayers, new Comparator<Layer>() {
+				@Override
+				public int compare(Layer o1, Layer o2) {
+					LayerRegister info1 = definitionMap.get(o1.findGeoResource(IGeoResource.class));
+					LayerRegister info2 = definitionMap.get(o2.findGeoResource(IGeoResource.class));
+
+					int index1 = userMap.getLayerList().indexOf(info1);
+					int index2 = userMap.getLayerList().indexOf(info2);
+					if (index1 < index2)
+						return -1;
+					if (index1 > index2)
+						return 1;
+					return 0;
+				}
+
+			});
+
+			// order layers
+			currentMap.getContextModel().eSetDeliver(false);
+			currentMap.getLayersInternal().removeAll(orderedLayers);
+			currentMap.getLayersInternal().addAll(0, orderedLayers);
+			currentMap.getContextModel().eSetDeliver(true);
+
+			// update basemap layer settings
+			ArrayList<ILayer> basemapCopy = new ArrayList<ILayer>(basemapLayers);
+			currentMap.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, basemapCopy);
+
+			// updates the map with the user settings
+			updateMap(currentMap, userMap);
+
+			for (ILayer layer : basemapLayers) {
+				LayerRegister info = definitionMap.get(layer.findGeoResource(IGeoResource.class));
+
+				((Layer) layer).setVisible(info.getVisible());
+				((Layer) layer).eSetDeliver(false);
+				updateLayer(((Layer) layer), info);
+				((Layer) layer).eSetDeliver(true);
+				((Layer) layer).eNotify(new ENotificationImpl(
+						(InternalEObject) layer, Notification.SET,
+						ProjectPackage.LAYER__STYLE_BLACKBOARD, layer
+								.getStyleBlackboard(), layer
+								.getStyleBlackboard()));
+
+			}
+
+			// turn back on events
+		} finally {
 			currentMap.eSetDeliver(true);
-			if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
-				((RenderManagerImpl)currentMap.getRenderManager()).enableRendering();
+			if (((RenderManagerImpl) currentMap.getRenderManager()) != null) {
+				((RenderManagerImpl) currentMap.getRenderManager())
+						.enableRendering();
 			}
 		}
-		try{
-			if (userMap.getCrsWkt() != null){
-				CoordinateReferenceSystem crs = CRS.parseWKT(userMap.getCrsWkt());
-				if (!CRS.equalsIgnoreMetadata(crs, currentMap.getViewportModel().getCRS())){
+		try {
+			if (userMap.getCrsWkt() != null) {
+				CoordinateReferenceSystem crs = CRS.parseWKT(userMap
+						.getCrsWkt());
+				if (!CRS.equalsIgnoreMetadata(crs, currentMap
+						.getViewportModel().getCRS())) {
 					ChangeCRSCommand command = new ChangeCRSCommand(crs);
 					currentMap.sendCommandSync(command);
 				}
 			}
-		}catch (Exception ex){
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		if (currentMap.getRenderManager() != null){
+		if (currentMap.getRenderManager() != null) {
 			currentMap.getRenderManager().refresh(null);
 		}
 
@@ -602,7 +635,6 @@ public class MapSettings {
 			 String jsonMap = gson.toJson(mapRegister);
 			 this.baseMap.setMapDef(jsonMap);
 			 
-			// all users can save theirs settings
 			Session s = HibernateManager.openSession();
 			try{
 				s.beginTransaction();
@@ -616,12 +648,6 @@ public class MapSettings {
 			}finally{
 				s.close();
 			}
-			 
-//			MapSettingsStore.save(this.user.getId(), jsonMap);
-//			if(SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
-//				MapSettingsStore.saveShared(jsonMap);
-//			}
-			
 		} catch (Exception e) {
 			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
 		
@@ -630,7 +656,7 @@ public class MapSettings {
 
 
 	/**
-	 * Imports the file associated to the layer inthe ./data/filestore/ directory
+	 * Imports the file associated to the layer into ./data/filestore/ directory
 	 *    
 	 * @param srcUri file to import
 	 * @param layerName 
