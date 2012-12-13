@@ -1,7 +1,7 @@
 package org.wcs.smart.query.model;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 public class GridQueryResultMetadata {
 
@@ -53,7 +53,7 @@ public class GridQueryResultMetadata {
 		return maxYTile;
 	}
 	
-	public static final GridQueryResultMetadata computeMetadata(List<GridResultItem> items){
+	public static final GridQueryResultMetadata computeMetadata(Collection<GridResultItem> items){
 		
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;

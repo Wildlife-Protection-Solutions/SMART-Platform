@@ -22,7 +22,7 @@
 package org.wcs.smart.query.engine;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -38,7 +38,7 @@ import org.wcs.smart.query.model.SimpleQuery;
  */
 public interface QueryEngine {
 
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
+	public Collection<QueryResultItem> executeQuery(final SimpleQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException ;
 }

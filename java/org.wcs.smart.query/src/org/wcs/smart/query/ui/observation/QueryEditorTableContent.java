@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.ui.observation;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.TableViewer;
@@ -110,7 +110,7 @@ public class QueryEditorTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final List<QueryResultItem> items, final IProgressMonitor monitor) {
+	public void setTableData(final Collection<QueryResultItem> items, final IProgressMonitor monitor) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override

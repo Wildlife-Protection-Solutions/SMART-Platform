@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class GriddedQuery extends Query {
 	private List<DropItem> filterDropItems;
 	
 	@Transient
-	private List<GridResultItem> lastResults;
+	private Collection<GridResultItem> lastResults;
 	@Transient
 	private GridQueryResultMetadata resultMetadata;
 
@@ -242,7 +243,7 @@ public class GriddedQuery extends Query {
 	 * @return Results from last query run
 	 */
 	@Transient
-	public List<GridResultItem> getLastResults(){
+	public Collection<GridResultItem> getLastResults(){
 		return this.lastResults;
 	}
 	
@@ -253,7 +254,7 @@ public class GriddedQuery extends Query {
 	 * @throws Exception
 	 */
 	@Transient
-	public List<GridResultItem> getQueryResults(IProgressMonitor monitor) throws Exception{
+	public Collection<GridResultItem> getQueryResults(IProgressMonitor monitor) throws Exception{
 		lastResults = Collections.emptyList();
 		resultMetadata = null;
 		Session session = HibernateManager.openSession();

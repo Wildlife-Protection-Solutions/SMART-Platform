@@ -23,7 +23,7 @@ package org.wcs.smart.query.ui.patrol;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -274,7 +274,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					List<QueryResultItem> results = query.getQueryResults(mymonitor);
+					Collection<QueryResultItem> results = query.getQueryResults(mymonitor);
 					page1.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_ErrorRunningQuery, ex);

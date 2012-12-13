@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -48,7 +50,7 @@ public class SimpleQueryResultSet implements IResultSet {
 	private int m_currentRowId = -1;
 
 	private SimpleQueryResultSetMetadata metadata;
-	private List<? extends IResultItem> items = null;
+	private List<IResultItem> items = null;
 
 	private Object lastObject = null;
 
@@ -64,11 +66,13 @@ public class SimpleQueryResultSet implements IResultSet {
 		this.metadata = metadata;
 
 		try {
-			items = query.getLastResults();
-			if (items == null) {
-				items = query.getQueryResults(new NullProgressMonitor());
-				m_maxRows = items.size();
+			Collection<? extends IResultItem> results = query.getLastResults();
+			if (results == null){
+				results = query.getQueryResults(new NullProgressMonitor());
 			}
+			init(results);
+			
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -82,20 +86,31 @@ public class SimpleQueryResultSet implements IResultSet {
 	 */
 	public SimpleQueryResultSet(GriddedQuery query,
 			SimpleQueryResultSetMetadata metadata) {
-
 		this.metadata = metadata;
-
 		try {
-			items = query.getLastResults();
-			if (items == null) {
-				items = query.getQueryResults(new NullProgressMonitor());
-				m_maxRows = items.size();
+			Collection<? extends IResultItem> results = query.getLastResults();
+			if (results == null){
+				results = query.getQueryResults(new NullProgressMonitor());
 			}
+			init(results);
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
+	private void init(Collection<? extends IResultItem> queryResults){
+		m_maxRows = queryResults.size();
+		
+		if (queryResults instanceof List){
+			items =  (List)queryResults;
+		}else{
+			items = new ArrayList<IResultItem>();
+			for (IResultItem i : queryResults){
+				items.add(i);
+			}
+		}
+	}
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getMetaData()
 	 */

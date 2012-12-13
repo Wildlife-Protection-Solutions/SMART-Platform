@@ -111,6 +111,8 @@ public class QueryResultItemComparator extends ViewerComparator{
 		Comparator compare = null;
 		if (type == ColumnType.INTEGER){
 			compare = SmartUtils.nullIntegerComparator;
+		}else if (type == ColumnType.LONG){
+			compare = SmartUtils.nullLongComparator;
 		}else if (type == ColumnType.DATE){
 			compare = SmartUtils.nullDateComparator;
 		}else if (type == ColumnType.BOOLEAN){

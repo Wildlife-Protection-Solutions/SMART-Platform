@@ -22,6 +22,7 @@
 package org.wcs.smart.query.export;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,7 +40,7 @@ import org.wcs.smart.query.model.observation.QueryColumn;
  */
 public abstract class SimpleQueryExporter {
 
-	protected List<QueryResultItem> data;
+	protected Collection<QueryResultItem> data;
 	protected List<QueryColumn> queryColumns; 
 	protected File outputFile;
 	
@@ -110,7 +111,7 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	public void setData(List<QueryResultItem> data, 
+	public void setData(Collection<QueryResultItem> data, 
 			List<QueryColumn> queryColumns, 
 			File outputFile ){
 		this.data = data;
