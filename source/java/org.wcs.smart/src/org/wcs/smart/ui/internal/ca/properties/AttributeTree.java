@@ -339,17 +339,19 @@ public class AttributeTree {
 					boolean delete = DataModelManager.getInstance().validateDelete(node, monitor, AttributeTree.this.currentSession);
 					if (delete){
 						if (node.getParent() != null){
+							node.getParent().getActiveChildren().remove(node);
 							node.getParent().getChildren().remove(node);
 							node.setParent(null);
 							node.setAttribute(null);
 						}else{
 							a.getTree().remove(node);
-//							node.getAttribute().getActiveTreeNodes().remove(node);
+							node.getAttribute().getActiveTreeNodes().remove(node);
 							node.getAttribute().getTree().remove(node);
 							node.setAttribute(null);
 						}
 					}
 				}
+				currentSession.flush();
 				refreshTree();
 				fireChangeListener();
 			}
