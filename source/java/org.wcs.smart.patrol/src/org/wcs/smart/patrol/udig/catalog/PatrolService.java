@@ -42,6 +42,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
 import org.wcs.smart.patrol.geotools.PatrolDataSourceFactory;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A udig service for smart
@@ -74,7 +75,7 @@ public class PatrolService extends IService {
 	public PatrolService(Patrol patrol){
 		this.patrol = patrol;
 		this.params = new HashMap<String, Serializable>();
-		this.params.put(PatrolDataSourceFactory.PATROL_UUID.key, this.patrol.getUuid());
+		this.params.put(PatrolDataSourceFactory.PATROL_UUID.key, SmartUtils.encodeHex(this.patrol.getUuid()));
 		this.url = PatrolServiceExtension.createURL(this.params);
 		
 	}

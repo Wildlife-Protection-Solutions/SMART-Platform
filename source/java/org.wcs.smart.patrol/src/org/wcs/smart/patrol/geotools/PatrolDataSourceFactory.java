@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Smart patrol data source factor.  This is a read only data source.
@@ -43,7 +44,7 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param PATROL_UUID = new Param("patroluuid", byte[].class, Messages.PatrolDataSourceFactory_PatrolUuidParameterName, true);  //$NON-NLS-1$
+	public static final Param PATROL_UUID = new Param("patroluuid", String.class, Messages.PatrolDataSourceFactory_PatrolUuidParameterName, true);  //$NON-NLS-1$
 	  
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -107,8 +108,9 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 		Session session = HibernateManager.openSession();
 		Patrol patrol = null;
 		try{
-			patrol = (Patrol)session.load(Patrol.class, ((byte[])params.get(PATROL_UUID.key)));	
-		
+			patrol = (Patrol)session.load(Patrol.class, SmartUtils.decodeHex((String)params.get(PATROL_UUID.key)));	
+		}catch (Exception ex){
+			throw new IOException(ex);
 		}finally{
 			session.close();
 		}

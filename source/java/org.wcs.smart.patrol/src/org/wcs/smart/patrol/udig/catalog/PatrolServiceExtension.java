@@ -56,7 +56,7 @@ public class PatrolServiceExtension implements ServiceExtension {
             return null;
             
         //check for the property service key
-        if (params.containsKey(PATROL_UUID_KEY) && params.get(PATROL_UUID_KEY) instanceof byte[]) {
+        if (params.containsKey(PATROL_UUID_KEY) && params.get(PATROL_UUID_KEY) instanceof String) {
             //found it, create the service handle
         	return  new PatrolService(params);
         }
@@ -72,19 +72,19 @@ public class PatrolServiceExtension implements ServiceExtension {
 	
 	public static Map<String, Serializable> createParamsFromUrl(URL url){
 		/* determine conservation area */
-		String scauuid = url.getPath();
-		if (scauuid == null){
+		String uuid = url.getPath();
+		if (uuid == null){
 			return null;
 		}
-		int pos = scauuid.lastIndexOf('/');
+		int pos = uuid.lastIndexOf('/');
 		if (pos < 0){
 			pos = 0;
 		}
 		
-		scauuid = scauuid.substring(pos);
-		byte[] buuid = scauuid.getBytes();
+		uuid = uuid.substring(pos);
+		
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(PATROL_UUID_KEY, buuid);
+		params.put(PATROL_UUID_KEY, uuid);
 		return params;
 	}
 
@@ -95,10 +95,10 @@ public class PatrolServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		if (params.get(PATROL_UUID_KEY) == null || !(params.get(PATROL_UUID_KEY) instanceof byte[])){
+		if (params.get(PATROL_UUID_KEY) == null || !(params.get(PATROL_UUID_KEY) instanceof String)){
 			return null;
 		}
-		String url = "smart://smartdb/patrol/" + new String((byte[])params.get(PATROL_UUID_KEY)) ; //$NON-NLS-1$
+		String url = "smart://smartdb/patrol/" + (String)params.get(PATROL_UUID_KEY); //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
