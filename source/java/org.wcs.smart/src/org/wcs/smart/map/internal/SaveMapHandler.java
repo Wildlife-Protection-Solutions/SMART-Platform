@@ -26,11 +26,16 @@ import net.refractions.udig.project.internal.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.ui.internal.SaveBasemapDialog;
 import org.wcs.smart.ui.map.MapView;
@@ -50,29 +55,27 @@ public class SaveMapHandler extends AbstractHandler {
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part instanceof MapView){
 			MapView view = (MapView)part;
-			
-			view.setTool(ID);
-			Map map = view.getMap();
+			final Map map = view.getMap();
 			if(map == null) return null;
-			
 			SaveBasemapDialog dialog = new SaveBasemapDialog(Display.getDefault().getActiveShell());
 			if (dialog.open() != IDialogConstants.OK_ID){
 				return null;
 			}
-			BasemapDefinition mapDef = dialog.getBasemap();
-			MapSettings settings = MapSettings.getInstance(mapDef);
-			settings.save(map);
-			
-			
-			//update map blackboard
-			map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY, map.getLayersInternal());
+			final BasemapDefinition mapDef = dialog.getBasemap();
+			Job j = new Job(Messages.SaveMapHandler_JobName){
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					MapSettings settings = MapSettings.getInstance(mapDef);
+					settings.save(map);
+					return Status.OK_STATUS;
+				}	
+			};
+			j.schedule();
 		}
 		return null;
 	}
-
-
-
 }
