@@ -169,7 +169,7 @@ CREATE TABLE smart.saved_maps
 	CA_UUID CHAR(16) for bit data,
 	IS_DEFAULT BOOLEAN NOT NULL,
 	NAME VARCHAR(256) NOT NULL,
-	MAP_DEF long VARCHAR not null,
+	MAP_DEF CLOB not null,
 	PRIMARY KEY (UUID)
 );
 
