@@ -22,6 +22,7 @@
 
 package org.wcs.smart.query.ui.gridded;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart{
 	    	try {
 	    		// retrieves the last query result
 				GriddedQuery query = (GriddedQuery) parentEditor.getQuery(); 
-				List<GridResultItem> queryResults = query.getLastResults();
+				Collection<GridResultItem> queryResults = query.getLastResults();
 	    		if( (queryResults == null) || queryResults.isEmpty() ) return Status.OK_STATUS;
 	    		
 	    		Map map = getMap();

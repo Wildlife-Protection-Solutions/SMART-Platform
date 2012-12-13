@@ -24,6 +24,7 @@ package org.wcs.smart.query.model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -70,7 +71,7 @@ public abstract class SimpleQuery extends Query {
 	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
 		
-	private List<QueryResultItem> lastResults  = null;
+	private Collection<QueryResultItem> lastResults  = null;
 	protected String visibleTableColumnKeys = null;
 	
 	/**
@@ -197,7 +198,7 @@ public abstract class SimpleQuery extends Query {
 	 * @throws Exception
 	 */
 	@Transient
-	public List<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception{
+	public Collection<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception{
 		
 		lastResults = null;
 		Session session = HibernateManager.openSession();
@@ -218,7 +219,7 @@ public abstract class SimpleQuery extends Query {
 	 * @return the last run results
 	 */
 	@Transient
-	public List<QueryResultItem> getLastResults(){
+	public Collection<QueryResultItem> getLastResults(){
 		return lastResults;
 	}
 	
@@ -232,7 +233,7 @@ public abstract class SimpleQuery extends Query {
 	 * @throws Exception
 	 */
 	@Transient
-	public abstract List<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception;
+	public abstract Collection<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception;
 
 	
 	/**

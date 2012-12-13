@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model.observation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -130,7 +131,7 @@ public class ObservationQuery extends SimpleQuery{
 
 	/** public for testing purposes only */
 	@Transient
-	public List<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception{
+	public Collection<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception{
 		DerbyQueryEngine2 engine = new DerbyQueryEngine2();
 		return engine.executeQuery(this, session, progressMonitor);
 	}

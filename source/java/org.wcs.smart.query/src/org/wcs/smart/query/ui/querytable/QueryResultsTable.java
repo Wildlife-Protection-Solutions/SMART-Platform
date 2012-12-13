@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.querytable;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -125,7 +126,7 @@ public class QueryResultsTable {
 	 * @param items items to display in table
 	 * 
 	 */
-	public void setInput(List<?> items){
+	public void setInput(Collection<?> items){
 		if (!table.getTable().isDisposed()){
 			if (items == null){
 				table.setItemCount(0);

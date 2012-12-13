@@ -57,6 +57,7 @@ public abstract class QueryColumn implements Cloneable{
 	 */
 	public enum ColumnType{
 		INTEGER("Integer", java.sql.Types.INTEGER), //$NON-NLS-1$
+		LONG("Integer", java.sql.Types.INTEGER), //$NON-NLS-1$
 		NUMBER("Double", java.sql.Types.DOUBLE), //$NON-NLS-1$
 		STRING("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		BOOLEAN("Integer", java.sql.Types.BOOLEAN), //$NON-NLS-1$

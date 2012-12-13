@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -157,7 +158,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * to get all attributes associated with a matching observations.
 	 */
 	@Override
-	public List<QueryResultItem> executeQuery(final SimpleQuery query,
+	public Collection<QueryResultItem> executeQuery(final SimpleQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 

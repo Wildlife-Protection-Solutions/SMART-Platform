@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -81,7 +82,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
 
 public class DerbyGridEngine extends DerbyQueryEngine2{
-	private List<GridResultItem> myResults;
+	private Collection<GridResultItem> myResults;
 	
 	protected static final String QUERY_GRID_TEMP_TABLE_PREFIX = "grid_intermediate_"; //$NON-NLS-1$
 	protected String gridTempTable = "";	 //$NON-NLS-1$
@@ -96,7 +97,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<GridResultItem> executeQuery(
+	public Collection<GridResultItem> executeQuery(
 			final GriddedQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
@@ -224,7 +225,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * 
 	 * @throws SQLException
 	 */
-	protected List<GridResultItem> getGridResults(Connection c, 
+	protected Collection<GridResultItem> getGridResults(Connection c, 
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
@@ -232,8 +233,8 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		ResultSet rs;
 
 		if (value instanceof CombinedValueItem){
-			List<GridResultItem> value1 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart1());
-			List<GridResultItem> value2 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart2());
+			Collection<GridResultItem> value1 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart1());
+			Collection<GridResultItem> value2 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart2());
 			
 			//merge the results based on tile ids
 			HashMap<Tile, Double> values2 = new HashMap<Tile, Double>();
@@ -259,10 +260,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			}
 			return value1;
 		}
-		
+		HashMap<String, GridResultItem> items;
 		if(value instanceof PatrolValueItem ){
-			return computePatrolValue(c, (PatrolValueItem)value, gridDef);
-		}
+			items = computePatrolValue(c, (PatrolValueItem)value, gridDef);
+		}else{
 		
 		if(value instanceof AttributeValueItem ){
 			AttributeValueItem tmp = (AttributeValueItem)value;
@@ -355,7 +356,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		}
 		
 		try {
-			HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
+			items = new HashMap<String, GridResultItem>();
 			while (rs.next()) {
 				GridResultItem it = new GridResultItem();
 				
@@ -371,24 +372,26 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					throw Grid.GRID_TO_BIG_EXCEPTION;
 				}
 			}
-			//combine the two if patrol and no count then we want the
-			//value 0 to display otherwise we keep the count value
-			List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef);
-			for (GridResultItem it : patrolLocations){
-				if (items.get(it.getTileX() + "_" + it.getTileY()) == null){ //$NON-NLS-1$
-					GridResultItem newitem = new GridResultItem();
-					newitem.setTileX(it.getTileX());
-					newitem.setTileY(it.getTileY());
-					newitem.setValue(0);
-					items.put(it.getTileX() + "_" + it.getTileY(), newitem); //$NON-NLS-1$
-				}
-			}
-			ArrayList<GridResultItem> list = new ArrayList<GridResultItem>();
-			list.addAll(items.values());
-			return list;
 		} finally {
 			rs.close();
 		}
+		}
+		
+		
+		//combine the two if patrol and no count then we want the
+		//value 0 to display otherwise we keep the count value
+		List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef);
+		for (GridResultItem it : patrolLocations){
+			if (items.get(it.getTileId()) == null){ 
+				GridResultItem newitem = new GridResultItem();
+				newitem.setTileX(it.getTileX());
+				newitem.setTileY(it.getTileY());
+				newitem.setValue(0);
+				items.put(it.getTileId(), newitem); 
+			}
+		}
+		
+		return items.values();
 	}
 
 	private List<GridResultItem> computePatrolExistance(Connection c, Grid gridDef) throws Exception{
@@ -401,7 +404,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		return computePatrolTrackNoFilter(c, engine);
 	}
 	
-	private List<GridResultItem> computePatrolValue(Connection c,
+	private HashMap<String,GridResultItem> computePatrolValue(Connection c,
 			PatrolValueItem item, 
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
@@ -429,7 +432,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		return computePatrolTrack(c, engine, dataField);
 	}
 	
-	private List<GridResultItem> computePatrolTrack(Connection c, 
+	private HashMap<String,GridResultItem> computePatrolTrack(Connection c, 
 			GridAnalysisEngine<?> engine, 
 			String[] dataField) throws Exception{
 		StringBuilder sql = new StringBuilder();
@@ -489,14 +492,14 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		}
 		rs.close();
 		
-		List<GridResultItem> items = new ArrayList<GridResultItem>();
+		HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
 			GridResultItem it = new GridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());
-			items.add(it);
+			items.put(it.getTileId(), it);
 		}
 		return items;
 		

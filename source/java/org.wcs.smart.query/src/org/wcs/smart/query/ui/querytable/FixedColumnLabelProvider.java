@@ -88,6 +88,8 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 			return (String) value;
 		} else if (type == ColumnType.INTEGER) {
 			return String.valueOf((Integer) value);
+		} else if (type == ColumnType.LONG) {
+			return String.valueOf((Long) value);
 		} else if (type == ColumnType.NUMBER) {
 			if (value instanceof Double) {
 				return String.valueOf((Double) value);

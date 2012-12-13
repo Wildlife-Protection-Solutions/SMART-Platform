@@ -31,7 +31,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
@@ -77,7 +77,7 @@ final class RasterBuilder {
 	private static final float NO_DATA = -9999;	//no data value
 	
 	/** a table where x,y values are the position in the raster grid. (0,0) is the bottom left tile and (360 180) is the top right tile */
-	private List<GridResultItem> table; 
+	private Collection<GridResultItem> table; 
 	private GridQueryResultMetadata metadata;
 	
 	private File file;
@@ -127,7 +127,7 @@ final class RasterBuilder {
 	 * @param table query result data
 	 * @param metadata query result metadata
 	 */
-	public void setTable(List<GridResultItem> data, GridQueryResultMetadata metadata ) {
+	public void setTable(Collection<GridResultItem> data, GridQueryResultMetadata metadata ) {
 		this.table = data;
 		this.metadata = metadata;
 	}

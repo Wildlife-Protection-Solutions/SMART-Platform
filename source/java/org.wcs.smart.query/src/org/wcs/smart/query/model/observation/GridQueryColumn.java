@@ -42,8 +42,8 @@ public class GridQueryColumn extends QueryColumn{
 	 * The defined fixed columns.
 	 */
 	public enum GridColumns{
-		TILE_X(Messages.GridQueryColumn_TileXIdColumnName, ColumnType.INTEGER,"tile_x"), //$NON-NLS-1$
-		TILE_Y(Messages.GridQueryColumn_TileYIdColumnName, ColumnType.INTEGER, "tile_y"), //$NON-NLS-1$
+		TILE_X(Messages.GridQueryColumn_TileXIdColumnName, ColumnType.LONG,"tile_x"), //$NON-NLS-1$
+		TILE_Y(Messages.GridQueryColumn_TileYIdColumnName, ColumnType.LONG, "tile_y"), //$NON-NLS-1$
 		VALUE(Messages.GridQueryColumn_ValueColumnName, ColumnType.NUMBER,"value"); //$NON-NLS-1$
 		
 		private String guiName;

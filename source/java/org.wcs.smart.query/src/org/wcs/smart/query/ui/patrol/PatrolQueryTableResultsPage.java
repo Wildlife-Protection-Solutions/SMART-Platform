@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.ui.patrol;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.layout.GridLayout;
@@ -136,7 +136,7 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(List<QueryResultItem> results, 
+	public void updateAndShowTable(Collection<QueryResultItem> results, 
 			IProgressMonitor monitor){
 		content.setTableData(results, monitor);
 	}

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.patrol;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -102,7 +103,7 @@ public class PatrolResultsTable {
 	 * @param items items to display in table
 	 * 
 	 */
-	public void setInput(List<QueryResultItem> items){
+	public void setInput(Collection<QueryResultItem> items){
 		if (!table.getTable().isDisposed()){
 			if (items == null){
 				table.setItemCount(0);

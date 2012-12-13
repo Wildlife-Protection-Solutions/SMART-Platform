@@ -56,7 +56,13 @@ public class GridResultItem implements IResultItem{
 	 */
 	public void setTileY(long y) {
 		this.tileY = y;
-		
+	}
+	/**
+	 * 
+	 * @return combines the x and y value into a single tile id value
+	 */
+	public String getTileId(){
+		return this.tileX + "_" + this.tileY;
 	}
 	
 	/**
