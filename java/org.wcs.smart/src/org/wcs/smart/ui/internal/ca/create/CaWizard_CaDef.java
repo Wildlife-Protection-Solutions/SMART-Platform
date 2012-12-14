@@ -38,6 +38,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -77,7 +78,6 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	 * @param parent
 	 */
 	public void createControl(Composite parent) {
-		
 		composite = new CaInfoComposite(parent,  SWT.NULL, null);
 		composite.addValidationListener(new CaInfoComposite.IValidationListener() {
 			@Override
