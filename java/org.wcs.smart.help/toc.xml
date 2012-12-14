@@ -2,19 +2,36 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="SMART Help" topic="html/toc.html">
-   <topic label="Getting Started">
-      <anchor id="gettingstarted"/>
+   <topic label="Introduction">
+      <topic label="Getting Started">
+      </topic>
+      <topic href="html/Requirements.html" label="Requirements">
+      </topic>
    </topic>
-   <topic label="Concepts">
-      <anchor id="concepts"/>
-   </topic>
-   <topic label="Tasks">
-      <anchor id="tasks"/>
-   </topic>
-   <topic label="Reference">
-      <anchor id="reference"/>
-   </topic>
-   <topic label="Samples">
-      <anchor id="samples"/>
+   <topic href="html/AdministrativeTasks.html" label="Administrator Tasks">
+      <topic href="html/SettingUpANewConservationArea.html" label="Creating a Conservation Area">
+         <topic href="html/SettingUpANewConservationArea.html#DataModel" label="Defining a Data Model">
+         </topic>
+         <topic href="html/SettingUpANewConservationArea.html#AgenciesRanks" label="Agencies &amp; Ranks">
+         </topic>
+         <topic href="html/SettingUpANewConservationArea.html#Employees" label="Employees">
+         </topic>
+      </topic>
+      <topic href="html/AdministrativeTasks.html#DeleteCa" label="Deleting a Conservation Area">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#ExportDataModel" label="Exporting The Data Model">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#UserNames" label="Changing Usernames and Passwords">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#ExportImportPatrol" label="Exporting and Importing Patrols">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#ImportDataModel" label="Importing The Data Model">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#ImportCa" label="Importing a Conservation Area">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#Backup" label="System Backup">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#AutoBackup" label="Automatic Backup">
+      </topic>
    </topic>
 </toc>

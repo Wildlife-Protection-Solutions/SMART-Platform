@@ -1,0 +1,33 @@
+body{
+	background-color:white;
+	margin:5px;
+	font-family: Arial, sans-serif;
+	font-size:12px;
+}
+
+p{
+	margin: 5px;
+}
+
+h2{
+	font-size:20px;
+	font-weight:bold;
+	color:white;
+	background-color: #4E5A8A;
+	padding: 5px;
+}
+
+h4{
+	font-size:15px;
+	font-weight:normal;
+	color:black;
+	background-color: #BCC9DC;
+	padding: 3px;
+}
+
+h5{
+	font-size:14px;
+	font-weight:bold;
+	color:black;
+	padding: 3px;
+}
