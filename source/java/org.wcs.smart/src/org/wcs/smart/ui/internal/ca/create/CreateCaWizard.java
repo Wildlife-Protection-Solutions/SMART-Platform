@@ -46,11 +46,7 @@ public class CreateCaWizard extends Wizard {
 	 */
 	public CreateCaWizard() {
 		setWindowTitle(Messages.CreateCaWizard_WziardName);
-		
-		
-		
 	}
-
 	
 	@Override
 	public void addPages() {
