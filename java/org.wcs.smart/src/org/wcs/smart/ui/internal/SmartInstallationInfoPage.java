@@ -37,7 +37,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Messages.SmartInstallationInfoPage_DBLocation_Label);
 		
-		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY);
+		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB);
 		File db = new File(embeddedDb);
 		try{
 			sb.append(db.getCanonicalPath());
@@ -48,7 +48,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		
 		sb.append(Messages.SmartInstallationInfoPage_FilestoreLocation_Label);
-		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
+		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
 		db = new File(embeddedDb);
 		try{
 			sb.append(db.getCanonicalPath());
@@ -59,7 +59,7 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SmartUtils.LINE_SEPARATOR);
 		
 		sb.append(Messages.SmartInstallationInfoPage_GPSBabel_LocationLabel);
-		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.GPS_BABLE_KEY);
+		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
 		db = new File(embeddedDb);
 		try{
 			sb.append(db.getCanonicalPath());

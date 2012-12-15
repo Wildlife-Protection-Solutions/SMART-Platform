@@ -27,8 +27,6 @@ import net.refractions.udig.tool.info.internal.InfoView2;
 
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IViewPart;
@@ -40,7 +38,6 @@ import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.backup.AutoBackupEngine;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -182,23 +179,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	LoadDefaultLayersJob job = new LoadDefaultLayersJob(view.getMap(), true);
     	job.schedule();
     	
-    	/* --- Image Descriptors for PlugIn --- */
-		ImageDescriptor descriptor = AbstractUIPlugin
-				.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,
-						"images/icons/obj16/user_orange.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(SmartPlugIn.SMART_EMPLOYEE_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/user_green.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(SmartPlugIn.EMPLOYEE_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/station.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(SmartPlugIn.STATION_ICON, descriptor);
-		}
+    	
     }
     
     public void postWindowCreate() {

@@ -23,7 +23,6 @@ package org.wcs.smart.query;
 
 import java.util.Map;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -100,7 +99,7 @@ public class QueryErrorControlContribution extends
 		gl.marginHeight = gl.verticalSpacing = gl.marginWidth = 0;
 		main.setLayout(gl);
 		lblErrorImage = new Label(main, SWT.NONE);
-		lblErrorImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.EXCLAMATION_ICON));
+		lblErrorImage.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.EXCLAMATION_ICON));
 		lblError = new Label(main, SWT.NONE);
 		lblError.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		lblError.setText(Messages.QueryErrorControlContribution_QueryErrorText);

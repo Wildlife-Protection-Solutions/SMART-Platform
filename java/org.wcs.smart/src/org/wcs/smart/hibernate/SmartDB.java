@@ -121,7 +121,7 @@ public class SmartDB {
 	 * @return true if the smart database exists, false otherwise
 	 */
 	public static boolean dbExists(){
-		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY);
+		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB);
 		File db = new File(embeddedDb); 
 		boolean exists = db.exists();
 		if (!exists){

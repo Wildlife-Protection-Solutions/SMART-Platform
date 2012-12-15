@@ -81,7 +81,7 @@ public class CaExporter {
 	 * @return the default backup file name based on the current date
 	 */
 	public static String getDefaultFileName(){
-		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
+		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
 		try{
 			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getCanonicalPath(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

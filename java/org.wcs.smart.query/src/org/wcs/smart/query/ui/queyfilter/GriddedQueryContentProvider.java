@@ -33,11 +33,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -53,7 +53,6 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
-import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
 /**
  * Content provider for gridded query options.  Includes
@@ -470,17 +469,17 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 		 */
 		public Image getImage(){
 			if (type == NodeType.VALUE_NODE){
-				return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON);
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON);
 			}else if (type == NodeType.PATROL_DATE_GROUPBYS){
-				return JFaceResources.getImageRegistry().get(QueryPlugIn.CALENDAR_ICON);
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CALENDAR_ICON);
 			}else if (type == NodeType.DATAMODEL_VALUES){
-				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.DATA_MODEL_ICON);
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
 			}else if (type == NodeType.PATROL_VALUES){
-				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
-				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.ATTRIBUTE_NUMBER_ICON);
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 			}else if (type == NodeType.DATAMODEL_VALUE_CATEGORY){
-				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.CATEGORY_ICON);
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 			}
 			return null;
 		}

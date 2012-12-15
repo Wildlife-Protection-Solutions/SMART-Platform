@@ -164,7 +164,7 @@ public class ConservationArea {
 	 */
 	@Transient
 	public String getFileDataStoreLocation(){
-		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
+		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
 		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(uuid);
 		return filestore;
 	}

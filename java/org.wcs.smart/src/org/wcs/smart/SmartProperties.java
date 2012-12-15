@@ -21,9 +21,14 @@
  */
 package org.wcs.smart;
 
+import java.io.File;
 import java.io.InputStream;
-import java.util.Properties;
+import java.text.MessageFormat;
 
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -34,19 +39,24 @@ import org.wcs.smart.internal.Messages;
  */
 public class SmartProperties {
 
-	private static final String SMART_PROPERTIES = "properties/smart.properties"; //$NON-NLS-1$
-	
 	private static final String DEFAULT_DATAMODEL_FILE = "properties/datamodel.xml"; //$NON-NLS-1$
 
 	/**
 	 * Database location key
 	 */
-	public static final String SMART_DB_KEY = "db.dbname"; //$NON-NLS-1$
-	public static final String FILESTORE_KEY = "filestore"; //$NON-NLS-1$
-	public static final String GPS_BABLE_KEY = "gpsbabel"; //$NON-NLS-1$
-	public static final String BACKUP_DIRECTORY_KEY = "backup.directory"; //$NON-NLS-1$
+	public static final String PROP_SMART_DB = "DATABASE_LOC"; //$NON-NLS-1$
+	public static final String PROP_FILESTORE = "FILESTORE_LOC"; //$NON-NLS-1$
+	public static final String PROP_GPS_BABEL = "GPSBABEL"; //$NON-NLS-1$
+	public static final String PROP_BACKUP_DIR = "BACKUP"; //$NON-NLS-1$
 	
-	private Properties prop = null;
+	private static final String SYSPROP_GPS_BABEL = "GPSBABEL"; //$NON-NLS-1$
+	private static final String SYSPROP_DATASTORE = "DATASTORE_DIR"; //$NON-NLS-1$
+	private static final String SYSPROP_BACKUPDIR = "BACKUP_DIR"; //$NON-NLS-1$
+	
+	//subloction of filestore within the data directory
+	private static final String FILESTORE_DIR_NAME = "filestore" + File.separator; //$NON-NLS-1$
+	//subloction of database within the data directory
+	private static final String DB_DIR_NAME = "database" + File.separator + "smartdb" + File.separator; //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private static SmartProperties instance = null;
 	
@@ -69,26 +79,44 @@ public class SmartProperties {
 		return SmartApp.class.getClassLoader().getResourceAsStream(DEFAULT_DATAMODEL_FILE);
 	}
 	
-	private void readProperties(){
-		prop = new Properties();
-		try{
-			InputStream stream = SmartApp.class.getClassLoader().getResourceAsStream(SMART_PROPERTIES);
-			prop.load(stream);
-		}catch (Exception ex){
-			//cannot load properties files
-			SmartPlugIn.displayLogExit(Messages.SmartProperties_Error_ReadingProperties, ex);
+	public String getProperty(String key){
+		if (key.equals(PROP_FILESTORE)){
+			return getSystemProperty(SYSPROP_DATASTORE) + File.separator + FILESTORE_DIR_NAME;
+		}else if (key.equals(PROP_SMART_DB)){
+			return getSystemProperty(SYSPROP_DATASTORE) + File.separator + DB_DIR_NAME;
+		}else if (key.equals(PROP_GPS_BABEL)){
+			return getSystemProperty(SYSPROP_GPS_BABEL);
+		}else if (key.equals(PROP_BACKUP_DIR)){
+			return getSystemProperty(SYSPROP_BACKUPDIR);
 		}
+		throw new IllegalStateException(MessageFormat.format(Messages.SmartProperties_InvalidProperty, new Object[]{key}));
 	}
-	
+		
 	/**
 	 * Loads a given property from the property file.
 	 * @param key
 	 * @return
 	 */
-	public String getProperty(String key){
-		if (prop == null){
-			readProperties();
+	private String getSystemProperty(String key){
+		IPreferencesService service = Platform.getPreferencesService();
+		String value = service.getString(SmartPlugIn.PLUGIN_ID, key, null, null);
+		return value;
+	}
+	
+	/**
+	 * Sets smart property.
+	 * <p>Only supports setting of PROP_GPS_BABEL.  All other properties
+	 * not supported.</p>
+	 * 
+	 * @param key smart property key
+	 * @param value new value
+	 * @throws Exception
+	 */
+	public void setKey(String key, String value) throws Exception{
+		if (key.equals(PROP_GPS_BABEL)){
+			IEclipsePreferences pref = ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID);
+			pref.put(SYSPROP_GPS_BABEL, value);
+			pref.flush();
 		}
-		return prop.getProperty(key);
 	}
 }

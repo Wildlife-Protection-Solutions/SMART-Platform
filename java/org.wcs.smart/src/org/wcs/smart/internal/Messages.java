@@ -448,6 +448,10 @@ public class Messages extends NLS {
 	public static String ExportCaHandler_ExportComplete_DialogTitle;
 	public static String FilterComposite_ClearButton_Tooltip;
 	public static String FilterComposite_Default_SearchText;
+	public static String GpsBabelPreferencePage_CouldNotUpdate;
+	public static String GpsBabelPreferencePage_FileNotFound;
+	public static String GpsBabelPreferencePage_ProgramLocLabel;
+	public static String GpsBabelPreferencePage_WarningDialogTitle;
 	public static String HibernateDataExporter_Progress_ExportMappedTables;
 	public static String HibernateDataExporter_SubProgress_ProcessingTable;
 	public static String HibernateManager_CannotChangeLastAdminUser;
@@ -615,6 +619,7 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_SystemLang_Label;
 	public static String SmartPlugIn_Error_Dialog_Title;
 	public static String SmartProperties_Error_ReadingProperties;
+	public static String SmartProperties_InvalidProperty;
 	public static String SmartService_Error_DisposingService;
 	public static String SmartServiceInfo_Description;
 	public static String SmartServiceInfo_Keyword1;

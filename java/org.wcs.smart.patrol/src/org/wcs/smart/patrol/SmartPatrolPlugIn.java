@@ -24,8 +24,7 @@ package org.wcs.smart.patrol;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -71,8 +70,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 * Image descriptor key for patrol leader
 	 */
 	public static final String PATROL_LEADER_ICON = "org.wsc.smart.patrol.PATROL_LEADER"; //$NON-NLS-1$
-
-
+	
 	/**
 	 * Image descriptor key for patrol pilot
 	 */
@@ -99,77 +97,26 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String PATROL_MANDATE_ICON = "org.wsc.smart.patrol.PATROL_MANDATE"; //$NON-NLS-1$
 	
-	
-	/**
-	 * Get image descriptors for the clear button.
-	 */
-	static {
-		ImageDescriptor descriptor = AbstractUIPlugin
-				.imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/airplane.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(AIR_PATROL_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol_armed.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(PATROL_ARMED_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol_team.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(PATROL_TEAM_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/boat.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(MARINE_PATROL_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol_ground.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(GROUND_PATROL_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol_leader.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(PATROL_LEADER_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol_member.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(PATROL_MEMBER_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol_pilot.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(PATROL_PILOT_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(PATROL_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				PLUGIN_ID, "images/icons/obj16/patrol_mandate.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(PATROL_MANDATE_ICON, descriptor);
-		}
-	}
-	
 	/**
 	 * The constructor
 	 */
 	public SmartPatrolPlugIn() {
 	}
 
+	@Override
+    protected void initializeImageRegistry(ImageRegistry reg) {
+		reg.put(PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol.png"));
+		reg.put(AIR_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/airplane.png"));
+		reg.put(PATROL_ARMED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_armed.png"));
+		reg.put(PATROL_TEAM_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_team.png"));
+		reg.put(MARINE_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/boat.png")); //$NON-NLS-1$
+		reg.put(GROUND_PATROL_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_ground.png")); //$NON-NLS-1$
+		reg.put(PATROL_LEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_leader.png")); //$NON-NLS-1$
+		reg.put(PATROL_MEMBER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_member.png")); //$NON-NLS-1$
+		reg.put(PATROL_PILOT_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_pilot.png")); //$NON-NLS-1$
+		reg.put(PATROL_MANDATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mandate.png")); //$NON-NLS-1$			
+    }
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
@@ -189,6 +136,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+		
 	}
 
 	/**

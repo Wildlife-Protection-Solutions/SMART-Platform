@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.startup;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -29,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -58,20 +60,18 @@ public class SmartStartUp {
 		//check that the database exists
 		if (!SmartDB.dbExists()){
 			//log error message and exit
-			SmartPlugIn.displayLogExit(Messages.SmartStartUp_Error_NoSmartDb, new IllegalStateException(Messages.SmartStartUp_Error_NoSmartDb));
+			throw new IllegalStateException(
+				MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
 		}
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
 			return HibernateManager.getConservationAreas(session);
-		}catch (Throwable t){
-			SmartPlugIn.displayLogExit(Messages.SmartStartUp_Error_LoadingCas, t);
 		}finally{
 			session.getTransaction().rollback();
 			session.close();
 		}
-		return null;
 	}
 	
 	/**

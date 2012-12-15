@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -46,11 +45,11 @@ public class PatrolUtils {
 	 */
 	public static Image getImage(PatrolType.Type type){
 		if (type == PatrolType.Type.GROUND){
-			return JFaceResources.getImageRegistry().get (SmartPatrolPlugIn.GROUND_PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
 		}else if (type == PatrolType.Type.MARINE){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
 		}else if (type == PatrolType.Type.AIR){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
 		}
 		return null;
 	}
@@ -65,11 +64,11 @@ public class PatrolUtils {
 	 */
 	public static ImageDescriptor getImageDescriptor(PatrolType.Type type){
 		if (type == PatrolType.Type.GROUND){
-			return JFaceResources.getImageRegistry().getDescriptor(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.GROUND_PATROL_ICON);
 		}else if (type == PatrolType.Type.MARINE){
-			return JFaceResources.getImageRegistry().getDescriptor(SmartPatrolPlugIn.MARINE_PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.MARINE_PATROL_ICON);
 		}else if (type == PatrolType.Type.AIR){
-			return JFaceResources.getImageRegistry().getDescriptor(SmartPatrolPlugIn.AIR_PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.AIR_PATROL_ICON);
 		}
 		return null;
 	}

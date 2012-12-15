@@ -76,7 +76,7 @@ public class GPSBabel {
 	 */
 	private static String getGpsBabelLocation(){
 		if (GPS_BABEL == null){
-			GPS_BABEL = SmartProperties.getInstance().getProperty(SmartProperties.GPS_BABLE_KEY);
+			GPS_BABEL = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
 		}
 		return new File(GPS_BABEL).getAbsolutePath();
 	}

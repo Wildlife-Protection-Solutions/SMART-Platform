@@ -172,8 +172,8 @@ public class DerbyRestoreEngine {
 		}
 		monitor.worked(1);
 
-		File dbFile = new File(SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
-		File dataFile = new File(SmartProperties.getInstance().getProperty( SmartProperties.FILESTORE_KEY));
+		File dbFile = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+		File dataFile = new File(SmartProperties.getInstance().getProperty( SmartProperties.PROP_FILESTORE));
 		if (!dataFile.exists()){
 			dataFile.mkdir();
 		}

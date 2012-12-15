@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.report.ui;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.QueryPlugIn;
@@ -44,9 +43,9 @@ public class ReportLabelProvider extends LabelProvider {
 	 */
 	public Image getImage(Object element) {
 		if (element instanceof RootReportFolder || element instanceof ReportFolder){
-			return JFaceResources.getImage(QueryPlugIn.FOLDER_ICON);
+			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.FOLDER_ICON);
 		}else if (element instanceof Report){
-			return JFaceResources.getImage(ReportPlugIn.REPORT_ICON);
+			return ReportPlugIn.getDefault().getImageRegistry().get(ReportPlugIn.REPORT_ICON);
 		}
 		return null;
 	}

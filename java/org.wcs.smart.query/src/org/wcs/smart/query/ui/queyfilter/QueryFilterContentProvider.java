@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -42,6 +41,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -52,7 +52,6 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
-import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
 /**
  * A content provider that provides the query
@@ -347,11 +346,11 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 		 */
 		public Image getImage(){
 			if (type == RootNodeType.PATROL_FILTERS){
-				return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 			}else if (type == RootNodeType.DATA_MODEL_FILTERS){
-				 return JFaceResources.getImageRegistry().get(DataModelLabelProvider.DATA_MODEL_ICON);
+				 return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
 			}else if (type == RootNodeType.AREA_FILTERS){
-				return JFaceResources.getImageRegistry().get(QueryPlugIn.AREA_FILTER_ICON);
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.AREA_FILTER_ICON);
 			}
 			return null;
 		}

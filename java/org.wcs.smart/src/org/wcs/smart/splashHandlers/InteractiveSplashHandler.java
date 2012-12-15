@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.application.DisplayAccess;
 import org.eclipse.ui.splash.AbstractSplashHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -136,8 +137,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		
 		//auto-login for testing
-		txtUserName.setText("smart"); //$NON-NLS-1$
-		txtPassword.setText("smart"); //$NON-NLS-1$
+//		txtUserName.setText("smart"); //$NON-NLS-1$
+//		txtPassword.setText("smart"); //$NON-NLS-1$
 		//handleButtonOKWidgetSelected();
 
 		doEventLoop();
@@ -380,24 +381,51 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private void startup(){
 		try {
 			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
-			List<ConservationArea> cas = SmartStartUp.getConservationAreas();
-			cmvConservationArea.getCombo().removeAll();
+			
+			Runnable r = new Runnable(){
 
-			if (cas != null && cas.size() > 0) {
-				for (ConservationArea ca : cas) {
-					cmvConservationArea.add(ca);
-				}
-				cmvConservationArea.getCombo().select(0);
-				enableControls(true);
-				progressLabel.setText(""); //$NON-NLS-1$
-				
-				validateUi();
-			} else {
-				// no conservation areas
-				enableControls(false);
-				(new StartUpDialog(parent)).open();
-				startup();
-			}
+				@Override
+				public void run() {
+					DisplayAccess.accessDisplayDuringStartup();
+					final List<ConservationArea> cas = new ArrayList<ConservationArea>();
+					try{
+						cas.addAll(SmartStartUp.getConservationAreas());
+					}catch (final Exception ex){
+						InteractiveSplashHandler.this.parent.getDisplay().asyncExec(new Runnable(){
+							public void run(){
+								SmartPlugIn.displayLogExit(ex.getMessage(), ex);
+							}
+						});
+					}
+					
+					InteractiveSplashHandler.this.parent.getDisplay().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							cmvConservationArea.getCombo().removeAll();
+
+							if (cas != null && cas.size() > 0) {
+								for (ConservationArea ca : cas) {
+									cmvConservationArea.add(ca);
+								}
+								cmvConservationArea.getCombo().select(0);
+								enableControls(true);
+								progressLabel.setText(""); //$NON-NLS-1$
+								
+								validateUi();
+							} else {
+								// no conservation areas
+								enableControls(false);
+								(new StartUpDialog(parent)).open();
+								startup();
+							}
+							
+						}});
+					
+				}};
+				Thread t = new Thread(r);
+				t.setContextClassLoader(Thread.currentThread().getContextClassLoader());
+				t.start();
+			
 
 		} catch (Exception ex) {
 			SmartPlugIn
@@ -407,5 +435,6 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		}
 	}
 	
+	 
 	
 }

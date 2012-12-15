@@ -106,6 +106,13 @@
                   style="push"
                   tooltip="%changeuserpass.command.tooltip">
             </command>
+            <command
+                  commandId="org.wcs.smart.systemPref"
+                  label="%systempref.command.label"
+                  mnemonic="%systempref.command.mnemonic"
+                  style="push"
+                  tooltip="%systempref.command.tooltip">
+            </command>
             <separator
                   name="org.wcs.smart.separator1"
                   visible="true">
@@ -364,7 +371,7 @@
          </property>
          <property
                name="preferenceCustomization"
-               value="plugin_customization.ini">
+               value="smart_customization.ini">
          </property>
          <property
                name="appName"
@@ -500,6 +507,10 @@
             id="org.wcs.smart.ca.showProjection"
             name="%manageprojections.command.name">
       </command>
+      <command
+            id="org.wcs.smart.systemPref"
+            name="%systempref.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -598,6 +609,10 @@
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowProjectionsPageHandler"
             commandId="org.wcs.smart.ca.showProjection">
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.ShowSystemPreferencesHandler"
+            commandId="org.wcs.smart.systemPref">
       </handler>
    </extension>
    <extension
@@ -782,6 +797,14 @@
             advisor="org.wcs.smart.internal.ca.advisors.EmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.wcs.smart.ui.internal.preference.GpsBabelPreferencePage"
+            id="org.wcs.smart.preference.GpsBabel"
+            name="%gpsbabel.preferencepage.name">
+      </page>
    </extension>
 
 </plugin>
