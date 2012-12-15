@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 import java.util.Set;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
@@ -83,21 +82,21 @@ public class EmployeeLabelProvider extends LabelProvider {
 
 			if (leaders == null) {
 				if (((Employee) element).getSmartUserId() == null) {
-					return JFaceResources.getImageRegistry().get(
+					return SmartPatrolPlugIn.getDefault().getImageRegistry().get(
 							SmartPlugIn.EMPLOYEE_ICON);
 				} else {
-					return JFaceResources.getImageRegistry().get(
+					return SmartPatrolPlugIn.getDefault().getImageRegistry().get(
 							SmartPlugIn.SMART_EMPLOYEE_ICON);
 				}
 			} else {
 				if (leaders.contains(element)) {
-					return JFaceResources.getImageRegistry().get(
+					return SmartPatrolPlugIn.getDefault().getImageRegistry().get(
 							SmartPatrolPlugIn.PATROL_LEADER_ICON);
 				} else if (pilots != null && pilots.contains(element)) {
-					return JFaceResources.getImageRegistry().get(
+					return SmartPatrolPlugIn.getDefault().getImageRegistry().get(
 							SmartPatrolPlugIn.PATROL_PILOT_ICON);
 				} else {
-					return JFaceResources.getImageRegistry().get(
+					return SmartPatrolPlugIn.getDefault().getImageRegistry().get(
 							SmartPatrolPlugIn.PATROL_MEMBER_ICON);
 				}
 			}

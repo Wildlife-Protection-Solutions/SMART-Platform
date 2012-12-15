@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.QueryPlugIn;
@@ -49,16 +48,16 @@ public class QueryListLabelProvider extends LabelProvider {
 	@Override 
 	public Image getImage(Object element) {
 		if (element instanceof QueryFolder){
-			return JFaceResources.getImage(QueryPlugIn.FOLDER_ICON);
+			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.FOLDER_ICON);
 		}else if (element instanceof QueryInput){
 			if (((QueryInput) element).getType() == QueryType.OBSERVATION){
-				return JFaceResources.getImage(QueryPlugIn.WAYPOINT_QUERY_ICON);
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.WAYPOINT_QUERY_ICON);
 			}else if (((QueryInput) element).getType() == QueryType.SUMMARY){
-				return JFaceResources.getImage(QueryPlugIn.SUMMARY_QUERY_ICON);
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.SUMMARY_QUERY_ICON);
 			}else if (((QueryInput) element).getType() == QueryType.PATROL){
-				return JFaceResources.getImage(QueryPlugIn.PATROL_QUERY_ICON);
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.PATROL_QUERY_ICON);
 			}else if (((QueryInput) element).getType() == QueryType.GRIDDED){
-				return JFaceResources.getImage(QueryPlugIn.GRIDDED_SUMMARY_QUERY_ICON);
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.GRIDDED_SUMMARY_QUERY_ICON);
 			}
 		}
 		return null;

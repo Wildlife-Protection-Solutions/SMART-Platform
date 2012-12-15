@@ -32,8 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -146,7 +145,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	/**
 	 * The value number of nights icon
 	 */
-	public static final String VALUE_NUM_NIGHTS_ICON = Messages.QueryPlugIn_15;
+	public static final String VALUE_NUM_NIGHTS_ICON = "org.wcs.smart.query.valuenumnights"; //$NON-NLS-1$
+	
 	/**
 	 * The value number of patrols icon
 	 */
@@ -198,53 +198,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * Query property extension id
 	 */
 	private static final String QUERY_PROPERTY_EXTENSION_ID = "org.wcs.smart.query.property"; //$NON-NLS-1$
-	/*
-	 * Load images
-	 */
-	static {
-		addImage("images/icons/obj16/delete.png",DELETE_MINI_ICON); //$NON-NLS-1$
-		
-		addImage("images/icons/obj16/querypatrol.gif",QUERY_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/summary_query.png",SUMMARY_QUERY_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/folder.png",FOLDER_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/waypoint_query.png",WAYPOINT_QUERY_ICON);	 //$NON-NLS-1$
-		addImage("images/icons/obj16/patrol_query.png",PATROL_QUERY_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/gridded_query.png", GRIDDED_SUMMARY_QUERY_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/grid.png", GRID_ICON); //$NON-NLS-1$
-		
-		addImage("images/icons/obj16/calendar.png",CALENDAR_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/calendar_day.png",CALENDAR_DAY_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/calendar_week.png",CALENDAR_WEEK_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/calendar_month.png",CALENDAR_MONTH_ICON); //$NON-NLS-1$
-			
-		addImage("images/icons/obj16/calendar_year.png",CALENDAR_YEAR_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/group_by.png",GROUPBY_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/values.png",VALUE_ICON); //$NON-NLS-1$
-		
-		addImage("images/icons/obj16/value_distance.png",VALUE_DISTANCE_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/value_numDays.png",VALUE_NUM_DAYS_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/value_numEmployees.png",VALUE_NUM_EMPLOYEES_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/value_numHours.png",VALUE_NUM_HOURS_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/value_numNights.png",VALUE_NUM_NIGHTS_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/value_numPatrol.png",VALUE_NUM_PATROLS_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/value_personDays.png",VALUE_PERSON_DAYS_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/value_personHours.png",VALUE_PERSON_HOURS_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/exclamation.png",EXCLAMATION_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/row_header.png",ROW_HEADER_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/column_header.png",COLUMN_HEADER_ICON); //$NON-NLS-1$
-		
-		addImage("images/icons/obj16/area_filter.png",AREA_FILTER_ICON); //$NON-NLS-1$
-		addImage("images/icons/obj16/area_polygon.png",AREA_POLYGON_FILTER_ICON);	 //$NON-NLS-1$
-	}
-	
+
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
-	
-	private static void addImage(String path, String icon){
-		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID, path); 
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(icon, descriptor);
-		}
-	}
 	
 	// The shared instance
 	private static QueryPlugIn plugin;
@@ -257,10 +212,40 @@ public class QueryPlugIn extends AbstractUIPlugin {
 
 	
 	public File getQueryTempDirectory(){
-		return new File(SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY), QUERY_TEMP_FOLDER);
+		return new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE), QUERY_TEMP_FOLDER);		
 	}
 	
-	
+	@Override
+	public void initializeImageRegistry(ImageRegistry reg){	
+		reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete.png")); //$NON-NLS-1$
+		reg.put(QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/querypatrol.gif"));//$NON-NLS-1$
+		reg.put(SUMMARY_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/summary_query.png"));//$NON-NLS-1$
+		reg.put(FOLDER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/folder.png"));//$NON-NLS-1$
+		reg.put(WAYPOINT_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/waypoint_query.png"));//$NON-NLS-1$
+		reg.put(PATROL_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/patrol_query.png"));//$NON-NLS-1$
+		reg.put(GRIDDED_SUMMARY_QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/gridded_query.png"));//$NON-NLS-1$
+		reg.put(GRID_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/grid.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar.png")); //$NON-NLS-1$
+		reg.put(CALENDAR_DAY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_day.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_WEEK_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_week.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_MONTH_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_month.png"));//$NON-NLS-1$
+		reg.put(CALENDAR_YEAR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/calendar_year.png"));//$NON-NLS-1$
+		reg.put(GROUPBY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/group_by.png"));//$NON-NLS-1$
+		reg.put(VALUE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/values.png"));//$NON-NLS-1$
+		reg.put(VALUE_DISTANCE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_distance.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_DAYS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numDays.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_EMPLOYEES_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numEmployees.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_HOURS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numHours.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_NIGHTS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numNights.png"));//$NON-NLS-1$
+		reg.put(VALUE_NUM_PATROLS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numPatrol.png"));//$NON-NLS-1$
+		reg.put(VALUE_PERSON_DAYS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_personDays.png"));//$NON-NLS-1$
+		reg.put(VALUE_PERSON_HOURS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_personHours.png"));//$NON-NLS-1$
+		reg.put(EXCLAMATION_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/exclamation.png"));//$NON-NLS-1$
+		reg.put(ROW_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/row_header.png"));//$NON-NLS-1$
+		reg.put(COLUMN_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/column_header.png"));//$NON-NLS-1$
+		reg.put(AREA_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_filter.png"));//$NON-NLS-1$
+		reg.put(AREA_POLYGON_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_polygon.png"));//$NON-NLS-1$
+	}
 	
 	/**
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)

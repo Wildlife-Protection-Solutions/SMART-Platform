@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.query.ui.queyfilter;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
@@ -60,12 +60,12 @@ public class QueryFilterLabelProvider extends LabelProvider {
 		}else if (element instanceof QueryFilterContentProvider.RootNode){
 			return ((QueryFilterContentProvider.RootNode)element).getImage();
 		}else if (element instanceof Area.AreaType || element instanceof Area){
-			return JFaceResources.getImageRegistry().get(QueryPlugIn.AREA_POLYGON_FILTER_ICON);
+			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.AREA_POLYGON_FILTER_ICON);
 		}else if (element instanceof QueryFilterContentProvider.DataModelItem){
 			if (element == DataModelItem.CATEGORIES){
-				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.CATEGORY_ICON);
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 			}else if (element == DataModelItem.ATTRIBUTES){
-				return JFaceResources.getImageRegistry().get(DataModelLabelProvider.ATTRIBUTE_NUMBER_ICON);
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 			}
 			return null;
 		}else{

@@ -30,8 +30,7 @@ import net.refractions.udig.catalog.IService;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -72,6 +71,37 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor for smart 48x48 icon
 	 */
 	public static final String SMART_48_ICON = "org.wcs.smart.SMART_48_ICON"; //$NON-NLS-1$
+	
+	
+	/**
+	 * Image descriptor for category icon
+	 */
+	public static final String CATEGORY_ICON = "org.wsc.smart.datamodel.CATEGORY_ICON"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for attribute text icon
+	 */
+	public static final String ATTRIBUTE_TEXT_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_TEXT_ICON"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor for attribute boolean icon
+	 */
+	public static final String ATTRIBUTE_BOOLEAN_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_BOOLEAN_ICON"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for attribute number icon
+	 */
+	public static final String ATTRIBUTE_NUMBER_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_NUMBER_ICON"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for attribute list icon
+	 */
+	public static final String ATTRIBUTE_LIST_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_LIST_ICON"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for attribute tree icon
+	 */
+	public static final String ATTRIBUTE_TREE_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_TREE_ICON"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for data model icon
+	 */
+	public static final String DATA_MODEL_ICON= "org.wsc.smart.datamodel.DATAMODEL_ICON"; //$NON-NLS-1$
 			
 	public BasemapDefinition defaultDefinition = null;
 	
@@ -98,18 +128,6 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
 		
-		Display.getDefault().syncExec(new Runnable(){
-
-			@Override
-			public void run() {
-				ImageDescriptor descriptor = AbstractUIPlugin
-						.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,
-								"/images/icons/smart48.gif"); //$NON-NLS-1$
-				if (descriptor != null) {
-					JFaceResources.getImageRegistry().put(SMART_48_ICON, descriptor);
-				}
-			}});
-		
 		
 		// add delete handler
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
@@ -135,6 +153,25 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		super.stop(context);
 	}
 
+	/**
+	 * Get image descriptors for the clear button.
+	 */
+	@Override
+	 protected void initializeImageRegistry(ImageRegistry reg) {
+	     reg.put(CATEGORY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/category_obj.gif")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_TEXT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_text.png")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_NUMBER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_number.png")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_BOOLEAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_boolean.png")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_LIST_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_list.png")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_TREE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_tree.png")); //$NON-NLS-1$
+	     reg.put(DATA_MODEL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/smart16.gif")); //$NON-NLS-1$
+	     
+	     reg.put(SMART_48_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "/images/icons/smart48.gif")); //$NON-NLS-1$
+	     reg.put(SMART_EMPLOYEE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/user_orange.png")); //$NON-NLS-1$
+	     reg.put(EMPLOYEE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/user_green.png")); //$NON-NLS-1$
+	     reg.put(STATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station.png")); //$NON-NLS-1$
+	}
+	
 	/**
 	 * Returns the shared instance
 	 *

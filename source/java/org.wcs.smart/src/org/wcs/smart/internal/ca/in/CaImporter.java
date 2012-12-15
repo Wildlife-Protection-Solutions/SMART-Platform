@@ -156,7 +156,7 @@ public class CaImporter {
 	 * @throws Exception
 	 */
 	private File backup() throws Exception{
-		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
+		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 		File copyTo = new File(databaseDir.getParentFile(), "smartdb.bak"); //$NON-NLS-1$
 		if (copyTo.exists()){
 			FileUtils.deleteDirectory(copyTo);
@@ -182,7 +182,7 @@ public class CaImporter {
 	 * @throws Exception
 	 */
 	private void restoreBackup(File backup) throws Exception{
-		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
+		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 		FileUtils.deleteDirectory(databaseDir);
 		FileUtils.copyDirectory(backup, databaseDir);
 		cleanUp(backup);
@@ -315,7 +315,7 @@ public class CaImporter {
 		File sourceFile = new File(dir, CaExporter.FILESTORE_DIR);
 		
 		
-		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY);
+		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
 		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(cauuid);
 		File destLocation = new File(filestore);
 		if (!destLocation.exists()){

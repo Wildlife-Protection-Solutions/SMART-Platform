@@ -47,7 +47,7 @@ public class DerbyBackupEngine {
 	 * @return the default backup file name based on the current date
 	 */
 	public static String getDefaultFileName(){
-		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
+		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
 		try{
 			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getCanonicalPath(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -86,8 +86,8 @@ public class DerbyBackupEngine {
 				//here we freeze the database to put it into a state for copying
 				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()"); //$NON-NLS-1$
 				q.executeUpdate();
-				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.FILESTORE_KEY));
-				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.SMART_DB_KEY));
+				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
+				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 			
 				if (!filestore.exists()){
 					filestore.mkdir();
@@ -112,7 +112,7 @@ public class DerbyBackupEngine {
 	 * @return the default auto backup location
 	 */
 	public static String getDefaultAutoBackupLocation() { 
-		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.BACKUP_DIRECTORY_KEY);
+		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
 		try{
 			return new File(backupDir).getCanonicalPath();
 		}catch (Exception ex){

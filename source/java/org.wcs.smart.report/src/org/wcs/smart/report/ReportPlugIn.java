@@ -28,8 +28,7 @@ import org.eclipse.birt.report.designer.ui.ReportPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -59,18 +58,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	public static final String REPORT_ICON = "org.wcs.smart.query.reporticon"; //$NON-NLS-1$
 
 	private ReportQueryListener queryListener = new ReportQueryListener();
-	
-	static {
-		addImage("images/icons/obj16/report.png", REPORT_ICON); //$NON-NLS-1$
-	}
 
-	private static void addImage(String path, String icon) {
-		ImageDescriptor descriptor = AbstractUIPlugin
-				.imageDescriptorFromPlugin(PLUGIN_ID, path);
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(icon, descriptor);
-		}
-	}
 
 	private ReportCaDeleteHandler deleteHandler = new ReportCaDeleteHandler();
 	
@@ -83,6 +71,12 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	public ReportPlugIn() {
 	}
 
+
+	@Override
+    protected void initializeImageRegistry(ImageRegistry reg) {
+		reg.put(REPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/report.png"));
+	}
+	
 	/**
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */

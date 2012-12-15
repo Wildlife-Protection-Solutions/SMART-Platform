@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -280,21 +279,21 @@ public class PatrolQueryOptions {
 		public Image getIcon(){
 			switch(this){
 				case NUM_PATROLS:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_PATROLS_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_PATROLS_ICON);
 				case NUM_DAYS:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_DAYS_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_DAYS_ICON);
 				case NUM_NIGHTS:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_NIGHTS_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_NIGHTS_ICON);
 				case DISTANCE:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_DISTANCE_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_DISTANCE_ICON);
 				case NUM_HOURS:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON);
 				case NUM_MEMBERS:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_NUM_EMPLOYEES_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_EMPLOYEES_ICON);
 				case MAN_HOURS:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_PERSON_HOURS_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_PERSON_HOURS_ICON);
 				case MAN_DAYS:
-					return JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_PERSON_DAYS_ICON);
+					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_PERSON_DAYS_ICON);
 			}
 			return null;
 		}
@@ -335,13 +334,13 @@ public class PatrolQueryOptions {
 	 */
 	public static Image getImage(DateGroupByOption option){
 		if (option == DateGroupByOption.DAY){
-			return JFaceResources.getImageRegistry().get(QueryPlugIn.CALENDAR_DAY_ICON);
+			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CALENDAR_DAY_ICON);
 		}else if (option == DateGroupByOption.MONTH){
-			return JFaceResources.getImageRegistry().get(QueryPlugIn.CALENDAR_MONTH_ICON);
+			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CALENDAR_MONTH_ICON);
 //		}else if (option == DateGroupByOption.WEEK){
-//			return JFaceResources.getImageRegistry().get(QueryPlugIn.CALENDAR_WEEK_ICON);
+//			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CALENDAR_WEEK_ICON);
 		}else if (option == DateGroupByOption.YEAR){
-			return JFaceResources.getImageRegistry().get(QueryPlugIn.CALENDAR_YEAR_ICON);
+			return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CALENDAR_YEAR_ICON);
 		}
 		return null;
 	}
@@ -354,25 +353,25 @@ public class PatrolQueryOptions {
 	 */
 	public static Image getImage(PatrolQueryOption option){
 		if (option == PatrolQueryOption.ARMED){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON);
 		}else if (option == PatrolQueryOption.TEAM){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
 		}else if (option == PatrolQueryOption.STATION){
-			return JFaceResources.getImageRegistry().get(SmartPlugIn.STATION_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON);
 		}else if (option == PatrolQueryOption.MANDATE){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
 		}else if (option == PatrolQueryOption.LEADER){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON);
 		}else if (option == PatrolQueryOption.PILOT){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON);
 		}else if (option == PatrolQueryOption.EMPLOYEE){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON);
 		}else if (option == PatrolQueryOption.PATROL_TYPE){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE){
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
 		}else {
-			return JFaceResources.getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
 		}
 	}
 	

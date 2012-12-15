@@ -21,15 +21,12 @@
  */
 package org.wcs.smart.ui.properties;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -45,89 +42,11 @@ import org.wcs.smart.internal.Messages;
  * @since 1.0.0
  */
 public class DataModelLabelProvider extends LabelProvider implements IColorProvider {
-	
-	/**
-	 * Image descriptor for category icon
-	 */
-	public static final String CATEGORY_ICON = "org.wsc.smart.datamodel.CATEGORY_ICON"; //$NON-NLS-1$
-	/**
-	 * Image descriptor for attribute text icon
-	 */
-	private static final String ATTRIBUTE_TEXT_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_TEXT_ICON"; //$NON-NLS-1$
-	
-	/**
-	 * Image descriptor for attribute boolean icon
-	 */
-	private static final String ATTRIBUTE_BOOLEAN_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_BOOLEAN_ICON"; //$NON-NLS-1$
-	/**
-	 * Image descriptor for attribute number icon
-	 */
-	public static final String ATTRIBUTE_NUMBER_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_NUMBER_ICON"; //$NON-NLS-1$
-	/**
-	 * Image descriptor for attribute list icon
-	 */
-	public static final String ATTRIBUTE_LIST_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_LIST_ICON"; //$NON-NLS-1$
-	/**
-	 * Image descriptor for attribute tree icon
-	 */
-	private static final String ATTRIBUTE_TREE_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_TREE_ICON"; //$NON-NLS-1$
-	/**
-	 * Image descriptor for data model icon
-	 */
-	public static final String DATA_MODEL_ICON= "org.wsc.smart.datamodel.DATAMODEL_ICON"; //$NON-NLS-1$
+
 	
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
-	
-	/**
-	 * Get image descriptors for the clear button.
-	 */
-	static {
-		ImageDescriptor descriptor = AbstractUIPlugin
-				.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,
-						"images/icons/obj16/category_obj.gif"); //$NON-NLS-1$
-						//"$nl$/icons/obj16/category_obj.gif"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(CATEGORY_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/attribute_text.png"); //$NON-NLS-1$
-		//"$nl$/icons/obj16/attribute_obj.gif"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(ATTRIBUTE_TEXT_ICON, descriptor);
-		}
-		
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/attribute_number.png"); //$NON-NLS-1$
-		//"$nl$/icons/obj16/attribute_obj.gif"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(ATTRIBUTE_NUMBER_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/attribute_boolean.png"); //$NON-NLS-1$
-		//"$nl$/icons/obj16/attribute_obj.gif"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(ATTRIBUTE_BOOLEAN_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/attribute_list.png"); //$NON-NLS-1$
-		//"$nl$/icons/obj16/attribute_obj.gif"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(ATTRIBUTE_LIST_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-				SmartPlugIn.PLUGIN_ID, "images/icons/obj16/attribute_tree.png"); //$NON-NLS-1$
-		//"$nl$/icons/obj16/attribute_obj.gif"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(ATTRIBUTE_TREE_ICON, descriptor);
-		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		if (descriptor != null){
-			JFaceResources.getImageRegistry().put(DATA_MODEL_ICON, descriptor);
-		}
-	}
-	
 	private Language currentLang = null;
 	
 	/**
@@ -183,7 +102,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof Category) {
-			return JFaceResources.getImageRegistry().get(CATEGORY_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 		}else if (element instanceof CategoryAttribute){
 			CategoryAttribute ca = (CategoryAttribute)element;
 			return getAttributeImage(ca.getAttribute());
@@ -191,22 +110,22 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 			return getAttributeImage((Attribute)element);
 			
 		}else if (element instanceof DataModelContentProvider.RootNode){
-			return JFaceResources.getImageRegistry().get(DATA_MODEL_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
 		}
 		return null;
 	}
 	
 	private Image getAttributeImage(Attribute att){
 		if (att.getType()== Attribute.AttributeType.BOOLEAN){
-			return JFaceResources.getImageRegistry().get(ATTRIBUTE_BOOLEAN_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
 		}else if (att.getType() == Attribute.AttributeType.TEXT){
-			return JFaceResources.getImageRegistry().get(ATTRIBUTE_TEXT_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
 		}else if (att.getType()== Attribute.AttributeType.LIST){
-			return JFaceResources.getImageRegistry().get(ATTRIBUTE_LIST_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
 		}else if (att.getType()== Attribute.AttributeType.NUMERIC){
-			return JFaceResources.getImageRegistry().get(ATTRIBUTE_NUMBER_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 		}else if (att.getType()== Attribute.AttributeType.TREE){
-			return JFaceResources.getImageRegistry().get(ATTRIBUTE_TREE_ICON);
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
 		}
 		return null;
 	}

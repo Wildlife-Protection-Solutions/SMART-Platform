@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.query.QueryPlugIn;
@@ -165,7 +164,7 @@ public class QueryInput implements IEditorInput {
 	 */
 	@Override
 	public ImageDescriptor getImageDescriptor() {
-		return JFaceResources.getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
+		return QueryPlugIn.getDefault().getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
 	}
 
 	/**

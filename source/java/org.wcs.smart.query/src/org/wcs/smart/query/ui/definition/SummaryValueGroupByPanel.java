@@ -23,7 +23,6 @@ package org.wcs.smart.query.ui.definition;
 
 import java.util.ArrayList;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -82,7 +81,7 @@ public class SummaryValueGroupByPanel {
 		rightInner.setLayout(gl);
 		
 		Label lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON));
+		lblValues.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON));
 		
 		lblValues = new Label(rightInner, SWT.NONE);
 		lblValues.setText(Messages.SummaryValueGroupByPanel_ValuesSectionHeader);
@@ -93,7 +92,7 @@ public class SummaryValueGroupByPanel {
 		gl = new GridLayout(2, false);
 		leftInner.setLayout(gl);
 		Label lblGroupBys = new Label(leftInner, SWT.NONE);
-		lblGroupBys.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.GROUPBY_ICON));
+		lblGroupBys.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.GROUPBY_ICON));
 		
 		lblGroupBys = new Label(leftInner, SWT.NONE);
 		lblGroupBys.setText(Messages.SummaryValueGroupByPanel_GroupBySectionHeader);
@@ -137,7 +136,7 @@ public class SummaryValueGroupByPanel {
 		rightInner.setLayout(gl);
 		
 		Label lblImage = new Label(rightInner, SWT.NONE);
-		lblImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.COLUMN_HEADER_ICON));
+		lblImage.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.COLUMN_HEADER_ICON));
 		
 		Label lblColumnHeaders = new Label(rightInner, SWT.NONE);
 		lblColumnHeaders.setText(Messages.SummaryValueGroupByPanel_ColumnHeadersHeader);
@@ -149,7 +148,7 @@ public class SummaryValueGroupByPanel {
 		leftInner.setLayout(gl);
 		
 		lblImage = new Label(leftInner, SWT.NONE);
-		lblImage.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.ROW_HEADER_ICON));
+		lblImage.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.ROW_HEADER_ICON));
 		
 		Label lblRowHeaders = new Label(leftInner, SWT.NONE);
 		lblRowHeaders.setText(Messages.SummaryValueGroupByPanel_RowHeadersHeader);

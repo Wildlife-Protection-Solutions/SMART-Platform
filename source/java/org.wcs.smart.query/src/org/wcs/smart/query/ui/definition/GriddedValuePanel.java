@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -217,7 +216,7 @@ public class GriddedValuePanel {
 		leftInner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblGridDef = new Label(leftInner, SWT.NONE);
-		lblGridDef.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.GRID_ICON));
+		lblGridDef.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.GRID_ICON));
 		
 		Label lblDef = new Label(leftInner, SWT.NONE);
 		lblDef.setText(Messages.GriddedValuePanel_GridDefLabel);
@@ -248,7 +247,7 @@ public class GriddedValuePanel {
 		rightInner.setLayout(gl);
 		
 		Label lblValues = new Label(rightInner, SWT.NONE);
-		lblValues.setImage(JFaceResources.getImageRegistry().get(QueryPlugIn.VALUE_ICON));
+		lblValues.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON));
 		
 		lblValues = new Label(rightInner, SWT.NONE);
 		lblValues.setText(Messages.GriddedValuePanel_GridValueLabel);

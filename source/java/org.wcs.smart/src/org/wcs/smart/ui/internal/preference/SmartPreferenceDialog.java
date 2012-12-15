@@ -19,25 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.map.udig;
+package org.wcs.smart.ui.internal.preference;
 
-import net.refractions.udig.catalog.IServiceInfo;
-
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.internal.Messages;
+import org.eclipse.jface.preference.IPreferenceNode;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 /**
- * Smart service information.
- * @author Emily
- * @since 1.0.0
+ * Customized preference dialog that only
+ * displays preference pages defined here. 
+ * 
+ * @author egouge
+ *
  */
-public class QueryServiceInfo extends IServiceInfo{
+public class SmartPreferenceDialog extends PreferenceDialog {
 
-	public QueryServiceInfo(QueryService service){
-		this.description = Messages.QueryServiceInfo_Description;
-		this.icon = QueryPlugIn.getDefault().getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
-		this.keywords = new String[]{Messages.QueryServiceInfo_Keyword1, Messages.QueryServiceInfo_Keyword2, Messages.QueryServiceInfo_Keyword3, Messages.QueryServiceInfo_Keyword4, Messages.QueryServiceInfo_Keyword5, Messages.QueryServiceInfo_Keyword6};
-		this.title = Messages.QueryServiceInfo_ServiceName + service.getQuery().getName();
+	public SmartPreferenceDialog(Shell parentShell) {
+		super(parentShell, createPreferenceManager());
+	}
+	
+	/**
+	 * Creates a preference manager that
+	 * defines which pages to display.
+	 * @return
+	 */
+	private static PreferenceManager createPreferenceManager(){
+		PreferenceManager manager = new PreferenceManager();
+		IPreferenceNode node = PlatformUI.getWorkbench().getPreferenceManager().find(GpsBabelPreferencePage.ID);
+		manager.addToRoot(node);
+		return manager;
 	}
 	
 }

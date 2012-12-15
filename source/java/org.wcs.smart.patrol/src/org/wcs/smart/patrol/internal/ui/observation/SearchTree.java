@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -80,6 +79,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 
 /**
@@ -194,12 +194,12 @@ public class SearchTree extends Composite {
 				.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID,
 						"$nl$/icons/full/etool16/clear_co.gif"); //$NON-NLS-1$
 		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(CLEAR_ICON, descriptor);
+			SmartPatrolPlugIn.getDefault().getImageRegistry().put(CLEAR_ICON, descriptor);
 		}
 		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
 				PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.gif"); //$NON-NLS-1$
 		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(DISABLED_CLEAR_ICON, descriptor);
+			SmartPatrolPlugIn.getDefault().getImageRegistry().put(DISABLED_CLEAR_ICON, descriptor);
 		}
 	}
 
@@ -900,8 +900,8 @@ public class SearchTree extends Composite {
 		// only create the button if the text widget doesn't support one
 		// natively
 		if ((filterText.getStyle() & SWT.ICON_CANCEL) == 0) {
-			final Image inactiveImage= JFaceResources.getImageRegistry().getDescriptor(DISABLED_CLEAR_ICON).createImage();
-			final Image activeImage= JFaceResources.getImageRegistry().getDescriptor(CLEAR_ICON).createImage();
+			final Image inactiveImage= SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(DISABLED_CLEAR_ICON).createImage();
+			final Image activeImage= SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(CLEAR_ICON).createImage();
 			final Image pressedImage= new Image(getDisplay(), activeImage, SWT.IMAGE_GRAY);
 			
 			final Label clearButton= new Label(parent, SWT.NONE);

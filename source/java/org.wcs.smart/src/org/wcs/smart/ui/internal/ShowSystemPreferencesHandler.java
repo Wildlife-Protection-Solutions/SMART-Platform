@@ -19,25 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.map.udig;
+package org.wcs.smart.ui.internal;
 
-import net.refractions.udig.catalog.IServiceInfo;
-
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.internal.Messages;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.ui.internal.preference.SmartPreferenceDialog;
 
 /**
- * Smart service information.
- * @author Emily
- * @since 1.0.0
+ * Handler for displaying system preferences
+ * 
+ * @author egouge
+ *
  */
-public class QueryServiceInfo extends IServiceInfo{
+public class ShowSystemPreferencesHandler extends AbstractHandler {
 
-	public QueryServiceInfo(QueryService service){
-		this.description = Messages.QueryServiceInfo_Description;
-		this.icon = QueryPlugIn.getDefault().getImageRegistry().getDescriptor(QueryPlugIn.QUERY_ICON);
-		this.keywords = new String[]{Messages.QueryServiceInfo_Keyword1, Messages.QueryServiceInfo_Keyword2, Messages.QueryServiceInfo_Keyword3, Messages.QueryServiceInfo_Keyword4, Messages.QueryServiceInfo_Keyword5, Messages.QueryServiceInfo_Keyword6};
-		this.title = Messages.QueryServiceInfo_ServiceName + service.getQuery().getName();
+	@Override
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		SmartPreferenceDialog dialog = new SmartPreferenceDialog(HandlerUtil.getActiveShell(event));
+		dialog.open();
+		return null;
 	}
-	
+
 }

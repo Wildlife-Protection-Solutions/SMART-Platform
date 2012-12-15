@@ -22,7 +22,6 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -185,7 +184,7 @@ public abstract class DropItem {
 		Label lblX = new Label(inner, SWT.NONE);
 		lblX.setToolTipText(Messages.DropItem_deleteitemTooltip);
 		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
-		lblX.setImage(JFaceResources.getImage(QueryPlugIn.DELETE_MINI_ICON));
+		lblX.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.DELETE_MINI_ICON));
 		lblX.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
