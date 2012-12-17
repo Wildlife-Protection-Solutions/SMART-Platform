@@ -38,7 +38,6 @@ import net.refractions.udig.project.internal.render.RenderPackage;
 import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.ui.AnimationUpdater;
 import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.IAnimation;
 import net.refractions.udig.project.ui.commands.IDrawCommand;
 import net.refractions.udig.project.ui.internal.FeatureAnimation;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -134,9 +133,15 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 	        }
 
 	        public void partHidden( IWorkbenchPartReference partRef ) {
+	        	if (partRef.getPart(false) == getParentEditor()) {
+	        		deregisterFeatureFlasher();
+	        	}
 	        }
 
 	        public void partVisible( IWorkbenchPartReference partRef ) {
+	        	if (partRef.getPart(false) == getParentEditor()) {
+	        		registerFeatureFlasher();
+	        	}
 	        }
 
 	        public void partInputChanged( IWorkbenchPartReference partRef ) {
@@ -165,6 +170,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 
     protected synchronized void deregisterFeatureFlasher() {
         flashFeatureRegistered = false;
+        AnimationUpdater.cancel(getMap().getRenderManager().getMapDisplay());
         getSite().getPage().removePostSelectionListener(selectFeatureListener);
     }
     
@@ -423,6 +429,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 	
 	private class FlashFeatureListener implements ISelectionListener {
 
+		
         public void selectionChanged( IWorkbenchPart part, final ISelection selection ) {
             if (part == SmartMapEditorPart.this.getParentEditor() || getSite().getPage().getActivePart() != part
                     || selection instanceof IBlockingSelection)
@@ -444,11 +451,11 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
                         if (features.size() == 0)
                             return;
                         if (!mapViewer.getRenderManager().isDisposed()) {
-                            IAnimation anim = createAnimation(features);
-                            //System.out.println("run animation");
+                        	FeatureAnimation anim = createAnimation(features);
                             if (anim != null){
                                 AnimationUpdater.runTimer(getMap().getRenderManager().getMapDisplay(), anim);
                             }
+                            
                         }
                     }
                 }
@@ -462,10 +469,9 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
             } catch (Exception e) {
             	SmartPlugIn.log("", e); //$NON-NLS-1$
             }
-            // PlatformGIS.run(sendAnimation);
         }
 
-        private IAnimation createAnimation( List<SimpleFeature> current ) {
+        private FeatureAnimation createAnimation( List<SimpleFeature> current ) {
             final List<IDrawCommand> commands = new ArrayList<IDrawCommand>();
             for( SimpleFeature feature : current ) {
                 if (feature == null || feature.getFeatureType().getGeometryDescriptor() == null)
@@ -478,19 +484,17 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
                             command = new DrawFeatureCommand(feature, layer);
                         } catch (IOException e) {
                             // do nothing... thats life
+                        	e.printStackTrace();
                         }
                 }
                 if (command == null) {
                     command = new DrawFeatureCommand(feature);
                 }
                 command.setMap(getMap());
-//                command.preRender();
                 commands.add(command);
             }
             Rectangle2D rect = new Rectangle();
-            // for( IDrawCommand command : commands ) {
-            // rect=rect.createUnion(command.getValidArea());
-            // }
+            
             final Rectangle validArea = (Rectangle) rect;
             FeatureAnimation anim = new FeatureAnimation(commands, validArea);
             return anim;
