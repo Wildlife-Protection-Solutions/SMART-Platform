@@ -182,7 +182,9 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 						}
 					}
 					if (!needsObservation){
-						if (query.getQueryDefinition().getQueryFilter().hasAttributeFilter() || query.getQueryDefinition().getQueryFilter().hasCategoryFilter()){
+						if (query.getQueryDefinition().getQueryFilter() != null && (
+								query.getQueryDefinition().getQueryFilter().hasAttributeFilter() || 
+								query.getQueryDefinition().getQueryFilter().hasCategoryFilter())){
 							needsObservation = true;
 						}
 					}
