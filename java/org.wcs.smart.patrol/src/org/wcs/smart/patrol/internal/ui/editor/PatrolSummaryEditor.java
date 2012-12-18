@@ -25,7 +25,9 @@ import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -574,11 +576,29 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 			} else {
 				WritableList input = new WritableList();
+				ArrayList<PatrolLegDay> days = new ArrayList<PatrolLegDay>();
 				for (PatrolLeg leg : patrol.getLegs()) {
 					for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-						input.add(pld);
+						days.add(pld);
 					}
 				}
+				//sort input 
+				Collections.sort(days, new Comparator<PatrolLegDay>(){
+					@Override
+					public int compare(PatrolLegDay d1, PatrolLegDay d2) {
+						int val = d1.getDate().compareTo(d2.getDate());
+						if (val == 0){
+							val = d1.getStartTime().compareTo(d2.getStartTime());
+							if (val == 0){
+								return Collator.getInstance().compare(d1.getPatrolLeg().getId(), d2.getPatrolLeg().getId());
+							}
+							return val;
+						}else{
+							return val;
+						}
+					}});
+				
+				input.addAll(days);
 				tblPatrolData.setInput(input);
 				if (!patrol.hasPilot()) {
 					TableViewerColumn tcolumn = tableColumns.get(PatrolLegDayColumn.PILOT);
