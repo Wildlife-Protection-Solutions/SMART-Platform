@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.map.internal;
 
-import net.refractions.udig.project.ui.internal.MapImport;
+import net.refractions.udig.project.ui.internal.wizard.MapImport;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;

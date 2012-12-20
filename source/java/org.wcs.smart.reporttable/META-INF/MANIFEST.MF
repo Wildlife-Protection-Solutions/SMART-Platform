@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Reporttable
 Bundle-SymbolicName: org.wcs.smart.reporttable;singleton:=true
-Bundle-Version: 0.0.1
+Bundle-Version: 0.0.4
 Bundle-Activator: org.wcs.smart.reporttable.Activator
-Require-Bundle: org.wcs.smart;bundle-version="0.0.1",
+Require-Bundle: org.wcs.smart,
  org.wcs.smart.data.oda.smart,
  org.wcs.smart.patrol
 Bundle-ActivationPolicy: lazy

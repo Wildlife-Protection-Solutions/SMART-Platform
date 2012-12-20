@@ -189,13 +189,6 @@
          unpack="false"/>
 
    <plugin
-         id="net.refractions.udig.tool.info"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="net.refractions.udig.tool.select"
          download-size="0"
          install-size="0"
@@ -675,7 +668,21 @@
          unpack="false"/>
 
    <plugin
-         id="net.refractions.udig.jai"
+         id="net.refractions.udig.info"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="net.refractions.udig.catalog.postgis"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="net.refractions.udig.jai.macosx"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.udig;
 
-import net.refractions.udig.project.ui.internal.MapImport;
+import net.refractions.udig.project.ui.internal.wizard.MapImport;
 import net.refractions.udig.project.ui.tool.AbstractActionTool;
 
 import org.eclipse.swt.widgets.Display;

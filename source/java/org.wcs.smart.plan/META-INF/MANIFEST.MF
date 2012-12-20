@@ -6,9 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.wcs.smart.plan.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart.hibernate.libs;bundle-version="1.0.0",
- org.wcs.smart;bundle-version="0.0.1",
- org.wcs.smart.patrol;bundle-version="1.0.0"
+ org.wcs.smart,
+ org.wcs.smart.patrol
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.core.databinding.observable.list,

@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
-import net.refractions.udig.tool.info.internal.InfoView2;
-
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -45,7 +43,7 @@ public class PatrolPerspective implements IPerspectiveFactory {
 		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.patrol.patrolMapFolder", IPageLayout.BOTTOM, 0.8f, PatrolListView.ID); //$NON-NLS-1$
 		
 		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
-		folder1.addPlaceholder(InfoView2.VIEW_ID);
+		folder1.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
 	}
 
 }

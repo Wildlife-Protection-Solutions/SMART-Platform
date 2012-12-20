@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.query.internal.ui;
 
-import net.refractions.udig.tool.info.internal.InfoView2;
-
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -60,7 +58,7 @@ public class QueryPerspective implements IPerspectiveFactory {
 		//bottom query and info view
 		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder2.addView(QueryDefView.ID);
-		folder2.addPlaceholder(InfoView2.VIEW_ID);
+		folder2.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
 
 		layout.getViewLayout(QueryDefView.ID).setCloseable(false);
 		layout.getViewLayout(QueryFilterView.ID).setCloseable(false);
