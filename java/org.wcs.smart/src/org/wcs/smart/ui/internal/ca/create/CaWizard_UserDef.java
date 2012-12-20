@@ -23,7 +23,6 @@ package org.wcs.smart.ui.internal.ca.create;
 
 import java.util.List;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -52,7 +51,7 @@ public class CaWizard_UserDef extends CaWizardPage{
 	 */
 	public CaWizard_UserDef() {
 		super(Messages.CaWizard_UserDef_PageName);
-		setImageDescriptor(JFaceResources.getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
+		setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
 		setTitle(Messages.CaWizard_UserDef_PageTitle);
 		setDescription(Messages.CaWizard_UserDef_PageDescription);
 	}

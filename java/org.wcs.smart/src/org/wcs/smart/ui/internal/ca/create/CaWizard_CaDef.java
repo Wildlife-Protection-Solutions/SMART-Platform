@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -38,7 +37,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -67,7 +65,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	 */
 	public CaWizard_CaDef() {
 		super(Messages.CaWizard_CaDef_CaDef_PageName);
-		setImageDescriptor(JFaceResources.getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
+		setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON));
 		setTitle(Messages.CaWizard_CaDef_PageTitle);
 		setDescription(Messages.CaWizard_CaDef_PageDescription);
 	}
