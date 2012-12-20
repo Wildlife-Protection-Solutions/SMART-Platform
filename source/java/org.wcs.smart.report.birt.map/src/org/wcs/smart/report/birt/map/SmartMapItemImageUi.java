@@ -23,7 +23,6 @@ package org.wcs.smart.report.birt.map;
 
 import org.eclipse.birt.report.designer.ui.extensions.IReportItemImageProvider;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -55,7 +54,7 @@ public class SmartMapItemImageUi implements IReportItemImageProvider {
 			Image img = new Image(Display.getCurrent(), iwidth, iheight);
 			gc = new GC(img);
 			
-			Image mapImage = JFaceResources.getImageRegistry().get(SmartMapItemPlugIn.SMART_MAP_ICON_64);
+			Image mapImage = SmartMapItemPlugIn.getDefault().getImageRegistry().get(SmartMapItemPlugIn.SMART_MAP_ICON_64);
 			int x = (int)((iwidth - mapImage.getBounds().width) * 0.5);
 			int y = (int)((iheight - mapImage.getBounds().height) * 0.5);
 			gc.drawImage(mapImage, x, y);

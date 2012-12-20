@@ -24,8 +24,7 @@ package org.wcs.smart.report.birt.map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -52,21 +51,18 @@ public class SmartMapItemPlugIn  extends AbstractUIPlugin {
 	// The shared instance
 	private static SmartMapItemPlugIn plugin;
 	private static ReportImportHandler importHandler = new ReportImportHandler();
-	
-	static {
-		ImageDescriptor descriptor = AbstractUIPlugin
-				.imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj64/map.png"); //$NON-NLS-1$
-		if (descriptor != null) {
-			JFaceResources.getImageRegistry().put(SMART_MAP_ICON_64, descriptor);
-		}
-	}
+
 	/**
 	 * The constructor
 	 */
 	public SmartMapItemPlugIn() {
 	}
 
+	@Override
+	 protected void initializeImageRegistry(ImageRegistry reg) {
+	     reg.put(SMART_MAP_ICON_64, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj64/map.png")); //$NON-NLS-1$
+	}
+	
 	/**
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
