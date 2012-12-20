@@ -170,7 +170,6 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 
     protected synchronized void deregisterFeatureFlasher() {
         flashFeatureRegistered = false;
-        AnimationUpdater.cancel(getMap().getRenderManager().getMapDisplay());
         getSite().getPage().removePostSelectionListener(selectFeatureListener);
     }
     
@@ -377,7 +376,8 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
     @Override
     public void dispose() {
         super.dispose();
-
+        deregisterFeatureFlasher();
+        
         if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null) {
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
@@ -385,9 +385,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         getMap().getViewportModelInternal().setInitialized(false);
         mapViewer.dispose();
         getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
-        
         partlistener = null;
-        deregisterFeatureFlasher();
         this.selectFeatureListener = null;
     }
 

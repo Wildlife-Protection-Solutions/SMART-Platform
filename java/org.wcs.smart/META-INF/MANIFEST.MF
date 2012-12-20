@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART
 Bundle-SymbolicName: org.wcs.smart;singleton:=true
-Bundle-Version: 0.0.4.test
+Bundle-Version: 0.0.4
 Bundle-Localization: plugin
 Bundle-Activator: org.wcs.smart.SmartPlugIn
 Require-Bundle: org.eclipse.ui,
@@ -14,13 +14,13 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.databinding,
  com.ibm.icu,
  org.eclipse.core.expressions;bundle-version="3.4.300",
- org.wcs.smart.hibernate.libs;bundle-version="1.0.0";visibility:=reexport,
+ org.wcs.smart.hibernate.libs;visibility:=reexport,
  net.refractions.udig.libs;bundle-version="1.3.2";visibility:=reexport,
  net.refractions.udig.project;bundle-version="1.3.1";visibility:=reexport,
  net.refractions.udig.project.ui;bundle-version="1.3.1";visibility:=reexport,
  net.refractions.udig.catalog.ui;bundle-version="1.3.0",
  net.refractions.udig.tool.default;bundle-version="1.3.0";visibility:=reexport,
- net.refractions.udig.tool.info;bundle-version="1.2.3";visibility:=reexport
+ net.refractions.udig.info;bundle-version="1.3.3"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,

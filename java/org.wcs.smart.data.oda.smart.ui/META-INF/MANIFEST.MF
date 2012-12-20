@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %plugin.name
 Bundle-SymbolicName: org.wcs.smart.data.oda.smart.ui; singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.0.4
 Bundle-Activator: org.wcs.smart.data.oda.smart.ui.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.datatools.connectivity.oda.design.ui;bundle-version="[3.2.0,4.0.0)",
  org.wcs.smart.data.oda.smart,
- org.wcs.smart.query;bundle-version="1.0.0",
- org.wcs.smart.report;bundle-version="1.0.0",
+ org.wcs.smart.query,
+ org.wcs.smart.report,
  org.eclipse.birt.report.designer.ui.editors;bundle-version="3.7.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
