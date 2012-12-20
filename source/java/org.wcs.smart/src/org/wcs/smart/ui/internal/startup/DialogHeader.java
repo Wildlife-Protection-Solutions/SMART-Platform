@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui.internal.startup;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -64,7 +63,7 @@ public class DialogHeader extends Composite {
 		fd_label.right = new FormAttachment(100);
 		fd_label.left = new FormAttachment(0, 366);
 		label.setLayoutData(fd_label);
-		label.setImage(JFaceResources.getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON).createImage());
+		label.setImage(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.SMART_48_ICON).createImage());
 		
 		txtHeader = new Label(this, SWT.NONE);
 		txtHeader.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
