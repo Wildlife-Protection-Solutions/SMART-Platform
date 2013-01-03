@@ -716,7 +716,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			refreshTree();
 			try{
-				getSession().flush();
+				new ProgressMonitorDialog(getShell()).run(true, false, new IRunnableWithProgress(){
+
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.DataModelPropertyPage_ApplyingUpdates, 0);
+					getSession().flush();
+				}});
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Edit + ex.getLocalizedMessage(), ex);
 			}

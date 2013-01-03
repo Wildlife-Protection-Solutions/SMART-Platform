@@ -370,6 +370,7 @@ public class AttributeTree {
 			SmartPlugIn.displayLog(viewer.getTree().getShell(), Messages.AttributeTree_GenericError, ex);
 		}
 	}
+	
 	/*
 	 * Enables the attribute tree node and all its children
 	 */
@@ -380,6 +381,7 @@ public class AttributeTree {
 			enableAll(child);
 		}		
 	}
+	
 	/*
 	 * disable items in the tree
 	 */

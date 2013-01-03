@@ -257,7 +257,8 @@ public class Attribute extends DmObject{
 	 * 
 	 * @return the set of aggregations that are valid for the attribute
 	 */
-	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+	//@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name="smart.dm_att_agg_map", 
 	 joinColumns = {@JoinColumn(name="attribute_uuid")},
 	 inverseJoinColumns = {@JoinColumn(name="agg_name")}

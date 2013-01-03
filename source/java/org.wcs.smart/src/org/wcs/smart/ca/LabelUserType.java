@@ -53,7 +53,7 @@ public class LabelUserType implements UserType {
 	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
 			throws HibernateException, SQLException {
 		assert names.length == 1;
-		byte[] uuid = (byte[]) BinaryType.INSTANCE.get(rs, names[0]);
+		byte[] uuid = (byte[]) rs.getBytes(names[0]);
 		return Label.getDescription(uuid);
 	}
 

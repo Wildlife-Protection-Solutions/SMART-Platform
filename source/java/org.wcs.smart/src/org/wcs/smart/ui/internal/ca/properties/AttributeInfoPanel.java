@@ -793,10 +793,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	
 
 	private void setAttribute(Attribute newAttribute, AttributeTreeNode node){
-		node.setAttribute(newAttribute);
-		if (node.getChildren() != null){
-			for (AttributeTreeNode child : node.getChildren()){
-				setAttribute(newAttribute, child);
+		if (!node.getAttribute().equals(newAttribute)){
+			node.setAttribute(newAttribute);
+			if (node.getChildren() != null){
+				for (AttributeTreeNode child : node.getChildren()){
+					setAttribute(newAttribute, child);
+				}
 			}
 		}
 		
