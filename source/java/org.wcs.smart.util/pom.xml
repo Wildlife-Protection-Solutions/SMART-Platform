@@ -23,6 +23,11 @@
             <artifactId>derby</artifactId>
             <version>10.8.2.2</version>
         </dependency>
+	<dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.1</version>
+        </dependency>
         <dependency>
             <groupId>net.sourceforge.hatbox</groupId>
             <artifactId>hatbox</artifactId>
@@ -32,7 +37,12 @@
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
             <version>1.12-SNAPSHOT</version>
-        </dependency>	
+        </dependency>
+        <dependency>
+		<groupId>net.sf.opencsv</groupId>
+		<artifactId>opencsv</artifactId>
+		<version>2.0</version>
+	</dependency>	
 	</dependencies>
 
 	<build>
