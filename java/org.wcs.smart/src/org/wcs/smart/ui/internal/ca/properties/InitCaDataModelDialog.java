@@ -355,7 +355,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						throw new InvocationTargetException(new IllegalStateException(error), error);
 					}
 					monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_SavingDm);
-					dm.save(getSession());
+					dm.save(getSession(), monitor);
 					return ;
 				}
 			});

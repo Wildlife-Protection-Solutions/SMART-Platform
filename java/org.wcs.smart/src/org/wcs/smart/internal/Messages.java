@@ -256,6 +256,9 @@ public class Messages extends NLS {
 	public static String DataModel_Error_Key_ToLong;
 	public static String DataModel_Error_LoadAggregations;
 	public static String DataModel_LoadAttribute_JobName;
+	public static String DataModel_Progress_SaveAttribute;
+	public static String DataModel_Progress_SaveCategory;
+	public static String DataModel_Progress_SaveDm;
 	public static String DataModelExporter_Progress_DataModelTables;
 	public static String DataModelLabelProvider_RootNode_Label;
 	public static String DataModelManager_Cancelled_AttributeDelete;
@@ -281,6 +284,7 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_AddAttribute_Tooltip;
 	public static String DataModelPropertyPage_AddCategory_Button;
 	public static String DataModelPropertyPage_AddCategory_Tooltip;
+	public static String DataModelPropertyPage_ApplyingUpdates;
 	public static String DataModelPropertyPage_Close_DialogMessage;
 	public static String DataModelPropertyPage_Close_DialogTitle;
 	public static String DataModelPropertyPage_Confirm_DeleteAttribute;
@@ -618,14 +622,12 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_GPSBabel_LocationLabel;
 	public static String SmartInstallationInfoPage_SystemLang_Label;
 	public static String SmartPlugIn_Error_Dialog_Title;
-	public static String SmartProperties_Error_ReadingProperties;
 	public static String SmartProperties_InvalidProperty;
 	public static String SmartService_Error_DisposingService;
 	public static String SmartServiceInfo_Description;
 	public static String SmartServiceInfo_Keyword1;
 	public static String SmartServiceInfo_Keyword2;
 	public static String SmartServiceInfo_Title;
-	public static String SmartStartUp_Error_LoadingCas;
 	public static String SmartStartUp_Error_LoginError;
 	public static String SmartStartUp_Error_LoginFail;
 	public static String SmartStartUp_Error_NoSmartDb;

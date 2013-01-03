@@ -39,6 +39,7 @@ import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 import com.ibm.icu.text.MessageFormat;
@@ -457,16 +458,26 @@ public class DataModel {
 	 * 
 	 * @throws HibernateException if changes cannot be saved
 	 */
-	public void save(Session session){
+	public void save(Session session, IProgressMonitor m){
 		session.beginTransaction();
+		m.beginTask(Messages.DataModel_Progress_SaveDm, attributes.size() + categories.size());
 		try {
 			for (Attribute att : attributes) {
-				session.saveOrUpdate(att);
+				m.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+				session.save(att);
+				session.flush();
+				session.clear();
+				m.internalWorked(1);
 			}
 
 			for (Category c : categories) {
-				session.saveOrUpdate(c);
+				m.subTask(Messages.DataModel_Progress_SaveCategory + c.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+				session.save(c);
+				session.flush();
+				session.clear();
+				m.internalWorked(1);
 			}
+			m.done();
 			session.getTransaction().commit();
 		} catch (HibernateException ex) {
 			session.getTransaction().rollback();
