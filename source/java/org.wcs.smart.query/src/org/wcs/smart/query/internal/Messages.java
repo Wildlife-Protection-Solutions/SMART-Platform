@@ -400,7 +400,6 @@ public class Messages extends NLS {
 	public static String QueryMapPageEditor_ErrorRefreshing;
 	public static String QueryMapPageEditor_RefreshJobName;
 	public static String QueryMapPageEditor_UnknownStatus;
-	public static String QueryPlugIn_15;
 	public static String QueryPlugIn_Error_DialogTitle;
 	public static String QueryPlugIn_QueryCleanUpJobName;
 	public static String QueryPropertiesDialog_ColumnsLabel;
