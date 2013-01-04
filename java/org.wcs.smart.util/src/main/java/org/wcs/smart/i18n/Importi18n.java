@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i18n;
 
 import java.io.BufferedReader;
@@ -6,36 +27,46 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TreeSet;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
- * Tool for importing a multiple csv files that contain
+ * Tool for importing multiple csv files that contain
  * various plugin i18n messages.  Each csv file represents
  * a single set of i18n files - one column for each language.
  * <br>
  * First line contains header.  Second line
  * location of base properties i18n file.
+ * <br>
+ * When importing the base language keys are merged.  If the 
+ * current code has a new key it is added to the import.  If the base
+ * language has keys removed these are also removed from the import.
  * 
  * @author egouge
  *
  */
 public class Importi18n {
 
-	
+	/**
+	 * Process the given csv file.  This will contain
+	 * a set of i18n translations for a plugin translation
+	 * file.
+	 * 
+	 * @param f
+	 * @throws Exception
+	 */
 	private void processCsv(File f) throws Exception{
+		
+		// Read CSV File
 		FileReader fr = new FileReader(f);
 		BufferedReader tmp = new BufferedReader(fr);
 		String baseLocation = "";
@@ -67,10 +98,10 @@ public class Importi18n {
 		}
 		while ((line = reader.readNext()) != null){
 			String key = line[0].trim();
-			String base = line[1].trim();
+			String base = line[1];
 			baselang.put(key, base);
 			for (int i = 0; i < headers.length; i ++){
-				String value = line[i+2].trim();
+				String value = line[i+2];
 				if (value.length() > 0){
 					value = ConversionUtils.nativeToAscii(value);
 				}
@@ -82,11 +113,18 @@ public class Importi18n {
 		}
 		reader.close();
 		
+		//process Data
 		processData(baseLocation, baselang, headers, langs);
-		
-		
 	}
 	
+	/**
+	 * Processes the csv data
+	 * @param root 
+	 * @param baseLang
+	 * @param headers
+	 * @param otherLangs
+	 * @throws Exception
+	 */
 	private void processData(String root, HashMap<String, String> baseLang, 
 			String[] headers, 
 			HashMap<String, String>[] otherLangs) throws Exception{
@@ -100,22 +138,53 @@ public class Importi18n {
 		String prefix = baseFile.getCanonicalPath().substring(0, index);
 		String suffix = baseFile.getCanonicalPath().substring(index + 1);
 		
-		//verify that the number of entries is the same
+		//read current properties file and merge data
 		Properties existingData = new Properties();
 		InputStreamReader isr = new InputStreamReader(new FileInputStream(baseFile));
 		existingData.load(isr);
 		isr.close();
+		mergeValues(existingData, baseLang, otherLangs);
 		
-		if (existingData.size() != baseLang.size()){
-			throw new Exception("Base file " + baseFile.toString() + " has a different number of entries (" + existingData.size() + ") from new data file (" + baseLang.size() + "). Update not completed.");
-		}
-		
+		//write results
 		writeProperties(baseFile, baseLang);		
 		for (int i = 0; i < otherLangs.length; i ++){
 			File output = new File(prefix + "_" + headers[i] + "." + suffix);
 			writeProperties(output, otherLangs[i]);
 		}
 		
+	}
+	
+	/*
+	 * Merges new values with existing values removing or adding keys 
+	 * as required
+	 */
+	private void mergeValues(Properties existing, HashMap<String, String> base, 
+			HashMap<String, String>[] other){
+		
+		/* check for keys added */
+		for (Object x : existing.keySet()){
+			String str = (String)x;
+			if (!base.containsKey(str)){
+				//new key added since extra; be sure to add to base
+				//we don't have translations so we won't add to translations
+				base.put(str, existing.getProperty(str));
+			}
+		}
+		
+		/* check for keys removed */
+		List<String> keysToRemove = new ArrayList<String>();
+		for (String key : base.keySet()){
+			if (!existing.containsKey(key)){
+				//key has been removed
+				keysToRemove.add(key);
+			}
+		}
+		for (String key : keysToRemove){
+			base.remove(key);
+			for (int i = 0; i < other.length; i ++){
+				other[i].remove(key);
+			}
+		}
 	}
 	
 	/*
@@ -139,17 +208,6 @@ public class Importi18n {
 		
 	}
 	
-	private Properties createSortedProperties(){
-		return new Properties(){
-			@Override
-			public Set<Object> keySet(){
-				return Collections.unmodifiableSet(new TreeSet<Object>(super.keySet()));
-			}
-			public synchronized Enumeration<Object> keys(){
-				return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-			}
-		};
-	}
 	
 	public static void main(String args[]){
 		File f = new File(Packagei18n.OUT_DIR);
