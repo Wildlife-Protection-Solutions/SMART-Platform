@@ -53,6 +53,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
+import org.wcs.smart.ui.internal.ca.properties.TranslateSimpleListItemDialog;
 import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.Collator;
@@ -74,6 +75,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 	private Label lblCreateNew;
 	
 	private BasemapDefinition baseMap;
+	private BasemapDefinition newBasemap;
 	
 	/**
 	 * @param parent
@@ -129,9 +131,9 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		btnCreateNew.addSelectionListener(enableListener);
 		
 		Composite compNew = new Composite(main, SWT.NONE);
-		compNew.setLayout(new GridLayout(2, false));
+		compNew.setLayout(new GridLayout(3, false));
 		lblCreateNew = new Label(compNew, SWT.NONE);
-		lblCreateNew.setText(Messages.SaveBasemapDialog_NameLabel);
+		lblCreateNew.setText(Messages.SaveBasemapDialog_NameLabel + " [" + SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		lblCreateNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtName = new Text(compNew, SWT.BORDER);
@@ -140,6 +142,23 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalIndent = 20;
 		compNew.setLayoutData(gd);
+
+		Button btnTranslate = new Button(compNew, SWT.PUSH);
+		btnTranslate.setText(Messages.SaveBasemapDialog_Button_Translate);
+		btnTranslate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnTranslate.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				BasemapDefinition tmp = getNewBasemap();
+				tmp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), txtName.getText());
+				
+				TranslateSimpleListItemDialog d = new TranslateSimpleListItemDialog(getShell(), tmp, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				if (d.open() == TranslateSimpleListItemDialog.OK){
+					txtName.setText(baseMap.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+				}
+						
+			}
+		});
 		
 		
 		btnOverwrite = new Button(main, SWT.RADIO);
@@ -174,6 +193,15 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		return main;
 	}
 	
+	private BasemapDefinition getNewBasemap(){
+		if (newBasemap == null){
+			newBasemap = new BasemapDefinition();
+			newBasemap.setConservationArea(SmartDB.getCurrentConservationArea());
+			newBasemap.setName(txtName.getText());
+			newBasemap.setIsDefault(false);
+		}
+		return newBasemap;
+	}
 	private void loadData(){
 		Job loadData = new Job(Messages.SaveBasemapDialog_LoadDataJob){
 
@@ -240,17 +268,16 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 				setErrorMessage(Messages.SaveBasemapDialog_Error_NoName);
 				ok = false;
 			}
-			if (!SmartUtils.isSimpleString(name, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, BasemapDefinition.MAX_NAME_LENGTH)){
+			if (!SmartUtils.isSimpleString(name, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, org.wcs.smart.ca.Label.MAX_LENGTH )){
 				setErrorMessage(
 						MessageFormat.format(
 								Messages.SaveBasemapDialog_Error_BasemapName,
-								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, BasemapDefinition.MAX_NAME_LENGTH }));
+								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, org.wcs.smart.ca.Label.MAX_LENGTH }));
 				ok = false;
 			}
-			baseMap = new BasemapDefinition();
-			baseMap.setConservationArea(SmartDB.getCurrentConservationArea());
-			baseMap.setName(name);
-			baseMap.setIsDefault(false);
+			getNewBasemap().updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
+			baseMap = getNewBasemap();
+			
 		}
 		if (baseMap != null){
 			baseMap.setEmployee(SmartDB.getCurrentEmployee());

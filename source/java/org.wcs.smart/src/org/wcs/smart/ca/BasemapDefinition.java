@@ -26,13 +26,10 @@ import java.util.Arrays;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
 
 /**
  * Map setting store
@@ -42,37 +39,18 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "smart.saved_maps")
-public class BasemapDefinition {
-	
-	public static final int MAX_NAME_LENGTH = 256;
-	
-	private byte[] uuid;
+public class BasemapDefinition extends SimpleListItem{
+		
 	private Employee employee;
 	private ConservationArea conservationArea;
-	private String name;
+	
 	private String mapDef;
 	private boolean isDefault;
 	
 	public BasemapDefinition(){
-		
+		super();
 	}
 
-	
-	/**
-	 * @return the uuid
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid(){
-		return this.uuid;
-	}
-	/**
-	 * sets the uuid field
-	 */
-	public void setUuid(byte[] uuid){
-		this.uuid = uuid;
-	}
 	/**
 	 * @return the employee
 	 */
@@ -103,21 +81,6 @@ public class BasemapDefinition {
 	 */
 	public void setConservationArea(ConservationArea conservationArea) {
 		this.conservationArea = conservationArea;
-	}
-
-	/**
-	 * @return the name
-	 */
-	@Column(name="name")
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	/**
@@ -157,7 +120,7 @@ public class BasemapDefinition {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(uuid);
+		result = prime * result + Arrays.hashCode(getUuid());
 		return result;
 	}
 
@@ -174,7 +137,7 @@ public class BasemapDefinition {
 		if (getClass() != obj.getClass())
 			return false;
 		BasemapDefinition other = (BasemapDefinition) obj;
-		if (!Arrays.equals(uuid, other.uuid))
+		if (!Arrays.equals(getUuid(), other.getUuid()))
 			return false;
 		return true;
 	}
