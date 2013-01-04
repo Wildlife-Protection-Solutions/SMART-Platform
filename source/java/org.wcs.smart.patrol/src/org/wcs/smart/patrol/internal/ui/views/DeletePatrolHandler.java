@@ -8,6 +8,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -46,13 +47,16 @@ public class DeletePatrolHandler extends AbstractHandler {
 
 								@Override
 								public void run() {
-									if (MessageDialog
-											.openConfirm(
-													Display.getCurrent()
-															.getActiveShell(),
-													Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle,
-													MessageFormat.format(
-													Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage, new Object[]{in.getPatrolId()}))) {
+									MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+											Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle,
+											null,
+											 MessageFormat.format(
+														Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage, new Object[]{in.getPatrolId()}),
+											MessageDialog.CONFIRM, 
+											new String[] { IDialogConstants.OK_LABEL,
+													IDialogConstants.CANCEL_LABEL }, 1);
+									
+									if (dialog.open() == MessageDialog.OK){
 										canDelete = true;
 									}
 									
