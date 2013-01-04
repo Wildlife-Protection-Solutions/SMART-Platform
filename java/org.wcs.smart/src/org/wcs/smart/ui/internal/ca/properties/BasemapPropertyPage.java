@@ -26,10 +26,13 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,9 +44,11 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.LanguageViewer;
 
 import com.ibm.icu.text.Collator;
 
@@ -56,7 +61,7 @@ import com.ibm.icu.text.Collator;
  */
 public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	
-	// buttons for modifying layers; these are ordered by Area.AreaType.values()
+	private LanguageViewer langViewer;
 	private ListViewer lstBasemaps;
 	private BasemapDefinition[] basemaps;
 	
@@ -113,16 +118,32 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
 
-		lstBasemaps = new ListViewer(comp, SWT.SINGLE | SWT.DEFAULT | SWT.BORDER);
+		Composite left = new Composite(comp, SWT.NONE);
+		left.setLayout(new GridLayout(1, false));
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		langViewer = new LanguageViewer(left, SWT.DEFAULT, SmartDB.getCurrentConservationArea());
+		langViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				lstBasemaps.refresh();
+			}
+		});
+		
+		lstBasemaps = new ListViewer(left, SWT.SINGLE | SWT.DEFAULT | SWT.BORDER);
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstBasemaps.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof BasemapDefinition){
-					if (((BasemapDefinition) element).getIsDefault()){
-						return ((BasemapDefinition) element).getName() + Messages.BasemapPropertyPage_DefaultLabel;
-					}else{
-						return ((BasemapDefinition) element).getName();
+					String name = ((BasemapDefinition) element).findNameNull(langViewer.getCurrentSelection());
+					if (name == null){
+						name = ((BasemapDefinition) element).getName();
 					}
+					if (((BasemapDefinition) element).getIsDefault()){
+						name = name + " " + Messages.BasemapPropertyPage_DefaultLabel; //$NON-NLS-1$
+					}
+					return name;
 				}
 				return super.getText(element);
 			}
@@ -134,6 +155,26 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		Composite compButtons = new Composite(comp, SWT.NONE);
 		compButtons.setLayout(new GridLayout(1, false));
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		Button btnRename = new Button(compButtons, SWT.PUSH);
+		btnRename.setText(Messages.BasemapPropertyPage_RenameButton);
+		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnRename.addSelectionListener(new SelectionAdapter() {		
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
+				if (sel.isEmpty() ) return;
+				BasemapDefinition toEdit = (BasemapDefinition) sel.getFirstElement();
+				
+				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toEdit, SmartDB.getCurrentLanguage());
+				if (dialog.open() ==  Window.OK){
+					setChangesMade(true);
+					lstBasemaps.refresh();
+				}
+			}
+		});
+		
 		Button btnSetDefault = new Button(compButtons, SWT.PUSH);
 		btnSetDefault.setText(Messages.BasemapPropertyPage_SetDefaultButton);
 		btnSetDefault.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));

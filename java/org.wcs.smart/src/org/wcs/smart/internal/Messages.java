@@ -165,6 +165,7 @@ public class Messages extends NLS {
 	public static String BasemapPropertyPage_Dialog_Title;
 	public static String BasemapPropertyPage_Error_CouldNotSave;
 	public static String BasemapPropertyPage_Progress_Loading;
+	public static String BasemapPropertyPage_RenameButton;
 	public static String BasemapPropertyPage_SetDefaultButton;
 	public static String CaExporter_Error_TempDirDelete;
 	public static String CaImporter_Error_CaAlreadyExists;
@@ -589,6 +590,7 @@ public class Messages extends NLS {
 	public static String RestoreHandler_ReportComplete_DialogTitle;
 	public static String RestoreHandler_ReportFailed_Message;
 	public static String RestoreHandler_RestoreButton;
+	public static String SaveBasemapDialog_Button_Translate;
 	public static String SaveBasemapDialog_CreateNewOp;
 	public static String SaveBasemapDialog_Error_BasemapName;
 	public static String SaveBasemapDialog_Error_NoBasemap;
@@ -660,6 +662,12 @@ public class Messages extends NLS {
 	public static String StationListPropertyPage_InvalidDescription_DialogTitle;
 	public static String StationListPropertyPage_InvalidName_DialogTitle;
 	public static String StationListPropertyPage_LanguageLabel;
+	public static String TranslateSimpleListItemDialog_DialogMessage;
+	public static String TranslateSimpleListItemDialog_DialogTitle;
+	public static String TranslateSimpleListItemDialog_Error_InvalidLabel;
+	public static String TranslateSimpleListItemDialog_Error_LabelRequired;
+	public static String TranslateSimpleListItemDialog_LanguageLabel;
+	public static String TranslateSimpleListItemDialog_NameLabel;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;
 	public static String UserNamePasswordDialog_Username_Label;

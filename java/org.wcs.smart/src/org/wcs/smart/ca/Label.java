@@ -61,6 +61,8 @@ import org.wcs.smart.hibernate.SmartDB;
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Label  {
 
+	public static final int MAX_LENGTH = 1024;
+	
 	private LabelItemPK id;
 	private String value;
 	
