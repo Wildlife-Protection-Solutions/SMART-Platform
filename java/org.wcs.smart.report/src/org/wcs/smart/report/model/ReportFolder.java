@@ -21,13 +21,9 @@
  */
 package org.wcs.smart.report.model;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -40,12 +36,9 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.HasLabel;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.SimpleListItem;
 
 /**
  * A report folder object
@@ -54,15 +47,13 @@ import org.wcs.smart.ca.Language;
  */
 @Entity
 @Table(name="smart.report_folder")
-public class ReportFolder extends HasLabel implements IAdaptable {
+public class ReportFolder extends SimpleListItem implements IAdaptable {
 
 	private ReportFolder parentFolder;
 	private Employee employee;
 	private ConservationArea conservationArea;
 	
 	private List<ReportFolder> childrenFolders;
-	private Set<Label> names;	//names
-	private String name;
 	
 	private ReportFolder deletedParent;
 	
@@ -131,68 +122,6 @@ public class ReportFolder extends HasLabel implements IAdaptable {
 		this.childrenFolders = children;
 	}
 	
-	/**
-	 * 
-	 * @return the names associated with the list element in the
-	 * language the platform is running in.
-	 */
-	@Type(type="org.wcs.smart.ca.LabelUserType")
-	@Column(name="uuid", insertable=false, updatable=false)	
-	@Basic(fetch = FetchType.LAZY)
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * Do not use to set the name.
-	 * @param name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	/**
-	 * Updates the name of the associated language
-	 * @param name
-	 */
-	@Transient
-	public void updateName(String name, Language language){
-		boolean found = false;
-		for (Label l : names){
-			if (l.getLanguage().equals(language)){
-				l.setValue(name);
-				found = true;
-			}
-		}
-		if (!found){
-			Label lbl = new Label();
-			lbl.setElement(this);
-			lbl.setLanguage(language);
-			lbl.setValue(name);
-			names.add(lbl);
-		}
-	}
-	
-	/**
-	 * 
-	 * @return the names associated with the list element
-	 */
-	@OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY, mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
-	public Set<Label> getNames() {
-		if (names == null){
-			names = new HashSet<Label>();
-		}
-		return names;
-	}
-
-	/**
-	 * Sets all names
-	 * @param names
-	 */
-	public void setNames(Set<Label> names) {
-		this.names = names;
-	}
-
 	/**
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */

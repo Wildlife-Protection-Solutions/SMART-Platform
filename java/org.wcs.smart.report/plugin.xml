@@ -56,6 +56,10 @@
             id="org.wcs.smart.report.editLibrary"
             name="%editlibrary.command.name">
       </command>
+      <command
+            id="org.wcs.smart.report.translateItem"
+            name="Translate...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -227,6 +231,10 @@
             </and>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.TranslateNamesHandler"
+            commandId="org.wcs.smart.report.translateItem">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -363,6 +371,27 @@
                mnemonic="%reportlist.popupmenu.rename.command.mnemonic"
                style="push"
                tooltip="%reportlist.popupmenu.rename.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="rename"
+                           property="org.wcs.smart.report.menu.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.report.translateItem"
+               label="Translate..."
+               mnemonic="t"
+               style="push"
+               tooltip="Provide translations for name">
             <visibleWhen
                   checkEnabled="false">
                <with

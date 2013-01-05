@@ -19,10 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model.observation;
+package org.wcs.smart.query.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,41 +32,36 @@ import javax.persistence.Transient;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.engine.DerbyQueryEngine2;
-import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.query.engine.DerbyPatrolEngine;
+import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**
- * A class to represent an observation query.
- * <p>Observation queries query each observation
- * which consists of a category and a 
- * set of attributes.</p>
- * 
- * @author Emily
+ * A representation of a patrol query.
+ * @author egouge
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.waypoint_query")
-public class ObservationQuery extends SimpleQuery{
+@Table(name="smart.patrol_query")
+public class PatrolQuery extends SimpleQuery {
 
 	private List<QueryColumn> queryColumns = null;
+
 	
 	/**
-	 * Creates a new observation query with the default
+	 * Creates a new patrol query with the default
 	 * conservation area filter and no date filter
 	 */
-	public ObservationQuery(){
+	protected PatrolQuery(){
 		super();
 	}
-	
-	
 	
 	/**
 	 * Updates the visible columns based 
 	 * on the isVisible field of the associated
-	 * WaypointQueryColumn columns.
+	 * QueryColumn columns.
 	 */
 	@Transient
+	@Override
 	public void updateVisibleColumns(){
 		StringBuilder sb = new StringBuilder();
 		boolean all = true;
@@ -84,9 +78,7 @@ public class ObservationQuery extends SimpleQuery{
 				sb.deleteCharAt(sb.length() - 1);
 			}
 			setVisibleColumns(sb.toString());
-		}else{
-			setVisibleColumns(null);
-		}
+		}	
 	}
 	
 	/**
@@ -106,7 +98,7 @@ public class ObservationQuery extends SimpleQuery{
 	 * Loads the query columns
 	 */
 	private void initQueryColumns(){
-		QueryColumn[] cols = QueryColumn.getWaypointQueryColumns();
+		QueryColumn[] cols = QueryColumn.getPatrolQueryColumns();
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;
@@ -128,11 +120,11 @@ public class ObservationQuery extends SimpleQuery{
 			}
 		}
 	}
-
+	
 	/** public for testing purposes only */
 	@Transient
-	public Collection<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception{
-		DerbyQueryEngine2 engine = new DerbyQueryEngine2();
+	public List<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception{
+		DerbyPatrolEngine engine = new DerbyPatrolEngine();
 		return engine.executeQuery(this, session, progressMonitor);
 	}
 	
@@ -141,9 +133,8 @@ public class ObservationQuery extends SimpleQuery{
 	 * @see java.lang.Object#clone()
 	 */
 	@Transient
-	@Override
-	public ObservationQuery clone(){
-		ObservationQuery q = new ObservationQuery();
+	public PatrolQuery clone(){
+		PatrolQuery q = new PatrolQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());
@@ -155,12 +146,16 @@ public class ObservationQuery extends SimpleQuery{
 		q.setVisibleColumns(getVisibleColumns());
 		return q;
 	}
+
+
+
 	/**
 	 * @see org.wcs.smart.query.model.Query#getType()
 	 */
 	@Override
 	@Transient
 	public QueryType getType() {
-		return QueryType.OBSERVATION;
+		return QueryType.PATROL;
 	}
 }
+

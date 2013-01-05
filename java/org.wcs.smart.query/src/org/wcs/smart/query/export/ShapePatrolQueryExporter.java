@@ -37,9 +37,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryResultItemFeature;
+import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
  * Shapefile query exporter.  Exports

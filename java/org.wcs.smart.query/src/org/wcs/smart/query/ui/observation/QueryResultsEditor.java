@@ -48,10 +48,11 @@ import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.observation.ObservationQuery;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
@@ -168,7 +169,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			QueryInput input2 = ((QueryInput)input);
 			if (input2.getUuid() == null){
 				//create a new query
-				this.query = new ObservationQuery();
+				this.query = QueryFactory.createObservationQuery();
 				setDirty(false);
 			}else{
 				loadQueryLoad.schedule();

@@ -34,9 +34,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.ui.querytable.QueryResultItemComparator;
 import org.wcs.smart.query.ui.querytable.QueryTableViewerColumn;
 

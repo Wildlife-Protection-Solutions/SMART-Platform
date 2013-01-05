@@ -26,11 +26,11 @@ import java.io.FileWriter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;

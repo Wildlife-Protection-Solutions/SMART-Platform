@@ -21,27 +21,18 @@
  */
 package org.wcs.smart.query.model;
 
-import java.util.Arrays;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
@@ -57,8 +48,7 @@ import org.wcs.smart.query.ui.summary.SummaryEditor;
  */
 
 @Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public abstract class Query {
+public abstract class Query extends SimpleListItem {
 	
 	//if you add another query type you must update
 	//the queryInput constructor
@@ -114,55 +104,19 @@ public abstract class Query {
 			return this.editorId;
 		}
 	}
-	private byte[] uuid = null;
-	private String name = null;
+	
 	private Employee owner = null;
 	private ConservationArea conservationArea = null;
 	private boolean isShared = false;
 	private String id;
-	
 	private QueryFolder ownerFolder = null;
 	private boolean isValid = false;
 	
 	
-	public Query(){
-		name = Messages.Query_DefaultQueryName;
-		conservationArea = SmartDB.getCurrentConservationArea();
-		owner =  SmartDB.getCurrentEmployee();
-		ownerFolder = null;
-		isShared = false;;
+	protected Query(){
+		
 	}
 	
-	/**
-	 * @return query uuid
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	
-	/**
-	 * @param uuid the query uuid
-	 */
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-	
-	/**
-	 * @return query name
-	 */
-	@Column(name = "name")
-	public String getName() {
-		return name;
-	}
-	/**
-	 * @param name the query name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	/**
 	 * A human-readable conservation area unique identifier for
@@ -241,44 +195,6 @@ public abstract class Query {
 	 */
 	public void setFolder(QueryFolder folder){
 		this.ownerFolder = folder;
-	}
-	
-	
-//	/**
-//	 * @return date created
-//	 */
-//	public Date getDateCreated() {
-//		return dateCreated;
-//	}
-//	/**
-//	 * @param dateCreated the date the query created
-//	 */
-//	public void setDateCreated(Date dateCreated) {
-//		this.dateCreated = dateCreated;
-//	}
-//	
-	
-	@Override
-	public int hashCode() {
-		if (uuid == null){ return super.hashCode(); }
-		return Arrays.hashCode(uuid);
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (! (obj instanceof Query)){
-			return false;
-		}
-		Query other = (Query) obj;
-		if (getUuid() == null && other.getUuid() == null){
-			return super.equals(obj);
-		}
-		if (!Arrays.equals(getUuid(), other.getUuid()))
-			return false;
-		return true;
 	}
 	
 	/**

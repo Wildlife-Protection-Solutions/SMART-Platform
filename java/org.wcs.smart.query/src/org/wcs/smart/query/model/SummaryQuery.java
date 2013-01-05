@@ -92,15 +92,9 @@ public class SummaryQuery extends Query {
 	 * Creates a new summary query with the default
 	 * conservation area filter and no date filter
 	 */
-	public SummaryQuery(){
+	protected SummaryQuery(){
 		super();
-		setName(Messages.SummaryQuery_DefaultQueryName);
-		caFilter = new ConservationAreaFilter();
-		if (SmartDB.getCurrentConservationArea() != null){
-			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		}
 		
-		dateFilter = null;
 	}
 	
 	@Transient
@@ -253,7 +247,7 @@ public class SummaryQuery extends Query {
 	 */
 	@Transient
 	public SummaryQuery clone(){
-		SummaryQuery q = new SummaryQuery();
+		SummaryQuery q = QueryFactory.createSummaryQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());

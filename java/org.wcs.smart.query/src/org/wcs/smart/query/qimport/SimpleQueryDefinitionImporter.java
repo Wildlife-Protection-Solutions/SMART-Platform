@@ -31,10 +31,11 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
@@ -78,9 +79,9 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 
 		String langCode = qt.getLanguage();
 		if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.OBSERVATION.name())){
-			wq = new ObservationQuery();	
+			wq = QueryFactory.createObservationQuery();	
 		}else if (qt.getQueryType().equalsIgnoreCase(org.wcs.smart.query.model.Query.QueryType.PATROL.name())){
-			wq = new PatrolQuery();
+			wq = QueryFactory.createPatrolQuery();
 		}else{
 			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
 		}

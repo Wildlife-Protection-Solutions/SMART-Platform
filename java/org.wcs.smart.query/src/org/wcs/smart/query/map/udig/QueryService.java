@@ -44,10 +44,10 @@ import org.wcs.smart.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSource;
 import org.wcs.smart.query.map.geotools.QueryDataSourceFactory;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
  * A udig service for a smart waypoint or patrol queries.

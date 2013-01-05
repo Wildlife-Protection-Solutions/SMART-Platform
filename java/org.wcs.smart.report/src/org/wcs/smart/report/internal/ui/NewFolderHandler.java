@@ -76,6 +76,14 @@ public class NewFolderHandler extends AbstractHandler implements IHandler {
 					newFolder.setNames(new HashSet<Label>());
 					newFolder.getNames().add(lbl);
 					newFolder.setName(lbl.getValue());
+					
+					if (!SmartDB.getCurrentLanguage().isDefault()){
+						lbl.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+						lbl.setValue(Messages.NewFolderHandler_DefaultNewFolderName);
+						lbl.setElement(newFolder);
+						newFolder.getNames().add(lbl);
+					}
+					
 					newFolder.setConservationArea(SmartDB.getCurrentConservationArea());
 					
 					if (o instanceof ReportFolder){

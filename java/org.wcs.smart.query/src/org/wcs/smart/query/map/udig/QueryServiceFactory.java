@@ -24,10 +24,10 @@ package org.wcs.smart.query.map.udig;
 import net.refractions.udig.catalog.IService;
 
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
-import org.wcs.smart.query.model.observation.ObservationQuery;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
  * Query service factory.
