@@ -511,6 +511,10 @@
             id="org.wcs.smart.systemPref"
             name="%systempref.command.name">
       </command>
+      <command
+            id="org.wcs.smart.translateItem"
+            name="Translate...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -613,6 +617,10 @@
       <handler
             class="org.wcs.smart.ui.internal.ShowSystemPreferencesHandler"
             commandId="org.wcs.smart.systemPref">
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.TranslateNamesHandler"
+            commandId="org.wcs.smart.translateItem">
       </handler>
    </extension>
    <extension

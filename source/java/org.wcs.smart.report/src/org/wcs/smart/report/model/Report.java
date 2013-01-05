@@ -22,21 +22,18 @@
 package org.wcs.smart.report.model;
 
 import java.io.File;
-import java.util.Arrays;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.report.ReportPlugIn;
 
 /**
@@ -47,34 +44,16 @@ import org.wcs.smart.report.ReportPlugIn;
  */
 @Entity
 @Table(name="smart.report")
-public class Report {
+public class Report extends SimpleListItem {
 
-	public static final int MAX_NAME_LENGTH = 1024;
+	public static final int MAX_NAME_LENGTH = org.wcs.smart.ca.Label.MAX_LENGTH;
 	
-	private byte[] uuid;
 	private Employee creator;
-	private String name;
 	private String id;
 	private ConservationArea conservationArea;
 	private boolean isShared;
 	private ReportFolder folder;
 	private String filename;
-	
-	/**
-	 * @return the uuid
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	/**
-	 * @param uuid the uuid to set
-	 */
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
 	
 	/**
 	 * @return the creator
@@ -89,19 +68,6 @@ public class Report {
 	 */
 	public void setOwner(Employee owner) {
 		this.creator = owner;
-	}
-	/**
-	 * @return the name
-	 */
-	@Column(name="name")
-	public String getName() {
-		return name;
-	}
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 	
 	/**
@@ -188,19 +154,4 @@ public class Report {
 		return new File(ReportPlugIn.getReportDirectory(), getFilename());
 	}
 	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}
-		return super.hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		if (o instanceof Report){
-			return Arrays.equals(((Report) o).getUuid(), uuid);
-		}
-		return false;
-	}
 }

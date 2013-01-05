@@ -8,6 +8,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
@@ -48,7 +49,7 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 		warnings.clear();
 		
 		String langCode = qt.getLanguage();
-		GriddedQuery griddedQuery = new GriddedQuery();
+		GriddedQuery griddedQuery = QueryFactory.createGriddedQuery();
 		griddedQuery.setName(qt.getName());
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();

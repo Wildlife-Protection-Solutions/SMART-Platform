@@ -53,6 +53,7 @@ import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.ui.IQueryEditor;
@@ -172,7 +173,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			QueryInput input2 = ((QueryInput) input);
 			if (input2.getUuid() == null) {
 				// create a new query
-				this.query = new SummaryQuery();
+				this.query = QueryFactory.createSummaryQuery();
 				setDirty(false);
 			} else {
 				loadQueryLoad.schedule();

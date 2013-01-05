@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.FilterValidator;
@@ -73,7 +74,7 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 		warnings.clear();
 		
 		String langCode = qt.getLanguage();
-		SummaryQuery summaryQuery = new SummaryQuery();
+		SummaryQuery summaryQuery = QueryFactory.createSummaryQuery();
 		summaryQuery.setName(qt.getName());
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();

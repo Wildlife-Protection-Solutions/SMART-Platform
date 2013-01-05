@@ -79,6 +79,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 				session.beginTransaction();
 				try {
 					session.saveOrUpdate(report);
+					report.updateName(SmartDB.getCurrentLanguage(),value);
 					report.setName(value);
 					session.getTransaction().commit();
 					ReportEventManager.getInstance().fireReportUpdated(report);
@@ -114,8 +115,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 				session.beginTransaction();
 				try {
 					session.saveOrUpdate((ReportFolder) folder);
-					folder.updateName(value,
-							SmartDB.getCurrentLanguage());
+					folder.updateName(SmartDB.getCurrentLanguage(), value);
 					folder.setName(value);
 					session.getTransaction().commit();
 					ReportEventManager.getInstance().fireReportFolderModified(folder);

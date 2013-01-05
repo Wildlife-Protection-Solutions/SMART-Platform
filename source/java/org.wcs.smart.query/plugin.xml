@@ -267,6 +267,27 @@
                </with>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.wcs.smart.query.translate"
+               label="Translate..."
+               mnemonic="t"
+               style="push"
+               tooltip="Provide translations for name">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="rename"
+                           property="org.wcs.smart.query.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
          <separator
                name="org.wcs.smart.query.separator2"
                visible="true">
@@ -595,6 +616,10 @@
             id="org.wcs.smart.query.openQuery"
             name="%openquery.command.name">
       </command>
+      <command
+            id="org.wcs.smart.query.translate"
+            name="Translate...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -780,6 +805,10 @@
             class="org.wcs.smart.query.ui.querylist.OpenQueryHandler"
             commandId="org.wcs.smart.query.openQuery">
       </handler>
+      <handler
+            class="org.wcs.smart.query.ui.querylist.TranslateNamesHandler"
+            commandId="org.wcs.smart.query.translate">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.services">
@@ -808,13 +837,13 @@
             class="org.wcs.smart.query.model.Query">
       </class>
       <class
-            class="org.wcs.smart.query.model.observation.ObservationQuery">
+            class="org.wcs.smart.query.model.ObservationQuery">
       </class>
       <class
             class="org.wcs.smart.query.model.SummaryQuery">
       </class>
       <class
-            class="org.wcs.smart.query.model.patrol.PatrolQuery">
+            class="org.wcs.smart.query.model.PatrolQuery">
       </class>
       <class
             class="org.wcs.smart.query.model.SimpleQuery">

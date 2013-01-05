@@ -51,6 +51,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryEditorUtils;
@@ -175,7 +176,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			QueryInput input2 = ((QueryInput)input);
 			if (input2.getUuid() == null){
 				//create a new query
-				this.query = new GriddedQuery();
+				this.query = QueryFactory.createGriddedQuery();
 				setDirty(false);
 			}else{
 				loadQueryLoad.schedule();

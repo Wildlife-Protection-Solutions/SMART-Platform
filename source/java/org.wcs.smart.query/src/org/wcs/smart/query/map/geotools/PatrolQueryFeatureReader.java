@@ -28,8 +28,8 @@ import java.util.NoSuchElementException;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.QueryResultItem;
-import org.wcs.smart.query.model.patrol.PatrolQuery;
 
 /**
  * A patrol query geotools feature reader.

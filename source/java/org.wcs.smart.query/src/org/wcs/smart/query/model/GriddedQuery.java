@@ -93,15 +93,8 @@ public class GriddedQuery extends Query {
 	 * Creates a new gridded query with the default
 	 * conservation area filter and no date filter
 	 */
-	public GriddedQuery(){
+	protected GriddedQuery(){
 		super();
-		setName(Messages.GriddedQuery_DefaultQueryName);
-		caFilter = new ConservationAreaFilter();
-		if (SmartDB.getCurrentConservationArea() != null){
-			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		}
-		
-		dateFilter = null;
 	}
 	
 	

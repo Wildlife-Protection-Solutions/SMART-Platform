@@ -33,7 +33,7 @@ import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.observation.ObservationQuery;
+import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
 /**

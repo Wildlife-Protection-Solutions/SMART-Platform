@@ -53,7 +53,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
-import org.wcs.smart.ui.internal.ca.properties.TranslateSimpleListItemDialog;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.Collator;
