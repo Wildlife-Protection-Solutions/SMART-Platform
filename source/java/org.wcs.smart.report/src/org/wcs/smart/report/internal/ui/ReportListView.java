@@ -149,6 +149,11 @@ public class ReportListView extends ViewPart {
 				@Override
 				public void run() {
 					reportList.update(o, null);
+					if (o instanceof Report){
+						reportList.refresh(((Report)o).getFolder());
+					}else if (o instanceof ReportFolder){
+						reportList.refresh(((ReportFolder)o).getParentFolder());
+					}
 					//reportList.refresh();
 				}
 			});
