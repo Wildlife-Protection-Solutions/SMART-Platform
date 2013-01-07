@@ -68,7 +68,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryFolderListener;
@@ -287,14 +289,36 @@ public class ImportReportEngine {
 		Properties prop = new Properties();
 		InputStream inStream = new FileInputStream(f);
 		prop.load(inStream);
-		String reportName = prop.getProperty("name"); //$NON-NLS-1$
-		String fileName = prop.getProperty("filename"); //$NON-NLS-1$
 		inStream.close();
 		
 		Report r = new Report();
 		r.setConservationArea(SmartDB.getCurrentConservationArea());
-		r.setName(reportName);
-		r.setFilename(fileName);
+		
+		for (Object o : prop.keySet()){
+			if (o.equals("filename")){ //$NON-NLS-1$
+				r.setFilename((String)prop.get(o));
+			}else if (((String)o).startsWith("name_")){ //$NON-NLS-1$
+				String key = (String)o;
+				int index = key.indexOf('_');
+				String code = key.substring(index+1);
+				
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try{
+					List<?> items = s.createCriteria(Language.class).add(Restrictions.eq("ca", r.getConservationArea())).add(Restrictions.eq("code", code)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+					for (Object item : items){
+						r.updateName((Language)item, prop.getProperty(key));
+					}
+					r.setName(r.findName(SmartDB.getCurrentLanguage()));
+					if (r.getName() == null){
+						r.setName(r.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+					}
+				}finally{
+					s.getTransaction().rollback();
+					s.close();
+				}
+			}
+		}
 		
 		return r;
 	}
@@ -313,7 +337,7 @@ public class ImportReportEngine {
 	 */
 	private Report validateReport(final Report report){
 		
-		String hql = " from Report where name = :name and ((owner = :owner and shared = 'false') or shared = 'true') and conservationArea = :ca"; //$NON-NLS-1$
+		String hql = "Select r from Report as  r join r.names as l where l.value = :name and ((r.owner = :owner and r.shared = 'false') or r.shared = 'true') and r.conservationArea = :ca"; //$NON-NLS-1$
 		Query query = session.createQuery(hql);
 		
 		query.setParameter("name", report.getName()); //$NON-NLS-1$

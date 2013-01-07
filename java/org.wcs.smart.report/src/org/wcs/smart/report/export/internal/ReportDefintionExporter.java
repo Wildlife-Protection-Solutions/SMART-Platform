@@ -41,6 +41,7 @@ import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.export.DefinitionQueryExporter;
@@ -118,12 +119,23 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * @throws Exception
 	 */
 	private void writeReportInfo(File f, Report report) throws Exception{
-		Properties prop = new Properties();
-		prop.setProperty("name", report.getName()); //$NON-NLS-1$
-		prop.setProperty("filename", report.getFilename()); //$NON-NLS-1$
-		FileOutputStream fout = new FileOutputStream(f);
-		prop.store(fout, null);
-		fout.close();
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		s.saveOrUpdate(report);
+		try {
+			Properties prop = new Properties();
+			for (Label l : report.getNames()) {
+				prop.setProperty(
+						"name_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+			}
+			prop.setProperty("filename", report.getFilename()); //$NON-NLS-1$
+			FileOutputStream fout = new FileOutputStream(f);
+			prop.store(fout, null);
+			fout.close();
+		} finally {
+			s.getTransaction().rollback();
+			s.close();
+		}
 	}
 	
 	/**
