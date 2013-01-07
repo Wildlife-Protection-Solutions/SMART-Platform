@@ -170,6 +170,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 
     protected synchronized void deregisterFeatureFlasher() {
         flashFeatureRegistered = false;
+        //AnimationUpdater.cancel(getMap().getRenderManager().getMapDisplay());
         getSite().getPage().removePostSelectionListener(selectFeatureListener);
     }
     
@@ -361,6 +362,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
+				if (lblSRID.isDisposed()) return;
 				lblSRID.setText(getMap().getViewportModel().getCRS().getName()
 						.getCode());
 				lblSRID.getParent().layout();

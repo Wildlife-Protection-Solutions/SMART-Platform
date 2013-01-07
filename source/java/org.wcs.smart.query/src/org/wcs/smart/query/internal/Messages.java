@@ -409,6 +409,7 @@ public class Messages extends NLS {
 	public static String QueryPropertiesDialog_DialogTitle;
 	public static String QueryPropertiesDialog_QueryNameLabel;
 	public static String QueryPropertiesDialog_SelectAllLabel;
+	public static String QueryPropertiesDialog_TranslateLink;
 	public static String QueryResultItemFeature_GeomParseError;
 	public static String QueryResultsEditor_Error_CouldNotLoad;
 	public static String QueryResultsEditor_Error_CouldNotParse;
@@ -505,6 +506,7 @@ public class Messages extends NLS {
 	public static String SummaryValueGroupByPanel_RowHeadersTooltip;
 	public static String SummaryValueGroupByPanel_ValuesSectionHeader;
 	public static String SummaryValueGroupByPanel_ValuesSectionTooltip;
+	public static String TranslateNamesHandler_LoadQueryError;
 
 	static {
 		// initialize resource bundle

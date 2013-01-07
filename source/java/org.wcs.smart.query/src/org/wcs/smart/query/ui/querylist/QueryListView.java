@@ -52,7 +52,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.query.IQueryFolderListener;
+import org.wcs.smart.query.IQueryListener;
+import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.IQueryEditor;
 
@@ -158,6 +161,7 @@ public class QueryListView extends ViewPart {
 	public QueryListView(){
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
 	}
+	
 	public QueryListViewContentProvider getQueryListContentProvider(){
 		return (QueryListViewContentProvider) this.queryList.getContentProvider();
 	}
@@ -218,6 +222,26 @@ public class QueryListView extends ViewPart {
 		SavedQueryTree.getInstance().addListener(listener);
 		
 		loadQueriesJob.schedule();
+		
+		QueryEventManager.getInstance().addQueryChangedEvent(new IQueryListener() {
+			
+			@Override
+			public void queryRun(Query query) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void queryNameUpdated(Query query) {
+				queryList.refresh();
+			}
+			
+			@Override
+			public void queryChanged(Query query) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 	
 	

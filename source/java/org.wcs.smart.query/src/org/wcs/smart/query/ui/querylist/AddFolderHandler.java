@@ -91,6 +91,10 @@ public class AddFolderHandler extends AbstractHandler {
 		newFolder.getNames().add(lbl);
 		newFolder.setName(lbl.getValue());
 		
+		if (!SmartDB.getCurrentLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage())){
+			newFolder.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), Messages.AddFolderHandler_DefaultNewFolderName);
+		}
+		
 		//need to save and refresh query list view
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();

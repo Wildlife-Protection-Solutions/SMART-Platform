@@ -29,9 +29,15 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
+import org.wcs.smart.query.xml.model.QueryName;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**
@@ -101,5 +107,48 @@ public class QueryImporter {
 		return null;
 	}
 	
+	
+	/**
+	 * Imports the query names from the xml query type to the SMART query object.
+	 * @param query
+	 * @param qt
+	 * @throws Exception
+	 */
+	public static void importNames(org.wcs.smart.query.model.Query query, QueryType qt) throws Exception{
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try{
+			query.getNames().clear();
+			String xmlDefaultName = null;
+			for (QueryName qn : qt.getName()){
+				if (qn.getIsDefault()){
+					xmlDefaultName = qn.getName();
+				}
+				List<?> values = session.createCriteria(Language.class).add(Restrictions.eq("ca", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("code",qn.getLanguage())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+				if (values.size() > 0){
+					for (Object l : values){
+						query.updateName((Language)l, qn.getName());
+					}
+				}
+			}
+			String defaultName = query.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			if (defaultName == null){
+				if (xmlDefaultName != null){
+					query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), xmlDefaultName);
+				}else{
+					query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), qt.getName().get(0).getName());
+				}
+			}
+			String name = query.findNameNull(SmartDB.getCurrentLanguage());
+			if (name == null){
+				name = query.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			}
+			query.setName(name);
+		
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
+		}
+	}
 }
 

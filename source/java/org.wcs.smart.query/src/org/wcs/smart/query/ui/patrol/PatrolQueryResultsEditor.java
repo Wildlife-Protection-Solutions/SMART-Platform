@@ -95,6 +95,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			if (query != null && query.equals(PatrolQueryResultsEditor.this.query)){
 				boolean lIsDirty = isDirty;
 				PatrolQueryResultsEditor.this.query.setName(query.getName());
+				PatrolQueryResultsEditor.this.query.setNames(query.getNames());
 				((QueryInput)getEditorInput()).setQueryName(query.getName());
 				updatePartName();
 				page1.updateQueryName();

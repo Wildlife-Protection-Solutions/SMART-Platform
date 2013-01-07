@@ -15,7 +15,7 @@
       </view>
       <view
             allowMultiple="false"
-            class="org.wcs.smart.query.ui.queyfilter.QueryFilterView"
+            class="org.wcs.smart.query.ui.queryfilter.QueryFilterView"
             icon="images/icons/view16/query_filter_op.png"
             id="org.wcs.smart.query.ui.QueryFilter"
             name="%queryfilter.view.name"

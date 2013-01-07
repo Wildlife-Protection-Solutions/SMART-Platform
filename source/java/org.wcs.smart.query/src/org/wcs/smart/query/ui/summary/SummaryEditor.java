@@ -48,6 +48,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -99,6 +100,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			if (query != null && query.equals(SummaryEditor.this.query)){
 				boolean lIsDirty = isDirty;
 				SummaryEditor.this.query.setName(query.getName());
+				SummaryEditor.this.query.setNames(query.getNames());
 				((QueryInput)getEditorInput()).setQueryName(query.getName());
 				updatePartName();
 				compQueryName.setText(query.getName(), query.getId());
@@ -428,6 +430,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			@Override
 			public void handleEvent(Event event) {
 				getQuery().setName(event.text);
+				getQuery().updateName(SmartDB.getCurrentLanguage(), event.text);
 				setDirty(true);
 				
 			}});

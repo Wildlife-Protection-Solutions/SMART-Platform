@@ -27,12 +27,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/query}QueryName" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="queryPart" type="{http://www.smartconservationsoftware.org/xml/1.0/query}QueryPart" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="uuiditem" type="{http://www.smartconservationsoftware.org/xml/1.0/query}UuidItemType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="language" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="queryType" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="language" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -42,19 +42,19 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "QueryType", propOrder = {
+	"name",
     "queryPart",
     "uuiditem"
 })
 public class QueryType {
-
+	protected List<QueryName> name;
     protected List<QueryPart> queryPart;
     protected List<UuidItemType> uuiditem;
-    @XmlAttribute
-    protected String name;
-    @XmlAttribute
-    protected String language;
+
     @XmlAttribute
     protected String queryType;
+    @XmlAttribute
+    protected String language;
 
     /**
      * Gets the value of the queryPart property.
@@ -122,20 +122,11 @@ public class QueryType {
      *     {@link String }
      *     
      */
-    public String getName() {
+    public List<QueryName> getName() {
+    	 if (name == null) {
+             name = new ArrayList<QueryName>();
+         }
         return name;
-    }
-
-    /**
-     * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setName(String value) {
-        this.name = value;
     }
 
     /**
@@ -161,7 +152,7 @@ public class QueryType {
     public void setLanguage(String value) {
         this.language = value;
     }
-
+  
     /**
      * Gets the value of the queryType property.
      * 

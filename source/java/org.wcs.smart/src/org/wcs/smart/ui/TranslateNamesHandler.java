@@ -32,6 +32,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Handler for translating names
@@ -52,26 +53,29 @@ public class TranslateNamesHandler extends AbstractHandler {
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
 		final Object o = obj;
 		if (o instanceof SimpleListItem ){
-			SimpleListItem toUpdate = (SimpleListItem)o;
-			Session s = HibernateManager.openSession();
-			try{
-				s.beginTransaction();
-				s.saveOrUpdate(toUpdate);
-				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(HandlerUtil.getActiveShell(event), 
-					toUpdate, SmartDB.getCurrentLanguage());
-				if (dialog.open() == TranslateSimpleListItemDialog.OK){
-					s.getTransaction().commit();
-				}else{
-					s.getTransaction().rollback();
-				}
-			}catch (Exception ex){
-				SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), "Error updating translations for item.", ex);
-			}finally{
-				s.close();
-			}
+			translateItem((SimpleListItem) o, event);
 		}
 		
 		
 		return null;
+	}
+	
+	protected void translateItem(SimpleListItem toUpdate, ExecutionEvent event){
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			s.saveOrUpdate(toUpdate);
+			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(HandlerUtil.getActiveShell(event), 
+				toUpdate, SmartDB.getCurrentLanguage());
+			if (dialog.open() == TranslateSimpleListItemDialog.OK){
+				s.getTransaction().commit();
+			}else{
+				s.getTransaction().rollback();
+			}
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), Messages.TranslateNamesHandler_Error_TranslatingName, ex);
+		}finally{
+			s.close();
+		}
 	}
 }

@@ -75,7 +75,7 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 		
 		String langCode = qt.getLanguage();
 		SummaryQuery summaryQuery = QueryFactory.createSummaryQuery();
-		summaryQuery.setName(qt.getName());
+		QueryImporter.importNames(summaryQuery, qt);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){

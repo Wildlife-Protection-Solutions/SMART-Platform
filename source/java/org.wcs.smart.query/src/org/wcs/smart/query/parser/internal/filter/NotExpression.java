@@ -29,7 +29,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider.OtherItems;
+import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.OtherItems;
 
 /**
  * A not filter expression of the form:

@@ -105,10 +105,10 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 
 	@Override
     protected void initializeImageRegistry(ImageRegistry reg) {
-		reg.put(PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol.png"));
-		reg.put(AIR_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/airplane.png"));
-		reg.put(PATROL_ARMED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_armed.png"));
-		reg.put(PATROL_TEAM_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_team.png"));
+		reg.put(PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol.png")); //$NON-NLS-1$
+		reg.put(AIR_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/airplane.png")); //$NON-NLS-1$
+		reg.put(PATROL_ARMED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_armed.png")); //$NON-NLS-1$
+		reg.put(PATROL_TEAM_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_team.png")); //$NON-NLS-1$
 		reg.put(MARINE_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/boat.png")); //$NON-NLS-1$
 		reg.put(GROUND_PATROL_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_ground.png")); //$NON-NLS-1$
 		reg.put(PATROL_LEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_leader.png")); //$NON-NLS-1$

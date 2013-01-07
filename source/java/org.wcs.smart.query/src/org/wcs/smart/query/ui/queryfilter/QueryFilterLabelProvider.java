@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.queyfilter;
+package org.wcs.smart.query.ui.queryfilter;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -29,7 +29,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider.DataModelItem;
+import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.DataModelItem;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
 /**

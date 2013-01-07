@@ -35,8 +35,8 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.BracketDropItem.BracketType;
-import org.wcs.smart.query.ui.queyfilter.QueryFilterContentProvider;
-import org.wcs.smart.query.ui.queyfilter.SummaryDmObject;
+import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider;
+import org.wcs.smart.query.ui.queryfilter.SummaryDmObject;
 
 /**
  * 
