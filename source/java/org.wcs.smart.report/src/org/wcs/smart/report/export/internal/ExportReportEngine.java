@@ -197,7 +197,7 @@ public class ExportReportEngine {
 	
 	/**
 	 * Generates a filename for a given report.  The filename will
-	 * be based on the existing report file name with a new extension.
+	 * be based on the existing report filename with a new extension.
 	 * <p>
 	 * 
 	 * @param report report to generate filename for

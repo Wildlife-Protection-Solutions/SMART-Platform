@@ -348,6 +348,10 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 				});
 				
 			}
+		}else if (eventType == EventType.REPORT_UPDATED){
+			if (getEditorInputLocal().getReport().equals(o)){
+				setPartName(((Report)o).getName());
+			}
 		}
 		
 	}
