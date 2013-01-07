@@ -179,7 +179,7 @@ public class LoadDefaultLayersJob extends Job{
 			return HibernateManager.getDefaultBasemapDefinition(s);	
 		}finally{
 			if (s.getTransaction().isActive()){
-				s.getTransaction().commit();
+				s.getTransaction().rollback();
 			}
 			s.close();
 		}
@@ -196,7 +196,7 @@ public class LoadDefaultLayersJob extends Job{
 			return HibernateManager.getBasemapDefinition(s, basemapUuid);	
 		}finally{
 			if (s.getTransaction().isActive()){
-				s.getTransaction().commit();
+				s.getTransaction().rollback();
 			}
 			s.close();
 		}
