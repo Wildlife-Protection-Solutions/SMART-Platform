@@ -133,6 +133,7 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 								SmartDB.getCurrentConservationArea())).list();
 				kids.addAll(kidQueries);
 			}
+			ReportContentProvider.sortItems(kids);
 			collector.add(kids.toArray(), monitor);
 			s.getTransaction().commit();
 		}finally{

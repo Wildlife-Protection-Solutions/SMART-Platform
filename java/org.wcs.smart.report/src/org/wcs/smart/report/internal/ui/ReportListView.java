@@ -148,7 +148,8 @@ public class ReportListView extends ViewPart {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					reportList.update(o, null);	
+					reportList.update(o, null);
+					//reportList.refresh();
 				}
 			});
 		}else if (type == EventType.REPORT_ADDED || type == EventType.REPORT_DELETED){

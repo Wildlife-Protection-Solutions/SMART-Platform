@@ -21,12 +21,18 @@
  */
 package org.wcs.smart.report.ui;
 
+import java.text.Collator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 
 /**
@@ -127,7 +133,26 @@ public class ReportContentProvider extends BaseWorkbenchContentProvider{
 				return kids;
 			}
 		}
-		return super.getChildren(parent);
+		Object[] kids = super.getChildren(parent);
+		return kids;
+	}
+	
+	public static void sortItems(List<Object> items){
+		Collections.sort(items, new Comparator<Object>(){
+
+			@Override
+			public int compare(Object a, Object b) {
+				if (a instanceof ReportFolder && !(b instanceof ReportFolder)){
+					return 1;
+				}else if (a instanceof ReportFolder && b instanceof ReportFolder){
+					return Collator.getInstance().compare(((ReportFolder)a).getName(), ((ReportFolder)b).getName());
+				}else if (b instanceof ReportFolder && !(a instanceof ReportFolder)){
+					return -1;
+				}else if (a instanceof Report && b instanceof Report){
+					return Collator.getInstance().compare(((Report)a).getName(), ((Report)b).getName());
+				}
+				return Collator.getInstance().compare(a.toString(),b.toString());
+		}});
 	}
 	
 }
