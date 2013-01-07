@@ -143,11 +143,11 @@ public class ReportContentProvider extends BaseWorkbenchContentProvider{
 			@Override
 			public int compare(Object a, Object b) {
 				if (a instanceof ReportFolder && !(b instanceof ReportFolder)){
-					return 1;
+					return -1;
 				}else if (a instanceof ReportFolder && b instanceof ReportFolder){
 					return Collator.getInstance().compare(((ReportFolder)a).getName(), ((ReportFolder)b).getName());
 				}else if (b instanceof ReportFolder && !(a instanceof ReportFolder)){
-					return -1;
+					return 1;
 				}else if (a instanceof Report && b instanceof Report){
 					return Collator.getInstance().compare(((Report)a).getName(), ((Report)b).getName());
 				}
