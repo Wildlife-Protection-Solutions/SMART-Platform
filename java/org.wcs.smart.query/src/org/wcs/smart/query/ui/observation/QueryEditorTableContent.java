@@ -40,6 +40,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.QueryResultItem;
@@ -183,6 +184,7 @@ public class QueryEditorTableContent {
 			@Override
 			public void handleEvent(Event event) {
 				editor.getQuery().setName(event.text);
+				editor.getQuery().updateName(SmartDB.getCurrentLanguage(), event.text);
 				editor.setDirty(true);
 			}});
 	}

@@ -36,6 +36,7 @@ public class AddLayerHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
 		MapImport mapImport = new MapImport();
 		mapImport.getDialog().open();
 		return null;

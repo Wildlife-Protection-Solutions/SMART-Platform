@@ -31,8 +31,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.ObservationQuery;
-import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.SimpleQuery;
@@ -86,7 +84,7 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
 		}
 		
-		wq.setName(qt.getName());
+		QueryImporter.importNames(wq, qt);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){

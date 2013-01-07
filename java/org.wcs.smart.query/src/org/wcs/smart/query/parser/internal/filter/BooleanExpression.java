@@ -79,7 +79,7 @@ public class BooleanExpression implements IFilter{
 	 */
 	@Override
 	public String asString(){
-		return e1.asString() + " " + op.asSql() + " " +e2.asString() ; //$NON-NLS-1$ //$NON-NLS-2$
+		return e1.asString() + " " + op.asSmartValue() + " " +e2.asString() ; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	

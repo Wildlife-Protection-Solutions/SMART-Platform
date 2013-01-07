@@ -1,4 +1,4 @@
-package org.wcs.smart.query.ui.queyfilter;
+package org.wcs.smart.query.ui.queryfilter;
 
 import java.text.MessageFormat;
 

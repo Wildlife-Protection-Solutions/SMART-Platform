@@ -28,12 +28,14 @@ import java.io.OutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
+import org.wcs.smart.query.xml.model.QueryName;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.SmartUtils;
@@ -91,10 +93,26 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		Query wpquery = new Query();
 		QueryType xmlQuery = new QueryType();
 		wpquery.setQuery(xmlQuery);
-		
-		xmlQuery.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode());
-		xmlQuery.setName(query.getName());
 		xmlQuery.setQueryType(query.getType().name());
+		xmlQuery.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage().getCode());
+		
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try {
+			s.saveOrUpdate(query);
+
+			for (org.wcs.smart.ca.Label l : query.getNames()) {
+				QueryName qn = new QueryName();
+				qn.setName(l.getValue());
+				qn.setLanguage(l.getLanguage().getCode());
+				qn.setIsDefault(l.getLanguage().isDefault());
+
+				xmlQuery.getName().add(qn);
+			}
+		} finally {
+			s.getTransaction().rollback();
+			s.close();
+		}
 		
 		writeQuerySpecifics(query, xmlQuery);
 		

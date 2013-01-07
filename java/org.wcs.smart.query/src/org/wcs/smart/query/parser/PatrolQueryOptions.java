@@ -501,7 +501,8 @@ public class PatrolQueryOptions {
 		
 		/**
 		 * Return an array of names that represent
-		 * the uuid for a given option.
+		 * the uuid for a given option.  Name provided in 
+		 * the conservation area default language.
 		 * 
 		 * @param session
 		 * @param uuid

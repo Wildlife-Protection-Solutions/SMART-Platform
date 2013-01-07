@@ -87,18 +87,31 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 	private boolean validate(){
 		boolean ok = true;
 		setErrorMessage(null);
-		for(Entry<Language, String> value : values.entrySet()){
-			if (value.getKey().isDefault() && value.getValue().trim().length() == 0){
-				setErrorMessage(MessageFormat.format(Messages.TranslateSimpleListItemDialog_Error_LabelRequired, new Object[]{value.getKey().getDisplayName()}));
-				ok = false;
-			}
-			if (!SmartUtils.isSimpleString(value.getValue(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, org.wcs.smart.ca.Label.MAX_LENGTH,0)){
-				
-				setErrorMessage(
-						MessageFormat.format(
-								Messages.TranslateSimpleListItemDialog_Error_InvalidLabel,
-								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, org.wcs.smart.ca.Label.MAX_LENGTH }));
-				ok = false;
+		if (values.get(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
+			setErrorMessage(MessageFormat.format(Messages.TranslateSimpleListItemDialog_Error_LabelRequired, new Object[]{SmartDB.getCurrentConservationArea().getDefaultLanguage().getDisplayName()}));
+			ok = false;
+		}
+		if (ok) {
+			for (Entry<Language, String> value : values.entrySet()) {
+				if (value.getKey().isDefault()
+						&& value.getValue().trim().length() == 0) {
+					setErrorMessage(MessageFormat
+							.format(Messages.TranslateSimpleListItemDialog_Error_LabelRequired,
+									new Object[] { value.getKey()
+											.getDisplayName() }));
+					ok = false;
+				}
+				if (!SmartUtils.isSimpleString(value.getValue(),
+						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
+						org.wcs.smart.ca.Label.MAX_LENGTH, 0)) {
+
+					setErrorMessage(MessageFormat
+							.format(Messages.TranslateSimpleListItemDialog_Error_InvalidLabel,
+									new Object[] {
+											SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc,
+											org.wcs.smart.ca.Label.MAX_LENGTH }));
+					ok = false;
+				}
 			}
 		}
 		Button btn = getButton(IDialogConstants.OK_ID);
@@ -139,7 +152,7 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 				this.item.getNames().add(l);
 				lbl = l;
 			}
-			if (lbl.getLanguage().isDefault()){
+			if (lbl.getLanguage().equals(SmartDB.getCurrentLanguage())){
 				this.item.setName(lbl.getValue());
 			}
 		}

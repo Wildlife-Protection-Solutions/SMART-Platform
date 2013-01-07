@@ -529,7 +529,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		public String getText(Object element) {
 			String x = findValue(column, (Team) element);
 			if (x == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return x;
 		}

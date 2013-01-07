@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -49,12 +53,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 
 /**
  * Dialog box for modifying query information.  This includes the query
@@ -68,7 +78,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	private Query query;
 	private CheckboxTableViewer columnViewer;
 	private Text txtName;
-	
+	private HashMap<Language, String> names;
 
 	/**
 	 * @param parent the parent shell
@@ -79,6 +89,20 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			Query query) {
 		super(parent);
 		this.query = query;
+		
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			s.saveOrUpdate(this.query);
+		
+			this.names = new HashMap<Language, String>();
+			for (org.wcs.smart.ca.Label l : query.getNames()){
+				names.put(l.getLanguage(), l.getValue());
+			}
+			s.getTransaction().rollback();
+		}finally{
+			s.close();
+		}
 	}
 	
 	
@@ -150,13 +174,43 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		lblName.setText(Messages.QueryPropertiesDialog_QueryNameLabel);
 		lblName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		txtName = new Text(main, SWT.BORDER);
+		Composite tmp = new Composite(main, SWT.NONE);
+		gl = new GridLayout(2, false);
+		gl.marginBottom = gl.marginHeight = gl.marginLeft = gl.marginRight = gl.marginWidth = gl.marginTop = 0;
+		tmp.setLayout(gl);
+		tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtName = new Text(tmp, SWT.BORDER);
 		txtName.setText(query.getName());
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				setChangesMade(true);
+			}
+		});
+		
+		Link lnkTranslate = new Link(tmp, SWT.NONE);
+		lnkTranslate.setText("<a>" + Messages.QueryPropertiesDialog_TranslateLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		lnkTranslate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SimpleListItem toUpdate = new SimpleListItem();
+				for(Entry<Language, String> l : QueryPropertiesDialog.this.names.entrySet()){
+					toUpdate.updateName(l.getKey(), l.getValue());
+					
+				}
+				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
+						getShell(), toUpdate, SmartDB.getCurrentLanguage());
+				if (dialog.open() == TranslateSimpleListItemDialog.OK){
+					txtName.setText(toUpdate.getName());
+					 QueryPropertiesDialog.this.names.clear();
+					 for (org.wcs.smart.ca.Label l : toUpdate.getNames()){
+						 QueryPropertiesDialog.this.names.put(l.getLanguage(), l.getValue());	 
+					 }
+					setChangesMade(true);
+				}
+				
+				
 			}
 		});
 		
@@ -236,9 +290,25 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 	 */
 	protected boolean performSave() {
 		
+		//update names
 		if (!query.getName().equals(txtName.getText())){
 			query.setName(txtName.getText());
 		}
+		for (Entry<Language, String> l : names.entrySet()){
+			query.updateName(l.getKey(), l.getValue());
+		}
+		//remove any languages no longer valid
+		Set<org.wcs.smart.ca.Label> toRemove = new HashSet<org.wcs.smart.ca.Label>();
+		for (org.wcs.smart.ca.Label l : query.getNames()){
+			if (names.get(l.getLanguage()) == null){
+				toRemove.add(l);
+			}
+		}
+		for (org.wcs.smart.ca.Label l : toRemove){
+			query.getNames().remove(l);
+		}
+		
+		
 		if (query instanceof SimpleQuery){
 			List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
 			for (QueryColumn col : cols){

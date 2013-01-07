@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.queyfilter;
+package org.wcs.smart.query.ui.queryfilter;
 
 import java.text.Collator;
 import java.text.MessageFormat;

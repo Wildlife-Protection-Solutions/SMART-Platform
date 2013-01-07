@@ -87,7 +87,8 @@ public class BooleanOpDropItem extends DropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		return operators[operator.getSelectionIndex()].asSql();
+		//return operators[operator.getSelectionIndex()].asSql();
+		return currentSelection;
 	}
 
 	/**
@@ -108,19 +109,28 @@ public class BooleanOpDropItem extends DropItem {
 		operator.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!currentSelection.equals(operators[operator.getSelectionIndex()].asSql())){
-					currentSelection = operators[operator.getSelectionIndex()].asSql();
+				if (!currentSelection.equals(operators[operator.getSelectionIndex()].asSmartValue())){
+					currentSelection = operators[operator.getSelectionIndex()].asSmartValue();
 					queryChanged();
 				}
 			}
 		});
 		initDrag(operator);
 		
+		
 		if (currentSelection != null){
-			operator.setText( formatStringForLabel(currentSelection));
+			Operator op = Operator.parseOperator(currentSelection);
+			if (op != null){
+				operator.setText( formatStringForLabel(op.getGuiValue()));	
+				currentSelection = op.asSmartValue();
+			}else{
+				operator.select(0);
+				currentSelection = operators[operator.getSelectionIndex()].asSmartValue();
+			}
+			
 		}else{
 			operator.select(0);
-			currentSelection = operators[operator.getSelectionIndex()].asSql();
+			currentSelection = operators[operator.getSelectionIndex()].asSmartValue();
 		}
 	}
 	

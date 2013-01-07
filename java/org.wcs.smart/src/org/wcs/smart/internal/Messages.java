@@ -662,6 +662,7 @@ public class Messages extends NLS {
 	public static String StationListPropertyPage_InvalidDescription_DialogTitle;
 	public static String StationListPropertyPage_InvalidName_DialogTitle;
 	public static String StationListPropertyPage_LanguageLabel;
+	public static String TranslateNamesHandler_Error_TranslatingName;
 	public static String TranslateSimpleListItemDialog_DialogMessage;
 	public static String TranslateSimpleListItemDialog_DialogTitle;
 	public static String TranslateSimpleListItemDialog_Error_InvalidLabel;

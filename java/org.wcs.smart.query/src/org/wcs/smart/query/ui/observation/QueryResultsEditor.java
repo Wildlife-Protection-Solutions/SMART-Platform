@@ -95,6 +95,8 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			if (query != null && query.equals(QueryResultsEditor.this.query)){
 				boolean lIsDirty = isDirty;
 				QueryResultsEditor.this.query.setName(query.getName());
+				QueryResultsEditor.this.query.setNames(query.getNames());
+				
 				((QueryInput)getEditorInput()).setQueryName(query.getName());
 				updatePartName();
 				page1.updateQueryName();

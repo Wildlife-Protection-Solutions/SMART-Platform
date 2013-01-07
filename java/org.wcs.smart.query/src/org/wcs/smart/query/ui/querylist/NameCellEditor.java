@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Item;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -108,8 +109,7 @@ public class NameCellEditor implements ICellModifier {
 					thisquery.setName(newName);
 					query.setQueryName(newName);
 					session.getTransaction().commit();
-					fireChangeListener(thisquery);
-					updateViewer(query);
+					fireQueryNameChangeListener(thisquery);
 				} catch (Exception ex) {
 					if (session.getTransaction().isActive()){
 						session.getTransaction().rollback();
@@ -148,7 +148,7 @@ public class NameCellEditor implements ICellModifier {
 					folder.updateName(SmartDB.getCurrentLanguage(), newName);
 					folder.setName(newName);
 					session.getTransaction().commit();
-					updateViewer(folder);
+					fireFolderNameChangeListener(folder);
 				} catch (Exception ex) {
 					if (session.getTransaction().isActive()){
 						session.getTransaction().rollback();
@@ -166,7 +166,7 @@ public class NameCellEditor implements ICellModifier {
 		j.schedule();
 	}
 	
-	private void fireChangeListener(final Query query){
+	private void fireQueryNameChangeListener(final Query query){
 		viewer.getTree().getDisplay().syncExec(new Runnable(){
 			@Override
 			public void run() {
@@ -175,12 +175,13 @@ public class NameCellEditor implements ICellModifier {
 		
 	}
 	
-	private void updateViewer(final Object obj){
-		viewer.getTree().getDisplay().asyncExec(new Runnable(){
+	private void fireFolderNameChangeListener(final QueryFolder folder){
+		viewer.getTree().getDisplay().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				viewer.refresh(obj);
-			}
-		});
+				QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.FOLDER_RENAMED, folder);
+			}});
+		
 	}
+
 }
