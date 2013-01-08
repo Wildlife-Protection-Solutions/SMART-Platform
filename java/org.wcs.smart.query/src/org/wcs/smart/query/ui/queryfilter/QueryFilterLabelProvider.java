@@ -91,7 +91,7 @@ public class QueryFilterLabelProvider extends LabelProvider {
 		}else if (element instanceof Area.AreaType){
 			return ((Area.AreaType) element).getGuiName();
 		}else if (element instanceof Area){
-			return ((Area) element).getId();
+			return ((Area) element).getName();
 		}else if (element instanceof QueryFilterContentProvider.OtherItems){
 			return ((QueryFilterContentProvider.OtherItems) element).guiName;
 		}else if (element instanceof QueryFilterContentProvider.DataModelItem){
