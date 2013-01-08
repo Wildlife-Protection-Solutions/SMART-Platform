@@ -114,7 +114,7 @@ public class AreaIdDialog extends TitleAreaDialog {
 			createCombo(lang, main, attributes);
 		}
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("* required fields");
+		lbl.setText("* " + Messages.AreaIdDialog_RequiredField); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 2, 1));
 		setMessage(Messages.AreaIdDialog_DialogMessage);
 		getShell().setText(Messages.AreaIdDialog_DialogTitle);

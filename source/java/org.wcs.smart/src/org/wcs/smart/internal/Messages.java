@@ -53,6 +53,7 @@ public class Messages extends NLS {
 	public static String AreaIdDialog_Error_IdToLong;
 	public static String AreaIdDialog_Op_DefinedIDField;
 	public static String AreaIdDialog_Op_UserSystemId;
+	public static String AreaIdDialog_RequiredField;
 	public static String AreaNameDialogPage_ConfirmClose_DialogMessage;
 	public static String AreaNameDialogPage_ConfirmClose_DialogTitle;
 	public static String AreaNameDialogPage_DialogMessage;
