@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 
 /**
@@ -54,7 +55,7 @@ public class AreaDropItem extends DropItem {
 	 */
 	@Override
 	public String getText() {
-		return area.getType().getGuiName() + " = " + area.getId(); //$NON-NLS-1$
+		return area.getType().getGuiName() + " = " + area.getName(); //$NON-NLS-1$
 	}
 
 	/**
@@ -104,7 +105,7 @@ public class AreaDropItem extends DropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText( formatStringForLabel(area.getId() + " [" + area.getType().getGuiName() + "]"));  //$NON-NLS-1$//$NON-NLS-2$
+		lbl.setText( formatStringForLabel(area.getName() + " [" + area.getType().getGuiName() + "]"));  //$NON-NLS-1$//$NON-NLS-2$
 		initDrag(lbl);
 
 	}
