@@ -27,17 +27,16 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -48,6 +47,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -124,25 +124,50 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		Composite composite = (Composite)super.createDialogArea(parent);
 		
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new TableColumnLayout());
+//		main.setLayout(new TableColumnLayout());
+		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		tableViewer = new TableViewer(main, SWT.BORDER | SWT.MULTI
+		tableViewer = new TableViewer(main, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.MULTI
 				| SWT.FULL_SELECTION);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.widthHint = 200;
+		tableViewer.getTable().setLayoutData(gd);
 
-		TableViewerColumn colName = new TableViewerColumn(tableViewer,SWT.NONE);
+		createKeyColumn();
+		createColumn(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()) {
+			if (l.isDefault()) continue;
+			createColumn(l);
+		}
+		
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
+		tableViewer.getTable().setHeaderVisible(true);
+		tableViewer.getTable().setLinesVisible(true);
+		
+		loadAreaTypes();		
+		
+		getShell().setText(Messages.AreaNameDialogPage_DialogTitle);
+		setTitle(Messages.AreaNameDialogPage_MessageTitle + type.getGuiName());
+		setMessage(Messages.AreaNameDialogPage_DialogMessage);
+		
+		return composite; 
+	}
+	
+	private void createColumn(final Language l){
+		TableViewerColumn colName = new TableViewerColumn(tableViewer,
+				SWT.NONE);
 		TableColumn column = colName.getColumn();
-		column.setText(Messages.AreaNameDialogPage_Name_ColumnHeader);
+		column.setText(l.getDisplayName());
 		column.setResizable(true);
 		column.setMoveable(false);
-		TableColumnLayout layout = (TableColumnLayout) tableViewer.getTable().getParent().getLayout();
-		layout.setColumnData(column, new ColumnWeightData(60, ColumnWeightData.MINIMUM_WIDTH, true));
-		
-		colName.setLabelProvider(new ColumnLabelProvider(){
+		column.setWidth(150);
+
+		colName.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof Area){
-					return ((Area)element).getId();
+				if (element instanceof Area) {
+					return ((Area) element).findName(l);
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -151,44 +176,48 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			@Override
 			protected void setValue(Object element, Object value) {
 				setErrorMessage(null);
-				if (!( ((String)value).equals(((Area)element).getId()))){
-					String newId = (String)value;
-					if (newId.length() > Area.ID_MAX_LENGTH){
-						setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_Warning_NameTruncate, new Object[]{ Area.ID_MAX_LENGTH }));
-						newId = newId.substring(0, Area.ID_MAX_LENGTH);
+				if (!(((String) value).equals(((Area) element).findName(l)))) {
+					String newId = (String) value;
+					if (newId.length() > Area.NAME_MAX_LENGTH) {
+						setErrorMessage(MessageFormat
+								.format(Messages.AreaNameDialogPage_Warning_NameTruncate,
+										new Object[] { Area.NAME_MAX_LENGTH }));
+						newId = newId.substring(0, Area.NAME_MAX_LENGTH);
 					}
-					
-					((Area)element).setId(newId);
+
+					((Area) element).updateName(l, newId);
 					tableViewer.refresh();
 					setDirty();
 				}
 			}
-			
+
 			@Override
 			protected Object getValue(Object element) {
-				String value = ((Area)element).getId();
-				if (value == null) return ""; //$NON-NLS-1$
+				String value = ((Area) element).findName(l);
+				if (value == null)
+					return ""; //$NON-NLS-1$
 				return value;
 			}
-			
+
 			@Override
 			protected CellEditor getCellEditor(Object element) {
 				return new TextCellEditor(tableViewer.getTable());
 			}
-			
+
 			@Override
 			protected boolean canEdit(Object element) {
 				return true;
 			}
 		});
-		
+	}
+	
+	private void createKeyColumn(){
 		TableViewerColumn colKey = new TableViewerColumn(tableViewer,SWT.NONE);
-		column = colKey.getColumn();
+		TableColumn column = colKey.getColumn();
 		column.setText(Messages.AreaNameDialogPage_Key_ColumnName);
 		column.setResizable(true);
 		column.setMoveable(false);
-		layout.setColumnData(column, new ColumnWeightData(40, ColumnWeightData.MINIMUM_WIDTH, true));
-		
+		column.setWidth(150);
 		colKey.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element) {
@@ -245,20 +274,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 				return true;
 			}
 		});
-		
-		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
-		tableViewer.getTable().setHeaderVisible(true);
-		tableViewer.getTable().setLinesVisible(true);
-		
-		loadAreaTypes();		
-		
-		getShell().setText(Messages.AreaNameDialogPage_DialogTitle);
-		setTitle(Messages.AreaNameDialogPage_MessageTitle + type.getGuiName());
-		setMessage(Messages.AreaNameDialogPage_DialogMessage);
-		
-		return composite; 
 	}
-	
 	private void setDirty(){
 		getButton(IDialogConstants.OK_ID).setEnabled(true);
 		dirty = true;

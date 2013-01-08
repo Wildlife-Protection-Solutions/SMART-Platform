@@ -58,10 +58,10 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 @Entity
 @Table(name ="smart.area_geometries")
-public class Area {
+public class Area extends SimpleListItem{
 	
-	public static final int ID_MAX_LENGTH = 256;
 	public static final int KEY_MAX_LENGTH = 256;
+	public static final int NAME_MAX_LENGTH = 256;
 	
 	public static CoordinateReferenceSystem AREA_CRS;
 	static{
@@ -96,13 +96,8 @@ public class Area {
 		public String getGuiName(){
 			return this.name;
 		}
-		
 	}
 	
-	
-	private byte[] uuid;
-	
-	private String id;
 	private String key;
 	private byte[] geom;
 	private ConservationArea ca;
@@ -113,31 +108,6 @@ public class Area {
 		
 	}
 
-	/**
-	 * 
-	 * @return the uuid for the list element
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-
-	
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-	
-	@Column(name="id")
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-	
 	@Column(name="keyid")
 	public String getKeyId() {
 		return key;

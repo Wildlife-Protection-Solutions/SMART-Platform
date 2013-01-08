@@ -391,14 +391,14 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 					try{
 						cas.addAll(SmartStartUp.getConservationAreas());
 					}catch (final Exception ex){
-						InteractiveSplashHandler.this.parent.getDisplay().asyncExec(new Runnable(){
+						InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
 							public void run(){
 								SmartPlugIn.displayLogExit(ex.getMessage(), ex);
 							}
 						});
 					}
 					
-					InteractiveSplashHandler.this.parent.getDisplay().asyncExec(new Runnable(){
+					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							cmvConservationArea.getCombo().removeAll();

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IResolve;
@@ -59,10 +60,12 @@ import org.geotools.referencing.CRS;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResourceInfo;
@@ -424,16 +427,19 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 								Geometry geom = (Geometry) sf.getDefaultGeometry();
 								geom = JTS.transform(geom, transform);
 								area.setGeom(writer.write(geom));
-								if (idDialog[0].useGenerated()){
-									area.setId(areatype.name() + "_" + cnt++); //$NON-NLS-1$
-								}else{
-									String id = sf.getAttribute(idDialog[0].getSelectedAttribute().getName()).toString();
-									if (id.length() > Area.ID_MAX_LENGTH){
-										id = id.substring(0, Area.ID_MAX_LENGTH);
+								String defaultName = areatype + "_" + cnt++; //$NON-NLS-1$
+								HashMap<Language, AttributeDescriptor> data = idDialog[0].getSelectedFields();
+								for(Entry<Language, AttributeDescriptor> entry : data.entrySet()){
+									String id = sf.getAttribute(entry.getValue().getName()).toString();
+									if (id.length() > Area.NAME_MAX_LENGTH){
+										id = id.substring(0, Area.NAME_MAX_LENGTH);
 									}
-									area.setId(id);
+									area.updateName(entry.getKey(), id);
+									if (entry.getKey().isDefault()){
+										defaultName = id;
+									}
 								}
-								String key = Area.generateKey(area.getId(), currentKeys);
+								String key = Area.generateKey(defaultName, currentKeys);
 								area.setKeyId(key);
 								currentKeys.add(key);
 								

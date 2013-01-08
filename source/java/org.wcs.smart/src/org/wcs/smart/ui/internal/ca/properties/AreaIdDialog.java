@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -42,18 +43,31 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
-import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-
+/**
+ * Dialog for importing areas from shapefiles.  Asks
+ * users which shapefile attributes to use for
+ * various area attributes.
+ * 
+ * @author egouge
+ *
+ */
 public class AreaIdDialog extends TitleAreaDialog {
 	
 	private SimpleFeatureType schema;
-	private ComboViewer cmbAttributes;
-	private Button opField;
-	private Button opGenerated;
+	private List<ComboViewer> langViewers;
+	private HashMap<Language, AttributeDescriptor>  results ;
 	
-	private boolean blnGenerate;
-	private AttributeDescriptor selectedAttribute;
+	private LabelProvider attributeLabelProvider = new LabelProvider(){
+		public String getText(Object element) {
+			if (element instanceof AttributeDescriptor){
+				return ((AttributeDescriptor)element).getLocalName();
+			}
+			return super.getText(element);
+		}
+	};
 	
 	private Listener validateListener =  new Listener() {
 		@Override
@@ -74,62 +88,60 @@ public class AreaIdDialog extends TitleAreaDialog {
 		Composite composite = (Composite)super.createDialogArea(parent);
 		
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(1, false));
+		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		opField = new Button(main, SWT.RADIO);
-		opField.setText(Messages.AreaIdDialog_Op_DefinedIDField);
-		opField.addListener(SWT.Selection,validateListener);
-		opField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		cmbAttributes = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbAttributes.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof AttributeDescriptor){
-					return ((AttributeDescriptor)element).getLocalName();
-				}
-				return super.getText(element);
-			}
-		});
-		ArrayList<AttributeDescriptor> atts = new ArrayList<AttributeDescriptor>();
+		langViewers = new ArrayList<ComboViewer>();
+
+		ArrayList<Object> atts = new ArrayList<Object>();
 		for (AttributeDescriptor att : schema.getAttributeDescriptors()){
 			atts.add(att);
 		}
-		cmbAttributes.setInput(atts.toArray(new AttributeDescriptor[atts.size()]));
-		cmbAttributes.getCombo().addListener(SWT.Modify, validateListener);
-		cmbAttributes.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)cmbAttributes.getCombo().getLayoutData()).horizontalIndent = 20;
+		Object[] attributes = atts.toArray(new Object[atts.size()]);
+				
+		Language l = SmartDB.getCurrentConservationArea().getDefaultLanguage();
+		Label lbl = new Label(main, SWT.NONE);
+		lbl.setText(l.getDisplayName() + "*:"); //$NON-NLS-1$
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		createCombo(l, main, attributes);
 		
-		Label lblInfo = new Label(main, SWT.WRAP);
-		lblInfo.setText( MessageFormat.format(Messages.AreaIdDialog_Error_IdToLong, new Object[]{ Area.ID_MAX_LENGTH }));
-		lblInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)lblInfo.getLayoutData()).horizontalIndent = 20;
-		
-		opGenerated = new Button(main, SWT.RADIO);
-		opGenerated.setText(Messages.AreaIdDialog_Op_UserSystemId);
-		opGenerated.addListener(SWT.Selection,validateListener);
-		opGenerated.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		opField.setSelection(true);
-		
+		atts.add(""); //$NON-NLS-1$
+		attributes = atts.toArray(new Object[atts.size()]);
+		for (Language lang : SmartDB.getCurrentConservationArea().getLanguages()){
+			if (lang.isDefault()) continue;
+			lbl = new Label(main, SWT.NONE);
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			lbl.setText(lang.getDisplayName() + ":"); //$NON-NLS-1$
+			createCombo(lang, main, attributes);
+		}
+		lbl = new Label(main, SWT.NONE);
+		lbl.setText("* required fields");
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 2, 1));
 		setMessage(Messages.AreaIdDialog_DialogMessage);
 		getShell().setText(Messages.AreaIdDialog_DialogTitle);
 		return composite; 
 	}
 	
+	private void createCombo(Language l, Composite parent, Object[] input){
+		ComboViewer cmbAttributes = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbAttributes.setContentProvider(ArrayContentProvider.getInstance());
+		cmbAttributes.setLabelProvider(attributeLabelProvider);
+		cmbAttributes.setInput(input);
+		cmbAttributes.getCombo().addListener(SWT.Modify, validateListener);
+		cmbAttributes.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbAttributes.getControl().setData(l);
+		langViewers.add(cmbAttributes);
+	}
 	private void validate(){
-		if (opGenerated.getSelection()){
-			getButton(IDialogConstants.OK_ID).setEnabled(true);
-			cmbAttributes.getControl().setEnabled(false);
-		}else if (opField.getSelection()){
-			cmbAttributes.getControl().setEnabled(true);
-			if (cmbAttributes.getSelection().isEmpty()){
-				getButton(IDialogConstants.OK_ID).setEnabled(false);	
-			}else{
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
+		boolean ok = true;
+		for (ComboViewer cmb : langViewers){
+			Language l = (Language) cmb.getCombo().getData();
+			if (l.isDefault() && cmb.getSelection().isEmpty()){
+				ok = false;
+				break;
+				
 			}
 		}
+		getButton(IDialogConstants.OK_ID).setEnabled(ok);
 	}
 
 	@Override
@@ -142,19 +154,23 @@ public class AreaIdDialog extends TitleAreaDialog {
 	
 	@Override
 	protected void buttonPressed(int buttonId) {
-		blnGenerate = opGenerated.getSelection();
-		selectedAttribute = null;
-		if (!cmbAttributes.getSelection().isEmpty()){
-			selectedAttribute = (AttributeDescriptor) ((IStructuredSelection)cmbAttributes.getSelection()).getFirstElement();
+		
+		results = new HashMap<Language, AttributeDescriptor> ();
+		for (ComboViewer cmb : langViewers){
+			Language l = (Language) cmb.getCombo().getData();
+			if (!cmb.getSelection().isEmpty() ){
+				Object d = (Object) ((IStructuredSelection)cmb.getSelection()).getFirstElement();
+				if (d instanceof AttributeDescriptor){
+					results.put(l, (AttributeDescriptor)d);
+				}
+			}
 		}
 		super.buttonPressed(buttonId);
 	}
 	
-	public boolean useGenerated(){
-		return this.blnGenerate;
-	}
-	public AttributeDescriptor getSelectedAttribute(){
-		return this.selectedAttribute;
+	
+	public HashMap<Language, AttributeDescriptor> getSelectedFields(){
+		return results;
 	}
 	
 	/** dialog is resizable
