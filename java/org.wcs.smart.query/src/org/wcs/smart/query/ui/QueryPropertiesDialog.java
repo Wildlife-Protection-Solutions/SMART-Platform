@@ -57,7 +57,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -200,7 +199,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 					
 				}
 				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
-						getShell(), toUpdate, SmartDB.getCurrentLanguage());
+						getShell(), toUpdate);
 				if (dialog.open() == TranslateSimpleListItemDialog.OK){
 					txtName.setText(toUpdate.getName());
 					 QueryPropertiesDialog.this.names.clear();

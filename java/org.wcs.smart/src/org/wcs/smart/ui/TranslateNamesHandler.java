@@ -31,7 +31,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -66,7 +65,7 @@ public class TranslateNamesHandler extends AbstractHandler {
 			s.beginTransaction();
 			s.saveOrUpdate(toUpdate);
 			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(HandlerUtil.getActiveShell(event), 
-				toUpdate, SmartDB.getCurrentLanguage());
+				toUpdate);
 			if (dialog.open() == TranslateSimpleListItemDialog.OK){
 				s.getTransaction().commit();
 			}else{

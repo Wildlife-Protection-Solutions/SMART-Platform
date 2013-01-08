@@ -168,7 +168,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 				if (sel.isEmpty() ) return;
 				BasemapDefinition toEdit = (BasemapDefinition) sel.getFirstElement();
 				
-				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toEdit, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toEdit);
 				if (dialog.open() ==  Window.OK){
 					setChangesMade(true);
 					lstBasemaps.refresh();

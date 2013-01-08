@@ -152,7 +152,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 				BasemapDefinition tmp = getNewBasemap();
 				tmp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), txtName.getText());
 				
-				TranslateSimpleListItemDialog d = new TranslateSimpleListItemDialog(getShell(), tmp, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				TranslateSimpleListItemDialog d = new TranslateSimpleListItemDialog(getShell(), tmp);
 				if (d.open() == TranslateSimpleListItemDialog.OK){
 					txtName.setText(baseMap.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				}
