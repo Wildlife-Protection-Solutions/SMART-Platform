@@ -23,10 +23,10 @@ ALTER TABLE smart.dm_aggregation_i18n
 ;
 
 
-INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'sum');
-INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'min');
-INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'max');
-INSERT INTO smart.dm_aggregation_i18n (NAME, GUI_NAME) VALUES ( 'avg');
+INSERT INTO smart.dm_aggregation (NAME) VALUES ( 'sum');
+INSERT INTO smart.dm_aggregation (NAME) VALUES ( 'min');
+INSERT INTO smart.dm_aggregation (NAME) VALUES ( 'max');
+INSERT INTO smart.dm_aggregation (NAME) VALUES ( 'avg');
 
 INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'en', 'Sum' );
 INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'en', 'Minimum');
