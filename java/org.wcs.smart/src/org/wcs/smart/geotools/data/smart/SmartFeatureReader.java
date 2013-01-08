@@ -36,6 +36,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -101,7 +102,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		String fid = ftype.getTypeName() + "." + a.getKeyId(); //$NON-NLS-1$
 		Object values[] = new Object[5];
 		values[0] = fid;
-		values[1] = a.getId();
+		values[1] = a.findName(SmartDB.getCurrentLanguage());
 		values[2] = a.getKeyId();
 		values[3] = SmartUtils.encodeHex(a.getUuid());
 		values[4] = a.getGeometry();
