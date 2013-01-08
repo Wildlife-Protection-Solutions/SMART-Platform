@@ -146,7 +146,6 @@ CREATE TABLE smart.area_geometries
 	uuid CHAR(16) for bit data NOT NULL UNIQUE,
 	ca_uuid CHAR(16) for bit data NOT NULL,
 	area_type VARCHAR(5) NOT NULL,
-	id VARCHAR(256),
 	keyid VARCHAR(256),
 	geom BLOB NOT NULL,
 	PRIMARY KEY (PID)
@@ -168,7 +167,6 @@ CREATE TABLE smart.saved_maps
 	EMPLOYEE_UUID CHAR(16) for bit data NOT NULL,
 	CA_UUID CHAR(16) for bit data,
 	IS_DEFAULT BOOLEAN NOT NULL,
-	NAME VARCHAR(256) NOT NULL,
 	MAP_DEF CLOB not null,
 	PRIMARY KEY (UUID)
 );
