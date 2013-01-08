@@ -29,25 +29,26 @@ import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -61,47 +62,43 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 
-	private LanguageViewer langViewer;
+	private TableViewer tblViewer;
 	private SimpleListItem item;
-	private Text txtName;
-	private Language currentLang;
-	private HashMap<Language, String> values;
+	private org.wcs.smart.ca.Label[] input;
 	
 
 	/**
 	 * @param parentShell parent shell
 	 * @param item item to update
-	 * @param initLang initial language to display value for
 	 */
-	public TranslateSimpleListItemDialog(Shell parentShell, SimpleListItem item, Language initLang) {
+	public TranslateSimpleListItemDialog(Shell parentShell, SimpleListItem item) {
 		super(parentShell);
 
 		this.item = item;
-		values = new HashMap<Language, String>();
-		for (org.wcs.smart.ca.Label l : this.item.getNames()) {
-			values.put(l.getLanguage(), l.getValue());
+		input = new org.wcs.smart.ca.Label[SmartDB.getCurrentConservationArea().getLanguages().size()];
+		int i = 0;
+		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()){
+			org.wcs.smart.ca.Label copy = new org.wcs.smart.ca.Label();
+			copy.setValue(item.findName(l));
+			copy.setLanguage(l);
+			input[i++] = copy;
 		}
-		this.currentLang = initLang;
+		
 	}
 
 	private boolean validate(){
 		boolean ok = true;
 		setErrorMessage(null);
-		if (values.get(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
-			setErrorMessage(MessageFormat.format(Messages.TranslateSimpleListItemDialog_Error_LabelRequired, new Object[]{SmartDB.getCurrentConservationArea().getDefaultLanguage().getDisplayName()}));
-			ok = false;
-		}
-		if (ok) {
-			for (Entry<Language, String> value : values.entrySet()) {
-				if (value.getKey().isDefault()
-						&& value.getValue().trim().length() == 0) {
-					setErrorMessage(MessageFormat
-							.format(Messages.TranslateSimpleListItemDialog_Error_LabelRequired,
-									new Object[] { value.getKey()
-											.getDisplayName() }));
-					ok = false;
-				}
-				if (!SmartUtils.isSimpleString(value.getValue(),
+		for(int i = 0 ; i < input.length;i++){
+			org.wcs.smart.ca.Label lbl = input[i];
+		
+			if (lbl.getLanguage().isDefault() && lbl.getValue().length() == 0){
+		
+				setErrorMessage(MessageFormat.format(Messages.TranslateSimpleListItemDialog_Error_LabelRequired, new Object[]{SmartDB.getCurrentConservationArea().getDefaultLanguage().getDisplayName()}));
+				ok = false;
+				break;
+			}
+			if (!SmartUtils.isSimpleString(lbl.getValue(),
 						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
 						org.wcs.smart.ca.Label.MAX_LENGTH, 0)) {
 
@@ -111,7 +108,8 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 											SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc,
 											org.wcs.smart.ca.Label.MAX_LENGTH }));
 					ok = false;
-				}
+					break;
+				
 			}
 		}
 		Button btn = getButton(IDialogConstants.OK_ID);
@@ -120,19 +118,18 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		}
 		return ok;
 	}
+	
 	protected void okPressed() {
 		if (!validate()){
 			return ;
 		}
-		if (currentLang != null) {
-			if (txtName.getText().trim().isEmpty()) {
-				values.remove(currentLang);
-			} else {
-				values.put(currentLang, txtName.getText().trim());
+		HashMap<Language, String> values = new HashMap<Language, String>();
+		for (int i = 0; i < input.length;i++){
+			if (((org.wcs.smart.ca.Label)input[i]).getValue().length() > 0){
+				values.put(((org.wcs.smart.ca.Label)input[i]).getLanguage(), ((org.wcs.smart.ca.Label)input[i]).getValue());
 			}
 		}
-		
-		
+				
 		// update item object 
 		for (Entry<Language, String> e : values.entrySet()) {
 			org.wcs.smart.ca.Label lbl = null;
@@ -177,55 +174,140 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		composite = new Composite(composite, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		composite.setLayout(new GridLayout(2, false));
-
-		Label lbl = new Label(composite, SWT.NONE);
-		lbl.setText(Messages.TranslateSimpleListItemDialog_LanguageLabel);
-
-		langViewer = new LanguageViewer(composite, SWT.DEFAULT,
-				SmartDB.getCurrentConservationArea());
-		langViewer.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, false));
-		langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+//		composite.setLayout(new GridLayout(2, false));
+		composite.setLayout(new TableColumnLayout());
+		tblViewer = new TableViewer(composite, SWT.BORDER);
+		tblViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		TableViewerColumn viewerColumn = new TableViewerColumn(tblViewer,SWT.NONE);
+		TableColumn column = viewerColumn.getColumn();
+		TableColumnLayout layout = (TableColumnLayout) tblViewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(34,ColumnWeightData.MINIMUM_WIDTH, true));
+		column.setText(Messages.TranslateSimpleListItemDialog_LanguageLabel);
+		column.setResizable(true);
+		column.setMoveable(true);
+		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (currentLang != null) {
-					if (txtName.getText().trim().isEmpty()) {
-						values.remove(currentLang);
-					} else {
-						values.put(currentLang, txtName.getText().trim());
-					}
+			public String getText(Object element) {
+				String x = ((org.wcs.smart.ca.Label)element).getLanguage().getDisplayName();
+				if (x == null){
+					return ""; //$NON-NLS-1$
 				}
-				currentLang = langViewer.getCurrentSelection();
-				String newValue = values.get(currentLang);
-				if (newValue == null) {
-					newValue = ""; //$NON-NLS-1$
-				}
-				txtName.setText(newValue);
+				return x;
 			}
+			 
 		});
 		
-		
-		lbl = new Label(composite, SWT.NONE);
-		lbl.setText(Messages.TranslateSimpleListItemDialog_NameLabel);
-		txtName = new Text(composite, SWT.BORDER);
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtName.addModifyListener(new ModifyListener() {			
+		viewerColumn = new TableViewerColumn(tblViewer,SWT.NONE);
+		column = viewerColumn.getColumn();
+		layout = (TableColumnLayout) tblViewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(66,ColumnWeightData.MINIMUM_WIDTH, true));
+		column.setText(Messages.TranslateSimpleListItemDialog_NameLabel);
+		column.setResizable(true);
+		column.setMoveable(true);
+		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
 			@Override
-			public void modifyText(ModifyEvent e) {
-				values.put(currentLang, txtName.getText());
-				validate();	
+			public String getText(Object element) {
+				String x = ((org.wcs.smart.ca.Label)element).getValue();
+				if (x == null){
+					return ""; //$NON-NLS-1$
+				}
+				return x;
 			}
+			 
 		});
+		viewerColumn.setEditingSupport(new TextTableEditor(tblViewer));
+//		TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+//		layout.setColumnData(column, new ColumnWeightData(weight,ColumnWeightData.MINIMUM_WIDTH, true));
+//		return viewerColumn;
 
-		Language defaultLang = currentLang;
-		currentLang = null;
-		langViewer.setSelection(new StructuredSelection(defaultLang));
+		tblViewer.setContentProvider(ArrayContentProvider.getInstance());
+		tblViewer.setInput(input);
+		tblViewer.getTable().setHeaderVisible(true);
+		tblViewer.getTable().setLinesVisible(true);
+		
+//		langViewer = new LanguageViewer(composite, SWT.DEFAULT,
+//				SmartDB.getCurrentConservationArea());
+//		langViewer.getControl().setLayoutData(
+//				new GridData(SWT.FILL, SWT.FILL, true, false));
+//		langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+//			@Override
+//			public void selectionChanged(SelectionChangedEvent event) {
+//				if (currentLang != null) {
+//					if (txtName.getText().trim().isEmpty()) {
+//						values.remove(currentLang);
+//					} else {
+//						values.put(currentLang, txtName.getText().trim());
+//					}
+//				}
+//				currentLang = langViewer.getCurrentSelection();
+//				String newValue = values.get(currentLang);
+//				if (newValue == null) {
+//					newValue = ""; //$NON-NLS-1$
+//				}
+//				txtName.setText(newValue);
+//			}
+//		});
+//		
+//		
+//		lbl = new Label(composite, SWT.NONE);
+//		lbl.setText(Messages.TranslateSimpleListItemDialog_NameLabel);
+//		txtName = new Text(composite, SWT.BORDER);
+//		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		txtName.addModifyListener(new ModifyListener() {			
+//			@Override
+//			public void modifyText(ModifyEvent e) {
+//				values.put(currentLang, txtName.getText());
+//				validate();	
+//			}
+//		});
+//
+//		Language defaultLang = currentLang;
+//		currentLang = null;
+//		langViewer.setSelection(new StructuredSelection(defaultLang));
 		
 		return composite;
 	}
 
 	protected boolean isResizable() {
 		return true;
+	}
+	
+	/**
+	 * Agency table editor 
+	 * 
+	 * @author Emily
+	 * @since 1.0.0
+	 */
+	private class TextTableEditor extends EditingSupport{
+
+		private TableViewer viewer;
+		
+		TextTableEditor(TableViewer  viewer) {
+			super(viewer);
+			this.viewer = viewer;
+		}
+		
+		@Override
+		protected void setValue(Object element, Object value) {
+			((org.wcs.smart.ca.Label)element).setValue((String)value);
+			viewer.refresh();
+			TranslateSimpleListItemDialog.this.validate();
+		}
+		
+		@Override
+		protected Object getValue(Object element) {
+			return ((org.wcs.smart.ca.Label)element).getValue();
+		}
+		
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return new TextCellEditor(viewer.getTable());
+		}
+		
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
 	}
 }
