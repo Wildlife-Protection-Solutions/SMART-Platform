@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.query.ui.patrol;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.TableViewer;
@@ -75,6 +77,8 @@ public class PatrolQueryEditorTableContent {
 	private Hyperlink runQueryLink;
 	private QueryHeaderComposite compQueryName;
 	private Label lblNumResults;
+	private Label lblNumPatrols;
+	
 	/**
 	 * Creates a new editor area
 	 * @param parent parent composite
@@ -128,12 +132,26 @@ public class PatrolQueryEditorTableContent {
 					showCancelled();
 				}else{
 					lblNumResults.setText(String.valueOf(items.size()));
+					lblNumPatrols.setText(String.valueOf(computeNumberOfPatrols(items)));
 					lblNumResults.getParent().getParent().layout();
 					resultsTable.setInput(items);
 					showTable();
 				}
 			}
 		});
+	}
+	
+	private int computeNumberOfPatrols(Collection<QueryResultItem> items){
+		HashSet<Integer> keys = new HashSet<Integer>();
+		int cnt = 0;
+		for (QueryResultItem it : items){
+			int key = Arrays.hashCode(it.getPatrolUuid());
+			if (!keys.contains(key)){
+				cnt++;
+				keys.add(key);
+			}
+		}
+		return cnt;
 	}
 
 	/**
@@ -275,13 +293,23 @@ public class PatrolQueryEditorTableContent {
 		main.setLayout(new GridLayout(1, false));
 		
 		Composite comp = toolkit.createComposite(main);
-		GridLayout layout = new GridLayout(2,false);
+		GridLayout layout = new GridLayout(7,false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		comp.setLayout(layout);
+		
+		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberOfPatrolsLabel);
+		lblNumPatrols = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
+		
+		toolkit.createLabel(comp,  "  "); //$NON-NLS-1$
+		Label l = toolkit.createLabel(comp, "", SWT.SEPARATOR | SWT.VERTICAL); //$NON-NLS-1$
+		l.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		((GridData)l.getLayoutData()).heightHint = 20;
+		toolkit.createLabel(comp,  "  "); //$NON-NLS-1$
+		
 		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberofRecordsLabel);
 		lblNumResults = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
-		
+	
 		resultsTable = new PatrolResultsTable();
 
 		TableViewer viewer = resultsTable.createTable(main);

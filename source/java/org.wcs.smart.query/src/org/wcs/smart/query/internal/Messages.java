@@ -264,6 +264,7 @@ public class Messages extends NLS {
 	public static String PatrolListDropItem_LoadingLabel;
 	public static String PatrolQueryDataSource_SchemaError;
 	public static String PatrolQueryEditorTableContent_NALabel;
+	public static String PatrolQueryEditorTableContent_NumberOfPatrolsLabel;
 	public static String PatrolQueryEditorTableContent_NumberofRecordsLabel;
 	public static String PatrolQueryEditorTableContent_PatrolQueryLabel;
 	public static String PatrolQueryEditorTableContent_QueryPropertiesLabel;
@@ -342,6 +343,7 @@ public class Messages extends NLS {
 	public static String QueryDateFilterComposite_TodayLabel;
 	public static String QueryDefView_CloseError;
 	public static String QueryEditorTableContent_NaLabel;
+	public static String QueryEditorTableContent_NumberOfIncidentLabel;
 	public static String QueryEditorTableContent_NumberOfRecordsLabel;
 	public static String QueryEditorTableContent_QueryLabel;
 	public static String QueryEditorTableContent_QueryPropertiesLable;
