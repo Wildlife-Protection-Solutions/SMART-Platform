@@ -38,12 +38,16 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.HasLabel;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -652,13 +656,47 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		QueryResultItem last = null;
 		try {
+			
+			/*Field order:
+			 * 1 - "p_uuid"
+			 * 2 - "p_id"
+			 * 3 - "p_start_date"
+			 * 4 - "p_end_date"
+			 * 5 - "p_station_uuid"
+			 * 6 - "p_team_uuid"
+			 * 7 - "p_objective"
+			 * 8 - "p_mandate_uuid"
+			 * 9 - "p_type"
+			 * 10 - "p_is_armed"
+			 * 11 - "pl_transport_uuid"
+			 * 12 - "pl_id"
+			 * 13 - "pld_patrol_day"
+			 * 14 - "plm_leader"
+			 * 15 - "plm_pilot"
+			 * 16 - "uuid"
+			 * 17 - "id"
+			 * 18 - "x"
+			 * 19 - "y"
+			 * 20 - "time"
+			 * 21 - "direction"
+			 * 22 - "distance"
+			 * 23 - "wp_comment"
+			 * 24 - "uuid"
+			 * 25 - "category_uuid"
+			 * 26 - "attribute_uuid"
+			 * 27 - "number_value"
+			 * 28 - "string_value"
+			 * 29 - "list_element_uuid"
+			 * 30 - "tree_node_uuid"
+			 */
+
 			while (rs.next()) {
-				byte[] wpouuid = rs.getBytes(23);
+				byte[] wpouuid = rs.getBytes(24);
 				if (wpouuid != null && last != null
 						&& last.getObservationUuid() != null
 						&& Arrays.equals(wpouuid, last.getObservationUuid())) {
 					//same observation new attribute
-					Attribute att = getAttribute(rs.getBytes(25), session);
+					Attribute att = getAttribute(rs.getBytes(26), session);
 					if (att != null){
 						Object value = getAttributeValue(att, rs, session);
 						last.addAttribute(att.getKeyId(), value);
@@ -671,30 +709,31 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				it.setPatrolId(rs.getString(2));
 				it.setPatrolStartDate(rs.getDate(3));
 				it.setPatrolEndDate(rs.getDate(4));
-				it.setStation(getStationName(rs.getBytes(5), session));				
-				it.setTeam(getTeamName(rs.getBytes(6), session));				
+				it.setStation(getName(rs.getBytes(5), session));				
+				it.setTeam(getName(rs.getBytes(6), session));				
 //				it.setObjectiveRating(rs.getInt(7));
 				it.setObjective(rs.getString(7));
-				it.setMandate(getMandateName(rs.getBytes(8), session));
+				it.setMandate(getName(rs.getBytes(8), session));
+				//it.setMandate(getMandateName(rs.getBytes(8), session));
 				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(9)));
 				it.setArmed(rs.getBoolean(10));
-				it.setTransportType(getTransportType(rs.getBytes(11), session));
+				it.setTransportType(getName(rs.getBytes(11), session));
 				it.setPatrolLegId(rs.getString(12));
 				it.setWpDateTime(rs.getDate(13));
 				
 				it.setLeader(getEmployeeName(rs.getBytes(14), session));
 				it.setPilot(getEmployeeName(rs.getBytes(15), session));
-				
-				it.setWaypointId(rs.getInt(16));
-				it.setWaypointX(rs.getDouble(17));
-				it.setWaypointY(rs.getDouble(18));
-				it.setWaypointTime(rs.getTime(19));
-				it.setWaypointDirection(rs.getFloat(20));
-				it.setWaypointDistance(rs.getFloat(21));
-				it.setWaypointComment(rs.getString(22));
+				it.setWaypointUuid(rs.getBytes(16));
+				it.setWaypointId(rs.getInt(17));
+				it.setWaypointX(rs.getDouble(18));
+				it.setWaypointY(rs.getDouble(19));
+				it.setWaypointTime(rs.getTime(20));
+				it.setWaypointDirection(rs.getFloat(21));
+				it.setWaypointDistance(rs.getFloat(22));
+				it.setWaypointComment(rs.getString(23));
 				it.setObservationUuid(wpouuid);
-				it.setCategory(getCategory(rs.getBytes(24), session));
-				Attribute att = getAttribute(rs.getBytes(25), session);
+				it.setCategory(getCategory(rs.getBytes(25), session));
+				Attribute att = getAttribute(rs.getBytes(26), session);
 				if (att != null){
 					Object value = getAttributeValue(att, rs, session);
 					it.addAttribute(att.getKeyId(), value);
@@ -723,28 +762,30 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		Object value = null;
 		switch (att.getType()) {
 		case NUMERIC:
-			value = rs.getDouble(26);
+			value = rs.getDouble(27);
 			break;
 		case BOOLEAN:
-			value = (rs.getDouble(26) >= 0.5);
+			value = (rs.getDouble(27) >= 0.5);
 			break;
 		case TEXT:
-			value = rs.getString(27);
+			value = rs.getString(28);
 			break;
 		case TREE:
-			byte[] nodeuuid = rs.getBytes(29);
+			byte[] nodeuuid = rs.getBytes(30);
 			if (nodeuuid != null) {
-				AttributeTreeNode i = (AttributeTreeNode) session.load(
-						AttributeTreeNode.class, nodeuuid);
-				value = i.getName();
+				value = getName(nodeuuid, session);
+//				AttributeTreeNode i = (AttributeTreeNode) session.load(
+//						AttributeTreeNode.class, nodeuuid);
+//				value = i.getName();
 			}
 			break;
 		case LIST:
-			byte[] listuuid = rs.getBytes(28);
+			byte[] listuuid = rs.getBytes(29);
 			if (listuuid != null) {
-				AttributeListItem i = (AttributeListItem) session.load(
-						AttributeListItem.class, listuuid);
-				value = i.getName();
+				value = getName(listuuid, session);
+//				AttributeListItem i = (AttributeListItem) session.load(
+//						AttributeListItem.class, listuuid);
+//				value = i.getName();
 			}
 			break;
 		}
@@ -783,42 +824,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	}
 	
 	/**
-	 * Loads the station object from the session
-	 * and returns the associated name.
-	 * 
-	 * @param suuid
-	 * @param session
-	 * @return
-	 */
-	protected String getStationName(byte[] suuid, Session session){
-		if (suuid != null){
-			Station x = (Station) session.load(Station.class, suuid);
-			if (x != null) {
-				return x.getName();
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Loads the team object from the session
-	 * and returns the associated name.
-	 * 
-	 * @param suuid
-	 * @param session
-	 * @return
-	 */
-	protected String getTeamName(byte[] tuuid, Session session){
-		if (tuuid != null){
-			Team x = (Team) session.load(Team.class, tuuid);
-			if (x != null) {
-				return x.getName();
-			}
-		}
-		return null;
-	}
-	
-	/**
 	 * Loads the team object from the session
 	 * and returns the associated name.
 	 * 
@@ -836,43 +841,9 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		return null;
 	}
 	
-	/**
-	 * Loads the team mandate from the session
-	 * and returns the associated name.
-	 * 
-	 * @param suuid
-	 * @param session
-	 * @return
-	 */
-	protected String getMandateName(byte[] muuid, Session session){
-		if (muuid != null){
-			PatrolMandate x = (PatrolMandate) session.load(PatrolMandate.class, muuid);
-			if (x != null) {
-				return x.getName();
-			}
-		}
-		return null;
+	protected String getName(byte[] uuid, Session session){
+		return Label.getDescription(uuid);
 	}
-	
-	/**
-	 * Loads the transport type from the session
-	 * and returns the associated name.
-	 * 
-	 * @param suuid
-	 * @param session
-	 * @return
-	 */
-	protected String getTransportType(byte[] uuid, Session session){
-		if (uuid != null){
-			PatrolTransportType x = (PatrolTransportType) session.load(
-					PatrolTransportType.class, uuid);
-			if (x != null){
-				return x.getName();
-			}
-		}
-		return null;
-	}
-	
 	
 	/**
 	 * Build select clause 
@@ -886,7 +857,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", "pld_patrol_day", "plm_leader", "plm_pilot" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
-		String[] waypoints = { "id", "x", "y", "time", "direction", "distance", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		String[] waypoints = { "uuid", "id", "x", "y", "time", "direction", "distance", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 				"wp_comment" }; //$NON-NLS-1$
 		
 		String[] observations = { "uuid", "category_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$

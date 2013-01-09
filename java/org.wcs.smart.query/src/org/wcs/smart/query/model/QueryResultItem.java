@@ -62,6 +62,7 @@ public class QueryResultItem implements IResultItem{
 	private String leader;
 	private String pilot;
 	
+	private byte[] waypointUuid;
 	private int waypointId;
 	private double waypointX;
 	private double waypointY;
@@ -173,6 +174,21 @@ public class QueryResultItem implements IResultItem{
 		attributes.put(key, value);
 	}
 		
+	/**
+	 * sets the waypoint uuid
+	 * @param uuid
+	 */
+	public void setWaypointUuid(byte[] uuid){
+		this.waypointUuid = uuid;
+	}
+	/**
+	 * 
+	 * @return the waypoint uuid
+	 */
+	public byte[] getWaypointUuid(){
+		return this.waypointUuid;
+	}
+	
 	/**
 	 * @param patrolId patrol id
 	 */

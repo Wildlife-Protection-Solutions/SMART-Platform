@@ -173,7 +173,19 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 	}
 
-
+	@Override
+	protected String SelectClause(boolean includeObservations) {
+		String[] waypoints = { "uuid", "x", "y"}; 
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < waypoints.length; i++) {
+			sb.append(","); //$NON-NLS-1$
+			sb.append(tablePrefix.get(Waypoint.class) + "." + waypoints[i] //$NON-NLS-1$
+					+ " as w_" + waypoints[i]); //$NON-NLS-1$
+		}
+		return sb.toString();
+	}
 	protected double[] getCoordinateMins(Connection c, IFilter filter) throws SQLException {
 		
 		HashSet<AttributeInfo> keys = new HashSet<AttributeInfo>();

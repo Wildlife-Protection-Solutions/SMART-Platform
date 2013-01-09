@@ -169,13 +169,13 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 					it.setPatrolId(rs.getString(2));
 					it.setPatrolStartDate(rs.getDate(3));
 					it.setPatrolEndDate(rs.getDate(4));
-					it.setStation(getStationName(rs.getBytes(5), session));				
-					it.setTeam(getTeamName(rs.getBytes(6), session));				
+					it.setStation(getName(rs.getBytes(5), session));				
+					it.setTeam(getName(rs.getBytes(6), session));				
 					it.setObjective(rs.getString(7));
-					it.setMandate(getMandateName(rs.getBytes(8), session));
+					it.setMandate(getName(rs.getBytes(8), session));
 					it.setPatrolType(PatrolType.Type.valueOf(rs.getString(9)));
 					it.setArmed(rs.getBoolean(10));
-					it.setTransportType(getTransportType(rs.getBytes(11), session));
+					it.setTransportType(getName(rs.getBytes(11), session));
 					it.setPatrolLegId(rs.getString(12));
 					it.setPatrolLegStartDate(rs.getDate(13));
 					it.setPatrolLegEndDate(rs.getDate(14));
