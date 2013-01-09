@@ -50,9 +50,6 @@ public class Messages extends NLS {
 	public static String Area_PatrolSectorArea_Name;
 	public static String AreaIdDialog_DialogMessage;
 	public static String AreaIdDialog_DialogTitle;
-	public static String AreaIdDialog_Error_IdToLong;
-	public static String AreaIdDialog_Op_DefinedIDField;
-	public static String AreaIdDialog_Op_UserSystemId;
 	public static String AreaIdDialog_RequiredField;
 	public static String AreaNameDialogPage_ConfirmClose_DialogMessage;
 	public static String AreaNameDialogPage_ConfirmClose_DialogTitle;
@@ -64,7 +61,6 @@ public class Messages extends NLS {
 	public static String AreaNameDialogPage_Error_Save;
 	public static String AreaNameDialogPage_Key_ColumnName;
 	public static String AreaNameDialogPage_MessageTitle;
-	public static String AreaNameDialogPage_Name_ColumnHeader;
 	public static String AreaNameDialogPage_Warning_NameTruncate;
 	public static String AreaPropertyPage_AllFiles_FilterName;
 	public static String AreaPropertyPage_Area_Underfined;
