@@ -91,7 +91,7 @@ public class GpsBabelPreferencePage extends PreferencePage implements
     		if (newLocation.startsWith(appLoc)){
     			newLocation = "." + newLocation.substring(appLoc.length()); //$NON-NLS-1$
     		}
-    		gpsLoc.setLabelText(newLocation);
+    		gpsLoc.setStringValue(newLocation);
     	}catch (Exception ex){}
     	
     	try{
