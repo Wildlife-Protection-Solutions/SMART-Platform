@@ -675,14 +675,7 @@
          unpack="false"/>
 
    <plugin
-         id="net.refractions.udig.catalog.postgis"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="net.refractions.udig.jai.macosx"
+         id="net.refractions.udig.jai"
          download-size="0"
          install-size="0"
          version="0.0.0"
