@@ -46,6 +46,8 @@ public class Messages extends NLS {
 
     public static String IntelligenceHandler_TaskName;
 
+	public static String IntelligencePlugIn_ErrorDialog_Title;
+
     public static String IntelligenceReceivedWizardPage_Message;
 
     public static String IntelligenceReceivedWizardPage_PageTitle;
