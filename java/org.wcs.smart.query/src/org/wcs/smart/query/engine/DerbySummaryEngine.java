@@ -763,21 +763,21 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			
 				groupBySql.append("attribute_" + itemcnt); //$NON-NLS-1$
 				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
-					groupByInnerSql.append(tablePrefix.get(AttributeListItem.class));
+					groupByInnerSql.append(tablePrefix.get(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append(".keyid as  attribute_" + itemcnt); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
 					groupByInnerSql.append("smart.trimHkeyToLevel("); //$NON-NLS-1$
 					groupByInnerSql.append(((AttributeGroupBy)gb).getTreeLevel().intValue() + ","); //$NON-NLS-1$
-					groupByInnerSql.append(tablePrefix.get(AttributeTreeNode.class));
+					groupByInnerSql.append(tablePrefix.get(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append(".hkey) as  attribute_" + itemcnt + " "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
 				fromSql.append(tableNames.get(WaypointObservationAttribute.class));
 				fromSql.append(" "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class));
+				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(" on "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class));
+				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".observation_uuid = temp.ob_uuid "); //$NON-NLS-1$
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
@@ -795,32 +795,32 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
 					fromSql.append(tableNames.get(AttributeListItem.class));
 					fromSql.append(" "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeListItem.class));
+					fromSql.append(tablePrefix.get(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(" on "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeListItem.class));
+					fromSql.append(tablePrefix.get(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".uuid ="); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(WaypointObservationAttribute.class));
+					fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".list_element_uuid "); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
 					fromSql.append(tableNames.get(AttributeTreeNode.class));
 					fromSql.append(" "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeTreeNode.class));
+					fromSql.append(tablePrefix.get(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(" on "); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(AttributeTreeNode.class));
+					fromSql.append(tablePrefix.get(AttributeTreeNode.class)+ "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".uuid ="); //$NON-NLS-1$
-					fromSql.append(tablePrefix.get(WaypointObservationAttribute.class));
+					fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".tree_node_uuid "); //$NON-NLS-1$
 				}
 				fromSql.append(" JOIN "); //$NON-NLS-1$
 				fromSql.append(tableNames.get(Attribute.class));
 				fromSql.append(" "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(Attribute.class));
+				fromSql.append(tablePrefix.get(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(" on "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class));
+				fromSql.append(tablePrefix.get(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".attribute_uuid = "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(Attribute.class));
+				fromSql.append(tablePrefix.get(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".uuid AND "); //$NON-NLS-1$
-				fromSql.append(tablePrefix.get(Attribute.class));
+				fromSql.append(tablePrefix.get(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".keyid = '"); //$NON-NLS-1$
 				fromSql.append(((AttributeGroupBy)gb).getAttributeKey());
 				fromSql.append("' "); //$NON-NLS-1$
