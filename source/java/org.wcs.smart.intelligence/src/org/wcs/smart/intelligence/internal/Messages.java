@@ -46,6 +46,10 @@ public class Messages extends NLS {
 
     public static String IntelligenceHandler_TaskName;
 
+	public static String IntelligenceLocationWizardPage_Message;
+
+	public static String IntelligenceLocationWizardPage_PageTitle;
+
 	public static String IntelligencePlugIn_ErrorDialog_Title;
 
     public static String IntelligenceReceivedWizardPage_Message;
@@ -54,7 +58,19 @@ public class Messages extends NLS {
 
     public static String IntelligenceReceivedWizardPage_ReceivedDate_Label;
 
-    public static String IntelligenceSourceWizardPage_IntelligenceSource_Label;
+    public static String IntelligenceSourceType_CET;
+
+	public static String IntelligenceSourceType_Informant;
+
+	public static String IntelligenceSourceType_Patrol;
+
+	public static String IntelligenceSourceType_Public;
+
+	public static String IntelligenceSourceWizardPage_Error_PatrolIdRequired;
+
+	public static String IntelligenceSourceWizardPage_Error_SourceRequired;
+
+	public static String IntelligenceSourceWizardPage_IntelligenceSource_Label;
 
     public static String IntelligenceSourceWizardPage_Message;
 

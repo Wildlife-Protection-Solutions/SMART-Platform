@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -55,6 +56,7 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
     
     @Override
     public void addPages() {
+		((WizardDialog) getContainer()).addPageChangingListener(this);
         addPage(new IntelligenceReceivedWizardPage());
         addPage(new IntelligenceSourceWizardPage());
         addPage(new IntelligenceDatesWizardPage());

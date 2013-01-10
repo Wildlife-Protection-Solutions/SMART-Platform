@@ -23,10 +23,20 @@ package org.wcs.smart.intelligence.model;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.patrol.model.Patrol;
 
 /**
  * @author elitvin
@@ -36,11 +46,30 @@ import org.wcs.smart.ca.ConservationArea;
 @Table(name = "smart.intelligence")
 public class Intelligence {
 
+	private byte[] uuid;
     private ConservationArea conservationArea;
     private Date recievedDate;
-    
+    private IntelligenceSourceType source;
+    private Patrol patrol;
+    private Date fromDate;
+    private Date toDate;
+    private String shortName;
+    private String description;
+ 
+	@Id
+	@GeneratedValue(generator="uuid")
+	@GenericGenerator(name= "uuid", strategy="uuid2")
+    public byte[] getUuid() {
+		return uuid;
+	}
 
-    public ConservationArea getConservationArea() {
+	public void setUuid(byte[] uuid) {
+		this.uuid = uuid;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
         return conservationArea;
     }
 
@@ -48,12 +77,69 @@ public class Intelligence {
         this.conservationArea = conservationArea;
     }
 
-    public Date getRecievedDate() {
+	@Column(name="recieved_date")
+   public Date getRecievedDate() {
         return recievedDate;
     }
 
     public void setRecievedDate(Date recievedDate) {
         this.recievedDate = recievedDate;
     }
+
+	@Column(name="source")
+	@Enumerated(EnumType.STRING)
+	public IntelligenceSourceType getSource() {
+		return source;
+	}
+
+	public void setSource(IntelligenceSourceType source) {
+		this.source = source;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="patrol_uuid", referencedColumnName="uuid")
+	public Patrol getPatrol() {
+		return patrol;
+	}
+
+	public void setPatrol(Patrol patrol) {
+		this.patrol = patrol;
+	}
+
+	@Column(name="from_date")
+	public Date getFromDate() {
+		return fromDate;
+	}
+
+	public void setFromDate(Date fromDate) {
+		this.fromDate = fromDate;
+	}
+
+	@Column(name="to_date")
+	public Date getToDate() {
+		return toDate;
+	}
+
+	public void setToDate(Date toDate) {
+		this.toDate = toDate;
+	}
+
+	@Column(name="short_date")
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
+	@Column(name="description")
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 }

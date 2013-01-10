@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.intelligence.ui.wizard;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -45,8 +44,11 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligenceSourceType;
+import org.wcs.smart.patrol.model.Patrol;
 
 /**
  * Intelligence Wizard page for collecting the intelligence source information
@@ -56,6 +58,9 @@ import org.wcs.smart.intelligence.model.Intelligence;
  */
 public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
 
+	private static final String ERROR_SOURCE_REQUIRED = Messages.IntelligenceSourceWizardPage_Error_SourceRequired;
+	private static final String ERROR_PATROL_ID_REQUIRED = Messages.IntelligenceSourceWizardPage_Error_PatrolIdRequired;
+	
     private ComboViewer sourceType = null;
     
     private Label patrolLabel = null;
@@ -89,23 +94,17 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
         sourceType = new ComboViewer(center, SWT.READ_ONLY);
         sourceType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         sourceType.setContentProvider(ArrayContentProvider.getInstance());
-        sourceType.setLabelProvider(new LabelProvider());
+        sourceType.setLabelProvider(new IntelligenceSourceLabelProvider());
  
-        //TODO: use enum
-        ArrayList<String> options = new ArrayList<String>();
-        options.add("Patrol"); //$NON-NLS-1$
-        options.add("Public"); //$NON-NLS-1$
-        options.add("Informant"); //$NON-NLS-1$
-        options.add("CET"); //$NON-NLS-1$
-        sourceType.setInput(options);
-        sourceType.setSelection(new StructuredSelection("Patrol")); //$NON-NLS-1$
+        sourceType.setInput(IntelligenceSourceType.values());
+        sourceType.setSelection(new StructuredSelection(IntelligenceSourceType.PATROL));
         sourceType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = event.getSelection();
 				if (selection instanceof IStructuredSelection) {
 					IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-					boolean isPatrolSelected = "Patrol".equals(structuredSelection.getFirstElement());
+					boolean isPatrolSelected = IntelligenceSourceType.PATROL.equals(structuredSelection.getFirstElement());
 					patrolLabel.setVisible(isPatrolSelected);
 					patrolId.getControl().setVisible(isPatrolSelected);
 				}
@@ -120,7 +119,7 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
         patrolId = new ComboViewer(center, SWT.READ_ONLY);
         patrolId.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         patrolId.setContentProvider(ArrayContentProvider.getInstance());
-        patrolId.setLabelProvider(new LabelProvider());
+        patrolId.setLabelProvider(new PatrolIDLabelProvider());
         
         setControl(center);
         setMessage(Messages.IntelligenceSourceWizardPage_Message);
@@ -134,7 +133,26 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
      */
     @Override
     protected boolean updateModel(Intelligence intelligence) {
-        // TODO Auto-generated method stub
+		ISelection sourceSelection = sourceType.getSelection();
+		if (sourceSelection instanceof IStructuredSelection) {
+			IntelligenceSourceType source = (IntelligenceSourceType)((IStructuredSelection)sourceSelection).getFirstElement();
+			if (source == null) {
+				IntelligencePlugIn.displayLog(ERROR_SOURCE_REQUIRED, null);
+				return false;
+			}
+	    	intelligence.setSource(source);
+	    	if (IntelligenceSourceType.PATROL.equals(source)) {
+	    		ISelection patrolSelection = patrolId.getSelection();
+	    		if (patrolSelection instanceof IStructuredSelection) {
+	    			Patrol patrol = (Patrol)((IStructuredSelection)patrolSelection).getFirstElement();
+					if (patrol == null) {
+						IntelligencePlugIn.displayLog(ERROR_PATROL_ID_REQUIRED, null);
+						return false;
+					}
+			    	intelligence.setSource(source);
+	    		}
+	    	}
+		}
         return true;
     }
 
@@ -143,7 +161,12 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
      */
     @Override
     void initModel(Intelligence intelligence, Session session) {
-        // TODO Auto-generated method stub
+    	if (intelligence.getSource() != null) {
+            sourceType.setSelection(new StructuredSelection(intelligence.getSource()));
+    	}
+    	if (intelligence.getPatrol() != null) {
+            patrolId.setSelection(new StructuredSelection(intelligence.getPatrol()));
+    	}
 
     }
 
@@ -166,14 +189,14 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
             }
             Session s = HibernateManager.openSession();
             try {
-                final List<String> data = IntelligenceHibernateManager.getPatrolIds(s);
+                final List<Patrol> data = IntelligenceHibernateManager.getPatrols(s);
                 Display.getDefault().asyncExec(new Runnable(){
                     @Override
                     public void run() {
                         if (patrolId.getControl().isDisposed()){
                             return ;
                         }
-                        for (String id : data){
+                        for (Patrol id : data){
                         	patrolId.add(id);
                         }               
                     }});
@@ -183,6 +206,37 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
             }
             return Status.OK_STATUS;
         }
+    }
 
+    /**
+     * LabelProvider used to display enum values from {@link IntelligenceSourceType}
+     * 
+     * @author elitvin
+     *
+     */
+    private class IntelligenceSourceLabelProvider extends LabelProvider {
+    	@Override
+    	public String getText(Object element) {
+    		if (element instanceof IntelligenceSourceType) {
+    			return ((IntelligenceSourceType)element).getName();
+    		}
+    		return super.getText(element);
+    	}
+    }
+
+    /**
+     * LabelProvider used to display {@link Patrol} IDs values
+     * 
+     * @author elitvin
+     *
+     */
+    private class PatrolIDLabelProvider extends LabelProvider {
+    	@Override
+    	public String getText(Object element) {
+    		if (element instanceof Patrol) {
+    			return ((Patrol)element).getId();
+    		}
+    		return super.getText(element);
+    	}
     }    
 }
