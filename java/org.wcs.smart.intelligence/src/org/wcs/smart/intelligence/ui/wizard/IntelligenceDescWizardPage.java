@@ -39,8 +39,8 @@ import org.wcs.smart.intelligence.model.Intelligence;
  */
 public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
 
-    private Text planName;
-    private Text planDesc;
+    private Text shortName;
+    private Text description;
     
     /**
      * @param pageName
@@ -62,25 +62,24 @@ public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
         nameLabel.setText(Messages.IntelligenceDescWizardPage_Name_Label);
         nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-        planName = new Text(center, SWT.BORDER | SWT.LEFT);
-        planName.setTextLimit(32);
+        shortName = new Text(center, SWT.BORDER | SWT.LEFT);
+        shortName.setTextLimit(32);
 
         GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
         data.horizontalIndent = 8;
         data.widthHint = 170;
-        planName.setLayoutData(data);
+        shortName.setLayoutData(data);
 
-        Label lbl3 = new Label(center, SWT.NONE);
-        lbl3.setText(Messages.IntelligenceDescWizardPage_Description_Label);
-        lbl3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+        Label descLabel = new Label(center, SWT.NONE);
+        descLabel.setText(Messages.IntelligenceDescWizardPage_Description_Label);
+        descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-        planDesc = new Text(center, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
+        description = new Text(center, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
         gd.heightHint = 80;
         gd.horizontalIndent = 8;
 
-
-        planDesc.setLayoutData(gd);
+        description.setLayoutData(gd);
         
         setControl(center);
         setMessage(Messages.IntelligenceDescWizardPage_Message);
@@ -91,7 +90,8 @@ public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
      */
     @Override
     protected boolean updateModel(Intelligence intelligence) {
-        // TODO Auto-generated method stub
+    	intelligence.setShortName(shortName.getText());
+    	intelligence.setDescription(description.getText());
         return true;
     }
 
@@ -100,8 +100,12 @@ public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
      */
     @Override
     void initModel(Intelligence intelligence, Session session) {
-        // TODO Auto-generated method stub
-
+    	if (intelligence.getShortName() != null) {
+    		shortName.setText(intelligence.getShortName());
+    	}
+    	if (intelligence.getDescription() != null) {
+    		description.setText(intelligence.getDescription());
+    	}
     }
 
 }

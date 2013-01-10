@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.wizard;
 
+import java.util.Calendar;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -30,6 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Intelligence Wizard page for collecting the intelligence relevant date(s) information
@@ -83,7 +86,8 @@ public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
      */
     @Override
     protected boolean updateModel(Intelligence intelligence) {
-        // TODO Auto-generated method stub
+        intelligence.setFromDate(SmartUtils.getDate(dtFromDate));
+        intelligence.setToDate(SmartUtils.getDate(dtToDate));
         return true;
     }
 
@@ -92,8 +96,14 @@ public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
      */
     @Override
     void initModel(Intelligence intelligence, Session session) {
-        // TODO Auto-generated method stub
-
+        if (intelligence.getFromDate() != null){
+            Calendar cal = SmartUtils.convertDate(intelligence.getFromDate());
+            dtFromDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+        }
+        if (intelligence.getToDate() != null){
+            Calendar cal = SmartUtils.convertDate(intelligence.getToDate());
+            dtToDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+        }
     }
 
 }

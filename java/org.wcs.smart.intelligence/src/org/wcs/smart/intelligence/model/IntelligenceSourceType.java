@@ -19,37 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence;
+package org.wcs.smart.intelligence.model;
 
-import java.util.List;
+import org.wcs.smart.intelligence.internal.Messages;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * Intelligence related database functions.
- * 
+ * The supported source types for intelligence.
+ *
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceHibernateManager {
-
-	/**
-	 * Loads patrols from database 
-	 * 
-	 * @param session session 
-	 * @return list of patrols
-	 */
-	public static List<Patrol> getPatrols(Session session){
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Patrol> list = query.list();
-		return list;
+public enum IntelligenceSourceType {
+	PATROL(Messages.IntelligenceSourceType_Patrol),
+	PUBLIC(Messages.IntelligenceSourceType_Public),
+	INFORMANT(Messages.IntelligenceSourceType_Informant),
+	CET(Messages.IntelligenceSourceType_CET);
+	
+	private String name;
+	
+	IntelligenceSourceType(String name){
+		this.name = name;
 	}
 	
+	public String getName(){
+		return this.name;
+	}
+
 }
