@@ -255,7 +255,7 @@ public class ParserTest {
 		query = "( category:threats.fish.color.blue or attribute:n:age>=30) AND (patrol:id equals \"00001\" OR patrol:id equals \"90002\")";
 		test = parseQuery(query);
 		System.out.println(test.asString());
-		Assert.assertEquals(test.asString(), "(category:threats.fish.color.blue OR attribute:n:age >= 30.0) AND (patrol:id equals \"00001\" OR patrol:id equals \"90002\")");
+		Assert.assertEquals(test.asString(), "(category:threats.fish.color.blue or attribute:n:age >= 30.0) and (patrol:id equals \"00001\" or patrol:id equals \"90002\")");
 	}
 	
 	@Test
@@ -265,7 +265,7 @@ public class ParserTest {
 		Assert.assertEquals(test.asString(), query);
 		
 		query = "NOT (category:threats.pigs or category:threats.items)";
-		String queryOK = "NOT (category:threats.pigs OR category:threats.items)";
+		String queryOK = "NOT (category:threats.pigs or category:threats.items)";
 		test = parseQuery(query);
 		Assert.assertEquals(test.asString(), queryOK);
 		
@@ -294,11 +294,11 @@ public class ParserTest {
 		}
 		Assert.assertTrue(error);
 		
-		query = "NOT (category:threats.pigs) OR NOT category:threats.mules";
+		query = "NOT (category:threats.pigs) or NOT category:threats.mules";
 		test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		
-		query = "NOT ((category:threats.pigs) OR NOT category:threats.mules)";
+		query = "NOT ((category:threats.pigs) or NOT category:threats.mules)";
 		test = parseQuery(query);
 		Assert.assertEquals(test.asString(), query);
 		

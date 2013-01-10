@@ -48,7 +48,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -411,10 +410,8 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 				}
 			}
 		});
-		
 		resultsArea = new SummaryResultsArea(main, toolkit, this);
 		resultsArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
 		
 		initQuery();
 		updatePartName();
@@ -430,7 +427,6 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			@Override
 			public void handleEvent(Event event) {
 				getQuery().setName(event.text);
-				getQuery().updateName(SmartDB.getCurrentLanguage(), event.text);
 				setDirty(true);
 				
 			}});

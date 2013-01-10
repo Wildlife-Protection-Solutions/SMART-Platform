@@ -57,6 +57,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -98,6 +99,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			for (org.wcs.smart.ca.Label l : query.getNames()){
 				names.put(l.getLanguage(), l.getValue());
 			}
+			this.names.put(SmartDB.getCurrentLanguage(), query.getName());
 			s.getTransaction().rollback();
 		}finally{
 			s.close();

@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
-import java.text.MessageFormat;
-
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -41,8 +39,20 @@ import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
  */
 public class CategoryValueItem implements IValueItem {
 
+	public enum ValueType{
+		OBSERVATION("obs", Messages.CategoryValueItem_CountObservationLabel), //$NON-NLS-1$
+		WAYPOINT("wp", Messages.CategoryValueItem_CountIncidentLabel); //$NON-NLS-1$
+		
+		public String key;
+		public String guiLabel;
+		
+		private ValueType(String key, String guiLabel){
+			this.key = key;
+			this.guiLabel = guiLabel;
+		}
+	}
 
-	private static final String COUNT_LABEL = Messages.CategoryValueItem_CountLabel;
+	
 
 	/**
 	 * Creates a new category value item of the form
@@ -57,6 +67,7 @@ public class CategoryValueItem implements IValueItem {
 	
 	private String key;
 	private String categoryHkey;
+	private ValueType type;
 	
 	/**
 	 * Creates a new category value item.
@@ -65,7 +76,15 @@ public class CategoryValueItem implements IValueItem {
 	 */
 	public CategoryValueItem(String key){
 		this.key = key;
-		this.categoryHkey = key.split(":")[2]; //$NON-NLS-1$
+		String[] bits = key.split(":"); //$NON-NLS-1$
+		this.type = ValueType.OBSERVATION;
+		for (ValueType vt : ValueType.values()){
+			if (vt.key.endsWith(bits[2])){
+				this.type = vt;
+				break;
+			}
+		}
+		this.categoryHkey = bits[3];
 	}
 	
 	/**
@@ -80,6 +99,14 @@ public class CategoryValueItem implements IValueItem {
 	public String asString(){
 		return this.key;
 	}
+	
+	/**
+	 * 
+	 * @return the type of category value
+	 */
+	public ValueType getType(){
+		return this.type;
+	}
 
 	
 	/**
@@ -90,7 +117,7 @@ public class CategoryValueItem implements IValueItem {
 		if (c == null){
 			return this.key;
 		}
-		return MessageFormat.format(COUNT_LABEL, new Object[]{c.getName()});
+		return type.guiLabel + " " + c.getName(); //$NON-NLS-1$
 	}
 
 	/**
@@ -101,7 +128,7 @@ public class CategoryValueItem implements IValueItem {
 		if (c == null){
 			return this.key;
 		}
-		return MessageFormat.format(COUNT_LABEL, new Object[]{c.getFullCategoryName()});
+		return type.guiLabel + " " + c.getName(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -112,7 +139,9 @@ public class CategoryValueItem implements IValueItem {
 		Category category = QueryHibernateManager.getCategory(session, categoryHkey);
 		if (category != null){
 			category.getFullCategoryName();		//cache this
-			return DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
+			DropItem di = DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
+			di.initializeData(new Object[]{getDropItemInitializeData(), null});
+			return di;
 		}
 		return null;
 	}
@@ -121,7 +150,7 @@ public class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getInitializeData()
 	 */
 	public Object getDropItemInitializeData(){
-		return null;
+		return type.key;
 	}
 	
 	/**

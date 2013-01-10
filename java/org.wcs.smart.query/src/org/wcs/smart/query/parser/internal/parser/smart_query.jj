@@ -47,13 +47,7 @@ TOKEN :
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
-// | < PATROL_STR_KEY : ( < PATROL_STR_ITEM > |  < PATROLLEG_STR_ITEM > ) >
-// | < PATROL_VALUE_KEY : "patrol:" ( < PATROL_VALUE_ITEM > | < PATROLLEG_VALUE_ITEM > ) > 
- | < PATROL_BOOL_KEY : "patrol:" ("armed")  >// | < #PATROL_STR_ITEM : (< PATROL_ID_KEY > | < PATROL_STATION_KEY > | < PATROL_TEAM_KEY > | < PATROL_MANDATE_KEY > | < PATROL_TYPE_KEY > ) >
-// | < #PATROLLEG_STR_ITEM : (< PATROLLEG_TRANSPORT_KEY > | < PATROLLEG_LEADER_KEY > | < PATROLLEG_PILOT_KEY > | < PATROLLEG_MEMBER_KEY > ) >
-// | <  #PATROL_VALUE_ITEM : () >
-// | <  #PATROLLEG_VALUE_ITEM : () >
- |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ | < PATROL_BOOL_KEY : "patrol:" ("armed")  > |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
  | < PATROL_ID_KEY : "patrol:id" >
@@ -69,19 +63,12 @@ TOKEN :
 /* Summary Query */
 TOKEN :
 {
-	 /*< VALUE_ITEM : ( < PATROL_VALUE_ITEM > | < DM_VALUE_ITEM > ) >*/
     < PATROL_VALUE_ITEM : ( "patrol:" < AGG > ":" < PATROL_VALUE_KEY > ) >
 |  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "distance" | "numhours" | "nummembers" | "manhours" | "mandays") >
-/*|    < DM_VALUE_ITEM : ( < CAT_VALUE_KEY > | < ATTRIBUTE_VALUE_KEY > ) >*/
-|    < SUM_CAT_VALUE_KEY : "category:sum:" < DM_KEY > >
+|    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" < DM_KEY > >
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
 |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":attribute:n:" < AGG > ":" < DM_KEY > >
 |    < AGG  : ("sum" | "avg" | "min" | "max" ) >
-//|    < PATROL_VALUE_ITEM_RATIO : < PATROL_VALUE_ITEM > <SLASH > <PATROL_VALUE_ITEM > >
-/*|    < GROUPBY_FILTER : < GROUPBY_ITEM > ("," < GROUPBY_ITEM >)*  >*/
-//|    < GROUPBY_ITEM : ( < PATROL_GROUPBY_ITEM > | < DM_GROUPBY_ITEM > | < DATE_GROUPBY_ITEM > ) >
-//|    < PATROL_GROUPBY_ITEM : ( < PATROL_ID_KEY > | < PATROL_STATION_KEY > | < PATROL_TEAM_KEY > | < PATROL_MANDATE_KEY > | < PATROL_TYPE_KEY > | < PATROLLEG_TRANSPORT_KEY > | < PATROLLEG_LEADER_KEY > ) >
-//|    < DM_GROUPBY_ITEM : < CATEGORY_KEY > >
 | 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" ) >
 |    < QUERY_SPLITTER : "|" >
 |    < PATROL_UUID_GROUPBY_OPTION :(
@@ -94,9 +81,6 @@ TOKEN :
 			< PATROLLEG_MEMBER_KEY > ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 |    < PATROL_STRING_GROUPBY_OPTION :
   			< PATROL_ID_KEY >  ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
-//| 	< PATROL_GROUPBY_OPTION : (
-//			< PATROL_UUID_GROUPBY_OPTION > |
-//			< PATROL_STRING_GROUPBY_OPTION > ) >
 | 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :
 			( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
