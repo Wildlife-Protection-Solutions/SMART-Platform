@@ -22,12 +22,18 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 
 /**
  * A drop item for a category value item.
@@ -37,19 +43,33 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class CategoryValueDropItem extends AbstractValueDropItem {
 
-	private static final String COUNT_LABEL = Messages.CategoryValueDropItem_CountLabel;
 	private Category category = null;
 
+	private Combo combo = null;
+	private Font smallerFont = null;
+	private int defaultSelection = 0;
+	
 	public CategoryValueDropItem(Category category) {
 		this.category = category;
 	}
 
 	/**
+	 * @see org.eclipse.swt.widgets.Widget#dispose()
+	 */
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (smallerFont != null){
+			smallerFont.dispose();
+		}
+	}
+	
+	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#getValueText()
 	 */
 	@Override
 	public String getValueText() {
-		return COUNT_LABEL + " " + category.getFullCategoryName(); //$NON-NLS-1$
+		return combo.getItem(combo.getSelectionIndex()) + " " + category.getFullCategoryName(); //$NON-NLS-1$
 	}
 
 	/**
@@ -59,6 +79,13 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 	public String getValueQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("category:sum:"); //$NON-NLS-1$
+		CategoryValueItem.ValueType[] values = CategoryValueItem.ValueType.values();
+		for (int i = 0; i < values.length; i++){
+			if (values[i].guiLabel.equals(combo.getItem(combo.getSelectionIndex()))){
+				sb.append(values[i].key + ":"); //$NON-NLS-1$
+				break;
+			}
+		}
 		sb.append(category.getHkey());
 		return sb.toString();
 	}
@@ -74,7 +101,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 	protected void createValueComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 
-		GridLayout gl = new GridLayout(1, false);
+		GridLayout gl = new GridLayout(2, false);
 		gl.marginTop = 0;
 		gl.marginBottom = 0;
 		gl.marginWidth = 0;
@@ -82,9 +109,28 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 		main.setLayout(gl);
 		main.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, true));
 
+		combo = new Combo(main, SWT.READ_ONLY);
+		CategoryValueItem.ValueType[] values = CategoryValueItem.ValueType.values();
+		for (int i = 0; i < values.length; i++){
+			combo.add(values[i].guiLabel);
+		}
+		combo.select(defaultSelection);
+		combo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				defaultSelection = combo.getSelectionIndex();
+				CategoryValueDropItem.this.queryChanged();
+			}
+		});
+		
+		FontData fd = (combo.getFont().getFontData()[0]);
+		fd.setHeight(fd.getHeight() - 1);
+		smallerFont = new Font(Display.getCurrent(), fd);
+		combo.setFont(smallerFont);
+		
 		Label lblText = new Label(main, SWT.NONE);
 		StringBuilder sb = new StringBuilder();
-		sb.append(COUNT_LABEL + " " + category.getFullCategoryName()); //$NON-NLS-1$
+		sb.append(category.getFullCategoryName());
 		lblText.setText( formatStringForLabel(sb.toString()));
 
 		initDrag(main);
@@ -92,12 +138,19 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 
 	}
 
-	/** Does nothing
+	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)
 	 */
 	@Override
 	protected void initializeValueData(Object data) {
 		
+		CategoryValueItem.ValueType[] values = CategoryValueItem.ValueType.values();
+		for (int i = 0; i < values.length; i++){
+			if (((String)data).equals(values[i].key)){
+				defaultSelection = i;
+				break;
+			}		
+		}
 	}
 
 }

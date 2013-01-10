@@ -80,7 +80,7 @@ public class SummaryParserTest {
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
 		Assert.assertNull(test.getQueryFilter());
 		
-		valuePart = "patrol:max:distance,patrol:avg:numhours,category:sum:pigs.fish.blue"; 
+		valuePart = "patrol:max:distance,patrol:avg:numhours,category:sum:obs:pigs.fish.blue"; 
 		rowGroupByPart = "";
 		colGroupByPart = "";
 		queryPart = "";
@@ -282,12 +282,23 @@ public class SummaryParserTest {
 	@Test
 	public void testCategoryValues() throws Exception{
 		
-		String valuePart = "category:sum:threats.";
+		String valuePart = "category:sum:wp:threats.";
 		String rowGroupByPart = "";
 		String colGroupByPart = "";
 		String queryPart = "";
 		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
 		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "category:sum:obs:threats.";
+		rowGroupByPart = "";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
 		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
 		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);

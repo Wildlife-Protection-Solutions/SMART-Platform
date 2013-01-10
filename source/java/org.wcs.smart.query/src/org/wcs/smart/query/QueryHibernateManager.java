@@ -487,6 +487,8 @@ public class QueryHibernateManager {
 				s.evict(query);
 			}
 			s.saveOrUpdate(query);
+			
+			query.updateName(SmartDB.getCurrentLanguage(), query.getName());
 			s.getTransaction().commit();
 
 		}catch (Exception ex){

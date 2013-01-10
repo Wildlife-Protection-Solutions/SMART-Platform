@@ -36,7 +36,9 @@ public class Messages extends NLS {
 	public static String CategoryGroupByDropItem_IncludedLabel;
 	public static String CategoryGroupByDropItem_TreeLevelLabel;
 	public static String CategoryValueDropItem_CountLabel;
+	public static String CategoryValueItem_CountIncidentLabel;
 	public static String CategoryValueItem_CountLabel;
+	public static String CategoryValueItem_CountObservationLabel;
 	public static String CombinedValueItem_PER_LABEL;
 	public static String ConservationAreaFilter_InvalidCaFilter;
 	public static String CreateHandler_QueryEditorError;

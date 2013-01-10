@@ -70,10 +70,10 @@ import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
+import org.wcs.smart.query.parser.internal.summary.CategoryValueItem.ValueType;
 import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
@@ -173,60 +173,6 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 	}
 
-	@Override
-	protected String SelectClause(boolean includeObservations) {
-		String[] waypoints = { "uuid", "x", "y"}; 
-		
-		StringBuilder sb = new StringBuilder();
-		
-		for (int i = 0; i < waypoints.length; i++) {
-			sb.append(","); //$NON-NLS-1$
-			sb.append(tablePrefix.get(Waypoint.class) + "." + waypoints[i] //$NON-NLS-1$
-					+ " as w_" + waypoints[i]); //$NON-NLS-1$
-		}
-		return sb.toString();
-	}
-	protected double[] getCoordinateMins(Connection c, IFilter filter) throws SQLException {
-		
-		HashSet<AttributeInfo> keys = new HashSet<AttributeInfo>();
-		filter.getAttributeFilters(keys);
-		
-		StringBuilder sql = new StringBuilder();
-//		sql.append("SELECT min(\"X\") as minx, min(\"Y\") as miny FROM " + queryTempTable);
-		sql.append("SELECT min(w_x) as minx, min(w_y) as miny  FROM ("); //$NON-NLS-1$
-		sql.append(" SELECT "); //$NON-NLS-1$
-		sql.append(SelectClause(true));
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(FromClause(true));
-		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(WhereClause(true));
-		sql.append(" UNION "); //$NON-NLS-1$
-		sql.append(" SELECT "); //$NON-NLS-1$
-		sql.append(SelectClause(false));
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(FromClause(false));
-		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(WhereClause(false));
-		sql.append(" ) as foo"); //$NON-NLS-1$
-
-		
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		double minx=0;
-		double miny=0;
-		if(rs.next()){
-			minx = rs.getDouble("minx"); //$NON-NLS-1$
-			miny = rs.getDouble("miny"); //$NON-NLS-1$
-		}
-		
-		double[] both = new double[2];
-		both[0] = minx;
-		both[1] = miny;
-
-		return both;
-	}
-
-	
 	/**
 	 * Gets results from the temporary query table, grouped by the tile ID
 	 * and loads them into internal memory store
@@ -329,9 +275,14 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			double size = gridDef.getCellSize();
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT "); //$NON-NLS-1$
-			sql.append(strAgg + "(keyid) as value,tile_id"); //$NON-NLS-1$
+			sql.append(strAgg + "(localkey) as value,tile_id"); //$NON-NLS-1$
 			sql.append(" FROM ("); //$NON-NLS-1$
-			sql.append("SELECT keyid, "); //$NON-NLS-1$
+			sql.append("SELECT distinct "); //$NON-NLS-1$
+			if (tmp.getType() == ValueType.OBSERVATION){
+				sql.append(tablePrefix.get(WaypointObservation.class) +".uuid as localkey, "); //$NON-NLS-1$
+			}else{
+				sql.append(queryTempTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
+			}
 			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
 			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(" JOIN " + queryTempTable  //$NON-NLS-1$
@@ -345,16 +296,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				+ tablePrefix.get(Category.class)
 				+ ".uuid" //$NON-NLS-1$
 				+ " AND Hkey >= '" + hkey + "' AND Hkey < '" + hkey_max + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			
-//			WHERE ( c.hkey >= 'threat.residentialcommercialdevelopment.' and c.hkey < 'threat.residentialcommercialdevelopment/') 
-			
+	
 			sql.append(" JOIN " + tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class)  //$NON-NLS-1$ //$NON-NLS-2$
 				+ " on " + tablePrefix.get(Waypoint.class) //$NON-NLS-1$
 				+ ".uuid = " //$NON-NLS-1$
 				+ queryTempTable
 				+ ".wp_uuid"); //$NON-NLS-1$
-			//sql.append(" group by (floor(  (X - " + minX + ") /" + size + " ) + 1), (floor(  (Y - " + minY + ") / " + size + " ) + 1)");
-			//sql.append(" group by tile_id");
 			sql.append(") as foo "); //$NON-NLS-1$
 			sql.append(" group by "); //$NON-NLS-1$
 			sql.append("tile_id"); //$NON-NLS-1$

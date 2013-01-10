@@ -60,6 +60,7 @@ import org.wcs.smart.query.parser.internal.summary.AttributeGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryGroupBy;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
+import org.wcs.smart.query.parser.internal.summary.CategoryValueItem.ValueType;
 import org.wcs.smart.query.parser.internal.summary.CombinedValueItem;
 import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;
@@ -653,9 +654,15 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 
 		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
 		
-		String valueSql = "temp.ob_uuid"; //$NON-NLS-1$
+		String valueSql = ""; //$NON-NLS-1$
 		StringBuilder valueAggSql = new StringBuilder();
-		valueAggSql.append("count(ob_uuid)"); //$NON-NLS-1$
+		if (categoryItem.getType() == ValueType.OBSERVATION){
+			valueSql = "temp.ob_uuid"; //$NON-NLS-1$
+			valueAggSql.append("count(ob_uuid)"); //$NON-NLS-1$
+		}else{
+			valueSql = "temp.wp_uuid"; //$NON-NLS-1$
+			valueAggSql.append("count(wp_uuid)"); //$NON-NLS-1$
+		}
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT "); //$NON-NLS-1$
@@ -665,7 +672,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		}
 		sql.append(valueAggSql);
 		sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
-		sql.append("temp.cat_hkey, "); //$NON-NLS-1$
+		//sql.append("temp.cat_hkey, "); //$NON-NLS-1$
 		sql.append(groupByInnerSql);
 		if (groupByInnerSql.length() > 0){
 			sql.append(","); //$NON-NLS-1$
@@ -674,34 +681,15 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(fromSql);
 		
-		
-		sql.append(") foo"); //$NON-NLS-1$
-//		
-//		sql.append(" join smart.wp_observation ");
-//		sql.append(tablePrefix.get(WaypointObservation.class));
-//		sql.append(" on foo.ob_uuid = ");
-//		sql.append(tablePrefix.get(WaypointObservation.class));
-//		sql.append(".uuid");
-//		sql.append(" join smart.dm_category ");
-//		sql.append(tablePrefix.get(Category.class));
-//		sql.append(" on ");
-//		sql.append(tablePrefix.get(WaypointObservation.class));
-//		sql.append(".category_uuid = ");
-//		sql.append(tablePrefix.get(Category.class));
-//		sql.append(".uuid ");
-		
 		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(" ("); //$NON-NLS-1$
-//		sql.append(tablePrefix.get(Category.class));
-//		sql.append(".hkey >= '");
 		sql.append("cat_hkey >= '"); //$NON-NLS-1$
 		sql.append(categoryItem.getCategoryHKey());
 		sql.append("' and "); //$NON-NLS-1$
-//		sql.append(tablePrefix.get(Category.class));
-//		sql.append(".hkey < '");
 		sql.append("cat_hkey < '"); //$NON-NLS-1$
 		sql.append(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1));
-		sql.append("/') "); //$NON-NLS-1$
+		sql.append("/') "); //$NON-NLS-1$	
+		sql.append(") foo"); //$NON-NLS-1$
 		
 		if (groupBySql.length() > 0){
 			sql.append(" GROUP BY " ); //$NON-NLS-1$
