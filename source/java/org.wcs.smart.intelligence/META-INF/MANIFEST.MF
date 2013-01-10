@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Intelligence
+Bundle-SymbolicName: org.wcs.smart.intelligence;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.wcs.smart.intelligence.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.wcs.smart,
+ org.wcs.smart.patrol
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
