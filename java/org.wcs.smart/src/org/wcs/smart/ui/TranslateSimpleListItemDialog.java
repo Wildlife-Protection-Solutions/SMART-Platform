@@ -176,7 +176,8 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //		composite.setLayout(new GridLayout(2, false));
 		composite.setLayout(new TableColumnLayout());
-		tblViewer = new TableViewer(composite, SWT.BORDER);
+		
+		tblViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
 		tblViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		TableViewerColumn viewerColumn = new TableViewerColumn(tblViewer,SWT.NONE);
@@ -213,58 +214,14 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 					return ""; //$NON-NLS-1$
 				}
 				return x;
-			}
-			 
+			}			 
 		});
 		viewerColumn.setEditingSupport(new TextTableEditor(tblViewer));
-//		TableColumnLayout layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
-//		layout.setColumnData(column, new ColumnWeightData(weight,ColumnWeightData.MINIMUM_WIDTH, true));
-//		return viewerColumn;
 
 		tblViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tblViewer.setInput(input);
 		tblViewer.getTable().setHeaderVisible(true);
 		tblViewer.getTable().setLinesVisible(true);
-		
-//		langViewer = new LanguageViewer(composite, SWT.DEFAULT,
-//				SmartDB.getCurrentConservationArea());
-//		langViewer.getControl().setLayoutData(
-//				new GridData(SWT.FILL, SWT.FILL, true, false));
-//		langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-//			@Override
-//			public void selectionChanged(SelectionChangedEvent event) {
-//				if (currentLang != null) {
-//					if (txtName.getText().trim().isEmpty()) {
-//						values.remove(currentLang);
-//					} else {
-//						values.put(currentLang, txtName.getText().trim());
-//					}
-//				}
-//				currentLang = langViewer.getCurrentSelection();
-//				String newValue = values.get(currentLang);
-//				if (newValue == null) {
-//					newValue = ""; //$NON-NLS-1$
-//				}
-//				txtName.setText(newValue);
-//			}
-//		});
-//		
-//		
-//		lbl = new Label(composite, SWT.NONE);
-//		lbl.setText(Messages.TranslateSimpleListItemDialog_NameLabel);
-//		txtName = new Text(composite, SWT.BORDER);
-//		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-//		txtName.addModifyListener(new ModifyListener() {			
-//			@Override
-//			public void modifyText(ModifyEvent e) {
-//				values.put(currentLang, txtName.getText());
-//				validate();	
-//			}
-//		});
-//
-//		Language defaultLang = currentLang;
-//		currentLang = null;
-//		langViewer.setSelection(new StructuredSelection(defaultLang));
 		
 		return composite;
 	}
