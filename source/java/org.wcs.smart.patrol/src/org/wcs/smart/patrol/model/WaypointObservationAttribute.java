@@ -190,6 +190,54 @@ public class WaypointObservationAttribute {
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}
 	
+	/**
+	 * The string representation of the attribute value based
+	 * on the attribute type as follows:
+	 * * TEXT - return the text string
+	 * * BOOLEAN - return Attribute.BOOLEAN_FALSE_LABEL or BOOLEAN_TRUE_LABEL
+	 * * LIST - return the name of the list item or empty string
+	 * * TREE - name of the tree node or empty string
+	 * * NUMERIC - string representation of numeric value
+	 * 
+	 * @return the string representation of the attribute values.
+	 */
+	@Transient
+	public String getAttributeValueAsString(){
+		String text = ""; //$NON-NLS-1$
+		switch (getAttribute().getType()){
+		case TEXT:
+			if (getStringValue() != null){
+				text = getStringValue();
+			}
+			break;
+		case NUMERIC:
+			if (getNumberValue() != null){
+				text = String.valueOf(getNumberValue());	
+			}
+			break;
+		case BOOLEAN:
+			if (getNumberValue() != null){
+				if (getNumberValue() < 0.5){
+					text = Attribute.BOOLEAN_FALSE_LABEL;
+				}else{
+					text = Attribute.BOOLEAN_TRUE_LABEL;
+				}
+			}
+			break;
+		case LIST:
+			if (getAttributeListItem() != null){
+				text = getAttributeListItem().getName();
+			}
+			break;
+		case TREE:
+			if (getAttributeTreeNode() != null){
+				text = getAttributeTreeNode().getName();
+			}
+			break;
+		}
+		return text;
+	}
+	
 	@Embeddable
 	private static class WaypointObservationAttributePk implements Serializable{
 		/**

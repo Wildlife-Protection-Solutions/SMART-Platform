@@ -213,36 +213,7 @@ public class AttributeTable {
 				WaypointObservationAttribute att = observation.findAttribute(attribute);
 				
 				if (att != null) {
-					if (attribute.getType() == AttributeType.TEXT) {
-						if (att.getStringValue() == null) {
-							return ""; //$NON-NLS-1$
-						}
-						return att.getStringValue();
-					} else if (attribute.getType() == AttributeType.BOOLEAN) {
-						if (att.getNumberValue() == null) {
-							return ""; //$NON-NLS-1$
-						}
-						if (att.getNumberValue() < 0.5) {
-							return Attribute.BOOLEAN_FALSE_LABEL;
-						} else {
-							return Attribute.BOOLEAN_TRUE_LABEL;
-						}
-					} else if (attribute.getType() == AttributeType.NUMERIC) {
-						if (att.getNumberValue() == null) {
-							return ""; //$NON-NLS-1$
-						}
-						return String.valueOf(att.getNumberValue());
-					} else if (attribute.getType() == AttributeType.LIST) {
-						if (att.getAttributeListItem() == null) {
-							return ""; //$NON-NLS-1$
-						}
-						return att.getAttributeListItem().getName();
-					} else if (attribute.getType() == AttributeType.TREE) {
-						if (att.getAttributeTreeNode() == null) {
-							return ""; //$NON-NLS-1$
-						}
-						return att.getAttributeTreeNode().getName();
-					}
+					return att.getAttributeValueAsString();
 				}
 				
 			}

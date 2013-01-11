@@ -440,14 +440,8 @@ public class PatrolLegDayInputComposite {
 			}
 		});
 
-		
-		
-//		Composite compTable = toolkit.createComposite(main);
-//		compTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		TableColumnLayout tableLayout = new TableColumnLayout();
-//		compTable.setLayout(tableLayout);
-
 		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		editor.getPatrolEditor().getSelectionProvider().addSelectionProvider(observationTable);
 		toolkit.adapt(observationTable.getTable());
 		setupObservationTable();
 		observationTable.getTable().addPaintListener(new PaintListener() {
