@@ -31,5 +31,19 @@
             commandId="org.wcs.smart.intelligence.NewIntelligence">
       </handler>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.intelligence.model.Intelligence">
+      </class>
+      <class
+            ca_property=".intelligence.conservationArea"
+            class="org.wcs.smart.intelligence.model.IntelligencePoint">
+      </class>
+      <class
+            ca_property=".intelligence.conservationArea"
+            class="org.wcs.smart.intelligence.model.IntelligenceAttachment">
+      </class>
+   </extension>
 
 </plugin>

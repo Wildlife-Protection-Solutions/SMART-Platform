@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.intelligence.model;
 
+import java.io.File;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -32,11 +35,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * @author elitvin
@@ -48,13 +55,16 @@ public class Intelligence {
 
 	private byte[] uuid;
     private ConservationArea conservationArea;
-    private Date recievedDate;
+    private Date receivedDate;
     private IntelligenceSourceType source;
     private Patrol patrol;
     private Date fromDate;
     private Date toDate;
     private String shortName;
     private String description;
+	private List<IntelligencePoint> points;
+	private List<IntelligenceAttachment> attachments;
+   
  
 	@Id
 	@GeneratedValue(generator="uuid")
@@ -77,13 +87,13 @@ public class Intelligence {
         this.conservationArea = conservationArea;
     }
 
-	@Column(name="recieved_date")
-   public Date getRecievedDate() {
-        return recievedDate;
+	@Column(name="received_date")
+   public Date getReceivedDate() {
+        return receivedDate;
     }
 
-    public void setRecievedDate(Date recievedDate) {
-        this.recievedDate = recievedDate;
+    public void setReceivedDate(Date receivedDate) {
+        this.receivedDate = receivedDate;
     }
 
 	@Column(name="source")
@@ -124,7 +134,7 @@ public class Intelligence {
 		this.toDate = toDate;
 	}
 
-	@Column(name="short_date")
+	@Column(name="short_name")
 	public String getShortName() {
 		return shortName;
 	}
@@ -141,5 +151,40 @@ public class Intelligence {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="intelligence", orphanRemoval=true, cascade={CascadeType.ALL})
+//	@BatchSize(size=200)
+	public List<IntelligencePoint> getPoints() {
+		return points;
+	}
+
+	public void setPoints(List<IntelligencePoint> points) {
+		this.points = points;
+	}
+	
+	@OneToMany(fetch = FetchType.EAGER, mappedBy="intelligence", orphanRemoval=true, cascade={CascadeType.ALL})
+	public List<IntelligenceAttachment> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<IntelligenceAttachment> attachments) {
+		this.attachments = attachments;
+	}
+
+	/**
+	 * 
+	 * <p>
+	 * To get full file names you must prepend this with the conservation area file store location.
+	 * </p>
+	 * <code>
+	 * ConservationArea.getFileDataStoreLocation() + File.separator + Intelligence.getPatrolDatastorePath();
+	 * </code>
+	 * @return the file store location for the intelligence relative to the conservation area file store
+	 */
+	@Transient
+	public String getIntelligenceDatastorePath(){
+		return "Intelligence" + File.separator + SmartUtils.getDirectoryPath(uuid); //$NON-NLS-1$
+	}
+	
 
 }
