@@ -26,9 +26,13 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.wcs.smart.intelligence.internal.messages"; //$NON-NLS-1$
 
-    public static String IntelligenceDatesWizardPage_From_Label;
+    public static String IntelligenceDatesWizardPage_Date_Label;
+
+	public static String IntelligenceDatesWizardPage_From_Label;
 
     public static String IntelligenceDatesWizardPage_Message;
+
+	public static String IntelligenceDatesWizardPage_MutliDaysCheckbox_Label;
 
     public static String IntelligenceDatesWizardPage_PageTitle;
 
@@ -45,6 +49,8 @@ public class Messages extends NLS {
     public static String IntelligenceHandler_LoadingErrorMessage;
 
     public static String IntelligenceHandler_TaskName;
+
+	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
 
 	public static String IntelligenceLocationWizardPage_Message;
 
