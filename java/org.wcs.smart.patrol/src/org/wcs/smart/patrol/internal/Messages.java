@@ -643,6 +643,9 @@ public class Messages extends NLS {
 	public static String TreeAttributeField_InvalidTreeValue;
 	public static String Waypoint_ErrorImportingAttachment;
 	public static String WaypointAttachmentInterceptor_Error_SavingPatrolModifications;
+	public static String WaypointInfoView_DateTimeLabel;
+	public static String WaypointInfoView_UpdateJobName;
+	public static String WaypointInfoView_WaypointIdLabel;
 	public static String XmlToPatrolConverter_Error_DuplicateAttributes;
 	public static String XmlToPatrolConverter_Error_InvalidTransportType;
 	public static String XmlToPatrolConverter_Error_MandateNotFound;

@@ -536,6 +536,7 @@
             restorable="false">
       </view>
       <view
+            allowMultiple="false"
             class="org.wcs.smart.patrol.ui.views.WaypointInfoView"
             icon="images/icons/view16/waypoint_info.png"
             id="org.wcs.smart.patrol.waypointInfo"
@@ -619,6 +620,16 @@
             advisor="org.wcs.smart.patrol.internal.advisors.EmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="net.refractions.udig.project.AdaptableFeature"
+            class="org.wcs.smart.patrol.geotools.WaypointFeatureAdapterFactory">
+         <adapter
+               type="org.wcs.smart.patrol.model.Waypoint">
+         </adapter>
+      </factory>
    </extension>
 
 </plugin>

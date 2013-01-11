@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.patrol.ui.views;
 
 import java.text.Collator;
@@ -10,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,11 +55,19 @@ import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * View for displaying all observation information at a
+ * given waypoint.
+ * 
+ * @author egouge
+ *
+ */
 public class WaypointInfoView extends ViewPart implements ISelectionListener {
 
 	public static final String ID = "org.wcs.smart.patrol.waypointInfo"; //$NON-NLS-1$
@@ -50,7 +80,9 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	private ScrolledForm infoSection = null;
 
 	private Waypoint selectedWaypoint;
-	private Job updateUiJob = new Job("update info indow"){
+	
+	// job to update view
+	private Job updateUiJob = new Job(Messages.WaypointInfoView_UpdateJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -92,37 +124,55 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
-					if (lblWaypointId.isDisposed()) return;
+					if (lblWaypointId.isDisposed())
+						return;
+
+					for (Control c : infoSection.getBody().getChildren()) {
+						c.dispose();
+					}
+
 					lblWaypointId.setText(String.valueOf(wp.getId()));
-					lblDateTime.setText(DateFormat.getDateInstance(DateFormat.SHORT).format(wpDate2) + " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(wp.getTime())); //$NON-NLS-1$
-					
-					for (Entry<String, List<List<String[]>>> cat : displayData.entrySet()){
-						Label lbl = toolkit.createLabel(infoSection.getBody(), SmartUtils.formatStringForLabel(cat.getKey()), SWT.WRAP);
+					lblDateTime
+							.setText(DateFormat.getDateInstance(
+									DateFormat.SHORT).format(wpDate2)
+									+ " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(wp.getTime())); //$NON-NLS-1$
+
+					for (Entry<String, List<List<String[]>>> cat : displayData
+							.entrySet()) {
+						Label lbl = toolkit.createLabel(infoSection.getBody(),SmartUtils.formatStringForLabel(cat.getKey()),SWT.WRAP);
 						lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-						((GridData)lbl.getLayoutData()).widthHint = 50;
+						 ((GridData)lbl.getLayoutData()).widthHint = 200;
 						lbl.setFont(boldFont);
-						 
+
 						Composite attributeComp = toolkit.createComposite(infoSection.getBody());
 						attributeComp.setLayout(new GridLayout(2, false));
-						((GridLayout)attributeComp.getLayout()).marginLeft = 5;
-						attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						
-						
-						for(List<String[]> obs : cat.getValue()){
+						((GridLayout) attributeComp.getLayout()).marginLeft = 5;
+						attributeComp.setLayoutData(new GridData(SWT.FILL,
+								SWT.FILL, true, false));
+
+						for (int i = 0; i < cat.getValue().size(); i ++){
+							List<String[]> obs = cat.getValue().get(i);
 							Collections.sort(obs, new Comparator<String[]>() {
 								@Override
 								public int compare(String[] o1, String[] o2) {
 									return Collator.getInstance().compare(o1[0], o2[0]);
 								}});
 							for (String[] att : obs){
-								toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[0] + ":")); //$NON-NLS-1$
-								toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[1]));
+								Label l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[0] + ":")); //$NON-NLS-1$
+								l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+								l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(att[1]));
+								l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 							}
-							Label l = toolkit.createLabel(attributeComp, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
-							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-							
+							if ( i < cat.getValue().size() - 1){
+								Label l = toolkit.createLabel(attributeComp, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+								l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+							}
 						}
+						
+						Label l2 = toolkit.createLabel(infoSection.getBody(), "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+						l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 					}
+					infoSection.getBody().pack();
 					infoSection.getBody().layout();
 					infoSection.reflow(true);
 					lblWaypointId.getParent().layout();
@@ -133,9 +183,15 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			return Status.OK_STATUS;
 		}};
 	
+	/**
+	 * Creates new view
+	 */
 	public WaypointInfoView() {
 	}
 
+	/**
+	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
+	 */
 	@Override
 	public void dispose(){
 		super.dispose();
@@ -145,6 +201,10 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			boldFont = null;
 		}
 	}
+	
+	/**
+	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	 */
 	@Override
 	public void createPartControl(Composite parent) {
 		getSite().getPage().addSelectionListener(this);
@@ -162,12 +222,13 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		//infoSection = toolkit.createComposite(main);
 		infoSection = toolkit.createScrolledForm(main);
-		infoSection.getBody().setLayout(new GridLayout(1, false));
-		infoSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		gl = new GridLayout(1, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		infoSection.getBody().setLayout(gl);
 		
-		
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		infoSection.setLayoutData(gd);
 	}
 	
 	
@@ -176,7 +237,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		header.setLayout(new GridLayout(4, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
-		Label l = toolkit.createLabel(header, "Waypiont Id:");
+		Label l = toolkit.createLabel(header, Messages.WaypointInfoView_WaypointIdLabel);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -186,30 +247,32 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		lblWaypointId = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblWaypointId.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
-		l = toolkit.createLabel(header,  "DateTime:");
+		l = toolkit.createLabel(header,  Messages.WaypointInfoView_DateTimeLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		//l.setFont(boldFont);
 		
-		lblDateTime = toolkit.createLabel(header, "");
+		lblDateTime = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblDateTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		
 	}
 
+	/**
+	 * Updates the contents of with the information
+	 * in the provided waypoint
+	 * @param wp
+	 */
 	private void updateContents(final Waypoint wp){
-		for (Control c : infoSection.getBody().getChildren()){
-			c.dispose();
-		}
 		selectedWaypoint = wp;
 		updateUiJob.schedule();
 	}
 	
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
+		lblWaypointId.setFocus();
 	}
 
+	/**
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+	 */
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (selection.isEmpty()) {
@@ -222,8 +285,12 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		Object o = ss.getFirstElement();
 		if (o instanceof Waypoint) {
 			updateContents((Waypoint) o);
+		}else if (o instanceof IAdaptable){
+			Waypoint wp = (Waypoint) ((IAdaptable)o).getAdapter(Waypoint.class);
+			if (wp != null){
+				updateContents(wp);
+			}
 		}
-
+		
 	}
-
 }
