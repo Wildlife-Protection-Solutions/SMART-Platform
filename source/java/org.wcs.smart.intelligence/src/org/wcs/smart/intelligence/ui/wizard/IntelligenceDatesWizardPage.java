@@ -24,9 +24,13 @@ package org.wcs.smart.intelligence.ui.wizard;
 import java.util.Calendar;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
@@ -42,9 +46,13 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
 
-    private DateTime dtFromDate;
+    private Label dtFromLabel;
+    private Label dtToLabel;
+
+	private DateTime dtFromDate;
     private DateTime dtToDate;
     
+    private Button multipleDays;
     /**
      * @param pageName
      */
@@ -58,30 +66,56 @@ public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
     @Override
     public void createControl(Composite parent) {
         Composite center = new Composite(parent, SWT.NONE);
-        center.setLayout(new GridLayout(2, false));
-        center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+        center.setLayout(new GridLayout(1, false));
+        center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
-        Label label = new Label(center, SWT.NONE);
-        label.setText(Messages.IntelligenceDatesWizardPage_From_Label);
-        label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+        multipleDays = new Button(center, SWT.CHECK);
+        multipleDays.setText(Messages.IntelligenceDatesWizardPage_MutliDaysCheckbox_Label);
+        multipleDays.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+        		applyCurrentState();
+        	}
+		});
         
-        dtFromDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+        Composite dateComposite = new Composite(center, SWT.NONE);
+        dateComposite.setLayout(new GridLayout(2, false));
+        dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        dtFromLabel = new Label(dateComposite, SWT.NONE);
+        dtFromLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+        
+        dtFromDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
         dtFromDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtFromDate.getLayoutData()).horizontalIndent = 10;
         
-        label = new Label(center, SWT.NONE);
-        label.setText(Messages.IntelligenceDatesWizardPage_To_Label);
-        label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+        dtToLabel = new Label(dateComposite, SWT.NONE);
+        dtToLabel.setText(Messages.IntelligenceDatesWizardPage_To_Label);
+        dtToLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        dtToDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+        dtToDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
         dtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtToDate.getLayoutData()).horizontalIndent = 10;
         
         setControl(center);
         setMessage(Messages.IntelligenceDatesWizardPage_Message);
+        applyCurrentState();
     }
 
-    /* (non-Javadoc)
+    /**
+     * updates gui state according to multipleDays checkbox state
+     */
+    private void applyCurrentState() {
+		boolean isMultiple = multipleDays.getSelection();
+		String labelText = isMultiple ? Messages.IntelligenceDatesWizardPage_From_Label : Messages.IntelligenceDatesWizardPage_Date_Label;
+		dtFromLabel.setText(labelText);
+		dtToLabel.setVisible(isMultiple);
+		dtToDate.setVisible(isMultiple);
+		//line below is required to avoid label truncation
+		dtFromLabel.getParent().layout(true, true);
+	}
+
+	/* (non-Javadoc)
      * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#updateModel(org.wcs.smart.intelligence.model.Intelligence)
      */
     @Override
