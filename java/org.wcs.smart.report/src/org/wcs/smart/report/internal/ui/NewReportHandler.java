@@ -111,9 +111,11 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 		report.setOwner(SmartDB.getCurrentEmployee());
 		
 		report.updateName(SmartDB.getCurrentLanguage(), reportName);
+		report.setName(reportName);
 		if (!SmartDB.getCurrentLanguage().isDefault()){
 			report.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), reportName);	
 		}
+		
 		report.setShared(isShared);
 		report.setFolder(parentFolder);
 

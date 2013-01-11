@@ -237,6 +237,10 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 					copy.setFolder(parentFolder);
 					copy.setShared(isShared);
 					copy.setName(dialog.getReportName());
+					copy.updateName(SmartDB.getCurrentLanguage(), dialog.getReportName());
+					if (!SmartDB.getCurrentLanguage().isDefault()){
+						copy.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), dialog.getReportName());
+					}
 					copy.setOwner(SmartDB.getCurrentEmployee());
 					copy.setShared(isShared);
 
