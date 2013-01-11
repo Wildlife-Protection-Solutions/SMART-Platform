@@ -61,6 +61,8 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
         addPage(new IntelligenceSourceWizardPage());
         addPage(new IntelligenceDatesWizardPage());
         addPage(new IntelligenceDescWizardPage());
+        addPage(new IntelligenceLocationWizardPage());
+        addPage(new IntelligenceAttachmentsWizardPage());
         
         super.addPages();
     }
@@ -70,8 +72,7 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
      */
     @Override
     public boolean performFinish() {
-        // TODO Auto-generated method stub
-        return false;
+    	return false;
     }
 
     /**
