@@ -194,7 +194,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 * validates the ui components, enabling and disabling required components.
 	 */
 	private void validateUi(){
-		btnOk.setEnabled((txtUserName.getText().length() > 0 && txtPassword.getText().length() > 0));
+		btnOk.setEnabled(txtUserName.isEnabled() && (txtUserName.getText().length() > 0 && txtPassword.getText().length() > 0));
 	}
 
 

@@ -194,14 +194,20 @@ public class AutoBackupEngine {
 	 * Reads the properties file for auto-backup config
 	 * 
 	 * @return a Properties object 
+	 * @throws IOException if file not found
 	 */
 	public static Properties getAutoBackupProperties(){
 		Properties properties = new Properties();
 		try {
 			String location = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE) + SMART_BACKUP_PROPERTIES_FILE;
+			File f = new File(location);
+			if (!f.exists()){
+				return properties;
+			}
 		    properties.load(new FileInputStream(location));
 		} catch (IOException e) {
 			SmartPlugIn.log(Messages.AutoBackupEngine_ErrorReadingPropFile + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
+			return properties;
 		}
 		return properties;
 	}
