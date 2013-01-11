@@ -74,14 +74,14 @@ public class IntelligenceReceivedWizardPage extends IntelligenceWizardPage {
 
     @Override
     protected boolean updateModel(Intelligence intelligence) {
-        intelligence.setRecievedDate(SmartUtils.getDate(dtReceivedDate));
+        intelligence.setReceivedDate(SmartUtils.getDate(dtReceivedDate));
         return true;
     }
 
     @Override
     void initModel(Intelligence intelligence, Session session) {
-        if (intelligence.getRecievedDate() != null){
-            Calendar cal = SmartUtils.convertDate(intelligence.getRecievedDate());
+        if (intelligence.getReceivedDate() != null){
+            Calendar cal = SmartUtils.convertDate(intelligence.getReceivedDate());
             dtReceivedDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
         }
     }
