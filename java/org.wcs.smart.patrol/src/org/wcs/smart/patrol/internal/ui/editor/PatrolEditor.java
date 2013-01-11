@@ -89,6 +89,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private Projection[] projections;
 	
+	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
+	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
@@ -201,6 +203,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		manager.patrolChanged(PatrolEventManager.PATROL_ID, patrol);
 	}
 	
+	
 	@Override
 	protected void createPages() {
 		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
@@ -219,6 +222,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, Messages.PatrolEditor_PatrolMapPageName);
 			showBusy(false);
+			
+			getSite().setSelectionProvider(selectionProvider);
 		} catch (final Throwable t) {
 			PatrolEditor.this.getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
@@ -240,6 +245,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			});
 
 		}
+	}
+	
+	public CombinedSelectionProvider getSelectionProvider(){
+		return this.selectionProvider;
 	}
 	
 	public void updateSummaryPage(){

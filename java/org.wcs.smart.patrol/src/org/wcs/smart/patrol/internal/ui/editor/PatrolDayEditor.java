@@ -158,6 +158,7 @@ public class PatrolDayEditor extends EditorPart {
 				comp.createComposite(frmSummary.getBody(), toolkit);
 				comp.setData((PatrolLegDay)plds.get(0));
 				children[0] = comp;
+				
 			}else{
 				//sort legs by start date
 				Collections.sort(plds, new Comparator<PatrolLegDay>(){
@@ -176,6 +177,7 @@ public class PatrolDayEditor extends EditorPart {
 				Composite mainComp = toolkit.createComposite(frmSummary.getBody());
 				mainComp.setLayout(new GridLayout(1, false));
 				mainComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+				
 				
 				for (int i = 0; i < plds.size(); i ++){
 					PatrolLegDay pld = (PatrolLegDay)plds.get(i);
@@ -200,9 +202,9 @@ public class PatrolDayEditor extends EditorPart {
 					Composite comp2 = comp.createComposite(sec, toolkit);
 					comp.setData(pld);
 					sec.setClient(comp2);
-					children[i] = comp;
-					
+					children[i] = comp;					
 				}
+				
 			}
 			
 		}finally{

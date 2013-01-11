@@ -486,10 +486,12 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				MessageDialog.openError(getShell(), Messages.AttributeWizardPage_Error_DialogTitle, Messages.AttributeWizardPage_CannotCreateObservationError_DialogMessage + err);
 				return null;
 			}
-			WaypointObservationAttribute att = new WaypointObservationAttribute();
-			att.setAttribute(field.getAttribute());
-			att.setObservation(wo);
+			//only store non-null values
 			if (field.getValue() != null){
+				WaypointObservationAttribute att = new WaypointObservationAttribute();
+				att.setAttribute(field.getAttribute());
+				att.setObservation(wo);
+				
 				Object x = field.getValue();
 				if (field.getAttribute().getType() == AttributeType.BOOLEAN){
 					if ((Boolean)x){
@@ -506,8 +508,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}else if (field.getAttribute().getType() == AttributeType.NUMERIC){
 					att.setNumberValue((Double)x);
 				}
+				wo.getAttributes().add(att);
 			}
-			wo.getAttributes().add(att);
+			
 		}
 		for (IAttributeField<?> field : attributeFields){
 			field.clear();

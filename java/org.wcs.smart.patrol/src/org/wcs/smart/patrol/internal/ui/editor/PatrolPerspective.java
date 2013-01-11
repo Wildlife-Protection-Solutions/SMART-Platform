@@ -25,6 +25,7 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
+import org.wcs.smart.patrol.ui.views.WaypointInfoView;
 /**
  * The parol perspective.
  * 
@@ -40,8 +41,9 @@ public class PatrolPerspective implements IPerspectiveFactory {
 		layout.addView(PatrolListView.ID, IPageLayout.LEFT, 0.3f, IPageLayout.ID_EDITOR_AREA);
 		layout.getViewLayout(PatrolListView.ID).setCloseable(false);
 		
-		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.patrol.patrolMapFolder", IPageLayout.BOTTOM, 0.8f, PatrolListView.ID); //$NON-NLS-1$
+		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.patrol.patrolMapFolder", IPageLayout.BOTTOM, 0.6f, PatrolListView.ID); //$NON-NLS-1$
 		
+		folder1.addView(WaypointInfoView.ID); 
 		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
 		folder1.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
 	}

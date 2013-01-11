@@ -37,6 +37,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -90,7 +91,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			for (WaypointObservation ob : this.wp.getObservations()){
 				//add to list
 				ob.setCategory((Category)getSession().merge(ob.getCategory()));
-
+				for (CategoryAttribute ca : ob.getCategory().getAttributes()){
+					ca.setAttribute((Attribute) session.merge(ca.getAttribute()));
+				}
 				List<WaypointObservation> lst = observations.get(ob.getCategory());
 				if (lst == null) {
 					lst = new ArrayList<WaypointObservation>();
@@ -100,7 +103,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				
 				for (WaypointObservationAttribute a : ob.getAttributes()){
 					a.setAttribute((Attribute)getSession().merge(a.getAttribute()));
-
 				}
 			}
 		}

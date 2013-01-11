@@ -535,6 +535,13 @@
             name="%patrollist.view.name"
             restorable="false">
       </view>
+      <view
+            class="org.wcs.smart.patrol.ui.views.WaypointInfoView"
+            icon="images/icons/view16/waypoint_info.png"
+            id="org.wcs.smart.patrol.waypointInfo"
+            name="%waypointinfo.view.name"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
