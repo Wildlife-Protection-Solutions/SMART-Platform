@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -149,7 +148,7 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
 						IntelligencePlugIn.displayLog(ERROR_PATROL_ID_REQUIRED, null);
 						return false;
 					}
-			    	intelligence.setSource(source);
+			    	intelligence.setPatrol(patrol);
 	    		}
 	    	}
 		}
@@ -187,23 +186,17 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
             if (patrolId == null || patrolId.getControl().isDisposed()){
                 return Status.OK_STATUS;
             }
-            Session s = HibernateManager.openSession();
-            try {
-                final List<Patrol> data = IntelligenceHibernateManager.getPatrols(s);
-                Display.getDefault().asyncExec(new Runnable(){
-                    @Override
-                    public void run() {
-                        if (patrolId.getControl().isDisposed()){
-                            return ;
-                        }
-                        for (Patrol id : data){
-                        	patrolId.add(id);
-                        }               
-                    }});
-
-            } finally {
-                s.close();
-            }
+            final List<Patrol> data = IntelligenceHibernateManager.getPatrols();
+            Display.getDefault().asyncExec(new Runnable(){
+                @Override
+                public void run() {
+                    if (patrolId.getControl().isDisposed()){
+                        return ;
+                    }
+                    for (Patrol id : data){
+                    	patrolId.add(id);
+                    }               
+                }});
             return Status.OK_STATUS;
         }
     }
