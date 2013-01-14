@@ -66,6 +66,14 @@ public class Tile {
 	}
 
 	/**
+	 * Converts the tile to a tile id of the
+	 * form <x>_<y>
+	 * @return
+	 */
+	public String getId(){
+		return xid + "_" + yid;
+	}
+	/**
 	 * <p>Two tiles are equals if they have the same
 	 * tile x id and tile y id
 	 * </p>
