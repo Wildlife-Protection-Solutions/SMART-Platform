@@ -28,6 +28,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -72,7 +73,7 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
      */
     @Override
     public boolean performFinish() {
-    	return false;
+    	return IntelligenceHibernateManager.saveIntelligence(intelligence);
     }
 
     /**

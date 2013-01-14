@@ -27,7 +27,11 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -36,7 +40,7 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceHibernateManager {
+public class IntelligenceHibernateManager extends HibernateManager {
 
 	/**
 	 * Loads patrols from database 
@@ -44,12 +48,41 @@ public class IntelligenceHibernateManager {
 	 * @param session session 
 	 * @return list of patrols
 	 */
-	public static List<Patrol> getPatrols(Session session){
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Patrol> list = query.list();
-		return list;
+	public static List<Patrol> getPatrols(){
+		Session session = SmartHibernateManager.openSession();
+		try {
+			ConservationArea ca = SmartDB.getCurrentConservationArea();
+			Criteria query = session.createCriteria(Patrol.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+			@SuppressWarnings("unchecked")
+			List<Patrol> list = query.list();
+			return list;
+		} finally {
+			session.close();
+		}
+	}
+
+	/**
+	 * Saves a given intelligence to the database.
+	 * 
+	 * @param intelligence the intelligence to save
+	 * @return <code>true</code> if saved successfully, <code>false</code> if error
+	 */
+	public static boolean saveIntelligence(Intelligence intelligence) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			session.beginTransaction();
+			try {
+				session.saveOrUpdate(intelligence);
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_SaveIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return false;
+			}
+		} finally {
+			session.close();
+		}
+		return true;
 	}
 	
 }
