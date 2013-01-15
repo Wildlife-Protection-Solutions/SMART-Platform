@@ -162,8 +162,14 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		}
 
 		this.getPatrol().createLegDays();
-		boolean ret = PatrolHibernateManager.savePatrol(getPatrol(),
-				PatrolHibernateManager.openSession(), false);
+		
+		Session session = PatrolHibernateManager.openSession();
+		boolean ret = false;
+		try{
+			ret = PatrolHibernateManager.savePatrol(getPatrol(), session, false);
+		}finally{
+			session.close();
+		}
 
 		if (!ret)
 			return false;

@@ -87,7 +87,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 			}
 		}
 		
-		//add reminaing; these should all be new attachments
+		//add remaining; these should all be new attachments
 		for (Iterator<WaypointAttachment> iterator = attachments.iterator(); iterator.hasNext();) {
 			WaypointAttachment att = (WaypointAttachment) iterator.next();
 			att.setWaypoint(wp);
