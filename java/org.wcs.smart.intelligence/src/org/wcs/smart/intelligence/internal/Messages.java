@@ -26,7 +26,11 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.wcs.smart.intelligence.internal.messages"; //$NON-NLS-1$
 
-    public static String IntelligenceDatesWizardPage_Date_Label;
+    public static String IntelligenceAttachmentsWizardPage_Message;
+
+	public static String IntelligenceAttachmentsWizardPage_PageTitle;
+
+	public static String IntelligenceDatesWizardPage_Date_Label;
 
 	public static String IntelligenceDatesWizardPage_From_Label;
 

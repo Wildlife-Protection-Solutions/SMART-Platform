@@ -22,7 +22,6 @@
 package org.wcs.smart.intelligence.ui.wizard;
 
 import org.eclipse.jface.wizard.WizardPage;
-import org.hibernate.Session;
 import org.wcs.smart.intelligence.model.Intelligence;
 
 /**
@@ -38,7 +37,7 @@ public abstract class IntelligenceWizardPage extends WizardPage {
      */
     public IntelligenceWizardPage(String pageName) {
         super(pageName);
-    }
+   }
 
     /**
      * Updates the current intelligence with the new values inputed
@@ -49,13 +48,22 @@ public abstract class IntelligenceWizardPage extends WizardPage {
      */
     abstract protected boolean updateModel(Intelligence intelligence);
 
+//    /**
+//     * Updates the current page gui components with the values
+//     * from the intelligence
+//     * 
+//     * @param intelligence intelligence to use when updating gui components
+//     * @param session the current hibernate session
+//     */
+//    abstract void initModel(Intelligence intelligence, Session session);
+    
     /**
-     * Updates the current page gui components with the values
-     * from the intelligence
+     * Returns is data in page is valid and can be save in database.
+     * <code>true</code> by default
      * 
-     * @param intelligence intelligence to use when updating gui components
-     * @param session the current hibernate session
      */
-    abstract void initModel(Intelligence intelligence, Session session);
+    public boolean isPageValid() {
+    	return true; //default value
+    }
     
 }

@@ -41,7 +41,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Session;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -75,6 +74,7 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
      */
     public IntelligenceSourceWizardPage() {
         super(Messages.IntelligenceSourceWizardPage_PageTitle);
+        setPageComplete(false);
     }
 
     /* (non-Javadoc)
@@ -100,13 +100,10 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
         sourceType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				ISelection selection = event.getSelection();
-				if (selection instanceof IStructuredSelection) {
-					IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-					boolean isPatrolSelected = IntelligenceSourceType.PATROL.equals(structuredSelection.getFirstElement());
-					patrolLabel.setVisible(isPatrolSelected);
-					patrolId.getControl().setVisible(isPatrolSelected);
-				}
+				boolean isPatrolSelected = IntelligenceSourceType.PATROL.equals(getSelectedSourceType());
+				patrolLabel.setVisible(isPatrolSelected);
+				patrolId.getControl().setVisible(isPatrolSelected);
+				setPageComplete(isPageValid());
 			}
 		});
         
@@ -119,6 +116,12 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
         patrolId.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         patrolId.setContentProvider(ArrayContentProvider.getInstance());
         patrolId.setLabelProvider(new PatrolIDLabelProvider());
+        patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				setPageComplete(isPageValid());
+			}
+		});
         
         setControl(center);
         setMessage(Messages.IntelligenceSourceWizardPage_Message);
@@ -132,43 +135,53 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
      */
     @Override
     protected boolean updateModel(Intelligence intelligence) {
+    	IntelligenceSourceType source = getSelectedSourceType();
+    	if (source == null) {
+    		IntelligencePlugIn.displayLog(ERROR_SOURCE_REQUIRED, null);
+    		return false;
+    	}
+    	intelligence.setSource(source);
+    	if (IntelligenceSourceType.PATROL.equals(source)) {
+    		Patrol patrol = getSelectedPatrol();
+    		if (patrol == null) {
+    			IntelligencePlugIn.displayLog(ERROR_PATROL_ID_REQUIRED, null);
+    			return false;
+    		}
+    		intelligence.setPatrol(patrol);
+    	} else {
+    		intelligence.setPatrol(null);
+    	}
+    	return true;
+    }
+
+    @Override
+    public boolean isPageValid() {
+    	IntelligenceSourceType source = getSelectedSourceType();
+		if (source == null) {
+			return false;
+		}
+		if (IntelligenceSourceType.PATROL.equals(source)) {
+			return getSelectedPatrol() != null;
+		}
+		return true;
+    }
+    
+    private IntelligenceSourceType getSelectedSourceType() {
 		ISelection sourceSelection = sourceType.getSelection();
 		if (sourceSelection instanceof IStructuredSelection) {
-			IntelligenceSourceType source = (IntelligenceSourceType)((IStructuredSelection)sourceSelection).getFirstElement();
-			if (source == null) {
-				IntelligencePlugIn.displayLog(ERROR_SOURCE_REQUIRED, null);
-				return false;
-			}
-	    	intelligence.setSource(source);
-	    	if (IntelligenceSourceType.PATROL.equals(source)) {
-	    		ISelection patrolSelection = patrolId.getSelection();
-	    		if (patrolSelection instanceof IStructuredSelection) {
-	    			Patrol patrol = (Patrol)((IStructuredSelection)patrolSelection).getFirstElement();
-					if (patrol == null) {
-						IntelligencePlugIn.displayLog(ERROR_PATROL_ID_REQUIRED, null);
-						return false;
-					}
-			    	intelligence.setPatrol(patrol);
-	    		}
-	    	}
+			return (IntelligenceSourceType)((IStructuredSelection)sourceSelection).getFirstElement();
 		}
-        return true;
+		return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#initModel(org.wcs.smart.intelligence.model.Intelligence, org.hibernate.Session)
-     */
-    @Override
-    void initModel(Intelligence intelligence, Session session) {
-    	if (intelligence.getSource() != null) {
-            sourceType.setSelection(new StructuredSelection(intelligence.getSource()));
-    	}
-    	if (intelligence.getPatrol() != null) {
-            patrolId.setSelection(new StructuredSelection(intelligence.getPatrol()));
-    	}
-
+    private Patrol getSelectedPatrol() {
+		ISelection patrolSelection = patrolId.getSelection();
+		if (patrolSelection instanceof IStructuredSelection) {
+			return (Patrol)((IStructuredSelection)patrolSelection).getFirstElement();
+		}
+		return null;
     }
-
+    
     /**
      * Job is used to fill some list viewer with data
      * 

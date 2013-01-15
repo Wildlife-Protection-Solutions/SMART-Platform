@@ -21,13 +21,17 @@
  */
 package org.wcs.smart.intelligence.ui.wizard;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Session;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.ISmartPoint;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.ui.wizard.location.LocationSelectComposite;
 
 /**
@@ -37,6 +41,8 @@ import org.wcs.smart.intelligence.ui.wizard.location.LocationSelectComposite;
  * @since 1.0.0
  */
 public class IntelligenceLocationWizardPage extends IntelligenceWizardPage {
+	
+	private LocationSelectComposite<IntelligencePoint> locationSelect;
 
 	/**
 	 * @param pageName
@@ -50,14 +56,15 @@ public class IntelligenceLocationWizardPage extends IntelligenceWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-        Composite center = new Composite(parent, SWT.NONE);
-        center.setLayout(new GridLayout(2, false));
-        center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-
-        Composite locationSelect = new LocationSelectComposite(center, SWT.NONE);
+        locationSelect = new LocationSelectComposite<IntelligencePoint>(parent, SWT.NONE) {
+			@Override
+			protected ISmartPoint createNewPoint() {
+				return new IntelligencePoint();
+			}
+        };
         locationSelect.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
-        setControl(center);
+        setControl(locationSelect);
         setMessage(Messages.IntelligenceLocationWizardPage_Message);
  	}
 
@@ -66,17 +73,26 @@ public class IntelligenceLocationWizardPage extends IntelligenceWizardPage {
 	 */
 	@Override
 	protected boolean updateModel(Intelligence intelligence) {
-		// TODO Auto-generated method stub
+		//Update the points
+		List<IntelligencePoint> points = locationSelect.getPoints();
+		if (intelligence.getPoints() == null) {
+			intelligence.setPoints(new ArrayList<IntelligencePoint>());
+		}
+		
+		for (Iterator<IntelligencePoint> iterator = intelligence.getPoints().iterator(); iterator.hasNext();) {
+			IntelligencePoint pt = iterator.next();
+			if (!points.remove(pt)){
+				iterator.remove();
+			}
+		}
+		
+		//add reminaing; these should all be new points
+		for (Iterator<IntelligencePoint> iterator = points.iterator(); iterator.hasNext();) {
+			IntelligencePoint pt = iterator.next();
+			pt.setIntelligence(intelligence);
+			intelligence.getPoints().add(pt);
+		}
 		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#initModel(org.wcs.smart.intelligence.model.Intelligence, org.hibernate.Session)
-	 */
-	@Override
-	void initModel(Intelligence intelligence, Session session) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

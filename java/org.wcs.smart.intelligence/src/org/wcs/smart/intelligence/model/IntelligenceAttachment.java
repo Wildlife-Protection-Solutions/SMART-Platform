@@ -34,6 +34,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -44,7 +45,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 @Entity
 @Table(name="smart.intelligence_attachment")
-public class IntelligenceAttachment {
+public class IntelligenceAttachment implements ISmartAttachment {
 	private byte[] uuid;
 	private Intelligence intelligence;
 	private String filename;
@@ -99,8 +100,7 @@ public class IntelligenceAttachment {
 	}
 	private void setFullFile(){
 		if (intelligence != null) {
-			this.fullFile = SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator
-					+ intelligence.getIntelligenceDatastorePath() + File.separator + getFilename();
+			this.fullFile = getDatastoreFolderPath() + File.separator + getFilename();
 		}
 	}
 	@Transient
@@ -110,6 +110,13 @@ public class IntelligenceAttachment {
 			setFullFile();
 		}
 		return new File(this.fullFile);
+	}
+	
+	@Override
+	@Transient
+	public String getDatastoreFolderPath() {
+		return SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator
+				+ intelligence.getIntelligenceDatastorePath();
 	}
 	
 }

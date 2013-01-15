@@ -24,9 +24,11 @@ package org.wcs.smart.intelligence;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
@@ -68,7 +70,8 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return <code>true</code> if saved successfully, <code>false</code> if error
 	 */
 	public static boolean saveIntelligence(Intelligence intelligence) {
-		Session session = SmartHibernateManager.openSession();
+		Interceptor interceptor = new AttachmentInterceptor();
+		Session session = SmartHibernateManager.openSession(interceptor);
 		try {
 			session.beginTransaction();
 			try {

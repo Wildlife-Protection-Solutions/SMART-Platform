@@ -22,12 +22,13 @@
 package org.wcs.smart.intelligence.ui.wizard;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 
@@ -47,6 +48,7 @@ public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
      */
     public IntelligenceDescWizardPage() {
         super(Messages.IntelligenceDescWizardPage_PageTitle);
+        setPageComplete(false);
     }
 
     /* (non-Javadoc)
@@ -64,6 +66,12 @@ public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
 
         shortName = new Text(center, SWT.BORDER | SWT.LEFT);
         shortName.setTextLimit(32);
+        shortName.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				setPageComplete(isPageValid());
+			}
+		});
 
         GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
         data.horizontalIndent = 8;
@@ -95,17 +103,8 @@ public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#initModel(org.wcs.smart.intelligence.model.Intelligence, org.hibernate.Session)
-     */
     @Override
-    void initModel(Intelligence intelligence, Session session) {
-    	if (intelligence.getShortName() != null) {
-    		shortName.setText(intelligence.getShortName());
-    	}
-    	if (intelligence.getDescription() != null) {
-    		description.setText(intelligence.getDescription());
-    	}
+    public boolean isPageValid() {
+    	return shortName.getText() != null && !shortName.getText().isEmpty();
     }
-
 }

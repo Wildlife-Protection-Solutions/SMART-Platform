@@ -27,11 +27,12 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 
 /**
  * Wizard to create new intelligence.
@@ -73,6 +74,12 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
      */
     @Override
     public boolean performFinish() {
+        if (lastPage instanceof IntelligenceWizardPage) {
+            if (!((IntelligenceWizardPage) lastPage).updateModel(intelligence)) {
+                return false;
+            }
+        }
+    	
     	return IntelligenceHibernateManager.saveIntelligence(intelligence);
     }
 
@@ -82,13 +89,13 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
      * @return
      */
     public Session getSession() {
-            if (session == null || !session.isOpen()) {
-                    session = PatrolHibernateManager.openSession();
-                    session.update(intelligence.getConservationArea());
-            }
-            return session;
+    	if (session == null || !session.isOpen()) {
+    		session = SmartHibernateManager.openSession();
+    		session.update(intelligence.getConservationArea());
+    	}
+    	return session;
     }
-    
+
     @Override
     public void handlePageChanging(PageChangingEvent event) {
         if (event.getCurrentPage() instanceof IntelligenceWizardPage) {
@@ -97,13 +104,21 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
                 return;
             }
         }
-        if (event.getTargetPage() instanceof IntelligenceWizardPage) {
-            ((IntelligenceWizardPage) event.getTargetPage()).initModel(intelligence, getSession());
-        }
 
         if (event.doit) {
             lastPage = (IWizardPage) event.getTargetPage();
         }
     }
+
+	/**
+	 * Closes the active session
+	 */
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (session != null && session.isOpen()) {
+			session.close();
+		}
+	}
 
 }
