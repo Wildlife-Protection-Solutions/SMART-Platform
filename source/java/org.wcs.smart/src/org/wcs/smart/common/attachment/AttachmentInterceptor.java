@@ -60,14 +60,10 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	if (shouldIntercept(entity)) {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
     		attachment.getFullFile().delete();
-    		afterFileDelete(attachment);
     	}
     	
     }
- 
-    protected void afterFileDelete(ISmartAttachment attachment) {
-    	//nothing by default
-    }
+
     
     /**
 	 * When a object is saved it also saves the file on disk.
