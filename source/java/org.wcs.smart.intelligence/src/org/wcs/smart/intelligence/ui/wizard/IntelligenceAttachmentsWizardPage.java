@@ -21,12 +21,17 @@
  */
 package org.wcs.smart.intelligence.ui.wizard;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Session;
+import org.wcs.smart.common.attachment.AttachmentComposite;
+import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligenceAttachment;
 
 /**
  * Intelligence Wizard page for collecting the intelligence attachments information
@@ -36,11 +41,13 @@ import org.wcs.smart.intelligence.model.Intelligence;
  */
 public class IntelligenceAttachmentsWizardPage extends IntelligenceWizardPage {
 
+	private AttachmentComposite<IntelligenceAttachment> attachmentComposite;
+	
 	/**
 	 * @param pageName
 	 */
 	public IntelligenceAttachmentsWizardPage() {
-		super("Intelligence Attachments");
+		super(Messages.IntelligenceAttachmentsWizardPage_PageTitle);
 	}
 
 	/* (non-Javadoc)
@@ -48,12 +55,15 @@ public class IntelligenceAttachmentsWizardPage extends IntelligenceWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-        Composite center = new Composite(parent, SWT.NONE);
-        center.setLayout(new GridLayout(2, false));
-        center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+        attachmentComposite = new AttachmentComposite<IntelligenceAttachment>(parent, SWT.NONE) {
+			@Override
+			protected ISmartAttachment createNewAttachement() {
+				return new IntelligenceAttachment();
+			}
+		};
 
-        setControl(center);
-        setMessage("Attach any relevant images or documents associated with the intelligence here:");
+        setControl(attachmentComposite);
+        setMessage(Messages.IntelligenceAttachmentsWizardPage_Message);
 	}
 
 	/* (non-Javadoc)
@@ -61,17 +71,26 @@ public class IntelligenceAttachmentsWizardPage extends IntelligenceWizardPage {
 	 */
 	@Override
 	protected boolean updateModel(Intelligence intelligence) {
-		// TODO Auto-generated method stub
+		//Update the attachments
+		List<IntelligenceAttachment> attachments = attachmentComposite.getAttchments();
+		if (intelligence.getAttachments() == null) {
+			intelligence.setAttachments(new ArrayList<IntelligenceAttachment>());
+		}
+		
+		for (Iterator<IntelligenceAttachment> iterator = intelligence.getAttachments().iterator(); iterator.hasNext();) {
+			IntelligenceAttachment att = iterator.next();
+			if (!attachments.remove(att)){
+				iterator.remove();
+			}
+		}
+		
+		//add reminaing; these should all be new attachments
+		for (Iterator<IntelligenceAttachment> iterator = attachments.iterator(); iterator.hasNext();) {
+			IntelligenceAttachment att = iterator.next();
+			att.setIntelligence(intelligence);
+			intelligence.getAttachments().add(att);
+		}
 		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#initModel(org.wcs.smart.intelligence.model.Intelligence, org.hibernate.Session)
-	 */
-	@Override
-	void initModel(Intelligence intelligence, Session session) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

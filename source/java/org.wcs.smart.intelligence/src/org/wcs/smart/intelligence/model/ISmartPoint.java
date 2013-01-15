@@ -21,65 +21,19 @@
  */
 package org.wcs.smart.intelligence.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-
 /**
- * Intelligence Point
+ * Represents a point on a map with x and y coordinates.
  * 
  * @author elitvin
  * @since 1.0.0
  */
-@Entity
-@Table(name = "smart.intelligence_point")
-public class IntelligencePoint implements ISmartPoint {
+public interface ISmartPoint {
+
+	public double getX();
 	
-	private byte[] uuid;
-    private Intelligence intelligence;
-	private double x;
-	private double y;
-    
-    
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
+	public void setX(double x);
 
-	@ManyToOne
-	@JoinColumn(name="intelligence_uuid", referencedColumnName="uuid")
-	public Intelligence getIntelligence() {
-		return intelligence;
-	}
-	public void setIntelligence(Intelligence intelligence) {
-		this.intelligence = intelligence;
-	}
-
-	@Column(name="x")
-	public double getX() {
-		return x;
-	}
-	public void setX(double x) {
-		this.x = x;
-	}
-
-	@Column(name="y")
-	public double getY() {
-		return y;
-	}
-	public void setY(double y) {
-		this.y = y;
-	}
-
+	public double getY();
+	
+	public void setY(double y);
 }
