@@ -34,6 +34,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -45,7 +46,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 @Entity
 @Table(name="smart.wp_attachments")
-public class WaypointAttachment {
+public class WaypointAttachment implements ISmartAttachment {
 
 	private byte[] uuid;
 	private Waypoint wp;
@@ -105,8 +106,7 @@ public class WaypointAttachment {
 	}
 	private void setFullFile(){
 		if (wp != null && getWaypoint().getPatrolLegDay() != null ){
-			Patrol ptr = getWaypoint().getPatrolLegDay().getPatrolLeg().getPatrol();
-			this.fullFile = SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + ptr.getPatrolDatastorePath() + File.separator + getFilename();
+			this.fullFile = getDatastoreFolderPath() + File.separator + getFilename();
 		}
 	}
 	@Transient
@@ -118,5 +118,14 @@ public class WaypointAttachment {
 		return new File(this.fullFile);
 	}
 	
+	@Transient
+	@Override
+	public String getDatastoreFolderPath() {
+		if (wp != null && getWaypoint().getPatrolLegDay() != null ){
+			Patrol ptr = getWaypoint().getPatrolLegDay().getPatrolLeg().getPatrol();
+			return SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + ptr.getPatrolDatastorePath();
+		}
+		return null;
+	}
 }
 

@@ -21,36 +21,19 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
-import java.io.File;
-import java.text.MessageFormat;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.common.attachment.AttachmentComposite;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachment;
-import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for displaying attachments associated 
@@ -61,142 +44,44 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class AttachmentDialog extends TitleAreaDialog {
 
-	private TableViewer tblAttachments;
-	private WritableList attachments = new WritableList();
-	private Button btnRemove;
-	private Button btnOpen;
-
+	private Waypoint waypoint;
+	private AttachmentComposite<WaypointAttachment> attachmentComposite;
 	
 	/**
 	 * @param parentShell
 	 */
 	public AttachmentDialog(Shell parentShell, Waypoint wp) {
 		super(parentShell);
-		
-		if (wp.getAttachments() != null){
-			this.attachments.addAll(wp.getAttachments());
-		}
+		waypoint = wp;
 	}
 	
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite)super.createDialogArea(parent);
 		
-		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Label lblAttachments = new Label(main, SWT.NONE);
-		lblAttachments.setText(Messages.AttachmentDialog_Attachments_Label);
-		lblAttachments.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		tblAttachments = new TableViewer(main, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		tblAttachments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)tblAttachments.getTable().getLayoutData()).heightHint = 100;
-		((GridData)tblAttachments.getTable().getLayoutData()).widthHint = 200;
-		tblAttachments.setContentProvider(new ObservableListContentProvider());
-		tblAttachments.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof WaypointAttachment){
-					return ((WaypointAttachment) element).getFilename();
-				}
-				return super.getText(element);
-			}
-		});
-		tblAttachments.addSelectionChangedListener(new ISelectionChangedListener() {
-			
+		attachmentComposite = new AttachmentComposite<WaypointAttachment>(composite, SWT.NONE) {
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				btnOpen.setEnabled(!tblAttachments.getSelection().isEmpty());
-				btnRemove.setEnabled(!tblAttachments.getSelection().isEmpty());
-				
+			protected ISmartAttachment createNewAttachement() {
+				return new WaypointAttachment();
 			}
-		});
-		
-		Composite buttonPanel = new Composite(main, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout(1, false));
-		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, false, false));
-		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAdd.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				FileDialog fd = new FileDialog(AttachmentDialog.this.getShell(), SWT.MULTI);
-				
-				String file = fd.open();
-				if (file == null){
-					return;
-				}
-				for (int i = 0; i < fd.getFileNames().length; i ++){
-					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
-					if (!f.exists()){
-						SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.AttachmentDialog_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
-						return;
-					}
-					WaypointAttachment wpa = new WaypointAttachment();
-					wpa.setCopyFromLocation(f);
-					wpa.setFilename(f.getName());
-					attachments.add(wpa);
-				}
-				tblAttachments.refresh();
-			}
-		});
-		
-		btnRemove = new Button(buttonPanel, SWT.PUSH);
-		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnRemove.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
-				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-					WaypointAttachment type = (WaypointAttachment) iterator.next();
-					attachments.remove(type);
-				}
-				tblAttachments.refresh();
-			}
-		});
-		btnRemove.setEnabled(false);
-		
-		btnOpen = new Button(buttonPanel, SWT.PUSH);
-		btnOpen.setText(Messages.AttachmentDialog_Button_Open);
-		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnOpen.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
-				WaypointAttachment first = (WaypointAttachment) sel.getFirstElement();
-				if (first.getCopyFromLocation()!= null){
-					launch(first.getCopyFromLocation());
-				}else{
-					launch(first.getFullFile());
-				}
-			}
-		});
-		btnOpen.setEnabled(false);
-		
-		tblAttachments.setInput(this.attachments);
-		tblAttachments.refresh();
+		};
+		if (waypoint.getAttachments() != null){
+			attachmentComposite.getAttchments().addAll(waypoint.getAttachments());
+		}
 		
 		setMessage(Messages.AttachmentDialog_DialogMessage);
 		getShell().setText(Messages.AttachmentDialog_DialogTitle);
 		return composite; 
 	}
 
-	private void launch(File file){
-		try{
-			Program.launch(file.getCanonicalPath());
-		}catch (Exception ex){
-			Program.launch(file.getAbsolutePath());
-		}
-	}
 	/**
 	 * @return all attachments selected by the user
 	 */
-	@SuppressWarnings("unchecked")
-	public List<WaypointAttachment> getAttchments(){
-		return this.attachments;
+	public List<WaypointAttachment> getAttchments() {
+		if (attachmentComposite != null) {
+			return attachmentComposite.getAttchments();
+		}
+		return Collections.emptyList();
 	}
 
 	/** dialog is resizable

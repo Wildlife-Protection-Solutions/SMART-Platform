@@ -26,11 +26,8 @@ public class Messages extends NLS {
 	public static String ArmedComposite_Title;
 	public static String AttachmentCellEditor_NoAttachment_Label;
 	public static String AttachmentCellEditor_TableCell_Label;
-	public static String AttachmentDialog_Attachments_Label;
-	public static String AttachmentDialog_Button_Open;
 	public static String AttachmentDialog_DialogMessage;
 	public static String AttachmentDialog_DialogTitle;
-	public static String AttachmentDialog_Error_FileNotFound;
 	public static String AttributeDMAdvisor_Error_AttributeNotDeletable;
 	public static String AttributeDMAdvisor_Error_InvalidObjectType;
 	public static String AttributeListItemDMAdvisor_DeleteError;
@@ -642,7 +639,6 @@ public class Messages extends NLS {
 	public static String TransportTypeWizardPage_PageName;
 	public static String TreeAttributeField_InvalidTreeValue;
 	public static String Waypoint_ErrorImportingAttachment;
-	public static String WaypointAttachmentInterceptor_Error_SavingPatrolModifications;
 	public static String WaypointInfoView_DateTimeLabel;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;

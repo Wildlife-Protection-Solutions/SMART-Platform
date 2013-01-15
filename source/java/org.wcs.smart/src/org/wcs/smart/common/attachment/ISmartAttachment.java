@@ -19,34 +19,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.model;
+package org.wcs.smart.common.attachment;
 
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import java.io.File;
 
 /**
- * An interceptor for waypoint attachment that copies the file into the filestore
- * if necessary or deletes the file from the filestore.
+ * Interface that represents attachments used within {@link AttachmentComposite}.
+ * Classes that implement this interface will also be handled by {@link AttachmentInterceptor}
+ * if one is attached to hibernate session in order to save related files
+ * is datastore.
  * 
- * Must be applied to any hibernate session that modifies waypoints inorder for
- * waypoint files to be removed correctly from the data store.
- *  
- * @author Emily
+ * @author elitvin
  * @since 1.0.0
  */
-public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
+public interface ISmartAttachment {
+	
+	/**
+	 * Getter for file name
+	 * 
+	 * @return
+	 */
+	public String getFilename();
+	
+	/**
+	 * Setter for file name
+	 * 
+	 * @param filename
+	 */
+	public void setFilename(String filename);
 
 	/**
-	 * 
+	 * Location of the file to copy.  Temporarily set until
+	 * saved.  Will return null if file already in datastore.
+	 * @return File
 	 */
-	private static final long serialVersionUID = 1L;
-
-
-//	@Override
-//	protected void afterFileDelete(ISmartAttachment attachment) {
-//    	if (attachment instanceof WaypointAttachment){
-//    		WaypointAttachment wa = (WaypointAttachment)attachment;
-//    		wa.setWaypoint(null);
-//    	}
-//	}
-
+	public File getCopyFromLocation();
+	
+	/**
+	 * Location to copy files from.  Temporarily set
+	 * for newly added attachments until saved. 
+	 */
+	public void setCopyFromLocation(File newFile);
+	
+	/**
+	 * Returns the full file
+	 * 
+	 * @return File
+	 */
+	public File getFullFile();
+	
+	/**
+	 * Getter for datastore folder path
+	 * 
+	 * @return path to folder where file is saved
+	 */
+	public String getDatastoreFolderPath();
 }
