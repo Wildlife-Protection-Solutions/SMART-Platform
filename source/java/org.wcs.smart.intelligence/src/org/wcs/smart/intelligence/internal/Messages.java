@@ -91,6 +91,8 @@ public class Messages extends NLS {
     public static String IntelligenceWizard_Title;
 
 	public static String LoadPatrolIdJob_Name;
+
+	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

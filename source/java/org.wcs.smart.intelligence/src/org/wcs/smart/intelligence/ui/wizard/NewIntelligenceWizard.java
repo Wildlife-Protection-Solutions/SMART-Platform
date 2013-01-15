@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.intelligence.ui.wizard;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -47,6 +51,8 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
     private Intelligence intelligence = null;
 
     private IWizardPage lastPage = null;
+    
+    SaveIntelligenceJob saveIntelligenceJob = new SaveIntelligenceJob();    
 
     public NewIntelligenceWizard() {
         super();
@@ -79,8 +85,14 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
                 return false;
             }
         }
-    	
-    	return IntelligenceHibernateManager.saveIntelligence(intelligence);
+    	saveIntelligenceJob.schedule();
+    	try {
+			saveIntelligenceJob.join(); //we don't want to close wizard if save failed
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	//IntelligenceHibernateManager.saveIntelligence(intelligence);
+    	return Status.OK_STATUS.equals(saveIntelligenceJob.getResult());
     }
 
     /**
@@ -90,7 +102,7 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
      */
     public Session getSession() {
     	if (session == null || !session.isOpen()) {
-    		session = SmartHibernateManager.openSession();
+    		session = SmartHibernateManager.openSession(new AttachmentInterceptor());
     		session.update(intelligence.getConservationArea());
     	}
     	return session;
@@ -120,5 +132,27 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
 			session.close();
 		}
 	}
+
+	/**
+     * Job is used to save intelligence object
+     * 
+     * @author elitvin
+     *
+     */
+    private class SaveIntelligenceJob extends Job {
+  
+        public SaveIntelligenceJob() {
+            super(Messages.NewIntelligenceWizard_SaveIntelligenceJob_Title);
+        }
+
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+            if (IntelligenceHibernateManager.saveIntelligence(intelligence)) {
+            	return Status.OK_STATUS;
+            }
+            //no need to use other status as hibernate manager will report error in case something is wrong
+            return Status.CANCEL_STATUS;
+        }
+    }
 
 }
