@@ -88,6 +88,8 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		protected IStatus run(IProgressMonitor monitor) {
 			if (infoSection.isDisposed()) return Status.OK_STATUS;
 			final Waypoint wp = selectedWaypoint;
+			
+			
 			final HashMap<String, List<List<String[]>>> displayData = new HashMap<String, List<List<String[]>>>();
 			
 			Session s = HibernateManager.openSession();
@@ -97,21 +99,25 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 				s.update(wp);
 				wpDate = wp.getPatrolLegDay().getDate();
 				HashMap<Category, List<List<String[]>>> data = new HashMap<Category, List<List<String[]>>>();
-				for (WaypointObservation wo : wp.getObservations()){
-					List<List<String[]>> ops = data.get(wo.getCategory());
-					
-					if (ops == null){
-						ops = new ArrayList<List<String[]>>();
-						data.put(wo.getCategory(), ops);
+				if (wp.getObservations() != null) {
+					for (WaypointObservation wo : wp.getObservations()) {
+						List<List<String[]>> ops = data.get(wo.getCategory());
+
+						if (ops == null) {
+							ops = new ArrayList<List<String[]>>();
+							data.put(wo.getCategory(), ops);
+						}
+						ArrayList<String[]> attributeValues = new ArrayList<String[]>();
+						for (WaypointObservationAttribute woa : wo
+								.getAttributes()) {
+							String[] info = new String[] {
+									woa.getAttribute().getName(),
+									woa.getAttributeValueAsString() };
+							attributeValues.add(info);
+						}
+						ops.add(attributeValues);
 					}
-					ArrayList<String[]> attributeValues = new ArrayList<String[]>();
-					for (WaypointObservationAttribute woa : wo.getAttributes()){
-						String[] info = new String[]{woa.getAttribute().getName(), woa.getAttributeValueAsString()};
-						attributeValues.add(info);
-					}
-					ops.add(attributeValues);
 				}
-				
 				for (Entry<Category, List<List<String[]>>> cat : data.entrySet()){
 					Category c = (Category) s.merge(cat.getKey());
 					displayData.put(c.getFullCategoryName(), cat.getValue());

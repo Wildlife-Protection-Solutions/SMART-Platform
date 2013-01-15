@@ -21,14 +21,15 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.io.Serializable;
+
+import org.hibernate.type.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 
 /**
- * An interceptor for waypoint attachment that copies the file into the filestore
- * if necessary or deletes the file from the filestore.
- * 
- * Must be applied to any hibernate session that modifies waypoints inorder for
- * waypoint files to be removed correctly from the data store.
+ * An extension of the default attachment interceptor
+ * that also deletes waypoint attachments from patrol leg days.
  *  
  * @author Emily
  * @since 1.0.0
@@ -40,13 +41,37 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * When a parent object is deleted it also deletes the file on disk.
+	 */
+	@Override
+    public void onDelete(Object entity,
+            Serializable id,
+            Object[] state,
+            String[] propertyNames,
+            Type[] types) {
+		
+		super.onDelete(entity, id, state, propertyNames, types);
+		
+		/**
+		 * PatrolLegDay deletes are cascaded to waypoints in the
+		 * database and not in hibernate; therefore we need
+		 * to make sure we delete the attachments
+		 * here; otherwise they get left behind
+		 */
+		if (entity instanceof PatrolLegDay){
+			if (((PatrolLegDay) entity).getWaypoints() != null){
+				for (Waypoint wp : ((PatrolLegDay) entity).getWaypoints()){
+					if (wp.getAttachments() != null){
+						for (ISmartAttachment att : wp.getAttachments()){
+							att.getFullFile().delete();
+						}
+					}
+				}
+			}
+		}
+    	
+    }
 
-//	@Override
-//	protected void afterFileDelete(ISmartAttachment attachment) {
-//    	if (attachment instanceof WaypointAttachment){
-//    		WaypointAttachment wa = (WaypointAttachment)attachment;
-//    		wa.setWaypoint(null);
-//    	}
-//	}
 
 }

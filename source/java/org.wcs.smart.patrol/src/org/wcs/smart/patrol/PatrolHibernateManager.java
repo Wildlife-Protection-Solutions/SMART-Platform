@@ -370,7 +370,10 @@ public class PatrolHibernateManager extends HibernateManager{
 	
 	/**
 	 * Saves a given patrol to the database.
-	 * 
+	 * <p>This function does not close the session.  The calling code is responsible
+	 * for closing the session. 
+	 * The session must not have an active transaction.
+	 * </p>
 	 * @param patrol the patrol to save
 	 * @param session the database session to use
 	 * @param saveWaypoints if waypoints should also be saved; waypoints saving is not cascade automatically for performance reasons
@@ -384,14 +387,6 @@ public class PatrolHibernateManager extends HibernateManager{
 				patrol.setId(id);
 			}
 			
-//			File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath() );
-//			if (!f.exists()){
-//				SmartUtils.createDirectory(f);
-//			}
-//			
-			//save
-			//session.update(patrol);
-			//session.save(patrol);
 			session.saveOrUpdate(patrol);
 
 			if (saveWaypoints){
@@ -404,70 +399,14 @@ public class PatrolHibernateManager extends HibernateManager{
 					}
 				}
 			}
-
 			
-//			//sync attachments 
-//			//save new ones
-//			for (PatrolLeg leg: patrol.getLegs()){
-//				for (PatrolLegDay day : leg.getPatrolLegDays()){
-//					if (day.getWaypoints() ==null) continue;
-//					for (Waypoint wp : day.getWaypoints()){
-//						if (wp.getAttachments() ==null) continue;
-//						for (WaypointAttachment attachment : wp.getAttachments()){
-//							if (attachment.getCopyFromLocation() != null){
-//								int counter = 1;
-//								
-//								File to = new File(f.getAbsoluteFile() + File.separator + attachment.getFilename());
-//								while(to.exists()){
-//									String name = (counter++) + "_" + attachment.getFilename();
-//									to = new File(f.getAbsoluteFile() + File.separator + name);
-//								}
-//								if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
-//									throw new RuntimeException("Patrol modifications could not be saved because attachment could not be copied.  Ensure write permissions to directory or remove attachment.");
-//								}else{
-//									attachment.setFilename(to.getName());
-//									attachment.setCopyFromLocation(null);
-//								}
-//							}
-//						}
-//					}
-//				}
-//			}
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			session.getTransaction().rollback();
 			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
 			return false;
-		} finally {
-			session.close();
 		}
 		return true;
 	}
-	
-	/*
 
-	public static String generatePlanId(Plan p, Session s) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(p.getConservationArea().getId());
-		Query q = s.createQuery("SELECT id FROM Plan WHERE id like :id ORDER BY id desc");
-		q.setParameter("id", sb.toString() + "%");
-
-		List results = q.list();
-		
-		String id = p.getConservationArea().getId() + "_0";
-		if (results.size() > 0){
-			id = (String) q.list().get(0);
-		}
-		
-		long cnt = Integer.parseInt(id.substring(id.lastIndexOf('_')+1));
-		cnt++;
-		cnt = cnt % 999999;
-
-		sb.append("_");
-		sb.append(PLAN_ID_FORMATTER.format(cnt));
-		s.evict(p.getConservationArea());
-		return sb.toString();
-	}
-	
-	*/
 }
