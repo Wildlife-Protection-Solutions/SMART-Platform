@@ -88,6 +88,10 @@ public class Messages extends NLS {
 	public static String AreaPropertyPage_Shapefile_FilterName;
 	public static String AreaPropertyPage_Update_DialogMessage;
 	public static String AreaPropertyPage_Update_DialogTitle;
+	public static String AttachmentComposite_Label_Attachments;
+	public static String AttachmentComposite_Error_FileNotFound;
+	public static String AttachmentComposite_Button_Open;
+	public static String AttachmentInterceptor_Error_CannotCopyFile;
 	public static String Attribute_BooleanAttribute_False_Label;
 	public static String Attribute_BooleanAttribute_True_Label;
 	public static String AttributeDMAdvisor_Error_AttributeReferenced;

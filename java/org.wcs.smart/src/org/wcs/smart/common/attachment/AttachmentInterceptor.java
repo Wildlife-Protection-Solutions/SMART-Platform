@@ -1,0 +1,122 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.common.attachment;
+
+import java.io.File;
+import java.io.Serializable;
+
+import org.hibernate.EmptyInterceptor;
+import org.hibernate.type.Type;
+import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
+
+/**
+ * An interceptor for attachment that copies the file into the filestore
+ * if necessary or deletes the file from the filestore.
+ * 
+ * Must be applied to any hibernate session that modifies entity with attachments
+ * in order for attachment files to be saved/removed correctly from the data store.
+ *  
+ * @author elitvin
+ * @author Emily
+ * @since 1.0.0
+ */
+public class AttachmentInterceptor extends EmptyInterceptor {
+
+	private static final long serialVersionUID = 2710377589619179841L;
+
+	protected boolean shouldIntercept(Object entity) {
+		return (entity instanceof ISmartAttachment);
+	}
+	
+	/**
+	 * When a parent object is deleted it also deletes the file on disk.
+	 */
+    public void onDelete(Object entity,
+            Serializable id,
+            Object[] state,
+            String[] propertyNames,
+            Type[] types) {
+    	
+    	if (shouldIntercept(entity)) {
+    		ISmartAttachment attachment = (ISmartAttachment) entity;
+    		attachment.getFullFile().delete();
+    		afterFileDelete(attachment);
+    	}
+    	
+    }
+ 
+    protected void afterFileDelete(ISmartAttachment attachment) {
+    	//nothing by default
+    }
+    
+    /**
+	 * When a object is saved it also saves the file on disk.
+	 */
+    public boolean onSave(Object entity,
+            Serializable id,
+            Object[] state,
+            String[] propertyNames,
+            Type[] types) {
+    	
+    	if (shouldIntercept(entity)) {
+    		ISmartAttachment attachment = (ISmartAttachment) entity;
+    		
+    		if (attachment.getCopyFromLocation() != null){
+    		
+    			File f = new File(getFilePath(attachment));
+    			if (!f.exists()){
+    				SmartUtils.createDirectory(f);
+    			}
+    			File to = new File(f.getAbsoluteFile() + File.separator + attachment.getFilename());
+    			int counter = 1;
+    			while(to.exists()){
+    				String name = (counter++) + "_" + attachment.getFilename(); //$NON-NLS-1$
+    				to = new File(f.getAbsoluteFile() + File.separator + name);
+    			}
+    			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
+    				throw new RuntimeException(getExceptionErrorMessage());
+    			}else{
+    				//state is what is written to db and should be updated
+    				attachment.setFilename(to.getName());
+    				for (int i = 0; i < propertyNames.length;i++){
+    					if (propertyNames[i].equals("filename")){ //$NON-NLS-1$
+    						state[i] = to.getName();
+    					}
+    				}
+    				attachment.setCopyFromLocation(null);
+    			}
+    		}
+    		
+    	}
+    	
+    	return true;
+    }
+
+    protected String getFilePath(ISmartAttachment attachment) {
+    	return attachment.getDatastoreFolderPath();
+    }
+    
+    protected String getExceptionErrorMessage() {
+    	return Messages.AttachmentInterceptor_Error_CannotCopyFile;
+    }
+}
