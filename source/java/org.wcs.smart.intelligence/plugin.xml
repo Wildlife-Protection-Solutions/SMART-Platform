@@ -45,5 +45,20 @@
             class="org.wcs.smart.intelligence.model.IntelligenceAttachment">
       </class>
    </extension>
+   <extension
+         point="net.refractions.udig.project.ui.tool">
+      <category
+            id="org.wcs.smart.intelligence.maptools">
+      </category>
+      <modalTool
+            categoryId="org.wcs.smart.intelligence.maptools"
+            class="org.wcs.smart.intelligence.map.tool.SelectionTool"
+            icon="images/etool16/cursor.png"
+            id="org.wcs.smart.intelligence.map.tool.SelectionTool"
+            name="Select Point"
+            onToolbar="false"
+            tooltip="Click on a map to add new point">
+      </modalTool>
+   </extension>
 
 </plugin>
