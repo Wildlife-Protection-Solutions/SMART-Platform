@@ -129,6 +129,14 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 	};
 	
+	/**
+	 * Converts a double that represents a time range into
+	 * and hours and minutes string.  For example: 20.5 is 
+	 * converted into "20h 30m"
+	 * 
+	 * @param hrs time range in hours
+	 * @return formatted string
+	 */
 	public static String formatTimeRange(Double hrs){
 		boolean minus = false;
 		if (hrs < 0){
