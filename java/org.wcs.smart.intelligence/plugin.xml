@@ -55,9 +55,9 @@
             class="org.wcs.smart.intelligence.map.tool.SelectionTool"
             icon="images/etool16/cursor.png"
             id="org.wcs.smart.intelligence.map.tool.SelectionTool"
-            name="Select Point"
+            name="%tool.selectPoint.name"
             onToolbar="false"
-            tooltip="Click on a map to add new point">
+            tooltip="%tool.selectPoint.tooltip">
       </modalTool>
    </extension>
 
