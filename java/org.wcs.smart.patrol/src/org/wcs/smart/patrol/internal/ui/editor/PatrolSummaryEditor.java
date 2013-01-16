@@ -708,7 +708,8 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				}
 			}else if (column == PatrolLegDayColumn.HOURS){
 				double hrs = ((PatrolLegDay) element).getHoursWorked();
-				return PatrolEditor.REST_TIME_FORMATTER.format(hrs);
+//				return PatrolEditor.REST_TIME_FORMATTER.format(hrs);
+				return PatrolEditor.formatTimeRange(hrs);
 			}else if (column == PatrolLegDayColumn.LEG){
 				return ((PatrolLegDay)element).getPatrolLeg().getId();
 			}else if (column == PatrolLegDayColumn.LEADER){

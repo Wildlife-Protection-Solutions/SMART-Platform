@@ -653,7 +653,8 @@ public class PatrolLegDayInputComposite {
 		double d = Double.parseDouble(this.restMinutes.getText());
 		double time = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime() - d * 60 * 1000;
 		time = time / (1000 * 60 * 60);
-		lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time));
+		//lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time));
+		lblTotalHours.setText(PatrolEditor.formatTimeRange(time));
 		if (time < 0){
 			lblTotalHours.setFont(errorFont);
 			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
@@ -858,6 +859,14 @@ public class PatrolLegDayInputComposite {
 								
 								if (importAll){
 										Set<PatrolLegDay> modified = GPSDataImport.assignWaypoints(wp, editor.getPatrolEditor().getPatrol().getLegs());
+										//remove unassigned waypoints
+										for (Iterator<Waypoint> iterator = wp.iterator(); iterator.hasNext();) {
+											Waypoint wpnt = (Waypoint) iterator.next();
+											if (wpnt.getPatrolLegDay() == null){
+												iterator.remove();
+											}
+											
+										}
 										for (PatrolLegDay day : modified){
 											PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, day);
 										}
