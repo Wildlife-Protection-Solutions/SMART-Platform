@@ -35,9 +35,7 @@ public class Messages extends NLS {
 	public static String CategoryGroupByDropItem_FiltersLabel;
 	public static String CategoryGroupByDropItem_IncludedLabel;
 	public static String CategoryGroupByDropItem_TreeLevelLabel;
-	public static String CategoryValueDropItem_CountLabel;
 	public static String CategoryValueItem_CountIncidentLabel;
-	public static String CategoryValueItem_CountLabel;
 	public static String CategoryValueItem_CountObservationLabel;
 	public static String CombinedValueItem_PER_LABEL;
 	public static String ConservationAreaFilter_InvalidCaFilter;
@@ -475,9 +473,9 @@ public class Messages extends NLS {
 	public static String SummaryEditor_QueryError;
 	public static String SummaryEditor_RunQueryJobName;
 	public static String SummaryEditor_SummaryQueryLabel;
+	public static String SummaryQuery_CannotGroupByAttribute;
+	public static String SummaryQuery_CannotGroupByCategory;
 	public static String SummaryQuery_DefaultQueryName;
-	public static String SummaryQuery_GroupByError1;
-	public static String SummaryQuery_GroupByError2;
 	public static String SummaryQuery_GroupByError3;
 	public static String SummaryQuery_ParseError;
 

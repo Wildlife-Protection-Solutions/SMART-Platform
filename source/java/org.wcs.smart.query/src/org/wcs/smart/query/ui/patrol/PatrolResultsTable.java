@@ -62,7 +62,7 @@ public class PatrolResultsTable {
 	 * @return the resulting table viewer.
 	 */
 	public TableViewer createTable(Composite parent){
-		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION);
+		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		table.getTable().setHeaderVisible(true);
 		table.getTable().setLinesVisible(true);
 		
