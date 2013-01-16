@@ -74,11 +74,14 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
 
+	private static final String HOUR_LABEL = Messages.PatrolEditor_HourLabel;
+
+	private static final String MINUTE_LABEL = Messages.PatrolEditor_MinuteLabel;
+
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolEditor"; //$NON-NLS-1$
 
 	private static final String SAVE_PATROL_JOB_NAME = Messages.PatrolEditor_SavePatrol_JobName;
 	
-	public static final DecimalFormat REST_TIME_FORMATTER = new DecimalFormat("00.00"); //$NON-NLS-1$
 	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
 	
 	private Patrol patrol = null;
@@ -125,6 +128,21 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}
 		}
 	};
+	
+	public static String formatTimeRange(Double hrs){
+		boolean minus = false;
+		if (hrs < 0){
+			minus = true;
+			hrs = -hrs;
+		}
+		int lhrs = (int)Math.floor(hrs);
+		int lmin = (int)Math.round((hrs - lhrs) * 60.0);
+		if (minus){
+			return "-" + lhrs + HOUR_LABEL + " " + lmin + MINUTE_LABEL; //$NON-NLS-1$ //$NON-NLS-2$
+		}else{
+			return lhrs + HOUR_LABEL + " " + lmin + MINUTE_LABEL; //$NON-NLS-1$
+		}
+	}
 	
 	public PatrolEditor() {
 		super();

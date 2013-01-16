@@ -278,9 +278,11 @@ public class Messages extends NLS {
 	public static String PatrolEditor_EditorName_Prefix;
 	public static String PatrolEditor_Error_SavingPatrol;
 	public static String PatrolEditor_Error_SavingWaypoints;
+	public static String PatrolEditor_HourLabel;
 	public static String PatrolEditor_LoadEditorError_ErrorCreatingDayPages;
 	public static String PatrolEditor_LoadEditorError_NoMoreHandlers;
 	public static String PatrolEditor_LoadEditorError_Other;
+	public static String PatrolEditor_MinuteLabel;
 	public static String PatrolEditor_PatrolMapPageName;
 	public static String PatrolEditor_PatrolSummaryPageName;
 	public static String PatrolEditor_SavePatrol_JobName;
