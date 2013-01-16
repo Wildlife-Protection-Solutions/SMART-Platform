@@ -222,7 +222,6 @@ public class FilterDropTargetPanel implements IDropPanel {
 		width = Math.max(width, currx);
 		dropTargetContent.setSize(width, curry + height);
 		dropTarget.redraw();
-
 	}
 
 	/**

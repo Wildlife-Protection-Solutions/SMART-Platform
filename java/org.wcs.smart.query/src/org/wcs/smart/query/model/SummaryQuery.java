@@ -36,8 +36,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbySummaryEngine;
 import org.wcs.smart.query.internal.Messages;
@@ -48,7 +46,8 @@ import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
+import org.wcs.smart.query.parser.internal.summary.AttributeGroupBy;
+import org.wcs.smart.query.parser.internal.summary.CategoryGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;
 import org.wcs.smart.query.parser.internal.summary.IGroupBy;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
@@ -414,14 +413,13 @@ public class SummaryQuery extends Query {
 				if (pIt.getOption() == PatrolValueOption.NUM_NIGHTS){
 					//cannot group by patrol leader, patrol memeber, time period, or transport
 					for (IGroupBy groupBy : groupBys){
-						if (groupBy instanceof PatrolGroupBy){
-							Class<?> source = ((PatrolGroupBy)groupBy).getOption().getPatrolAttributeClass();
-							if (source.equals(PatrolLeg.class) || source.equals(PatrolLegMember.class)){
-								return MessageFormat.format(
-										Messages.SummaryQuery_GroupByError1 , new Object[]{pIt.getOption().getGuiName(), ((PatrolGroupBy)groupBy).getOption().getGuiName()});
-							}
-						}else if (groupBy instanceof DateGroupBy){
-							return MessageFormat.format(Messages.SummaryQuery_GroupByError2, new Object[]{pIt.getOption().getGuiName()});
+						if (groupBy instanceof CategoryGroupBy ){
+							return MessageFormat.format(
+									Messages.SummaryQuery_CannotGroupByCategory, new Object[]{pIt.getOption().getGuiName()});
+									
+						}else if (groupBy instanceof AttributeGroupBy){
+							return MessageFormat.format(
+									Messages.SummaryQuery_CannotGroupByAttribute, new Object[]{pIt.getOption().getGuiName()});
 						}
 					}
 				}else if (pIt.getOption() == PatrolValueOption.MAN_DAYS ||

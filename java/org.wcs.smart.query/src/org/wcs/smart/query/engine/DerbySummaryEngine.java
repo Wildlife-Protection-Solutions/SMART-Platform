@@ -872,9 +872,10 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		case NUM_PATROLS:
 			return "count(p_uuid)"; //$NON-NLS-1$
 		case NUM_DAYS:
-			return " count(pld_patrol_day) "; //$NON-NLS-1$
+			return " count(pld_patrol_day)";  //$NON-NLS-1$
 		case NUM_NIGHTS:
-			return " sum( {fn timestampdiff(SQL_TSI_DAY, p_start_date,p_end_date)} ) "; //$NON-NLS-1$
+//			return " sum( {fn timestampdiff(SQL_TSI_DAY, p_start_date,p_end_date)} ) "; //$NON-NLS-1$
+			return " count(pld_patrol_day) - count(distinct p_uuid) "; //$NON-NLS-1$
 		case DISTANCE:
 			return "sum(distance)"; //$NON-NLS-1$
 		case NUM_HOURS:
@@ -897,7 +898,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		case NUM_DAYS:
 			return "pld_patrol_day"; //$NON-NLS-1$
 		case NUM_NIGHTS:
-			return "p_start_date,p_end_date"; //$NON-NLS-1$
+			//return "p_start_date,p_end_date"; //$NON-NLS-1$
+			return "p_uuid, pld_patrol_day"; //$NON-NLS-1$
 		case DISTANCE:
 			return tablePrefix.get(Track.class) + ".distance as distance"; //$NON-NLS-1$
 		case NUM_HOURS:

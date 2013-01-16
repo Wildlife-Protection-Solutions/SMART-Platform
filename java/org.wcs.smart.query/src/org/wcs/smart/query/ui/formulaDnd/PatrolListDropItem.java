@@ -89,6 +89,7 @@ public class PatrolListDropItem extends DropItem{
 						listViewer.setInput(items.toArray(new ListItem[items.size()]));
 						if (currentSelection != null){
 							listViewer.setSelection(new StructuredSelection(currentSelection));
+							targetPanel.layout();
 						}
 					}});
 			}catch (Exception ex){
@@ -191,7 +192,7 @@ public class PatrolListDropItem extends DropItem{
 		
 		
 		listViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-		
+
 		FontData fd = (listViewer.getCombo().getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont = new Font(Display.getCurrent(), fd);
@@ -208,6 +209,7 @@ public class PatrolListDropItem extends DropItem{
 				}else{
 					currentSelection = newSelection;
 					PatrolListDropItem.this.queryChanged();
+					targetPanel.layout();
 				}
 			}
 		});
