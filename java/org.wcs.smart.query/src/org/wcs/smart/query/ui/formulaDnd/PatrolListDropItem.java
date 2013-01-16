@@ -89,8 +89,8 @@ public class PatrolListDropItem extends DropItem{
 						listViewer.setInput(items.toArray(new ListItem[items.size()]));
 						if (currentSelection != null){
 							listViewer.setSelection(new StructuredSelection(currentSelection));
-							targetPanel.layout();
 						}
+						targetPanel.layout();
 					}});
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(Messages.PatrolListDropItem_ErrorLoadingItems, ex);
