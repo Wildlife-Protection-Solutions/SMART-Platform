@@ -48,14 +48,19 @@ import org.wcs.smart.udig.SetBasemapTool;
  */
 public class MapToolComposite {
 
+	public static final String UDIG_ZOOM_EXTENT_ID = "org.wcs.smart.udig.ZoomExtents"; //$NON-NLS-1$
+	public static final String UDIG_PAN_ID = "net.refractions.udig.tools.Pan"; //$NON-NLS-1$
+	public static final String UDIG_ZOOM_ID = "net.refractions.udig.tools.Zoom"; //$NON-NLS-1$
+	public static final String UDIG_ZOOM_IN_ID = "net.refractions.udig.tool.default.ZoomIn"; //$NON-NLS-1$
+	public static final String UDIG_ZOOM_OUT_ID = "net.refractions.udig.tool.default.ZoomOut"; //$NON-NLS-1$
 	
 	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer",  //$NON-NLS-1$
 			SetBasemapTool.ID, 
-			"org.wcs.smart.udig.ZoomExtents",  //$NON-NLS-1$
-			"net.refractions.udig.tools.Pan", //$NON-NLS-1$
-			"net.refractions.udig.tools.Zoom",  //$NON-NLS-1$
-			"net.refractions.udig.tool.default.ZoomIn", //$NON-NLS-1$
-			"net.refractions.udig.tool.default.ZoomOut", //$NON-NLS-1$
+			UDIG_ZOOM_EXTENT_ID,
+			UDIG_PAN_ID,
+			UDIG_ZOOM_ID,
+			UDIG_ZOOM_IN_ID,
+			UDIG_ZOOM_OUT_ID,
 			InfoTool.ID};
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();
@@ -122,6 +127,19 @@ public class MapToolComposite {
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Returns tool with the given id if it exists
+	 * @param id
+	 */
+	public ToolItem getTool(String id){
+		for (ToolItem it : items){
+			if (  ((ToolProxy)it.getData()).getId().equals(id) ){
+				return it;
+			}
+		}
+		return null;
 	}
 	
 	private void select(ToolItem item){
