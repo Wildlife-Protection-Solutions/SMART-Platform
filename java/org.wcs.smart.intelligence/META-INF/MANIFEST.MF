@@ -12,4 +12,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.databinding;bundle-version="1.5.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.wcs.smart.intelligence.model
+Export-Package: org.wcs.smart.intelligence.map.tool,
+ org.wcs.smart.intelligence.model

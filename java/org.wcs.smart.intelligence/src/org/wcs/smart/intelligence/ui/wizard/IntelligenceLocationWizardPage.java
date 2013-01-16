@@ -25,10 +25,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.project.ui.ApplicationGIS;
+import net.refractions.udig.project.ui.tool.Tool;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.map.tool.SelectionTool;
 import org.wcs.smart.intelligence.model.ISmartPoint;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
@@ -64,6 +68,11 @@ public class IntelligenceLocationWizardPage extends IntelligenceWizardPage {
         };
         locationSelect.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
+		Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+		if (selectionTool != null) {
+			((SelectionTool)selectionTool).addListener(locationSelect);
+		}
+        
         setControl(locationSelect);
         setMessage(Messages.IntelligenceLocationWizardPage_Message);
  	}
@@ -95,4 +104,12 @@ public class IntelligenceLocationWizardPage extends IntelligenceWizardPage {
 		return true;
 	}
 
+	@Override
+	public void dispose() {
+		Tool tool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+		if (tool != null) {
+			((SelectionTool)tool).removeListener(locationSelect);
+		}
+		super.dispose();
+	}
 }
