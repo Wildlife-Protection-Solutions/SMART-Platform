@@ -758,6 +758,18 @@
             onToolbar="false"
             tooltip="Sets the map basemaps">
       </actionTool>
+      <category
+            id="org.wcs.smart.location.maptools">
+      </category>
+      <modalTool
+            categoryId="org.wcs.smart.location.maptools"
+            class="org.wcs.smart.ui.map.location.tool.SelectionTool"
+            icon="images/icons/etool16/cursor.png"
+            id="org.wcs.smart.ui.map.location.tool.SelectionTool"
+            name="%tool.selectPoint.name"
+            onToolbar="true"
+            tooltip="%tool.selectPoint.tooltip">
+      </modalTool>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">

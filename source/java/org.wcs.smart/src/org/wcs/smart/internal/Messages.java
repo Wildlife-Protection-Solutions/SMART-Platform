@@ -540,6 +540,13 @@ public class Messages extends NLS {
 	public static String LoadDefaultLayersJob_Error_AddingLayers;
 	public static String LoadDefaultLayersJob_Error_ParsingCrs;
 	public static String LoadDefaultLayersJob_JobName;
+	public static String LocationSelectComposite_Points_Label;
+	public static String LocationSelectComposite_X_Invalid_Error;
+	public static String LocationSelectComposite_X_Label;
+	public static String LocationSelectComposite_Y_Invalid_Error;
+	public static String LocationSelectComposite_Y_Label;
+	public static String MapComposite_Map_Name;
+	public static String MapComposite_MapResizeJob_Title;
 	public static String MapSettings_Error_CreateMapLayer;
 	public static String MapSettings_Error_SaveBasemap;
 	public static String SmartMapEditorPart_Error_SettingMapProjection;

@@ -19,21 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.model;
+package org.wcs.smart.ui.map.location.tool;
 
 /**
- * Represents a point on a map with x and y coordinates.
+ * Listener used by {@link SelectionTool} to fire map point selection event.
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public interface ISmartPoint {
+public interface IMapPointSelectionListener {
 
-	public double getX();
+	public void pointSelected(double x, double y);
 	
-	public void setX(double x);
-
-	public double getY();
-	
-	public void setY(double y);
 }

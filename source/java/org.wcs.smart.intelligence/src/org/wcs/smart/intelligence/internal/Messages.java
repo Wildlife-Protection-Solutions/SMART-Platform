@@ -92,20 +92,6 @@ public class Messages extends NLS {
 
 	public static String LoadPatrolIdJob_Name;
 
-	public static String LocationSelectComposite_Points_Label;
-
-	public static String LocationSelectComposite_X_Invalid_Error;
-
-	public static String LocationSelectComposite_X_Label;
-
-	public static String LocationSelectComposite_Y_Invalid_Error;
-
-	public static String LocationSelectComposite_Y_Label;
-
-	public static String MapComposite_Map_Name;
-
-	public static String MapComposite_MapResizeJob_Title;
-
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
     static {
         // initialize resource bundle
