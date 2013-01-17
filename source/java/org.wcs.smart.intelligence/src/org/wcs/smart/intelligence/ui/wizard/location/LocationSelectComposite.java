@@ -29,7 +29,6 @@ import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -45,7 +44,6 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.map.tool.IMapPointSelectionListener;
 import org.wcs.smart.intelligence.model.ISmartPoint;
-import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -171,16 +169,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 	}
 	
 	protected IBaseLabelProvider createLabelProvider() {
-		return new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof ISmartPoint) {
-					ISmartPoint p = (ISmartPoint) element;
-					return p.getX() + SmartMapEditorPart.COORDINATE_XYSEPARATOR + p.getY();
-				}
-				return super.getText(element);
-			}
-		};
+		return new SmartPointLabelProvider();
 	}
 
 	protected void handleAddPoint(double x, double y) {
