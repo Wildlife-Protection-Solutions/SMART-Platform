@@ -32,11 +32,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.intelligence.map.tool.SelectionTool;
-import org.wcs.smart.intelligence.model.ISmartPoint;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.intelligence.ui.wizard.location.LocationSelectComposite;
+import org.wcs.smart.ui.map.location.ISmartPoint;
+import org.wcs.smart.ui.map.location.LocationSelectComposite;
+import org.wcs.smart.ui.map.location.tool.SelectionTool;
 
 /**
  * Intelligence Wizard page for collecting the intelligence location(s) information

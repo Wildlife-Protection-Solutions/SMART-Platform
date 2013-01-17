@@ -46,6 +46,8 @@ Export-Package: au.com.bytecode.opencsv,
  org.wcs.smart.udig.catalog.smart.ui,
  org.wcs.smart.ui,
  org.wcs.smart.ui.map,
+ org.wcs.smart.ui.map.location,
+ org.wcs.smart.ui.map.location.tool,
  org.wcs.smart.ui.properties,
  org.wcs.smart.util
 Eclipse-BuddyPolicy: global
