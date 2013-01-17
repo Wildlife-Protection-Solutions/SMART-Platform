@@ -80,14 +80,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		((GridData)tblAttachments.getTable().getLayoutData()).heightHint = 100;
 		((GridData)tblAttachments.getTable().getLayoutData()).widthHint = 200;
 		tblAttachments.setContentProvider(new ObservableListContentProvider());
-		tblAttachments.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof ISmartAttachment){
-					return ((ISmartAttachment) element).getFilename();
-				}
-				return super.getText(element);
-			}
-		});
+		tblAttachments.setLabelProvider(new SmartAttachmentLabelProvider());
 		tblAttachments.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
