@@ -22,12 +22,8 @@
 package org.wcs.smart.intelligence.map.tool;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Listener used by {@link SelectionTool} to fire map point selection event.
+ * 
  * @author elitvin
  * @since 1.0.0
  */
