@@ -11,6 +11,7 @@
    </aboutInfo>
 
    <configIni use="default">
+      <win32>configuration/config.ini</win32>
    </configIni>
 
    <launcherArgs>
@@ -55,5 +56,12 @@ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRES
       <feature id="org.wcs.smart.language_feature" version="1.0.0.qualifier"/>
    </features>
 
+   <configurations>
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.transforms.xslt" autoStart="true" startLevel="1" />
+      <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="3" />
+      <plugin id="org.wcs.smart.udig.customization" autoStart="true" startLevel="1" />
+   </configurations>
 
 </product>

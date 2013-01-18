@@ -30,12 +30,6 @@
          unpack="false"/>
 
    <plugin
-         id="net.refractions.udig"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="net.refractions.udig.catalog"
          download-size="0"
          install-size="0"
@@ -626,13 +620,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.w3c.dom.events"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.w3c.dom.smil"
          download-size="0"
          install-size="0"
@@ -641,13 +628,6 @@
 
    <plugin
          id="org.w3c.dom.svg"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="eu.udig.tools"
          download-size="0"
          install-size="0"
          version="0.0.0"
