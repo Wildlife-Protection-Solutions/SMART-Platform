@@ -24,6 +24,9 @@ package org.wcs.smart.ui.map.location;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.project.ui.ApplicationGIS;
+import net.refractions.udig.project.ui.tool.Tool;
+
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -32,6 +35,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -44,6 +49,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.location.tool.IMapPointSelectionListener;
+import org.wcs.smart.ui.map.location.tool.SelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -76,6 +82,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 
 	private void createControls(){
 		setLayout(new GridLayout(2, false));
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
 		
 		//========points part========
 		Composite pointsComposite = new Composite(this, SWT.NONE);
@@ -150,6 +157,23 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
         
 		//========map part========
         new MapComposite(this, SWT.NONE);
+        
+        //========register required listeners========
+		Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+		if (selectionTool != null) {
+			((SelectionTool)selectionTool).addListener(this);
+		}
+		this.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				//we need to properly remove listener added to selection tool
+				//when this component was created
+				Tool tool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+				if (tool != null) {
+					((SelectionTool)tool).removeListener(LocationSelectComposite.this);
+				}
+			}
+		});
 	}	
 
 	@Override
