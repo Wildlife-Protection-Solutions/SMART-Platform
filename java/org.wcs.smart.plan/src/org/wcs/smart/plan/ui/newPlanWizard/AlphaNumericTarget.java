@@ -28,12 +28,14 @@ import java.util.ArrayList;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.plan.model.PlanTarget;
 
 
 public class AlphaNumericTarget extends Composite {
@@ -119,6 +121,40 @@ public class AlphaNumericTarget extends Composite {
 		targetValue.setLayoutData(data);
 		
 		return center;
+	}
+	
+	public void setTargetValue(double targetValue) {
+		this.targetValue.setText(Double.toString(targetValue));
+	}
+
+
+	public void setTargetName(String targetName) {
+		this.targetName.setText(targetName);
+	}
+
+
+	public void setTargetType(PlanTarget pt) {
+		this.targetType.setSelection(new StructuredSelection(pt.getType()));
+	}
+
+
+	public void setTargetOp(PlanTarget pt) {
+		this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
+	}
+
+
+	public double getTargetValue(){
+		return Double.valueOf(targetValue.getText());
+	}
+	
+	public String getTargetName(){
+		return targetName.getText();
+	}
+	public String getTargetType(){
+		return targetType.getSelection().toString();
+	}
+	public String getTargetOp(){
+		return targetOp.getSelection().toString();
 	}
 }
 

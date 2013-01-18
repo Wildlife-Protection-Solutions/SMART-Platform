@@ -47,5 +47,15 @@
             name="Create New Plan">
       </command>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.plan.model.Plan">
+      </class>
+      <class
+            ca_property=".plan.conservationArea"
+            class="org.wcs.smart.plan.model.PlanTarget">
+      </class>
+   </extension>
 
 </plugin>

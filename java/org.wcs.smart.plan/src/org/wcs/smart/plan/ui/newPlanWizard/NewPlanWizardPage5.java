@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -110,6 +111,8 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage implements SelectionLi
 
 	@Override
 	public boolean updateModel(Plan p) {
+		p.setEndDate(SmartUtils.getDate(dtEndDate));
+		p.setStartDate(SmartUtils.getDate(dtStartDate));
 		return true;
 	}
 	

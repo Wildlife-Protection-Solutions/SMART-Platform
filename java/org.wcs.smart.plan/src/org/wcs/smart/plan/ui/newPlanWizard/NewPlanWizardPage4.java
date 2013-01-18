@@ -119,6 +119,9 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
+		p.setId(planId.getText());
+		p.setName(planName.getText());
+		p.setDescription(planDesc.getText());
 		return true;
 	}
 	

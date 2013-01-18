@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Plan
 Bundle-SymbolicName: org.wcs.smart.plan;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: org.wcs.smart.plan.Activator
+Bundle-Activator: org.wcs.smart.plan.SmartPlanPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart,
@@ -12,3 +12,5 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.core.databinding.observable.list,
  org.eclipse.jface.databinding.viewers
+Export-Package: org.wcs.smart.plan,
+ org.wcs.smart.plan.model
