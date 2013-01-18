@@ -19,8 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
+package org.wcs.smart.intelligence.ui.panel;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.eclipse.swt.SWT;
@@ -37,12 +38,12 @@ import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Intelligence Wizard page for collecting the intelligence relevant date(s) information
+ * Composite for collecting the intelligence relevant date(s) information
  *  
  * @author elitvin
- *
+ * @since 1.0.0
  */
-public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
+public class IntelligenceDatesComposite extends IntelligenceComposite {
 
     private Label dtFromLabel;
     private Label dtToLabel;
@@ -51,23 +52,22 @@ public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
     private DateTime dtToDate;
     
     private Button multipleDays;
-    /**
-     * @param pageName
-     */
-    public IntelligenceDatesWizardPage() {
-        super(Messages.IntelligenceDatesWizardPage_PageTitle);
-    }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-     */
-    @Override
-    public void createControl(Composite parent) {
-        Composite center = new Composite(parent, SWT.NONE);
-        center.setLayout(new GridLayout(1, false));
-        center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	/**
+	 * @param parent
+	 * @param style
+	 */
+	public IntelligenceDatesComposite(Composite parent, int style) {
+		super(parent, style);
+		setMessage(Messages.IntelligenceDatesWizardPage_Message);
+		createControls();
+	}
+
+	private void createControls() {
+        this.setLayout(new GridLayout(1, false));
+        this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
-        multipleDays = new Button(center, SWT.CHECK);
+        multipleDays = new Button(this, SWT.CHECK);
         multipleDays.setText(Messages.IntelligenceDatesWizardPage_MutliDaysCheckbox_Label);
         multipleDays.addSelectionListener(new SelectionAdapter() {
         	@Override
@@ -76,7 +76,7 @@ public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
         	}
 		});
         
-        Composite dateComposite = new Composite(center, SWT.NONE);
+        Composite dateComposite = new Composite(this, SWT.NONE);
         dateComposite.setLayout(new GridLayout(2, false));
         dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
@@ -95,8 +95,6 @@ public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
         dtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtToDate.getLayoutData()).horizontalIndent = 10;
         
-        setControl(center);
-        setMessage(Messages.IntelligenceDatesWizardPage_Message);
         applyCurrentState();
     }
 
@@ -111,17 +109,28 @@ public class IntelligenceDatesWizardPage extends IntelligenceWizardPage {
 		dtToDate.setVisible(isMultiple);
 		//line below is required to avoid label truncation
 		dtFromLabel.getParent().layout(true, true);
-	}
+    }	
 
-	/* (non-Javadoc)
-     * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#updateModel(org.wcs.smart.intelligence.model.Intelligence)
-     */
-    @Override
-    protected boolean updateModel(Intelligence intelligence) {
+	@Override
+	public boolean updateModel(Intelligence intelligence) {
         intelligence.setFromDate(SmartUtils.getDate(dtFromDate));
         Date toDate = multipleDays.getSelection() ? SmartUtils.getDate(dtToDate) : null;
         intelligence.setToDate(toDate);
         return true;
-    }
+	}
 
+	@Override
+	public void initFromModel(Intelligence intelligence) {
+	    if (intelligence.getFromDate() != null) {
+	    	Calendar cal = SmartUtils.convertDate(intelligence.getFromDate());
+	    	dtFromDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    }
+	    if (intelligence.getToDate() != null) {
+	    	Calendar cal = SmartUtils.convertDate(intelligence.getToDate());
+	    	dtToDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    	multipleDays.setSelection(true);
+	    }
+	    applyCurrentState();
+	}
+    
 }

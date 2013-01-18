@@ -19,13 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
+package org.wcs.smart.intelligence.ui.panel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -34,43 +36,43 @@ import org.wcs.smart.ui.map.location.ISmartPoint;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
 /**
- * Intelligence Wizard page for collecting the intelligence location(s) information
+ * Composite for collecting the intelligence location(s) information
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceLocationWizardPage extends IntelligenceWizardPage {
-	
+public class IntelligenceLocationComposite extends IntelligenceComposite {
+
 	private LocationSelectComposite<IntelligencePoint> locationSelect;
 
 	/**
-	 * @param pageName
+	 * @param parent
+	 * @param style
 	 */
-	public IntelligenceLocationWizardPage() {
-		super(Messages.IntelligenceLocationWizardPage_PageTitle);
+	public IntelligenceLocationComposite(Composite parent, int style) {
+		super(parent, style);
+		setMessage(Messages.IntelligenceLocationWizardPage_Message);
+		createControls();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
-	@Override
-	public void createControl(Composite parent) {
-        locationSelect = new LocationSelectComposite<IntelligencePoint>(parent, SWT.NONE) {
+	private void createControls() {
+        this.setLayout(new GridLayout(1, false));
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		this.setLayoutData(layoutData);
+        
+        locationSelect = new LocationSelectComposite<IntelligencePoint>(this, SWT.NONE) {
 			@Override
 			protected ISmartPoint createNewPoint() {
 				return new IntelligencePoint();
 			}
         };
-        
-        setControl(locationSelect);
-        setMessage(Messages.IntelligenceLocationWizardPage_Message);
- 	}
-
+	}
+	
 	/* (non-Javadoc)
-	 * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#updateModel(org.wcs.smart.intelligence.model.Intelligence)
+	 * @see org.wcs.smart.intelligence.ui.panel.IIntelligenceModifier#updateModel(org.wcs.smart.intelligence.model.Intelligence)
 	 */
 	@Override
-	protected boolean updateModel(Intelligence intelligence) {
+	public boolean updateModel(Intelligence intelligence) {
 		//Update the points
 		List<IntelligencePoint> points = locationSelect.getPoints();
 		if (intelligence.getPoints() == null) {
@@ -84,13 +86,19 @@ public class IntelligenceLocationWizardPage extends IntelligenceWizardPage {
 			}
 		}
 		
-		//add reminaing; these should all be new points
+		//add remaining; these should all be new points
 		for (Iterator<IntelligencePoint> iterator = points.iterator(); iterator.hasNext();) {
 			IntelligencePoint pt = iterator.next();
 			pt.setIntelligence(intelligence);
 			intelligence.getPoints().add(pt);
 		}
 		return true;
+	}
+
+	@Override
+	public void initFromModel(Intelligence intelligence) {
+		locationSelect.getPoints().clear();
+		locationSelect.getPoints().addAll(intelligence.getPoints());
 	}
 
 }

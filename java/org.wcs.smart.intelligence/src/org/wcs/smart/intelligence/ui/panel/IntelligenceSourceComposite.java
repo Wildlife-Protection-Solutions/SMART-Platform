@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
+package org.wcs.smart.intelligence.ui.panel;
 
 import java.util.List;
 
@@ -49,48 +49,45 @@ import org.wcs.smart.intelligence.model.IntelligenceSourceType;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * Intelligence Wizard page for collecting the intelligence source information
+ * Composite for collecting the intelligence source information
  * 
  * @author elitvin
- *
+ * @since 1.0.0
  */
-public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
+public class IntelligenceSourceComposite extends IntelligenceComposite {
 
 	private static final String ERROR_SOURCE_REQUIRED = Messages.IntelligenceSourceWizardPage_Error_SourceRequired;
 	private static final String ERROR_PATROL_ID_REQUIRED = Messages.IntelligenceSourceWizardPage_Error_PatrolIdRequired;
 	
-    private ComboViewer sourceType = null;
+    private ComboViewer sourceType;
     
-    private Label patrolLabel = null;
-    private ComboViewer patrolId = null;
+    private Label patrolLabel;
+    private ComboViewer patrolId;
     
 	/*
 	 * job to load all patrol ids
 	 */
-	private Job loadPatrolIdJob = new LoadPatrolIdJob();
-    
-    /**
-     * @param pageName
-     */
-    public IntelligenceSourceWizardPage() {
-        super(Messages.IntelligenceSourceWizardPage_PageTitle);
-        setPageComplete(false);
-    }
+	private LoadPatrolIdJob loadPatrolIdJob = new LoadPatrolIdJob();
+	
+	/**
+	 * @param parent
+	 * @param style
+	 */
+	public IntelligenceSourceComposite(Composite parent, int style) {
+		super(parent, style);
+		setMessage(Messages.IntelligenceSourceWizardPage_Message);
+		createControls();
+	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-     */
-    @Override
-    public void createControl(Composite parent) {
-        Composite center = new Composite(parent, SWT.NONE);
-        center.setLayout(new GridLayout(2, false));
-        center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+	private void createControls() {
+        this.setLayout(new GridLayout(2, false));
+        this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
-        Label sourceLabel = new Label(center, SWT.NONE);
+        Label sourceLabel = new Label(this, SWT.NONE);
         sourceLabel.setText(Messages.IntelligenceSourceWizardPage_IntelligenceSource_Label);
         sourceLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        sourceType = new ComboViewer(center, SWT.READ_ONLY);
+        sourceType = new ComboViewer(this, SWT.READ_ONLY);
         sourceType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         sourceType.setContentProvider(ArrayContentProvider.getInstance());
         sourceType.setLabelProvider(new IntelligenceSourceLabelProvider());
@@ -103,38 +100,31 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
 				boolean isPatrolSelected = IntelligenceSourceType.PATROL.equals(getSelectedSourceType());
 				patrolLabel.setVisible(isPatrolSelected);
 				patrolId.getControl().setVisible(isPatrolSelected);
-				setPageComplete(isPageValid());
+				fireDataValidStateListeners();
 			}
 		});
         
-        patrolLabel = new Label(center, SWT.NONE);
+        patrolLabel = new Label(this, SWT.NONE);
         patrolLabel.setText(Messages.IntelligenceSourceWizardPage_PatrolId_Label);
         patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         //NOTE: data for patrolId is filled with loadPatrolIdJob
-        patrolId = new ComboViewer(center, SWT.READ_ONLY);
+        patrolId = new ComboViewer(this, SWT.READ_ONLY);
         patrolId.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         patrolId.setContentProvider(ArrayContentProvider.getInstance());
         patrolId.setLabelProvider(new PatrolIDLabelProvider());
         patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				setPageComplete(isPageValid());
+				fireDataValidStateListeners();
 			}
 		});
-        
-        setControl(center);
-        setMessage(Messages.IntelligenceSourceWizardPage_Message);
-        
+
         loadPatrolIdJob.schedule();
+	}
 
-    }
-
-    /* (non-Javadoc)
-     * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#updateModel(org.wcs.smart.intelligence.model.Intelligence)
-     */
     @Override
-    protected boolean updateModel(Intelligence intelligence) {
+    public boolean updateModel(Intelligence intelligence) {
     	IntelligenceSourceType source = getSelectedSourceType();
     	if (source == null) {
     		IntelligencePlugIn.displayLog(ERROR_SOURCE_REQUIRED, null);
@@ -154,8 +144,20 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
     	return true;
     }
 
+	@Override
+	public void initFromModel(Intelligence intelligence) {
+	    if (intelligence.getSource() != null) {
+	    	sourceType.setSelection(new StructuredSelection(intelligence.getSource()));
+	    }
+	    if (intelligence.getPatrol() != null) {
+	    	//in case data is not loaded yet we will make it as default selection after data is loaded
+	    	loadPatrolIdJob.setDefaultPatrolId(intelligence.getPatrol());
+	    	patrolId.setSelection(new StructuredSelection(intelligence.getPatrol()));
+	    }
+	}
+    
     @Override
-    public boolean isPageValid() {
+    public boolean isDataValid() {
     	IntelligenceSourceType source = getSelectedSourceType();
 		if (source == null) {
 			return false;
@@ -181,15 +183,17 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
 		}
 		return null;
     }
-    
-    /**
+	
+   /**
      * Job is used to fill some list viewer with data
      * 
      * @author elitvin
      *
      */
     private class LoadPatrolIdJob extends Job {
-        
+ 
+        private Patrol defaultPatrolId;
+    	
         public LoadPatrolIdJob() {
             super(Messages.LoadPatrolIdJob_Name);
         }
@@ -206,12 +210,17 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
                     if (patrolId.getControl().isDisposed()){
                         return ;
                     }
-                    for (Patrol id : data){
-                    	patrolId.add(id);
-                    }               
+                    patrolId.add(data.toArray());
+                    if (defaultPatrolId != null) {
+                    	patrolId.setSelection(new StructuredSelection(defaultPatrolId));
+                    }
                 }});
             return Status.OK_STATUS;
         }
+        
+        public void setDefaultPatrolId(Patrol defaultPatrolId) {
+			this.defaultPatrolId = defaultPatrolId;
+		}
     }
 
     /**
@@ -245,4 +254,5 @@ public class IntelligenceSourceWizardPage extends IntelligenceWizardPage {
     		return super.getText(element);
     	}
     }    
+	
 }

@@ -19,33 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
-
-import org.eclipse.jface.wizard.WizardPage;
-import org.wcs.smart.intelligence.model.Intelligence;
+package org.wcs.smart.intelligence.ui.panel;
 
 /**
- * An abstract class for intelligence wizard pages.
+ * Listener that is involved when data state is changed.
  * 
  * @author elitvin
- *
+ * @since 1.0.0
  */
-public abstract class IntelligenceWizardPage extends WizardPage {
-
-    /**
-     * @param pageName
-     */
-    public IntelligenceWizardPage(String pageName) {
-        super(pageName);
-   }
-
-    /**
-     * Updates the current intelligence with the new values inputed
-     * in the wizard page.
-     * 
-     * @param intelligence intelligence to update
-     * @return <code>true</code> of model updated; <code>false</code> if error 
-     */
-    abstract protected boolean updateModel(Intelligence intelligence);
+public interface IDataValidStateListener {
+	
+	public void stateChanged(boolean isDataValid);
 
 }
