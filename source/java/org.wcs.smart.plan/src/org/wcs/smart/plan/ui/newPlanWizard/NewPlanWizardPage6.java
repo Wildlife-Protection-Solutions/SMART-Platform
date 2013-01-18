@@ -21,23 +21,38 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import org.codehaus.groovy.tools.shell.Shell;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.ui.newPlanWizard.viewer.TargetListViewer;
 
 
 
@@ -48,14 +63,15 @@ import org.wcs.smart.plan.model.Plan;
  */
 public class NewPlanWizardPage6 extends NewPlanWizardPage {
 
-	private TableViewer targetTable;
+	private TargetListViewer targetTable;
 	private HashMap<ttColumn, TableViewerColumn> targetTableColumns;
 	private Plan plan;
+	private TargetPropertyPage dia;
 	
+	private TargetListViewer rows;
 		
 	protected NewPlanWizardPage6(Plan plan) {
 		super("Plan Targets");
-		
 		this.plan = plan;		
 	}
 	protected enum ttColumn {
@@ -84,57 +100,58 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		
 		
-		targetTable = new TableViewer(center, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-		setupTable();
+
 		
-		WritableList inputList = new WritableList();
-		targetTable.setInput(inputList);
+		Composite table = new Composite(center, SWT.NONE);
+		table.setLayout(new TableColumnLayout());
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		targetTable  = new TargetListViewer(table, plan);
 		
+   
 		Button btnNew = new Button(center, SWT.NONE);
 		btnNew.setText("Add Target...");
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, null); //the plan
-				dia.open();
+				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, null); 
+			    if (dia.open() == Window.CANCEL){
+			    	//do nothing
+				}else{
+					targetTable.updateModel(plan);
+				}
 			}
 			
 		});
 		
+		Button btnEdit = new Button(center, SWT.NONE);
+		btnEdit.setText("Edit Selected Target");
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection sec = (IStructuredSelection)targetTable.getSelection();
+		        if (sec.isEmpty()){
+		            return;
+		        }
+		        
+		        PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
+				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, selected); 
+			    if (dia.open() == Window.CANCEL){
+			    	//do nothing
+				}else{
+					targetTable.updateModel(plan);
+				}
+			}
+			
+		});
+
+		
 		setControl(center);
 		setMessage("Add all of the plan targets by selecting the \"Add new target\" button. Click the edit button beside an existing target to make change to it:");
-	
+		
+			
 	}
 	
-	private void setupTable() {
-		targetTableColumns = new HashMap<ttColumn, TableViewerColumn>();
-
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true,2,1);
-		gd.heightHint = targetTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		targetTable.getTable().setLayoutData(gd);
-		targetTable.getTable().setLinesVisible(true);
-		targetTable.getTable().setHeaderVisible(true);
-		targetTable.setContentProvider(new ObservableListContentProvider());
-
-		
-		for (int i = 0; i < ttColumn.values().length; i++) {
-			final ttColumn columntype = ttColumn.values()[i];
-		
-
-		
-			final TableViewerColumn column = new TableViewerColumn(targetTable,SWT.NONE);
-			column.setLabelProvider(new targetTableLabelProvider(columntype));
-			column.getColumn().setText(columntype.guiName);
-			column.getColumn().setResizable(true);
-			column.getColumn().setMoveable(false);
-
-
-		
-			targetTableColumns.put(columntype, column);
-		
-		}
-	
-	}
 
 
 	@Override
@@ -147,18 +164,8 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 
 	}
 	
-	class targetTableLabelProvider extends ColumnLabelProvider {
-
-		private ttColumn column = null;
-
-		public targetTableLabelProvider(ttColumn column) {
-			this.column = column;
-		}
-	}
-
 	public void refreshTargetTable(){
-		targetTable.refresh();
+		//targetTable.refresh();
 	}
-	
 	
 }

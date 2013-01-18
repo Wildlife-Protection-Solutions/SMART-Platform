@@ -24,10 +24,15 @@ package org.wcs.smart.plan.model;
 
 import java.util.Arrays;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -38,16 +43,42 @@ import org.hibernate.annotations.GenericGenerator;
  * @since 1.0.0
  */
 @Entity
-@Table(name="smart.target")
-public class Target{
+@Table(name="smart.plan_target")
+public class PlanTarget{
 
 	private byte[] uuid;
+	private byte[] plan_uuid;
+	
+
+	public String getDescription() {
+		return description;
+	}
+	
+	@Transient 
+	public String getSummary() {
+		return type + " " + op + " " + value;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+
+
 	private Plan plan;
 	private String name;
 	private String description;
+	private double value;
+	private String op;
+	private String type;
+	private tarCategory cat;
+	
+	public enum tarCategory {
+		ALPHANUMERIC, SPATIAL, ADMIN; 
+	}
 	
 	
-	public Target(){
+	public PlanTarget(){
 		
 	}
 
@@ -62,10 +93,12 @@ public class Target{
 		this.uuid = uuid;
 	}
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="plan_uuid", referencedColumnName="uuid")
 	public Plan getPlan() {
 		return plan;
 	}
-
+	
 	public void setPlan(Plan plan) {
 		this.plan = plan;
 	}
@@ -82,8 +115,8 @@ public class Target{
 	
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof Target){
-			Target s = (Target)other;
+		if (other != null && other instanceof PlanTarget){
+			PlanTarget s = (PlanTarget)other;
 			if (s.getUuid() == null && this.getUuid() == null){
 				return s.hashCode() == hashCode();
 			}else if (s.getUuid() != null && this.getUuid() != null){
@@ -93,6 +126,7 @@ public class Target{
 		return false;
 	}
 
+	@Column(name = "name")
 	public String getName() {
 		return name;
 	}
@@ -100,4 +134,38 @@ public class Target{
 		this.name = name;
 	}
 	
+	@Column(name = "value")
+	public double getValue() {
+		return value;
+	}
+	public void setValue(double value) {
+		this.value = value;
+		
+	}
+		
+	@Column(name = "op")
+	public String getOp() {
+		return this.op;
+	}
+	public void setOp(String op) {
+		this.op = op;
+	}	
+	
+	@Column(name = "type")
+	public String getType() {
+		return this.type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	
+	@Column(name = "category")
+	public tarCategory getCat() {
+		return cat;
+	}
+
+	public void setCat(tarCategory cat) {
+		this.cat = cat;
+	}
 }

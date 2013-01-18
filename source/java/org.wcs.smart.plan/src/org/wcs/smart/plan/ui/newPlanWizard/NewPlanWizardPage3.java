@@ -22,10 +22,9 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -34,10 +33,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.ca.Station;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.ui.StationComposite;
+import org.wcs.smart.patrol.internal.ui.TeamComposite;
 import org.wcs.smart.plan.model.Plan;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
 
 
 
@@ -50,9 +51,10 @@ import org.eclipse.swt.graphics.Point;
 public class NewPlanWizardPage3 extends NewPlanWizardPage {
 
 	
-	
-	private ComboViewer team = null;
-	private ComboViewer station= null;
+	private TeamComposite teamList;
+	private StationComposite stationList;
+	//private ComboViewer team = null;
+	//private ComboViewer station= null;
 	private Text unavailable;
 
 	/**
@@ -70,42 +72,14 @@ public class NewPlanWizardPage3 extends NewPlanWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(2, false));
+		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+				
+		teamList = new TeamComposite();
+		teamList.createComponent(center, SWT.NONE);
 		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Team (optional):");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		team = new ComboViewer(center, SWT.READ_ONLY);
-		team.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		team.setContentProvider(ArrayContentProvider.getInstance());
-		team.setLabelProvider(new LabelProvider());
-		
-		ArrayList<String> options = new ArrayList<String>();
-		options.add("Team 1");
-		options.add("Team 2");
-		options.add("Team 3");
-		options.add("Team 4");
-		
-		team.setInput(options);
-		
-		Label lbl2 = new Label(center, SWT.NONE);
-		lbl2.setText("Station (optional):");
-		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		ArrayList<String> soptions = new ArrayList<String>();
-		soptions.add("Station X");
-		soptions.add("Station Y");
-		soptions.add("Station Z");
-		
-		station = new ComboViewer(center, SWT.READ_ONLY);
-		station.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		station.setContentProvider(ArrayContentProvider.getInstance());
-		station.setLabelProvider(new LabelProvider());
-		
-		station.setInput(soptions);
-
+		stationList = new StationComposite();
+		stationList.createComponent(center,  SWT.NONE);
 		
 		setControl(center);
 		setMessage("Select the associated Team and/or Station for this plan, if applicable:");
@@ -115,11 +89,30 @@ public class NewPlanWizardPage3 extends NewPlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
+		p.setStation(stationList.getSelectedStation());
+		p.setTeam(teamList.getSelectedTeam());
+		
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p, Session session) {
+		
+		//Set team values, 
+		List<? extends Object> teams = null;
+		try{
+			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
 
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Could not load teams.", ex);
+			session.close();
+		}
+		
+		teamList.setInput(teams, p.getTeam());
+		
+		List<? extends Object> stations = PatrolHibernateManager.getActiveStations(p.getConservationArea(), session);
+		stationList.setInput(stations, p.getStation());		
+		
+		
 	}
 }

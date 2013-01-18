@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -34,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.model.Plan;
 import org.eclipse.swt.graphics.Font;
@@ -52,8 +54,16 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 	
 	
 	private ComboViewer planType = null;
-	private Text unavilable;
-
+	private Text unavailableEmployees;
+	private Integer expectedEmployees = 0;
+	private Label activeEmployees;
+	
+	static String TYPE_CA = "Conservation Plan";
+	static String TYPE_S = "Station Plan";
+	static String TYPE_T = "Team Plan";
+	static String TYPE_P = "Patrol Plan";
+	
+	
 	/**
 	 * 
 	 */
@@ -82,10 +92,10 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 		planType.setLabelProvider(new LabelProvider());
 		
 		ArrayList<String> options = new ArrayList<String>();
-		options.add("Conservation Plan");
-		options.add("Station Plan");
-		options.add("Team Plan");
-		options.add("Patrol Plan");
+		options.add(TYPE_CA);
+		options.add(TYPE_S);
+		options.add(TYPE_T);
+		options.add(TYPE_P);
 		planType.setInput(options);
 		planType.setSelection(new StructuredSelection("Patrol Plan"));
 		
@@ -93,28 +103,27 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 		lbl2.setText("Active Rangers:");
 		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		Label lbl3 = new Label(center, SWT.NONE);
-		//TODO: get the number of current active employees, maybe only non-smart user ones? 
-		lbl3.setText("15");
+		activeEmployees = new Label(center, SWT.NONE);
+
+		activeEmployees.setText("unknown");
 		GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
 		data.widthHint = 100;
-		lbl3.setLayoutData(data);
+		activeEmployees.setLayoutData(data);
 
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText("Unavailable Rangers:");
 		lbl4.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-		unavilable = new Text(center, SWT.BORDER | SWT.LEFT);
-		unavilable.setTextLimit(5);
-		unavilable.setText("0");
+		unavailableEmployees = new Text(center, SWT.BORDER | SWT.LEFT);
+		unavailableEmployees.setTextLimit(5);
+		unavailableEmployees.setText("0");
 		
 		Label lbl5 = new Label(center, SWT.NONE);
 		lbl5.setText("(vacation, sickness, etc)");
 		lbl5.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		unavilable.setLayoutData(data);
-		
+		unavailableEmployees.setLayoutData(data);
 		
 		setControl(center);
 		setMessage("Select the Type of Plan that you wish to create:");
@@ -124,11 +133,19 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
+		String type = planType.getSelection().toString().replace("[", "");
+		type = type.replace("]", "");
+		p.setType(type);
+		Integer act = Integer.valueOf(activeEmployees.getText());
+		Integer un = Integer.valueOf(this.unavailableEmployees.getText());
+		p.setUnavailableEmployees(un);
+		p.setActiveEmployees(act);
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p, Session session) {
-
+		Integer act = HibernateManager.getActiveEmployees(p.getConservationArea(), session).size();
+		activeEmployees.setText(act.toString());
 	}
 }

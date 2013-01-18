@@ -24,15 +24,12 @@ package org.wcs.smart.plan.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -42,9 +39,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.model.Team;
@@ -69,9 +64,13 @@ public class Plan {
 	private String description;
 	private Date startDate;
 	private Date endDate;
-
-	private List<Target> targets;
+	private String type;
 	
+	private List<PlanTarget> targets;
+
+	private Integer unavailableEmployees;
+	private Integer activeEmployees;
+
 	
 	public Plan(){
 		
@@ -183,7 +182,61 @@ public class Plan {
 	public String getPlanDatastorePath(){
 		return "Plan" + File.separator + SmartUtils.getDirectoryPath(uuid);
 	}
-
-
 	
+	@Column(name = "type")
+	public String getType() {
+		return type;
+	}
+	
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	@Column(name = "description")
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	@Column(name = "name")
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setUnavailableEmployees(Integer unavailableEmployees){
+		this.unavailableEmployees = unavailableEmployees; 
+	}
+	@Column(name = "unavailable_employees")
+	public Integer getUnavailableEmployees(){
+		return this.unavailableEmployees; 
+	}
+	
+	public void setActiveEmployees(Integer activeEmployees){
+		this.activeEmployees = activeEmployees;
+	}
+	@Column(name = "active_employees")
+	public Integer getActiveEmployees(){
+		return activeEmployees;
+	}
+
+	@Transient
+	public void addTarget(PlanTarget t){
+		if(targets == null){
+			targets = new ArrayList<PlanTarget>();
+		}
+		targets.add(t);
+	}
+
+	@OneToMany(fetch = FetchType.EAGER, mappedBy="plan", orphanRemoval=true, cascade={CascadeType.ALL})
+	public List<PlanTarget> getTargets() {
+		return targets;
+	}
+	public void setTargets(List<PlanTarget> targets) {
+		this.targets = targets;
+	}
 }

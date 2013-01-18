@@ -40,6 +40,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -68,13 +69,7 @@ public class TeamComposite extends PatrolItemComposite{
 		}
 	};
 	
-	/**
-	 * 
-	 */
-	public TeamComposite() {
-
-	}
-
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
 	 */
@@ -116,26 +111,9 @@ public class TeamComposite extends PatrolItemComposite{
 			SmartPatrolPlugIn.displayLog(Messages.TeamComposite_Error_CouldNotLoadTeams, ex);
 			session.close();
 		}
-		Collections.sort(teams, new Comparator<Object>(){
-			@Override
-			public int compare(Object o1, Object o2) {
-				return Collator.getInstance().compare(((Team)o1).getName(), ((Team)o2).getName());
-		}});
 		
-		String none = Messages.TeamComposite_NoTeam_Label;
-		List<Object> stns = new ArrayList<Object>();
-		stns.add(none);
-		if (teams != null){
-			stns.addAll(teams);
-		}
+		setInput(teams, p.getTeam());
 		
-		teamList.setInput(stns.toArray());
-		if (p.getTeam() != null){
-			teamList.setSelection(new StructuredSelection(p.getTeam()));
-		}else{
-			teamList.setSelection(new StructuredSelection(none));
-		}
-
 	}
 
 	/**
@@ -168,5 +146,43 @@ public class TeamComposite extends PatrolItemComposite{
 	public int getAttribute() {
 		return PatrolEventManager.PATROL_TEAM;
 	}
+
+	public void setInput(List<? extends Object> teams, Team team) {
+		Collections.sort(teams, new Comparator<Object>(){
+			@Override
+			public int compare(Object o1, Object o2) {
+				return Collator.getInstance().compare(((Team)o1).getName(), ((Team)o2).getName());
+		}});
+		
+		String none = Messages.TeamComposite_NoTeam_Label;
+		List<Object> stns = new ArrayList<Object>();
+		stns.add(none);
+		if (teams != null){
+			stns.addAll(teams);
+		}
+		
+		teamList.setInput(stns.toArray());
+		if (team != null){
+			teamList.setSelection(new StructuredSelection(team));
+		}else{
+			teamList.setSelection(new StructuredSelection(none));
+		}
+
+		
+	}
+
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getSelectedTeam()
+	 */
+
+	public Team getSelectedTeam() {
+		Object team = (Object)((IStructuredSelection)teamList.getSelection()).getFirstElement();
+		if (team != null && team instanceof Team){
+			return((Team)team);
+		}else{
+			return null;
+		}
+	}
+	
 }
 

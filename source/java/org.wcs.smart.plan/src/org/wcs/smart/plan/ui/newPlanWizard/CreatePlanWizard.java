@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -61,8 +62,10 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		
 		plan.setConservationArea(SmartDB.getCurrentConservationArea());
 
-		//TODO: make this work:
-		//plan.setId(PatrolHibernateManager.generatePlanId(plan, getSession()));
+		Session mysession = getSession();
+		mysession.beginTransaction();
+		plan.setId(PlanHibernateManager.generatePlanId(plan, session));
+		mysession.getTransaction().rollback();
 	}
 
 	/**
@@ -108,6 +111,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	public Session getSession() {
 		if (session == null || !session.isOpen()) {
 			session = PatrolHibernateManager.openSession();
+			
 			session.update(plan.getConservationArea());
 		}
 		return session;
@@ -132,7 +136,10 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	@Override
 	 public void createPageControls(Composite pageContainer) {
 		 super.createPageControls(pageContainer);
-		 page1.initModel(plan, getSession());
+		 Session mysession = getSession();
+		 mysession.beginTransaction();
+		 page1.initModel(plan, mysession);
+		 mysession.getTransaction().rollback();
 	 }
 
 	/**
@@ -155,15 +162,13 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 
 
 		//TODO: make the following 8 lines work:
-		boolean ret = true;
-//		boolean ret = PatrolHibernateManager.savePlan(getPlan(),
-//				PatrolHibernateManager.openSession(), false);
-//
-//		if (!ret)
-//			return false;
-//
-//		// fire events
-//		PatrolEventManager.getInstance().planAdded(getPlan());
+		boolean ret = PlanHibernateManager.savePlan(getPlan(),PlanHibernateManager.openSession());
+		
+		 if (!ret)
+		 return false;
+		
+		 // fire events
+		 //PlanEventManager.getInstance().planAdded(getPlan());
 		
 		// open in editor
 		//TODO:open in an editor once we have one. 
@@ -194,8 +199,10 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			}
 		}
 		if (event.getTargetPage() instanceof NewPlanWizardPage) {
+			session.beginTransaction();
 			((NewPlanWizardPage) event.getTargetPage()).initModel(plan,
-					getSession());
+					session);
+			session.getTransaction().rollback();
 		}
 
 		if (event.doit) {
