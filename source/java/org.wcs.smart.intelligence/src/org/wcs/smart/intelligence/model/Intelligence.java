@@ -161,7 +161,7 @@ public class Intelligence {
 		this.points = points;
 	}
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy="intelligence", orphanRemoval=true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="intelligence", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<IntelligenceAttachment> getAttachments() {
 		return attachments;
 	}
