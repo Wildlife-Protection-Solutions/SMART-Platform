@@ -157,23 +157,24 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
         
 		//========map part========
         new MapComposite(this, SWT.NONE);
-        
+
         //========register required listeners========
-		Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
-		if (selectionTool != null) {
-			((SelectionTool)selectionTool).addListener(this);
-		}
-		this.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				//we need to properly remove listener added to selection tool
-				//when this component was created
-				Tool tool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
-				if (tool != null) {
-					((SelectionTool)tool).removeListener(LocationSelectComposite.this);
-				}
-			}
-		});
+        Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+        if (selectionTool != null) {
+        	((SelectionTool)selectionTool).addListener(this);
+        }
+        
+        this.addDisposeListener(new DisposeListener() {
+        	@Override
+        	public void widgetDisposed(DisposeEvent e) {
+        		//we need to properly remove listener added to selection tool
+        		//when this component was created
+        		Tool tool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+        		if (tool != null) {
+        			((SelectionTool)tool).removeListener(LocationSelectComposite.this);
+        		}
+        	}
+        });
 	}	
 
 	@Override
