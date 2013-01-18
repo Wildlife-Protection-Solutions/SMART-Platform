@@ -64,13 +64,13 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 	private TableViewer pointsListViewer;
 
 	private WritableList points = new WritableList();
-	
+
 	private Text xCoordText;
 	private Text yCoordText;
-	
+
 	private Button addButton;
 	private Button removeButton;
-	
+
 	/**
 	 * @param parent
 	 * @param style
@@ -83,15 +83,15 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 	private void createControls(){
 		setLayout(new GridLayout(2, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
-		
+
 		//========points part========
 		Composite pointsComposite = new Composite(this, SWT.NONE);
-        pointsComposite.setLayout(new GridLayout(1, false));
-        pointsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
-		
+		pointsComposite.setLayout(new GridLayout(1, false));
+		pointsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+
 		Label label = new Label(pointsComposite, SWT.NONE);
 		label.setText(Messages.LocationSelectComposite_Points_Label);
-		
+
 		pointsListViewer = new TableViewer(pointsComposite, SWT.MULTI | SWT.BORDER);
 		pointsListViewer.setContentProvider(new ObservableListContentProvider());
 		pointsListViewer.setLabelProvider(createLabelProvider());
@@ -103,33 +103,33 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 				removeButton.setEnabled(!pointsListViewer.getSelection().isEmpty());
 			}
 		});
-		
+
 		//========point coordinates manual input part========
 		Composite coordsComposite = new Composite(pointsComposite, SWT.NONE);
 		coordsComposite.setLayout(new GridLayout(2, false));
 		coordsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-      
-        Label xLabel = new Label(coordsComposite, SWT.NONE);
-        xLabel.setText(Messages.LocationSelectComposite_X_Label);
-        xLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-        xCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
+		Label xLabel = new Label(coordsComposite, SWT.NONE);
+		xLabel.setText(Messages.LocationSelectComposite_X_Label);
+		xLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-        Label yLabel = new Label(coordsComposite, SWT.NONE);
-        yLabel.setText(Messages.LocationSelectComposite_Y_Label);
-        yLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		xCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
 
-        yCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
-  
-        //========buttons part part========
+		Label yLabel = new Label(coordsComposite, SWT.NONE);
+		yLabel.setText(Messages.LocationSelectComposite_Y_Label);
+		yLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		yCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
+
+		//========buttons part part========
 		Composite buttonsComposite = new Composite(pointsComposite, SWT.NONE);
 		buttonsComposite.setLayout(new GridLayout(2, false));
 		buttonsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		addButton = new Button(buttonsComposite, SWT.PUSH);
-        addButton.setText(DialogConstants.ADD_BUTTON_TEXT);
-        addButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-        addButton.addSelectionListener(new SelectionAdapter() {
+		addButton.setText(DialogConstants.ADD_BUTTON_TEXT);
+		addButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Double x = convertToDouble(xCoordText.getText(), Messages.LocationSelectComposite_X_Invalid_Error);
@@ -139,12 +139,12 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 				}
 			}
 		});
- 
+
 		removeButton = new Button(buttonsComposite, SWT.PUSH);
-        removeButton.setText(DialogConstants.DELETE_BUTTON_TEXT);
-        removeButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-        removeButton.setEnabled(false);
-        removeButton.addSelectionListener(new SelectionAdapter() {
+		removeButton.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		removeButton.setEnabled(false);
+		removeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection sel = (IStructuredSelection) pointsListViewer.getSelection();
@@ -154,34 +154,34 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 				pointsListViewer.refresh();
 			}
 		});
-        
-		//========map part========
-        new MapComposite(this, SWT.NONE);
 
-        //========register required listeners========
-        Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
-        if (selectionTool != null) {
-        	((SelectionTool)selectionTool).addListener(this);
-        }
-        
-        this.addDisposeListener(new DisposeListener() {
-        	@Override
-        	public void widgetDisposed(DisposeEvent e) {
-        		//we need to properly remove listener added to selection tool
-        		//when this component was created
-        		Tool tool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
-        		if (tool != null) {
-        			((SelectionTool)tool).removeListener(LocationSelectComposite.this);
-        		}
-        	}
-        });
+		//========map part========
+		new MapComposite(this, SWT.NONE);
+
+		//========register required listeners========
+		Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+		if (selectionTool != null) {
+			((SelectionTool)selectionTool).addListener(this);
+		}
+
+		this.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				//we need to properly remove listener added to selection tool
+				//when this component was created
+				Tool tool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
+				if (tool != null) {
+					((SelectionTool)tool).removeListener(LocationSelectComposite.this);
+				}
+			}
+		});
 	}	
 
 	@Override
 	public void pointSelected(double x, double y) {
 		handleAddPoint(x, y);
 	}
-	
+
 	private Double convertToDouble(String value, String errorMessage) {
 		try {
 			Double result = Double.valueOf(value);
@@ -190,9 +190,9 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), errorMessage, null);
 		}
 		return null;
-		
+
 	}
-	
+
 	protected IBaseLabelProvider createLabelProvider() {
 		return new SmartPointLabelProvider();
 	}
@@ -203,7 +203,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 		point.setY(y);
 		points.add(point);
 	}
-	
+
 	protected abstract ISmartPoint createNewPoint();
 
 	@SuppressWarnings("unchecked")

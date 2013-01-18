@@ -71,7 +71,7 @@ public class MapComposite extends Composite implements MapPart {
 	}
 
 	private void createControls() {
-		
+
 		GridLayout gd = new GridLayout(2, false);
 		gd.marginBottom=0;
 		gd.marginHeight = 0;
@@ -80,24 +80,24 @@ public class MapComposite extends Composite implements MapPart {
 		gd.marginTop = 0;
 		gd.marginWidth = 0;
 		this.setLayout(gd);
-        this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        mapViewer = new MapViewer(this,  SWT.SINGLE | SWT.DOUBLE_BUFFERED);
-        mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        map = (Map) ProjectFactory.eINSTANCE.createMap();
-        map.setName(Messages.MapComposite_Map_Name);
-        mapViewer.setMap(map);
-        //set default crs
+		mapViewer = new MapViewer(this,  SWT.SINGLE | SWT.DOUBLE_BUFFERED);
+		mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		map = (Map) ProjectFactory.eINSTANCE.createMap();
+		map.setName(Messages.MapComposite_Map_Name);
+		mapViewer.setMap(map);
+		//set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
- 
+
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		String[] thisTools = new String[] {
 				MapToolComposite.UDIG_ZOOM_EXTENT_ID,
 				MapToolComposite.UDIG_PAN_ID,
 				MapToolComposite.UDIG_ZOOM_ID,
 				SelectionTool.ID };
-		
+
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(this);
 		new MapInfoAreaComposite(this, SWT.NONE, mapViewer) ;
@@ -114,7 +114,7 @@ public class MapComposite extends Composite implements MapPart {
 			}
 		});
 		layer.schedule();
-		
+
 		getShell().addListener(SWT.Resize, new Listener(){
 			Job j = new Job(Messages.MapComposite_MapResizeJob_Title){
 				@Override
@@ -123,7 +123,7 @@ public class MapComposite extends Composite implements MapPart {
 					return Status.OK_STATUS;
 				}
 			};
-			
+
 			@Override
 			public void handleEvent(Event event) {
 				j.schedule(500);
@@ -139,19 +139,19 @@ public class MapComposite extends Composite implements MapPart {
 	@Override
 	public void openContextMenu() {
 		mapViewer.openContextMenu();
-		
+
 	}
 
 	@Override
 	public void setFont(Control textArea) {
 		mapViewer.setFont(textArea);
-		
+
 	}
 
 	@Override
 	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
 		mapViewer.setSelectionProvider(selectionProvider);
-		
+
 	}
 
 	@Override
