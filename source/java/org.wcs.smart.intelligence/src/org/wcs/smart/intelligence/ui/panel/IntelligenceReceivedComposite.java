@@ -19,7 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
+package org.wcs.smart.intelligence.ui.panel;
+
+import java.util.Calendar;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -32,47 +34,49 @@ import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Intelligence Wizard page for collecting the intelligence received date information
+ * Composite for collecting the intelligence received date information
  * 
  * @author elitvin
- *
+ * @since 1.0.0
  */
-public class IntelligenceReceivedWizardPage extends IntelligenceWizardPage {
+public class IntelligenceReceivedComposite extends IntelligenceComposite {
 
-    private DateTime dtReceivedDate;
+   private DateTime dtReceivedDate;
+	
+	/**
+	 * @param parent
+	 * @param style
+	 */
+	public IntelligenceReceivedComposite(Composite parent, int style) {
+		super(parent, style);
+		setMessage(Messages.IntelligenceReceivedWizardPage_Message);
+		createControls();
+	}
 
-    /**
-     * @param pageName
-     */
-    public IntelligenceReceivedWizardPage() {
-        super(Messages.IntelligenceReceivedWizardPage_PageTitle);
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-     */
-    @Override
-    public void createControl(Composite parent) {
-        Composite center = new Composite(parent, SWT.NONE);
-        center.setLayout(new GridLayout(2, false));
-        center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+	private void createControls() {
+        this.setLayout(new GridLayout(2, false));
+        this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
-        Label lbl = new Label(center, SWT.NONE);
+        Label lbl = new Label(this, SWT.NONE);
         lbl.setText(Messages.IntelligenceReceivedWizardPage_ReceivedDate_Label);
         lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        dtReceivedDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+        dtReceivedDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
         dtReceivedDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtReceivedDate.getLayoutData()).horizontalIndent = 10;
-        
-        setControl(center);
-        setMessage(Messages.IntelligenceReceivedWizardPage_Message);
-    }
+	}
 
-    @Override
-    protected boolean updateModel(Intelligence intelligence) {
-        intelligence.setReceivedDate(SmartUtils.getDate(dtReceivedDate));
-        return true;
-    }
+	@Override
+	public boolean updateModel(Intelligence intelligence) {
+		intelligence.setReceivedDate(SmartUtils.getDate(dtReceivedDate));
+		return true;
+	}
 
+	@Override
+	public void initFromModel(Intelligence intelligence) {
+	    if (intelligence.getReceivedDate() != null) {
+	    	Calendar cal = SmartUtils.convertDate(intelligence.getReceivedDate());
+	    	dtReceivedDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+	    }
+	}
 }

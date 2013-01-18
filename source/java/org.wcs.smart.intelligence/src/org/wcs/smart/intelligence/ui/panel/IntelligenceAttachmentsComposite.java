@@ -19,13 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
+package org.wcs.smart.intelligence.ui.panel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.common.attachment.AttachmentComposite;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -34,43 +36,38 @@ import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceAttachment;
 
 /**
- * Intelligence Wizard page for collecting the intelligence attachments information
+ * Composite for collecting the intelligence attachments information
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceAttachmentsWizardPage extends IntelligenceWizardPage {
+public class IntelligenceAttachmentsComposite extends IntelligenceComposite {
 
 	private AttachmentComposite<IntelligenceAttachment> attachmentComposite;
-	
+
 	/**
-	 * @param pageName
+	 * @param parent
+	 * @param style
 	 */
-	public IntelligenceAttachmentsWizardPage() {
-		super(Messages.IntelligenceAttachmentsWizardPage_PageTitle);
+	public IntelligenceAttachmentsComposite(Composite parent, int style) {
+		super(parent, style);
+		setMessage(Messages.IntelligenceAttachmentsWizardPage_Message);
+		createControls();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
-	@Override
-	public void createControl(Composite parent) {
-        attachmentComposite = new AttachmentComposite<IntelligenceAttachment>(parent, SWT.NONE) {
+	private void createControls() {
+        this.setLayout(new GridLayout(1, false));
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        attachmentComposite = new AttachmentComposite<IntelligenceAttachment>(this, SWT.NONE) {
 			@Override
 			protected ISmartAttachment createNewAttachement() {
 				return new IntelligenceAttachment();
 			}
 		};
-
-        setControl(attachmentComposite);
-        setMessage(Messages.IntelligenceAttachmentsWizardPage_Message);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#updateModel(org.wcs.smart.intelligence.model.Intelligence)
-	 */
 	@Override
-	protected boolean updateModel(Intelligence intelligence) {
+	public boolean updateModel(Intelligence intelligence) {
 		//Update the attachments
 		List<IntelligenceAttachment> attachments = attachmentComposite.getAttchments();
 		if (intelligence.getAttachments() == null) {
@@ -84,13 +81,19 @@ public class IntelligenceAttachmentsWizardPage extends IntelligenceWizardPage {
 			}
 		}
 		
-		//add reminaing; these should all be new attachments
+		//add remaining; these should all be new attachments
 		for (Iterator<IntelligenceAttachment> iterator = attachments.iterator(); iterator.hasNext();) {
 			IntelligenceAttachment att = iterator.next();
 			att.setIntelligence(intelligence);
 			intelligence.getAttachments().add(att);
 		}
 		return true;
+	}
+
+	@Override
+	public void initFromModel(Intelligence intelligence) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

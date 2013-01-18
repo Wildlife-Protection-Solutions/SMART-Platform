@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
+package org.wcs.smart.intelligence.ui.panel;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -33,43 +33,42 @@ import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 
 /**
- * Intelligence Wizard page for collecting the intelligence description information
- *
+ * Composite for collecting the intelligence description information
+ * 
  * @author elitvin
- *
+ * @since 1.0.0
  */
-public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
+public class IntelligenceDescComposite extends IntelligenceComposite {
 
-    private Text shortName;
+	private Label nameLabel;
+	
+	private Text shortName;
     private Text description;
-    
-    /**
-     * @param pageName
-     */
-    public IntelligenceDescWizardPage() {
-        super(Messages.IntelligenceDescWizardPage_PageTitle);
-        setPageComplete(false);
-    }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-     */
-    @Override
-    public void createControl(Composite parent) {
-        Composite center = new Composite(parent, SWT.NONE);
-        center.setLayout(new GridLayout(2, false));
-        center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+	/**
+	 * @param parent
+	 * @param style
+	 */
+	public IntelligenceDescComposite(Composite parent, int style) {
+		super(parent, style);
+		setMessage(Messages.IntelligenceDescWizardPage_Message);
+		createControls();
+	}
+
+	private void createControls() {
+        this.setLayout(new GridLayout(2, false));
+        this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
-        Label nameLabel = new Label(center, SWT.NONE);
+        nameLabel = new Label(this, SWT.NONE);
         nameLabel.setText(Messages.IntelligenceDescWizardPage_Name_Label);
         nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-        shortName = new Text(center, SWT.BORDER | SWT.LEFT);
+        shortName = new Text(this, SWT.BORDER | SWT.LEFT);
         shortName.setTextLimit(32);
         shortName.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				setPageComplete(isPageValid());
+				fireDataValidStateListeners();
 			}
 		});
 
@@ -78,33 +77,52 @@ public class IntelligenceDescWizardPage extends IntelligenceWizardPage {
         data.widthHint = 170;
         shortName.setLayoutData(data);
 
-        Label descLabel = new Label(center, SWT.NONE);
+        Label descLabel = new Label(this, SWT.NONE);
         descLabel.setText(Messages.IntelligenceDescWizardPage_Description_Label);
         descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-        description = new Text(center, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
+        description = new Text(this, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
         gd.heightHint = 80;
         gd.horizontalIndent = 8;
 
         description.setLayoutData(gd);
-        
-        setControl(center);
-        setMessage(Messages.IntelligenceDescWizardPage_Message);
-    }
-
-    /* (non-Javadoc)
-     * @see org.wcs.smart.intelligence.ui.wizard.IntelligenceWizardPage#updateModel(org.wcs.smart.intelligence.model.Intelligence)
-     */
-    @Override
-    protected boolean updateModel(Intelligence intelligence) {
+	}
+	
+	@Override
+	public boolean updateModel(Intelligence intelligence) {
     	intelligence.setShortName(shortName.getText());
     	intelligence.setDescription(description.getText());
         return true;
-    }
+	}
 
-    @Override
-    public boolean isPageValid() {
-    	return shortName.getText() != null && !shortName.getText().isEmpty();
-    }
+	@Override
+	public void initFromModel(Intelligence intelligence) {
+		shortName.setText(intelligence.getShortName());
+		description.setText(intelligence.getDescription());
+	}
+
+	@Override
+	public boolean isDataValid() {
+    	return shortName != null && shortName.getText() != null && !shortName.getText().isEmpty();
+	}
+	
+	@Override
+	public void applyNewMode(CompositeMode state) {
+		switch (state) {
+		case WIZARD:
+			nameLabel.setVisible(true);
+			shortName.setVisible(true);
+			setMessage(Messages.IntelligenceDescWizardPage_Message);
+			break;
+		case EDITOR:
+			nameLabel.setVisible(false);
+			shortName.setVisible(false);
+			setMessage(Messages.IntelligenceDescWizardPage_Message);
+			break;
+		default:
+			break;
+		}
+		super.applyNewMode(state);
+	}
 }

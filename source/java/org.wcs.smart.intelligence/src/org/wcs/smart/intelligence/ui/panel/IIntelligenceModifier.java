@@ -19,33 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.wizard;
+package org.wcs.smart.intelligence.ui.panel;
 
-import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.intelligence.model.Intelligence;
 
 /**
- * An abstract class for intelligence wizard pages.
+ * Should be implemented by ui components that can modify {@link Intelligence} object
  * 
  * @author elitvin
- *
+ * @since 1.0.0
  */
-public abstract class IntelligenceWizardPage extends WizardPage {
-
-    /**
-     * @param pageName
-     */
-    public IntelligenceWizardPage(String pageName) {
-        super(pageName);
-   }
+public interface IIntelligenceModifier {
 
     /**
      * Updates the current intelligence with the new values inputed
-     * in the wizard page.
+     * in the gui components.
      * 
      * @param intelligence intelligence to update
      * @return <code>true</code> of model updated; <code>false</code> if error 
      */
-    abstract protected boolean updateModel(Intelligence intelligence);
+    public boolean updateModel(Intelligence intelligence);
 
+    /**
+     * Updates the current page gui components with the values
+     * from the intelligence
+     * 
+     * @param intelligence intelligence to use when updating gui components
+     */
+    public void initFromModel(Intelligence intelligence);
+	
+
+	/**
+	 * Returns if data input in gui components is valid and can be save in database.
+	 */
+    public boolean isDataValid();
 }

@@ -37,6 +37,7 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
 
 /**
  * Wizard to create new intelligence.
@@ -64,15 +65,23 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
     
     @Override
     public void addPages() {
-		((WizardDialog) getContainer()).addPageChangingListener(this);
-        addPage(new IntelligenceReceivedWizardPage());
-        addPage(new IntelligenceSourceWizardPage());
-        addPage(new IntelligenceDatesWizardPage());
-        addPage(new IntelligenceDescWizardPage());
-        addPage(new IntelligenceLocationWizardPage());
-        addPage(new IntelligenceAttachmentsWizardPage());
-        
-        super.addPages();
+    	((WizardDialog) getContainer()).addPageChangingListener(this);
+    	addPage(new TypedIntelligenceWizardPage(PanelType.RECIEVED));
+    	addPage(new TypedIntelligenceWizardPage(PanelType.SOURCE));
+    	addPage(new TypedIntelligenceWizardPage(PanelType.DATES));
+    	addPage(new TypedIntelligenceWizardPage(PanelType.DESCRIPTION));
+    	addPage(new TypedIntelligenceWizardPage(PanelType.LOCATION));
+    	addPage(new TypedIntelligenceWizardPage(PanelType.ATTACHMENTS));
+
+
+//    	addPage(new IntelligenceReceivedWizardPage());
+//    	addPage(new IntelligenceSourceWizardPage());
+//    	addPage(new IntelligenceDatesWizardPage());
+//    	addPage(new IntelligenceDescWizardPage());
+//    	addPage(new IntelligenceLocationWizardPage());
+//    	addPage(new IntelligenceAttachmentsWizardPage());
+
+    	super.addPages();
     }
 
     /* (non-Javadoc)
