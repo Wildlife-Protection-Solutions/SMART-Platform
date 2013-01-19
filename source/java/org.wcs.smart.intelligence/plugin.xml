@@ -16,6 +16,17 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives">
+         <command
+               commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
+               icon="images/etool16/intelligence.png"
+               label="Show Intelligence Persepctive"
+               style="push"
+               tooltip="Show Intelligence Persepctive">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -23,12 +34,20 @@
             id="org.wcs.smart.intelligence.NewIntelligence"
             name="%intelligence.command.name">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
+            name="Show Intelligence Persepctive">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.NewIntelligenceHandler"
             commandId="org.wcs.smart.intelligence.NewIntelligence">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ShowIntelligencePersepctiveHandler"
+            commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive">
       </handler>
    </extension>
    <extension
@@ -46,19 +65,33 @@
       </class>
    </extension>
    <extension
-         point="net.refractions.udig.project.ui.tool">
-      <category
-            id="org.wcs.smart.intelligence.maptools">
-      </category>
-      <modalTool
-            categoryId="org.wcs.smart.intelligence.maptools"
-            class="org.wcs.smart.intelligence.map.tool.SelectionTool"
-            icon="images/etool16/cursor.png"
-            id="org.wcs.smart.intelligence.map.tool.SelectionTool"
-            name="%tool.selectPoint.name"
-            onToolbar="false"
-            tooltip="%tool.selectPoint.tooltip">
-      </modalTool>
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.wcs.smart.intelligence.ui.IntelligencePerspective"
+            icon="images/etool16/intelligence.png"
+            id="org.wcs.smart.intelligence.IntelligencePerspective"
+            name="Intelligence Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.intelligence.ui.IntelligenceListView"
+            icon="images/etool16/intelligence.png"
+            id="org.wcs.smart.intelligence.IntelligenceListView"
+            name="Intelligence List View"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.intelligence.ui.editor.IntelligenceEditor"
+            default="false"
+            icon="images/etool16/intelligence.png"
+            id="org.wcs.smart.intelligence.IntelligenceEditor"
+            name="Intelligence Editor">
+      </editor>
    </extension>
 
 </plugin>

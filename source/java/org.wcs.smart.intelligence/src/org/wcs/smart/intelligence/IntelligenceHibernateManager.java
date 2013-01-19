@@ -63,6 +63,19 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
+	public static List<Intelligence> getIntelligences() {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			ConservationArea ca = SmartDB.getCurrentConservationArea();
+			Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+			@SuppressWarnings("unchecked")
+			List<Intelligence> list = query.list();
+			return list;
+		} finally {
+			session.close();
+		}
+	}
+	
 	/**
 	 * Saves a given intelligence to the database.
 	 * 
@@ -87,5 +100,5 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 		return true;
 	}
-	
+
 }
