@@ -14,6 +14,7 @@ CREATE TABLE smart.plan
 	team_uuid CHAR(16) FOR BIT DATA,
 	active_employees INTEGER,
 	unavailable_employees INTEGER,
+	PARENT_UUID CHAR(16) for bit data,
 	PRIMARY KEY (UUID)
 );
 
@@ -35,6 +36,14 @@ ALTER TABLE smart.PLAN
 	REFERENCES smart.team (UUID)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
+;
+
+
+ALTER TABLE smart.plan 
+	ADD CONSTRAINT plan_parent_uuid_fk FOREIGN KEY (PARENT_UUID)
+	REFERENCES smart.plan (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
 ;
 
 CREATE TABLE smart.plan_target
