@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.patrol.wizardpage" name="New Patrol Wizard Page " schema="schema/org.wcs.smart.patrol.wizardpage.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -630,6 +631,61 @@
                type="org.wcs.smart.patrol.model.Waypoint">
          </adapter>
       </factory>
+   </extension>
+   <extension
+         point="org.wcs.smart.patrol.wizardpage">
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolIdWizardPage"
+            id="newpatrol.patrolid">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolTypeWizardPage"
+            id="newpatrol.patroltype">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.TransportTypeWizardPage"
+            id="newpatrol.transporttype">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolArmedWizardPage"
+            id="newpatrol.patrolarmed">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.StationTeamWizardPage"
+            id="newpatrol.stationteam">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolMandateWizardPage"
+            id="newpatrol.patrolmandate">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolObjectiveWizardPage"
+            id="newpatrol.patrolobjective">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.CommentWizardPage"
+            id="newpatrol.patrolcomment">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolDateWizardPage"
+            id="newpatrol.patroldate">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolMemberWizardPage"
+            id="newpatrol.patrolmember">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolLeaderWizardPage"
+            id="newpatrol.patrolleader">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.MultiLegWizardPage"
+            id="newpatrol.patrolmutlileg">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolLegsWizardPage"
+            id="newpatrol.patrollegs">
+      </wizardpage>
    </extension>
 
 </plugin>

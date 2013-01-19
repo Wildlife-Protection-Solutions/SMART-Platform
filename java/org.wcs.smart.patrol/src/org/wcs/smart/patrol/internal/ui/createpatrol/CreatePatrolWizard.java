@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.ui.createpatrol;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -33,10 +40,12 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard to create a new patrol.
@@ -46,6 +55,8 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class CreatePatrolWizard extends Wizard implements IPageChangingListener {
 
+	public static final String EXTENSION_ID = "org.wcs.smart.patrol.wizardpage"; //$NON-NLS-1$
+	
 	private boolean completedOK = false;
 
 	private Patrol patrol = null;
@@ -54,7 +65,6 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	private boolean canFinish = false;
 	private IWizardPage lastPage = null;
 
-	private PatrolIdWizardPage page1;
 
 	/**
 	 * Creates a new wizard.
@@ -63,7 +73,6 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		setWindowTitle(Messages.CreatePatrolWizard_Title);
 
 		patrol = new Patrol();
-		
 		patrol.setConservationArea(SmartDB.getCurrentConservationArea());
 		patrol.setId(PatrolHibernateManager.generatePatrolId(patrol, getSession()));
 	}
@@ -119,28 +128,86 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	@Override
 	public void addPages() {
 		((WizardDialog) getContainer()).addPageChangingListener(this);
-		page1 = new PatrolIdWizardPage();
+		List<NewPatrolWizardPage> pages = findPages();
+		if (pages == null){
+			throw new IllegalStateException("Wizard pages cannot be null"); //$NON-NLS-1$
+		}
+		for (NewPatrolWizardPage p : pages){
+			super.addPage(p);
+		}
+	}
+	
+	
+	/**
+	 * @return gets all hibernate mappings
+	 */
+	private List<NewPatrolWizardPage> findPages(){
 		
-		super.addPage(page1);
-		super.addPage(new PatrolTypeWizardPage());
-		super.addPage(new TransportTypeWizardPage());
-		super.addPage(new PatrolArmedWizardPage());
-		super.addPage(new StationTeamWizardPage());
-		super.addPage(new PatrolMandateWizardPage());
-		super.addPage(new PatrolObjectiveWizardPage());
-		super.addPage(new CommentWizardPage());
-		super.addPage(new PatrolDateWizardPage());
-		super.addPage(new PatrolMemberWizardPage());
-		super.addPage(new PatrolLeaderWizardPage());
-		super.addPage(new MultiLegWizardPage());
-		super.addPage(new PatrolLegsWizardPage());
+		HashMap<String, NewPatrolWizardPage> idToPage = new HashMap<String, NewPatrolWizardPage>();
+		List<NewPatrolWizardPage> thisitems = new ArrayList<NewPatrolWizardPage>();
+		List<NewPatrolWizardPage> items = new ArrayList<NewPatrolWizardPage>();
 		
+		List<Object[]> sortRules = new ArrayList<Object[]>();
+		
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				NewPatrolWizardPage page = (NewPatrolWizardPage)e.createExecutableExtension("class"); //$NON-NLS-1$
+				String i = e.getAttribute("id"); //$NON-NLS-1$
+				idToPage.put(i, page);
+				String sort = e.getAttribute("location"); //$NON-NLS-1$
+				if (sort != null && sort.trim().length() > 0){
+					sortRules.add(new Object[]{sort, page});
+				}
+				if (e.getContributor().getName().equals(SmartPatrolPlugIn.PLUGIN_ID)){
+					thisitems.add(page);
+				}else{
+					items.add(page);
+				}
+			}
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(Messages.CreatePatrolWizard_ErrorCreatingWizardPages, ex);
+			return null;
+		}
+		
+		//apply sort rules
+		thisitems.addAll(items);
+		for (Object[] sort : sortRules){
+			try{
+				String[] bits = ((String)sort[0]).split("="); //$NON-NLS-1$
+				if (bits.length != 2){
+					continue;
+				}
+				String targetId = bits[1];
+				NewPatrolWizardPage sortTargetPage = idToPage.get(targetId);
+				NewPatrolWizardPage sortSource = (NewPatrolWizardPage) sort[1];
+				
+				int targetIndex = thisitems.indexOf(sortTargetPage);
+				int sourceIndex = thisitems.indexOf(sortSource);
+				
+				if (targetIndex < 0 || sourceIndex < 0){
+					continue;
+				}
+				if (bits[0].toLowerCase().equals("before")){ //$NON-NLS-1$
+					thisitems.remove(sourceIndex);
+					thisitems.add(targetIndex, sortSource);
+				}else if (bits[0].toLowerCase().endsWith("after")){ //$NON-NLS-1$
+					thisitems.remove(sourceIndex);
+					thisitems.add(targetIndex + 1, sortSource);
+				}
+			}catch (Exception ex){
+				//eat this error
+				ex.printStackTrace();
+			}
+		}
+		return thisitems;
 	}
 	
 	@Override
 	 public void createPageControls(Composite pageContainer) {
 		 super.createPageControls(pageContainer);
-		 page1.initModel(patrol, getSession());
+		 ((NewPatrolWizardPage)getPages()[0]).initModel(patrol, getSession());
 	 }
 
 	/**
@@ -161,12 +228,24 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 			((NewPatrolWizardPage) lastPage).updateModel(this.patrol);
 		}
 
-		this.getPatrol().createLegDays();
+		
+		patrol.createLegDays();
 		
 		Session session = PatrolHibernateManager.openSession();
-		boolean ret = false;
+		session.beginTransaction();
+		boolean ret = true;
 		try{
-			ret = PatrolHibernateManager.savePatrol(getPatrol(), session, false);
+			PatrolHibernateManager.savePatrol(patrol, session, false);
+			for (IWizardPage p : getPages()){
+				if (p instanceof NewPatrolWizardPage){
+					((NewPatrolWizardPage) p).save(patrol, session);
+				}
+			}
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			ret = false;
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+			session.getTransaction().rollback();			
 		}finally{
 			session.close();
 		}
@@ -203,21 +282,19 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 				return;
 			}
 		}
+		
 		if (event.getTargetPage() instanceof NewPatrolWizardPage) {
 			((NewPatrolWizardPage) event.getTargetPage()).initModel(patrol,
 					getSession());
 		}
 
-		if (!(event.getTargetPage() instanceof MultiLegWizardPage)
-				&& !(event.getTargetPage() instanceof PatrolLegsWizardPage)) {
+		if (((IWizardPage) event.getTargetPage()).getNextPage() == null){
+			setCanFinish(true);
+		}else{
 			setCanFinish(false);
 		}
-		// last page of wizard
-		// if (!event.getTargetPage().equals(getPages()[getPageCount()-1])){
-		// // setCanFinish(true);
-		// // }else{
-		// setCanFinish(false);
-		// }
+		
+
 		if (event.doit) {
 			lastPage = (IWizardPage) event.getTargetPage();
 		}

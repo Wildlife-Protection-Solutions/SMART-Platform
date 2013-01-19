@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolMandateComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to collect patrol mandate information
@@ -43,8 +44,8 @@ public class PatrolMandateWizardPage extends NewPatrolWizardPage {
 	/**
 	 * @param pageName
 	 */
-	protected PatrolMandateWizardPage() {
-		super(Messages.PatrolMandateWizardPage_PageName);
+	public PatrolMandateWizardPage() {
+		super("PatrolMandate"); //$NON-NLS-1$
 		
 	}
 
@@ -68,7 +69,7 @@ public class PatrolMandateWizardPage extends NewPatrolWizardPage {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -82,10 +83,10 @@ public class PatrolMandateWizardPage extends NewPatrolWizardPage {
 	}
 
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		mandateComp.setValues( p, session );
 	}
 }

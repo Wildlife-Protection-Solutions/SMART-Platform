@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui;
+package org.wcs.smart.patrol.ui;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -44,6 +44,7 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**

@@ -35,6 +35,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to determine the type of patrol.
@@ -47,8 +48,8 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 	
 	/**
 	 */
-	protected PatrolTypeWizardPage() {
-		super(Messages.PatrolTypeWizardPage_PageName);
+	public PatrolTypeWizardPage() {
+		super("PatrolType"); //$NON-NLS-1$
 		
 	}
 
@@ -100,7 +101,7 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -115,10 +116,10 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 
 
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 	}
 	
 

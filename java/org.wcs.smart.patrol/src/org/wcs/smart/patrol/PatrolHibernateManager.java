@@ -369,37 +369,20 @@ public class PatrolHibernateManager extends HibernateManager{
 	}
 	
 	/**
-	 * Saves a given patrol to the database.
+	 * Saves a given patrol to the database first starting a transaction.
 	 * <p>This function does not close the session.  The calling code is responsible
 	 * for closing the session. 
-	 * The session must not have an active transaction.
+	 * The session must not have an active transaction; as it creates is own transaction.
 	 * </p>
 	 * @param patrol the patrol to save
 	 * @param session the database session to use
 	 * @param saveWaypoints if waypoints should also be saved; waypoints saving is not cascade automatically for performance reasons
 	 * @return <code>true</code> if saved successfully, <code>false</code> if error
 	 */
-	public static boolean savePatrol(Patrol patrol, Session session, boolean saveWaypoints){
+	public static boolean savePatrolInTransaction(Patrol patrol, Session session, boolean saveWaypoints){
 		session.beginTransaction();
 		try{
-			if (patrol.getId() == null || patrol.getId().equals(Patrol.AUTO_GENERATE_TEXT)){
-				String id = PatrolHibernateManager.generatePatrolId(patrol, session);
-				patrol.setId(id);
-			}
-			
-			session.saveOrUpdate(patrol);
-
-			if (saveWaypoints){
-				//save all the waypoints as well
-				for (PatrolLeg pl : patrol.getLegs()){
-					for (PatrolLegDay pld : pl.getPatrolLegDays()){
-						for (Waypoint wp: pld.getWaypoints()){
-							session.saveOrUpdate(wp);
-						}
-					}
-				}
-			}
-			
+			savePatrol(patrol, session, saveWaypoints);
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			session.getTransaction().rollback();
@@ -407,6 +390,35 @@ public class PatrolHibernateManager extends HibernateManager{
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Similar to savePatrolInTransaction except it doesn't not try to start a 
+	 * transaction.  It assumes a transaction is already initialized 
+	 * 
+	 * @param patrol
+	 * @param session
+	 * @param saveWaypoints
+	 * @return
+	 */
+	public static void savePatrol(Patrol patrol, Session session, boolean saveWaypoints) throws Exception{
+		if (patrol.getId() == null || patrol.getId().equals(Patrol.AUTO_GENERATE_TEXT)){
+			String id = PatrolHibernateManager.generatePatrolId(patrol, session);
+			patrol.setId(id);
+		}
+		
+		session.saveOrUpdate(patrol);
+
+		if (saveWaypoints){
+			//save all the waypoints as well
+			for (PatrolLeg pl : patrol.getLegs()){
+				for (PatrolLegDay pld : pl.getPatrolLegDays()){
+					for (Waypoint wp: pld.getWaypoints()){
+						session.saveOrUpdate(wp);
+					}
+				}
+			}
+		}
 	}
 
 }

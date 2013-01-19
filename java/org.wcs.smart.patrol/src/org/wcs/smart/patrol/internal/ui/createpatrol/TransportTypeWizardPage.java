@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolTransportComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to gather patrol transport type.
@@ -44,8 +45,8 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 	/**
 	 * 
 	 */
-	protected TransportTypeWizardPage() {
-		super(Messages.TransportTypeWizardPage_PageName);
+	public TransportTypeWizardPage() {
+		super("TransportType"); //$NON-NLS-1$
 	}
 
 	/**
@@ -76,7 +77,7 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 	}
 
 	/**
-     * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+     * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
      */
     @Override
     public void initModel(Patrol p, Session session) {
@@ -84,7 +85,7 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
     }
     
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {

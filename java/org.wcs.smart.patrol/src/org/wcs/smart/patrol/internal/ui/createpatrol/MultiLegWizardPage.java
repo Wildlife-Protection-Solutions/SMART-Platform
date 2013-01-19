@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to select if the
@@ -47,14 +48,16 @@ import org.wcs.smart.patrol.model.PatrolLeg;
  */
 public class MultiLegWizardPage  extends NewPatrolWizardPage {
 
+	private static final String NAME = "IsMultiLegPatrol"; //$NON-NLS-1$
+	
 	private Button btnYes;
 	private Button btnNo;
 	
 	/**
 	 * Creates a new wizard page
 	 */
-	protected MultiLegWizardPage() {
-		super(Messages.MultiLegWizardPage_PageName);
+	public MultiLegWizardPage() {
+		super(NAME);
 		
 	}
 
@@ -86,7 +89,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		btnNo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				((CreatePatrolWizard)getWizard()).setCanFinish(true);
+				getWizardInternal().getContainer().updateButtons();
 				
 			}
 		});
@@ -97,7 +100,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		btnYes.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				((CreatePatrolWizard)getWizard()).setCanFinish(false);
+				getWizardInternal().getContainer().updateButtons();
 			}
 		});
 		
@@ -109,7 +112,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		setMessage(Messages.MultiLegWizardPage_PageMessage);
 		super.setControl(main);
 	}
-   
+    
 	@Override
 	public void setVisible(boolean isVisible){
 		super.setVisible(isVisible);
@@ -118,7 +121,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		}
 	}
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	@Override
     public void initModel(Patrol p, Session session) {
@@ -130,15 +133,13 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
        		btnNo.setSelection(false);
        	}
        	setPageComplete(true);
-       	((CreatePatrolWizard)getWizard()).setCanFinish(btnNo.getSelection());
     }
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
-		
 		if (btnNo.getSelection()){
 			if (p.getLegs().size() > 1){
 				PatrolLeg leg1 = p.getLegs().get(0);
@@ -157,7 +158,9 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 	@Override
 	public IWizardPage getNextPage(){
 		if (btnNo.getSelection()){
-			return null;
+			//skip the patrol legs wizard page
+			IWizardPage page = getWizard().getNextPage(this);
+			return getWizard().getNextPage(page);
 		}
 		return getWizard().getPage(PatrolLegsWizardPage.PAGE_NAME);
 	}

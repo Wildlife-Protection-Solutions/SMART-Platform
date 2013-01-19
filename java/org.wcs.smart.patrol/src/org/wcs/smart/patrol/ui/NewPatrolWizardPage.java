@@ -19,59 +19,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.createpatrol;
+package org.wcs.smart.patrol.ui;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.wizard.WizardPage;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.CommentComposite;
+import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
- * Wizard page for collecting the patrol comment
- * @author egouge
+ * An abstract class for new patrol wizard pages.
+ * 
+ * @author Emily
  * @since 1.0.0
  */
-public class CommentWizardPage extends NewPatrolWizardPage {
-
-	
-	private CommentComposite commentComp = null;
+public abstract class NewPatrolWizardPage extends WizardPage {
 
 
 	/**
+	 * @param pageName the name of the patrol wizard page
+	 */
+	protected NewPatrolWizardPage(String pageName) {
+		super(pageName);
+	}
+
+	public CreatePatrolWizard getWizardInternal(){
+		return (CreatePatrolWizard) super.getWizard();
+	}
+	/**
+	 * Updates the current patrol with the new values inputed
+	 * in the patrol page.
 	 * 
+	 * @param p patrol to update
+	 * @return <code>true</code> if model updated; <code>false</code> if error 
 	 */
-	public CommentWizardPage() {
-		super("PatrolComment"); //$NON-NLS-1$
-	}
+	public abstract boolean updateModel(Patrol p);
 
+	/**
+	 * Updates the current page gui components with the values
+	 * from the patrol
+	 * 
+	 * @param p patrol to use when updating gui components
+	 * @param session the current hibernate session
+	 */
+	public abstract void initModel(Patrol p, Session session);
 	
 	/**
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 * Called when the patrol is saved to the database.
+	 * 
+	 * @param p the patrol saved
+	 * @param session current session in open transaction
+	 * 
+	 * @throws Exception if error occurs while saving 
 	 */
-	@Override
-	public void createControl(Composite parent) {
-		commentComp = new CommentComposite();
-		setMessage(Messages.CommentWizardPage_PageMessage);
-		super.setControl(commentComp.createComponent(parent, SWT.NONE));
-	}
-	
-	/**
-	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
-	 */
-	@Override
-	public boolean updateModel(Patrol p) {
-		return commentComp.updatePatrol(p);
-	}
-	
-	/**
-	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
-	 */
-	@Override
-	public void initModel(Patrol p, Session session) {
-		commentComp.setValues(p, session);
-	}
-	
+	public void save(Patrol p, Session session) throws Exception{}
 }
