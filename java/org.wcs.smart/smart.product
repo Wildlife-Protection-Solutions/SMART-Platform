@@ -11,7 +11,6 @@
    </aboutInfo>
 
    <configIni use="default">
-      <win32>configuration/config.ini</win32>
    </configIni>
 
    <launcherArgs>
