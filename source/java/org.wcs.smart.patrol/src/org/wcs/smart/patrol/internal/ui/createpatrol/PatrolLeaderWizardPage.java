@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.LeaderPilotComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to identify patrol leader and pilot is applicable.
@@ -46,8 +47,8 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 	/**
 	 * @param pageName
 	 */
-	protected PatrolLeaderWizardPage() {
-		super(Messages.PatrolLeaderWizardPage_PageName);
+	public PatrolLeaderWizardPage() {
+		super("PatrolLeaderPilot"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -65,7 +66,7 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 	}
 
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -79,10 +80,10 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		leaderComposite.setValues(p, session);
     	if (p.hasPilot()){
     		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_LeaderPilot);

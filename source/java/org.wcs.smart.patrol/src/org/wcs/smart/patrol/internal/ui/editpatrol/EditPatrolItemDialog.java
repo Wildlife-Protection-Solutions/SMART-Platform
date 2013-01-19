@@ -130,7 +130,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				MessageDialog.openError(getShell(), Messages.EditPatrolItemDialog_Error_DialotTitle, ex.getLocalizedMessage());
 				return false;
 			}
-			if (PatrolHibernateManager.savePatrol(patrol, s, false)){
+			if (PatrolHibernateManager.savePatrolInTransaction(patrol, s, false)){
 				setChangesMade(false);
 				return true;
 			}

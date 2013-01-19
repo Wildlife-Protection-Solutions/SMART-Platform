@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to gather patrol objective wizard page.
@@ -43,8 +44,8 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	/**
 	 * 
 	 */
-	protected PatrolObjectiveWizardPage() {
-		super(Messages.PatrolObjectiveWizardPage_PageTitle);
+	public PatrolObjectiveWizardPage() {
+		super("PatrolObjective"); //$NON-NLS-1$
 		
 	}
 
@@ -60,7 +61,7 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -68,10 +69,10 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		objectiveComp.setValues(p, session);
 	}
 }

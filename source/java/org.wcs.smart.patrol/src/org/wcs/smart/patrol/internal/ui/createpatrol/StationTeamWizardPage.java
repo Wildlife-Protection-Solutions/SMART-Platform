@@ -27,9 +27,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.StationComposite;
-import org.wcs.smart.patrol.internal.ui.TeamComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
+import org.wcs.smart.patrol.ui.StationComposite;
+import org.wcs.smart.patrol.ui.TeamComposite;
 
 /**
  * Wizard page to gather station and
@@ -45,8 +46,8 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 	/**
 	 *
 	 */
-	protected StationTeamWizardPage() {
-		super(Messages.StationTeamWizardPage_PageName);
+	public StationTeamWizardPage() {
+		super("PatrolStation"); //$NON-NLS-1$
 	}
 
 	
@@ -76,7 +77,7 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 	}
 
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -86,10 +87,10 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 	}
 
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		teamList.setValues(p, session);
 		stationList.setValues(p, session);
 	}

@@ -90,8 +90,6 @@ import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolLegsComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolMandateComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolTransportComposite;
-import org.wcs.smart.patrol.internal.ui.StationComposite;
-import org.wcs.smart.patrol.internal.ui.TeamComposite;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolLegDayLabelProvider.PatrolLegDayColumn;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolItemDialog;
@@ -99,6 +97,8 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.ui.StationComposite;
+import org.wcs.smart.patrol.ui.TeamComposite;
 
 /**
  * Editor part for displaying and editing patrol information.

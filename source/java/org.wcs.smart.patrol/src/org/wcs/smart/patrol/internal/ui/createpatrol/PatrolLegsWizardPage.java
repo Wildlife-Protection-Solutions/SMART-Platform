@@ -28,6 +28,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolLegsComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to for inputting patrol leg information.
@@ -37,8 +38,7 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 
-
-	public static final String PAGE_NAME = Messages.PatrolLegsWizardPage_PageName;
+	public static final String PAGE_NAME = "PatrolLegsDialog"; //$NON-NLS-1$
 
 	private PatrolLegsComposite legComposite; 
 	
@@ -46,9 +46,8 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 	/**
 	 * @param pageName
 	 */
-	protected PatrolLegsWizardPage() {
+	public PatrolLegsWizardPage() {
 		super(PAGE_NAME);
-		
 	}
 
 	/**
@@ -62,11 +61,9 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 		Composite comp = legComposite.createComponent(parent, SWT.NONE);
 
 		legComposite.addChangeListener(new IPatrolItemChangeListener() {
-			
 			@Override
 			public void itemChanged() {
 				validate();
-				
 			}
 		});
 		setMessage(Messages.PatrolLegsWizardPage_PageMessage);
@@ -90,7 +87,7 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 	}
 
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -98,12 +95,11 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 	}	
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		legComposite.setValues(p, session);
 		validate();
-		((CreatePatrolWizard)getWizard()).setCanFinish(true);
 	}
 }

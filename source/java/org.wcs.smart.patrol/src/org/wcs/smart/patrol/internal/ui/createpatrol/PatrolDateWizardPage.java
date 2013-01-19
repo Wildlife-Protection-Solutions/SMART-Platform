@@ -30,6 +30,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to determine the start and end dates of a patrol
@@ -43,8 +44,8 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 	/**
 	 * @param pageName
 	 */
-	protected PatrolDateWizardPage() {
-		super(Messages.PatrolDateWizardPage_PageName);
+	public PatrolDateWizardPage() {
+		super("PatrolDates"); //$NON-NLS-1$
 		
 	}
 
@@ -80,7 +81,7 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -88,10 +89,10 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		dateComposite.setValues(p, session);		
 	}
 }

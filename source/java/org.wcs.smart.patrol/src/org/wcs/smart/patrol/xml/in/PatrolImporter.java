@@ -261,7 +261,7 @@ public class PatrolImporter {
 			Patrol imported = converter.getImportedPatrol();
 			
 			monitor.subTask(Messages.PatrolImporter_Progress_Saving);
-			if (!PatrolHibernateManager.savePatrol(imported, session, true)){
+			if (!PatrolHibernateManager.savePatrolInTransaction(imported, session, true)){
 				imported = null;
 			}
 			monitor.worked(1);

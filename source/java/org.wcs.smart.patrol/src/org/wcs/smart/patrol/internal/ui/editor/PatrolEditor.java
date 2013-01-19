@@ -419,7 +419,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			protected IStatus run(IProgressMonitor monitor) {
 				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 				try{
-					if (PatrolHibernateManager.savePatrol(patrol, saveSession, false)){
+					if (PatrolHibernateManager.savePatrolInTransaction(patrol, saveSession, false)){
 					//saved okay
 						PatrolEventManager.getInstance().patrolSaved(patrol);
 					}

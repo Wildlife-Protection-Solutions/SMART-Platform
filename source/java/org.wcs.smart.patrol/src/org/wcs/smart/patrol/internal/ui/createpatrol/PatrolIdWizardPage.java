@@ -28,6 +28,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolIdComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  * Wizard page to set the patrol id.
@@ -41,8 +42,8 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	
 	/**
 	 */
-	protected PatrolIdWizardPage() {
-		super(Messages.PatrolIdWizardPage_PageName);
+	public PatrolIdWizardPage() {
+		super("PatrolId"); //$NON-NLS-1$
 
 	}
 
@@ -51,10 +52,7 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	 */
 	@Override
 	public void createControl(Composite parent) {
-
-		
 		patrolIdComp = new PatrolIdComposite();
-		
 		patrolIdComp.addChangeListener(this);
 		setMessage(Messages.PatrolIdWizardPage_PageMessage);
 		super.setControl(patrolIdComp.createComponent(parent, SWT.NONE));
@@ -62,7 +60,7 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean updateModel(Patrol p) {
@@ -76,10 +74,10 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		patrolIdComp.setValues(p, session);
 	}
 

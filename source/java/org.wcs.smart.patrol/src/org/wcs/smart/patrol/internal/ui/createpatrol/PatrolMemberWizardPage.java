@@ -37,6 +37,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
  *
@@ -53,8 +54,8 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	/**
 	 * 
 	 */
-	protected PatrolMemberWizardPage() {
-		super(Messages.PatrolMemberWizardPage_PageName);
+	public PatrolMemberWizardPage() {
+		super("PatrolMembers"); //$NON-NLS-1$
 		
 	}
 
@@ -102,14 +103,14 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#initModel(org.wcs.smart.patrol.model.Patrol)
 	 */
 	@Override
-	void initModel(Patrol p, Session session) {
+	public void initModel(Patrol p, Session session) {
 		PatrolLeg pl = p.getFirstLeg();
     	ArrayList<Employee> current = new ArrayList<Employee>();
     	if (pl.getMembers() != null){
-    		for (Iterator iterator = pl.getMembers().iterator(); iterator.hasNext();) {
+    		for (Iterator<PatrolLegMember> iterator = pl.getMembers().iterator(); iterator.hasNext();) {
     			PatrolLegMember employee = (PatrolLegMember) iterator.next();
     			current.add(employee.getMember());
     		}
@@ -118,14 +119,14 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.createpatrol.NewPatrolWizardPage#updateModel()
+	 * @see org.wcs.smart.patrol.ui.NewPatrolWizardPage#updateModel()
 	 */
 	@Override
 	public boolean  updateModel(Patrol p) {		
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
 		
-    	for (Iterator iterator = members.getSelectedEmployees().iterator(); iterator.hasNext();) {
+    	for (Iterator<?> iterator = members.getSelectedEmployees().iterator(); iterator.hasNext();) {
 			Employee e = (Employee) iterator.next();
 			firstLeg.addPatrolLegMember(e);
 		}
