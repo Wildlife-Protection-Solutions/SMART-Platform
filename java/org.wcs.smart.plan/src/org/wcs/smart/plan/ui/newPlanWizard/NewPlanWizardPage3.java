@@ -36,8 +36,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.ui.StationComposite;
-import org.wcs.smart.patrol.internal.ui.TeamComposite;
+import org.wcs.smart.patrol.ui.StationComposite;
+import org.wcs.smart.patrol.ui.TeamComposite;
 import org.wcs.smart.plan.model.Plan;
 
 

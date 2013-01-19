@@ -47,6 +47,16 @@
             name="Create New Plan">
       </command>
    </extension>
+
+   <extension
+         point="org.wcs.smart.patrol.wizardpage">
+      <wizardpage
+            class="org.wcs.smart.plan.internal.ui.patrol.NewPatrolPlanWizardPage"
+            id="newpatrol.plan"
+            location="after=newpatrol.patrolid">
+      </wizardpage>
+   </extension>
+
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class

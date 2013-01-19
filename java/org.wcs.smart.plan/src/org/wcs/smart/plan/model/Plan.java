@@ -39,6 +39,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
@@ -71,6 +74,8 @@ public class Plan {
 	private Integer unavailableEmployees;
 	private Integer activeEmployees;
 
+	private List<Plan> children = new ArrayList<Plan>();
+	private Plan parent = null;
 	
 	public Plan(){
 		
@@ -238,5 +243,34 @@ public class Plan {
 	}
 	public void setTargets(List<PlanTarget> targets) {
 		this.targets = targets;
+	}
+	
+	/**
+	 * 
+	 * @return the children plans
+	 */
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
+	@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<Plan> getChildren(){
+		return this.children;
+	}
+	
+	public void setChildren(List<Plan> children){
+		this.children = children;
+	}
+	
+	/**
+	 * 
+	 * @return parent plan or null if not parent
+	 */
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="parent_uuid")
+	public Plan getParent(){
+		return this.parent;
+	}
+	
+	public void setParent(Plan parent){
+		this.parent = parent;
 	}
 }
