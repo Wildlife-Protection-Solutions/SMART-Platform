@@ -56,8 +56,8 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class IntelligenceSourceComposite extends IntelligenceComposite {
 
-	private static final String ERROR_SOURCE_REQUIRED = Messages.IntelligenceSourceWizardPage_Error_SourceRequired;
-	private static final String ERROR_PATROL_ID_REQUIRED = Messages.IntelligenceSourceWizardPage_Error_PatrolIdRequired;
+	private static final String ERROR_SOURCE_REQUIRED = Messages.IntelligenceSource_Error_SourceRequired;
+	private static final String ERROR_PATROL_ID_REQUIRED = Messages.IntelligenceSource_Error_PatrolIdRequired;
 	
     private ComboViewer sourceType;
     
@@ -75,7 +75,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceSourceComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage(Messages.IntelligenceSourceWizardPage_Message);
+		setMessage(Messages.IntelligenceSource_Message);
 		createControls();
 	}
 
@@ -84,7 +84,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
         Label sourceLabel = new Label(this, SWT.NONE);
-        sourceLabel.setText(Messages.IntelligenceSourceWizardPage_IntelligenceSource_Label);
+        sourceLabel.setText(Messages.IntelligenceSource_IntelligenceSource_Label);
         sourceLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         sourceType = new ComboViewer(this, SWT.READ_ONLY);
@@ -105,7 +105,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 		});
         
         patrolLabel = new Label(this, SWT.NONE);
-        patrolLabel.setText(Messages.IntelligenceSourceWizardPage_PatrolId_Label);
+        patrolLabel.setText(Messages.IntelligenceSource_PatrolId_Label);
         patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         //NOTE: data for patrolId is filled with loadPatrolIdJob

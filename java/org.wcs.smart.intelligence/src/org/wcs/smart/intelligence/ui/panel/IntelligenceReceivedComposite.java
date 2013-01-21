@@ -49,7 +49,7 @@ public class IntelligenceReceivedComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceReceivedComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage(Messages.IntelligenceReceivedWizardPage_Message);
+		setMessage(Messages.IntelligenceReceived_Message);
 		createControls();
 	}
 
@@ -58,7 +58,7 @@ public class IntelligenceReceivedComposite extends IntelligenceComposite {
         this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
         Label lbl = new Label(this, SWT.NONE);
-        lbl.setText(Messages.IntelligenceReceivedWizardPage_ReceivedDate_Label);
+        lbl.setText(Messages.IntelligenceReceived_ReceivedDate_Label);
         lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         dtReceivedDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);

@@ -58,27 +58,15 @@ public class IntelligenceCompositeFactory {
 
 	public String getTitle(PanelType type) {
 		switch (type) {
-		case RECIEVED:    return Messages.IntelligenceReceivedWizardPage_PageTitle;
-		case SOURCE:      return Messages.IntelligenceSourceWizardPage_PageTitle;
-		case DATES:       return Messages.IntelligenceDatesWizardPage_PageTitle;
-		case DESCRIPTION: return Messages.IntelligenceDescWizardPage_PageTitle;
-		case LOCATION:    return Messages.IntelligenceLocationWizardPage_PageTitle;
-		case ATTACHMENTS: return Messages.IntelligenceAttachmentsWizardPage_PageTitle;
+		case RECIEVED:    return Messages.IntelligenceReceived_PageTitle;
+		case SOURCE:      return Messages.IntelligenceSource_PageTitle;
+		case DATES:       return Messages.IntelligenceDates_PageTitle;
+		case DESCRIPTION: return Messages.IntelligenceDesc_PageTitle;
+		case LOCATION:    return Messages.IntelligenceLocation_PageTitle;
+		case ATTACHMENTS: return Messages.IntelligenceAttachments_PageTitle;
 		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
 		}
 	}
-
-//	public String getMessage(PanelType type) {
-//		switch (type) {
-//		case RECIEVED:    return Messages.IntelligenceReceivedWizardPage_Message;
-//		case SOURCE:      return Messages.IntelligenceSourceWizardPage_Message;
-//		case DATES:       return Messages.IntelligenceDatesWizardPage_Message;
-//		case DESCRIPTION: return Messages.IntelligenceDescWizardPage_Message;
-//		case LOCATION:    return Messages.IntelligenceLocationWizardPage_Message;
-//		case ATTACHMENTS: return Messages.IntelligenceAttachmentsWizardPage_Message;
-//		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
-//		}
-//	}
 
 	/**
 	 * The supported panels.

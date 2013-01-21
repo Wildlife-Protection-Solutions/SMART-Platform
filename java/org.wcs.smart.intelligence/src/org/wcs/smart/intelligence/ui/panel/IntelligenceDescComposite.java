@@ -51,7 +51,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceDescComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage(Messages.IntelligenceDescWizardPage_Message);
+		setMessage(Messages.IntelligenceDesc_Message);
 		createControls();
 	}
 
@@ -60,7 +60,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
         nameLabel = new Label(this, SWT.NONE);
-        nameLabel.setText(Messages.IntelligenceDescWizardPage_Name_Label);
+        nameLabel.setText(Messages.IntelligenceDesc_Name_Label);
         nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         shortName = new Text(this, SWT.BORDER | SWT.LEFT);
@@ -78,7 +78,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         shortName.setLayoutData(data);
 
         Label descLabel = new Label(this, SWT.NONE);
-        descLabel.setText(Messages.IntelligenceDescWizardPage_Description_Label);
+        descLabel.setText(Messages.IntelligenceDesc_Description_Label);
         descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         description = new Text(this, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
@@ -113,12 +113,12 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 		case WIZARD:
 			nameLabel.setVisible(true);
 			shortName.setVisible(true);
-			setMessage(Messages.IntelligenceDescWizardPage_Message);
+			setMessage(Messages.IntelligenceDesc_Message);
 			break;
 		case EDITOR:
 			nameLabel.setVisible(false);
 			shortName.setVisible(false);
-			setMessage(Messages.IntelligenceDescWizardPage_Message);
+			setMessage(Messages.IntelligenceDesc_Message);
 			break;
 		default:
 			break;

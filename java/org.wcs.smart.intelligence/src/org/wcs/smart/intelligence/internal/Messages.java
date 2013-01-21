@@ -26,47 +26,55 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.wcs.smart.intelligence.internal.messages"; //$NON-NLS-1$
 
-    public static String IntelligenceAttachmentsWizardPage_Message;
+    public static String IntelligenceAttachments_Attachments_Label;
 
-	public static String IntelligenceAttachmentsWizardPage_PageTitle;
+    public static String IntelligenceAttachments_Message;
 
-	public static String IntelligenceDatesWizardPage_Date_Label;
+	public static String IntelligenceAttachments_PageTitle;
 
-	public static String IntelligenceDatesWizardPage_From_Label;
+	public static String IntelligenceDates_Date_Label;
 
-    public static String IntelligenceDatesWizardPage_Message;
+	public static String IntelligenceDates_From_Label;
 
-	public static String IntelligenceDatesWizardPage_MutliDaysCheckbox_Label;
+    public static String IntelligenceDates_Message;
 
-    public static String IntelligenceDatesWizardPage_PageTitle;
+	public static String IntelligenceDates_MutliDaysCheckbox_Label;
 
-    public static String IntelligenceDatesWizardPage_To_Label;
+    public static String IntelligenceDates_PageTitle;
 
-    public static String IntelligenceDescWizardPage_Description_Label;
+    public static String IntelligenceDates_To_Label;
 
-    public static String IntelligenceDescWizardPage_Message;
+    public static String IntelligenceDesc_Description_Label;
 
-    public static String IntelligenceDescWizardPage_Name_Label;
+    public static String IntelligenceDesc_Message;
 
-    public static String IntelligenceDescWizardPage_PageTitle;
+    public static String IntelligenceDesc_Name_Label;
 
-    public static String IntelligenceHandler_LoadingErrorMessage;
+    public static String IntelligenceDesc_PageTitle;
+
+	public static String IntelligenceEditor_Edit_LinkLabel;
+
+	public static String IntelligenceEditor_NoValue;
+
+	public static String IntelligenceHandler_LoadingErrorMessage;
 
     public static String IntelligenceHandler_TaskName;
 
 	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
 
-	public static String IntelligenceLocationWizardPage_Message;
+	public static String IntelligenceLocation_Location_Label;
 
-	public static String IntelligenceLocationWizardPage_PageTitle;
+	public static String IntelligenceLocation_Message;
+
+	public static String IntelligenceLocation_PageTitle;
 
 	public static String IntelligencePlugIn_ErrorDialog_Title;
 
-    public static String IntelligenceReceivedWizardPage_Message;
+    public static String IntelligenceReceived_Message;
 
-    public static String IntelligenceReceivedWizardPage_PageTitle;
+    public static String IntelligenceReceived_PageTitle;
 
-    public static String IntelligenceReceivedWizardPage_ReceivedDate_Label;
+    public static String IntelligenceReceived_ReceivedDate_Label;
 
     public static String IntelligenceSourceType_CET;
 
@@ -76,17 +84,17 @@ public class Messages extends NLS {
 
 	public static String IntelligenceSourceType_Public;
 
-	public static String IntelligenceSourceWizardPage_Error_PatrolIdRequired;
+	public static String IntelligenceSource_Error_PatrolIdRequired;
 
-	public static String IntelligenceSourceWizardPage_Error_SourceRequired;
+	public static String IntelligenceSource_Error_SourceRequired;
 
-	public static String IntelligenceSourceWizardPage_IntelligenceSource_Label;
+	public static String IntelligenceSource_IntelligenceSource_Label;
 
-    public static String IntelligenceSourceWizardPage_Message;
+    public static String IntelligenceSource_Message;
 
-    public static String IntelligenceSourceWizardPage_PageTitle;
+    public static String IntelligenceSource_PageTitle;
 
-    public static String IntelligenceSourceWizardPage_PatrolId_Label;
+    public static String IntelligenceSource_PatrolId_Label;
 
     public static String IntelligenceWizard_Title;
 

@@ -59,7 +59,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceDatesComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage(Messages.IntelligenceDatesWizardPage_Message);
+		setMessage(Messages.IntelligenceDates_Message);
 		createControls();
 	}
 
@@ -68,7 +68,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         
         multipleDays = new Button(this, SWT.CHECK);
-        multipleDays.setText(Messages.IntelligenceDatesWizardPage_MutliDaysCheckbox_Label);
+        multipleDays.setText(Messages.IntelligenceDates_MutliDaysCheckbox_Label);
         multipleDays.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
@@ -88,7 +88,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         ((GridData)dtFromDate.getLayoutData()).horizontalIndent = 10;
         
         dtToLabel = new Label(dateComposite, SWT.NONE);
-        dtToLabel.setText(Messages.IntelligenceDatesWizardPage_To_Label);
+        dtToLabel.setText(Messages.IntelligenceDates_To_Label);
         dtToLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         dtToDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
@@ -103,7 +103,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
      */
     private void applyCurrentState() {
 		boolean isMultiple = multipleDays.getSelection();
-		String labelText = isMultiple ? Messages.IntelligenceDatesWizardPage_From_Label : Messages.IntelligenceDatesWizardPage_Date_Label;
+		String labelText = isMultiple ? Messages.IntelligenceDates_From_Label : Messages.IntelligenceDates_Date_Label;
 		dtFromLabel.setText(labelText);
 		dtToLabel.setVisible(isMultiple);
 		dtToDate.setVisible(isMultiple);
