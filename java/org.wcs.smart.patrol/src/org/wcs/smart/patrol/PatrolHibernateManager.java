@@ -339,33 +339,40 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * 
 	 * @return patrol id for given patrol
 	 */
-	public static String generatePatrolId(Patrol p, Session s){
+	public static String generatePatrolId(Patrol p, Session s) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(p.getConservationArea().getId());
+		s.beginTransaction();
+		try {
 
-		Query q = s.createQuery("SELECT id FROM Patrol WHERE id like :id ORDER BY id desc"); //$NON-NLS-1$
-		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(p.getConservationArea().getId());
 
-		long idNumber = 0;
-		List<?> results = q.list();
-		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-			String localId = (String) iterator.next();
-			try{
-				idNumber = Integer.parseInt(localId.substring(localId.lastIndexOf('_')+1));
-				break;
-			}catch (Exception ex){
-				//not of the form CAID_# skip this one
+			Query q = s
+					.createQuery("SELECT id FROM Patrol WHERE id like :id ORDER BY id desc"); //$NON-NLS-1$
+			q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+
+			long idNumber = 0;
+			List<?> results = q.list();
+			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+				String localId = (String) iterator.next();
+				try {
+					idNumber = Integer.parseInt(localId.substring(localId
+							.lastIndexOf('_') + 1));
+					break;
+				} catch (Exception ex) {
+					// not of the form CAID_# skip this one
+				}
 			}
+			sb.append("_"); //$NON-NLS-1$
+			idNumber = (idNumber + 1) % 1000000;
+			if (idNumber <= 0) {
+				idNumber = 1;
+			}
+			sb.append(PATROL_ID_FORMATTER.format(idNumber));
+		} finally {
+			s.getTransaction().rollback();
 		}
-		sb.append("_"); //$NON-NLS-1$
-		idNumber = (idNumber+1) % 1000000;
-		if (idNumber <= 0){
-			idNumber = 1;
-		}
-		sb.append(PATROL_ID_FORMATTER.format(idNumber));
-		s.evict(p.getConservationArea());
 		return sb.toString();
-		
+
 	}
 	
 	/**
