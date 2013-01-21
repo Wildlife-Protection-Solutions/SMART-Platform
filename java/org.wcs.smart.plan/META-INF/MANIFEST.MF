@@ -7,7 +7,8 @@ Bundle-Activator: org.wcs.smart.plan.SmartPlanPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart,
- org.wcs.smart.patrol
+ org.wcs.smart.patrol,
+ org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.core.databinding.observable.list,

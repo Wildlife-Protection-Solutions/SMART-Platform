@@ -67,5 +67,11 @@
             class="org.wcs.smart.plan.model.PlanTarget">
       </class>
    </extension>
+   <extension
+         point="org.wcs.smart.patrol.editorContribution">
+      <contribution
+            class="org.wcs.smart.plan.internal.ui.patrol.PatrolPlanContribution">
+      </contribution>
+   </extension>
 
 </plugin>
