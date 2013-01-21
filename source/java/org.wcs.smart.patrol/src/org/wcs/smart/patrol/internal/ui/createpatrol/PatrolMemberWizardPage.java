@@ -69,8 +69,11 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		CreatePatrolWizard wizard = (CreatePatrolWizard)getWizard();
 		
 		wizard.getSession().beginTransaction();
-		allEmployees = HibernateManager.getActiveEmployees(wizard.getPatrol().getConservationArea(), wizard.getSession());
-		wizard.getSession().getTransaction().rollback();
+		try{
+			allEmployees = HibernateManager.getActiveEmployees(wizard.getPatrol().getConservationArea(), wizard.getSession());
+		}finally{
+			wizard.getSession().getTransaction().rollback();
+		}
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
