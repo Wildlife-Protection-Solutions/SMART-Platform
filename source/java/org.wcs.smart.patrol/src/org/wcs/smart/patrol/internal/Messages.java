@@ -280,6 +280,7 @@ public class Messages extends NLS {
 	public static String PatrolEditor_LoadEditorError_NoMoreHandlers;
 	public static String PatrolEditor_LoadEditorError_Other;
 	public static String PatrolEditor_MinuteLabel;
+	public static String PatrolEditor_OtherPatrolTabName;
 	public static String PatrolEditor_PatrolMapPageName;
 	public static String PatrolEditor_PatrolSummaryPageName;
 	public static String PatrolEditor_SavePatrol_JobName;

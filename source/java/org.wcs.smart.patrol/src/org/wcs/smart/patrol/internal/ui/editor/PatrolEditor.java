@@ -247,7 +247,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			mapPage = new PatrolMapPageEditor(PatrolEditor.this);
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, Messages.PatrolEditor_PatrolMapPageName);
-			showBusy(false);
+			
+			
+			if (PatrolContributionPageEditor.hasContributions()){
+				PatrolContributionPageEditor contributionPage = new PatrolContributionPageEditor(PatrolEditor.this);
+				int index = addPage(contributionPage, getEditorInput());
+				setPageText(index, Messages.PatrolEditor_OtherPatrolTabName);
+			}
 			
 			getSite().setSelectionProvider(selectionProvider);
 		} catch (final Throwable t) {
@@ -270,6 +276,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						}
 			});
 
+		}finally{
+			showBusy(false);
 		}
 	}
 	
