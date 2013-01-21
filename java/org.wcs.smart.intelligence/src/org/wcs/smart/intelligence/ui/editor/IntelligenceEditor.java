@@ -22,7 +22,6 @@
 package org.wcs.smart.intelligence.ui.editor;
 
 import java.text.DateFormat;
-import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -49,7 +48,6 @@ import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
-import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 
 /**
