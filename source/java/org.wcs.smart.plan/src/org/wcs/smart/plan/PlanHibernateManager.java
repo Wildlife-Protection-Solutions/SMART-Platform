@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.plan;
 
 import java.text.DecimalFormat;
@@ -5,15 +26,10 @@ import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.model.PlanTarget;
 
 /**
  * Extension of the smart hibernate manager for plan related data.
@@ -21,51 +37,25 @@ import org.wcs.smart.plan.model.PlanTarget;
  * @author jeffloun
  * @since 1.0.0
  */
-public class PlanHibernateManager extends HibernateManager{
+public class PlanHibernateManager{
 	
 	private static NumberFormat PLAN_ID_FORMATTER = new DecimalFormat("000000");
 
 	
 	/**
-	 * Gets all teams (active and in-active) for a given conservation area
 	 * 
-	 * @param ca conservation area 
-	 * @param s active session 
-	 * @return list of active and inactive teams
+	 * @param s
+	 * @return an array of plans without any parents.
 	 */
-	public static List<Team> getTeams(ConservationArea ca, Session s){
-		return getTeams(ca, s, false);
-	}
-	
-	/**
-	 * Gets active teams for a given conservation area
-	 * 
-	 * @param ca conservation area
-	 * @param s active session
-	 * @return list of active teams
-	 */
-	public static List<Team> getActiveTeams(ConservationArea ca, Session s){
-		return getTeams(ca, s, true);
-	}
-	
-	/**
-	 * Loads teams from database 
-	 * 
-	 * @param ca conservation area
-	 * @param s session 
-	 * @param onlyActive <code>true</code> if only active status should be loaded; <code>false</code> returns all stations 
-	 * @return list of stations
-	 */
-	private static List<Team> getTeams(ConservationArea ca, Session s, boolean onlyActive){
-		List<Team> list = null;
-		Criteria query = s.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca));
-		if (onlyActive){
-			query.add(Restrictions.eq("isActive", true));
+	public static List<Plan> getAllRootPlans(Session s){
+		s.beginTransaction();
+		try{
+			List<Plan> plans = s.createCriteria(Plan.class).add(Restrictions.isNull("parent")).list();
+			return plans;
+		}finally{
+			s.getTransaction().rollback();
 		}
-		list = query.list();
-		return list;
 	}
-	
 	
 		
 	/**
@@ -75,33 +65,34 @@ public class PlanHibernateManager extends HibernateManager{
 	 * 
 	 * @return plan id for given plan
 	 */
-	public static String generatePlanId(Plan p, Session s){
+	public static String generatePlanId(Plan p, Session s) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
 
-		Query q = s.createQuery("SELECT id FROM Plan WHERE id like :id ORDER BY id desc");
+		Query q = s
+				.createQuery("SELECT id FROM Plan WHERE id like :id ORDER BY id desc");
 		q.setParameter("id", sb.toString() + "%");
 
 		long idNumber = 0;
 		List<?> results = q.list();
 		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 			String localId = (String) iterator.next();
-			try{
-				idNumber = Integer.parseInt(localId.substring(localId.lastIndexOf('_')+1));
+			try {
+				idNumber = Integer.parseInt(localId.substring(localId
+						.lastIndexOf('_') + 1));
 				break;
-			}catch (Exception ex){
-				//not of the form CAID_# skip this one
+			} catch (Exception ex) {
+				// not of the form CAID_# skip this one
 			}
 		}
 		sb.append("_");
-		idNumber = (idNumber+1) % 1000000;
-		if (idNumber <= 0){
+		idNumber = (idNumber + 1) % 1000000;
+		if (idNumber <= 0) {
 			idNumber = 1;
 		}
 		sb.append(PLAN_ID_FORMATTER.format(idNumber));
-		s.evict(p.getConservationArea());
+
 		return sb.toString();
-		
 	}
 	
 	/**

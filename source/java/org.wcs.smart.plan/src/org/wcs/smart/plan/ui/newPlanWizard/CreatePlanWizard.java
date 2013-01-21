@@ -28,6 +28,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -162,7 +163,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 
 
 		//TODO: make the following 8 lines work:
-		boolean ret = PlanHibernateManager.savePlan(getPlan(),PlanHibernateManager.openSession());
+		boolean ret = PlanHibernateManager.savePlan(getPlan(),HibernateManager.openSession());
 		
 		 if (!ret)
 		 return false;
