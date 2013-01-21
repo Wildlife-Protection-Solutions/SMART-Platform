@@ -51,7 +51,7 @@ public class IntelligenceAttachmentsComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceAttachmentsComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage(Messages.IntelligenceAttachmentsWizardPage_Message);
+		setMessage(Messages.IntelligenceAttachments_Message);
 		createControls();
 	}
 

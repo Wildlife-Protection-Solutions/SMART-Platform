@@ -46,6 +46,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
@@ -123,26 +124,26 @@ public class IntelligenceEditor extends EditorPart {
 		((GridLayout)content.getLayout()).marginRight = 10;
 	
 		//Label label = null;
-		toolkit.createLabel(content, "Date Received:");
+		toolkit.createLabel(content, Messages.IntelligenceReceived_ReceivedDate_Label);
 		txtDateReceived = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtDateReceived.setEditable(false);
 		txtDateReceived.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, content, PanelType.RECIEVED); 
 
-		toolkit.createLabel(content, "Intelligence Source:");
+		toolkit.createLabel(content, Messages.IntelligenceSource_IntelligenceSource_Label);
 		txtSource = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtSource.setEditable(false);
 		txtSource.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, content, PanelType.SOURCE); 
 
-		toolkit.createLabel(content, "Patrol ID:");
+		toolkit.createLabel(content, Messages.IntelligenceSource_PatrolId_Label);
 		txtPatrolID = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtPatrolID.setEditable(false);
 		txtPatrolID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
 		
-		toolkit.createLabel(content, "Description:");
+		toolkit.createLabel(content, Messages.IntelligenceDesc_Description_Label);
 		txtDescription = toolkit.createText(content, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtDescription.setEditable(false);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -150,19 +151,19 @@ public class IntelligenceEditor extends EditorPart {
 //		((GridData)txtDescription.getLayoutData()).widthHint=100;
 		createEditLink(toolkit, content, PanelType.DESCRIPTION); 
 		
-		toolkit.createLabel(content, "From Date:");
+		toolkit.createLabel(content, Messages.IntelligenceDates_From_Label);
 		txtFromDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtFromDate.setEditable(false);
 		txtFromDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, content, PanelType.DATES); 
 
-		toolkit.createLabel(content, "To Date:");
+		toolkit.createLabel(content, Messages.IntelligenceDates_To_Label);
 		txtToDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtToDate.setEditable(false);
 		txtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
-		toolkit.createLabel(content, "Location:");
+		toolkit.createLabel(content, Messages.IntelligenceLocation_Location_Label);
 		Table pointsTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
 		pointsList = new TableViewer(pointsTable);
 		pointsList.setContentProvider(ArrayContentProvider.getInstance());
@@ -170,7 +171,7 @@ public class IntelligenceEditor extends EditorPart {
 		pointsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		createEditLink(toolkit, content, PanelType.LOCATION); 
 
-		toolkit.createLabel(content, "Attachments:");
+		toolkit.createLabel(content, Messages.IntelligenceAttachments_Attachments_Label);
 		Table attachTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
 		attachmentsList = new TableViewer(attachTable);
 		attachmentsList.setContentProvider(ArrayContentProvider.getInstance());
@@ -188,7 +189,7 @@ public class IntelligenceEditor extends EditorPart {
 	private void initValues() {
 		Intelligence intel = getIntelligence();
 		form.setText(intel.getShortName());
-		String none = "(none)";
+		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
 		txtDateReceived.setText(intel.getReceivedDate().toString());
 		txtSource.setText(intel.getSource().getName());
@@ -228,7 +229,7 @@ public class IntelligenceEditor extends EditorPart {
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent, final PanelType panelType) {
-		Hyperlink editLink = toolkit.createHyperlink(parent, "edit", SWT.WRAP);
+		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
 		
 		if (!canEdit()){
 			editLink.setEnabled(false);

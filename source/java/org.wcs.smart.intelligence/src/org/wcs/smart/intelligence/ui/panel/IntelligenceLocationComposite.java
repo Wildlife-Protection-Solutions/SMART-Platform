@@ -51,7 +51,7 @@ public class IntelligenceLocationComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceLocationComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage(Messages.IntelligenceLocationWizardPage_Message);
+		setMessage(Messages.IntelligenceLocation_Message);
 		createControls();
 	}
 
