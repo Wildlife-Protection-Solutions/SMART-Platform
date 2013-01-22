@@ -90,6 +90,7 @@
             default="false"
             icon="images/etool16/intelligence.png"
             id="org.wcs.smart.intelligence.IntelligenceEditor"
+            matchingStrategy="org.wcs.smart.intelligence.ui.editor.IntelligenceEditorMatchingStrategy"
             name="Intelligence Editor">
       </editor>
    </extension>
