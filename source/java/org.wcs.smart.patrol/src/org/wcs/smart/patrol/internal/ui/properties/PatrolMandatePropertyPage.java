@@ -345,7 +345,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				}else{
 					//invalid value, show error 
 					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, 
-							MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_InvalidMandateName, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+							MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_InvalidMandateName, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolMandate.MAX_NAME_LENGTH}));
 					setChangesMade(false);
 				}
 				

@@ -39,6 +39,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -96,13 +97,15 @@ public class PatrolContributionPageEditor extends EditorPart{
 
 	@Override
 	public void createPartControl(Composite parent) {
-		Composite main = toolkit.createComposite(parent);
-		main.setLayout(new GridLayout(1, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		ScrolledForm main = toolkit.createScrolledForm(parent);
+		
+		main.getBody().setLayout(new GridLayout(1, false));
+		main.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		List<IPatrolEditorContribution> parts = findContributions();
 		for (IPatrolEditorContribution part : parts){
-			final Section sec = toolkit.createSection(main, Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
+			final Section sec = toolkit.createSection(main.getBody(), Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
 			sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			sec.addExpansionListener(new ExpansionAdapter() {
 				@Override

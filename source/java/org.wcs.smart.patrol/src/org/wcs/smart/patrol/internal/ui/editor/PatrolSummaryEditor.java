@@ -71,6 +71,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
@@ -111,7 +112,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * 
 	 */
 	private static final String EDIT_LABEL = PatrolUtils.EDIT_LINK_TEXT;
-
+	private static final int WIDTH_HINT = 50;	//width hint for fields
+	
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolSummaryEditor"; //$NON-NLS-1$
 
 	private boolean isDirty = false;
@@ -163,15 +165,15 @@ public class PatrolSummaryEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 
-		Composite container = toolkit.createComposite(parent, SWT.NONE);
+		ScrolledForm container = toolkit.createScrolledForm(parent);
 
 		toolkit.paintBordersFor(container);
-		container.setLayout(new GridLayout(1, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		container.getBody().setLayout(new GridLayout(1, false));
+		container.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 
 		
-		frmPatrolSummary = toolkit.createForm(container);
+		frmPatrolSummary = toolkit.createForm(container.getBody());
 		frmPatrolSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		GridLayout layout = new GridLayout(1, true);
@@ -214,24 +216,14 @@ public class PatrolSummaryEditor extends EditorPart {
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)right.getLayout()).marginLeft = 10;
 		
-		
-		toolkit.createLabel(right, Messages.PatrolSummaryEditor_PatrolId_Label);
-		txtPatrolId = toolkit.createFormText(right, false);
-		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		txtPatrolId.setData(FormToolkit.KEY_DRAW_BORDER, null);
-		
-	
-		editId = createEditLink(toolkit, right, new PatrolIdComposite());
-		editId.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
-				
-		
+		/* left side */		
 		toolkit.createLabel(left, Messages.PatrolSummaryEditor_PatrolType_Label);
 		txtPatrolType = toolkit.createFormText(left, false);
 		txtPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		Label lbl = null;
 		
-		if (editor.getPatrol().getLegs().size() <=1 ){
+		if (editor.getPatrol().getLegs().size() <= 1 ){
 			lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
 			txtTransport = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
 			txtTransport.setEditable(false);
@@ -250,42 +242,23 @@ public class PatrolSummaryEditor extends EditorPart {
 		txtMandate = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
 		txtMandate.setEditable(false);
 		txtMandate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		 createEditLink(toolkit, left, new PatrolMandateComposite()); 
+		((GridData)txtMandate.getLayoutData()).widthHint = WIDTH_HINT;
+		createEditLink(toolkit, left, new PatrolMandateComposite()); 
 		
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Team_Label);
 		txtTeam= toolkit.createText(left, ""); //$NON-NLS-1$
 		txtTeam .setEditable(false);
 		txtTeam .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		 createEditLink(toolkit, left, new TeamComposite()); 
+		((GridData)txtTeam.getLayoutData()).widthHint = WIDTH_HINT;
+		createEditLink(toolkit, left, new TeamComposite()); 
 	
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Station_Label);
 		txtStation = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtStation .setEditable(false);
 		txtStation .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtStation.getLayoutData()).widthHint = WIDTH_HINT;
 		createEditLink(toolkit, left, new StationComposite()); 
 
-		lbl = toolkit.createLabel(right, Messages.PatrolSummaryEditor_Objective_Label);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		txtObjective = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
-		txtObjective .setEditable(false);
-		txtObjective .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		((GridData)txtObjective.getLayoutData()).heightHint=80;
-		((GridData)txtObjective.getLayoutData()).widthHint=100;
-		editObjective = createEditLink(toolkit, right, new ObjectiveComposite());
-		editObjective.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
-		
-		
-		lbl = toolkit.createLabel(right, Messages.PatrolSummaryEditor_Comment_Label);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		txtComment = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
-		txtComment.setEditable(false);
-		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		((GridData)txtComment.getLayoutData()).heightHint=80;
-		((GridData)txtComment.getLayoutData()).widthHint=100;
-		editComment = createEditLink(toolkit, right, new CommentComposite());
-		editComment.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false,1,1));
-		
-		
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Member_Label);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		
@@ -294,7 +267,37 @@ public class PatrolSummaryEditor extends EditorPart {
 		employeeList.setContentProvider(ArrayContentProvider.getInstance());
 		employeeList.setLabelProvider(new EmployeeLabelProvider());
 		employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-
+		//note: layout data on employeeTable is set up below
+		
+		/* right side */
+		toolkit.createLabel(right, Messages.PatrolSummaryEditor_PatrolId_Label);
+		txtPatrolId = toolkit.createFormText(right, false);
+		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtPatrolId.getLayoutData()).widthHint = WIDTH_HINT;
+		txtPatrolId.setData(FormToolkit.KEY_DRAW_BORDER, null);
+		editId = createEditLink(toolkit, right, new PatrolIdComposite());
+		editId.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
+		
+		lbl = toolkit.createLabel(right, Messages.PatrolSummaryEditor_Objective_Label);
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		txtObjective = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
+		txtObjective .setEditable(false);
+		txtObjective .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		((GridData)txtObjective.getLayoutData()).widthHint = WIDTH_HINT;
+		((GridData)txtObjective.getLayoutData()).heightHint = 100;
+		editObjective = createEditLink(toolkit, right, new ObjectiveComposite());
+		editObjective.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false, 1, 1));
+		
+		lbl = toolkit.createLabel(right, Messages.PatrolSummaryEditor_Comment_Label);
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		txtComment = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
+		txtComment.setEditable(false);
+		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		((GridData)txtComment.getLayoutData()).widthHint = WIDTH_HINT;
+		((GridData)txtComment.getLayoutData()).heightHint = 100;
+		editComment = createEditLink(toolkit, right, new CommentComposite());
+		editComment.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false,1,1));
+		
 		/* ----- Patrol Days / Legs Section ------- */
 		Section dataSection = toolkit.createSection(frmPatrolSummary.getBody(), Section.TITLE_BAR | Section.EXPANDED  );
 		dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -350,7 +353,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			lbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label,SWT.WRAP);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
-		
+		((GridData)employeeTable.getLayoutData()).widthHint = WIDTH_HINT;
 		
 		/* --- Patrol days table  ---*/
 		Composite compTable = toolkit.createComposite(compData);
