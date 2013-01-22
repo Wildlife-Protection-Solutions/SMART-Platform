@@ -23,6 +23,7 @@ package org.wcs.smart.common.attachment;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,7 +31,6 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -61,6 +61,8 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 	private WritableList attachments = new WritableList();
 	private Button btnRemove;
 	private Button btnOpen;
+
+	private List<IAttachmentsChangeListener> attachmentsChangeListeners = new ArrayList<IAttachmentsChangeListener>();
 	
 	public AttachmentComposite(Composite parent, int style) {
 		super(parent, style);
@@ -117,6 +119,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 					wpa.setFilename(f.getName());
 					attachments.add(wpa);
 				}
+				fireAttachmentsChangeListeners();
 				tblAttachments.refresh();
 			}
 		});
@@ -128,9 +131,12 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
-				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-					ISmartAttachment type = (ISmartAttachment) iterator.next();
-					attachments.remove(type);
+				if (!sel.isEmpty()) {
+					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+						ISmartAttachment type = (ISmartAttachment) iterator.next();
+						attachments.remove(type);
+					}
+					fireAttachmentsChangeListeners();
 				}
 				tblAttachments.refresh();
 			}
@@ -176,4 +182,18 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		return this.attachments;
 	}
 
+	public void addAttachmentsChangeListener(IAttachmentsChangeListener listener) {
+		attachmentsChangeListeners.add(listener);
+	}
+
+	public void removeAttachmentsChangeListener(IAttachmentsChangeListener listener) {
+		attachmentsChangeListeners.remove(listener);
+	}
+	
+	private void fireAttachmentsChangeListeners() {
+		for (IAttachmentsChangeListener listener : attachmentsChangeListeners) {
+			listener.attachmentsChanged();
+		}
+	}
+	
 }
