@@ -21,10 +21,14 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.intelligence.IntelligenceEventManager;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceComposite;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceComposite.CompositeMode;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory;
@@ -39,9 +43,22 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 
+	private IntelligenceComposite content;
+	
 	private PanelType panelType;
 	private Intelligence intelligence;
 
+	IInputChangeListener inputChangeListener = new IInputChangeListener() {			
+		@Override
+		public void inputChanged() {
+			setChangesMade(true);
+//			EditItelligenceItemDialog.this.setErrorMessage(item.getErrorMessage());
+			if (getButton(IDialogConstants.OK_ID) != null){
+				getButton(IDialogConstants.OK_ID).setEnabled(content.isDataValid());
+			}
+		}
+	};
+	
 	/**
 	 * @param parent
 	 * @param panelType
@@ -55,16 +72,22 @@ public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected Composite createContent(Composite parent) {
-		IntelligenceComposite content = IntelligenceCompositeFactory.getInstance().createComposite(parent, SWT.NONE, panelType);
+		content = IntelligenceCompositeFactory.getInstance().createComposite(parent, SWT.NONE, panelType);
 		content.initFromModel(intelligence);
 		content.setMode(CompositeMode.EDITOR);
+		content.addInputChangeListener(inputChangeListener);
 		setMessage(content.getMessage());
 		return content;
 	}
 
 	@Override
 	protected boolean performSave() {
-		// TODO Auto-generated method stub
+		content.updateModel(intelligence);
+		if (IntelligenceHibernateManager.saveIntelligence(intelligence)) {
+			setChangesMade(false);
+			IntelligenceEventManager.getInstance().intelligenceChanged(0, intelligence);
+			return true;
+		}
 		return false;
 	}
 	

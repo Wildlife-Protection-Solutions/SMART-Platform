@@ -38,6 +38,7 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 	private CompositeMode mode = CompositeMode.WIZARD;
 	private String message;
 	private List<IDataValidStateListener> stateListeners = new ArrayList<IDataValidStateListener>();
+	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
 
 	/**
 	 * @param parent
@@ -64,12 +65,26 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 		stateListeners.remove(listener);
 	}
 	
-	public void fireDataValidStateListeners() {
+	protected void fireDataValidStateListeners() {
 		for (IDataValidStateListener listener : stateListeners) {
 			listener.stateChanged(isDataValid());
 		}
 	}
 
+	public void addInputChangeListener(IInputChangeListener listener) {
+		inputListeners.add(listener);
+	}
+
+	public void removeInputChangeListener(IInputChangeListener listener) {
+		inputListeners.remove(listener);
+	}
+	
+	protected void fireInputChangeListeners() {
+		for (IInputChangeListener listener : inputListeners) {
+			listener.inputChanged();
+		}
+	}
+	
 	public CompositeMode getMode() {
 		return mode;
 	}

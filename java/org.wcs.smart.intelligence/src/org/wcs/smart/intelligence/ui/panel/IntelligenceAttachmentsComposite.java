@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.common.attachment.AttachmentComposite;
+import org.wcs.smart.common.attachment.IAttachmentsChangeListener;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -41,7 +42,7 @@ import org.wcs.smart.intelligence.model.IntelligenceAttachment;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceAttachmentsComposite extends IntelligenceComposite {
+public class IntelligenceAttachmentsComposite extends IntelligenceComposite implements IAttachmentsChangeListener {
 
 	private AttachmentComposite<IntelligenceAttachment> attachmentComposite;
 
@@ -64,12 +65,15 @@ public class IntelligenceAttachmentsComposite extends IntelligenceComposite {
 				return new IntelligenceAttachment();
 			}
 		};
+		attachmentComposite.addAttachmentsChangeListener(this);
 	}
 
 	@Override
 	public boolean updateModel(Intelligence intelligence) {
+		//create a copy of attachments array 
+		//(we don't want to remove from original array as this will effect gui)
+		List<IntelligenceAttachment> attachments = new ArrayList<IntelligenceAttachment>(attachmentComposite.getAttchments());
 		//Update the attachments
-		List<IntelligenceAttachment> attachments = attachmentComposite.getAttchments();
 		if (intelligence.getAttachments() == null) {
 			intelligence.setAttachments(new ArrayList<IntelligenceAttachment>());
 		}
@@ -92,8 +96,13 @@ public class IntelligenceAttachmentsComposite extends IntelligenceComposite {
 
 	@Override
 	public void initFromModel(Intelligence intelligence) {
-		// TODO Auto-generated method stub
+		attachmentComposite.getAttchments().clear();
+		attachmentComposite.getAttchments().addAll(intelligence.getAttachments());
+	}
 
+	@Override
+	public void attachmentsChanged() {
+		fireInputChangeListeners();
 	}
 
 }
