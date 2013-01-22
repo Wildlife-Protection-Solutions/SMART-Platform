@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -101,7 +102,11 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
 			e.printStackTrace();
 		}
     	//IntelligenceHibernateManager.saveIntelligence(intelligence);
-    	return Status.OK_STATUS.equals(saveIntelligenceJob.getResult());
+    	if (Status.OK_STATUS.equals(saveIntelligenceJob.getResult())) {
+        	IntelligenceEventManager.getInstance().intelligenceAdded(intelligence);
+        	return true;
+    	}
+		return false;
     }
 
     /**

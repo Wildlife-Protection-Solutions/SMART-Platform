@@ -104,6 +104,7 @@ public class IntelligenceEditor extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
+		setPartName(((IntelligenceEditorInput)getEditorInput()).getName());		
 		
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
