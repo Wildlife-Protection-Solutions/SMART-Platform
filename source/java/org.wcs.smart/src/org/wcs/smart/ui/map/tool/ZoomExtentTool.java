@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.birt.map.tools;
+package org.wcs.smart.ui.map.tool;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -30,7 +30,8 @@ import net.refractions.udig.project.ui.tool.AbstractActionTool;
 
 public class ZoomExtentTool extends AbstractActionTool {
 
-	public static final String ID = "org.wcs.smart.birt.map.tools.ZoomExtents"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.ui.map.tool.ZoomExtentsTool"; //$NON-NLS-1$
+
 	public ZoomExtentTool() {
 	}
 

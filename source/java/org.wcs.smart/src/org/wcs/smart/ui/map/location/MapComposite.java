@@ -49,6 +49,9 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapInfoAreaComposite;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.location.tool.SelectionTool;
+import org.wcs.smart.ui.map.tool.PanTool;
+import org.wcs.smart.ui.map.tool.ZoomExtentTool;
+import org.wcs.smart.ui.map.tool.ZoomTool;
 
 /**
  * Map Composite
@@ -93,16 +96,16 @@ public class MapComposite extends Composite implements MapPart {
 
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		String[] thisTools = new String[] {
-				MapToolComposite.UDIG_ZOOM_EXTENT_ID,
-				MapToolComposite.UDIG_PAN_ID,
-				MapToolComposite.UDIG_ZOOM_ID,
+				ZoomExtentTool.ID,
+				PanTool.ID,
+				ZoomTool.ID,
 				SelectionTool.ID };
 
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(this);
 		new MapInfoAreaComposite(this, SWT.NONE, mapViewer) ;
 
-		tools.selectTool(MapToolComposite.UDIG_PAN_ID);
+		tools.selectTool(PanTool.ID);
 
 		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, true, null);
 		// we need to do this because this map is in a dialog box and
