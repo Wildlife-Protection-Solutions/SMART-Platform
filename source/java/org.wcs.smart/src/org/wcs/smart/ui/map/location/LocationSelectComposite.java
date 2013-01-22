@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.map.location;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,6 +72,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 	private Button addButton;
 	private Button removeButton;
 
+	private List<ILocationPointsChangeListener> pointsChangeListeners = new ArrayList<ILocationPointsChangeListener>();
+	
 	/**
 	 * @param parent
 	 * @param style
@@ -148,8 +151,11 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection sel = (IStructuredSelection) pointsListViewer.getSelection();
-				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-					points.remove(iterator.next());
+				if (!sel.isEmpty()) {
+					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+						points.remove(iterator.next());
+					}
+					fireLocationPointsChangeListeners();
 				}
 				pointsListViewer.refresh();
 			}
@@ -202,6 +208,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 		point.setX(x);
 		point.setY(y);
 		points.add(point);
+		fireLocationPointsChangeListeners();
 	}
 
 	protected abstract ISmartPoint createNewPoint();
@@ -210,4 +217,19 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 	public List<T> getPoints() {
 		return points;
 	}
+
+	public void addLocationPointsChangeListener(ILocationPointsChangeListener listener) {
+		pointsChangeListeners.add(listener);
+	}
+
+	public void removeLocationPointsChangeListener(ILocationPointsChangeListener listener) {
+		pointsChangeListeners.remove(listener);
+	}
+	
+	protected void fireLocationPointsChangeListeners() {
+		for (ILocationPointsChangeListener listener : pointsChangeListeners) {
+			listener.locationPointsChanged();
+		}
+	}
+	
 }
