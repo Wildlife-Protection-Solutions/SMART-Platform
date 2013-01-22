@@ -770,6 +770,38 @@
             onToolbar="true"
             tooltip="%tool.selectPoint.tooltip">
       </modalTool>
+      <category
+            id="org.wcs.smart.ui.map.tool">
+      </category>
+      <actionTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.ui.map.tool.ZoomExtentTool"
+            icon="images/icons/elcl16/zoom_layers.png"
+            id="org.wcs.smart.ui.map.tool.ZoomExtentsTool"
+            name="Zoom Extents"
+            onToolbar="false"
+            tooltip="Zoom to map extents">
+      </actionTool>
+      <modalTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.ui.map.tool.ZoomTool"
+            icon="images/icons/elcl16/zoom_tool.png"
+            id="org.wcs.smart.ui.map.tool.ZoomTool"
+            name="Zoom Tool"
+            onToolbar="false"
+            toolCursorId="zoomCursor"
+            tooltip="Zoom the map">
+      </modalTool>
+      <modalTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.ui.map.tool.PanTool"
+            icon="images/icons/elcl16/pan_tool.png"
+            id="org.wcs.smart.ui.map.tool.PanTool"
+            name="Pan Tool"
+            onToolbar="false"
+            toolCursorId="move"
+            tooltip="Pans the map">
+      </modalTool>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">

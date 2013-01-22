@@ -64,13 +64,13 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.report.birt.map.internal.Messages;
-import org.wcs.smart.report.birt.map.tools.PanTool;
-import org.wcs.smart.report.birt.map.tools.ZoomExtentTool;
-import org.wcs.smart.report.birt.map.tools.ZoomTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
 import org.wcs.smart.ui.map.ScaleRatioComposite;
+import org.wcs.smart.ui.map.tool.PanTool;
+import org.wcs.smart.ui.map.tool.ZoomExtentTool;
+import org.wcs.smart.ui.map.tool.ZoomTool;
 
 import com.vividsolutions.jts.geom.Coordinate;
 

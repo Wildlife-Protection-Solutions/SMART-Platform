@@ -149,40 +149,5 @@
          </adapter>
       </adaptable>
    </extension>
-   <extension
-         point="net.refractions.udig.project.ui.tool">
-      <category
-            id="org.wcs.smart.udig.report.maptools">
-      </category>
-      <actionTool
-            categoryId="org.wcs.smart.udig.report.maptools"
-            class="org.wcs.smart.report.birt.map.tools.ZoomExtentTool"
-            icon="images/icons/etool16/zoom_layers.png"
-            id="org.wcs.smart.birt.map.tools.ZoomExtents"
-            name="Zoom Extents"
-            onToolbar="false"
-            tooltip="Zoom to map extents">
-      </actionTool>
-      <modalTool
-            categoryId="org.wcs.smart.udig.report.maptools"
-            class="org.wcs.smart.report.birt.map.tools.ZoomTool"
-            icon="images/icons/etool16/zoom_mode.gif"
-            id="org.wcs.smart.birt.map.tools.Zoom"
-            name="%zoomlTool.name"
-            onToolbar="false"
-            toolCursorId="zoomCursor"
-            tooltip="%zoomlTool.tooltip">
-      </modalTool>
-      <modalTool
-            categoryId="org.wcs.smart.udig.report.maptools"
-            class="org.wcs.smart.report.birt.map.tools.PanTool"
-            icon="images/icons/etool16/pan_mode.gif"
-            id="org.wcs.smart.birt.map.tools.Pan"
-            name="%panTool.name"
-            onToolbar="false"
-            toolCursorId="move"
-            tooltip="%panTool.tooltip">
-      </modalTool>
-   </extension>
 
 </plugin>
