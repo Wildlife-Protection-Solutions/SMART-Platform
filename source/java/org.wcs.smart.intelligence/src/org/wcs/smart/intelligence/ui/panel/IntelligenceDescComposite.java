@@ -69,6 +69,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				fireDataValidStateListeners();
+				fireInputChangeListeners();
 			}
 		});
 
@@ -87,6 +88,13 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         gd.horizontalIndent = 8;
 
         description.setLayoutData(gd);
+        description.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				fireInputChangeListeners();
+			}
+		});
+        
 	}
 	
 	@Override

@@ -46,9 +46,13 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.intelligence.IntelligenceEventManager;
+import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
+import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 
 /**
@@ -78,12 +82,29 @@ public class IntelligenceEditor extends EditorPart {
 	private TableViewer attachmentsList;
 
 	/**
+	 * listener for intelligence change events.
+	 */
+	private IIntelligenceEventListener intelligenceListener = new IIntelligenceEventListener(){
+		@Override
+		public void eventFired(int type, Intelligence source) {
+			initValues();
+		}
+	};
+
+	/**
 	 * Default constructor
 	 */
 	public IntelligenceEditor() {
 		super();
+		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
 	}
 
+	@Override
+	public void dispose() {
+		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
+		super.dispose();
+	}
+	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		if (!(input instanceof IntelligenceEditorInput)) {

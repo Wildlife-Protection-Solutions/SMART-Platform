@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
+import org.wcs.smart.ui.map.location.ILocationPointsChangeListener;
 import org.wcs.smart.ui.map.location.ISmartPoint;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
@@ -41,7 +42,7 @@ import org.wcs.smart.ui.map.location.LocationSelectComposite;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceLocationComposite extends IntelligenceComposite {
+public class IntelligenceLocationComposite extends IntelligenceComposite implements ILocationPointsChangeListener {
 
 	private LocationSelectComposite<IntelligencePoint> locationSelect;
 
@@ -66,6 +67,7 @@ public class IntelligenceLocationComposite extends IntelligenceComposite {
 				return new IntelligencePoint();
 			}
         };
+        locationSelect.addLocationPointsChangeListener(this);
 	}
 	
 	/* (non-Javadoc)
@@ -73,8 +75,9 @@ public class IntelligenceLocationComposite extends IntelligenceComposite {
 	 */
 	@Override
 	public boolean updateModel(Intelligence intelligence) {
+		//create a copu of points array from composite (we don't want to remove from original array as this will effect gui)
+		List<IntelligencePoint> points = new ArrayList<IntelligencePoint>(locationSelect.getPoints());
 		//Update the points
-		List<IntelligencePoint> points = locationSelect.getPoints();
 		if (intelligence.getPoints() == null) {
 			intelligence.setPoints(new ArrayList<IntelligencePoint>());
 		}
@@ -99,6 +102,11 @@ public class IntelligenceLocationComposite extends IntelligenceComposite {
 	public void initFromModel(Intelligence intelligence) {
 		locationSelect.getPoints().clear();
 		locationSelect.getPoints().addAll(intelligence.getPoints());
+	}
+
+	@Override
+	public void locationPointsChanged() {
+		fireInputChangeListeners();
 	}
 
 }

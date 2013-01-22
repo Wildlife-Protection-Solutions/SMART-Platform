@@ -24,6 +24,8 @@ package org.wcs.smart.intelligence.ui.panel;
 import java.util.Calendar;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -64,6 +66,12 @@ public class IntelligenceReceivedComposite extends IntelligenceComposite {
         dtReceivedDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
         dtReceivedDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtReceivedDate.getLayoutData()).horizontalIndent = 10;
+        dtReceivedDate.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+        		fireInputChangeListeners();
+        	}
+		});
 	}
 
 	@Override
