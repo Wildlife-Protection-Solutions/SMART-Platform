@@ -54,6 +54,8 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	public void createControl(Composite parent) {
 		patrolIdComp = new PatrolIdComposite();
 		patrolIdComp.addChangeListener(this);
+		
+		setTitle(Messages.PatrolIdWizardPage_Title);
 		setMessage(Messages.PatrolIdWizardPage_PageMessage);
 		super.setControl(patrolIdComp.createComponent(parent, SWT.NONE));
 		

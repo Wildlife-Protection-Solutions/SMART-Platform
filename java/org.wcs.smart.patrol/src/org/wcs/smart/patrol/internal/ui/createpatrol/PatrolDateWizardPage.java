@@ -75,6 +75,7 @@ public class PatrolDateWizardPage extends NewPatrolWizardPage {
 			}
 		});
 		
+		setTitle(Messages.PatrolDateWizardPage_Title);
 		setMessage(Messages.PatrolDateWizardPage_PageMessage);
 		super.setControl(main);
 		

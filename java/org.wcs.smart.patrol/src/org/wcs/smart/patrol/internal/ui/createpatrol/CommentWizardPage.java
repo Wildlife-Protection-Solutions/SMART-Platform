@@ -54,6 +54,7 @@ public class CommentWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		commentComp = new CommentComposite();
+		setTitle(Messages.CommentWizardPage_Title);
 		setMessage(Messages.CommentWizardPage_PageMessage);
 		super.setControl(commentComp.createComponent(parent, SWT.NONE));
 	}

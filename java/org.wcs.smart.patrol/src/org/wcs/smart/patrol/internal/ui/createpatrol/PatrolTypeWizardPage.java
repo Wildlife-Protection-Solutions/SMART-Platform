@@ -98,6 +98,7 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 			setPageComplete(false);
 		}
 		
+		setTitle(Messages.PatrolTypeWizardPage_Title);
 		setMessage(Messages.PatrolTypeWizardPage_PageMessage);
 		super.setControl(main);
 

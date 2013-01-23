@@ -101,6 +101,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		});
 		
 		setErrorMessage(null);
+		setTitle(Messages.PatrolMemberWizardPage_Title);
 		setMessage(Messages.PatrolMemberWizardPage_PageMessage);
 		super.setControl(main);
 	}

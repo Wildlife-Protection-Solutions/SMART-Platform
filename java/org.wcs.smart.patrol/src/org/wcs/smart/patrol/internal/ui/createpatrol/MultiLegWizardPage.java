@@ -109,6 +109,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		lbl.setLayoutData(gd);
 		
+		setTitle(Messages.MultiLegWizardPage_Title);
 		setMessage(Messages.MultiLegWizardPage_PageMessage);
 		super.setControl(main);
 	}

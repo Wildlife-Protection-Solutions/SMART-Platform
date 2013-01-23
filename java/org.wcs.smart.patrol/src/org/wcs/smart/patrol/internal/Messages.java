@@ -59,6 +59,7 @@ public class Messages extends NLS {
 	public static String CommentComposite_Comments_Label;
 	public static String CommentComposite_Title;
 	public static String CommentWizardPage_PageMessage;
+	public static String CommentWizardPage_Title;
 	public static String CreatePatrolWizard_ErrorCreatingWizardPages;
 	public static String CreatePatrolWizard_Title;
 	public static String DateComposite_EndDate_Label;
@@ -222,6 +223,7 @@ public class Messages extends NLS {
 	public static String MultiLegWizardPage_OpNo;
 	public static String MultiLegWizardPage_OpYes;
 	public static String MultiLegWizardPage_PageMessage;
+	public static String MultiLegWizardPage_Title;
 	public static String MultiPatrolExportDialog_AttachmentInfoLabel;
 	public static String MultiPatrolExportDialog_BrowseButton;
 	public static String MultiPatrolExportDialog_DeselectAll_Label;
@@ -252,6 +254,7 @@ public class Messages extends NLS {
 	public static String ObservationWizardPage_PageName;
 	public static String Patrol_SystemGenerateId_Name;
 	public static String PatrolArmedWizardPage_PageMessage;
+	public static String PatrolArmedWizardPage_Title;
 	public static String PatrolCaDeleteHandler_Progress_DeletingMandates;
 	public static String PatrolCaDeleteHandler_Progress_DeletingPatrols;
 	public static String PatrolCaDeleteHandler_Progress_DeletingTeams;
@@ -263,6 +266,7 @@ public class Messages extends NLS {
 	public static String PatrolDataSourceFactory_PatrolDataSourceName;
 	public static String PatrolDataSourceFactory_PatrolUuidParameterName;
 	public static String PatrolDateWizardPage_PageMessage;
+	public static String PatrolDateWizardPage_Title;
 	public static String PatrolDayEditor_PatrolDayTitle;
 	public static String PatrolDayEditor_CanNotEditPatrol;
 	public static String PatrolDayEditor_Error_LoadingPatrolData;
@@ -328,6 +332,7 @@ public class Messages extends NLS {
 	public static String PatrolIdComposite_Id_Label;
 	public static String PatrolIdComposite_Title;
 	public static String PatrolIdWizardPage_PageMessage;
+	public static String PatrolIdWizardPage_Title;
 	public static String PatrolImporter_ConfirmationMessage;
 	public static String PatrolImporter_Error_ReadingPatrolXmlFile;
 	public static String PatrolImporter_Error_UnzipError;
@@ -343,6 +348,8 @@ public class Messages extends NLS {
 	public static String PatrolImporter_Progress_Saving;
 	public static String PatrolImporter_Progress_TaskName;
 	public static String PatrolImporter_Progress_Validating;
+	public static String PatrolLeaderWizardPage_LeaderPilotTitle;
+	public static String PatrolLeaderWizardPage_LeaderTitle;
 	public static String PatrolLeaderWizardPage_PageMessage_Leader;
 	public static String PatrolLeaderWizardPage_PageMessage_LeaderPilot;
 	public static String PatrolLegDayInputComposite_AddWaypoint_Button;
@@ -417,6 +424,7 @@ public class Messages extends NLS {
 	public static String PatrolLegsComposite_SplitPatrol_Button;
 	public static String PatrolLegsComposite_Title;
 	public static String PatrolLegsWizardPage_PageMessage;
+	public static String PatrolLegsWizardPage_Title;
 	public static String PatrolLegSplitDialog_AddEmployees_ToolTip;
 	public static String PatrolLegSplitDialog_DateGroupsJoined_Label;
 	public static String PatrolLegSplitDialog_DateofSplit_Label;
@@ -482,6 +490,7 @@ public class Messages extends NLS {
 	public static String PatrolMandatePropertyPage_InvalidName_DialogTitle;
 	public static String PatrolMandatePropertyPage_Language_Label;
 	public static String PatrolMandateWizardPage_PageMessage;
+	public static String PatrolMandateWizardPage_Title;
 	public static String PatrolMapPageEditor_AddLayersJobName;
 	public static String PatrolMapPageEditor_Error_LoadingMapPage;
 	public static String PatrolMapPageEditor_Error_RefreshingLayers;
@@ -490,7 +499,9 @@ public class Messages extends NLS {
 	public static String PatrolMemberWizardPage_Error_NoEmployees;
 	public static String PatrolMemberWizardPage_PageMessage;
 	public static String PatrolMemberWizardPage_SelectEmployees_Label;
+	public static String PatrolMemberWizardPage_Title;
 	public static String PatrolObjectiveWizardPage_PageMessage;
+	public static String PatrolObjectiveWizardPage_Title;
 	public static String PatrolOptionsPropertyPage_DialogMessage;
 	public static String PatrolOptionsPropertyPage_DialogTitle;
 	public static String PatrolOptionsPropertyPage_DistanceDirection_DescLabel;
@@ -571,6 +582,7 @@ public class Messages extends NLS {
 	public static String PatrolTypeWizardPage_Error_NoTypesFound;
 	public static String PatrolTypeWizardPage_PageMessage;
 	public static String PatrolTypeWizardPage_SelectType_Label;
+	public static String PatrolTypeWizardPage_Title;
 	public static String PatrolUtils_Edit_Link_Label;
 	public static String PatrolViewFilter_ContainsLabel;
 	public static String PatrolViewFilter_CustomDatesOp;
@@ -601,6 +613,7 @@ public class Messages extends NLS {
 	public static String StationDeleteAdvisor_DeleteError;
 	public static String StationDeleteAdvisor_InvalidObjectType;
 	public static String StationTeamWizardPage_PageMessage;
+	public static String StationTeamWizardPage_Title;
 	public static String Team_DescriptionFieldName;
 	public static String Team_MandateFieldName;
 	public static String Team_Name;
@@ -628,6 +641,7 @@ public class Messages extends NLS {
 	public static String TransportTypeDeleteAdvisor_InvalidObjectType;
 	public static String TransportTypeWizardPage_MultiTransportType_InfoLabel;
 	public static String TransportTypeWizardPage_PageMessage;
+	public static String TransportTypeWizardPage_Title;
 	public static String TreeAttributeField_InvalidTreeValue;
 	public static String Waypoint_ErrorImportingAttachment;
 	public static String WaypointInfoView_DateTimeLabel;
