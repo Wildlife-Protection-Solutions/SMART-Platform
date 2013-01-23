@@ -101,4 +101,29 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		return true;
 	}
 
+	/**
+	 * Delete a given intelligence from the database.
+	 * 
+	 * @param intelligence the intelligence to delete
+	 * @return <code>true</code> if deleted successfully, <code>false</code> if error
+	 */
+	public static boolean deleteIntelligence(Intelligence intelligence) {
+		Interceptor interceptor = new AttachmentInterceptor();
+		Session session = SmartHibernateManager.openSession(interceptor);
+		try {
+			session.beginTransaction();
+			try {
+				session.delete(intelligence);
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				IntelligencePlugIn.displayLog("Unable to delete intelligence." + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return false;
+			}
+		} finally {
+			session.close();
+		}
+		return true;
+	}
+	
 }

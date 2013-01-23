@@ -37,7 +37,7 @@ public class IntelligencePerspective implements IPerspectiveFactory {
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
 		layout.setEditorAreaVisible(true);
-		layout.addView(IntelligenceListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
+		layout.addView(IntelligenceListView.ID, IPageLayout.LEFT, 0.25f, IPageLayout.ID_EDITOR_AREA);
 		layout.getViewLayout(IntelligenceListView.ID).setCloseable(false);
 	}
 

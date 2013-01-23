@@ -27,6 +27,28 @@
                tooltip="Show Intelligence Persepctive">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.intelligence.IntelligenceListView">
+         <command
+               commandId="org.wcs.smart.intelligence.DeleteIntelligence"
+               icon="images/etool16/delete.png"
+               label="Delete Intelligence"
+               style="push"
+               tooltip="Delete selected inteligence">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="true"
+            locationURI="popup:org.wcs.smart.intelligence.IntelligenceListView">
+         <command
+               commandId="org.wcs.smart.intelligence.DeleteIntelligence"
+               icon="images/etool16/delete.png"
+               label="Delete Intelligence"
+               style="push"
+               tooltip="Delete selected inteligence">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -38,6 +60,10 @@
             id="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
             name="Show Intelligence Persepctive">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.DeleteIntelligence"
+            name="Delete Intelligence">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -48,6 +74,10 @@
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.ShowIntelligencePersepctiveHandler"
             commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.DeleteIntelligenceHandler"
+            commandId="org.wcs.smart.intelligence.DeleteIntelligence">
       </handler>
    </extension>
    <extension

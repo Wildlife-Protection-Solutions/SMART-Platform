@@ -78,8 +78,8 @@ public class IntelligenceEventManager {
 	/**
 	 * Fires a Intelligence deleted event
 	 */
-	public void intelligenceDeleted(Intelligence Intelligence){
-		fireListeners(EventType.INTELLIGENCE_DELETED, -1, Intelligence);
+	public void intelligenceDeleted(Intelligence source){
+		fireListeners(EventType.INTELLIGENCE_DELETED, -1, source);
 	}
 	
 	/**
