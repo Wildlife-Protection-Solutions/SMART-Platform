@@ -32,6 +32,8 @@ import java.util.List;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -121,7 +123,13 @@ public class EmployeeSelectComposite extends Composite{
 		employeeListViewer.setLabelProvider(employeeLabelProvider);
 		employeeListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		employeeListViewer.setInput(allEmployees);
-		
+		((GridData)employeeListViewer.getControl().getLayoutData()).widthHint = 100;
+		employeeListViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				addEmployees();
+			}
+		});
 		Composite btnComposite = new Composite(this, SWT.NONE);
 		btnComposite.setLayout(new GridLayout(1, false));
 		btnComposite.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
@@ -150,6 +158,7 @@ public class EmployeeSelectComposite extends Composite{
 		selectedEmployeeListViewer.setLabelProvider(employeeLabelProvider);
 		selectedEmployeeListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		selectedEmployeeListViewer.setInput(selectedEmployees);
+		((GridData)selectedEmployeeListViewer.getControl().getLayoutData()).widthHint = 100;
 	}
 	
 	/**
