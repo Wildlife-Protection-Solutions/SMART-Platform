@@ -115,22 +115,4 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
     	return shortName != null && shortName.getText() != null && !shortName.getText().isEmpty();
 	}
 	
-	@Override
-	public void applyNewMode(CompositeMode state) {
-		switch (state) {
-		case WIZARD:
-			nameLabel.setVisible(true);
-			shortName.setVisible(true);
-			setMessage(Messages.IntelligenceDesc_Message);
-			break;
-		case EDITOR:
-			nameLabel.setVisible(false);
-			shortName.setVisible(false);
-			setMessage(Messages.IntelligenceDesc_Message);
-			break;
-		default:
-			break;
-		}
-		super.applyNewMode(state);
-	}
 }
