@@ -74,6 +74,7 @@ public class IntelligenceEditor extends EditorPart {
 	private Text txtDateReceived;
 	private Text txtSource;
 	private Text txtPatrolID;
+	private Text txtShortName;
 	private Text txtDescription;
 	private Text txtFromDate;
 	private Text txtToDate;
@@ -124,8 +125,6 @@ public class IntelligenceEditor extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		setPartName(((IntelligenceEditorInput)getEditorInput()).getName());		
-		
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
 		toolkit.paintBordersFor(container);
@@ -144,7 +143,6 @@ public class IntelligenceEditor extends EditorPart {
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)content.getLayout()).marginRight = 10;
 	
-		//Label label = null;
 		toolkit.createLabel(content, Messages.IntelligenceReceived_ReceivedDate_Label);
 		txtDateReceived = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtDateReceived.setEditable(false);
@@ -163,6 +161,11 @@ public class IntelligenceEditor extends EditorPart {
 		txtPatrolID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
+		toolkit.createLabel(content, Messages.IntelligenceDesc_Name_Label);
+		txtShortName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		txtShortName.setEditable(false);
+		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(toolkit, content, PanelType.DESCRIPTION); 
 		
 		toolkit.createLabel(content, Messages.IntelligenceDesc_Description_Label);
 		txtDescription = toolkit.createText(content, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
@@ -200,7 +203,6 @@ public class IntelligenceEditor extends EditorPart {
 		attachTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		createEditLink(toolkit, content, PanelType.ATTACHMENTS); 
 		
-		
 		initValues();
 	}
 
@@ -209,6 +211,7 @@ public class IntelligenceEditor extends EditorPart {
 	 */
 	private void initValues() {
 		Intelligence intel = getIntelligence();
+		setPartName(intel.getShortName());		
 		form.setText(intel.getShortName());
 		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
@@ -216,6 +219,7 @@ public class IntelligenceEditor extends EditorPart {
 		txtSource.setText(intel.getSource().getName());
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		txtPatrolID.setText(value);
+		txtShortName.setText(intel.getShortName());
 		txtDescription.setText(intel.getDescription());
 		txtFromDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getFromDate()));
 		value = intel.getToDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(intel.getToDate()) : txtFromDate.getText();
