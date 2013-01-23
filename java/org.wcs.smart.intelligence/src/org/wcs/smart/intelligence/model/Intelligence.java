@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.model;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -170,6 +171,27 @@ public class Intelligence {
 		this.attachments = attachments;
 	}
 
+	@Override
+	public int hashCode() {
+		if (uuid != null) {
+			return Arrays.hashCode(uuid);
+		}
+		return super.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Intelligence) {
+			Intelligence i = (Intelligence)other;
+			if (i.getUuid() == null && this.getUuid() == null) {
+				return super.equals(i);
+			}else if (i.getUuid() != null && this.getUuid() != null) {
+				return Arrays.equals(i.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * 
 	 * <p>
