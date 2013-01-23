@@ -27,6 +27,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 
 /**
@@ -43,7 +44,7 @@ public class ShowIntelligencePersepctiveHandler extends AbstractHandler {
 			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench()
 					.showPerspective(IntelligencePerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
 		} catch (WorkbenchException e) {
-			IntelligencePlugIn.displayLog("Error loading intelligence perspective.", e);
+			IntelligencePlugIn.displayLog(Messages.ShowIntelligencePersepctiveHandler_Error, e);
 		}
 		return null;
 	}

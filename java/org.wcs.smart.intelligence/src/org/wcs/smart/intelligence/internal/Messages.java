@@ -26,7 +26,11 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.wcs.smart.intelligence.internal.messages"; //$NON-NLS-1$
 
-    public static String IntelligenceAttachments_Attachments_Label;
+    public static String DeleteIntelligenceHandler_ConfirmationDialog_Message;
+
+	public static String DeleteIntelligenceHandler_ConfirmationDialog_Title;
+
+	public static String IntelligenceAttachments_Attachments_Label;
 
     public static String IntelligenceAttachments_Message;
 
@@ -58,9 +62,17 @@ public class Messages extends NLS {
 
 	public static String IntelligenceHandler_LoadingErrorMessage;
 
+	public static String IntelligenceHandler_LoadPerspective_Error;
+
     public static String IntelligenceHandler_TaskName;
 
 	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
+
+	public static String IntelligenceListView_Loading_Label;
+
+	public static String IntelligenceListView_UpdateJob_LoadTask_Name;
+
+	public static String IntelligenceListView_UpdateJob_Title;
 
 	public static String IntelligenceLocation_Location_Label;
 
@@ -101,6 +113,8 @@ public class Messages extends NLS {
 	public static String LoadPatrolIdJob_Name;
 
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
+
+	public static String ShowIntelligencePersepctiveHandler_Error;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
