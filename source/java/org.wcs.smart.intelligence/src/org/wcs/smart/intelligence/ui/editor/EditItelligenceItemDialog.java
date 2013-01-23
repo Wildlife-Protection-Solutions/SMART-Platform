@@ -30,7 +30,6 @@ import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceComposite;
-import org.wcs.smart.intelligence.ui.panel.IntelligenceComposite.CompositeMode;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -74,7 +73,6 @@ public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 	protected Composite createContent(Composite parent) {
 		content = IntelligenceCompositeFactory.getInstance().createComposite(parent, SWT.NONE, panelType);
 		content.initFromModel(intelligence);
-		content.setMode(CompositeMode.EDITOR);
 		content.addInputChangeListener(inputChangeListener);
 		setMessage(content.getMessage());
 		return content;

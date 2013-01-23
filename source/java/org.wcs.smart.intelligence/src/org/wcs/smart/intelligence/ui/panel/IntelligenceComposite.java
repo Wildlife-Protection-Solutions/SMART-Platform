@@ -35,7 +35,6 @@ import org.wcs.smart.intelligence.model.Intelligence;
  */
 public abstract class IntelligenceComposite extends Composite implements IIntelligenceModifier {
 
-	private CompositeMode mode = CompositeMode.WIZARD;
 	private String message;
 	private List<IDataValidStateListener> stateListeners = new ArrayList<IDataValidStateListener>();
 	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
@@ -85,36 +84,12 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 		}
 	}
 	
-	public CompositeMode getMode() {
-		return mode;
-	}
-
-	public void setMode(CompositeMode mode) {
-		if (this.mode != mode) {
-			this.mode = mode;
-			applyNewMode(this.mode);
-		}
-	}
-
-	protected void applyNewMode(CompositeMode state) {
-		//nothing; by default gui is the same in all modes
-	}
-	
 	public String getMessage() {
 		return message;
 	}
 
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-
-	/**
-	 * Possible states for composite.
-	 */
-	public enum CompositeMode {
-		WIZARD,
-		EDITOR;
 	}
 
 }
