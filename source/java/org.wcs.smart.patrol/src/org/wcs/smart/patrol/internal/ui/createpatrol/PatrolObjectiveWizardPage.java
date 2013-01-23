@@ -56,6 +56,7 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		objectiveComp = new ObjectiveComposite();
+		setTitle(Messages.PatrolObjectiveWizardPage_Title);
 		setMessage(Messages.PatrolObjectiveWizardPage_PageMessage);
 		super.setControl(objectiveComp.createComponent(parent, SWT.NONE));
 	}

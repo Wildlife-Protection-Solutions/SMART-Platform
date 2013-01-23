@@ -87,8 +87,10 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 		leaderComposite.setValues(p, session);
     	if (p.hasPilot()){
     		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_LeaderPilot);
+    		setTitle(Messages.PatrolLeaderWizardPage_LeaderPilotTitle);
     	}else{
     		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_Leader);
+    		setTitle(Messages.PatrolLeaderWizardPage_LeaderTitle);
     	}	
 	}
 }

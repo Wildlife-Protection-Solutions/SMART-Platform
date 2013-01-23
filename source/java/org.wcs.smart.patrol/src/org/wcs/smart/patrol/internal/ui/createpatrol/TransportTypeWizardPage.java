@@ -73,6 +73,8 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 		
 		
 		setControl(main);
+		
+		setTitle(Messages.TransportTypeWizardPage_Title);
 		setMessage(Messages.TransportTypeWizardPage_PageMessage);
 	}
 

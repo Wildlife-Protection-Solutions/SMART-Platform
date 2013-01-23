@@ -214,6 +214,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	@Override
 	public void createPartControl(Composite parent) {
 		getSite().getPage().addSelectionListener(this);
+		
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginWidth = gl.marginHeight = 0;
 		parent.setLayout(gl);
@@ -271,6 +272,19 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		updateUiJob.schedule();
 	}
 	
+	/**
+	 * Clears the current contents
+	 */
+	private void clearContents(){
+		selectedWaypoint = null;
+		for (Control c : infoSection.getBody().getChildren()) {
+			c.dispose();
+		}
+
+		lblWaypointId.setText(""); //$NON-NLS-1$
+		lblDateTime.setText(""); //$NON-NLS-1$
+	}
+	
 	@Override
 	public void setFocus() {
 		lblWaypointId.setFocus();
@@ -289,14 +303,19 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		}
 		IStructuredSelection ss = (IStructuredSelection) selection;
 		Object o = ss.getFirstElement();
+		boolean update = false;
 		if (o instanceof Waypoint) {
+			update = true;
 			updateContents((Waypoint) o);
 		}else if (o instanceof IAdaptable){
 			Waypoint wp = (Waypoint) ((IAdaptable)o).getAdapter(Waypoint.class);
 			if (wp != null){
+				update = true;
 				updateContents(wp);
 			}
 		}
-		
+		if (!update){
+			clearContents();
+		}
 	}
 }
