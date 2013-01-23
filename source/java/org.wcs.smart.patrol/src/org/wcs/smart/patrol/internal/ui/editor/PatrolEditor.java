@@ -225,8 +225,6 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void updatePartName(){
 		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
 		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + input.getPatrolId());
-		PatrolEventManager manager = PatrolEventManager.getInstance();
-		manager.patrolChanged(PatrolEventManager.PATROL_ID, patrol);
 	}
 	
 	
