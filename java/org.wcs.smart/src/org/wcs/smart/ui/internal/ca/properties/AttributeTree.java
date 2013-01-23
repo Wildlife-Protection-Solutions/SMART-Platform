@@ -198,6 +198,25 @@ public class AttributeTree {
 			}
 		});
 		
+		final Button btnImport = new Button(buttonPanel, SWT.NONE);
+		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnImport.setText(Messages.AttributeTree_ImportButtonText);
+		btnImport.setToolTipText(Messages.AttributeTree_ImportButtonTooltip);
+		btnImport.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				///TODO: fix this up
+				ImportAttributeProcessor processor = new ImportAttributeProcessor((Attribute)viewer.getInput());
+				processor.importAttribute();
+				refreshTree();
+				fireChangeListener();
+				viewer.expandToLevel(2);
+			}
+		});
+		
+		Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		final Button btnDisable = new Button(buttonPanel, SWT.NONE);
 		btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		btnDisable.setToolTipText(Messages.AttributeTree_DisableButton_ToolTip);
@@ -215,10 +234,7 @@ public class AttributeTree {
 				}
 			}
 		});
-		
-		Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+	
 		final Button btnDisableAll = new Button(buttonPanel, SWT.NONE);
 		btnDisableAll.setText(DialogConstants.DISABLEALL_BUTTON_TEXT);
 		btnDisableAll.setToolTipText(Messages.AttributeTree_DisableAll_Tooltip);

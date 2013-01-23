@@ -123,24 +123,9 @@ public class DataModelXmlToSmartConverter {
 		
 		if (syncLanguages){
 			//here we check to ensure default ca lang
-			boolean hasDefault = false;
-			for (LanguageType lt : xmlDataModel.getLanguages().getLanguages()){
-				if (lt.getCode().equals(targetCa.getDefaultLanguage().getCode())){
-					hasDefault = true;
-				}
-			}
-			if (!hasDefault){
-				
-				List<LanguageType> lls = xmlDataModel.getLanguages().getLanguages();
-				String[] values = new String[lls.size()];
-				for (int i = 0; i < values.length; i ++){
-					values[i] = lls.get(i).getCode();
-				}
-				LanguageSelectionDialog sd = new LanguageSelectionDialog(Display.getCurrent().getActiveShell(), targetCa, values);
-				if (sd.open() != IDialogConstants.OK_ID){
-					return null;
-				}
-				useAsDefault = (String)((StructuredSelection)sd.getSelection()).getFirstElement();
+			useAsDefault = checkLanguage(xmlDataModel.getLanguages().getLanguages(), targetCa);
+			if (useAsDefault == null){
+				return null;
 			}
 		}
 		
@@ -166,6 +151,37 @@ public class DataModelXmlToSmartConverter {
 		
 		return dm;
 	}
+	
+	/**
+	 * Returns the language code to use as the default language.
+	 * <p>
+	 * Any labels with the selected language code should be applied 
+	 * to the default language of the conservation area.
+	 * </p>
+	 * @param xmlLanguages
+	 * @param targetCa
+	 * @return null if should not continue (no default language found); otherwise
+	 * the language code to use as the default ca language
+	 */
+	public static String checkLanguage(List<LanguageType> xmlLanguages, ConservationArea targetCa){
+		//here we check to ensure default ca lang
+		for (LanguageType lt : xmlLanguages){
+			if (lt.getCode().equals(targetCa.getDefaultLanguage().getCode())){
+				return lt.getCode();
+			}
+		}
+		
+		String[] values = new String[xmlLanguages.size()];
+		for (int i = 0; i < values.length; i ++){
+			values[i] = xmlLanguages.get(i).getCode();
+		}
+		LanguageSelectionDialog sd = new LanguageSelectionDialog(Display.getCurrent().getActiveShell(), targetCa, values);
+		if (sd.open() != IDialogConstants.OK_ID){
+			return null;
+		}
+		return (String)((StructuredSelection)sd.getSelection()).getFirstElement();
+	}
+	
 	/**
 	 * Converts an xml data model file into a SMART
 	 * datamodel file.

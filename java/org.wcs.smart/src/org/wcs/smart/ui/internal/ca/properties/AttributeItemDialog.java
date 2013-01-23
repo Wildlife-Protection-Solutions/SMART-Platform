@@ -29,6 +29,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -38,7 +39,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Dialog box for adding/modifing an attribute list
+ * Dialog box for adding/modifying an attribute tree node or list
  * item.
  * 
  * @author Emily
@@ -94,10 +95,21 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 			protected Collection<? extends DmObject> getSiblings() {
 				return siblings;
 			}
+			
+			@Override
+			protected boolean validate(){
+				boolean ok = super.validate();
+				Button btn = getButton(IDialogConstants.OK_ID);
+				if (btn != null){
+					btn.setEnabled(!ok);
+				}
+				return ok;
+			}
 		};
 		
 		comp.createNameKeyFields(container, true, toUpdate.getKeyId() == null);
 		comp.initFields(toUpdate, lang);
+	
 		setMessage(Messages.AttributeItemDialog_Dialog_Message);
 		return container;
 		
@@ -109,6 +121,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		// create OK and Cancel buttons by default
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		comp.validate();
 	}
 	
 	@Override

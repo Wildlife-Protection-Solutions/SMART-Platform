@@ -301,7 +301,7 @@ public abstract class NameKeyComposite extends Composite {
 	
 	/**
 	 * Validate the name and key fields.  
-	 * @return
+	 * @return <code>true</code> if error on page; <code>false</code> otherwise
 	 */
 	protected boolean validate(){
 		boolean error = false;

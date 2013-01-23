@@ -54,6 +54,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
@@ -402,30 +403,41 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				return;
 			}
 		}
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
-			pmd.run(false, false, new IRunnableWithProgress() {
+			pmd.run(true, false, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try{
-					monitor.beginTask(Messages.DataModelPropertyPage_Progress_ExportingXml, 2);
-					DataModel dm = ((DataModel) viewer.getInput());
-					monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
-					org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = DataModelSmartToXmlConverter.convert(dm);
-					monitor.worked(1);
-					monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
-					FileOutputStream fout = new FileOutputStream(f);
-					try{
-						XmlSmartDataModelManager.writeDataModel(xml,fout);
-					}finally{
-						fout.close();
-					}
-					MessageDialog.openInformation(getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
-					monitor.done();
+						monitor.beginTask(Messages.DataModelPropertyPage_Progress_ExportingXml, 2);
+						DataModel dm = ((DataModel) viewer.getInput());
+						
+						monitor.subTask(Messages.DataModelPropertyPage_Progress_ConvertingXml);
+						org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = DataModelSmartToXmlConverter.convert(dm);
+						monitor.worked(1);
+						
+						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
+						FileOutputStream fout = new FileOutputStream(f);
+						try{
+							XmlSmartDataModelManager.writeDataModel(xml,fout);
+						}finally{
+							fout.close();
+						}
+						monitor.done();
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
+							}});
+						
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getShell(),Messages.DataModelPropertyPage_Error_XmlExport, ex);			
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openInformation(pmd.getShell(), Messages.DataModelPropertyPage_ExportSuccess_DialogTitle, Messages.DataModelPropertyPage_ExportSuccess_DialogMessage);
+							}});
 					}
 				}
 			});
