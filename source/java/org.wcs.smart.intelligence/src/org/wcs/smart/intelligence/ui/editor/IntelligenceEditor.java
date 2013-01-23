@@ -92,16 +92,36 @@ public class IntelligenceEditor extends EditorPart {
 	};
 
 	/**
+	 * listener for intelligence delete events.
+	 */
+	private IIntelligenceEventListener deleteListener = new IIntelligenceEventListener(){
+		@Override
+		public void eventFired(int type, Intelligence source) {
+			if (source.equals(IntelligenceEditor.this.intelligence)) {
+				//close this editor
+				IntelligenceEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						IntelligenceEditor.this.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(IntelligenceEditor.this, false);					
+					}
+				});
+			}
+		}
+	};
+	
+	/**
 	 * Default constructor
 	 */
 	public IntelligenceEditor() {
 		super();
 		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
+		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_DELETED, deleteListener);
 	}
 
 	@Override
 	public void dispose() {
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
+		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_DELETED, deleteListener);
 		super.dispose();
 	}
 	
