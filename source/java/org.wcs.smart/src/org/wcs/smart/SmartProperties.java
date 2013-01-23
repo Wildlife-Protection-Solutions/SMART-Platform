@@ -39,7 +39,12 @@ import org.wcs.smart.internal.Messages;
  */
 public class SmartProperties {
 
-	private static final String DEFAULT_DATAMODEL_FILE = "properties/datamodel.xml"; //$NON-NLS-1$
+	/**
+	 * Names of directory containing all properties files
+	 */
+	public static final String PROPERTIES_DIR = "properties"; //$NON-NLS-1$
+	
+	private static final String DEFAULT_DATAMODEL_FILE = PROPERTIES_DIR + File.separator + "datamodel.xml"; //$NON-NLS-1$
 
 	/**
 	 * Database location key
