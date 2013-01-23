@@ -337,6 +337,7 @@ public class IntelligenceEditor extends EditorPart {
 
 	@Override
 	public void setFocus() {
+		txtDateReceived.setFocus();
 	}
 
 	@Override
