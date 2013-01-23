@@ -52,7 +52,6 @@ import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventLis
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
-import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 
 /**
@@ -213,7 +212,7 @@ public class IntelligenceEditor extends EditorPart {
 		form.setText(intel.getShortName());
 		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
-		txtDateReceived.setText(intel.getReceivedDate().toString());
+		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
 		txtSource.setText(intel.getSource().getName());
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		txtPatrolID.setText(value);
@@ -253,7 +252,7 @@ public class IntelligenceEditor extends EditorPart {
 	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent, final PanelType panelType) {
 		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
 		
-		if (!canEdit()){
+		if (!canEdit()) {
 			editLink.setEnabled(false);
 			editLink.setVisible(false);
 //		}else {
@@ -309,8 +308,7 @@ public class IntelligenceEditor extends EditorPart {
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-
+		// nothing
 	}
 
 	@Override
