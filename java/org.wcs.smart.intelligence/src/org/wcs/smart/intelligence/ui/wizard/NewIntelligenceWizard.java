@@ -30,6 +30,8 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.SmartDB;
@@ -38,6 +40,8 @@ import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
+import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
 
 /**
@@ -74,14 +78,6 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
     	addPage(new TypedIntelligenceWizardPage(PanelType.LOCATION));
     	addPage(new TypedIntelligenceWizardPage(PanelType.ATTACHMENTS));
 
-
-//    	addPage(new IntelligenceReceivedWizardPage());
-//    	addPage(new IntelligenceSourceWizardPage());
-//    	addPage(new IntelligenceDatesWizardPage());
-//    	addPage(new IntelligenceDescWizardPage());
-//    	addPage(new IntelligenceLocationWizardPage());
-//    	addPage(new IntelligenceAttachmentsWizardPage());
-
     	super.addPages();
     }
 
@@ -103,7 +99,18 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
 		}
     	//IntelligenceHibernateManager.saveIntelligence(intelligence);
     	if (Status.OK_STATUS.equals(saveIntelligenceJob.getResult())) {
+    		// fire events
         	IntelligenceEventManager.getInstance().intelligenceAdded(intelligence);
+        	
+    		// open in editor
+    		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName());
+    		try {
+    			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+    					.getActivePage().openEditor(input, IntelligenceEditor.ID);
+    		} catch (PartInitException e) {
+    			throw new RuntimeException(e);
+    		}
+        	
         	return true;
     	}
 		return false;
