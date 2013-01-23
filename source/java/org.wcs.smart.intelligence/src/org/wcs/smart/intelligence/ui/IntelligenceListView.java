@@ -48,6 +48,7 @@ import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
@@ -114,7 +115,7 @@ public class IntelligenceListView extends ViewPart {
 		
 		intelligenceListViewer.setLabelProvider(new IntelligenceLabelProvider());
 		intelligenceListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		intelligenceListViewer.setInput(new Object[]{"Loading..."});
+		intelligenceListViewer.setInput(new Object[]{Messages.IntelligenceListView_Loading_Label});
 		intelligenceListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		updateContent();
 
@@ -192,12 +193,12 @@ public class IntelligenceListView extends ViewPart {
     private class UpdateIntelligenceListIdJob extends Job {
 
     	public UpdateIntelligenceListIdJob() {
-			super("Update Intelligence List");
+			super(Messages.IntelligenceListView_UpdateJob_Title);
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("Loading Intelligences", 1);
+			monitor.beginTask(Messages.IntelligenceListView_UpdateJob_LoadTask_Name, 1);
 			final List<Intelligence> result = IntelligenceHibernateManager.getIntelligences();
 			monitor.internalWorked(0.8);
 			Display.getDefault().asyncExec(new Runnable() {
@@ -239,9 +240,10 @@ public class IntelligenceListView extends ViewPart {
 //			if (partRef.getId().equals(IntelligenceEditor.ID)){
 //				IWorkbenchPart part = partRef.getPart(false);
 //				if (part instanceof IntelligenceEditor){
-//					intelligenceListViewer.setSelection(new StructuredSelection(  ((IntelligenceEditor) part).getEditorInput() ));
+//					intelligenceListViewer.setSelection(new StructuredSelection( ((IntelligenceEditor) part).getEditorInput()));
 //				}
 //			}
 //		}
 //    }
+    
 }

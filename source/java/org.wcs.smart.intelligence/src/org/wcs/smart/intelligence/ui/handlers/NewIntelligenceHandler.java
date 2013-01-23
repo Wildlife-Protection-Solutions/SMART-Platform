@@ -30,8 +30,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 import org.wcs.smart.intelligence.ui.wizard.NewIntelligenceWizard;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
@@ -50,7 +52,16 @@ public class NewIntelligenceHandler extends AbstractHandler {
      */
     @Override
     public Object execute(final ExecutionEvent event) throws ExecutionException {
-        final NewIntelligenceWizard wizard = new NewIntelligenceWizard();
+		//Open Intelligence Perspective
+		try {
+			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench()
+					.showPerspective(IntelligencePerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
+		} catch (WorkbenchException e) {
+			SmartPatrolPlugIn.displayLog(Messages.IntelligenceHandler_LoadPerspective_Error, e);
+		}
+
+		//Show Create New Intelligence Wizard
+       final NewIntelligenceWizard wizard = new NewIntelligenceWizard();
         ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
         try {
                 pmd.run(false, false, new IRunnableWithProgress() {
