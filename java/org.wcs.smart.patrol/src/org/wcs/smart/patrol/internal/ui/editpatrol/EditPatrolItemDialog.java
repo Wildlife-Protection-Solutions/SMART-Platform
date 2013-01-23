@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -121,7 +122,17 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected boolean performSave() {
-		
+		//this trick is done to ensure that hibernate session will be closed after save
+		//as some listeners might open another session
+		if (savePatrolInternal()) {
+			setChangesMade(false);
+			PatrolEventManager.getInstance().patrolChanged(item.getAttribute(), patrol);
+			return true;
+		}
+		return false;
+	}
+
+	private boolean savePatrolInternal() {
 		Session s = getSession();
 		try{
 			try{
@@ -130,12 +141,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				MessageDialog.openError(getShell(), Messages.EditPatrolItemDialog_Error_DialotTitle, ex.getLocalizedMessage());
 				return false;
 			}
-			if (PatrolHibernateManager.savePatrolInTransaction(patrol, s, false)){
-				setChangesMade(false);
-				return true;
-			}
-			//s.saveOrUpdate(patrol);
-			return false;
+			return PatrolHibernateManager.savePatrolInTransaction(patrol, s, false);
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getLocalizedMessage(), ex);
 		}finally{
@@ -143,6 +149,6 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		}
 		
 		return false;
+		
 	}
-
 }

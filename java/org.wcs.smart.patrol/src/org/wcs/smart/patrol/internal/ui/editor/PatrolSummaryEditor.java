@@ -78,6 +78,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolEventManager.EventType;
+import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -148,16 +150,36 @@ public class PatrolSummaryEditor extends EditorPart {
 	private boolean isMulti = false;
 	
 	private HashMap<PatrolLegDayColumn, TableViewerColumn> tableColumns = new HashMap<PatrolLegDayColumn, TableViewerColumn>();
-	
+
+	/**
+	 * listener for patrol change events.
+	 */
+	private IPatrolEventListener modifyListener = new IPatrolEventListener(){
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			initValues();
+			PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
+			input.setId(editor.getPatrol().getId());
+			editor.updatePartName();
+		}
+	};
+
 	/**
 	 * Creates a new summary editor page
 	 * @param editor parent editor
 	 */
 	public PatrolSummaryEditor(PatrolEditor editor) {
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, modifyListener);
 		super.setPartName(Messages.PatrolSummaryEditor_Summary_TabName);
 		this.editor = editor;
 	}
 
+	@Override
+	public void dispose() {
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, modifyListener);
+		super.dispose();
+	}
+	
 	/**
 	 * Create contents of the editor part.
 	 * @param parent
@@ -451,17 +473,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		}finally{
 		}
 		
-		if (ret == IDialogConstants.OK_ID){
-			PatrolEventManager.getInstance().patrolChanged(comp.getAttribute(), editor.getPatrol());
-			this.initValues();
-			
-			PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-			input.setId(editor.getPatrol().getId());
-			editor.updatePartName();
-			
-			return true;
-		}
-		return false;
+		return ret == IDialogConstants.OK_ID;
 	}
 	
 	
