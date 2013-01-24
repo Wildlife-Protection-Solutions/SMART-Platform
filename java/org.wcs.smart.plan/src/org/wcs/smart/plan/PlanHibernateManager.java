@@ -29,6 +29,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -123,6 +124,27 @@ public class PlanHibernateManager{
 			session.close();
 		}
 		return true;
+	}
+	
+	public static boolean isDuplicatePlanId(Session s, String id) {
+		double count =99;
+		s.beginTransaction();
+		try {
+			Query q = s
+					.createQuery("SELECT count(*) FROM Plan WHERE id = '" + id + "'");
+
+			count = Integer.parseInt(q.list().get(0).toString());
+
+		}finally{
+			s.getTransaction().rollback();
+		}
+
+		if (count > 0) {
+			return true;
+		}
+		
+		return false;
+
 	}
 	
 }
