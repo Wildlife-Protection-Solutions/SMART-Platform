@@ -254,6 +254,10 @@
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
                id="org.wcs.smart.perspectives">
+            <separator
+                  name="org.wcs.smart.perspectivesSeperator"
+                  visible="false">
+            </separator>
             <command
                   commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective"
                   icon="images/icons/etool16/map.png"

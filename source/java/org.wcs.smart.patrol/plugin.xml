@@ -142,7 +142,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.resetSeparator">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.ui.internal.ShowDefaultPerspective">
          <command
                commandId="org.wcs.smart.patrol.PatrolPerspective"
                icon="images/icons/etool16/patrol.png"
