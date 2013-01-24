@@ -21,31 +21,26 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.util.SmartUtils;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.util.SmartUtils;
 
 
 
@@ -106,8 +101,40 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage implements SelectionLi
 		setControl(center);
 		setMessage("Enter a name and description for the new Plan:");
 	
+		Listener validate = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				validate();
+			}
+		};
+		dtStartDate.addListener(SWT.Selection, validate);
+		dtEndDate.addListener(SWT.Selection, validate);
+
 	}
 	
+	protected void validate() {
+		boolean isValid = true;
+		cdEndDate.hide();
+		if(dtStartDate == null || dtEndDate == null){
+			isValid = false;
+			cdEndDate.show();
+			cdEndDate.setDescriptionText("You must select valid dates.");
+			((CreatePlanWizard)getWizard()).setCanFinish(false);
+		}
+
+		if( (SmartUtils.getDate(dtEndDate)).before(SmartUtils.getDate(dtStartDate)) ){
+			isValid = false;
+			cdEndDate.show();
+			cdEndDate.setDescriptionText("End date must be after the start date.");
+			((CreatePlanWizard)getWizard()).setCanFinish(false);
+		}
+		
+		if(isValid){
+			((CreatePlanWizard)getWizard()).validate();
+		}
+
+	}
+
 
 	@Override
 	public boolean updateModel(Plan p) {
@@ -118,38 +145,28 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage implements SelectionLi
 	
 	@Override
 	void initModel(Plan p, Session session) {
-
+		try{
+			Calendar startDate = SmartUtils.convertDate(p.getStartDate());
+			Calendar endDate = SmartUtils.convertDate(p.getEndDate());
+			dtStartDate.setDate(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH), startDate.get(Calendar.DATE));
+			dtEndDate.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
+		}catch (Exception e) {
+			// OK, no data to update will give us Exceptions
+		}
 	}
 	
-	/**
-	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-	 */
-	@Override
-	public void widgetSelected(SelectionEvent e) {
-		String error = null;
-		cdEndDate.hide();
-		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
-			error = "End date must be after the start date.";
-		}else{
-			long startD = SmartUtils.getDate(dtStartDate).getTime();
-			long endD = SmartUtils.getDate(dtEndDate).getTime();
-			
-			if (startD + Patrol.MAX_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
-				error = "Patrol cannot be longer that " + Patrol.MAX_PATROL_LENGTH_DAYS + " days in length.";
-			}else if(startD + Patrol.WARN_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
-				cdEndDate.setDescriptionText("Patrol is longer than 30 days");
-				cdEndDate.show();
-			}
-		}
-		
-		setErrorMessage(error);
-		fireChangeListeners();
-	}
 	
 	/**
 	 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
 	 */
 	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
+	}
+
+
+	@Override
+	public void widgetSelected(SelectionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

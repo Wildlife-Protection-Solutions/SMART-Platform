@@ -21,11 +21,10 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -38,12 +37,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.tree.FakeLabelProvider;
-import org.wcs.smart.plan.ui.tree.MockModel;
-import org.wcs.smart.plan.ui.tree.fakePlanTreeContentProvider;
+import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.ui.tree.PlanViewer;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -64,7 +63,8 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 	private Button btnUseSelected;
 	private ControlDecoration cdEndDate;
 	
-	private TreeViewer planTreeViewer;
+	private PlanViewer planTreeViewer;
+	private Plan lastSelection = null;
 	
 	
 	/**
@@ -111,13 +111,11 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 		dtStartDate.addSelectionListener(this);
 		
 
-		planTreeViewer = new TreeViewer(center);
-		planTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,4,1));
-		planTreeViewer.setLabelProvider(new FakeLabelProvider());
-		planTreeViewer.setContentProvider(new fakePlanTreeContentProvider());
+		planTreeViewer = new PlanViewer(center);
+		planTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		
-		initialize();
-				
+		super.setTitle("Patrol Plan");
+		
 		setControl(center);
 		setMessage("Select the Plan to use as a template:");
 	
@@ -128,35 +126,15 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 	 * A job that initializes the query 
 	 * filter options
 	 */
-	private void initialize(){
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-//TODO:load real plan list
-//dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-				//load into memory; no-lazy loading here.
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
-		}
-		final HashMap<String, Object> input = new HashMap<String, Object>();
-
-		planTreeViewer.setInput(new MockModel());
-		planTreeViewer.expandAll();
-				
+	public void initModel(Plan p, Session session){
+		List roots = PlanHibernateManager.getAllRootPlans(session);
+		planTreeViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
+		lastSelection = p.getTemplatePlan();
+		if (lastSelection != null){
+			planTreeViewer.setSelection(lastSelection);
+		}			
 	}
-	
 
-
-	@Override
-	public boolean updateModel(Plan p) {
-		return true;
-	}
-	
-	@Override
-	void initModel(Plan p, Session session) {
-
-	}
 	
 	/**
 	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
@@ -192,5 +170,42 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 	
+	@Override
+	public boolean updateModel(Plan p) {
+		Plan t = planTreeViewer.getSelectedPlan();
+		p.setTemplatePlan(t);
+		
+		//init our current plan with the values from the template selected
+		//exceptions occur if there is no values yet, which is fine.
+		try{
+			p.setName(t.getName());
+			p.setId(t.getId());
+			p.setDescription(t.getDescription());
+			p.setStartDate(t.getStartDate());
+			p.setEndDate(t.getEndDate());
+			p.setStation(t.getStation());
+			p.setTeam(t.getTeam());
+			Plan tmp = t.getParent();
+			p.setParent(tmp);
+			p.setType(t.getType());
+			p.setUnavailableEmployees(t.getUnavailableEmployees());
+			
+			List<PlanTarget> tars = t.getTargets();
+			List<PlanTarget> newTars = new ArrayList<PlanTarget>();
+			for(PlanTarget x : tars){
+//				x.setPlan(p);
+//can't do this yet as the plan doesn't really exist? Hibernate unsaved transient issues.
+// it is done in the performFinish() method of the wizard
+				
+				newTars.add(x.clone());
+			}
+			p.setTargets(newTars);
+		}catch(Exception e){
+			//SmartPlanPlugIn.displayLog("Could not clone Plan. " + e.getMessage(), e);
+			//this will occur sometimes if you hit next or back without selecting anything, which is not a problem
+		}
+		
+		return true;
+	}
 	
 }

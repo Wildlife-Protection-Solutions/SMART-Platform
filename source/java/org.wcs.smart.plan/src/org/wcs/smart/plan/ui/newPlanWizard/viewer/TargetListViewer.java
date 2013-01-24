@@ -78,9 +78,13 @@ public class TargetListViewer {
 	}
 	
 	
+	
+	
 	public void updateModel(Plan p) {
-		v.setInput(p.getTargets().toArray());
-		v.refresh();
+		if(p.getTargets() != null){
+			v.setInput(p.getTargets().toArray());
+			v.refresh();
+		}
 	}
 
 

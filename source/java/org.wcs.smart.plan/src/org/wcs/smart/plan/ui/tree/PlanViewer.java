@@ -24,6 +24,8 @@ package org.wcs.smart.plan.ui.tree;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
 
@@ -56,7 +58,20 @@ public class PlanViewer {
 			}
 			
 		});
+		planViewer.setComparator(new ViewerComparator() {					
+		    @Override
+		    public int compare(Viewer viewer, Object e1, Object e2) {
+
+		    	if (e1 instanceof Plan && e2 instanceof Plan){	        	
+		            return ((Plan) e1).getName().compareToIgnoreCase(((Plan) e2).getName());
+		        }
+		        else{
+		        	throw new IllegalArgumentException("Not comparable: " + e1 + " " + e2);
+		        }
+		    }
+		});
 	}
+	
 	
 	public Plan getSelectedPlan(){
 		if (planViewer.getSelection().isEmpty()){

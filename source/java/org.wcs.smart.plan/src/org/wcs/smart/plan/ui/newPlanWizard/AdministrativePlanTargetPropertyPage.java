@@ -25,35 +25,51 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 
 import java.util.ArrayList;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.plan.model.AdministrativePlanTarget;
+import org.wcs.smart.plan.model.NumericPlanTarget;
+import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.util.SmartUtils;
 
 
 
 
 
 
-public class AdministrativeTarget extends Composite{
+public class AdministrativePlanTargetPropertyPage extends Composite{
 
+	private TargetPropertyPage parentWindow;
 	private Composite parent;
 	
 	private Text targetDesc;
 	private Text targetName;
 	
+	private ControlDecoration cdTargetName;
+	
 	/**
 	 * Creates new editor page
 	 * @param parent
 	 */
-	public AdministrativeTarget(Composite parent, int style) {
+	public AdministrativePlanTargetPropertyPage(TargetPropertyPage parentWindow, Composite parent, int style) {
 		super(parent, style);
 		this.parent = parent;
+		this.parentWindow = parentWindow;
 	}
 	
 	
@@ -88,7 +104,76 @@ public class AdministrativeTarget extends Composite{
 		data2.heightHint = 50; 
 		targetDesc.setLayoutData(data2);
 		
+
+		KeyListener validate = new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				validate();
+			}
+		};
+		targetName.addKeyListener(validate);
+		
+		cdTargetName = createDecoration(targetName);
+
+		validate();
+		
 		return center;
 	}
+	
+	protected ControlDecoration createDecoration(Control control){
+		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
+	}
+	
+	/**
+	 * Validate the input fields
+	 * 
+	 * @return <code>false</code> if not complete, <code>true</code> otherwise
+	 */
+	public boolean validate() {
+
+		boolean isComplete = true;
+		if (targetName.getText().trim().isEmpty()
+				|| ! SmartUtils.isSimpleString(targetName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
+			cdTargetName.show();
+			cdTargetName.setDescriptionText("Name cannot be empty or use the following characters: " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX);
+			isComplete = false;
+		}else{
+			cdTargetName.hide();
+		}
+		
+		if(isComplete){
+			parentWindow.enableOK(true);
+		}else{
+			parentWindow.enableOK(false);
+		}
+		return isComplete;
+	}
+
+
+	public String getTargetDesc() {
+		return targetDesc.getText();
+	}
+	public void setTargetDesc(String targetDesc) {
+		this.targetDesc.setText( targetDesc);
+	}
+	
+	public String getTargetName() {
+		return targetName.getText();
+	}
+	public void setTargetName(String targetName) {
+		this.targetName.setText(targetName);
+	}
+	
+	public void setPlanTarget(PlanTarget p) {
+		AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
+		this.targetName.setText(pt.getName());
+		this.targetDesc.setText(pt.getTargetDesc());
+		validate();
+	}
+
 }
 

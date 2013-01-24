@@ -67,12 +67,14 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 	private HashMap<ttColumn, TableViewerColumn> targetTableColumns;
 	private Plan plan;
 	private TargetPropertyPage dia;
+	private NewPlanWizardPage6 thisPage;
 	
 	private TargetListViewer rows;
 		
 	protected NewPlanWizardPage6(Plan plan) {
 		super("Plan Targets");
-		this.plan = plan;		
+		this.plan = plan;
+		this.thisPage = this;
 	}
 	protected enum ttColumn {
 		NAME("Target Name", 1), DESC("Target Description", 2);
@@ -114,7 +116,7 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, null); 
+				TargetPropertyPage dia = new TargetPropertyPage(thisPage, getShell(), plan, null); 
 			    if (dia.open() == Window.CANCEL){
 			    	//do nothing
 				}else{
@@ -135,11 +137,12 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 		        }
 		        
 		        PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
-				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, selected); 
+				TargetPropertyPage dia = new TargetPropertyPage(thisPage, getShell(), plan, selected); 
 			    if (dia.open() == Window.CANCEL){
 			    	//do nothing
 				}else{
 					targetTable.updateModel(plan);
+					validate();
 				}
 			}
 			
@@ -156,16 +159,21 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
+		targetTable.updateModel(plan);
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p, Session session) {
-
+		targetTable.updateModel(plan);
 	}
 	
 	public void refreshTargetTable(){
 		//targetTable.refresh();
+	}
+	
+	public void validate(){
+		((CreatePlanWizard)getWizard()).validate();
 	}
 	
 }

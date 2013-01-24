@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -34,6 +37,8 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Wizard to create a new patrol.
@@ -53,6 +58,10 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 
 	private NewPlanWizardPage1 page1;
 
+	//set once all pages are seen, I don't want to allow the user to "finish" without actually seeing the options to set a parent plan etc.
+	//overridden if the user selects a template however.
+	private boolean seenAll;
+
 	/**
 	 * Creates a new wizard.
 	 */
@@ -63,12 +72,39 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		
 		plan.setConservationArea(SmartDB.getCurrentConservationArea());
 
-		Session mysession = getSession();
-		mysession.beginTransaction();
-		plan.setId(PlanHibernateManager.generatePlanId(plan, session));
-		mysession.getTransaction().rollback();
-	}
+		plan.setId(PlanHibernateManager.generatePlanId(plan, getSession()));
+}
 
+	/*
+	 * Check for valid data throughout the whole wizard and set the finish button 
+	 */
+	public void validate(){
+		if(plan.getTemplatePlan() != null && validData()){
+			setCanFinish(true);
+		}else if (seenAll && validData()){
+			setCanFinish(true);
+		}else{
+			setCanFinish(false);
+		}
+	}
+	
+	/* 
+	 * just checks for valid data that won't crash the insert
+	 */
+	public boolean validData(){
+		boolean isValid = true;
+		boolean idIsSimple = SmartUtils.isSimpleString(plan.getId(),
+				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
+				32, 2);
+				
+		if(plan.getId() == null || !idIsSimple || plan.getType() == null || plan.getStartDate() == null){
+			isValid = false;
+		}
+		
+		return isValid;
+	}
+	
+	
 	/**
 	 * Sets if the wizard can finish
 	 * 
@@ -86,8 +122,12 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (session != null && session.isOpen()) {
-			session.close();
+		Session tmp = getSession();
+		if (tmp != null && tmp.isOpen()) {
+			if(tmp.getTransaction().isActive()){
+				tmp.getTransaction().commit();
+			}
+			tmp.close();
 		}
 	}
 
@@ -112,7 +152,6 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	public Session getSession() {
 		if (session == null || !session.isOpen()) {
 			session = PatrolHibernateManager.openSession();
-			
 			session.update(plan.getConservationArea());
 		}
 		return session;
@@ -126,8 +165,8 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		super.addPage(page1); //choose a template or not
 		super.addPage(new NewPlanWizardPage2b()); //template selector
 		super.addPage(new NewPlanWizardPage2()); //choose type
-		super.addPage(new NewPlanWizardPage3()); //team/station
-		super.addPage(new NewPlanWizardPage4()); // id/name/desc
+		super.addPage(new NewPlanWizardPage3()); // id/name/desc
+		super.addPage(new NewPlanWizardPage4()); //team/station
 		super.addPage(new NewPlanWizardPage5()); // dates
 		super.addPage(new NewPlanWizardPage6(plan)); //targets
 		super.addPage(new NewPlanWizardPage7()); //parent
@@ -137,10 +176,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	@Override
 	 public void createPageControls(Composite pageContainer) {
 		 super.createPageControls(pageContainer);
-		 Session mysession = getSession();
-		 mysession.beginTransaction();
-		 page1.initModel(plan, mysession);
-		 mysession.getTransaction().rollback();
+		 page1.initModel(plan, getSession());
 	 }
 
 	/**
@@ -153,7 +189,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	}
 
 	/**
-	 * Creates the patrol leg days then saved the patrol to the database.
+	 * Saves the Plan, then loads it in the view plan perspective.
 	 */
 	@Override
 	public boolean performFinish() {
@@ -161,12 +197,21 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			((NewPlanWizardPage) lastPage).updateModel(this.plan);
 		}
 
+		Plan p = getPlan();
+		if (p.getParent() != null){
+			p.getParent().getChildren().add(p);
+		}
+
+		if(p.getTargets() != null){
+			List<PlanTarget> tars = p.getTargets();
+			for(PlanTarget x : tars){
+				x.setPlan(p);
+			}
+		}
+
 
 		//TODO: make the following 8 lines work:
-		boolean ret = PlanHibernateManager.savePlan(getPlan(),HibernateManager.openSession());
-		
-		 if (!ret)
-		 return false;
+		boolean ret = PlanHibernateManager.savePlan(p,getSession());
 		
 		 // fire events
 		 //PlanEventManager.getInstance().planAdded(getPlan());
@@ -200,15 +245,17 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			}
 		}
 		if (event.getTargetPage() instanceof NewPlanWizardPage) {
-			session.beginTransaction();
-			((NewPlanWizardPage) event.getTargetPage()).initModel(plan,
-					session);
-			session.getTransaction().rollback();
+			((NewPlanWizardPage) event.getTargetPage()).initModel(plan, getSession());
 		}
 
 		if (event.doit) {
 			lastPage = (IWizardPage) event.getTargetPage();
 		}
+		validate();
+	}
+
+	public void setSeenAll(boolean b) {
+		this.seenAll = b;
 	}
 
 }

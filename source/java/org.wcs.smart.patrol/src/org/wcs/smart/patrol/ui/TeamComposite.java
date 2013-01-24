@@ -175,6 +175,14 @@ public class TeamComposite extends PatrolItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getSelectedTeam()
 	 */
 
+	public void setSelectedTeam(Team team) {
+		teamList.setSelection(new StructuredSelection(team));
+	}
+
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getSelectedTeam()
+	 */
+
 	public Team getSelectedTeam() {
 		Object team = (Object)((IStructuredSelection)teamList.getSelection()).getFirstElement();
 		if (team != null && team instanceof Team){

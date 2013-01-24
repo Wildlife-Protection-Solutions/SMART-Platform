@@ -25,10 +25,14 @@ package org.wcs.smart.plan.model;
 import java.util.Arrays;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -37,74 +41,53 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
- * Represents a patrol object
+ * Represents a PlanTarget object, implemented by various types of targets: Numeric, Spatial and Administrative
  * 
  * @author Jeff
  * @since 1.0.0
  */
 @Entity
 @Table(name="smart.plan_target")
-public class PlanTarget{
-
-	private byte[] uuid;
-	private byte[] plan_uuid;
-	
-
-	public String getDescription() {
-		return description;
-	}
-	
-	@Transient 
-	public String getSummary() {
-		return type + " " + op + " " + value;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
+@Inheritance(strategy= InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="Category" , discriminatorType=DiscriminatorType.STRING)
+public abstract class PlanTarget{
 
 
-
-	private Plan plan;
 	private String name;
-	private String description;
-	private double value;
-	private String op;
-	private String type;
-	private tarCategory cat;
+	private PlanTarget.tarCategory cat;
+	private Plan plan;
 	
-	public enum tarCategory {
+	public static enum tarCategory {
 		ALPHANUMERIC, SPATIAL, ADMIN; 
 	}
 	
+	@Transient
+	public abstract String getSummary();
 	
-	public PlanTarget(){
-		
-	}
 
+	private byte[] uuid;
+	
 	@Id
 	@GeneratedValue(generator="uuid")
 	@GenericGenerator(name= "uuid", strategy="uuid2")
 	public byte[] getUuid() {
 		return uuid;
 	}
-
 	public void setUuid(byte[] uuid) {
 		this.uuid = uuid;
 	}
+
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="plan_uuid", referencedColumnName="uuid")
 	public Plan getPlan() {
 		return plan;
 	}
-	
 	public void setPlan(Plan plan) {
 		this.plan = plan;
 	}
-	
-	
-	@Override
+
+	@Transient
 	public int hashCode(){
 		if (uuid != null){
 			return Arrays.hashCode(uuid);
@@ -113,59 +96,34 @@ public class PlanTarget{
 		}
 	}
 	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof PlanTarget){
-			PlanTarget s = (PlanTarget)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return s.hashCode() == hashCode();
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
-
 	@Column(name = "name")
-	public String getName() {
+	public String getName(){
 		return name;
 	}
-	public void setName(String name) {
+	public void setName(String name){
 		this.name = name;
 	}
 	
-	@Column(name = "value")
-	public double getValue() {
-		return value;
-	}
-	public void setValue(double value) {
-		this.value = value;
-		
-	}
-		
-	@Column(name = "op")
-	public String getOp() {
-		return this.op;
-	}
-	public void setOp(String op) {
-		this.op = op;
-	}	
-	
-	@Column(name = "type")
-	public String getType() {
-		return this.type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	
+/* Don't think we need this, the discriminator at the top seems to add it automagically?
 	@Column(name = "category")
-	public tarCategory getCat() {
-		return cat;
+	*/
+	@Transient
+	public PlanTarget.tarCategory getCat(){
+		return this.cat;
 	}
+	//public void setCat(PlanTarget.tarCategory cat){
+    //	this.cat = cat;
+	//}
 
-	public void setCat(tarCategory cat) {
-		this.cat = cat;
+	abstract public PlanTarget clone();
+	
+	
+	//this chould only be called from the subclasses which will actually instantiate a new obkect and pass it in here 
+	public PlanTarget clone(PlanTarget pt){
+		pt.name = this.name;
+		pt.cat = this.cat;
+		pt.plan = this.plan;
+		return pt;
 	}
+	
 }

@@ -22,10 +22,9 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -34,10 +33,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.ca.Station;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.ui.StationComposite;
+import org.wcs.smart.patrol.ui.TeamComposite;
 import org.wcs.smart.plan.model.Plan;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
 
 
 
@@ -50,16 +51,17 @@ import org.eclipse.swt.graphics.Point;
 public class NewPlanWizardPage4 extends NewPlanWizardPage {
 
 	
-	
-	private Text planId;
-	private Text planName;
-	private Text planDesc;
+	private TeamComposite teamList;
+	private StationComposite stationList;
+	//private ComboViewer team = null;
+	//private ComboViewer station= null;
+	private Text unavailable;
 
 	/**
 	 * 
 	 */
 	protected NewPlanWizardPage4() {
-		super("Plan Details");
+		super("Plan Station/Team");
 		
 	}
 
@@ -70,63 +72,54 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(2, false));
+		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+				
+		teamList = new TeamComposite();
+		teamList.createComponent(center, SWT.NONE);
 		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Plan ID:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		planId = new Text(center, SWT.BORDER | SWT.LEFT);
-		planId.setTextLimit(32);
-
-		
-		GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
-		data.horizontalIndent = 8;
-		data.widthHint = 100;
-		
-		planId .setLayoutData(data);
-		
-		Label lbl2 = new Label(center, SWT.NONE);
-		lbl2.setText("Plan Name:");
-		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		planName = new Text(center, SWT.BORDER | SWT.LEFT);
-		planName.setTextLimit(32);
-
-		data.widthHint = 170;
-		planName.setLayoutData(data);
-
-		Label lbl3 = new Label(center, SWT.NONE);
-		lbl3.setText("Plan Descrption:");
-		lbl3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		planDesc = new Text(center, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-		gd.heightHint = 80;
-		gd.horizontalIndent = 8;
-
-
-		planDesc.setLayoutData(gd);
+		stationList = new StationComposite();
+		stationList.createComponent(center,  SWT.NONE);
 		
 		setControl(center);
-		setMessage("Enter a name and description for the new Plan:");
+		setMessage("Select the associated Team and/or Station for this plan, if applicable:");
 
-
-		
 	}
 	
 
 	@Override
 	public boolean updateModel(Plan p) {
-		p.setId(planId.getText());
-		p.setName(planName.getText());
-		p.setDescription(planDesc.getText());
+		p.setStation(stationList.getSelectedStation());
+		p.setTeam(teamList.getSelectedTeam());
+		
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p, Session session) {
+		
+		//Set team values, 
+		List<? extends Object> teams = null;
+		try{
+			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
 
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog("Could not load teams.", ex);
+			session.close();
+		}
+		
+		teamList.setInput(teams, p.getTeam());
+		
+		List<? extends Object> stations = PatrolHibernateManager.getActiveStations(p.getConservationArea(), session);
+		stationList.setInput(stations, p.getStation());		
+		
+		try{
+			teamList.setSelectedTeam(p.getTeam() );
+			stationList.setSelectedStation(p.getStation() );
+		}catch (Exception e){
+			//do nothing, probably just no template so we can't set the values to anything
+		}
+		
+		
 	}
 }

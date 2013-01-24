@@ -76,6 +76,7 @@ public class Plan {
 
 	private List<Plan> children = new ArrayList<Plan>();
 	private Plan parent = null;
+	private Plan template = null;
 	
 	public Plan(){
 		
@@ -237,7 +238,7 @@ public class Plan {
 		targets.add(t);
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy="plan", orphanRemoval=true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="plan", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<PlanTarget> getTargets() {
 		return targets;
 	}
@@ -272,5 +273,13 @@ public class Plan {
 	
 	public void setParent(Plan parent){
 		this.parent = parent;
+	}
+
+	@Transient
+	public Plan getTemplatePlan() {
+		return template;
+	}
+	public void setTemplatePlan(Plan p) {
+		template = p;
 	}
 }
