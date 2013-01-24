@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.intelligence.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,10 +44,12 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
-import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -65,6 +68,8 @@ public class IntelligenceListView extends ViewPart {
 
 	private TableViewer intelligenceListViewer;
 	private Job updateJob = new UpdateIntelligenceListIdJob();
+	private IntelligenceViewFilter filter = new IntelligenceViewFilter();
+	
 
 //	private IPartListener2 partListener = new IntelligencePartListener();
 
@@ -113,7 +118,7 @@ public class IntelligenceListView extends ViewPart {
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		list.setBounds(0, 0, 88, 68);
 		
-		intelligenceListViewer.setLabelProvider(new IntelligenceLabelProvider());
+		intelligenceListViewer.setLabelProvider(new IntelligenceEditorInputLabelProvider());
 		intelligenceListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		intelligenceListViewer.setInput(new Object[]{Messages.IntelligenceListView_Loading_Label});
 		intelligenceListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -127,12 +132,10 @@ public class IntelligenceListView extends ViewPart {
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				Intelligence intelligence = (Intelligence)((IStructuredSelection)intelligenceListViewer.getSelection()).getFirstElement();
-				if (intelligence != null){
-					IWorkbenchPage page = null;
+				IntelligenceEditorInput input = (IntelligenceEditorInput)((IStructuredSelection)intelligenceListViewer.getSelection()).getFirstElement();
+				if (input != null){
 					try {
-						page = getSite().getPage();
-						IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName());
+						IWorkbenchPage page = getSite().getPage();
 						page.openEditor(input, IntelligenceEditor.ID);						
 					} catch (Throwable t) {
 						IntelligencePlugIn.displayLog(t.getLocalizedMessage(), t);
@@ -167,17 +170,21 @@ public class IntelligenceListView extends ViewPart {
 
 	}
 
+	public IntelligenceViewFilter getFilter() {
+		return filter;
+	}
+	
     /**
-     * Label provider for intelligence objects.
+     * Label provider for intelligence editor input objects.
      * 
      * @author elitvin
      *
      */
-	private class IntelligenceLabelProvider extends LabelProvider {
+	private class IntelligenceEditorInputLabelProvider extends LabelProvider {
 		@Override
 		public String getText(Object element) {
-			if (element instanceof Intelligence){
-				return ((Intelligence)element).getShortName();
+			if (element instanceof IntelligenceEditorInput){
+				return ((IntelligenceEditorInput)element).getName();
 			}
 			return super.getText(element);
 		}
@@ -199,16 +206,37 @@ public class IntelligenceListView extends ViewPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask(Messages.IntelligenceListView_UpdateJob_LoadTask_Name, 1);
-			final List<Intelligence> result = IntelligenceHibernateManager.getIntelligences();
+			
+			List<?> result = loadIntelligences();
+			monitor.internalWorked(0.7);
+			
+			//convert loaded data to List<IntelligenceEditorInput>
+			final List<IntelligenceEditorInput> inputData = new ArrayList<IntelligenceEditorInput>();
+			for (Object obj : result) {
+				Object[] data = (Object[]) obj;
+				inputData.add(new IntelligenceEditorInput((byte[])data[0], (String)data[1]));
+			}
 			monitor.internalWorked(0.8);
+			
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					intelligenceListViewer.setInput(result.toArray());
+					intelligenceListViewer.setInput(inputData);
 					intelligenceListViewer.refresh();
 				}
 			});
 			return Status.OK_STATUS;
+		}
+		
+		private List<?> loadIntelligences() {
+			Session session = SmartHibernateManager.openSession();
+			try {
+				Query query = IntelligenceListView.this.getFilter().buildQuery(session);
+				List<?> list = query.list();
+				return list;
+			} finally {
+				session.close();
+			}
 		}
    	
     }
