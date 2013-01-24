@@ -145,6 +145,11 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 		int lhrs = (int)Math.floor(hrs);
 		int lmin = (int)Math.round((hrs - lhrs) * 60.0);
+		
+		if (lmin == 60){
+			lmin = 0;
+			lhrs++;
+		}
 		if (minus){
 			return "-" + lhrs + HOUR_LABEL + " " + lmin + MINUTE_LABEL; //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
