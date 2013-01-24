@@ -21,11 +21,9 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -38,12 +36,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.tree.FakeLabelProvider;
-import org.wcs.smart.plan.ui.tree.MockModel;
-import org.wcs.smart.plan.ui.tree.fakePlanTreeContentProvider;
+import org.wcs.smart.plan.ui.tree.PlanViewer;
 import org.wcs.smart.util.SmartUtils;
 
 
@@ -64,8 +60,9 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 	private Button btnUseSelected;
 	private ControlDecoration cdEndDate;
 	
-	private TreeViewer planTreeViewer;
 	
+	private PlanViewer planTreeViewer;
+	private Plan lastSelection = null;
 	
 	/**
 	 * 
@@ -124,17 +121,9 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 		dtEndDate.addSelectionListener(this);
 		dtStartDate.addSelectionListener(this);
 		
-
-		planTreeViewer = new TreeViewer(center);
-		planTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,4,1));
-		planTreeViewer.setLabelProvider(new FakeLabelProvider());
-		planTreeViewer.setContentProvider(new fakePlanTreeContentProvider());
+		planTreeViewer = new PlanViewer(center);
+		planTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		
-//		planTreeViewer.setInput("Loading...");
-
-		
-		initialize();
-				
 		setControl(center);
 		setMessage("A parent plan allows you to group patrol plans into team, station and conservation area plans." +
 				"Create the conservation area plan first, then select it in this window when creating each each patrol, " +
@@ -142,39 +131,43 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 	
 	}
 	
-	
-	/**
-	 * A job that initializes the query 
-	 * filter options
-	 */
-	private void initialize(){
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-//TODO:load real plan list
-//dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-				//load into memory; no-lazy loading here.
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
-		}
-
-			
-		planTreeViewer.setInput(new MockModel());
-		planTreeViewer.expandAll();
-				
-	}
-	
-
 
 	@Override
 	public boolean updateModel(Plan p) {
+		if(!btnNoParent.getSelection()){
+			try{
+				Plan tmp = planTreeViewer.getSelectedPlan();
+				p.setParent(tmp);
+			}catch (Exception e) {
+			// nothing to update if those are null
+			}
+		}else{
+			p.setParent(null);
+		}
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p, Session session) {
-		((CreatePlanWizard)getWizard()).setCanFinish(true);
+		((CreatePlanWizard)getWizard()).setSeenAll(true);
+		
+		List roots = PlanHibernateManager.getAllRootPlans(session);
+		planTreeViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
+		lastSelection = p.getParent();
+		if (lastSelection != null){
+			planTreeViewer.setSelection(lastSelection);
+			btnNoParent.setSelection(false);
+			btnUseSelected.setSelection(true);
+		}else{
+			btnNoParent.setSelection(true);
+			btnUseSelected.setSelection(false);
+		}
+
+		try{
+			planTreeViewer.setSelection(p.getTemplatePlan().getParent());
+		}catch (Exception e) {
+			// means there was no default, OK
+		}
 	}
 	
 	/**

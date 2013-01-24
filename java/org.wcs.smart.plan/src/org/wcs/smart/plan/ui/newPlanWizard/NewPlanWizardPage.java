@@ -72,4 +72,6 @@ public abstract class NewPlanWizardPage extends WizardPage {
 			listener.itemChanged();
 		}
 	}
+	
+
 }

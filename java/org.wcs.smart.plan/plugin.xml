@@ -64,7 +64,11 @@
       </class>
       <class
             ca_property=".plan.conservationArea"
-            class="org.wcs.smart.plan.model.PlanTarget">
+            class="org.wcs.smart.plan.model.NumericPlanTarget">
+      </class>
+      <class
+            ca_property=".plan.conservationArea"
+            class="org.wcs.smart.plan.model.AdministrativePlanTarget">
       </class>
    </extension>
    <extension

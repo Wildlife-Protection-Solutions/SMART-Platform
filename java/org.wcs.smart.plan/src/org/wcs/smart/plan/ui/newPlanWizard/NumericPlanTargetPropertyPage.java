@@ -25,35 +25,51 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 
 import java.util.ArrayList;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.annotations.Parent;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.util.SmartUtils;
 
 
-public class AlphaNumericTarget extends Composite {
+public class NumericPlanTargetPropertyPage extends Composite {
 
-	private Composite parent;
+	
+	private TargetPropertyPage parentWindow;
 	
 	private Text targetValue;
 	private Text targetName;
 	private ComboViewer targetType = null;
 	private ComboViewer targetOp = null;
 	
+	private ControlDecoration cdTargetValue;
+	private ControlDecoration cdTargetName;
+	
+	
 	/**
 	 * Creates new editor page
 	 * @param parent
 	 */
-	public AlphaNumericTarget(Composite parent, int style) {
+	public NumericPlanTargetPropertyPage(TargetPropertyPage parentWindow, Composite parent, int style) {
 		super(parent, style);
-		this.parent = parent;
+		this.parentWindow = parentWindow;
 	}
 	
 	
@@ -92,6 +108,9 @@ public class AlphaNumericTarget extends Composite {
 		options.add("Patrol Man-Hours");
 		
 		targetType.setInput(options);
+		String d = options.get(0);
+		targetType.setSelection(new StructuredSelection(d));
+		
 		
 		Label lbl3 = new Label(center, SWT.NONE);
 		lbl3.setText("Operator:");
@@ -109,6 +128,8 @@ public class AlphaNumericTarget extends Composite {
 		optionsOp.add("!=");
 		
 		targetOp.setInput(optionsOp);
+		String dOp = optionsOp.get(0);
+		targetOp.setSelection(new StructuredSelection(dOp));
 		
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText("Target Value:");
@@ -120,27 +141,77 @@ public class AlphaNumericTarget extends Composite {
 		data.widthHint = 170;
 		targetValue.setLayoutData(data);
 		
+		
+		KeyListener validate = new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				validate();
+			}
+		};
+		targetValue.addKeyListener(validate);
+		targetName.addKeyListener(validate);
+		
+		cdTargetValue = createDecoration(targetValue);
+		cdTargetName = createDecoration(targetName);
+
+		validate();
 		return center;
 	}
 	
-	public void setTargetValue(double targetValue) {
-		this.targetValue.setText(Double.toString(targetValue));
+	protected ControlDecoration createDecoration(Control control){
+		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
+	}
+	
+	/**
+	 * Validate the input fields
+	 * 
+	 * @return <code>false</code> if not complete, <code>true</code> otherwise
+	 */
+	public boolean validate() {
+
+		boolean isComplete = true;
+		if (targetName.getText().trim().isEmpty()
+				|| ! SmartUtils.isSimpleString(targetName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
+			cdTargetName.show();
+			cdTargetName.setDescriptionText("Name cannot be empty or use the following characters: " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX);
+			isComplete = false;
+		}else{
+			cdTargetName.hide();
+		}
+		
+		try{
+			Double.parseDouble(targetValue.getText());
+			//exception will kick us out here if it's not valid
+			cdTargetValue.hide();
+		}catch(Exception e){
+			cdTargetValue.show();
+			cdTargetValue.setDescriptionText("Value must be a numeric value");
+			isComplete = false;
+		}
+
+		if(isComplete){
+			parentWindow.enableOK(true);
+		}else{
+			parentWindow.enableOK(false);
+		}
+		return isComplete;
 	}
 
 
-	public void setTargetName(String targetName) {
-		this.targetName.setText(targetName);
+	
+	public void setPlanTarget(PlanTarget p) {
+		NumericPlanTarget pt = (NumericPlanTarget) p;
+		this.targetValue.setText(Double.toString(pt.getValue()));
+		this.targetName.setText(pt.getName());
+		this.targetType.setSelection(new StructuredSelection( pt.getType() ));
+		this.targetOp.setSelection(new StructuredSelection( pt.getOp() ));
+		validate();
 	}
 
-
-	public void setTargetType(PlanTarget pt) {
-		this.targetType.setSelection(new StructuredSelection(pt.getType()));
-	}
-
-
-	public void setTargetOp(PlanTarget pt) {
-		this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
-	}
 
 
 	public double getTargetValue(){
@@ -156,5 +227,6 @@ public class AlphaNumericTarget extends Composite {
 	public String getTargetOp(){
 		return targetOp.getSelection().toString();
 	}
+	
 }
 

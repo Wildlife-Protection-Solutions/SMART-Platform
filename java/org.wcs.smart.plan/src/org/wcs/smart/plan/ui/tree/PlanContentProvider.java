@@ -40,6 +40,8 @@ public class PlanContentProvider implements ITreeContentProvider {
 	public Object[] getElements(Object inputElement) {
 		return rootNodes;
 	}
+	
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)

@@ -145,7 +145,18 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 	
 	@Override
 	void initModel(Plan p, Session session) {
+		//need this transaction as this is not the plan hibernate manager, and I don't want to break other 
+		//code by changing the transcation paradigm in the main plug in
+		session.beginTransaction();
 		Integer act = HibernateManager.getActiveEmployees(p.getConservationArea(), session).size();
+		session.getTransaction().rollback();
+		
 		activeEmployees.setText(act.toString());
+		try{
+			unavailableEmployees.setText(p.getUnavailableEmployees().toString());
+			planType.setSelection(new StructuredSelection(p.getType()));
+		}catch (Exception e){
+			//do nothing, probably just no template so we can't set the values to anything
+		}
 	}
 }

@@ -66,6 +66,7 @@ public class PlanHibernateManager{
 	 * @return plan id for given plan
 	 */
 	public static String generatePlanId(Plan p, Session s) {
+		s.beginTransaction();
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
 
@@ -83,6 +84,8 @@ public class PlanHibernateManager{
 				break;
 			} catch (Exception ex) {
 				// not of the form CAID_# skip this one
+			}finally{
+				s.getTransaction().rollback();
 			}
 		}
 		sb.append("_");
@@ -114,7 +117,6 @@ public class PlanHibernateManager{
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			session.getTransaction().rollback();
-			
 			SmartPlanPlugIn.displayLog("Could not save plan. " + ex.getMessage(), ex);
 			return false;
 		}finally{

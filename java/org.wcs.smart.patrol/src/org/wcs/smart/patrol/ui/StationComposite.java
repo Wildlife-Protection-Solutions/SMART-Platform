@@ -46,6 +46,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.Team;
 
 /**
  * Patrol Item composite for selecting patrol station.
@@ -137,7 +138,13 @@ public class StationComposite extends PatrolItemComposite{
 			return null;
 		}
 	}
-	
+	/**
+	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getSelectedTeam()
+	 */
+
+	public void setSelectedStation(Station stn) {
+		stationList.setSelection(new StructuredSelection(stn));
+	}	
 
 
 	/**

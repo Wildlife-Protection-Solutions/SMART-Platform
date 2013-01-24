@@ -21,10 +21,10 @@
  */
 
 /**
- * Dialog for creating new employees or
- * editing existing employees.
+ * Dialog for creating new targets or
+ * editing existing targets.
  * 
- * @author Emily
+ * @author Jeff
  * @since 1.0.0
  */
 
@@ -33,20 +33,18 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.plan.model.AdministrativePlanTarget;
+import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 
@@ -54,12 +52,14 @@ import org.wcs.smart.plan.model.PlanTarget;
 public class TargetPropertyPage extends Dialog {
 
 	private Plan parentPlan;
+	private NewPlanWizardPage6 parentWindow;
 	private PlanTarget toUpdate;
 	
 	private String title = null;
 	private Session session = null;
 	
-
+	public Button btnOk;
+	
 	TabFolder tabFolder; 
 	
 	public static String AUTO_GENERATE = "system-generated";
@@ -77,7 +77,7 @@ public class TargetPropertyPage extends Dialog {
 	 * @param parent
 	 * @param style
 	 */
-	public TargetPropertyPage(Shell parent,  
+	public TargetPropertyPage(NewPlanWizardPage6 parentWindow, Shell parent,  
 		Plan parentPlan, PlanTarget toUpdate) {
 		
 		super(parent);
@@ -85,6 +85,7 @@ public class TargetPropertyPage extends Dialog {
 		this.toUpdate = toUpdate;
 		this.parentPlan = parentPlan;
 		this.parent = parent;
+		this.parentWindow = parentWindow;
 		
 		
 		if (toUpdate == null){
@@ -99,16 +100,20 @@ public class TargetPropertyPage extends Dialog {
 		if(toUpdate == null){
 			return; //get out if we are creating a new target, nothing to initialize
 		}
-		if(toUpdate.getCat() == PlanTarget.tarCategory.ALPHANUMERIC){
+		if(toUpdate instanceof  NumericPlanTarget){
 			Control ctls[] = tabFolder.getChildren();
-			if(ctls[0] instanceof AlphaNumericTarget){
-				((AlphaNumericTarget)ctls[0]).setTargetValue(toUpdate.getValue());
-				((AlphaNumericTarget)ctls[0]).setTargetName(toUpdate.getName());
-				((AlphaNumericTarget)ctls[0]).setTargetOp(toUpdate);
-				((AlphaNumericTarget)ctls[0]).setTargetType(toUpdate);
+			if(ctls[0] instanceof NumericPlanTargetPropertyPage){
+				((NumericPlanTargetPropertyPage)ctls[0]).setPlanTarget( toUpdate);
 			}
+			tabFolder.setSelection(0);
+		}else if(toUpdate instanceof  AdministrativePlanTarget){
+			Control ctls[] = tabFolder.getChildren();
+			//3rd tab is forth control... 0,2,4...for 1st 2nd 3rd tabs
+			if(ctls[4] instanceof AdministrativePlanTargetPropertyPage){
+				((AdministrativePlanTargetPropertyPage)ctls[4]).setPlanTarget( toUpdate);
+			}
+			tabFolder.setSelection(2); //3rd tab
 			
-		}else if(toUpdate.getCat() == PlanTarget.tarCategory.SPATIAL){
 		}else if(toUpdate.getCat() == PlanTarget.tarCategory.ADMIN){
 		}
 	}
@@ -142,19 +147,19 @@ public class TargetPropertyPage extends Dialog {
 		
 		TabItem item = new TabItem (tabFolder, SWT.NONE);
 		item.setText (TAB1);
-		AlphaNumericTarget page1 = new AlphaNumericTarget(tabFolder, SWT.PUSH);
+		NumericPlanTargetPropertyPage page1 = new NumericPlanTargetPropertyPage(this, tabFolder, SWT.PUSH);
 		item.setControl (page1.createComponent(tabFolder, SWT.NONE));
 		
 		
 		TabItem item2 = new TabItem (tabFolder, SWT.NONE);
 		item2.setText (TAB2);
-		AlphaNumericTarget page2 = new AlphaNumericTarget(tabFolder, SWT.PUSH);
+		NumericPlanTargetPropertyPage page2 = new NumericPlanTargetPropertyPage(this, tabFolder, SWT.PUSH);
 		item2.setControl (page2.createComponent(tabFolder, SWT.NONE));
 		
 		
 		TabItem item3 = new TabItem (tabFolder, SWT.NONE);
 		item3.setText(TAB3);
-		AdministrativeTarget page3 = new AdministrativeTarget(tabFolder, SWT.PUSH);
+		AdministrativePlanTargetPropertyPage page3 = new AdministrativePlanTargetPropertyPage(this, tabFolder, SWT.PUSH);
 		item3.setControl (page3.createComponent(tabFolder, SWT.NONE));
 		
 		tabFolder.pack();
@@ -164,10 +169,19 @@ public class TargetPropertyPage extends Dialog {
 	}
 	
 	
+	public void enableOK(boolean val){
+		if(btnOk != null){
+			btnOk.setEnabled(val);
+		}
+	}
+	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		btnOk = createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		if(toUpdate == null){
+			btnOk.setEnabled(false);
+		}
 		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
 		
 	}
@@ -186,46 +200,64 @@ public class TargetPropertyPage extends Dialog {
 	}
 	
 	private boolean performSave(){
-		PlanTarget t;
-		if(toUpdate == null){
-			t = new PlanTarget();
-			t.setPlan(parentPlan);
-		}else{
-			t = toUpdate;
-		}
-
-		TabItem tab[] = tabFolder.getSelection();
+		PlanTarget pt;
+		int i = tabFolder.getSelectionIndex();
+		Control[] ctls = tabFolder.getChildren();
 		
-		if(tab[0].getText() == TAB1){
-			Control ctls[] = tabFolder.getChildren();
-			if(ctls[0] instanceof AlphaNumericTarget){
-				double value = ((AlphaNumericTarget)ctls[0]).getTargetValue();
-				String name = ((AlphaNumericTarget)ctls[0]).getTargetName();
-				String op = ((AlphaNumericTarget)ctls[0]).getTargetOp();
-				String type = ((AlphaNumericTarget)ctls[0]).getTargetType();
-				op = op.replace("[", "");
-				op = op.replace("]", "");
-				type = type.replace("[", "");
-				type = type.replace("]", "");
-				t.setValue(value);
-				t.setOp(op);
-				t.setType(type);
-				t.setName(name);
-				t.setCat(PlanTarget.tarCategory.ALPHANUMERIC);
+		if(i == 0){//numeric
+			if(toUpdate == null){
+				pt = new NumericPlanTarget();
+				pt.setPlan(parentPlan);
+			}else{
+				pt = toUpdate;
 			}
+
+			double value;
+			try{
+				value = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetValue();
+			}catch(Exception e){
+				return false;
+			}				
+			String name = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetName();
+			String op = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetOp();
+			String type = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetType();
+			if(name == "" || op =="" || type ==""){
+				return false;
+			}
+			op = op.replace("[", "");
+			op = op.replace("]", "");
+			type = type.replace("[", "");
+			type = type.replace("]", "");
+			((NumericPlanTarget)pt).setValue(value);
+			((NumericPlanTarget)pt).setOp(op);
+			((NumericPlanTarget)pt).setType(type);
+			pt.setName(name);
+
 			
-		}else if(tab[0].getText() == TAB2){
-			t.setCat(PlanTarget.tarCategory.SPATIAL);
-		}else if(tab[0].getText() == TAB3){
-			t.setCat(PlanTarget.tarCategory.ALPHANUMERIC);
+//		}else if(i==1){ //spatial
+			//seems to be 2 controls for each tab, so the 2nd tab is 3 in a 0-indexed array
+//			NumericPlanTarget pt = (NumericPlanTarget)t;
+//			pt.setCat(PlanTarget.tarCategory.SPATIAL);
+		}else if(i == 2){//admin
+			if(toUpdate == null){
+				pt = new AdministrativePlanTarget();
+				pt.setPlan(parentPlan);
+			}else{
+				pt = (AdministrativePlanTarget)toUpdate;
+			}
+			//seems to be 2 controls for each tab, so the 3rd tab is 4 in a 0-indexed array
+			String name = ((AdministrativePlanTargetPropertyPage)ctls[4]).getTargetName();
+			String desc = ((AdministrativePlanTargetPropertyPage)ctls[4]).getTargetDesc();
+			desc= desc.replace("[", "");
+			desc = desc.replace("]", "");
+			((AdministrativePlanTarget)pt).setTargetDesc(desc);
+			pt.setName(name);
 		}else{
-			return false;//not a known tab that is trying to save something.
+			return false;
 		}
 		
 		if(toUpdate == null){
-			parentPlan.addTarget(t);
-		}else{
-			//target object is modified, might need to save or update here explicity?
+			parentPlan.addTarget(pt);
 		}
 		return true;
 	}
@@ -233,5 +265,6 @@ public class TargetPropertyPage extends Dialog {
 	public void addListener(int code, Listener listener) {
 		this.getShell().addListener(code, listener);
 	}
+	
 	
 }
