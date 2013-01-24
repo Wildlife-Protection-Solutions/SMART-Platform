@@ -117,13 +117,40 @@ public class IntelligenceHibernateManager extends HibernateManager {
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
-				IntelligencePlugIn.displayLog("Unable to delete intelligence." + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_DeleteIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 				return false;
 			}
 		} finally {
 			session.close();
 		}
 		return true;
+	}
+
+	/**
+	 * Delete a given intelligence from the database.
+	 * 
+	 * @param uuid uuid of the intelligence to delete
+	 * @return intelligence that was deleted or <code>null</code> in case of error
+	 */
+	public static Intelligence deleteIntelligence(byte[] uuid) {
+		Interceptor interceptor = new AttachmentInterceptor();
+		Session session = SmartHibernateManager.openSession(interceptor);
+		Intelligence intelligence = null;
+		try {
+			session.beginTransaction();
+			try {
+				intelligence = (Intelligence) session.load(Intelligence.class, uuid);
+				session.delete(intelligence);
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_DeleteIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return null;
+			}
+		} finally {
+			session.close();
+		}
+		return intelligence;
 	}
 	
 }

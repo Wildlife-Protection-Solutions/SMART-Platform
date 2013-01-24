@@ -66,6 +66,8 @@ public class Messages extends NLS {
 
     public static String IntelligenceHandler_TaskName;
 
+	public static String IntelligenceHibernateManager_DeleteIntelligence_Error;
+
 	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
 
 	public static String IntelligenceListView_Loading_Label;

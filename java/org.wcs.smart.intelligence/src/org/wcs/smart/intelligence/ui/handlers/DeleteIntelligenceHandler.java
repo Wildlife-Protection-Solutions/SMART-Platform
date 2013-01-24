@@ -40,6 +40,7 @@ import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
 
 /**
 /**
@@ -63,20 +64,20 @@ public class DeleteIntelligenceHandler extends AbstractHandler {
 		
 		for (Iterator<?> iterator = lastSelection.iterator(); iterator.hasNext();) {
 			Object selected = iterator.next();
-			if (selected instanceof Intelligence) {
-				final Intelligence intelligence = (Intelligence) selected;
+			if (selected instanceof IntelligenceEditorInput) {
+				final IntelligenceEditorInput editorInput = (IntelligenceEditorInput) selected;
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
 								Messages.DeleteIntelligenceHandler_ConfirmationDialog_Title,
 								null,
-								MessageFormat.format(Messages.DeleteIntelligenceHandler_ConfirmationDialog_Message, new Object[]{intelligence.getShortName()}),
+								MessageFormat.format(Messages.DeleteIntelligenceHandler_ConfirmationDialog_Message, new Object[]{editorInput.getName()}),
 								MessageDialog.CONFIRM, 
 								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 						
 						if (dialog.open() == MessageDialog.OK) {
-							DeleteIntelligenceJob deleteJob = new DeleteIntelligenceJob(intelligence);
+							DeleteIntelligenceJob deleteJob = new DeleteIntelligenceJob(editorInput.getUuid());
 							deleteJob.schedule();
 						}
 					}});
@@ -93,18 +94,19 @@ public class DeleteIntelligenceHandler extends AbstractHandler {
      */
     private class DeleteIntelligenceJob extends Job {
     	
-    	private Intelligence intelligence;
+    	private byte[] uuid;
   
-        public DeleteIntelligenceJob(Intelligence intelligence) {
+        public DeleteIntelligenceJob(byte[] uuid) {
             super(Messages.NewIntelligenceWizard_SaveIntelligenceJob_Title);
-            this.intelligence = intelligence;
+            this.uuid = uuid;
         }
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-            if (IntelligenceHibernateManager.deleteIntelligence(DeleteIntelligenceJob.this.intelligence)) {
+            Intelligence deletedIntelligence = IntelligenceHibernateManager.deleteIntelligence(uuid);
+			if (deletedIntelligence != null) {
             	//NOTE: you have to be careful with this call
-            	IntelligenceEventManager.getInstance().intelligenceDeleted(DeleteIntelligenceJob.this.intelligence);
+            	IntelligenceEventManager.getInstance().intelligenceDeleted(deletedIntelligence);
             	return Status.OK_STATUS;
             }
             //no need to use other status as hibernate manager will report error in case something is wrong
