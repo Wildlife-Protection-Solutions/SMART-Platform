@@ -38,6 +38,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
@@ -106,15 +107,23 @@ public class TargetPropertyPage extends Dialog {
 				((NumericPlanTargetPropertyPage)ctls[0]).setPlanTarget( toUpdate);
 			}
 			tabFolder.setSelection(0);
+			tabFolder.getItem(1).dispose();
+			tabFolder.getItem(1).dispose();//once we remove 1, 2 becomes 1...
+
 		}else if(toUpdate instanceof  AdministrativePlanTarget){
 			Control ctls[] = tabFolder.getChildren();
 			//3rd tab is forth control... 0,2,4...for 1st 2nd 3rd tabs
 			if(ctls[4] instanceof AdministrativePlanTargetPropertyPage){
 				((AdministrativePlanTargetPropertyPage)ctls[4]).setPlanTarget( toUpdate);
 			}
-			tabFolder.setSelection(2); //3rd tab
 			
+			tabFolder.getItem(0).dispose();
+			tabFolder.getItem(0).dispose();//1 becomes 0, remove it as well
+
 		}else if(toUpdate.getCat() == PlanTarget.tarCategory.ADMIN){
+			
+			tabFolder.getItem(0).dispose();
+			tabFolder.getItem(1).dispose();//2 becomes 1 now, remove it.
 		}
 	}
 
@@ -203,8 +212,23 @@ public class TargetPropertyPage extends Dialog {
 		PlanTarget pt;
 		int i = tabFolder.getSelectionIndex();
 		Control[] ctls = tabFolder.getChildren();
+		int tabType;//tab indexeds, they change with updates, bit complicated... 
+		//I can't figure out how to disable the other 2 types when editing one, so i dispose them, changint he indexes...
+		if(toUpdate != null){
+			if(toUpdate instanceof NumericPlanTarget){
+				tabType = 0;
+			//}else if(toUpdate instanceof SpatialPlanTarget){
+				//type = 1;
+			}else if(toUpdate instanceof AdministrativePlanTarget){
+				tabType = 2;
+			}else{
+				tabType = -1;
+			}
+		}else{//new one normal indexes
+			tabType = i;
+		}
 		
-		if(i == 0){//numeric
+		if(tabType  == 0){//numeric
 			if(toUpdate == null){
 				pt = new NumericPlanTarget();
 				pt.setPlan(parentPlan);
@@ -234,11 +258,11 @@ public class TargetPropertyPage extends Dialog {
 			pt.setName(name);
 
 			
-//		}else if(i==1){ //spatial
+//		}else if(tabType  == 1){ //spatial
 			//seems to be 2 controls for each tab, so the 2nd tab is 3 in a 0-indexed array
 //			NumericPlanTarget pt = (NumericPlanTarget)t;
 //			pt.setCat(PlanTarget.tarCategory.SPATIAL);
-		}else if(i == 2){//admin
+		}else if(tabType  == 2){//admin
 			if(toUpdate == null){
 				pt = new AdministrativePlanTarget();
 				pt.setPlan(parentPlan);

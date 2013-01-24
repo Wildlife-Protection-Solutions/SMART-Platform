@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
 import org.eclipse.swt.events.KeyAdapter;
@@ -144,6 +145,14 @@ public class NewPlanWizardPage3 extends NewPlanWizardPage {
 		Plan p = ((CreatePlanWizard)getWizard()).getPlan();
 		p.setId(planId.getText());
 		cdPlanID.hide();
+		
+		if(PlanHibernateManager.isDuplicatePlanId(((CreatePlanWizard)getWizard()).getSession(), planId.getText())){
+			cdPlanID.show();
+			cdPlanID.setDescriptionText("Plan Id is already in the database, choose a unique ID");
+			setPageComplete(false);
+		}
+		
+		
 		boolean idIsSimple = SmartUtils.isSimpleString(planId.getText(),
 				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
 				32, 2);
