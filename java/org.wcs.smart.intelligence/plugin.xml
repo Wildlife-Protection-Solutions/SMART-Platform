@@ -18,7 +18,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives">
+            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
          <command
                commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
                icon="images/etool16/intelligence.png"
