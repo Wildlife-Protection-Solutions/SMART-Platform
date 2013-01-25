@@ -21,18 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,20 +32,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.DateFilterComposite;
+import org.wcs.smart.common.filter.SmartFilterDialog;
+import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Filter dialog for filtering the patrols displayed in the patrol list view.
@@ -62,43 +49,20 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolFilterDialog extends TitleAreaDialog {
+public class PatrolFilterDialog extends SmartFilterDialog {
 
-	private static final int APPLY_ID = 4;
-	private static final int DEFAULTS_ID = 8;
 	//current filter
 	private PatrolViewFilter currentFilter;
 	private PatrolListView view;
 	
-	//date filter
-	private Button btnFilterDate;
-	private Button btnIncludeAllDate;
-	private ComboViewer dateViewer;
-	private Label lblStartDateAnd;
-	private Label lblStartDateBetween;
+	private DateFilterComposite dateFilterCmp;
+	private StringFilterComposite patrolIdFilterCmp;
 	
 	//type filter
 	private Button btnFilterTypes;
 	private Button btnIncludeAllTypes;
 	private CheckboxTableViewer patrolTypeTableViewer;
-	private DateTime dtEnd;
-	private DateTime dtStart;
 	
-	//id filter
-	private Button btnFilterIds;
-	private ComboViewer pidComparatorViewer;
-	private Text txtPatrolIdFilter;
-	private Button btnIncludeAllIds;
-	private Label lblPatrolId;
-	
-	private Listener validateListener = new Listener(){
-
-		@Override
-		public void handleEvent(Event event) {
-			validate();
-		}};
-	
-
 	/**
 	 * Create the dialog.
 	 * @param parent parent shell
@@ -117,49 +81,22 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 	}
 	
 	@Override
-	protected void okPressed() {
-		updateFilter();
-		applyUpdates();
-		super.okPressed();
+	protected void resetFilterModel() {
+		currentFilter.setDefaults();
 	}
 	
 	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, APPLY_ID, Messages.PatrolFilterDialog_Apply_Button, false);
-		createButton(parent, DEFAULTS_ID, Messages.PatrolFilterDialog_Reset_Button, false);
-		super.createButtonsForButtonBar(parent);		
-	}
-	
-	@Override
-	protected void buttonPressed(int buttonId) {
-		if (buttonId == DEFAULTS_ID){
-			currentFilter.setDefaults();
-			updateValues();
-		}else if (buttonId == APPLY_ID){
-			updateFilter();
-			applyUpdates();
-		}
-		super.buttonPressed(buttonId);
-	}
-	
-	private void applyUpdates(){
+	protected void applyFilterToView(){
 		this.view.updateContent();
 	}
+	
 	/*
-	 * Updates the current filter with the values from the 
-	 * user
+	 * Updates the current filter with the values from the user
 	 */
-	private void updateFilter(){
-		if (btnFilterDate.getSelection()){
-			PatrolViewFilter.DateFilter df = (PatrolViewFilter.DateFilter) ((IStructuredSelection)dateViewer.getSelection()).getFirstElement();
-			if (df == PatrolViewFilter.DateFilter.CUSTOM){
-				this.currentFilter.setDateFilter(df,SmartUtils.getDate(dtStart), SmartUtils.getDate(dtEnd));
-			}else{
-				this.currentFilter.setDateFilter(df, null, null);
-			}
-		}else{
-			this.currentFilter.setDateFilter(null, null, null);
-		}
+	@Override
+	protected void updateFilterModel(){
+		this.currentFilter.setDateFilter(dateFilterCmp.getDateFilterForModel(),
+				dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
 		
 		if (btnFilterTypes.getSelection()){
 			Object[] values = patrolTypeTableViewer.getCheckedElements();
@@ -172,17 +109,15 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 			this.currentFilter.setPatrolTypes(null);
 		}
 		
-		if (btnFilterIds.getSelection()){
-			this.currentFilter.setPatrolIdFilter(  (PatrolViewFilter.StringComparison)((IStructuredSelection)this.pidComparatorViewer.getSelection()).getFirstElement()  , txtPatrolIdFilter.getText());
-		}else{
-			this.currentFilter.setPatrolIdFilter(null, null);
-		}
+		currentFilter.setPatrolIdFilter(patrolIdFilterCmp.getComparisonForModel(), 
+				patrolIdFilterCmp.getFilterValueForModel());
 	}
 
 	/**
 	 * Updates the widgets with the values from the current filter
 	 */
-	private void updateValues(){
+	@Override
+	protected void updateControlsValues(){
 		//patrol type
 		boolean enabled = currentFilter.getPatrolTypeFilters() != null;
 		btnFilterTypes.setSelection(enabled);
@@ -193,49 +128,12 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		}else{
 			patrolTypeTableViewer.setAllChecked(true);
 		}
-		
+
 		//date 
-		enabled = currentFilter.getDateFilter() != null;
-		btnFilterDate.setSelection(enabled);
-		btnIncludeAllDate.setSelection(!enabled);
-		dateViewer.getControl().setEnabled(enabled);
-		dtStart.setEnabled(false);
-		dtEnd.setEnabled(false);
-		lblStartDateAnd.setEnabled(false);
-		lblStartDateBetween.setEnabled(false);
+		dateFilterCmp.applyState(currentFilter.getDateFilter(), currentFilter.getStartDate(), currentFilter.getEndDate());
 		
-		if (enabled){
-			dateViewer.setSelection(new StructuredSelection(currentFilter.getDateFilter()));
-			if (currentFilter.getDateFilter() == PatrolViewFilter.DateFilter.CUSTOM){
-				GregorianCalendar cal = SmartUtils.convertDate(currentFilter.getStartDate());
-				dtStart.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
-				cal = SmartUtils.convertDate(currentFilter.getEndDate());
-				dtEnd.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
-		
-				dtStart.setEnabled(true);
-				dtEnd.setEnabled(true);
-				lblStartDateAnd.setEnabled(true);
-				lblStartDateBetween.setEnabled(true);
-			}
-		}else{
-			dateViewer.setSelection(new StructuredSelection(PatrolViewFilter.DateFilter.LAST_30_DAYS));
-		}
-		
-		// patrol id
-		enabled = currentFilter.getPatrolIdComparator() != null && currentFilter.getPatrolIdFilter()  != null;
-		btnFilterIds.setSelection(enabled);
-		btnIncludeAllIds.setSelection(!enabled);
-		txtPatrolIdFilter.setEnabled(enabled);
-		pidComparatorViewer.getControl().setEnabled(enabled);
-		lblPatrolId.setEnabled(enabled);
-		if (enabled){
-			txtPatrolIdFilter.setText(currentFilter.getPatrolIdFilter());
-			pidComparatorViewer.setSelection(new StructuredSelection(currentFilter.getPatrolIdComparator()));
-		}else{
-			pidComparatorViewer.setSelection(new StructuredSelection(PatrolViewFilter.StringComparison.CONTAINS));
-		}
-		
-		
+		//patrol id
+		patrolIdFilterCmp.applyState(currentFilter.getPatrolIdComparator(), currentFilter.getPatrolIdFilter());
 	}
 	/**
 	 * Create contents of the dialog.
@@ -252,15 +150,18 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 			Composite dateFilterExpComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolDatesGroupLabel, composite);
-			createDateFilter(dateFilterExpComp);
+			dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
 
 			Composite patrolType = createGroupComposite(Messages.PatrolFilterDialog_PatrolTypesGroupLabel, composite);
 			createPatrolType(session, patrolType);
 
 			Composite patrolIdComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolIdGroupLabel, composite);
-			createIdFilter(patrolIdComp);
+			patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE);
+			patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
+			patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
+			patrolIdFilterCmp.setValueLabel(Messages.PatrolFilterDialog_PatrolIdLabel);
 			
-			updateValues();
+			updateControlsValues();
 		} finally {
 			session.getTransaction().commit();
 			session.close();
@@ -318,179 +219,4 @@ public class PatrolFilterDialog extends TitleAreaDialog {
 		return patrolTypeComp;
 	}
 	
-	/*
-	 * Creates the date filter section
-	 */
-	private Composite createDateFilter(Composite parent){
-		Composite dateComp = new Composite(parent, SWT.NONE);
-		dateComp.setLayout(new GridLayout(1, false));
-		dateComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		btnIncludeAllDate = new Button(dateComp, SWT.RADIO);
-		btnIncludeAllDate.setText(Messages.PatrolFilterDialog_OpIncludeAllDatesLabel);
-		btnIncludeAllDate.addListener(SWT.Selection, validateListener);
-		btnIncludeAllDate.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (btnIncludeAllDate.getSelection()){
-					dtEnd.setEnabled(false);
-					dtStart.setEnabled(false);
-				}
-			}
-		});
-		btnFilterDate = new Button(dateComp, SWT.RADIO);
-		btnFilterDate.setText(Messages.PatrolFilterDialog_OpFilterDatesLabel);
-		btnFilterDate.addListener(SWT.Selection, validateListener);
-		btnFilterDate.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				PatrolViewFilter.DateFilter ff = (PatrolViewFilter.DateFilter)((StructuredSelection)dateViewer.getSelection()).getFirstElement();
-				boolean enabled =  (ff != null && ff == PatrolViewFilter.DateFilter.CUSTOM);
-				dtStart.setEnabled(enabled);
-				dtEnd.setEnabled(enabled);
-				lblStartDateAnd.setEnabled(enabled);
-				lblStartDateBetween.setEnabled(enabled);
-			}
-		});
-		
-		Composite comp = new Composite(dateComp, SWT.NONE);
-		comp.setLayout(new GridLayout(5, false));
-		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		dateViewer = new ComboViewer(comp, SWT.READ_ONLY);
-		dateViewer.setContentProvider(ArrayContentProvider.getInstance());
-		dateViewer.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof PatrolViewFilter.DateFilter){
-					return ((PatrolViewFilter.DateFilter)element).getGuiName();
-				}
-				return super.getText(element);
-			}
-		});
-		dateViewer.setInput(PatrolViewFilter.DateFilter.values());
-		dateViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				PatrolViewFilter.DateFilter ff = (PatrolViewFilter.DateFilter)((StructuredSelection)dateViewer.getSelection()).getFirstElement();
-				boolean enabled =  (ff != null && ff == PatrolViewFilter.DateFilter.CUSTOM);
-				dtStart.setEnabled(enabled);
-				dtEnd.setEnabled(enabled);
-				lblStartDateAnd.setEnabled(enabled);
-				lblStartDateBetween.setEnabled(enabled);
-			}
-		});
-		dateViewer.getCombo().addListener(SWT.Modify, validateListener );
-		lblStartDateBetween = new Label(comp, SWT.NONE);
-		lblStartDateBetween.setText(Messages.PatrolFilterDialog_OpContainDatesLabel_A);
-		
-		
-		dtStart = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
-		dtStart.addListener(SWT.Selection, validateListener );
-		lblStartDateAnd = new Label(comp, SWT.NONE);
-		lblStartDateAnd.setText(Messages.PatrolFilterDialog_OpContainDatesLabel_B);
-		dtEnd = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
-		dtEnd.addListener(SWT.Selection, validateListener );
-		
-		btnFilterDate.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				dateViewer.getCombo().setEnabled(true);
-			}
-		});
-		btnIncludeAllDate.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				dateViewer.getCombo().setEnabled(false);
-			}
-		});
-		return dateComp;
-	}
-	
-	private void validate(){
-		setErrorMessage(null);
-		if (btnFilterDate.getSelection()){
-			IStructuredSelection dateSelection = (IStructuredSelection) this.dateViewer.getSelection();
-			if (dateSelection == null || dateSelection.isEmpty()){
-				setErrorMessage(Messages.PatrolFilterDialog_Error_DateMustBeSelected);
-				return;
-			}
-			if (dateSelection.getFirstElement().equals(PatrolViewFilter.DateFilter.CUSTOM)){
-				if (SmartUtils.getDate(dtStart).after(SmartUtils.getDate(dtEnd))){
-					setErrorMessage(Messages.PatrolFilterDialog_Error_EndDateBeforeStart);
-				}
-			}
-		}
-	}
-
-	/*
-	 * Creates the id filter section
-	 */
-	private Composite createIdFilter(Composite parent){
-		Composite idComp = new Composite(parent, SWT.NONE);
-		idComp.setLayout(new GridLayout(1, false));
-		idComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		btnIncludeAllIds = new Button(idComp, SWT.RADIO);
-		btnIncludeAllIds.setText(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
-		
-		btnFilterIds = new Button(idComp, SWT.RADIO);
-		btnFilterIds.setText(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
-	
-		
-		Composite comp = new Composite(parent, SWT.NONE);
-		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		comp.setLayout(new GridLayout(3, false));
-		lblPatrolId = new Label(comp, SWT.NONE);
-		lblPatrolId.setText(Messages.PatrolFilterDialog_PatrolIdLabel);
-		
-		pidComparatorViewer = new ComboViewer(comp, SWT.READ_ONLY);
-		pidComparatorViewer.setContentProvider(ArrayContentProvider.getInstance());
-		pidComparatorViewer.setInput(PatrolViewFilter.StringComparison.values());
-		pidComparatorViewer.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof PatrolViewFilter.StringComparison){
-					return ((PatrolViewFilter.StringComparison)element).getGuiName();
-				}
-				return super.getText(element);
-			}
-		});
-		
-		txtPatrolIdFilter = new Text(comp, SWT.BORDER);
-		txtPatrolIdFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		btnFilterIds.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				pidComparatorViewer.getCombo().setEnabled(true);
-				txtPatrolIdFilter.setEnabled(true);
-				lblPatrolId.setEnabled(true);
-			}
-		});
-		btnIncludeAllIds.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				pidComparatorViewer.getCombo().setEnabled(false);
-				txtPatrolIdFilter.setEnabled(false);
-				lblPatrolId.setEnabled(false);
-			}
-		});
-			
-		return idComp;
-	
-	}
-	
-	private Composite createGroupComposite(String title, Composite parent){
-		Group comp = new Group(parent,  SWT.NONE);
-		comp.setText(title);
-		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		comp.setLayout(new GridLayout(1, false));
-		return comp;
-	}
-	
-	
-	@Override
-	protected boolean isResizable() {
-		return true;
-	}
 }

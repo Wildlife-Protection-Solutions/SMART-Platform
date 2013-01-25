@@ -26,8 +26,9 @@ import java.util.Date;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
+import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
@@ -47,45 +48,6 @@ public class PatrolViewFilter {
 	
 	private Date startDate;
 	private Date endDate;
-	
-	
-	/**
-	 * Types of comparitors for patrol id filters.
-	 * @author Emily
-	 * @since 1.0.0
-	 */
-	public enum StringComparison{
-		EQUALS(Messages.PatrolViewFilter_EqualsLabel),
-		CONTAINS(Messages.PatrolViewFilter_ContainsLabel);
-		
-		private String guiName;
-		private StringComparison(String guiName){
-			this.guiName = guiName;
-		}
-		public String getGuiName(){
-			return this.guiName;
-		}
-	}
-	
-	/**
-	 * Date filters
-	 */
-	public enum DateFilter{
-		LAST_30_DAYS(Messages.PatrolViewFilter_Last30DaysOp),
-		LAST_60_DAYS(Messages.PatrolViewFilter_Last60DaysOp),
-		YEAR_TO_DATE(Messages.PatrolViewFilter_YearToDateOp),
-		MONTH_TO_DATE(Messages.PatrolViewFilter_MonthToDayOp),
-		CUSTOM(Messages.PatrolViewFilter_CustomDatesOp);
-		
-		private String guiName;
-		
-		private DateFilter(String name){
-			this.guiName = name;
-		}
-		public String getGuiName(){
-			return this.guiName;
-		}
-	}
 	
 	/**
 	 * 
