@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.ui.tree;
 
+import java.text.Collator;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -67,7 +69,7 @@ public class PlanViewer {
 		    public int compare(Viewer viewer, Object e1, Object e2) {
 
 		    	if (e1 instanceof Plan && e2 instanceof Plan){	        	
-		            return ((Plan) e1).getName().compareToIgnoreCase(((Plan) e2).getName());
+		            return Collator.getInstance().compare(((Plan) e1).getName(), (((Plan) e2).getName()));
 		        }
 		        else{
 		        	throw new IllegalArgumentException("Not comparable: " + e1 + " " + e2);
@@ -120,8 +122,8 @@ public class PlanViewer {
 	 * @return the viewer control
 	 */
 	public Composite getControl(){
+		
 		return planViewer.getTree();
 	}
-	
 	
 }
