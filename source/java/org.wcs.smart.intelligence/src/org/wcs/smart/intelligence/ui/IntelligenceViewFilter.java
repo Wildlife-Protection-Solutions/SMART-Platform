@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.intelligence.ui;
 
+import java.util.Date;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
+import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -34,7 +38,22 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class IntelligenceViewFilter {
 	
-	public Query buildQuery(Session s){ 
+	private DateFilter receivedDateFilter;
+	private Date receivedDateStart;
+	private Date receivedDateEnd;
+
+	private DateFilter relevantDateFilter;
+	private Date relevantDateStart;
+	private Date relevantDateEnd;
+
+	private StringComparison nameComparison;
+	private String name;
+
+	public IntelligenceViewFilter() {
+		resetDefaults();
+	}
+	
+	public Query buildQuery(Session s) { 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT i.uuid, i.shortName "); //$NON-NLS-1$
@@ -47,5 +66,120 @@ public class IntelligenceViewFilter {
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		return query;
 	}	
+
+	public void resetDefaults() {
+		this.receivedDateFilter = DateFilter.LAST_30_DAYS;
+		this.receivedDateStart = null;
+		this.receivedDateEnd = null;
+
+		this.relevantDateFilter = null;
+		this.relevantDateStart = null;
+		this.relevantDateEnd = null;
+
+		this.nameComparison = null;
+		this.name = null;
+	}
+	
+	/**
+	 * Sets the received date filter.  Set to null to include all dates;
+	 * 
+	 * @param filter date filter
+	 * @param start the start date for custom filter; null if not custom date filter
+	 * @param end the end date for custom filter; null if not cusom date filter
+	 */
+	public void setReceivedDateFilter(DateFilter filter, Date start, Date end) {
+		this.receivedDateFilter = filter;
+		this.receivedDateStart = start;
+		this.receivedDateEnd = end;
+	}
+
+	/**
+	 * Sets the relevant date filter.  Set to null to include all dates;
+	 * 
+	 * @param filter date filter
+	 * @param start the start date for custom filter; null if not custom date filter
+	 * @param end the end date for custom filter; null if not cusom date filter
+	 */
+	public void setRelevantDateFilter(DateFilter filter, Date start, Date end) {
+		this.relevantDateFilter = filter;
+		this.relevantDateStart = start;
+		this.relevantDateEnd = end;
+	}
+
+	/**
+	 * Sets the name filter.  If either are null then
+	 * all names will be included.
+	 * 
+	 * @param comparison the types of string comparison or null
+	 * @param text the text to compare or null
+	 */
+	public void setNameFilter(StringComparison comparison, String text){
+		this.nameComparison = comparison;
+		this.name = text;
+	}
+
+	public DateFilter getReceivedDateFilter() {
+		return receivedDateFilter;
+	}
+
+	public void setReceivedDateFilter(DateFilter receivedDateFilter) {
+		this.receivedDateFilter = receivedDateFilter;
+	}
+
+	public Date getReceivedDateStart() {
+		return receivedDateStart;
+	}
+
+	public void setReceivedDateStart(Date receivedDateStart) {
+		this.receivedDateStart = receivedDateStart;
+	}
+
+	public Date getReceivedDateEnd() {
+		return receivedDateEnd;
+	}
+
+	public void setReceivedDateEnd(Date receivedDateEnd) {
+		this.receivedDateEnd = receivedDateEnd;
+	}
+
+	public DateFilter getRelevantDateFilter() {
+		return relevantDateFilter;
+	}
+
+	public void setRelevantDateFilter(DateFilter relevantDateFilter) {
+		this.relevantDateFilter = relevantDateFilter;
+	}
+
+	public Date getRelevantDateStart() {
+		return relevantDateStart;
+	}
+
+	public void setRelevantDateStart(Date relevantDateStart) {
+		this.relevantDateStart = relevantDateStart;
+	}
+
+	public Date getRelevantDateEnd() {
+		return relevantDateEnd;
+	}
+
+	public void setRelevantDateEnd(Date relevantDateEnd) {
+		this.relevantDateEnd = relevantDateEnd;
+	}
+
+	public StringComparison getNameComparison() {
+		return nameComparison;
+	}
+
+	public void setNameComparison(StringComparison nameComparison) {
+		this.nameComparison = nameComparison;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 }

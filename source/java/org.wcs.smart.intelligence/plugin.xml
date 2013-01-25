@@ -37,6 +37,13 @@
                style="push"
                tooltip="Delete selected inteligence">
          </command>
+         <command
+               commandId="org.wcs.smart.intelligence.ShowIntelligenceFilter"
+               icon="images/etool16/filter.png"
+               label="Show Intelligence Filter"
+               style="push"
+               tooltip="Filter intelligences displayed in this list">
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="true"
@@ -64,6 +71,10 @@
             id="org.wcs.smart.intelligence.DeleteIntelligence"
             name="Delete Intelligence">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.ShowIntelligenceFilter"
+            name="Show Intelligence Filter">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -78,6 +89,10 @@
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.DeleteIntelligenceHandler"
             commandId="org.wcs.smart.intelligence.DeleteIntelligence">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ShowIntelligenceFilterHandler"
+            commandId="org.wcs.smart.intelligence.ShowIntelligenceFilter">
       </handler>
    </extension>
    <extension
