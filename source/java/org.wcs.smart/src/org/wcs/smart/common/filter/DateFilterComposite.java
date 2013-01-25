@@ -208,6 +208,10 @@ public class DateFilterComposite extends Composite {
 		btnFilterDate.setText(text);
 	}
 	
+	public void setDateRangeLabel(String text) {
+		lblStartDateBetween.setText(text);
+	}
+	
 	private DateFilter getCurrentDateFilter() {
 		IStructuredSelection selection = (IStructuredSelection) dateViewer.getSelection();
 		if (selection != null) {
