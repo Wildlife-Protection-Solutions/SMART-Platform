@@ -52,7 +52,7 @@ CREATE TABLE smart.plan_target
 	name VARCHAR(32),
 	description VARCHAR(256),
 	value double,
-	op VARCHAR(1),
+	op VARCHAR(10),
 	type VARCHAR(32),
 	plan_uuid CHAR(16) FOR BIT DATA NOT NULL,
 	category varchar(16),
