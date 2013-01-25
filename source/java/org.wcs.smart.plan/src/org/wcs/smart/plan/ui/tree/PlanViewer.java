@@ -40,6 +40,10 @@ public class PlanViewer {
 
 	private TreeViewer planViewer;
 	
+	/**
+	 * Creates a new plan viewer
+	 * @param parent
+	 */
 	public PlanViewer(Composite parent) {
 		createControl(parent);
 
@@ -72,7 +76,10 @@ public class PlanViewer {
 		});
 	}
 	
-	
+	/**
+	 * 
+	 * @return the select plan in the plan viewer
+	 */
 	public Plan getSelectedPlan(){
 		if (planViewer.getSelection().isEmpty()){
 			return null;
@@ -84,19 +91,34 @@ public class PlanViewer {
 		return null;
 	}
 
+	/**
+	 * Set the selected plan
+	 * @param selection
+	 */
 	public void setSelection(Object selection){
 		planViewer.setSelection(new StructuredSelection(selection));
 	}
 	
+	/**
+	 * Set the root plans
+	 * @param roots
+	 */
 	public void setRootPlans(Object[] roots){
 		planViewer.setInput(roots);
 		planViewer.refresh();
 	}
 	
+	/**
+	 * Refresh the viewer
+	 */
 	public void refresh(){
 		planViewer.refresh();
 	}
 	
+	/**
+	 * 
+	 * @return the viewer control
+	 */
 	public Composite getControl(){
 		return planViewer.getTree();
 	}

@@ -54,17 +54,21 @@ public abstract class PlanTarget{
 
 
 	private String name;
-	private PlanTarget.tarCategory cat;
+	private PlanTarget.TargetCategory cat;
 	private Plan plan;
+	private byte[] uuid;
 	
-	public static enum tarCategory {
+	public static enum TargetCategory {
 		ALPHANUMERIC, SPATIAL, ADMIN; 
 	}
 	
+	/**
+	 * 
+	 * @return String representation of the target
+	 */
 	@Transient
 	public abstract String getSummary();
 
-	private byte[] uuid;
 	
 	@Id
 	@GeneratedValue(generator="uuid")
@@ -103,21 +107,28 @@ public abstract class PlanTarget{
 		this.name = name;
 	}
 	
-/* Don't think we need this, the discriminator at the top seems to add it automagically?
+	/* Don't think we need this, the discriminator at the top seems to add it automagically?
 	@Column(name = "category")
 	*/
 	@Transient
-	public PlanTarget.tarCategory getCat(){
+	public PlanTarget.TargetCategory getCat(){
 		return this.cat;
 	}
-	//public void setCat(PlanTarget.tarCategory cat){
-    //	this.cat = cat;
-	//}
 
-	abstract public PlanTarget clone();
+
+	/**
+	 * Clone the give plan tagart.
+	 */
+	public abstract PlanTarget clone();
 	
 	
-	//this chould only be called from the subclasses which will actually instantiate a new obkect and pass it in here 
+	/**
+	 * This should only be called from the subclasses which will actually 
+	 * instantiate a new object and pass it in here.
+	 *  
+	 * @param pt
+	 * @return
+	 */
 	public PlanTarget clone(PlanTarget pt){
 		pt.name = this.name;
 		pt.cat = this.cat;

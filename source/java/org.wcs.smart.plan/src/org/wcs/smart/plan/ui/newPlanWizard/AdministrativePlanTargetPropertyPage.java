@@ -23,14 +23,8 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 
-import java.util.ArrayList;
-
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -43,15 +37,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
-import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
 
-
-
-
-
-
+/**
+ * Page for collecting administrative plan target properties
+ * @author Emily
+ *
+ */
 public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 
 	private TargetPropertyPage parentWindow;
@@ -69,6 +62,9 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		this.parentWindow = parentWindow;
 	}
 	
+	/**
+	 * @return page name
+	 */
 	public String getPageName(){
 		return AdministrativePlanTarget.TARGET_GUI_NAME;
 	}
@@ -145,20 +141,23 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 	}
 
 
-	public String getTargetDesc() {
+	/*
+	 * return target description
+	 */
+	private String getTargetDesc() {
 		return targetDesc.getText();
 	}
-	public void setTargetDesc(String targetDesc) {
-		this.targetDesc.setText( targetDesc);
-	}
 	
-	public String getTargetName() {
+	/*
+	 * return target name
+	 */
+	private String getTargetName() {
 		return targetName.getText();
 	}
-	public void setTargetName(String targetName) {
-		this.targetName.setText(targetName);
-	}
 	
+	/**
+	 * @see org.wcs.smart.plan.ui.newPlanWizard.ITargetPage#initPage(org.wcs.smart.plan.model.PlanTarget)
+	 */
 	@Override
 	public void initPage(PlanTarget p) {
 		AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
@@ -167,10 +166,18 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		validate();
 	}
 	
+	/**
+	 * @see org.wcs.smart.plan.ui.newPlanWizard.ITargetPage#createTarget()
+	 */
+	@Override
 	public PlanTarget createTarget(){
 		return new AdministrativePlanTarget();
 	}
 	
+	/**
+	 * @see org.wcs.smart.plan.ui.newPlanWizard.ITargetPage#updateTarget(org.wcs.smart.plan.model.PlanTarget)
+	 */
+	@Override
 	public void updateTarget(PlanTarget pt){
 		AdministrativePlanTarget target = (AdministrativePlanTarget)pt;
 		target.setName(getTargetName());

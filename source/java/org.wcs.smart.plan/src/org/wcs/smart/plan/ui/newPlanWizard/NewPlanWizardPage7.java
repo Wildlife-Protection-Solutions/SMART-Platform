@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -36,7 +37,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
@@ -65,8 +65,7 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 	 * 
 	 */
 	protected NewPlanWizardPage7() {
-		super("Plan Dates");
-		
+		super("Plan Parent");
 	}
 
 	
@@ -88,13 +87,12 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 		btnNoParent = new Button(buttonPanel, SWT.RADIO);
 		btnNoParent.setText("No Parent Plan");
 		btnNoParent.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		btnNoParent.setSelection(true);
 		
 		btnUseSelected = new Button(buttonPanel, SWT.RADIO);
 		btnUseSelected.setText("Set the following to be the plan Parent:");
 		btnUseSelected.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		btnUseSelected.setSelection(true);
-
-		
+				
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText("Only show plans from:");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -121,13 +119,36 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 		planTreeViewer = new PlanViewer(center);
 		planTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		
+		
+		btnNoParent.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateVisibility();
+			}
+			
+		});
+		
+		btnUseSelected.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateVisibility();
+			}
+			
+		});
+		updateVisibility();
 		setControl(center);
 		setMessage("A parent plan allows you to group patrol plans into team, station and conservation area plans." +
 				"Create the conservation area plan first, then select it in this window when creating each each patrol, " +
 				"station or team plan you want to include in the Conservation area plan. Use the same method to create station or team plans.");
 	
 	}
-	
+
+	private void updateVisibility(){
+		boolean areVisible = !btnNoParent.getSelection();
+		dtEndDate.setEnabled(areVisible);
+		dtStartDate.setEnabled(areVisible);
+		planTreeViewer.getControl().setEnabled(areVisible);
+	}
 
 	@Override
 	public boolean updateModel(Plan p) {
@@ -148,7 +169,7 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 	void initModel(Plan p, Session session) {
 		((CreatePlanWizard)getWizard()).setSeenAll(true);
 		
-		List roots = PlanHibernateManager.getAllRootPlans(session);
+		List<Plan> roots = PlanHibernateManager.getAllRootPlans(session);
 		planTreeViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
 		lastSelection = p.getParent();
 		if (lastSelection != null){
@@ -159,7 +180,8 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 			btnNoParent.setSelection(true);
 			btnUseSelected.setSelection(false);
 		}
-
+		updateVisibility();
+		
 		try{
 			planTreeViewer.setSelection(p.getTemplatePlan().getParent());
 		}catch (Exception e) {
@@ -172,14 +194,12 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 	 */
 	@Override
 	public void widgetSelected(SelectionEvent e) {
-
-		
-		String error = null;
-		cdEndDate.hide();
 		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
-			error = "End date must be after the start date.";
+			cdEndDate.setDescriptionText("End date must be after the start date.");
+			cdEndDate.show();
+		}else{
+			cdEndDate.hide();
 		}
-		setErrorMessage(error);
 		fireChangeListeners();
 	}
 	

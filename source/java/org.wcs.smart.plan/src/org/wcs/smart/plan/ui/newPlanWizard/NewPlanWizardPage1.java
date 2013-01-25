@@ -23,25 +23,22 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
 
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for determining if plan is to be
+ * create from a template or not.
+ * 
  * @author egouge
  * @since 1.0.0
  */
 public class NewPlanWizardPage1 extends NewPlanWizardPage {
 
-	
-	
 	private Button btnExisting;
 	private Button btnNew;
 
@@ -104,14 +101,10 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 		}
         
         if( btnExisting.getSelection() == true){
-        	return getPage(1);
+        	return getWizard().getPage(NewPlanWizardPage2b.PAGENAME);
         }
-        return getPage(2);
+        return getWizard().getPage(NewPlanWizardPage2.PAGENAME);
     }
 	
 
-	public IWizardPage getPage(int index) {
-        IWizardPage[] pages = getWizard().getPages();
-        return pages[index];
-    }
 }

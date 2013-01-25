@@ -23,9 +23,6 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 
-import java.util.ArrayList;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -43,15 +40,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.annotations.Parent;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
 
-
+/**
+ * Page for collecting numeric plan target information.
+ * 
+ * @author Emily
+ *
+ */
 public class NumericPlanTargetPropertyPage implements ITargetPage {
 
 	
@@ -203,20 +203,10 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		return isComplete;
 	}
 
-
-	
-	public void setPlanTarget(PlanTarget p) {
-		NumericPlanTarget pt = (NumericPlanTarget) p;
-		this.targetValue.setText(Double.toString(pt.getValue()));
-		this.targetName.setText(pt.getName());
-		this.targetType.setSelection(new StructuredSelection( pt.getType() ));
-		this.targetOp.setSelection(new StructuredSelection( pt.getOp() ));
-		validate();
-	}
-
-
-
-	public Double getTargetValue(){
+	/*
+	 * return the numeric value entered by the user
+	 */
+	private Double getTargetValue(){
 		try{
 			return Double.valueOf(targetValue.getText());
 		}catch (Exception ex){
@@ -224,27 +214,44 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		}
 	}
 	
-	public String getTargetName(){
+	/*
+	 * return the target name
+	 */
+	private String getTargetName(){
 		return targetName.getText();
 	}
-	public NumericPlanTarget.TargetType getTargetType(){
+	
+	/*
+	 * return target type
+	 */
+	private NumericPlanTarget.TargetType getTargetType(){
 		if (targetType.getSelection().isEmpty()){
 			return null;
 		}
 		return (TargetType) ((IStructuredSelection)targetType.getSelection()).getFirstElement();
 	}
-	public NumericPlanTarget.Operator getTargetOp(){
+	
+	/*
+	 * return operator
+	 */
+	private NumericPlanTarget.Operator getTargetOp(){
 		if (targetOp.getSelection().isEmpty()){
 			return null;
 		}
 		return (NumericPlanTarget.Operator) ((IStructuredSelection)targetOp.getSelection()).getFirstElement();
 	}
 
+	/**
+	 * @see org.wcs.smart.plan.ui.newPlanWizard.ITargetPage#createTarget()
+	 */
 	@Override
 	public PlanTarget createTarget() {
 		return new NumericPlanTarget();
 	}
 	
+	/**
+	 * @see org.wcs.smart.plan.ui.newPlanWizard.ITargetPage#updateTarget(org.wcs.smart.plan.model.PlanTarget)
+	 */
 	@Override
 	public void updateTarget(PlanTarget pt){
 		NumericPlanTarget target = (NumericPlanTarget)pt;
@@ -255,6 +262,9 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		target.setOp(getTargetOp());
 	}
 	
+	/**
+	 * @see org.wcs.smart.plan.ui.newPlanWizard.ITargetPage#initPage(org.wcs.smart.plan.model.PlanTarget)
+	 */
 	@Override
 	public void initPage(PlanTarget p) {
 		NumericPlanTarget pt = (NumericPlanTarget) p;
