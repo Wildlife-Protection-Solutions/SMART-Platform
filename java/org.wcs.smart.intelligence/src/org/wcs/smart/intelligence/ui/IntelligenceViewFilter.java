@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.intelligence.ui;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.hibernate.Query;
@@ -37,6 +38,9 @@ import org.wcs.smart.hibernate.SmartDB;
  * @since 1.0.0
  */
 public class IntelligenceViewFilter {
+	
+	private static final int DAYS_30 = 30;
+	private static final int DAYS_60 = 60;
 	
 	private DateFilter receivedDateFilter;
 	private Date receivedDateStart;
@@ -59,14 +63,112 @@ public class IntelligenceViewFilter {
 		str.append("SELECT i.uuid, i.shortName "); //$NON-NLS-1$
 		str.append("FROM Intelligence i "); //$NON-NLS-1$
 		str.append("WHERE i.conservationArea = :ca " ); //$NON-NLS-1$
-	
+
+		//received date
+		if (receivedDateFilter != null) {
+			if (receivedDateFilter != DateFilter.CUSTOM) {
+				str.append("AND i.receivedDate >= :receivedStart "); //$NON-NLS-1$
+			} else {
+				str.append("AND i.receivedDate >= :receivedStart AND i.receivedDate <= :receivedEnd "); //$NON-NLS-1$
+			}
+		}
+
+		//relevant date
+		if (relevantDateFilter != null) {
+			if (relevantDateFilter != DateFilter.CUSTOM) {
+				str.append("AND coalesce(i.toDate, i.fromDate) >= :relevantStart "); //$NON-NLS-1$
+			} else {
+				str.append("AND coalesce(i.toDate, i.fromDate) >= :relevantStart AND i.fromDate <= :relevantEnd "); //$NON-NLS-1$
+			}
+		}
+		
+		
+		//name
+		if (nameComparison != null && name != null) {
+			str.append("AND lower(i.shortName) like :name "); //$NON-NLS-1$
+		}
 		
 		str.append("ORDER BY i.shortName asc"); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+
+		//received date
+		if (receivedDateFilter != null) {
+			switch (receivedDateFilter) {
+			case LAST_30_DAYS:
+				query.setParameter("receivedStart", getLastXDays(DAYS_30)); //$NON-NLS-1$
+				break;
+			case LAST_60_DAYS:
+				query.setParameter("receivedStart", getLastXDays(DAYS_60)); //$NON-NLS-1$
+				break;
+			case MONTH_TO_DATE:
+				query.setParameter("receivedStart", getMothToDate()); //$NON-NLS-1$
+				break;
+			case YEAR_TO_DATE:
+				query.setParameter("receivedStart", getYearToDate()); //$NON-NLS-1$
+				break;
+			case CUSTOM:
+				query.setParameter("receivedStart", receivedDateStart); //$NON-NLS-1$
+				query.setParameter("receivedEnd", receivedDateEnd); //$NON-NLS-1$
+				break;
+			}
+		}
+
+		//relevant date
+		if (relevantDateFilter != null) {
+			switch (relevantDateFilter) {
+			case LAST_30_DAYS:
+				query.setParameter("relevantStart", getLastXDays(DAYS_30)); //$NON-NLS-1$
+				break;
+			case LAST_60_DAYS:
+				query.setParameter("relevantStart", getLastXDays(DAYS_60)); //$NON-NLS-1$
+				break;
+			case MONTH_TO_DATE:
+				query.setParameter("relevantStart", getMothToDate()); //$NON-NLS-1$
+				break;
+			case YEAR_TO_DATE:
+				query.setParameter("relevantStart", getYearToDate()); //$NON-NLS-1$
+				break;
+			case CUSTOM:
+				query.setParameter("relevantStart", relevantDateStart); //$NON-NLS-1$
+				query.setParameter("relevantEnd", relevantDateEnd); //$NON-NLS-1$
+				break;
+			}
+		}
+		
+		//name
+		if (nameComparison != null && name != null) {
+			switch (nameComparison) {
+			case CONTAINS:
+				query.setParameter("name", "%" + name.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				break;
+			case EQUALS:
+				query.setParameter("name", name.toLowerCase()); //$NON-NLS-1$
+				break;
+			}
+		}
+
 		return query;
 	}	
 
+	private Date getLastXDays(int amount) {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_MONTH, -amount);
+		return cal.getTime();
+	}
+
+	private Date getMothToDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
+		return cal.getTime();
+	}
+
+	private Date getYearToDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
+		return cal.getTime();
+	}
+	
 	public void resetDefaults() {
 		this.receivedDateFilter = DateFilter.LAST_30_DAYS;
 		this.receivedDateStart = null;
