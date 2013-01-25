@@ -67,12 +67,14 @@ public class PlanViewer {
 		planViewer.setComparator(new ViewerComparator() {					
 		    @Override
 		    public int compare(Viewer viewer, Object e1, Object e2) {
-
 		    	if (e1 instanceof Plan && e2 instanceof Plan){	        	
 		            return Collator.getInstance().compare(((Plan) e1).getName(), (((Plan) e2).getName()));
-		        }
-		        else{
-		        	throw new IllegalArgumentException("Not comparable: " + e1 + " " + e2);
+		    	}else if (e1 instanceof Plan ){
+		    		return 1;
+		    	}else if (e2 instanceof Plan){
+		    		return -1;
+		    	}else{
+		    		return Collator.getInstance().compare(e1.toString(), e2.toString()); 
 		        }
 		    }
 		});
