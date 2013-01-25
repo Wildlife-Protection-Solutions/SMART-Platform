@@ -102,19 +102,6 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	public ImportType getType(){
 		return this.type;
 	}
-
-	/**
-	 * Creates a new session and attaches
-	 * the current conservation area.
-	 * 
-	 * @return
-	 */
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = PatrolHibernateManager.openSession();
-		}
-		return session;
-	}
 	
 	@Override
 	public void addPages() {
