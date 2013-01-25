@@ -92,7 +92,7 @@ public class Language {
 		if (other != null && other instanceof Language){
 			Language s = (Language)other;
 			if (s.getUuid() == null && this.getUuid() == null){
-				return s.hashCode() == hashCode();
+				return super.equals(s);
 			}else if (s.getUuid() != null && this.getUuid() != null){
 				return Arrays.equals(s.getUuid(), this.getUuid());
 			}

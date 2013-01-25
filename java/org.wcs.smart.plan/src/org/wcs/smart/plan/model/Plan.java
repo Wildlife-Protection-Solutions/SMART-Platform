@@ -181,7 +181,7 @@ public class Plan {
 		if (other != null && other instanceof Plan){
 			Plan s = (Plan)other;
 			if (s.getUuid() == null && this.getUuid() == null){
-				return s.hashCode() == hashCode();
+				return super.equals(s);
 			}else if (s.getUuid() != null && this.getUuid() != null){
 				return Arrays.equals(s.getUuid(), this.getUuid());
 			}

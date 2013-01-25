@@ -98,6 +98,19 @@ public abstract class PlanTarget{
 			return super.hashCode();
 		}
 	}
+
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof PlanTarget){
+			PlanTarget s = (PlanTarget)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return super.equals(s);
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
 	
 	@Column(name = "name")
 	public String getName(){
