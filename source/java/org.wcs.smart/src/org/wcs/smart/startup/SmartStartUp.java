@@ -35,6 +35,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
 
@@ -47,6 +48,9 @@ import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
  */
 public class SmartStartUp {
 	
+	public static void initDb(){
+		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+	}
 	/**
 	 * Gets a list of conservation areas from the database.  
 	 * 
