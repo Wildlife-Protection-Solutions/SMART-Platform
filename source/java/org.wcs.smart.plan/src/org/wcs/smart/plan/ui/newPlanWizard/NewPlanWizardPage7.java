@@ -42,18 +42,15 @@ import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
 import org.wcs.smart.util.SmartUtils;
 
-
-
-
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for selecting a parent plan
+ * 
+ * @author jeff
  * @author egouge
  * @since 1.0.0
  */
 public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionListener {
 
-	
-	
 	private DateTime dtStartDate;
 	private DateTime dtEndDate;
 	private Button btnNoParent;
@@ -181,18 +178,7 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage implements SelectionLi
 		cdEndDate.hide();
 		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
 			error = "End date must be after the start date.";
-		}else{
-			long startD = SmartUtils.getDate(dtStartDate).getTime();
-			long endD = SmartUtils.getDate(dtEndDate).getTime();
-			
-			if (startD + Patrol.MAX_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
-				error = "Patrol cannot be longer that " + Patrol.MAX_PATROL_LENGTH_DAYS + " days in length.";
-			}else if(startD + Patrol.WARN_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
-				cdEndDate.setDescriptionText("Patrol is longer than 30 days");
-				cdEndDate.show();
-			}
 		}
-		
 		setErrorMessage(error);
 		fireChangeListeners();
 	}

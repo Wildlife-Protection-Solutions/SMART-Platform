@@ -21,19 +21,14 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.ui.StationComposite;
@@ -44,7 +39,9 @@ import org.wcs.smart.plan.model.Plan;
 
 
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for collecting the plan team
+ * and station.
+ * 
  * @author egouge
  * @since 1.0.0
  */
@@ -53,10 +50,7 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 	
 	private TeamComposite teamList;
 	private StationComposite stationList;
-	//private ComboViewer team = null;
-	//private ComboViewer station= null;
-	private Text unavailable;
-
+	
 	/**
 	 * 
 	 */
@@ -91,7 +85,6 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 	public boolean updateModel(Plan p) {
 		p.setStation(stationList.getSelectedStation());
 		p.setTeam(teamList.getSelectedTeam());
-		
 		return true;
 	}
 	
@@ -100,24 +93,27 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 		
 		//Set team values, 
 		List<? extends Object> teams = null;
+		List<? extends Object> stations = null;
 		try{
 			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
-
+			stations = PatrolHibernateManager.getActiveStations(p.getConservationArea(), session);
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Could not load teams.", ex);
+			SmartPatrolPlugIn.displayLog("Could not load teams and stations.", ex);
 			session.close();
 		}
 		
 		teamList.setInput(teams, p.getTeam());
-		
-		List<? extends Object> stations = PatrolHibernateManager.getActiveStations(p.getConservationArea(), session);
 		stationList.setInput(stations, p.getStation());		
 		
 		try{
-			teamList.setSelectedTeam(p.getTeam() );
-			stationList.setSelectedStation(p.getStation() );
+			teamList.setSelectedTeam(p.getTeam());			
 		}catch (Exception e){
 			//do nothing, probably just no template so we can't set the values to anything
+		}
+		try{
+			stationList.setSelectedStation(p.getStation() );
+		}catch (Exception e){
+			//eat me
 		}
 		
 		

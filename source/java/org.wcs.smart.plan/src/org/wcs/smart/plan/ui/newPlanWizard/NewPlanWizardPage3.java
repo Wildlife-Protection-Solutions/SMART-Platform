@@ -21,15 +21,12 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.ArrayList;
-
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -37,21 +34,18 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
 
 
 
 
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for collecting the plan id,
+ * name, and description
+ * 
+ * @author jeff
  * @author egouge
  * @since 1.0.0
  */

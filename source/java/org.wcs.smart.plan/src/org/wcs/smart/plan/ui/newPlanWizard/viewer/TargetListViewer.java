@@ -78,7 +78,9 @@ public class TargetListViewer {
 	}
 	
 	
-	
+	public TableViewer getViewer(){
+		return this.v;
+	}
 	
 	public void updateModel(Plan p) {
 		if(p.getTargets() != null){

@@ -21,71 +21,45 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import org.codehaus.groovy.tools.shell.Shell;
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.viewer.TargetListViewer;
 
-
-
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for collecting the plan targets
+ * @author jeff
  * @author egouge
  * @since 1.0.0
  */
 public class NewPlanWizardPage6 extends NewPlanWizardPage {
 
 	private TargetListViewer targetTable;
-	private HashMap<ttColumn, TableViewerColumn> targetTableColumns;
 	private Plan plan;
-	private TargetPropertyPage dia;
 	private NewPlanWizardPage6 thisPage;
 	
-	private TargetListViewer rows;
-		
 	protected NewPlanWizardPage6(Plan plan) {
 		super("Plan Targets");
 		this.plan = plan;
 		this.thisPage = this;
 	}
-	protected enum ttColumn {
-		NAME("Target Name", 1), DESC("Target Description", 2);
-		protected String guiName;
-		protected int weight;
 
-		private ttColumn(String name, int weight) {
-			this.guiName = name;
-			this.weight = weight;
-		}
-	}
 
 	
 	/**
@@ -101,22 +75,22 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 		lbl.setText("Plan Targets:");
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		
-		
-
-		
 		Composite table = new Composite(center, SWT.NONE);
 		table.setLayout(new TableColumnLayout());
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		targetTable  = new TargetListViewer(table, plan);
 		
-   
-		Button btnNew = new Button(center, SWT.NONE);
+		Composite buttonPnl = new Composite(center, SWT.NONE);
+		buttonPnl.setLayout(new GridLayout());
+		buttonPnl.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
+		
+		Button btnNew = new Button(buttonPnl, SWT.NONE);
 		btnNew.setText("Add Target...");
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				TargetPropertyPage dia = new TargetPropertyPage(thisPage, getShell(), plan, null); 
+				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, null); 
 			    if (dia.open() == Window.CANCEL){
 			    	//do nothing
 				}else{
@@ -126,8 +100,9 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 			
 		});
 		
-		Button btnEdit = new Button(center, SWT.NONE);
-		btnEdit.setText("Edit Selected Target");
+		
+		final Button btnEdit = new Button(buttonPnl, SWT.NONE);
+		btnEdit.setText("Edit Target...");
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -137,7 +112,7 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 		        }
 		        
 		        PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
-				TargetPropertyPage dia = new TargetPropertyPage(thisPage, getShell(), plan, selected); 
+				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, selected); 
 			    if (dia.open() == Window.CANCEL){
 			    	//do nothing
 				}else{
@@ -147,12 +122,17 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 			}
 			
 		});
-
+		btnEdit.setEnabled(false);
+		targetTable.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				btnEdit.setEnabled(!targetTable.getSelection().isEmpty());
+				
+			}
+		});
 		
 		setControl(center);
 		setMessage("Add all of the plan targets by selecting the \"Add new target\" button. Click the edit button beside an existing target to make change to it:");
-		
-			
 	}
 	
 
@@ -167,10 +147,7 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 	void initModel(Plan p, Session session) {
 		targetTable.updateModel(plan);
 	}
-	
-	public void refreshTargetTable(){
-		//targetTable.refresh();
-	}
+
 	
 	public void validate(){
 		((CreatePlanWizard)getWizard()).validate();

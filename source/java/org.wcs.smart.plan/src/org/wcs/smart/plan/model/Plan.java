@@ -30,6 +30,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -58,6 +60,19 @@ import org.wcs.smart.util.SmartUtils;
 @Table(name="smart.plan")
 public class Plan {
 
+	public enum PlanType{
+		CA("Conservation Area Plan"),
+		STATION("Station Plan"),
+		TEAM("Team Plan"),
+		PATROL("Patrol Plan");
+		
+		public String guiName;
+		
+		private PlanType(String guiName){
+			this.guiName = guiName;
+		}
+	}
+	
 	private byte[] uuid;
 	private ConservationArea ca;
 	private Station station;
@@ -67,7 +82,7 @@ public class Plan {
 	private String description;
 	private Date startDate;
 	private Date endDate;
-	private String type;
+	private PlanType type;
 	
 	private List<PlanTarget> targets;
 
@@ -190,11 +205,12 @@ public class Plan {
 	}
 	
 	@Column(name = "type")
-	public String getType() {
+	@Enumerated(EnumType.STRING)
+	public PlanType getType() {
 		return type;
 	}
 	
-	public void setType(String type) {
+	public void setType(PlanType type) {
 		this.type = type;
 	}
 	
