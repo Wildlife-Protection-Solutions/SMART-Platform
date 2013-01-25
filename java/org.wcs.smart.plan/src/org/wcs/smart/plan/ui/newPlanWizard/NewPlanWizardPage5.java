@@ -25,8 +25,6 @@ import java.util.Calendar;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -42,11 +40,9 @@ import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
 
-
-
-
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for collecting the plan dates
+ * 
  * @author egouge
  * @since 1.0.0
  */

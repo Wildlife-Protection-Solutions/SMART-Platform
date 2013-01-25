@@ -30,44 +30,48 @@
 
 package org.wcs.smart.plan.ui.newPlanWizard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-import org.hibernate.Session;
-import org.wcs.smart.plan.model.AdministrativePlanTarget;
-import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 
 
+/**
+ * 
+ * Dialog box for adding and edition plan targets
+ * 
+ * @author Jeff
+ * @author Emily
+ *
+ */
 public class TargetPropertyPage extends Dialog {
 
 	private Plan parentPlan;
-	private NewPlanWizardPage6 parentWindow;
 	private PlanTarget toUpdate;
 	
 	private String title = null;
-	private Session session = null;
 	
 	public Button btnOk;
 	
 	TabFolder tabFolder; 
 	
-	public static String AUTO_GENERATE = "system-generated";
-	public static String TAB1 = "Numeric";
-	public static String TAB2 = "Location Target";
-	public static String TAB3 = "Administrative";
+	
 
+
+	private List<ITargetPage> tabs;
 	private static Shell parent;
 	
 	/**
@@ -78,7 +82,7 @@ public class TargetPropertyPage extends Dialog {
 	 * @param parent
 	 * @param style
 	 */
-	public TargetPropertyPage(NewPlanWizardPage6 parentWindow, Shell parent,  
+	public TargetPropertyPage(Shell parent,  
 		Plan parentPlan, PlanTarget toUpdate) {
 		
 		super(parent);
@@ -86,7 +90,6 @@ public class TargetPropertyPage extends Dialog {
 		this.toUpdate = toUpdate;
 		this.parentPlan = parentPlan;
 		this.parent = parent;
-		this.parentWindow = parentWindow;
 		
 		
 		if (toUpdate == null){
@@ -94,6 +97,10 @@ public class TargetPropertyPage extends Dialog {
 		}else{
 			title = "Update Target: " + toUpdate.getName();
 		}
+		
+		tabs = new ArrayList<ITargetPage>();
+		tabs.add(new NumericPlanTargetPropertyPage(this));
+		tabs.add(new AdministrativePlanTargetPropertyPage(this));
 	
 	}
 
@@ -101,30 +108,21 @@ public class TargetPropertyPage extends Dialog {
 		if(toUpdate == null){
 			return; //get out if we are creating a new target, nothing to initialize
 		}
-		if(toUpdate instanceof  NumericPlanTarget){
-			Control ctls[] = tabFolder.getChildren();
-			if(ctls[0] instanceof NumericPlanTargetPropertyPage){
-				((NumericPlanTargetPropertyPage)ctls[0]).setPlanTarget( toUpdate);
-			}
-			tabFolder.setSelection(0);
-			tabFolder.getItem(1).dispose();
-			tabFolder.getItem(1).dispose();//once we remove 1, 2 becomes 1...
-
-		}else if(toUpdate instanceof  AdministrativePlanTarget){
-			Control ctls[] = tabFolder.getChildren();
-			//3rd tab is forth control... 0,2,4...for 1st 2nd 3rd tabs
-			if(ctls[4] instanceof AdministrativePlanTargetPropertyPage){
-				((AdministrativePlanTargetPropertyPage)ctls[4]).setPlanTarget( toUpdate);
+		
+		List<TabItem> toDispose = new ArrayList<TabItem>();
+		for (int i = 0; i < tabs.size(); i ++){
+			ITargetPage tab = tabs.get(i);			if (toUpdate.getClass() == tab.createTarget().getClass()){
+				tab.initPage(toUpdate);
+				
+			}else{
+				toDispose.add(tabFolder.getItems()[i]);
 			}
 			
-			tabFolder.getItem(0).dispose();
-			tabFolder.getItem(0).dispose();//1 becomes 0, remove it as well
-
-		}else if(toUpdate.getCat() == PlanTarget.tarCategory.ADMIN){
-			
-			tabFolder.getItem(0).dispose();
-			tabFolder.getItem(1).dispose();//2 becomes 1 now, remove it.
 		}
+		for (TabItem c : toDispose){
+			c.dispose();
+		}
+		
 	}
 
 	@Override
@@ -151,25 +149,14 @@ public class TargetPropertyPage extends Dialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 		tabFolder = new TabFolder(parent, SWT.BORDER);
-		Rectangle clientArea = getShell().getClientArea ();
-		tabFolder.setLocation (clientArea.x, clientArea.y);
-		
-		TabItem item = new TabItem (tabFolder, SWT.NONE);
-		item.setText (TAB1);
-		NumericPlanTargetPropertyPage page1 = new NumericPlanTargetPropertyPage(this, tabFolder, SWT.PUSH);
-		item.setControl (page1.createComponent(tabFolder, SWT.NONE));
-		
-		
-		TabItem item2 = new TabItem (tabFolder, SWT.NONE);
-		item2.setText (TAB2);
-		NumericPlanTargetPropertyPage page2 = new NumericPlanTargetPropertyPage(this, tabFolder, SWT.PUSH);
-		item2.setControl (page2.createComponent(tabFolder, SWT.NONE));
-		
-		
-		TabItem item3 = new TabItem (tabFolder, SWT.NONE);
-		item3.setText(TAB3);
-		AdministrativePlanTargetPropertyPage page3 = new AdministrativePlanTargetPropertyPage(this, tabFolder, SWT.PUSH);
-		item3.setControl (page3.createComponent(tabFolder, SWT.NONE));
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)tabFolder.getLayoutData()).widthHint = 400;
+		((GridData)tabFolder.getLayoutData()).heightHint = 200;
+		for (ITargetPage page : tabs){
+			TabItem item = new TabItem(tabFolder, SWT.NONE);
+			item.setText(page.getPageName());
+			item.setControl(page.createComponent(tabFolder, SWT.NONE));
+		}
 		
 		tabFolder.pack();
 		
@@ -211,74 +198,16 @@ public class TargetPropertyPage extends Dialog {
 	private boolean performSave(){
 		PlanTarget pt;
 		int i = tabFolder.getSelectionIndex();
-		Control[] ctls = tabFolder.getChildren();
-		int tabType;//tab indexeds, they change with updates, bit complicated... 
-		//I can't figure out how to disable the other 2 types when editing one, so i dispose them, changint he indexes...
-		if(toUpdate != null){
-			if(toUpdate instanceof NumericPlanTarget){
-				tabType = 0;
-			//}else if(toUpdate instanceof SpatialPlanTarget){
-				//type = 1;
-			}else if(toUpdate instanceof AdministrativePlanTarget){
-				tabType = 2;
-			}else{
-				tabType = -1;
-			}
-		}else{//new one normal indexes
-			tabType = i;
-		}
+		ITargetPage target = tabs.get(i);
 		
-		if(tabType  == 0){//numeric
-			if(toUpdate == null){
-				pt = new NumericPlanTarget();
-				pt.setPlan(parentPlan);
-			}else{
-				pt = toUpdate;
-			}
-
-			double value;
-			try{
-				value = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetValue();
-			}catch(Exception e){
-				return false;
-			}				
-			String name = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetName();
-			String op = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetOp();
-			String type = ((NumericPlanTargetPropertyPage)ctls[0]).getTargetType();
-			if(name == "" || op =="" || type ==""){
-				return false;
-			}
-			op = op.replace("[", "");
-			op = op.replace("]", "");
-			type = type.replace("[", "");
-			type = type.replace("]", "");
-			((NumericPlanTarget)pt).setValue(value);
-			((NumericPlanTarget)pt).setOp(op);
-			((NumericPlanTarget)pt).setType(type);
-			pt.setName(name);
-
-			
-//		}else if(tabType  == 1){ //spatial
-			//seems to be 2 controls for each tab, so the 2nd tab is 3 in a 0-indexed array
-//			NumericPlanTarget pt = (NumericPlanTarget)t;
-//			pt.setCat(PlanTarget.tarCategory.SPATIAL);
-		}else if(tabType  == 2){//admin
-			if(toUpdate == null){
-				pt = new AdministrativePlanTarget();
-				pt.setPlan(parentPlan);
-			}else{
-				pt = (AdministrativePlanTarget)toUpdate;
-			}
-			//seems to be 2 controls for each tab, so the 3rd tab is 4 in a 0-indexed array
-			String name = ((AdministrativePlanTargetPropertyPage)ctls[4]).getTargetName();
-			String desc = ((AdministrativePlanTargetPropertyPage)ctls[4]).getTargetDesc();
-			desc= desc.replace("[", "");
-			desc = desc.replace("]", "");
-			((AdministrativePlanTarget)pt).setTargetDesc(desc);
-			pt.setName(name);
+		
+		if (toUpdate == null){
+			pt = target.createTarget();
+			pt.setPlan(parentPlan);
 		}else{
-			return false;
+			pt = toUpdate;
 		}
+		target.updateTarget(pt);
 		
 		if(toUpdate == null){
 			parentPlan.addTarget(pt);

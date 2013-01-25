@@ -63,7 +63,6 @@ public abstract class PlanTarget{
 	
 	@Transient
 	public abstract String getSummary();
-	
 
 	private byte[] uuid;
 	

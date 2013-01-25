@@ -52,10 +52,9 @@ import org.wcs.smart.util.SmartUtils;
 
 
 
-public class AdministrativePlanTargetPropertyPage extends Composite{
+public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 
 	private TargetPropertyPage parentWindow;
-	private Composite parent;
 	
 	private Text targetDesc;
 	private Text targetName;
@@ -66,13 +65,15 @@ public class AdministrativePlanTargetPropertyPage extends Composite{
 	 * Creates new editor page
 	 * @param parent
 	 */
-	public AdministrativePlanTargetPropertyPage(TargetPropertyPage parentWindow, Composite parent, int style) {
-		super(parent, style);
-		this.parent = parent;
+	public AdministrativePlanTargetPropertyPage(TargetPropertyPage parentWindow) {
 		this.parentWindow = parentWindow;
 	}
 	
+	public String getPageName(){
+		return AdministrativePlanTarget.TARGET_GUI_NAME;
+	}
 	
+	@Override
 	public Composite createComponent(Composite parent, int style) {
 		Composite center = new Composite(parent, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
@@ -84,25 +85,15 @@ public class AdministrativePlanTargetPropertyPage extends Composite{
 
 		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetName.setTextLimit(32);
-
+		targetName.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
-		data.widthHint = 170;
-		
-		targetName.setLayoutData(data);
-		
-				
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText("Target Description:");
-		lbl4.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl4.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 
 		targetDesc= new Text(center, SWT.BORDER | SWT.LEFT);
 		targetDesc.setTextLimit(2048);
-
-		GridData data2 = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
-		data2.widthHint = 400;
-		data2.heightHint = 50; 
-		targetDesc.setLayoutData(data2);
+		targetDesc.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 
 		KeyListener validate = new KeyAdapter() {
@@ -168,11 +159,23 @@ public class AdministrativePlanTargetPropertyPage extends Composite{
 		this.targetName.setText(targetName);
 	}
 	
-	public void setPlanTarget(PlanTarget p) {
+	@Override
+	public void initPage(PlanTarget p) {
 		AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
 		this.targetName.setText(pt.getName());
 		this.targetDesc.setText(pt.getTargetDesc());
 		validate();
+	}
+	
+	public PlanTarget createTarget(){
+		return new AdministrativePlanTarget();
+	}
+	
+	public void updateTarget(PlanTarget pt){
+		AdministrativePlanTarget target = (AdministrativePlanTarget)pt;
+		target.setName(getTargetName());
+		target.setTargetDesc(getTargetDesc());
+		
 	}
 
 }

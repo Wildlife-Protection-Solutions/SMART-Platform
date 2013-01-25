@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Text;
 @DiscriminatorValue("ADMINISTRATIVE")
 public class AdministrativePlanTarget extends PlanTarget{
 
+	public static final String TARGET_GUI_NAME = "Administrative";
+	
 	private String targetDesc;
 	
 

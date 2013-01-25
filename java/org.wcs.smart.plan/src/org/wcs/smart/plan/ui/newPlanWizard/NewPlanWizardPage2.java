@@ -21,11 +21,9 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.ArrayList;
-
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -36,33 +34,23 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.model.Plan;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
-
-
+import org.wcs.smart.plan.model.Plan.PlanType;
 
 
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for collecting the plan type,
+ * employees information
+ * 
+ * @author jeff
  * @author egouge
  * @since 1.0.0
  */
 public class NewPlanWizardPage2 extends NewPlanWizardPage {
 
-	
-	
 	private ComboViewer planType = null;
 	private Text unavailableEmployees;
-	private Integer expectedEmployees = 0;
 	private Label activeEmployees;
-	
-	static String TYPE_CA = "Conservation Plan";
-	static String TYPE_S = "Station Plan";
-	static String TYPE_T = "Team Plan";
-	static String TYPE_P = "Patrol Plan";
-	
 	
 	/**
 	 * 
@@ -89,42 +77,35 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 		planType = new ComboViewer(center, SWT.READ_ONLY);
 		planType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		planType.setContentProvider(ArrayContentProvider.getInstance());
-		planType.setLabelProvider(new LabelProvider());
-		
-		ArrayList<String> options = new ArrayList<String>();
-		options.add(TYPE_CA);
-		options.add(TYPE_S);
-		options.add(TYPE_T);
-		options.add(TYPE_P);
-		planType.setInput(options);
-		planType.setSelection(new StructuredSelection("Patrol Plan"));
+		planType.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				return ((Plan.PlanType)element).guiName;
+			}
+		});
+		planType.setInput(Plan.PlanType.values());
+		planType.setSelection(new StructuredSelection(Plan.PlanType.PATROL));
 		
 		Label lbl2 = new Label(center, SWT.NONE);
 		lbl2.setText("Active Rangers:");
 		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		activeEmployees = new Label(center, SWT.NONE);
-
 		activeEmployees.setText("unknown");
-		GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
-		data.horizontalIndent = 8;
-		data.widthHint = 100;
-		activeEmployees.setLayoutData(data);
+		activeEmployees.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText("Unavailable Rangers:");
 		lbl4.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-		unavailableEmployees = new Text(center, SWT.BORDER | SWT.LEFT);
+		unavailableEmployees = new Text(center, SWT.BORDER);
 		unavailableEmployees.setTextLimit(5);
 		unavailableEmployees.setText("0");
+		unavailableEmployees.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Label lbl5 = new Label(center, SWT.NONE);
 		lbl5.setText("(vacation, sickness, etc)");
 		lbl5.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		unavailableEmployees.setLayoutData(data);
-		
+				
 		setControl(center);
 		setMessage("Select the Type of Plan that you wish to create:");
 
@@ -133,9 +114,7 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
-		String type = planType.getSelection().toString().replace("[", "");
-		type = type.replace("]", "");
-		p.setType(type);
+		p.setType((PlanType) ((IStructuredSelection)planType.getSelection()).getFirstElement());
 		Integer act = Integer.valueOf(activeEmployees.getText());
 		Integer un = Integer.valueOf(this.unavailableEmployees.getText());
 		p.setUnavailableEmployees(un);

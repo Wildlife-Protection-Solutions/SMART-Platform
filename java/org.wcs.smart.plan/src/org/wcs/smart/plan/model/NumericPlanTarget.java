@@ -5,6 +5,8 @@ import java.util.Arrays;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -18,29 +20,56 @@ import javax.persistence.Transient;
 @DiscriminatorValue("ALPHANUMERIC")
 public class NumericPlanTarget extends PlanTarget {
 
-	private Double value;
-	private String op;
-	private String type;
+	public final static String TARGET_GUI_NAME = "Numeric";
 	
+	private Double value;
+	private Operator op;
+	private TargetType type;
+	
+	public enum TargetType{
+		DISTANCE("Distance Travelled"),
+		PATROL_HOURS("Patrol Hours"),
+		PATROL_DAYS("Patrol Days"),
+		PATROL_MANHOURS("Patrol Man-Hours");
+		
+		public String guiName;
+		private TargetType(String guiName){
+			this.guiName = guiName;
+		}
+	}
+	
+	public enum Operator{
+		GREATER(">"),
+		LESS("<"),
+		EQUAL("="),
+		NOEQUAL("!=");
+
+		public String guiName;
+		private Operator(String guiName){
+			this.guiName = guiName;
+		}
+	}
 	
 	@Transient
 	public String getSummary() {
-		return "[Numeric] " +type + " " + op + " " + value;
+		return "[Numeric] " + type.guiName + " " + op.guiName + " " + value;
 	}
 	
 	@Column(name = "op")
-	public String getOp() {
+	@Enumerated(EnumType.STRING)
+	public Operator getOp() {
 		return this.op;
 	}
-	public void setOp(String op) {
+	public void setOp(Operator op) {
 		this.op = op;
 	}	
 	
 	@Column(name = "type")
-	public String getType() {
+	@Enumerated(EnumType.STRING)
+	public TargetType getType() {
 		return this.type;
 	}
-	public void setType(String type) {
+	public void setType(TargetType type) {
 		this.type = type;
 	}
 

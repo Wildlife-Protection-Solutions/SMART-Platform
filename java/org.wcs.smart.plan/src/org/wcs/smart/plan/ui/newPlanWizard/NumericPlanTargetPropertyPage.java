@@ -30,6 +30,7 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -44,12 +45,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.annotations.Parent;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
+import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
 
 
-public class NumericPlanTargetPropertyPage extends Composite {
+public class NumericPlanTargetPropertyPage implements ITargetPage {
 
 	
 	private TargetPropertyPage parentWindow;
@@ -67,12 +70,16 @@ public class NumericPlanTargetPropertyPage extends Composite {
 	 * Creates new editor page
 	 * @param parent
 	 */
-	public NumericPlanTargetPropertyPage(TargetPropertyPage parentWindow, Composite parent, int style) {
-		super(parent, style);
+	public NumericPlanTargetPropertyPage(TargetPropertyPage parentWindow) {
 		this.parentWindow = parentWindow;
 	}
 	
+	@Override
+	public String getPageName(){
+		return NumericPlanTarget.TARGET_GUI_NAME;
+	}
 	
+	@Override
 	public Composite createComponent(Composite parent, int style) {
 		Composite center = new Composite(parent, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
@@ -85,12 +92,7 @@ public class NumericPlanTargetPropertyPage extends Composite {
 		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetName.setTextLimit(32);
 
-		
-		GridData data = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
-
-		data.widthHint = 100;
-		
-		targetName.setLayoutData(data);
+		targetName.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl2 = new Label(center, SWT.NONE);
 		lbl2.setText("Target Type:");
@@ -99,17 +101,13 @@ public class NumericPlanTargetPropertyPage extends Composite {
 		targetType= new ComboViewer(center, SWT.READ_ONLY);
 		targetType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		targetType.setContentProvider(ArrayContentProvider.getInstance());
-		targetType.setLabelProvider(new LabelProvider());
-		
-		ArrayList<String> options = new ArrayList<String>();
-		options.add("Distance Travelled");
-		options.add("Patrol Hours");
-		options.add("Patrol Days");
-		options.add("Patrol Man-Hours");
-		
-		targetType.setInput(options);
-		String d = options.get(0);
-		targetType.setSelection(new StructuredSelection(d));
+		targetType.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				return ((NumericPlanTarget.TargetType)element).guiName;
+			}
+		});
+		targetType.setInput(NumericPlanTarget.TargetType.values());
+		targetType.setSelection(new StructuredSelection(NumericPlanTarget.TargetType.DISTANCE));
 		
 		
 		Label lbl3 = new Label(center, SWT.NONE);
@@ -119,17 +117,13 @@ public class NumericPlanTargetPropertyPage extends Composite {
 		targetOp= new ComboViewer(center, SWT.READ_ONLY);
 		targetOp.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		targetOp.setContentProvider(ArrayContentProvider.getInstance());
-		targetOp.setLabelProvider(new LabelProvider());
-		
-		ArrayList<String> optionsOp = new ArrayList<String>();
-		optionsOp.add(">");
-		optionsOp.add("<");
-		optionsOp.add("=");
-		optionsOp.add("!=");
-		
-		targetOp.setInput(optionsOp);
-		String dOp = optionsOp.get(0);
-		targetOp.setSelection(new StructuredSelection(dOp));
+		targetOp.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				return ((NumericPlanTarget.Operator)element).guiName;
+			}
+		});
+		targetOp.setInput(NumericPlanTarget.Operator.values());
+		targetOp.setSelection(new StructuredSelection(NumericPlanTarget.Operator.LESS));
 		
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText("Target Value:");
@@ -137,9 +131,8 @@ public class NumericPlanTargetPropertyPage extends Composite {
 
 		targetValue = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetValue.setTextLimit(32);
-
-		data.widthHint = 170;
-		targetValue.setLayoutData(data);
+		targetValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		
 		
 		KeyListener validate = new KeyAdapter() {
@@ -171,6 +164,7 @@ public class NumericPlanTargetPropertyPage extends Composite {
 	 * 
 	 * @return <code>false</code> if not complete, <code>true</code> otherwise
 	 */
+	@Override
 	public boolean validate() {
 
 		boolean isComplete = true;
@@ -193,6 +187,14 @@ public class NumericPlanTargetPropertyPage extends Composite {
 			isComplete = false;
 		}
 
+		
+		if (getTargetOp() == null){
+			isComplete = false;
+		}
+		if (getTargetType() == null){
+			isComplete = false;
+		}
+		
 		if(isComplete){
 			parentWindow.enableOK(true);
 		}else{
@@ -214,18 +216,54 @@ public class NumericPlanTargetPropertyPage extends Composite {
 
 
 
-	public double getTargetValue(){
-		return Double.valueOf(targetValue.getText());
+	public Double getTargetValue(){
+		try{
+			return Double.valueOf(targetValue.getText());
+		}catch (Exception ex){
+			return null;
+		}
 	}
 	
 	public String getTargetName(){
 		return targetName.getText();
 	}
-	public String getTargetType(){
-		return targetType.getSelection().toString();
+	public NumericPlanTarget.TargetType getTargetType(){
+		if (targetType.getSelection().isEmpty()){
+			return null;
+		}
+		return (TargetType) ((IStructuredSelection)targetType.getSelection()).getFirstElement();
 	}
-	public String getTargetOp(){
-		return targetOp.getSelection().toString();
+	public NumericPlanTarget.Operator getTargetOp(){
+		if (targetOp.getSelection().isEmpty()){
+			return null;
+		}
+		return (NumericPlanTarget.Operator) ((IStructuredSelection)targetOp.getSelection()).getFirstElement();
+	}
+
+	@Override
+	public PlanTarget createTarget() {
+		return new NumericPlanTarget();
+	}
+	
+	@Override
+	public void updateTarget(PlanTarget pt){
+		NumericPlanTarget target = (NumericPlanTarget)pt;
+		
+		target.setValue(getTargetValue());
+		target.setName(getTargetName());
+		target.setType(getTargetType());
+		target.setOp(getTargetOp());
+	}
+	
+	@Override
+	public void initPage(PlanTarget p) {
+		NumericPlanTarget pt = (NumericPlanTarget) p;
+		this.targetName.setText(pt.getName());
+		this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
+		this.targetType.setSelection(new StructuredSelection(pt.getType()));
+		this.targetValue.setText(pt.getValue().toString());
+		
+		validate();
 	}
 	
 }
