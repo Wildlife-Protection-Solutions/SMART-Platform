@@ -50,9 +50,19 @@ public class SmartHibernateManager {
 	
 	private static  String userName = "login"; //$NON-NLS-1$
 	private static  String passWord = "smrt"; //$NON-NLS-1$
+	private static String databaseLocation = ""; //$NON-NLS-1$
 	
 	public static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
 	 
+	
+	/**
+	 * Sets the database connection parameters.
+	 * @param dbLocation the derby database location
+	 */
+	public static void setDatabaseParameter(String dbLocation){
+		databaseLocation = dbLocation;
+	}
+	
 	/**
 	 * Sets the user name and password to connect to database with.
 	 * 
@@ -76,13 +86,14 @@ public class SmartHibernateManager {
 	 * Creates a new session factory.
 	 * 
 	 */
-	public  static synchronized final void createSessionFactory(){
+	public static synchronized final void createSessionFactory(){
 		
 		if (sessionFactory == null){
 			Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
 			
 			config.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
 			config.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
+			config.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false");
 			
 			//add mapping classes
 			for (Class<?> c: getMappings()){
