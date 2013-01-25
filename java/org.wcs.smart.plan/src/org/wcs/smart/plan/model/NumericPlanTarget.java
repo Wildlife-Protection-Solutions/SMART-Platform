@@ -1,13 +1,10 @@
 package org.wcs.smart.plan.model;
 
-import java.util.Arrays;
-
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
@@ -22,10 +19,9 @@ public class NumericPlanTarget extends PlanTarget {
 
 	public final static String TARGET_GUI_NAME = "Numeric";
 	
-	private Double value;
-	private Operator op;
-	private TargetType type;
-	
+	/*
+	 * Valid target types
+	 */
 	public enum TargetType{
 		DISTANCE("Distance Travelled"),
 		PATROL_HOURS("Patrol Hours"),
@@ -38,6 +34,9 @@ public class NumericPlanTarget extends PlanTarget {
 		}
 	}
 	
+	/*
+	 * Valid operators
+	 */
 	public enum Operator{
 		GREATER(">"),
 		LESS("<"),
@@ -50,6 +49,11 @@ public class NumericPlanTarget extends PlanTarget {
 		}
 	}
 	
+	private Double value;
+	private Operator op;
+	private TargetType type;
+
+	@Override
 	@Transient
 	public String getSummary() {
 		return "[Numeric] " + type.guiName + " " + op.guiName + " " + value;

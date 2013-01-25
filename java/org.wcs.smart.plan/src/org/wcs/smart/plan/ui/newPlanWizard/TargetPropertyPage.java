@@ -64,15 +64,8 @@ public class TargetPropertyPage extends Dialog {
 	
 	private String title = null;
 	
-	public Button btnOk;
-	
-	TabFolder tabFolder; 
-	
-	
-
-
+	private TabFolder tabFolder; 
 	private List<ITargetPage> tabs;
-	private static Shell parent;
 	
 	/**
 	 * Create the dialog.
@@ -84,14 +77,10 @@ public class TargetPropertyPage extends Dialog {
 	 */
 	public TargetPropertyPage(Shell parent,  
 		Plan parentPlan, PlanTarget toUpdate) {
-		
 		super(parent);
 
 		this.toUpdate = toUpdate;
 		this.parentPlan = parentPlan;
-		this.parent = parent;
-		
-		
 		if (toUpdate == null){
 			title = "Create Target";
 		}else{
@@ -111,9 +100,9 @@ public class TargetPropertyPage extends Dialog {
 		
 		List<TabItem> toDispose = new ArrayList<TabItem>();
 		for (int i = 0; i < tabs.size(); i ++){
-			ITargetPage tab = tabs.get(i);			if (toUpdate.getClass() == tab.createTarget().getClass()){
+			ITargetPage tab = tabs.get(i);			
+			if (toUpdate.getClass() == tab.createTarget().getClass()){
 				tab.initPage(toUpdate);
-				
 			}else{
 				toDispose.add(tabFolder.getItems()[i]);
 			}
@@ -164,17 +153,20 @@ public class TargetPropertyPage extends Dialog {
 		return parent;
 	}
 	
-	
+	/**
+	 * Enable/disable the ok button
+	 * @param val
+	 */
 	public void enableOK(boolean val){
-		if(btnOk != null){
-			btnOk.setEnabled(val);
+		if(getButton(IDialogConstants.OK_ID) != null){
+			getButton(IDialogConstants.OK_ID).setEnabled(val);
 		}
 	}
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		btnOk = createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		Button btnOk = createButton(parent, IDialogConstants.OK_ID, "Save", true);
 		if(toUpdate == null){
 			btnOk.setEnabled(false);
 		}
@@ -195,23 +187,23 @@ public class TargetPropertyPage extends Dialog {
 		}
 	}
 	
+	/*
+	 * adds the plan target to the plan
+	 */
 	private boolean performSave(){
 		PlanTarget pt;
-		int i = tabFolder.getSelectionIndex();
-		ITargetPage target = tabs.get(i);
+		ITargetPage target = tabs.get(tabFolder.getSelectionIndex());
 		
-		
+		//create new target if necessary
 		if (toUpdate == null){
 			pt = target.createTarget();
 			pt.setPlan(parentPlan);
+			parentPlan.addTarget(pt);
 		}else{
 			pt = toUpdate;
 		}
+		//update target info
 		target.updateTarget(pt);
-		
-		if(toUpdate == null){
-			parentPlan.addTarget(pt);
-		}
 		return true;
 	}
 

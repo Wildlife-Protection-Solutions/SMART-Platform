@@ -28,10 +28,13 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Text;
 
-
+/**
+ * Represents a Administrative plan target
+ * 
+ * @author Jeff
+ * @since 1.0.0
+ */
 @Entity
 @DiscriminatorValue("ADMINISTRATIVE")
 public class AdministrativePlanTarget extends PlanTarget{
@@ -49,7 +52,6 @@ public class AdministrativePlanTarget extends PlanTarget{
 		this.targetDesc = targetDesc;
 	}
 	
-		
 	@Override
 	public AdministrativePlanTarget clone() {
 		AdministrativePlanTarget n = new AdministrativePlanTarget();
@@ -58,8 +60,8 @@ public class AdministrativePlanTarget extends PlanTarget{
 		return n;
 	}
 	
-	@Transient
 	@Override
+	@Transient
 	public String getSummary() {
 		return "[Admin] " + this.getName();
 	}

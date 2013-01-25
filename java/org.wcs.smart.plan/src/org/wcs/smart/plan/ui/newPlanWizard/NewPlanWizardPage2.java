@@ -48,6 +48,8 @@ import org.wcs.smart.plan.model.Plan.PlanType;
  */
 public class NewPlanWizardPage2 extends NewPlanWizardPage {
 
+	public static final String PAGENAME = "Plan Type"; //$NON-NLS-1$
+	
 	private ComboViewer planType = null;
 	private Text unavailableEmployees;
 	private Label activeEmployees;
@@ -56,7 +58,7 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 	 * 
 	 */
 	protected NewPlanWizardPage2() {
-		super("Plan Type");
+		super(PAGENAME);
 		
 	}
 

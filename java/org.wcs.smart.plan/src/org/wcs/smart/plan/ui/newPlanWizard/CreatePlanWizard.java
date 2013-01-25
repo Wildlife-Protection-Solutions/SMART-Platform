@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -31,9 +30,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
@@ -41,8 +38,9 @@ import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Wizard to create a new patrol.
+ * Wizard to create a new plan.
  * 
+ * @author Jeff
  * @author Emily
  * @since 1.0.0
  */
