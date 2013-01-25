@@ -321,6 +321,17 @@ public class Messages extends NLS {
 	public static String DataModelXmlToSmartConverter_Error_AggregationNotFound;
 	public static String DataModelXmlToSmartConverter_Error_AttributeTypeNotFound;
 	public static String DataModelXmlToSmartConverter_Error_CategoryAttributeNotFound;
+	public static String DateFilter_Custom;
+	public static String DateFilter_Last30Days;
+	public static String DateFilter_Last60Days;
+	public static String DateFilter_MonthToDate;
+	public static String DateFilter_YearToDate;
+	public static String DateFilterComposite_ContainsDate_Label_A;
+	public static String DateFilterComposite_ContainsDate_Label_B;
+	public static String DateFilterComposite_DateRequired_Error;
+	public static String DateFilterComposite_EndDateRange_Error;
+	public static String DateFilterComposite_FilterDates_Label;
+	public static String DateFilterComposite_IncludeAllDates_Label;
 	public static String DeleteConservationArea_Confirm_Delete;
 	public static String DeleteConservationArea_Delete_DialogTitle;
 	public static String DeleteConservationArea_Error_DeleteError;
@@ -642,6 +653,19 @@ public class Messages extends NLS {
 	public static String SmartDataSourceFactory_SmartDataSourceName;
 	public static String SmartDB_Error_NoSmartDatabase;
 	public static String SmartDB_Error_ReadingDefaultCRS;
+
+	public static String SmartFilterDialog_Apply_Button;
+	public static String SmartFilterDialog_Error_DateMustBeSelected;
+	public static String SmartFilterDialog_Error_EndDateBeforeStart;
+	public static String SmartFilterDialog_OpContainDatesLabel_A;
+	public static String SmartFilterDialog_OpContainDatesLabel_B;
+	public static String SmartFilterDialog_OpFilterDatesLabel;
+	public static String SmartFilterDialog_OpFilterPatrolIdLabel;
+	public static String SmartFilterDialog_OpIncludeAllDatesLabel;
+	public static String SmartFilterDialog_OpIncludeAllPatrolsIdsLabel;
+	public static String SmartFilterDialog_Reset_Button;
+	
+	
 	public static String SmartGeoResourceInfo_Error_ComputingBounds;
 	public static String SmartInstallationInfoPage_DBLocation_Label;
 	public static String SmartInstallationInfoPage_DefaultLang_Label;
@@ -687,6 +711,10 @@ public class Messages extends NLS {
 	public static String StationListPropertyPage_InvalidDescription_DialogTitle;
 	public static String StationListPropertyPage_InvalidName_DialogTitle;
 	public static String StationListPropertyPage_LanguageLabel;
+	public static String StringComparison_Contains;
+	public static String StringComparison_Equals;
+	public static String StringFilterComposite_Filter_Label;
+	public static String StringFilterComposite_IncludeAll_Label;
 	public static String TranslateNamesHandler_Error_TranslatingName;
 	public static String TranslateSimpleListItemDialog_DialogMessage;
 	public static String TranslateSimpleListItemDialog_DialogTitle;
