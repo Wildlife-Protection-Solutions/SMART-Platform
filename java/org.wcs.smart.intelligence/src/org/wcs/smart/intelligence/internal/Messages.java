@@ -54,6 +54,8 @@ public class Messages extends NLS {
 
     public static String IntelligenceDesc_Name_Label;
 
+	public static String IntelligenceDesc_NameRequired_Error;
+
     public static String IntelligenceDesc_PageTitle;
 
 	public static String IntelligenceEditor_Edit_LinkLabel;

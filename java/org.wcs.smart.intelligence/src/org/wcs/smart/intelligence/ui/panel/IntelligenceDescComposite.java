@@ -21,14 +21,17 @@
  */
 package org.wcs.smart.intelligence.ui.panel;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 
@@ -45,6 +48,8 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 	private Text shortName;
     private Text description;
 
+    private ControlDecoration shortNameDecoration;
+    
 	/**
 	 * @param parent
 	 * @param style
@@ -65,9 +70,14 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 
         shortName = new Text(this, SWT.BORDER | SWT.LEFT);
         shortName.setTextLimit(32);
-        shortName.addKeyListener(new KeyAdapter() {
+        shortName.addModifyListener(new ModifyListener() {
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void modifyText(ModifyEvent e) {
+				if (!isShortNameValid()) {
+					shortNameDecoration.show();
+				} else {
+					shortNameDecoration.hide();
+				}
 				fireDataValidStateListeners();
 				fireInputChangeListeners();
 			}
@@ -78,6 +88,12 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         data.widthHint = 170;
         shortName.setLayoutData(data);
 
+		shortNameDecoration = new ControlDecoration(shortName, SWT.LEFT);
+		shortNameDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		shortNameDecoration.setShowHover(true);
+		shortNameDecoration.setDescriptionText(Messages.IntelligenceDesc_NameRequired_Error);
+        
         Label descLabel = new Label(this, SWT.NONE);
         descLabel.setText(Messages.IntelligenceDesc_Description_Label);
         descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -88,9 +104,9 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         gd.horizontalIndent = 8;
 
         description.setLayoutData(gd);
-        description.addKeyListener(new KeyAdapter() {
+        description.addModifyListener(new ModifyListener() {
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void modifyText(ModifyEvent e) {
 				fireInputChangeListeners();
 			}
 		});
@@ -99,6 +115,10 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 	
 	@Override
 	public boolean updateModel(Intelligence intelligence) {
+		if (!isShortNameValid()) {
+			IntelligencePlugIn.displayLog(Messages.IntelligenceDesc_NameRequired_Error, null);
+	        return false;
+		}
     	intelligence.setShortName(shortName.getText());
     	intelligence.setDescription(description.getText());
         return true;
@@ -112,7 +132,10 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 
 	@Override
 	public boolean isDataValid() {
-    	return shortName != null && shortName.getText() != null && !shortName.getText().isEmpty();
+		return isShortNameValid();
 	}
 	
+	private boolean isShortNameValid() {
+    	return shortName != null && shortName.getText() != null && !shortName.getText().isEmpty();
+	}
 }
