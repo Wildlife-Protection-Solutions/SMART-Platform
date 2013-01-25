@@ -409,12 +409,16 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
 				}finally{
 					saveSession.close();
-				}
-				
+				}				
 				PatrolEventManager.getInstance().patrolSaved(patrol);
 				return Status.OK_STATUS;
 			}};
 			saveJob.schedule();
+			try{
+				saveJob.join();
+			}catch (InterruptedException ex){
+				throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
+			}
 	}
 	
 	
