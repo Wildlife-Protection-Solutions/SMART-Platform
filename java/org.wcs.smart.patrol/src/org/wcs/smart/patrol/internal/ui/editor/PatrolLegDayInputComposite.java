@@ -786,13 +786,16 @@ public class PatrolLegDayInputComposite {
 										Entry<PatrolLegDay, Track> type = (Entry<PatrolLegDay, Track>) iterator.next();
 										type.getKey().setTrack(type.getValue());
 										type.getValue().setPatrolLegDay(type.getKey());
-										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, type.getKey());
+										
 										count++;
 									}
 									for (Iterator<PatrolLegDay> iterator = tracks.keySet().iterator(); iterator.hasNext();) {
 										PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
 										editor.getPatrolEditor().save(pldToSave);
+										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pldToSave);
 									}
+									
+									
 									MessageDialog.openInformation(editor.getSite().getShell(), 
 											IMPORT_OK_DIALOG_TITLE, 
 											MessageFormat.format(Messages.PatrolLegDayInputComposite_TrackAllImportSuccessful_DailogMessage, new Object[]{ count }));
@@ -806,17 +809,20 @@ public class PatrolLegDayInputComposite {
 									if (track != null){
 										track.setPatrolLegDay(patrolLegDate);
 										patrolLegDate.setTrack(track);
-										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
 										MessageDialog.openInformation(editor.getSite().getShell(),
 												IMPORT_OK_DIALOG_TITLE, 
 												Messages.PatrolLegDayInputComposite_TrackSingleImportSuccessful_DailogMessage);
+
+										editor.getPatrolEditor().save(patrolLegDate);
+										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
+										
 									}else{
 										MessageDialog.openInformation(editor.getSite().getShell(), 
 												Messages.PatrolLegDayInputComposite_ImportTrackError_DialogTitle, 
 												Messages.PatrolLegDayInputComposite_ImportTrackError_DialogMessage);
 									}
 									
-									editor.getPatrolEditor().save(patrolLegDate);
+									
 								}
 								
 							}
