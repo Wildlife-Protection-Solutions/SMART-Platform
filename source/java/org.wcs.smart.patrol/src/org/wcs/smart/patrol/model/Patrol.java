@@ -300,7 +300,7 @@ public class Patrol {
 		if (other != null && other instanceof Patrol){
 			Patrol s = (Patrol)other;
 			if (s.getUuid() == null && this.getUuid() == null){
-				return s.hashCode() == hashCode();
+				return super.equals(s);
 			}else if (s.getUuid() != null && this.getUuid() != null){
 				return Arrays.equals(s.getUuid(), this.getUuid());
 			}
