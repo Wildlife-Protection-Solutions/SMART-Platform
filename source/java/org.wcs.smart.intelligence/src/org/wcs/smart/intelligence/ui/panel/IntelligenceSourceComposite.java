@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -63,7 +65,9 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     
     private Label patrolLabel;
     private ComboViewer patrolId;
-    
+
+    private ControlDecoration patrolIdDecoration;
+
 	/*
 	 * job to load all patrol ids
 	 */
@@ -100,6 +104,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 				boolean isPatrolSelected = IntelligenceSourceType.PATROL.equals(getSelectedSourceType());
 				patrolLabel.setVisible(isPatrolSelected);
 				patrolId.getControl().setVisible(isPatrolSelected);
+				refreshPatrolDecoration();
 				fireDataValidStateListeners();
 				fireInputChangeListeners();				
 			}
@@ -117,14 +122,30 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				refreshPatrolDecoration();
 				fireDataValidStateListeners();
 				fireInputChangeListeners();
 			}
 		});
+        
+        patrolIdDecoration = new ControlDecoration(patrolId.getControl(), SWT.LEFT);
+        patrolIdDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+        patrolIdDecoration.setShowHover(true);
+        patrolIdDecoration.setDescriptionText(ERROR_PATROL_ID_REQUIRED);
 
+        
         loadPatrolIdJob.schedule();
 	}
 
+	private void refreshPatrolDecoration() {
+		if (patrolIdDecoration.getControl().isVisible() && getSelectedPatrol() == null) {
+			patrolIdDecoration.show();
+		} else {
+			patrolIdDecoration.hide();
+		}
+	}
+	
     @Override
     public boolean updateModel(Intelligence intelligence) {
     	IntelligenceSourceType source = getSelectedSourceType();
@@ -132,17 +153,16 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     		IntelligencePlugIn.displayLog(ERROR_SOURCE_REQUIRED, null);
     		return false;
     	}
-    	intelligence.setSource(source);
+    	Patrol patrol = null;
     	if (IntelligenceSourceType.PATROL.equals(source)) {
-    		Patrol patrol = getSelectedPatrol();
+    		patrol = getSelectedPatrol();
     		if (patrol == null) {
     			IntelligencePlugIn.displayLog(ERROR_PATROL_ID_REQUIRED, null);
     			return false;
     		}
-    		intelligence.setPatrol(patrol);
-    	} else {
-    		intelligence.setPatrol(null);
     	}
+    	intelligence.setSource(source);
+		intelligence.setPatrol(patrol);
     	return true;
     }
 
