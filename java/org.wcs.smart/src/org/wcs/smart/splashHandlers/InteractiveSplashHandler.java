@@ -379,6 +379,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 * loading the conservation areas.
 	 */
 	private void startup(){
+		SmartStartUp.initDb();
 		try {
 			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
 			
