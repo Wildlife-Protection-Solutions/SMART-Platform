@@ -492,22 +492,34 @@ public class SummaryParserTest {
 	public void gridTestValues() throws Exception{
 		
 		String valuePart = "attribute:n:sum:age";
-		String queryPart = "";
-		String query = valuePart + "|" + "1" + "|" + queryPart;
+		String queryFilter = "";
+		String rateFilter = "";
+		String query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
 		GridQueryDefinition test = parseGridQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
-		Assert.assertNull(test.getQueryFilter());
+		Assert.assertNull(test.getValueFilter());
 		
 		valuePart = "attribute:n:sum:age";
-		queryPart = "patrol:station equals \"station1\"";
-		query = valuePart + "|" + "1" + "|" + queryPart;
+		queryFilter = "patrol:station equals \"station1\"";
+		rateFilter = "";
+		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
 		test = parseGridQuery(query);
 		Assert.assertEquals(test.getValuePart().asString(), valuePart);
-		Assert.assertEquals(test.getQueryFilter().asString(), queryPart);
+		Assert.assertEquals(test.getValueFilter().asString(), queryFilter);
+		
+		valuePart = "attribute:n:sum:age";
+		queryFilter = "patrol:station equals \"station1\"";
+		rateFilter =  "patrol:station equals \"station4\"";
+		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
+		test = parseGridQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getValueFilter().asString(), queryFilter);
+		Assert.assertEquals(test.getRateFilter().asString(), rateFilter);
 		
 		valuePart = "";
-		queryPart = "";
-		query = valuePart + "|" + "1" + "|" + queryPart;
+		queryFilter = "";
+		rateFilter = "";
+		query = valuePart + "|" + "1" + "|" + queryFilter + "|" + rateFilter;
 		boolean error = false;
 		try{
 			test = parseGridQuery(query);
