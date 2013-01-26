@@ -789,12 +789,16 @@ public class PatrolLegDayInputComposite {
 										
 										count++;
 									}
+									//save first
 									for (Iterator<PatrolLegDay> iterator = tracks.keySet().iterator(); iterator.hasNext();) {
 										PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
 										editor.getPatrolEditor().save(pldToSave);
+									}
+									//then fire events
+									for (Iterator<PatrolLegDay> iterator = tracks.keySet().iterator(); iterator.hasNext();) {
+										PatrolLegDay pldToSave = (PatrolLegDay) iterator.next();
 										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pldToSave);
 									}
-									
 									
 									MessageDialog.openInformation(editor.getSite().getShell(), 
 											IMPORT_OK_DIALOG_TITLE, 
