@@ -341,9 +341,8 @@ public class ListDropTargetPanel implements IDropPanel{
 					proxy.setLabelText(dragItem.getText());
 					proxy.getWidget().setVisible(true);
 					moveElements(event.x, event.y);
-					orderElements();
 				}
-				
+
 				orderElements();
 			}
 
@@ -351,7 +350,6 @@ public class ListDropTargetPanel implements IDropPanel{
 				if (proxy.getWidget().isVisible() && dragItem.targetPanel != ListDropTargetPanel.this){
 					items.remove(proxy);
 					proxy.getWidget().setVisible(false);
-					orderElements();
 				}
 				orderElements();
 			}

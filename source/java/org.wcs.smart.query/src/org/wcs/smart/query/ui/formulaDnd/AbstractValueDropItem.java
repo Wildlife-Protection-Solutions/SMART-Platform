@@ -80,6 +80,14 @@ public abstract class AbstractValueDropItem extends DropItem {
 	}
 	
 	/**
+	 * True if value drop item has encounter ratio
+	 * @return
+	 */
+	public boolean hasEncounterRatio(){
+		return this.encounterRatio != null;
+	}
+	
+	/**
 	 * Sets the encounter rate ratio options
 	 * @param options the patrol value options to be used as the 
 	 * encounter rate choices
@@ -96,7 +104,7 @@ public abstract class AbstractValueDropItem extends DropItem {
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getValueText());
-		if (encounterRatio != null){
+		if (hasEncounterRatio()){
 			sb.append( " " + PER_LABEL + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(encounterRatio.getGuiName());
 		}

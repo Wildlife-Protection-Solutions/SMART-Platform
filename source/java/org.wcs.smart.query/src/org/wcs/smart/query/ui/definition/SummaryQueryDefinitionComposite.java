@@ -214,5 +214,13 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
 		provider.setQueryDefinitionType(QueryDropType.SUMMARY_ITEM);
 	}
+	
+	/**
+	 * @see org.eclipse.swt.widgets.Widget#dispose()
+	 */
+	@Override
+	public void dispose(){
+		filterPanel.dispose();
+	}
 
 }

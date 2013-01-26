@@ -121,10 +121,7 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 			session.beginTransaction();
 			try{
 				query = (GriddedQuery) session.load(GriddedQuery.class, input.getUuid());
-				query.getFilterDropItems();
-				query.getValueDropItems();
 				query.generateDropItems(session);
-
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(
 						MessageFormat.format(Messages.GriddedEditor_ErrorParsingQuery, new Object[]{input.getName()}) + ex.getLocalizedMessage(), ex);

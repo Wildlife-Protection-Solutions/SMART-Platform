@@ -924,7 +924,6 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	protected String FromClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 
-//		sql.append(QUERY_TEMP_SCHEMA + "." + queryTempTable);
 		sql.append(queryTempTable);
 		sql.append(" r"); //$NON-NLS-1$
 

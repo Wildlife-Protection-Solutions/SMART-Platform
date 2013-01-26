@@ -56,7 +56,7 @@ public class QueryPerspective implements IPerspectiveFactory {
 		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
 		
 		//bottom query and info view
-		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder2.addView(QueryDefView.ID);
 		folder2.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
 

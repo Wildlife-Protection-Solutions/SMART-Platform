@@ -38,13 +38,17 @@ public class GridQueryDefinition {
 	 * @param valueItem the values 
 	 * @param queryFilter the filter
 	 */
-	public static final GridQueryDefinition createQuery(IValueItem valueItem, Double gridSize, IFilter queryFilter){
-		return new GridQueryDefinition(valueItem, gridSize, queryFilter);
+	public static final GridQueryDefinition createQuery(IValueItem valueItem, 
+			Double gridSize, 
+			IFilter queryFilter,
+			IFilter rateFilter){
+		return new GridQueryDefinition(valueItem, gridSize, queryFilter, rateFilter);
 	}
 	
 	
 	private IValueItem valueItem;
 	private IFilter queryFilter;
+	private IFilter rateFilter;
 	private Double gridSize;
 	
 	/**
@@ -53,9 +57,13 @@ public class GridQueryDefinition {
 	 * @param gridSize
 	 * @param queryFilter
 	 */
-	protected GridQueryDefinition (IValueItem valueItem, Double gridSize, IFilter queryFilter){
+	protected GridQueryDefinition (IValueItem valueItem, 
+			Double gridSize, 
+			IFilter queryFilter,
+			IFilter rateFilter){
 		this.valueItem = valueItem;
 		this.queryFilter = queryFilter;
+		this.rateFilter = rateFilter;
 		this.gridSize= gridSize;
 	}
 	
@@ -66,10 +74,17 @@ public class GridQueryDefinition {
 		return this.valueItem;
 	}
 	/**
-	 * @return the query filter
+	 * @return the value query filter
 	 */
-	public IFilter getQueryFilter(){
+	public IFilter getValueFilter(){
 		return this.queryFilter;
+	}
+	
+	/**
+	 * @return the rate query filter
+	 */
+	public IFilter getRateFilter(){
+		return this.rateFilter;
 	}
 	
 	/**

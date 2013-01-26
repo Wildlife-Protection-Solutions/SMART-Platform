@@ -82,7 +82,9 @@ public class GriddedQuery extends Query {
 	@Transient
 	private List<DropItem> valueDropItems;
 	@Transient
-	private List<DropItem> filterDropItems;
+	private List<DropItem> valueFilterDropItems;
+	@Transient
+	private List<DropItem> rateFilterDropItems;
 	
 	@Transient
 	private Collection<GridResultItem> lastResults;
@@ -317,19 +319,28 @@ public class GriddedQuery extends Query {
 	}
 	
 	/**
-	 * @return filter drop items
+	 * @return value filter drop items
 	 */
 	@Transient
-	public List<DropItem>getFilterDropItems(){
-		return this.filterDropItems;
+	public List<DropItem>getValueFilterDropItems(){
+		return this.valueFilterDropItems;
+	}
+	
+	/**
+	 * @return rate filter drop items
+	 */
+	@Transient
+	public List<DropItem>getRateFilterDropItems(){
+		return this.rateFilterDropItems;
 	}
 	
 	/**
 	 * @param items filter drop items
 	 */
 	@Transient
-	public void setFilterDropItems(List<DropItem> items){
-		this.filterDropItems = items;
+	public void setFilterDropItems(List<DropItem> valueFilterItems, List<DropItem> rateFilterItems){
+		this.valueFilterDropItems = valueFilterItems;
+		this.rateFilterDropItems = rateFilterItems;
 	}
 	
 	/**
@@ -341,24 +352,35 @@ public class GriddedQuery extends Query {
 	public void generateDropItems(Session session) throws Exception{
 
 		clearDropItemList(valueDropItems);
-		clearDropItemList(filterDropItems);
+		clearDropItemList(rateFilterDropItems);
+		clearDropItemList(valueFilterDropItems);
 		if (valueDropItems == null){
 			valueDropItems = new ArrayList<DropItem>();
 		}
-		if (filterDropItems == null){
-			filterDropItems = new ArrayList<DropItem>();
+		if (rateFilterDropItems == null){
+			rateFilterDropItems = new ArrayList<DropItem>();
+		}
+		if (valueFilterDropItems == null){
+			valueFilterDropItems = new ArrayList<DropItem>();
 		}
 
 		
-		//---- generate drop items for filter items ----		
-		IFilter query = getQueryDefinition().getQueryFilter();
-		if (query != null){
-			DropItem[] filterItems = query.getDropItems(session);
+		//---- generate drop items for value filter 		
+		IFilter valueFilter = getQueryDefinition().getValueFilter();
+		if (valueFilter != null){
+			DropItem[] filterItems = valueFilter.getDropItems(session);
 			for (int i = 0; i < filterItems.length; i ++){
-				filterDropItems.add(filterItems[i]);
+				valueFilterDropItems.add(filterItems[i]);
 			}
 		}
-		
+		//---- generate drop items for rate filter 		
+		IFilter rateFilter = getQueryDefinition().getRateFilter();
+		if (rateFilter != null){
+			DropItem[] filterItems = rateFilter.getDropItems(session);
+			for (int i = 0; i < filterItems.length; i ++){
+				rateFilterDropItems.add(filterItems[i]);
+			}
+		}
 		//---- generate drop items for value items ----
 		List<DropItem> valueItems = new ArrayList<DropItem>();
 		IValueItem part = getQueryDefinition().getValuePart();
@@ -368,9 +390,9 @@ public class GriddedQuery extends Query {
 		}
 		valueItems.add(di);
 		valueDropItems.addAll(valueItems);
-		
-			
 	}
+	
+	
 	
 	@Transient
 	private void clearDropItemList(List<DropItem> list){
@@ -461,19 +483,19 @@ public class GriddedQuery extends Query {
 		return query;
 	}
 	
-	/**
-	 * 
-	 * @return the query filter in the filter format.  Will
-	 * attempt to parse the query if it has not been parsed
-	 */
-	@Transient
-	public IFilter getFilter(){
-		IFilter filter = getQueryDefinition().getQueryFilter();
-		if (filter == null){
-			return IFilter.EMPTY_FILTER;
-		}
-		return filter;
-	}
+//	/**
+//	 * 
+//	 * @return the query filter in the filter format.  Will
+//	 * attempt to parse the query if it has not been parsed
+//	 */
+//	@Transient
+//	public IFilter getFilter(){
+//		IFilter filter = getQueryDefinition().getQueryFilter();
+//		if (filter == null){
+//			return IFilter.EMPTY_FILTER;
+//		}
+//		return filter;
+//	}
 
 	@Override
 	public boolean isDefinitionEqual(Query other) {

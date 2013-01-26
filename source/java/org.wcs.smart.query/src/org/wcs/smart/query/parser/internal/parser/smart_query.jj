@@ -114,22 +114,27 @@ SumQueryDefinition SumQuery() :
 GridQueryDefinition GridQuery() :
 {
 	IValueItem value = null;
-	IFilter filter = null;
+	IFilter valueFilter = null;
+	IFilter rateFilter = null;
 	Double gridSize = null;
 }
 {
 	(
 		value = ValueItem()
-	)?
+	)
 	< QUERY_SPLITTER >
 	< NUMBER > { gridSize = Double.parseDouble(token.image);}
 	< QUERY_SPLITTER > 
 	(
-	  filter = ExpressionPart()
+	  valueFilter = ExpressionPart()
+	)?
+	< QUERY_SPLITTER > 
+	(
+	  rateFilter = ExpressionPart()
 	)?
 	< EOF >
 	{
-    	return GridQueryDefinition.createQuery(value, gridSize, filter);
+    	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, rateFilter);
 	}
 }
 
