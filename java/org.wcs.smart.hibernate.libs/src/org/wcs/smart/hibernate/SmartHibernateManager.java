@@ -93,7 +93,7 @@ public class SmartHibernateManager {
 			
 			config.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
 			config.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
-			config.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false");
+			config.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			
 			//add mapping classes
 			for (Class<?> c: getMappings()){
