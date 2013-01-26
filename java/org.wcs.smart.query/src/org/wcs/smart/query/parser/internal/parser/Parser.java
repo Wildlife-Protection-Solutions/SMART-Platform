@@ -57,19 +57,10 @@ public class Parser implements ParserConstants {
 
   final public GridQueryDefinition GridQuery() throws ParseException {
         IValueItem value = null;
-        IFilter filter = null;
+        IFilter valueFilter = null;
+        IFilter rateFilter = null;
         Double gridSize = null;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case PATROL_VALUE_ITEM:
-    case SUM_CAT_VALUE_KEY:
-    case SUM_ATTRIBUTE_VALUE_KEY:
-    case SUM_CAT_ATT_VALUE_KEY:
-      value = ValueItem();
-      break;
-    default:
-      jj_la1[1] = jj_gen;
-      ;
-    }
+    value = ValueItem();
     jj_consume_token(QUERY_SPLITTER);
     jj_consume_token(NUMBER);
                      gridSize = Double.parseDouble(token.image);
@@ -99,14 +90,46 @@ public class Parser implements ParserConstants {
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
     case AREA_KEY:
-      filter = ExpressionPart();
+      valueFilter = ExpressionPart();
+      break;
+    default:
+      jj_la1[1] = jj_gen;
+      ;
+    }
+    jj_consume_token(QUERY_SPLITTER);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case K_NOT:
+    case OPENPAREN:
+    case CATEGORY_KEY:
+    case ATT_STR_KEY:
+    case ATT_VALUE_KEY:
+    case ATT_BOOL_KEY:
+    case ATT_LIST_KEY:
+    case ATT_TREE_KEY:
+    case CAT_ATT_STR_KEY:
+    case CAT_ATT_VALUE_KEY:
+    case CAT_ATT_BOOL_KEY:
+    case CAT_ATT_LIST_KEY:
+    case CAT_ATT_TREE_KEY:
+    case PATROL_BOOL_KEY:
+    case PATROL_ID_KEY:
+    case PATROL_STATION_KEY:
+    case PATROL_TEAM_KEY:
+    case PATROL_MANDATE_KEY:
+    case PATROL_TYPE_KEY:
+    case PATROLLEG_TRANSPORT_KEY:
+    case PATROLLEG_LEADER_KEY:
+    case PATROLLEG_PILOT_KEY:
+    case PATROLLEG_MEMBER_KEY:
+    case AREA_KEY:
+      rateFilter = ExpressionPart();
       break;
     default:
       jj_la1[2] = jj_gen;
       ;
     }
     jj_consume_token(0);
-        {if (true) return GridQueryDefinition.createQuery(value, gridSize, filter);}
+        {if (true) return GridQueryDefinition.createQuery(value, gridSize, valueFilter, rateFilter);}
     throw new Error("Missing return statement in function");
   }
 
@@ -673,13 +696,13 @@ public class Parser implements ParserConstants {
       jj_la1_init_2();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x2002000,0x0,0x2002000,0x0,0x20000,0x40000000,0x0,0x0,0x20000,0x0,0x0,0x4080,0x2000,0x2000000,0x0,0x0,0x0,0x0,0x0,0x1fc0000,0x0,0x4080,};
+      jj_la1_0 = new int[] {0x2002000,0x2002000,0x2002000,0x0,0x20000,0x40000000,0x0,0x0,0x20000,0x0,0x0,0x4080,0x2000,0x2000000,0x0,0x0,0x0,0x0,0x0,0x1fc0000,0x0,0x4080,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0xfc7ff800,0x0,0xfc7ff800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfc7ff800,0x484000,0x42000,0xfc7ff000,0xfc000000,0xfc021000,0x0,0x1c,0x0,};
+      jj_la1_1 = new int[] {0xfc7ff800,0xfc7ff800,0xfc7ff800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfc7ff800,0x484000,0x42000,0xfc7ff000,0xfc000000,0xfc021000,0x0,0x1c,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0xf,0x1d0,0xf,0x1d0,0x0,0x0,0x1d0,0x1f400,0x0,0x3000,0x1f400,0x0,0x0,0xf,0x0,0x0,0x7,0x7,0x7,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0xf,0xf,0xf,0x1d0,0x0,0x0,0x1d0,0x1f400,0x0,0x3000,0x1f400,0x0,0x0,0xf,0x0,0x0,0x7,0x7,0x7,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */

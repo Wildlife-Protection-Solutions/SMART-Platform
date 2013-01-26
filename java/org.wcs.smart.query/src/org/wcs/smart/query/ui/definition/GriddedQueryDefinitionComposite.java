@@ -24,7 +24,6 @@ package org.wcs.smart.query.ui.definition;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -43,7 +42,6 @@ import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
-import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
 
 
 /**
@@ -57,7 +55,8 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	private SourceProvider provider;
 	private QueryDefView parentView;
 	private GriddedValuePanel panel;
-	private FilterDropTargetPanel filterPanel;
+	//private FilterDropTargetPanel filterPanel;
+	private GriddedFilterPanel filterPanel;
 	private TabFolder tabs;
 	private boolean isInitializing = false;
 
@@ -74,6 +73,17 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		this.provider = (SourceProvider) service.getSourceProvider(SourceProvider.SELECTED_FILTERS);
 		
 		createComposite();
+	}
+	
+	/**
+	 * @see org.eclipse.swt.widgets.Widget#dispose()
+	 */
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (filterPanel != null){
+			filterPanel.dispose();
+		}
 	}
 
 	/**
@@ -98,7 +108,8 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		pnl.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		TabItem item2 = new TabItem(tabs, SWT.NONE);
-		filterPanel = new FilterDropTargetPanel(parentView);
+		//filterPanel = new FilterDropTargetPanel(parentView);
+		filterPanel = new GriddedFilterPanel(parentView);
 		item2.setControl( filterPanel.createComposite(tabs) );
 		item2.setText(Messages.GriddedQueryDefinitionComposite_FilterSectionHeader);
 	
@@ -131,6 +142,9 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	@Override
 	public String validate() {
 		if (isInitializing) return null; //still initializing ; do not validate
+		
+		//update ui components
+		filterPanel.updateFilterPanel(panel.hasRate());
 		
 		String query = ""; //$NON-NLS-1$
 		boolean isvalid = true;
@@ -203,7 +217,8 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	public void init() {
 		isInitializing = true;
 		GriddedQuery query = ((GriddedQuery)parentView.getQuery());
-		filterPanel.addElements(query.getFilterDropItems());
+		filterPanel.addValueFilterElements(query.getValueFilterDropItems());
+		filterPanel.addRateFilterElements(query.getRateFilterDropItems());
 		panel.init(query);
 		isInitializing = false;
 		validate();
@@ -218,11 +233,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		
 		//drop items
 		panel.saveDropItems(query);
-		
-		//filter items
-		List<DropItem> items = new ArrayList<DropItem>();
-		items.addAll(filterPanel.getItems());
-		query.setFilterDropItems(items);
+		query.setFilterDropItems(new ArrayList<DropItem>(filterPanel.getValueItems()), new ArrayList<DropItem>(filterPanel.getRateItems()));
 	}
 
 	/**

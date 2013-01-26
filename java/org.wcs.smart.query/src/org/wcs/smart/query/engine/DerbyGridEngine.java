@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
@@ -114,49 +115,61 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				monitor.beginTask(Messages.DerbyGridEngine_Progress_RunningQuery, 4);
 
 				try {
-					monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
-					IFilter qFilter = query.getFilter();
-					if (qFilter == null){
-						return;
-					}
-					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter());
-					}
-					monitor.worked(1);
-					if (monitor.isCanceled()){
-						return;
-					}
-
-					boolean needsObservation = false;
-					if (query.getQueryDefinition().getValuePart().hasCategory() ||
-							query.getQueryDefinition().getValuePart().hasAttribute() ||
-							query.getFilter().hasCategoryFilter() || 
-							query.getFilter().hasAttributeFilter() ){
-						needsObservation = true;
-					}
-					
-					monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingTempTable);
-					createTemporaryTable(c);
-
-					monitor.worked(1);
-					if (monitor.isCanceled()){
-						return;
-					}
-					
-					monitor.subTask(Messages.DerbyGridEngine_Progress_PopulatingResults);
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c, needsObservation);
-					monitor.worked(1);
-
-					if (monitor.isCanceled()){
-						return;
-					}
-					
-					monitor.subTask(Messages.DerbyGridEngine_Progress_CalculatingGridValue);
-					
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
+					IValueItem valueItem = query.getQueryDefinition().getValuePart();
+					IValueItem numerator = valueItem;
+					IValueItem denominator = null;
+					if (valueItem instanceof CombinedValueItem){
+						numerator = ((CombinedValueItem)valueItem).getPart1();
+						denominator = ((CombinedValueItem)valueItem).getPart2();
+					}
 					
-					//select the tile_id, and value that we want to show on the grid
-					myResults = getGridResults(c, session, gridDef, query.getQueryDefinition().getValuePart(), true);
+					
+					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), c, session, monitor, true);
+					
+					if (denominator != null){
+						boolean isSame = false;
+						if (query.getQueryDefinition().getRateFilter() != null && query.getQueryDefinition().getValueFilter() != null){
+							isSame = (query.getQueryDefinition().getRateFilter().asString().equals(query.getQueryDefinition().getValueFilter().asString()));	
+						}else if (query.getQueryDefinition().getRateFilter() == null && query.getQueryDefinition().getValueFilter() == null){
+							isSame = true;
+						}
+						
+						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), c, session, monitor, !isSame);
+						HashMap<String, Double> items = new HashMap<String, Double>();
+						for (GridResultItem it : denominatorResults){
+							items.put(it.getTileId(), it.getValue());
+						}
+						
+						for (GridResultItem i : numeratorResults){
+							Double v = items.get(i.getTileId());
+							if (v == null){
+								i.setValue(0);
+							}else if (v == 0){
+								i.setValue(0);
+							}else{
+								System.out.println(i.getValue() + " / " + v);
+								i.setValue(i.getValue() / v);
+							}
+						}
+					}
+
+					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
+					for (GridResultItem it : numeratorResults){
+						items.put(it.getTileId(), it);
+					}
+
+					List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef);
+					for (GridResultItem it : patrolLocations){
+						if (items.get(it.getTileId()) == null){ 
+							GridResultItem newitem = new GridResultItem();
+							newitem.setTileX(it.getTileX());
+							newitem.setTileY(it.getTileY());
+							newitem.setValue(0);
+							items.put(it.getTileId(), newitem); 
+						}
+					}
+					myResults = items.values();
 					
 					monitor.worked(1);
 				}catch (Exception ex){
@@ -164,6 +177,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
+					dropTemporaryGridTable(c);
 					monitor.done();
 				}
 			}
@@ -173,6 +187,57 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 	}
 
+	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, IFilter filter, Connection c, Session session, IProgressMonitor monitor, boolean needsFilter) throws Exception{
+		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
+		
+		if (needsFilter) {
+			try {
+				dropTemporaryTables(c);
+				dropTemporaryGridTable(c);
+			} catch (Exception ex) {
+				// eatme
+			}
+
+			if (filter == null){
+				filter = IFilter.EMPTY_FILTER;
+			}
+			if (filter != IFilter.EMPTY_FILTER && filter.hasAttributeFilter()) {
+				createObservationTable(c, filter, query.getDateFilter(),
+						query.getConservationAreaFilter());
+			}
+			monitor.worked(1);
+			if (monitor.isCanceled()) {
+				return null;
+			}
+
+			boolean needsObservation = false;
+			if (value.hasCategory() || value.hasAttribute()
+					|| filter.hasCategoryFilter()
+					|| filter.hasAttributeFilter()) {
+				needsObservation = true;
+			}
+
+			monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingTempTable);
+			createTemporaryTable(c);
+
+			monitor.worked(1);
+			if (monitor.isCanceled()) {
+				return null;
+			}
+
+			monitor.subTask(Messages.DerbyGridEngine_Progress_PopulatingResults);
+			populateTemporaryTable(filter, query.getDateFilter(),
+					query.getConservationAreaFilter(), false, c,
+					needsObservation);
+			monitor.worked(1);
+
+			if (monitor.isCanceled()) {
+				return null;
+			}
+		}
+		monitor.subTask(Messages.DerbyGridEngine_Progress_CalculatingGridValue);
+		return getGridResults(c, session, gridDef, value);
+	}
 	/**
 	 * Gets results from the temporary query table, grouped by the tile ID
 	 * and loads them into internal memory store
@@ -184,48 +249,15 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 	 * @throws SQLException
 	 */
 	protected Collection<GridResultItem> getGridResults(Connection c, 
-			Session session, Grid gridDef, IValueItem value, boolean addZeros)
+			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
 		String strAgg =""; //$NON-NLS-1$
 		ResultSet rs;
 
-		HashMap<String, GridResultItem> items;
-		
-		if (value instanceof CombinedValueItem){
-			items = new HashMap<String, GridResultItem>();
-			
-			Collection<GridResultItem> value1 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart1(), false);
-			Collection<GridResultItem> value2 = getGridResults(c, session, gridDef, ((CombinedValueItem)value).getPart2(), false);
-			
-			//merge the results based on tile ids
-			HashMap<Tile, Double> values2 = new HashMap<Tile, Double>();
-			for (Iterator<GridResultItem> iterator = value2.iterator(); iterator.hasNext();) {
-				GridResultItem gridResultItem = (GridResultItem) iterator.next();
-				values2.put(new Tile(gridResultItem.getTileX(), gridResultItem.getTileY()), gridResultItem.getValue());				
-			}
-			
-			
-			for (Iterator<GridResultItem> iterator = value1.iterator(); iterator.hasNext();) {
-				GridResultItem gridResultItem = (GridResultItem) iterator.next();
-				
-				Tile id = new Tile(gridResultItem.getTileX(), gridResultItem.getTileY());
-				Double denominator= values2.get(id);
-				if (denominator == null){
-					//no data
-					iterator.remove();
-				}else if (denominator == 0){
-					//error - cannot divide by 0
-					gridResultItem.setValue(0);	
-				}else{
-					gridResultItem.setValue(gridResultItem.getValue() / denominator);
-				}
-				items.put(id.getId(), gridResultItem);
-			}
-		}else if(value instanceof PatrolValueItem ){
-			items = computePatrolValue(c, (PatrolValueItem)value, gridDef);
+		if(value instanceof PatrolValueItem ){
+			return computePatrolValue(c, (PatrolValueItem)value, gridDef);
 		}else{
-		
 			if(value instanceof AttributeValueItem ){
 				AttributeValueItem tmp = (AttributeValueItem)value;
 				strAgg = tmp.getAggregation().getName(); 
@@ -316,7 +348,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			}
 		
 			try {
-				items = new HashMap<String, GridResultItem>();
+				List<GridResultItem> items = new ArrayList<GridResultItem>();
 				while (rs.next()) {
 					GridResultItem it = new GridResultItem();
 				
@@ -327,31 +359,16 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					it.setTileY(Long.parseLong(tileids[1]));
 					it.setValue(rs.getDouble("value")); //$NON-NLS-1$
 				
-					items.put(tid, it);
+					items.add(it);
 					if (items.size() > Grid.MAX_GRID_CELLS){
 						throw Grid.GRID_TO_BIG_EXCEPTION;
 					}
 				}
+				return items;
 			} finally {
 				rs.close();
 			}
 		}
-		
-		if (addZeros){
-			//combine the two if patrol and no count then we want the
-			//value 0 to display otherwise we keep the count value
-			List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef);
-			for (GridResultItem it : patrolLocations){
-				if (items.get(it.getTileId()) == null){ 
-					GridResultItem newitem = new GridResultItem();
-					newitem.setTileX(it.getTileX());
-					newitem.setTileY(it.getTileY());
-					newitem.setValue(0);
-					items.put(it.getTileId(), newitem); 
-				}
-			}
-		}
-		return items.values();
 	}
 
 	private List<GridResultItem> computePatrolExistance(Connection c, Grid gridDef) throws Exception{
@@ -364,7 +381,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		return computePatrolTrackNoFilter(c, engine);
 	}
 	
-	private HashMap<String,GridResultItem> computePatrolValue(Connection c,
+	private Collection<GridResultItem> computePatrolValue(Connection c,
 			PatrolValueItem item, 
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
@@ -392,7 +409,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		return computePatrolTrack(c, engine, dataField);
 	}
 	
-	private HashMap<String,GridResultItem> computePatrolTrack(Connection c, 
+	private Collection<GridResultItem> computePatrolTrack(Connection c, 
 			GridAnalysisEngine<?> engine, 
 			String[] dataField) throws Exception{
 		StringBuilder sql = new StringBuilder();
@@ -452,14 +469,14 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 		}
 		rs.close();
 		
-		HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
+		List<GridResultItem> items = new ArrayList<GridResultItem>();	
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
 			GridResultItem it = new GridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());
-			items.put(it.getTileId(), it);
+			items.add(it);
 		}
 		return items;
 		

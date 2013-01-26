@@ -87,6 +87,8 @@ public class SummaryValueGroupByPanel {
 		lblValues.setText(Messages.SummaryValueGroupByPanel_ValuesSectionHeader);
 		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		lblValues.setToolTipText(Messages.SummaryValueGroupByPanel_ValuesSectionTooltip);
+		//Label lblSeparator = new Label(right, SWT.HORIZONTAL | SWT.SEPARATOR);
+		//lblSeparator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
 		Composite leftInner = new Composite(left, SWT.NONE);
 		gl = new GridLayout(2, false);

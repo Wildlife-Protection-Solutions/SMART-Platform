@@ -54,6 +54,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.ListDropTargetPanel;
 import org.wcs.smart.ui.ProjectionLabelProvider;
@@ -117,6 +118,19 @@ public class GriddedValuePanel {
 	 */
 	public String getQueryString() {
 		return  lstValues.getQueryString();
+	}
+	
+	/**
+	 * 
+	 * @return true if one of the values has an encounter rate
+	 */
+	public boolean hasRate(){
+		for (DropItem it : lstValues.getItems()){
+			if (it instanceof AbstractValueDropItem && ((AbstractValueDropItem)it).hasEncounterRatio()){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -223,6 +237,11 @@ public class GriddedValuePanel {
 		lblDef.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		lblDef.setToolTipText(Messages.GriddedValuePanel_GridDefTooltip);
 		
+
+		Label lblSep = new Label(leftInner, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lblSep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		
 		Composite leftMain = new Composite(left, SWT.NONE);
 		leftMain.setLayout(new GridLayout(3, false));
 		leftMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -241,10 +260,11 @@ public class GriddedValuePanel {
 		rgl.verticalSpacing = 0;
 		rgl.horizontalSpacing = 0;
 		right.setLayout(rgl);
-		
+
 		Composite rightInner = new Composite(right, SWT.NONE);
 		gl = new GridLayout(2, false);
 		rightInner.setLayout(gl);
+		rightInner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblValues = new Label(rightInner, SWT.NONE);
 		lblValues.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON));
@@ -253,6 +273,9 @@ public class GriddedValuePanel {
 		lblValues.setText(Messages.GriddedValuePanel_GridValueLabel);
 		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		lblValues.setToolTipText(Messages.GriddedValuePanel_GridValueTooltip);
+		
+		lblSep = new Label(rightInner, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lblSep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		lstValues = new ListDropTargetPanel(parentView, false);
 		Composite comp = lstValues.createComposite(right);

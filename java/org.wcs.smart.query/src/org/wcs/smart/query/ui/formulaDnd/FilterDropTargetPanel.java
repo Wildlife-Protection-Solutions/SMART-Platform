@@ -22,7 +22,9 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -62,6 +64,8 @@ public class FilterDropTargetPanel implements IDropPanel {
 	private TreeDropDownViewer treeEditor = null;
 	
 
+	private Set<FilterDropTargetPanel> targetPanels;
+	
 	private DropItem dragItem;
 	
 	/**
@@ -70,8 +74,13 @@ public class FilterDropTargetPanel implements IDropPanel {
 	 */
 	public FilterDropTargetPanel(QueryDefView view){
 		this.parentView = view;
+		this.targetPanels = new HashSet<FilterDropTargetPanel>();
+		targetPanels.add(this);
 	}
 	
+	public void addDropTargetPanel(FilterDropTargetPanel panel){
+		this.targetPanels.add(panel);
+	}
 	
 	public QueryDefView getParentView(){
 		return this.parentView;
@@ -104,7 +113,12 @@ public class FilterDropTargetPanel implements IDropPanel {
 		proxy.getWidget().setVisible(false);
 		items.clear();
 		dropTarget.redraw();
+		if (this.dragItem != null){
+			this.dragItem.dispose();
+			this.dragItem = null;
+		}
 		validate();
+		
 	}
 	
 	/**
@@ -237,9 +251,12 @@ public class FilterDropTargetPanel implements IDropPanel {
 	 */
 	@Override
 	public void finishDrag(DropItem di){
-		if (!items.contains(di)){
+		if (di.targetPanel != this){
+			items.remove(di);
+		}
+		if (di.targetPanel == null && !items.contains(di)){
 			int index= items.indexOf(proxy);
-			items.remove(proxy);
+			
 			proxy.getWidget().setVisible(false);
 			if (index >= 0){
 				items.add(index, di);
@@ -247,10 +264,12 @@ public class FilterDropTargetPanel implements IDropPanel {
 				items.add(di);
 			}
 			di.getWidget().setVisible(true);
-			orderElements();
-			
 		}
+		items.remove(proxy);
+		proxy.getWidget().setVisible(false);
 		dragItem = null;
+		
+		orderElements();
 		fireQueryChangedListeners();
 	}
 	
@@ -290,6 +309,14 @@ public class FilterDropTargetPanel implements IDropPanel {
 					//hide drop item and setup proxy
 					dragItem = (DropItem)selection.getFirstElement();
 				}
+				
+				if (!targetPanels.contains(dragItem.targetPanel)){
+					event.detail  = DND.DROP_NONE;
+					dragItem = null;
+					return;
+				}
+				
+				
 				if (dragItem.getWidget().isVisible()){
 					dragItem.getWidget().setVisible(false);
 					int i = items.indexOf(dragItem);
@@ -299,6 +326,9 @@ public class FilterDropTargetPanel implements IDropPanel {
 						items.add(i, proxy);
 						items.remove(dragItem);
 					}
+				}else if (!proxy.getWidget().isVisible()){
+					moveElements(event.x, event.y);
+					
 				}
 				proxy.setLabelText(dragItem.getText());
 				proxy.getWidget().setVisible(true);
@@ -306,6 +336,10 @@ public class FilterDropTargetPanel implements IDropPanel {
 			}
 
 			public void dragLeave(DropTargetEvent event) {
+				if (proxy.getWidget().isVisible() && dragItem.targetPanel != FilterDropTargetPanel.this){
+					items.remove(proxy);
+					proxy.getWidget().setVisible(false);
+				}
 				orderElements();
 			}
 			
@@ -315,8 +349,12 @@ public class FilterDropTargetPanel implements IDropPanel {
 
 			@Override
 			public void dragOver(DropTargetEvent event) {
-				moveElements(event.x, event.y);
-				orderElements();
+				if (event.detail != DND.DROP_NONE){
+					if (dragItem == null) return;
+					moveElements(event.x, event.y);
+					orderElements();
+				}
+				
 			}
 
 			@Override
@@ -325,6 +363,15 @@ public class FilterDropTargetPanel implements IDropPanel {
 
 			@Override
 			public void drop(DropTargetEvent event) {
+				if (event.detail == DND.DROP_NONE || dragItem == null){
+					return;
+				}
+				if (dragItem.targetPanel != FilterDropTargetPanel.this){
+					IDropPanel target =  dragItem.targetPanel;
+					dragItem.moveParent(FilterDropTargetPanel.this);
+					target.finishDrag(dragItem);
+				}
+				
 				moveElements(event.x, event.y);
 				//remove proxy and put back the drop item
 				int i = items.indexOf(proxy);
@@ -374,7 +421,7 @@ public class FilterDropTargetPanel implements IDropPanel {
 		dropTargetContent.setSize(dropTarget.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
 		
-		treeEditor = new TreeDropDownViewer(parent.getShell());
+		//treeEditor = new TreeDropDownViewer(parent.getShell());
 		
 		//create proxy item
 		proxy = new ProxyItem();
