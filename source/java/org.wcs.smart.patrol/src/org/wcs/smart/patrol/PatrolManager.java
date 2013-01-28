@@ -92,6 +92,8 @@ public class PatrolManager {
 			session.getTransaction().commit();
 			monitor.worked(1);
 			
+			runAfterDeleteHandlers(patrol, monitor);
+			
 			if (fileStore.exists()){
 				monitor.subTask(Messages.PatrolManager_Progress_RemovingFileStore);
 				try{
@@ -124,6 +126,23 @@ public class PatrolManager {
 			ArrayList<IPatrolDeleteHandler> listeners = deleteHandlers.get(items.get(i));
 			for (IPatrolDeleteHandler listener : listeners){
 				listener.beforeDelete(patrol, session, monitor);
+				monitor.worked(1);
+			}
+		}
+	}
+
+	/**
+	 * Runs all the delete handlers in the order provided.
+	 * 
+	 */
+	private void runAfterDeleteHandlers(Patrol patrol, IProgressMonitor monitor) throws Exception{
+		ArrayList<Integer> items = new ArrayList<Integer> ();
+		items.addAll(deleteHandlers.keySet());
+		Collections.sort(items);
+		for(int i = items.size() -1; i >= 0; i --){
+			ArrayList<IPatrolDeleteHandler> listeners = deleteHandlers.get(items.get(i));
+			for (IPatrolDeleteHandler listener : listeners){
+				listener.afterDelete(patrol, monitor);
 				monitor.worked(1);
 			}
 		}

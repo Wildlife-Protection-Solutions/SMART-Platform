@@ -70,6 +70,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceHibernateManager_DeleteIntelligence_Error;
 
+	public static String IntelligenceHibernateManager_Error_CouldNotDeleteFilestore;
+
 	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
 
 	public static String IntelligenceListView_Loading_Label;
@@ -117,6 +119,12 @@ public class Messages extends NLS {
 	public static String LoadPatrolIdJob_Name;
 
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
+
+	public static String PatrolDeleteHandler_Task_DeleteFilestore;
+
+	public static String PatrolDeleteHandler_Task_DeleteIntelligence;
+
+	public static String PatrolDeleteHandler_Task_FetchIds;
 
 	public static String ShowIntelligencePersepctiveHandler_Error;
     static {
