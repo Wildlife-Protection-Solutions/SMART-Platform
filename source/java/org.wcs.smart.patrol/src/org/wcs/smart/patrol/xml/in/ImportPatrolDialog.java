@@ -71,12 +71,6 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 
 	}
 
-	/**
-	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
-	 */
-	protected void buttonPressed(int buttonId) {
-		super.buttonPressed(buttonId);
-	}
 
 	/**
 	 * @return the filename selected by user or 
