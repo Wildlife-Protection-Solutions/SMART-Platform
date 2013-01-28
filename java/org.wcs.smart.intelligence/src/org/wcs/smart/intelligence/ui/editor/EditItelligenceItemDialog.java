@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
-import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.job.SaveIntelligenceJob;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceComposite;
@@ -81,11 +82,20 @@ public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected boolean performSave() {
 		content.updateModel(intelligence);
-		if (IntelligenceHibernateManager.saveIntelligence(intelligence)) {
+		
+        SaveIntelligenceJob saveIntelligenceJob = new SaveIntelligenceJob(intelligence);    
+    	saveIntelligenceJob.schedule();
+    	try {
+			saveIntelligenceJob.join(); //we don't want to close editor if save failed
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+    	if (Status.OK_STATUS.equals(saveIntelligenceJob.getResult())) {
 			setChangesMade(false);
 			IntelligenceEventManager.getInstance().intelligenceChanged(0, intelligence);
 			return true;
-		}
+    	}
 		return false;
 	}
 	
