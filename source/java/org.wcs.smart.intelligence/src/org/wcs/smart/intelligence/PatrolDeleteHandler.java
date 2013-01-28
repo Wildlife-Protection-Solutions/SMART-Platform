@@ -40,6 +40,8 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class PatrolDeleteHandler implements IPatrolDeleteHandler {
 	
+	public static final int EXECUTE_ORDER = 1;
+
 	private List<Intelligence> removedList;
 
 	public PatrolDeleteHandler() {}
