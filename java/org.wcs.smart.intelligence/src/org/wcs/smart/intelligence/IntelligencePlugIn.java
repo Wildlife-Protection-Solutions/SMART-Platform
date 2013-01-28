@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.patrol.IPatrolDeleteHandler;
 import org.wcs.smart.patrol.PatrolManager;
@@ -42,8 +43,6 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static IntelligencePlugIn plugin;
 
-	private IPatrolDeleteHandler patrolDeleteHandler;
-	
 	/**
 	 * The constructor
 	 */
@@ -58,8 +57,8 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		patrolDeleteHandler = new PatrolDeleteHandler();
-		PatrolManager.getInstance().addDeleteHandler(patrolDeleteHandler, PatrolDeleteHandler.EXECUTE_ORDER);
+		PatrolManager.getInstance().addDeleteHandler(new PatrolDeleteHandler(), PatrolDeleteHandler.EXECUTE_ORDER);
+		ConservationAreaManager.getInstance().addDeleteHandler(new CaDeleteHandler(), CaDeleteHandler.EXECUTE_ORDER);
 	}
 
 	/*
