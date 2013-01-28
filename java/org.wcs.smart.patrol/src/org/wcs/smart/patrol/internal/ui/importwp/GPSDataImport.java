@@ -29,9 +29,11 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -196,11 +198,14 @@ public class GPSDataImport {
 		}
 		List<Coordinate> coords = new ArrayList<Coordinate>();
 		for (Waypoint wp : day.getWaypoints()){
-			coords.add(new Coordinate(wp.getX(), wp.getY(), SmartUtils.combineDateTime(wp.getPatrolLegDay().getDate(), wp.getTime()).getTime() ));
+			Date d = SmartUtils.combineDateTime(wp.getPatrolLegDay().getDate(), wp.getTime());
+			
+			coords.add(new Coordinate(wp.getX(), wp.getY(),d.getTime()));
 		}
 		Track newTrack = convertToTrack(coords);
 		return newTrack;
 	}
+	
 	
 	/**
 	 * Converts coordinates to tracks based on date (provided in Z) and the patrol leg dates.
@@ -630,6 +635,23 @@ public class GPSDataImport {
 					return ((Double) o1.z).compareTo((Double) o2.z);
 				}
 			});
+			
+			for (Coordinate c : coordinates){
+
+				//c.z is the date taking into account the current timezone.  We want to compute
+				//the date of GMT timezone and assign that to the point.
+				//we need to take the year,month,date, hour, min, sec and assign it to a date with
+				//a time zone of gmt
+				Calendar c1 = GregorianCalendar.getInstance();
+				c1.setTimeInMillis((long)c.z);
+				Calendar c2 = GregorianCalendar.getInstance();
+				c2.setTimeZone(Track.ZTIMEZONE);
+				c2.setTimeInMillis(0);
+				c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
+				
+				c.z = c2.getTime().getTime();
+				
+			}
 			LineString track = gf.createLineString(coordinates
 					.toArray(new Coordinate[coordinates.size()]));
 			Track t = new Track();

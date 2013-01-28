@@ -113,7 +113,9 @@ public class TrackPointDialog extends TitleAreaDialog {
 			public String getText(Object element) {
 				if (element instanceof Coordinate){
 					Date d = new Date( (long) ((Coordinate)element).z );
-					return DateFormat.getDateTimeInstance().format(d);
+					DateFormat df = DateFormat.getDateTimeInstance();
+					df.setTimeZone(Track.ZTIMEZONE);
+					return df.format(d);
 				}
 				return ""; //$NON-NLS-1$
 			}
