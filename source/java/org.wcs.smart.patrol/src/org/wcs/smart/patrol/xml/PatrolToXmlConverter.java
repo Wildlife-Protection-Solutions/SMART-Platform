@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -127,8 +128,10 @@ public class PatrolToXmlConverter {
 		
 		PatrolLegDayType xml = new PatrolLegDayType();
 		xml.setDate(toXmlDate(legDay.getDate()));
-		xml.setEndTime(toXmlDate(legDay.getEndTime()));
-		xml.setStartTime(toXmlDate(legDay.getStartTime()));
+		
+		xml.setEndTime(toXmlTime(legDay.getEndTime()));
+		xml.setStartTime(toXmlTime(legDay.getStartTime()));
+		
 		if (legDay.getRestMinutes() ==  null){
 			xml.setRestMinutes(0.0);
 		}else{
@@ -155,7 +158,7 @@ public class PatrolToXmlConverter {
 		xml.setDirection(wp.getDirection());
 		xml.setDistance(wp.getDistance());
 		xml.setId(wp.getId());
-		xml.setTime( toXmlDate(wp.getTime()));
+		xml.setTime( toXmlTime(wp.getTime()));
 		xml.setX(wp.getX());
 		xml.setY(wp.getY());
 		
@@ -211,11 +214,49 @@ public class PatrolToXmlConverter {
 		return xml;
 	}
 	
+	/**
+	 * Converts a time to an xml time.  Sets the
+	 * XML timezone field to undefined so timezone information
+	 * is not included in output.
+	 * 
+	 * @param d
+	 * @return
+	 * @throws DatatypeConfigurationException
+	 */
+	private static XMLGregorianCalendar toXmlTime(Date d) throws DatatypeConfigurationException{
+		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
+		cal.setTime(d);
+		
+		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setYear(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setMonth(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setDay(DatatypeConstants.FIELD_UNDEFINED);
+		
+		return xgc;
+	}
 	
+	/**
+	 * Converts a date to an xml date.  Sets the
+	 * XML timezone field to undefined so timezone information
+	 * is not included in output.
+	 * 
+	 * @param d
+	 * @return
+	 * @throws DatatypeConfigurationException
+	 */
 	private static XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException{
 		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
 		cal.setTime(d);
-		return DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setHour(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setMinute(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setSecond(DatatypeConstants.FIELD_UNDEFINED);
+		
+		return xgc;
 	}
 	
 
