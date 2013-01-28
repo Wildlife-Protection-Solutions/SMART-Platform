@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -56,7 +57,6 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 	 */
 	public PatrolMemberWizardPage() {
 		super("PatrolMembers"); //$NON-NLS-1$
-		
 	}
 
 	
@@ -86,7 +86,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		members = new EmployeeSelectComposite(main, SWT.NONE);
 		members.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		members.addSelectionChangedListener(new EmployeeSelectComposite.IListChanged() {
+		members.addSelectionChangedListener(new IListChanged<Employee>() {
 			@Override
 			public void listChanged(List<Employee> newEmployees) {
 				if (newEmployees.size() == 0){
@@ -119,7 +119,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
     			current.add(employee.getMember());
     		}
     	}
-    	members.setEmployeeData(allEmployees, current);
+    	members.setItemsData(allEmployees, current);
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
 		
-    	for (Iterator<?> iterator = members.getSelectedEmployees().iterator(); iterator.hasNext();) {
+    	for (Iterator<?> iterator = members.getSelectedItems().iterator(); iterator.hasNext();) {
 			Employee e = (Employee) iterator.next();
 			firstLeg.addPatrolLegMember(e);
 		}
