@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.intelligence;
 
+import java.io.File;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
@@ -63,19 +65,6 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
-	public static List<Intelligence> getIntelligences() {
-		Session session = SmartHibernateManager.openSession();
-		try {
-			ConservationArea ca = SmartDB.getCurrentConservationArea();
-			Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
-			List<Intelligence> list = query.list();
-			return list;
-		} finally {
-			session.close();
-		}
-	}
-	
 	/**
 	 * Saves a given intelligence to the database.
 	 * 
@@ -104,37 +93,12 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	/**
 	 * Delete a given intelligence from the database.
 	 * 
-	 * @param intelligence the intelligence to delete
-	 * @return <code>true</code> if deleted successfully, <code>false</code> if error
-	 */
-	public static boolean deleteIntelligence(Intelligence intelligence) {
-		Interceptor interceptor = new AttachmentInterceptor();
-		Session session = SmartHibernateManager.openSession(interceptor);
-		try {
-			session.beginTransaction();
-			try {
-				session.delete(intelligence);
-				session.getTransaction().commit();
-			} catch (Exception ex) {
-				session.getTransaction().rollback();
-				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_DeleteIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-				return false;
-			}
-		} finally {
-			session.close();
-		}
-		return true;
-	}
-
-	/**
-	 * Delete a given intelligence from the database.
-	 * 
 	 * @param uuid uuid of the intelligence to delete
 	 * @return intelligence that was deleted or <code>null</code> in case of error
 	 */
 	public static Intelligence deleteIntelligence(byte[] uuid) {
-		Interceptor interceptor = new AttachmentInterceptor();
-		Session session = SmartHibernateManager.openSession(interceptor);
+		//no need to add interceptor as files will be deleted manually
+		Session session = SmartHibernateManager.openSession();
 		Intelligence intelligence = null;
 		try {
 			session.beginTransaction();
@@ -142,6 +106,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 				intelligence = (Intelligence) session.load(Intelligence.class, uuid);
 				session.delete(intelligence);
 				session.getTransaction().commit();
+				deleteFilestore(intelligence);
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
 				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_DeleteIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
@@ -151,6 +116,22 @@ public class IntelligenceHibernateManager extends HibernateManager {
 			session.close();
 		}
 		return intelligence;
+	}
+
+	/**
+	 * Delete a filestore for given intelligence.
+	 * 
+	 * @param intelligence who's filestore to delete
+	 */
+	public static void deleteFilestore(Intelligence intelligence) {
+		File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + intelligence.getIntelligenceDatastorePath());
+		if (fileStore.exists()){
+			try{
+				FileUtils.forceDelete(fileStore);
+			}catch(Exception ex){
+				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_Error_CouldNotDeleteFilestore + fileStore.getAbsolutePath(), ex);
+			}
+		}
 	}
 	
 }
