@@ -139,5 +139,11 @@
             name="Intelligence Editor">
       </editor>
    </extension>
+   <extension
+         point="org.wcs.smart.patrol.editorContribution">
+      <contribution
+            class="org.wcs.smart.intelligence.ui.patrol.ReportedIntelligenceContribution">
+      </contribution>
+   </extension>
 
 </plugin>
