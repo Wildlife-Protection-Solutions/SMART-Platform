@@ -581,6 +581,8 @@ public class Messages extends NLS {
 	public static String SmartMapEditorPart_MapCoordinate_Label;
 	public static String SmartMapEditorPart_MapCoordinate_XYSeparator;
 	public static String MapView_MapName;
+	public static String MultipleSelectComposite_Button_Add;
+	public static String MultipleSelectComposite_Button_Remove;
 	public static String NameKeyComposite_ChangeKey_Button_Label;
 	public static String NameKeyComposite_ChangeKey_Button_Tooltip;
 	public static String NameKeyComposite_ChangeKey_ConfirmDialog_Message;

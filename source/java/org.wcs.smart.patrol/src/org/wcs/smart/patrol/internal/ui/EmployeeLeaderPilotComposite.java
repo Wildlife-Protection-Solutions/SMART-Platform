@@ -32,12 +32,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeSelectComposite;
-import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeSelectComposite.IListChanged;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -81,7 +81,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		
 		empListComposite = new EmployeeSelectComposite(main, SWT.NONE);
 		empListComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		empListComposite.addSelectionChangedListener(new EmployeeSelectComposite.IListChanged(){
+		empListComposite.addSelectionChangedListener(new IListChanged<Employee>(){
 			public void listChanged(List<Employee> newEmployees) {
 				if (newEmployees.size() == 0){
 					setErrorMessage(Messages.EmployeeLeaderPilotComposite_Error_AtLeastOneEmployee);
@@ -110,18 +110,18 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
     			current.add(employee.getMember());
     		}
     	}    	
-		empListComposite.getSelectedEmployees();
+		empListComposite.getSelectedItems();
 		session.beginTransaction();
 		try{
-			empListComposite.setEmployeeData(HibernateManager.getActiveEmployees(p.getConservationArea(), session), current);
+			empListComposite.setItemsData(HibernateManager.getActiveEmployees(p.getConservationArea(), session), current);
 			session.getTransaction().rollback();
 		}catch(Exception ex){
 			session.getTransaction().rollback();
 			session.close();
 			SmartPlugIn.displayLog(null, Messages.EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees + ex.getLocalizedMessage(), ex);			
 		}
-		leaderPilotComp.setEmployeeList(empListComposite.getSelectedEmployees(),p);
-		empListComposite.addSelectionChangedListener(new IListChanged() {
+		leaderPilotComp.setEmployeeList(empListComposite.getSelectedItems(),p);
+		empListComposite.addSelectionChangedListener(new IListChanged<Employee>() {
 			@Override
 			public void listChanged(List<Employee> newEmployees) {
 				leaderPilotComp.refresh();
@@ -148,11 +148,11 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	public boolean updatePatrol(Patrol p) {
 		PatrolLeg firstLeg = p.getFirstLeg();
 		firstLeg.clearPatrolLegMembers();
-		if (empListComposite.getSelectedEmployees().size() <= 0){
+		if (empListComposite.getSelectedItems().size() <= 0){
 			SmartPatrolPlugIn.displayLog(Messages.EmployeeLeaderPilotComposite_Error_AtLeastOneMember, null);
 			return false;
 		}
-    	for (Iterator<?> iterator = empListComposite.getSelectedEmployees().iterator(); iterator.hasNext();) {
+    	for (Iterator<?> iterator = empListComposite.getSelectedItems().iterator(); iterator.hasNext();) {
 			Employee e = (Employee) iterator.next();
 			firstLeg.addPatrolLegMember(e);
 		}
