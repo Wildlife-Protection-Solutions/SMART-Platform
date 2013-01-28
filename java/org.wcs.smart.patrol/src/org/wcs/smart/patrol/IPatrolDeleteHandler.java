@@ -43,4 +43,12 @@ public interface IPatrolDeleteHandler {
 	 * @throws Exception if error occurs and the patrol information could not be removed
 	 */
 	public void beforeDelete(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception;
+
+	/**
+	 * Perform some operation if needed after patrol was actually removed from database.
+	 * 
+	 * @param patrol the patrol to delete
+	 * @param monitor the progress monitor
+	 */
+	public void afterDelete(Patrol patrol, IProgressMonitor monitor);
 }

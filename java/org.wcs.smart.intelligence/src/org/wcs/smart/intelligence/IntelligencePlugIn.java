@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.patrol.IPatrolDeleteHandler;
+import org.wcs.smart.patrol.PatrolManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -39,6 +41,8 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 
 	// The shared instance
 	private static IntelligencePlugIn plugin;
+
+	private IPatrolDeleteHandler patrolDeleteHandler;
 	
 	/**
 	 * The constructor
@@ -53,6 +57,9 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		patrolDeleteHandler = new PatrolDeleteHandler();
+		PatrolManager.getInstance().addDeleteHandler(patrolDeleteHandler, 1);
 	}
 
 	/*
