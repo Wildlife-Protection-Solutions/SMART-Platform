@@ -26,7 +26,9 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.wcs.smart.intelligence.internal.messages"; //$NON-NLS-1$
 
-    public static String DeleteIntelligenceHandler_ConfirmationDialog_Message;
+    public static String CaDeleteHandler_DeletingIntelligences;
+
+	public static String DeleteIntelligenceHandler_ConfirmationDialog_Message;
 
 	public static String DeleteIntelligenceHandler_ConfirmationDialog_Title;
 
