@@ -59,7 +59,7 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		patrolDeleteHandler = new PatrolDeleteHandler();
-		PatrolManager.getInstance().addDeleteHandler(patrolDeleteHandler, 1);
+		PatrolManager.getInstance().addDeleteHandler(patrolDeleteHandler, PatrolDeleteHandler.EXECUTE_ORDER);
 	}
 
 	/*
