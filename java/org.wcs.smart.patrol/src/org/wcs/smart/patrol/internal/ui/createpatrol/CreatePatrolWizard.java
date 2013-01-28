@@ -74,7 +74,13 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 
 		patrol = new Patrol();
 		patrol.setConservationArea(SmartDB.getCurrentConservationArea());
-		patrol.setId(PatrolHibernateManager.generatePatrolId(patrol, getSession()));
+		Session s = getSession();
+		s.beginTransaction();
+		try{
+			patrol.setId(PatrolHibernateManager.generatePatrolId(patrol, s));
+		}finally{
+			s.getTransaction().rollback();
+		}
 	}
 
 	/**
