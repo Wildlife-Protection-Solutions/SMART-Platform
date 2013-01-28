@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.model;
 
 import java.util.Arrays;
+import java.util.TimeZone;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -52,11 +53,13 @@ import com.vividsolutions.jts.io.WKBWriter;
 @Entity
 @Table(name="smart.track")
 public class Track {
+	
+	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
+	
 	private byte[] uuid;
 	private byte[] geom;
 	private Float distance;
 	private PatrolLegDay patrolLegDay;
-	
 	private LineString ls;
 	
 	public Track(){

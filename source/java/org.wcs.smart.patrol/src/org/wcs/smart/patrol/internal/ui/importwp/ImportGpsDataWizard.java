@@ -40,7 +40,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.Messages;
