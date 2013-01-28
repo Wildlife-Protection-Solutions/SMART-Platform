@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
-
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryFolderListener;

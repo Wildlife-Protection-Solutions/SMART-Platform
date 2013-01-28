@@ -148,7 +148,14 @@ public class FilterDropTargetPanel implements IDropPanel {
 		return query.toString();
 	}
 	
+	/**
+	 * 
+	 * @return attribute tree viewer for drop down tree attributes
+	 */
 	public TreeDropDownViewer getTreeEditor(){
+		if (treeEditor == null){
+			treeEditor = new TreeDropDownViewer(parentView.getSite().getShell());
+		}
 		return this.treeEditor;
 	}
 	
@@ -420,8 +427,6 @@ public class FilterDropTargetPanel implements IDropPanel {
 		dropTarget.setSize(dropTarget.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		dropTargetContent.setSize(dropTarget.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
-		
-		//treeEditor = new TreeDropDownViewer(parent.getShell());
 		
 		//create proxy item
 		proxy = new ProxyItem();

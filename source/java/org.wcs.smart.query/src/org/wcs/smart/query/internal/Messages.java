@@ -155,6 +155,13 @@ public class Messages extends NLS {
 	public static String GriddedEditor_MappedResultsTabName;
 	public static String GriddedEditor_RunQueryJob;
 	public static String GriddedEditor_TableResultsTabName;
+	public static String GriddedFilterPanel_ClearLabel;
+	public static String GriddedFilterPanel_CopyError;
+	public static String GriddedFilterPanel_CopyLabel;
+	public static String GriddedFilterPanel_RateFilterLabel;
+	public static String GriddedFilterPanel_RateFilterTooltip;
+	public static String GriddedFilterPanel_ValueFilterLabel;
+	public static String GriddedFilterPanel_ValueFilterTooltip;
 	public static String GriddedQuery_DefaultQueryName;
 	public static String GriddedQuery_InvalidGridSize;
 	public static String GriddedQuery_ParseError;
