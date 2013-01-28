@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.query.ui.definition;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -38,6 +41,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
 
@@ -47,7 +56,7 @@ import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
  * @author Emily
  *
  */
-public class GriddedFilterPanel  {
+public class GriddedFilterPanel {
 
 	private FilterDropTargetPanel valueFilter = null;
 	private FilterDropTargetPanel rateFilter = null;
@@ -105,14 +114,14 @@ public class GriddedFilterPanel  {
 		
 		
 		Composite leftInner = new Composite(left, SWT.NONE);
-		gl = new GridLayout(1, false);
+		gl = new GridLayout(2, false);
 		leftInner.setLayout(gl);
 		leftInner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblValueFilter = new Label(leftInner, SWT.NONE);
-		lblValueFilter.setText("Value Filter");
+		lblValueFilter.setText(Messages.GriddedFilterPanel_ValueFilterLabel);
 		lblValueFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lblValueFilter.setToolTipText("The filter to be applied to the value being computed.");
+		lblValueFilter.setToolTipText(Messages.GriddedFilterPanel_ValueFilterTooltip);
 		lblValueFilter.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -122,8 +131,22 @@ public class GriddedFilterPanel  {
 			
 		});
 		
+		Link lblClear = new Link(leftInner, SWT.NONE);
+		lblClear.setText("<a>" + Messages.GriddedFilterPanel_ClearLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		FontData fd = lblClear.getFont().getFontData()[0];
+		fd.setHeight(fd.getHeight() - 2);
+		smallerFont = new Font(lblClear.getDisplay(), fd);
+		lblClear.setFont(smallerFont);
+		lblClear.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
+		lblClear.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				valueFilter.clear();
+			}
+		});
+		
 		Label lblSep2 = new Label(leftInner, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lblSep2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		lblSep2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		/* right panel value filter */
 		right = new Composite(main, SWT.BORDER);
@@ -145,14 +168,14 @@ public class GriddedFilterPanel  {
 		});
 
 		Composite rightInner = new Composite(right, SWT.NONE);
-		gl = new GridLayout(2, false);
+		gl = new GridLayout(3, false);
 		rightInner.setLayout(gl);
 		rightInner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblRateFilter = new Label(rightInner, SWT.NONE);
-		lblRateFilter.setText("Rate Filter");
+		lblRateFilter.setText(Messages.GriddedFilterPanel_RateFilterLabel);
 		lblRateFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-		lblRateFilter.setToolTipText("The filter applied to the rate computation");
+		lblRateFilter.setToolTipText(Messages.GriddedFilterPanel_RateFilterTooltip);
 		lblRateFilter.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -161,11 +184,20 @@ public class GriddedFilterPanel  {
 			}
 			
 		});
+		
+		Link lblClear2 = new Link(rightInner, SWT.NONE);
+		lblClear2.setText("<a>" + Messages.GriddedFilterPanel_ClearLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		lblClear2.setFont(smallerFont);
+		lblClear2.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
+		lblClear2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				rateFilter.clear();
+			}
+		});
+		
 		Link lblCopy = new Link(rightInner, SWT.NONE);
-		lblCopy.setText("<a>" + "Copy Value Filter" + "</a>");
-		FontData fd = lblCopy.getFont().getFontData()[0];
-		fd.setHeight(fd.getHeight() - 2);
-		smallerFont = new Font(rightInner.getDisplay(), fd);
+		lblCopy.setText("<a>" + Messages.GriddedFilterPanel_CopyLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		lblCopy.setFont(smallerFont);
 		lblCopy.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
 		lblCopy.addSelectionListener(new SelectionAdapter() {
@@ -177,7 +209,7 @@ public class GriddedFilterPanel  {
 		});
 		
 		Label lblSep = new Label(rightInner, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lblSep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		lblSep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 
 		//filter panels
 		
@@ -198,21 +230,47 @@ public class GriddedFilterPanel  {
 	
 	public void updateFilterPanel(boolean needsRateFilter){	
 		right.setVisible(needsRateFilter);			
-		
+		if (!needsRateFilter && currentTarget == rateFilter){
+			currentTarget = valueFilter;
+		}
 		main.layout();
 		left.redraw();
 		right.redraw();
 		
 	}
 	private void copyValueFilterToRateFilter(){
-		//TODO:
-//		view.getQuery()().generateDropItems(session)
-//		
-//		List<DropItem> items = valueFilter.getItems();
-//		for (DropItem di : items){
-//			di.
-//		}
+		String queryString = valueFilter.getQueryString();
+		Session session = null;
+		try{
+			InputStream is = new ByteArrayInputStream(queryString.getBytes());
+			Parser parser = new Parser(is);
+			IFilter filterPart = parser.ExpressionPart();
+			is.close();
+		
+			//---- generate drop items for value filter
+			session = HibernateManager.openSession();
+			session.beginTransaction();
+			List<DropItem> copies = new ArrayList<DropItem>();
+			if (filterPart != null){
+				DropItem[] filterItems = filterPart.getDropItems(session);
+				for (int i = 0; i < filterItems.length; i ++){
+					copies.add(filterItems[i]);
+				}
+			}
+			session.getTransaction().rollback();
+			rateFilter.addElements(copies);
+		}catch (Exception ex){
+			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
+		}finally{
+			if (session != null){
+				session.close();
+			}
+		}
 	}
+
 	private void setCurrent(FilterDropTargetPanel target){
 		this.currentTarget = target;
 		left.redraw();

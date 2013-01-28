@@ -71,7 +71,7 @@ public class Tile {
 	 * @return
 	 */
 	public String getId(){
-		return xid + "_" + yid;
+		return xid + "_" + yid; //$NON-NLS-1$
 	}
 	/**
 	 * <p>Two tiles are equals if they have the same

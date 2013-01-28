@@ -42,7 +42,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
@@ -125,8 +124,10 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 					}
 					
 					
+					//get numerator results
 					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), c, session, monitor, true);
 					
+					//apply denominator results
 					if (denominator != null){
 						boolean isSame = false;
 						if (query.getQueryDefinition().getRateFilter() != null && query.getQueryDefinition().getValueFilter() != null){
@@ -134,13 +135,15 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 						}else if (query.getQueryDefinition().getRateFilter() == null && query.getQueryDefinition().getValueFilter() == null){
 							isSame = true;
 						}
-						
+						//computer denominator results
+						//only recompute filter if filter is different
 						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), c, session, monitor, !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
 						for (GridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
 						}
 						
+						//compute value
 						for (GridResultItem i : numeratorResults){
 							Double v = items.get(i.getTileId());
 							if (v == null){
@@ -148,12 +151,12 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 							}else if (v == 0){
 								i.setValue(0);
 							}else{
-								System.out.println(i.getValue() + " / " + v);
 								i.setValue(i.getValue() / v);
 							}
 						}
 					}
 
+					//combine with the patrol existance value
 					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
 					for (GridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
@@ -187,7 +190,14 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 	}
 
-	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, IFilter filter, Connection c, Session session, IProgressMonitor monitor, boolean needsFilter) throws Exception{
+	/*
+	 * Computes the grid results
+	 * @param needsFilter if the values need to be filtered or if previous filter can be used
+	 * 
+	 */
+	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
+			IFilter filter, Connection c, Session session, 
+			IProgressMonitor monitor, boolean needsFilter) throws Exception{
 		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
 		
 		if (needsFilter) {

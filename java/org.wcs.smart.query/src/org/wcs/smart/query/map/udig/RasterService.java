@@ -393,7 +393,7 @@ public class RasterService extends AbstractRasterService {
 
 				// remove the tiff file
 				if( !this.rasterFile.delete()){
-					//TODO: this is a serious problem as we won't be
+					//this is a serious problem as we won't be
 					//able to regenerate this file
 					QueryPlugIn.log("cannot delete the file " + this.rasterFile.toString() , null); //$NON-NLS-1$
 				}
