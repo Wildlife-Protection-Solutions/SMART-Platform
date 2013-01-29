@@ -343,6 +343,7 @@ public abstract class SimpleQuery extends Query {
 		SimpleQuery q = (SimpleQuery)copy;
 		setQueryFilter(q.getQueryFilter());
 		setVisibleColumns(q.getVisibleColumns());
+		setConservationAreaFilter(q.getConservationAreaFilter());
 	}
 	
 }

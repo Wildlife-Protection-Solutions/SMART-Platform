@@ -98,7 +98,7 @@ public class GridQueryDefinition {
 	 * @return the string representation of the query
 	 */
 	public String asQuery(){
-		return valueItem.asString() + "|" + gridSize.toString() + "|" + (queryFilter == null ? "" : queryFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return valueItem.asString() + "|" + gridSize.toString() + "|" + (queryFilter == null ? "" : queryFilter.asString()) + "|" + (rateFilter == null ? "" : rateFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 
 }

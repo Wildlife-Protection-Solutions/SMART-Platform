@@ -229,6 +229,7 @@ public class GriddedFilterPanel {
 	}
 	
 	public void updateFilterPanel(boolean needsRateFilter){	
+		right.setData(needsRateFilter);
 		right.setVisible(needsRateFilter);			
 		if (!needsRateFilter && currentTarget == rateFilter){
 			currentTarget = valueFilter;
@@ -286,7 +287,7 @@ public class GriddedFilterPanel {
 	public String getQueryString(){
 		StringBuilder queryText = new StringBuilder(valueFilter.getQueryString());
 		queryText.append("|"); //$NON-NLS-1$
-		if (right.isVisible()){
+		if ((Boolean)right.getData()){
 			queryText.append(rateFilter.getQueryString());
 		}
 		return queryText.toString();
