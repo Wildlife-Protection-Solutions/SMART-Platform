@@ -6,6 +6,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -18,6 +19,7 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static SmartPlanPlugIn plugin;
 	
+	private PlanCaDeleteHandler deleteCa;
 	/**
 	 * The constructor
 	 */
@@ -31,6 +33,9 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		deleteCa = new PlanCaDeleteHandler();
+		ConservationAreaManager.getInstance().addDeleteHandler(deleteCa,PlanCaDeleteHandler.EXECUTE_ORDER );
 	}
 
 	/*
