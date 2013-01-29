@@ -252,14 +252,13 @@ public class CaImporter {
 		monitor.subTask(Messages.CaImporter_Progress_ScanningTable);
 		HashMap<String, List<String>> keys = getTableConstraints(session);
 		
-		HashMap<String, TableInfo> tables = scanTables(dir);
+		HashMap<String, List<TableInfo>> tables = scanTables(dir);
 		
 		Set<String> processed = new HashSet<String>();
 		
 		Queue<String> tablesToProcess = new LinkedList<String>();
-		for (String table : tables.keySet()){
-			tablesToProcess.add(table);
-		}
+		tablesToProcess.addAll(tables.keySet());
+		
 		
 		monitor.beginTask(Messages.CaImporter_Progress_processingTables, tablesToProcess.size());
 
@@ -288,11 +287,13 @@ public class CaImporter {
 			}
 			
 			if (exportTable){
-				TableInfo info = tables.get(tableName);
-				if (info == null) throw new Exception(Messages.CaImporter_Error_TableInfo + tableName);
-				if (!info.getDataFile().exists()) throw new Exception(MessageFormat.format(Messages.CaImporter_Error_TableDataFiles, new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
-				importData(session,tableName, info.getColumns(), info.getDataFile() );
-				processed.add(tableName);
+				List<TableInfo> infos = tables.get(tableName);
+				if (infos == null) throw new Exception(Messages.CaImporter_Error_TableInfo + tableName);
+				for (TableInfo info : infos){
+					if (!info.getDataFile().exists()) throw new Exception(MessageFormat.format(Messages.CaImporter_Error_TableDataFiles, new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
+					importData(session,tableName, info.getColumns(), info.getDataFile() );
+					processed.add(tableName);
+				}
 				monitor.worked(1);
 				last = ""; //$NON-NLS-1$
 			}else{
@@ -404,15 +405,20 @@ public class CaImporter {
 	 * Scans the directory/database for all table definition 
 	 * files (*.def).
 	 * 
+	 * <p>
+	 * Note: it is possible for a single table to have multiple 
+	 * export files.  This occurs when multiple hibernate classes
+	 * are mapped to a single table in the database.
+	 * </p>
 	 * @param dir the root directory of the conservation area 
 	 * backup file.
 	 * 
-	 * @return map of tableNames to tableInfo of all def files
-	 * found in the directory.
+	 * @return map of tableNames to list of tableInfo for all def files
+	 * found in the directory
 	 * 
 	 * @throws Exception
 	 */
-	private HashMap<String, TableInfo> scanTables(File dir) throws Exception{
+	private HashMap<String, List<TableInfo>> scanTables(File dir) throws Exception{
 		File dataFileDir = new File(dir, CaExporter.DATABASE_DIR);
 		//list all .def file
 		String files[] = dataFileDir.list(new FilenameFilter() {
@@ -423,7 +429,7 @@ public class CaImporter {
 		});
 		
 		//read info in files
-		HashMap<String, TableInfo> map = new HashMap<String, TableInfo>();
+		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
 		for (int i = 0; i < files.length; i++){
 			BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])));
 			try{
@@ -431,7 +437,12 @@ public class CaImporter {
 				String columns = reader.readLine();
 				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
 				
-				map.put(tablename, new TableInfo(tablename, columns, 
+				List<TableInfo> tablefiles = map.get(tablename);
+				if (tablefiles  == null){
+					tablefiles = new ArrayList<TableInfo>();
+					map.put(tablename, tablefiles);
+				}
+				tablefiles.add(new TableInfo(tablename, columns, 
 						new File(dataFileDir,data + ".dat"))); //$NON-NLS-1$
 			}finally{
 				reader.close();

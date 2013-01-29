@@ -76,8 +76,9 @@ public class DataModelExporter implements ICaDataExporter {
 		query.append(SmartUtils.encodeHex(exportEngine.getConservationArea().getUuid()));
 		query.append("''"); //$NON-NLS-1$
 		
-		exportEngine.writeTableDefinitionFile(tableName, columns);
-		exportEngine.writeQuery(tableName, query.toString());
+		String hibernateClass = "AttributeAggregation"; //$NON-NLS-1$
+		exportEngine.writeTableDefinitionFile(tableName, hibernateClass, columns);
+		exportEngine.writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
 	}
 	
 	private void exportAggregationTable(ICaDataExportEngine exportEngine) throws Exception{
@@ -99,8 +100,9 @@ public class DataModelExporter implements ICaDataExporter {
 		query.append(tableName);
 		query.append(" WHERE false"); //$NON-NLS-1$
 		
-		exportEngine.writeTableDefinitionFile(tableName, columns);
-		exportEngine.writeQuery(tableName, query.toString());
+		String hibernateClass = "Aggregation"; //$NON-NLS-1$
+		exportEngine.writeTableDefinitionFile(tableName, hibernateClass, columns);
+		exportEngine.writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
 		
 	}
 }
