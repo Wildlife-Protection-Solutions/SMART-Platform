@@ -29,6 +29,13 @@ CREATE TABLE smart.intelligence_attachment
 	PRIMARY KEY (UUID)
 );
 
+CREATE TABLE smart.patrol_intelligence
+(
+	PATROL_UUID CHAR(16)  for bit data  NOT NULL,
+	INTELLIGENCE_UUID CHAR(16)  for bit data  NOT NULL,
+	PRIMARY KEY (PATROL_UUID, INTELLIGENCE_UUID)
+);
+
 
 ALTER TABLE smart.intelligence
 	ADD CONSTRAINT intelligence_ca_uuid_fk FOREIGN KEY (CA_UUID)
@@ -53,6 +60,20 @@ ALTER TABLE smart.intelligence_point
 
 ALTER TABLE smart.intelligence_attachment
 	ADD CONSTRAINT intelligence_attachment_intelligence_uuid_fk FOREIGN KEY (INTELLIGENCE_UUID)
+	REFERENCES smart.intelligence (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
+
+ALTER TABLE smart.patrol_intelligence 
+    ADD CONSTRAINT patrol_intelligence_patrol_uuid_fk FOREIGN KEY (PATROL_UUID)
+	REFERENCES smart.patrol (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
+
+ALTER TABLE smart.patrol_intelligence
+    ADD CONSTRAINT patrol_intelligence_intelligence_uuid_fk FOREIGN KEY (INTELLIGENCE_UUID)
 	REFERENCES smart.intelligence (UUID)
 	ON UPDATE RESTRICT
 	ON DELETE CASCADE
