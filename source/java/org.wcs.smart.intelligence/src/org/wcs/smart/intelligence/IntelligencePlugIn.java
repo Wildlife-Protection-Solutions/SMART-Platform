@@ -29,7 +29,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.patrol.IPatrolDeleteHandler;
 import org.wcs.smart.patrol.PatrolManager;
 
 /**
