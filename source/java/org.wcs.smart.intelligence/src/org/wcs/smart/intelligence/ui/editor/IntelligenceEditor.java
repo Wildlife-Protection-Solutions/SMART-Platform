@@ -268,12 +268,12 @@ public class IntelligenceEditor extends EditorPart {
 
 	/**
 	 * Creates an edit hyperlink button
-	 * @param tolkit toolkit
+	 * @param toolkit toolkit
 	 * @param parent parent composite
 	 * @param partEditor editor to use
 	 * @return hyperlink created
 	 */
-	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent, final PanelType panelType) {
+	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent, final PanelType panelType) {
 		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
 		
 		if (!canEdit()) {
@@ -318,13 +318,6 @@ public class IntelligenceEditor extends EditorPart {
 		}
 		
 		if (ret == IDialogConstants.OK_ID){
-//			PatrolEventManager.getInstance().patrolChanged(comp.getAttribute(), editor.getPatrol());
-//			this.initValues();
-//			
-//			PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-//			input.setId(editor.getPatrol().getId());
-//			editor.updatePartName();
-			
 			return true;
 		}
 		return false;
