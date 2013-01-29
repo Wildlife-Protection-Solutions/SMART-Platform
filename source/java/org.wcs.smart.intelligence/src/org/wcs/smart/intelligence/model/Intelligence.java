@@ -204,7 +204,7 @@ public class Intelligence {
 	 */
 	@Transient
 	public String getIntelligenceDatastorePath(){
-		return "Intelligence" + File.separator + SmartUtils.getDirectoryPath(uuid); //$NON-NLS-1$
+		return "intelligence" + File.separator + SmartUtils.getDirectoryPath(uuid); //$NON-NLS-1$
 	}
 	
 
