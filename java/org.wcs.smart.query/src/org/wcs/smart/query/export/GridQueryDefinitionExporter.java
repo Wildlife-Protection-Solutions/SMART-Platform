@@ -21,10 +21,17 @@
  */
 package org.wcs.smart.query.export;
 
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
  * Definition exporter for a gridded query.
@@ -53,15 +60,49 @@ public class GridQueryDefinitionExporter extends DefinitionQueryExporter
 	public void writeQuerySpecifics(Query query, QueryType xmlQuery)
 			throws Exception {
 		
+		GriddedQuery gQuery = (GriddedQuery)query;
+		
 		QueryPart defPart = new QueryPart();
 		defPart.setKey("definition"); //$NON-NLS-1$
-		defPart.setValue( ((GriddedQuery)query).getQueryDefinition().asQuery() );
+		defPart.setValue( gQuery.getQueryDefinition().asQuery() );
 		xmlQuery.getQueryPart().add(defPart);
 
 		QueryPart crsPart = new QueryPart();
 		crsPart.setKey("crs"); //$NON-NLS-1$
-		crsPart.setValue(((GriddedQuery)query).getCrsDefinition());
+		crsPart.setValue(gQuery.getCrsDefinition());
 		xmlQuery.getQueryPart().add(crsPart);
+		
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			processFilter(gQuery.getQueryDefinition().getValueFilter(), xmlQuery, s);
+			processFilter(gQuery.getQueryDefinition().getRateFilter(), xmlQuery, s);
+		}finally{
+			s.getTransaction().rollback();
+			s.close();
+		}
+	}
+	
+	/*
+	 * Process the filter
+	 */
+	private void processFilter(IFilter f, QueryType qt, Session session) throws Exception{
+		if (f == null) return;
+		
+		if (f instanceof PatrolFilter){
+			PatrolFilter pf = (PatrolFilter)f;
+			UuidItemType item = super.processPatrolOption(pf.getPatrolOption(), pf.getValue(), session);
+			if (item != null){
+				qt.getUuiditem().add(item);
+			}
+		}
+		
+		List<IFilter> kids = f.getChildren();
+		if (kids != null){
+			for (IFilter kid : kids){
+				processFilter(kid, qt, session);
+			}
+		}
 	}
 
 }

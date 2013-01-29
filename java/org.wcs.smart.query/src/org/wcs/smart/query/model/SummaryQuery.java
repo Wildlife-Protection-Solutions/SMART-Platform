@@ -459,5 +459,6 @@ public class SummaryQuery extends Query {
 		
 		SummaryQuery q = (SummaryQuery)copy;
 		setQuery(q.getQuery());
+		setConservationAreaFilter(q.getConservationAreaFilter());
 	}
 }

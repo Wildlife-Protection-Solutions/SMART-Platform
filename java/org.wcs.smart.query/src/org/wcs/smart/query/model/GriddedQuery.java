@@ -169,6 +169,7 @@ public class GriddedQuery extends Query {
 	 */
 	public void setQuery(String query){
 		this.strQuery = query;
+		this.query = null;
 	}
 	
 	/**
@@ -483,19 +484,6 @@ public class GriddedQuery extends Query {
 		return query;
 	}
 	
-//	/**
-//	 * 
-//	 * @return the query filter in the filter format.  Will
-//	 * attempt to parse the query if it has not been parsed
-//	 */
-//	@Transient
-//	public IFilter getFilter(){
-//		IFilter filter = getQueryDefinition().getQueryFilter();
-//		if (filter == null){
-//			return IFilter.EMPTY_FILTER;
-//		}
-//		return filter;
-//	}
 
 	@Override
 	public boolean isDefinitionEqual(Query other) {
@@ -515,9 +503,9 @@ public class GriddedQuery extends Query {
 	public void copyFrom(Query copy) {
 		if (copy instanceof GriddedQuery){
 			setQuery(((GriddedQuery) copy).getQuery());
+			setCrsDefinition(((GriddedQuery) copy).getCrsDefinition());
+			setConservationAreaFilter(((GriddedQuery) copy).getConservationAreaFilter());
 		}
-		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
