@@ -36,6 +36,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.PatrolIntelligence;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -65,18 +66,12 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
-	public static List<Intelligence> getIntelligences() {
-		Session session = SmartHibernateManager.openSession();
-		try {
-			ConservationArea ca = SmartDB.getCurrentConservationArea();
-			Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
-			List<Intelligence> list = query.list();
-			return list;
-		} finally {
-			//TODO: do we need to close session?
-			//session.close();
-		}
+	public static List<Intelligence> getIntelligences(Session session) {
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Intelligence> list = query.list();
+		return list;
 	}
 	
 	/**
@@ -145,6 +140,15 @@ public class IntelligenceHibernateManager extends HibernateManager {
 			}catch(Exception ex){
 				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_Error_CouldNotDeleteFilestore + fileStore.getAbsolutePath(), ex);
 			}
+		}
+	}
+
+	public static void savePatrolIntelligences(Session session, Patrol patrol, List<Intelligence> intelligences) {
+		for (Intelligence intelligence : intelligences) {
+			PatrolIntelligence pi = new PatrolIntelligence();
+			pi.setPatrol(patrol);
+			pi.setIntelligence(intelligence);
+			session.saveOrUpdate(pi);
 		}
 	}
 	
