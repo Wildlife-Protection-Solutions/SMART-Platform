@@ -29,7 +29,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyRestoreEngine;
 import org.wcs.smart.internal.Messages;
@@ -91,17 +93,27 @@ public class RestoreHandler {
 		}
 		try {
 			final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(false, false, new IRunnableWithProgress() {
+			pmdDialog.run(true, false, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
+					DisplayAccess.accessDisplayDuringStartup();
 					File f = dialog.getSelectedFile();
 					try{
-						DerbyRestoreEngine.restoreSystem(f, monitor);	
-						MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage);
-					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
+						DerbyRestoreEngine.restoreSystem(f, monitor);
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage);
+								
+							}});
+					}catch (final Exception ex){
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(shell,Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
+							}});
 					}
 				}
 				
