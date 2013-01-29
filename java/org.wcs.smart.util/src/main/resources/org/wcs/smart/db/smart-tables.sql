@@ -200,3 +200,9 @@ ALTER TABLE smart.ca_projection ADD CONSTRAINT ca_projection_ca_uuid_fk FOREIGN 
 	ON UPDATE RESTRICT
 	ON DELETE CASCADE
 ;
+
+CREATE TABLE smart.db_version(
+	VERSION VARCHAR(15) NOT NULL
+);
+
+INSERT INTO smart.db_version VALUES ('1.0');
