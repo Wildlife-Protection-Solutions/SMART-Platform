@@ -60,20 +60,22 @@ public interface ICaDataExportEngine {
 	 * Writes the required table definition file.
 	 * 
 	 * @param tableName the table name
+	 * @param hibernateClass the hibernate class represented by the tablename
 	 * @param columns the columns in the table
 	 * @throws Exception
 	 */
-	void writeTableDefinitionFile(String tableName, String[] columns) throws Exception;
+	void writeTableDefinitionFile(String tableName, String hibernateClass, String[] columns) throws Exception;
 	
 	/**
 	 * Exports all data in the given table.
 	 * 
 	 * @param tableName the table name
+	 * @param hibernateClass the hibernate class represented by the tablename
 	 * @param columns all columns in the table
 	 * @param conservationAreaProperty the conservation area property column name
 	 * @throws Exception
 	 */
-	void exportTableData(String tableName, String[] columns, String conservationAreaProperty) throws Exception;
+	void exportTableData(String tableName, String hibernateClass, String[] columns, String conservationAreaProperty) throws Exception;
 	
 	/**
 	 * Exports all the data from a table that 
@@ -106,7 +108,7 @@ public interface ICaDataExportEngine {
 	 * @param query the query to extract the rows
 	 * @throws Exception
 	 */
-	void writeQuery(String tableName,
+	void writeQuery(String fileName,
 			String query) throws Exception;
 	
 }

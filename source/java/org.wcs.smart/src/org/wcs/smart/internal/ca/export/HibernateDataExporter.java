@@ -53,8 +53,8 @@ public class HibernateDataExporter implements ICaDataExporter {
 
 			if (in.getCaPropertyName() != null) {
 				String[] columns = exportEngine.getTableColumns(in.getTableName());
-				exportEngine.writeTableDefinitionFile(in.getTableName(), columns);
-				exportEngine.exportTableData(in.getTableName(), columns, in.getCaPropertyName());
+				exportEngine.writeTableDefinitionFile(in.getTableName(), in.getClazz().getSimpleName(), columns);
+				exportEngine.exportTableData(in.getTableName(), in.getClazz().getSimpleName(), columns, in.getCaPropertyName());
 			} else {
 				
 				String hqlQuery = SmartHibernateManager.getHqlExportQuery(in.getClazz());
@@ -64,7 +64,7 @@ public class HibernateDataExporter implements ICaDataExporter {
 				}
 				
 				String[] columns = exportEngine.getTableColumns(in.getTableName());
-				exportEngine.writeTableDefinitionFile(in.getTableName(), columns);
+				exportEngine.writeTableDefinitionFile(in.getTableName(), in.getClazz().getSimpleName(), columns);
 				exportEngine.writeHibernateQuery(in.getTableName(), in.getClazz().getSimpleName(), columns, hqlQuery);				
 			}
 		}

@@ -82,10 +82,10 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#writeTableDefinitionFile(java.io.File, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public void writeTableDefinitionFile(String tableName,
+	public void writeTableDefinitionFile(String tableName, String hibernateClass,
 			String[] columns) throws Exception {
 
-		File columnFile = createFileName(getExportLocation(), tableName + ".def"); //$NON-NLS-1$
+		File columnFile = createFileName(getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
 		BufferedWriter writer = new BufferedWriter(new FileWriter(columnFile));
 		writer.write(tableName);
 		writer.newLine();
@@ -106,6 +106,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	 */
 	@Override
 	public void exportTableData(String tableName,
+			String hibernateClass,
 			String[] columns, 
 			String conservationAreaProperty) throws Exception {
 		
@@ -125,7 +126,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		query.append(SmartUtils.encodeHex(getConservationArea().getUuid()));
 		query.append("''" ); //$NON-NLS-1$
 
-		writeQuery(tableName, query.toString());
+		writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -145,6 +146,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		
 		//convert hql to sql
 		String sql = SmartHibernateManager.toSql(q.getQueryString());
+		sql = sql.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//set sql parameter
 		sql = sql.replace("?", " x''" + SmartUtils.encodeHex(getConservationArea().getUuid()) + "''"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -173,17 +175,17 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 
 	
 		/* export data to file */
-		writeQuery(tableName, query.toString());
+		writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
 	}
 
 	/**
 	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#writeQuery(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void writeQuery(String tableName, String query){
+	public void writeQuery(String fileName, String query){
 		SQLQuery sqlQuery = getSession().createSQLQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
-				createFileName(getExportLocation(), tableName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" ); //$NON-NLS-1$ //$NON-NLS-2$
-		
+				createFileName(getExportLocation(), fileName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" ); //$NON-NLS-1$ //$NON-NLS-2$
+		System.out.println(sqlQuery.toString());
 		sqlQuery.executeUpdate();
 	}
 	
