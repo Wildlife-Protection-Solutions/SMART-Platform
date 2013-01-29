@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Interceptor;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
@@ -66,6 +67,13 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
+
+	/**
+	 * Returns all intelligences
+	 * 
+	 * @param session
+	 * @return all intelligences
+	 */
 	public static List<Intelligence> getIntelligences(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
@@ -149,6 +157,44 @@ public class IntelligenceHibernateManager extends HibernateManager {
 			pi.setPatrol(patrol);
 			pi.setIntelligence(intelligence);
 			session.saveOrUpdate(pi);
+		}
+	}
+
+	/**
+	 * Returns the list of intelligences reported by this patrol
+	 * 
+	 * @param patrol
+	 * @return the list of intelligences reported by this patrol
+	 */
+	public static List<Intelligence> getReportedIntelligences(Patrol patrol) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("patrol", patrol)); //$NON-NLS-1$
+			@SuppressWarnings("unchecked")
+			List<Intelligence> list = query.list();
+			return list;
+		} finally {
+			session.close();
+		}
+	}
+
+
+	/**
+	 * Returns the list of intelligences that motivated patrol
+	 * 
+	 * @param patrol
+	 * @return the list of intelligences that motivated patrol
+	 */
+	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol"); //$NON-NLS-1$
+			query.setParameter("patrol", patrol); //$NON-NLS-1$
+			@SuppressWarnings("unchecked")
+			List<Intelligence> list = query.list();
+			return list;
+		} finally {
+			session.close();
 		}
 	}
 	

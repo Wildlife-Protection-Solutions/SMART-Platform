@@ -148,6 +148,9 @@
       <contribution
             class="org.wcs.smart.intelligence.ui.patrol.ReportedIntelligenceContribution">
       </contribution>
+      <contribution
+            class="org.wcs.smart.intelligence.ui.patrol.MotivationIntelligenceContribution">
+      </contribution>
    </extension>
    <extension
          point="org.wcs.smart.patrol.wizardpage">
