@@ -29,7 +29,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.in.CaImporter;
@@ -79,17 +81,27 @@ public class ImportCaHandler {
 		}
 		try {
 			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(false, false, new IRunnableWithProgress() {
+			pmdDialog.run(true, false, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
+					DisplayAccess.accessDisplayDuringStartup();
 					File f = dialog.getSelectedFile();
 					try{
 						CaImporter.importCa(f, monitor);
-						MessageDialog.openInformation(shell, Messages.ImportCaHandler_Complete_DialogTitle, Messages.ImportCaHandler_Complete_DialogMessage);		
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openInformation(shell, Messages.ImportCaHandler_Complete_DialogTitle, Messages.ImportCaHandler_Complete_DialogMessage);
+							}});
+								
 					}catch (final Exception ex){
-						SmartPlugIn.displayLog(shell,Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);		
+						shell.getDisplay().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(shell,Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);
+							}});
 					}
 
 				}

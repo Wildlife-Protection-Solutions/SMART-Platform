@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.application.DisplayAccess;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyBackupEngine;
@@ -63,13 +64,14 @@ public class BackupHandler extends AbstractHandler {
 	/**
 	 * Execute the backup commend; prompting user as required
 	 * @param shell current shell
-	 * @param fork - <code>true</code> if not called from within splash screen thread
+	 * @param fork - <code>true</code> if not called from within splash screen thread, 
+	 * <code>false</code> if called from the splash screen
 	 */
 	/*
 	 * fork is true and called from within the splash screen thread causes application
 	 * deadlock.
 	 */
-	public void executeBackup(final Shell shell, boolean fork){
+	public void executeBackup(final Shell shell, final boolean fork){
 		backupState = 0;
 		
 		//prompt to save dirty editors
@@ -89,11 +91,14 @@ public class BackupHandler extends AbstractHandler {
 		}
 		try {
 			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
-			pmdDialog.run(fork, true, new IRunnableWithProgress() {
+			pmdDialog.run(true, true, new IRunnableWithProgress() {
 
 				@Override
 				public void run(final IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
+					if (!fork){
+						DisplayAccess.accessDisplayDuringStartup();
+					}
 					backupFile = dialog.getSelectedFile();
 					try {
 						final boolean ok = DerbyBackupEngine.backupSystem(backupFile,monitor);						
