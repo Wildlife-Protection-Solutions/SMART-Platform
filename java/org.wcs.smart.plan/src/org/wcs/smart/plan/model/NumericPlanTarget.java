@@ -14,7 +14,7 @@ import javax.persistence.Transient;
  * @since 1.0.0
  */
 @Entity
-@DiscriminatorValue("ALPHANUMERIC")
+@DiscriminatorValue("NUMERIC")
 public class NumericPlanTarget extends PlanTarget {
 
 	public final static String TARGET_GUI_NAME = "Numeric";
