@@ -84,7 +84,7 @@ public class PatrolIntelligence {
 	 * @since 1.0.0
 	 */
 	@Embeddable
-	protected class PatrolIntelligencePk implements Serializable {
+	protected static class PatrolIntelligencePk implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		
