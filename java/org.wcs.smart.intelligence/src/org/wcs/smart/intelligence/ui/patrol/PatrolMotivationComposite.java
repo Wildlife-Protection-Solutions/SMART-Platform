@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.patrol;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -31,8 +33,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.common.control.MultipleSelectComposite;
+import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
+import org.wcs.smart.patrol.model.Patrol;
 
 /**
  * Composite for collecting the patrol motivation information based on intelligence
@@ -45,6 +53,13 @@ public class PatrolMotivationComposite extends Composite {
 	private Button btnMotivated;
 	private Label selectLabel;
 	private MultipleSelectComposite<Intelligence> selectComposite;
+	
+	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
+	private String errorMessage;
+
+	private List<Intelligence> allIntelligences;
+	private List<Intelligence> selectedIntelligences = new ArrayList<Intelligence>();
+	
 	/**
 	 * @param parent
 	 * @param style
@@ -58,34 +73,29 @@ public class PatrolMotivationComposite extends Composite {
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         btnMotivated = new Button(this, SWT.CHECK);
-        btnMotivated.setText("Patrol is motivated by intelligence");
+        btnMotivated.setText(Messages.PatrolMotivationComposite_Motivated_Checkbox_Label);
         btnMotivated.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
         		applyCurrentState();
+        		handleInputChanged();
         	}
         });
         
 		selectLabel = new Label(this, SWT.NONE);
-		selectLabel.setText("Select intelligence");
+		selectLabel.setText(Messages.PatrolMotivationComposite_Selector_Label);
 		
 		selectComposite = new MultipleSelectComposite<Intelligence>(this, SWT.NONE);
 		selectComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		selectComposite.setLabelProvider(new IntelligenceLabelProvider());
 		selectComposite.setItemComparator(new IntelligenceComparator());
-		selectComposite.setLabelAllText("All Intelligences:");
-		selectComposite.setLabelSelectedText("Selected Intelligences:");
+		selectComposite.setLabelAllText(Messages.PatrolMotivationComposite_Selector_All_Label);
+		selectComposite.setLabelSelectedText(Messages.PatrolMotivationComposite_Selector_Selected_Label);
 		
-		selectComposite.addSelectionChangedListener(new MultipleSelectComposite.IListChanged<Intelligence>() {
+		selectComposite.addSelectionChangedListener(new IListChanged<Intelligence>() {
 			@Override
 			public void listChanged(List<Intelligence> items) {
-				if (items.size() == 0) {
-//					setPageComplete(false);
-//					setErrorMessage(Messages.PatrolMemberWizardPage_Error_NoEmployees);
-				} else {
-//					setPageComplete(true);
-//					setErrorMessage(null);
-				}
+				handleInputChanged();
 			}
 		});
         
@@ -100,8 +110,62 @@ public class PatrolMotivationComposite extends Composite {
 		selectLabel.setVisible(isMotivated);
 		selectComposite.setVisible(isMotivated);
     }	
-	
-	public MultipleSelectComposite<Intelligence> getSelectComposite() {
-		return selectComposite;
+
+	public boolean updateModel(Patrol p) {
+		selectedIntelligences.clear();
+    	for (Iterator<?> iterator = selectComposite.getSelectedItems().iterator(); iterator.hasNext();) {
+    		Intelligence i = (Intelligence) iterator.next();
+    		selectedIntelligences.add(i);
+		}
+		return true;
 	}
+    
+	public void initFromModel(Patrol p, Session session) {
+		if (allIntelligences == null) {
+			allIntelligences = IntelligenceHibernateManager.getIntelligences(session);
+		}
+    	selectComposite.setItemsData(allIntelligences, selectedIntelligences);
+	}
+
+	public List<Intelligence> getSelectedIntelligences() {
+		return selectedIntelligences;
+	}
+	
+    private void handleInputChanged() {
+    	validate();
+    	fireInputChangeListeners();
+    }
+    
+    private void validate() {
+    	if (btnMotivated.getSelection()) {
+     		if (selectComposite.getSelectedItems().isEmpty()) {
+    			setErrorMessage(Messages.PatrolMotivationComposite_Selector_Error);
+    			return;
+    		}
+    	}
+		setErrorMessage(null);
+    }
+    
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	protected void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	public void addInputChangeListener(IInputChangeListener listener) {
+		inputListeners.add(listener);
+	}
+
+	public void removeInputChangeListener(IInputChangeListener listener) {
+		inputListeners.remove(listener);
+	}
+	
+	protected void fireInputChangeListeners() {
+		for (IInputChangeListener listener : inputListeners) {
+			listener.inputChanged();
+		}
+	}
+	
 }
