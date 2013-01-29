@@ -88,6 +88,12 @@ public class Messages extends NLS {
 
 	public static String IntelligenceLocation_PageTitle;
 
+	public static String IntelligencePatrolWizardPage_Message;
+
+	public static String IntelligencePatrolWizardPage_PageName;
+
+	public static String IntelligencePatrolWizardPage_PageTitle;
+
 	public static String IntelligencePlugIn_ErrorDialog_Title;
 
     public static String IntelligenceReceived_Message;
@@ -127,6 +133,16 @@ public class Messages extends NLS {
 	public static String PatrolDeleteHandler_Task_DeleteIntelligence;
 
 	public static String PatrolDeleteHandler_Task_FetchIds;
+
+	public static String PatrolMotivationComposite_Motivated_Checkbox_Label;
+
+	public static String PatrolMotivationComposite_Selector_All_Label;
+
+	public static String PatrolMotivationComposite_Selector_Error;
+
+	public static String PatrolMotivationComposite_Selector_Label;
+
+	public static String PatrolMotivationComposite_Selector_Selected_Label;
 
 	public static String ShowIntelligencePersepctiveHandler_Error;
     static {

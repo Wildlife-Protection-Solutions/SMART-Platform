@@ -21,14 +21,12 @@
  */
 package org.wcs.smart.intelligence.ui.patrol;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
-import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
@@ -42,31 +40,43 @@ import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 public class IntelligencePatrolWizardPage extends NewPatrolWizardPage {
 
 	private PatrolMotivationComposite content;
-	private List<Intelligence> allIntelligences;
 
 	public IntelligencePatrolWizardPage() {
-		super("Intelligence Page");
+		super(Messages.IntelligencePatrolWizardPage_PageName);
 	}
 
 	@Override
 	public void createControl(Composite parent) {
-		allIntelligences = IntelligenceHibernateManager.getIntelligences();
-		
 		content = new PatrolMotivationComposite(parent, SWT.NONE);
-		setTitle("Patrol Motivation");
-		setMessage("Select if this patrol is based on intelligence");
+		setTitle(Messages.IntelligencePatrolWizardPage_PageTitle);
+		setMessage(Messages.IntelligencePatrolWizardPage_Message);
+		content.addInputChangeListener(new IInputChangeListener() {
+			@Override
+			public void inputChanged() {
+				if (content.getErrorMessage() == null) {
+					setPageComplete(true);
+					setErrorMessage(null);
+				} else {
+					setPageComplete(false);
+					setErrorMessage(content.getErrorMessage());
+				}
+			}
+		});
 		setControl(content);
 	}
 
 	@Override
 	public boolean updateModel(Patrol p) {
-		return true;
+		return content.updateModel(p);
 	}
 
 	@Override
 	public void initModel(Patrol p, Session session) {
-    	List<Intelligence> current = new ArrayList<Intelligence>();
-    	content.getSelectComposite().setItemsData(allIntelligences, current);
+		content.initFromModel(p, session);
 	}
 
+	@Override
+	public void save(Patrol p, Session session) throws Exception {
+		IntelligenceHibernateManager.savePatrolIntelligences(session, p, content.getSelectedIntelligences());
+	}
 }

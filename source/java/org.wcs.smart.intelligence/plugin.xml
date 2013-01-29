@@ -108,6 +108,10 @@
             ca_property=".intelligence.conservationArea"
             class="org.wcs.smart.intelligence.model.IntelligenceAttachment">
       </class>
+      <class
+            ca_property=".id.patrol.conservationArea"
+            class="org.wcs.smart.intelligence.model.PatrolIntelligence">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
