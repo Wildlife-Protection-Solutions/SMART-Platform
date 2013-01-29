@@ -61,6 +61,11 @@ import org.wcs.smart.util.SmartUtils;
 public class Patrol {
 
 	/**
+	 * Location of patrol data in the filestore
+	 */
+	public static final String PATROL_FILESTORE_LOC = "patrol"; //$NON-NLS-1$
+	
+	/**
 	 * Text to identify patrol id as auto-generated
 	 */
 	public static final String AUTO_GENERATE_TEXT = Messages.Patrol_SystemGenerateId_Name;
@@ -320,7 +325,7 @@ public class Patrol {
 	 */
 	@Transient
 	public String getPatrolDatastorePath(){
-		return "Patrol" + File.separator + SmartUtils.getDirectoryPath(uuid); //$NON-NLS-1$
+		return PATROL_FILESTORE_LOC + File.separator + SmartUtils.getDirectoryPath(uuid);
 	}
 
 
