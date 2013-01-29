@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.plan.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -48,7 +47,6 @@ import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Represents a patrol object
@@ -60,6 +58,10 @@ import org.wcs.smart.util.SmartUtils;
 @Table(name="smart.plan")
 public class Plan {
 
+	/**
+	 * Various plan types
+	 * 
+	 */
 	public enum PlanType{
 		CA("Conservation Area Plan"),
 		STATION("Station Plan"),
@@ -83,20 +85,23 @@ public class Plan {
 	private Date startDate;
 	private Date endDate;
 	private PlanType type;
-	
 	private List<PlanTarget> targets;
-
 	private Integer unavailableEmployees;
 	private Integer activeEmployees;
-
 	private List<Plan> children = new ArrayList<Plan>();
 	private Plan parent = null;
+	
+	
 	private Plan template = null;
 	
 	public Plan(){
 		
 	}
 
+	/**
+	 * 
+	 * @return unique plan identifier
+	 */
 	@Id
 	@GeneratedValue(generator="uuid")
 	@GenericGenerator(name= "uuid", strategy="uuid2")
@@ -108,6 +113,10 @@ public class Plan {
 		this.uuid = uuid;
 	}
 
+	/**
+	 * 
+	 * @return conservation area associated with plan
+	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -118,6 +127,10 @@ public class Plan {
 		this.ca = ca;
 	}
 	
+	/**
+	 * 
+	 * @return user defined plan id
+	 */
 	@Column(name = "id")
 	public String getId(){
 		return this.id;
@@ -126,6 +139,10 @@ public class Plan {
 		this.id = id;
 	}
 
+	/**
+	 * 
+	 * @return station associated with plan or <code>null</code>
+	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="station_uuid", referencedColumnName="uuid")
 	public Station getStation() {
@@ -136,6 +153,10 @@ public class Plan {
 		this.station = station;
 	}
 
+	/**
+	 * 
+	 * @return team associated with plan or <code>null</code>
+	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="team_uuid", referencedColumnName="uuid")
 	public Team getTeam() {
@@ -146,6 +167,10 @@ public class Plan {
 		this.team = team;
 	}
 
+	/**
+	 * 
+	 * @return plan start date
+	 */
 	@Column(name="start_date")
 	public Date getStartDate() {
 		return startDate;
@@ -155,6 +180,10 @@ public class Plan {
 		this.startDate = startDate;
 	}
 
+	/**
+	 * 
+	 * @return plan end date
+	 */
 	@Column(name="end_date")
 	public Date getEndDate() {
 		return endDate;
@@ -164,46 +193,10 @@ public class Plan {
 		this.endDate = endDate;
 	}
 	
-	
-	
-	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Plan){
-			Plan s = (Plan)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
-	
 	/**
 	 * 
-	 * <p>
-	 * To get full file names you must prepend this with the conservation area file store location.
-	 * </p>
-	 * <code>
-	 * ConservationArea.getFileDataStoreLocation() + File.separator + Patrol.getPatrolDatastorePath();
-	 * </code>
-	 * @return the file store location for the patrol relative to the conservation area file store
+	 * @return plane type
 	 */
-	@Transient
-	public String getPlanDatastorePath(){
-		return "Plan" + File.separator + SmartUtils.getDirectoryPath(uuid);
-	}
-	
 	@Column(name = "type")
 	@Enumerated(EnumType.STRING)
 	public PlanType getType() {
@@ -214,6 +207,10 @@ public class Plan {
 		this.type = type;
 	}
 	
+	/**
+	 * 
+	 * @return plan description
+	 */
 	@Column(name = "description")
 	public String getDescription() {
 		return description;
@@ -222,6 +219,10 @@ public class Plan {
 		this.description = description;
 	}
 	
+	/**
+	 * 
+	 * @return plan name
+	 */
 	@Column(name = "name")
 	public String getName() {
 		return name;
@@ -230,22 +231,35 @@ public class Plan {
 		this.name = name;
 	}
 
-	public void setUnavailableEmployees(Integer unavailableEmployees){
-		this.unavailableEmployees = unavailableEmployees; 
-	}
+	/**
+	 * 
+	 * @return number of unavailable employees
+	 */
 	@Column(name = "unavailable_employees")
 	public Integer getUnavailableEmployees(){
 		return this.unavailableEmployees; 
 	}
-	
-	public void setActiveEmployees(Integer activeEmployees){
-		this.activeEmployees = activeEmployees;
+	public void setUnavailableEmployees(Integer unavailableEmployees){
+		this.unavailableEmployees = unavailableEmployees; 
 	}
+	
+	/**
+	 * 
+	 * @return the number of active employees for plan
+	 */
 	@Column(name = "active_employees")
 	public Integer getActiveEmployees(){
 		return activeEmployees;
 	}
+	public void setActiveEmployees(Integer activeEmployees){
+		this.activeEmployees = activeEmployees;
+	}
+	
 
+	/**
+	 * Adds a new plan target
+	 * @param t
+	 */
 	@Transient
 	public void addTarget(PlanTarget t){
 		if(targets == null){
@@ -254,6 +268,10 @@ public class Plan {
 		targets.add(t);
 	}
 
+	/**
+	 * 
+	 * @return plan targets
+	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="plan", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<PlanTarget> getTargets() {
 		return targets;
@@ -291,11 +309,37 @@ public class Plan {
 		this.parent = parent;
 	}
 
+	/**
+	 * 
+	 * @return plan template
+	 */
 	@Transient
 	public Plan getTemplatePlan() {
 		return template;
 	}
 	public void setTemplatePlan(Plan p) {
 		template = p;
+	}
+	
+	@Override
+	public int hashCode(){
+		if (uuid != null){
+			return Arrays.hashCode(uuid);
+		}else{
+			return super.hashCode();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Plan){
+			Plan s = (Plan)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return super.equals(s);
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
 	}
 }

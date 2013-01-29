@@ -82,7 +82,6 @@ public abstract class PlanTarget{
 
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="plan_uuid", referencedColumnName="uuid")
 	public Plan getPlan() {
 		return plan;
 	}
