@@ -3,7 +3,7 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wcs.smart</groupId>
-	<artifactId>util</artifactId>
+	<artifactId>org.wcs.smart.util</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SMART - Spatial Monitoring and Reporting Tool Utilities</name>
 	<packaging>jar</packaging>
