@@ -64,6 +64,18 @@ public class Messages extends NLS {
 
 	public static String IntelligenceEditor_NoValue;
 
+	public static String IntelligenceFilterDialog_Message;
+
+	public static String IntelligenceFilterDialog_NameGroup_Label;
+
+	public static String IntelligenceFilterDialog_NameValue_Label;
+
+	public static String IntelligenceFilterDialog_ReceivedGroup_Label;
+
+	public static String IntelligenceFilterDialog_RelevantGroup_Label;
+
+	public static String IntelligenceFilterDialog_Title;
+
 	public static String IntelligenceHandler_LoadingErrorMessage;
 
 	public static String IntelligenceHandler_LoadPerspective_Error;

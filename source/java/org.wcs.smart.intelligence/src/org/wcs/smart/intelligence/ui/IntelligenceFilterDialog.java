@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
+import org.wcs.smart.intelligence.internal.Messages;
 
 /**
  * Filter dialog for filtering intelligences displayed in the intelligence list view.
@@ -57,21 +58,21 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
-		setMessage("Filter intelligences shown in the Intelligence List View.");
+		setMessage(Messages.IntelligenceFilterDialog_Message);
 		
 		Composite composite = new Composite((Composite) filter, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		Composite receivedGrp = createGroupComposite("Received Date", composite);
+		Composite receivedGrp = createGroupComposite(Messages.IntelligenceFilterDialog_ReceivedGroup_Label, composite);
 		receivedDateCmp = new DateFilterComposite(receivedGrp, SWT.NONE, this);
 		
-		Composite relevantGrp = createGroupComposite("Relevant Date(s)", composite);
+		Composite relevantGrp = createGroupComposite(Messages.IntelligenceFilterDialog_RelevantGroup_Label, composite);
 		relevantDateCmp = new DateFilterComposite(relevantGrp, SWT.NONE, this);
 
-		Composite nameGrp = createGroupComposite("Short Name", composite);
+		Composite nameGrp = createGroupComposite(Messages.IntelligenceFilterDialog_NameGroup_Label, composite);
 		nameCmp = new StringFilterComposite(nameGrp, SWT.NONE);
-		nameCmp.setValueLabel("Short Name");
+		nameCmp.setValueLabel(Messages.IntelligenceFilterDialog_NameValue_Label);
 		
 		updateControlsValues();
 		
@@ -81,7 +82,7 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText("Intelligence View Filter");
+		shell.setText(Messages.IntelligenceFilterDialog_Title);
 	}
 	
 	@Override
