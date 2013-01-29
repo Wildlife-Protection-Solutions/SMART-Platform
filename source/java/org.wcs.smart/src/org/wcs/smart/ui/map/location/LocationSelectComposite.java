@@ -99,6 +99,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 		pointsListViewer.setContentProvider(new ObservableListContentProvider());
 		pointsListViewer.setLabelProvider(createLabelProvider());
 		pointsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)pointsListViewer.getControl().getLayoutData()).widthHint = 120;
 		pointsListViewer.setInput(this.points);
 		pointsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -117,17 +118,19 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 		xLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		xCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
+		xCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		Label yLabel = new Label(coordsComposite, SWT.NONE);
 		yLabel.setText(Messages.LocationSelectComposite_Y_Label);
 		yLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		yCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
-
+		yCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
 		//========buttons part part========
 		Composite buttonsComposite = new Composite(pointsComposite, SWT.NONE);
 		buttonsComposite.setLayout(new GridLayout(2, false));
-		buttonsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		buttonsComposite.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
 		addButton = new Button(buttonsComposite, SWT.PUSH);
 		addButton.setText(DialogConstants.ADD_BUTTON_TEXT);
