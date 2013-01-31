@@ -41,9 +41,12 @@ public abstract class SmartFilterDialog extends TitleAreaDialog {
 
 	protected static final int APPLY_ID = 4;
 	protected static final int DEFAULTS_ID = 8;
+
+	private IUpdatableView view;
 	
-	public SmartFilterDialog(Shell parentShell) {
+	public SmartFilterDialog(Shell parentShell, IUpdatableView view) {
 		super(parentShell);
+		this.view = view;
 	}
 
 	protected Composite createGroupComposite(String title, Composite parent) {
@@ -85,7 +88,10 @@ public abstract class SmartFilterDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	protected abstract void applyFilterToView();
+	protected void applyFilterToView() {
+		view.updateContent();
+	}
+	
 
 	protected abstract void updateFilterModel();
 
