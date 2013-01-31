@@ -100,7 +100,7 @@ public class MultipleSelectComposite<T> extends Composite {
 	/*
 	 * Fires change listeners
 	 */
-	private void fireChangeListeners() {
+	protected void fireChangeListeners() {
 		for (IListChanged<T> listener : changeListeners) {
 			listener.listChanged(selectedItems);
 		}
@@ -111,8 +111,9 @@ public class MultipleSelectComposite<T> extends Composite {
 	 */
 	private void createControls(){
 		setLayout(new GridLayout(3, false));
-
-		labelAll = new Label(this, SWT.NONE);
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		labelAll = createFromSectionLabel(this);
 		new Label(this, SWT.NONE);
 		labelSelected = new Label(this, SWT.NONE);
 
@@ -154,6 +155,35 @@ public class MultipleSelectComposite<T> extends Composite {
 		selectedItemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		selectedItemsListViewer.setInput(selectedItems);
 		((GridData)selectedItemsListViewer.getControl().getLayoutData()).widthHint = 100;
+	}
+
+	private Label createFromSectionLabel(Composite parent) {
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(2, false);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		container.setLayout(layout);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label label = new Label(container, SWT.NONE);
+
+		Composite contribution = new Composite(container, SWT.NONE);
+		GridLayout cLayout = new GridLayout(1, false);
+		cLayout.horizontalSpacing = 0;
+		cLayout.verticalSpacing = 0;
+		cLayout.marginWidth = 0;
+		cLayout.marginHeight = 0;
+		contribution.setLayout(cLayout);
+		contribution.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
+		contributeToFromLabelSection(contribution);
+		
+		return label;
+	}
+	
+	protected void contributeToFromLabelSection(Composite parent) {
+		// nothing by default
 	}
 
 	/**
@@ -243,8 +273,9 @@ public class MultipleSelectComposite<T> extends Composite {
 		labelSelected.setText(text);
 	}
 	
-	public WritableList getSelectedItems(){
-		return (WritableList) this.selectedItemsListViewer.getInput();
+	public WritableList getSelectedItems() {
+		WritableList list = (WritableList) this.selectedItemsListViewer.getInput();
+		return list != null ? list : new WritableList();
 	}
 
 	/**
