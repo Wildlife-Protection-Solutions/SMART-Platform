@@ -19,6 +19,7 @@ Bundle-Activator: org.wcs.smart.patrol.SmartPatrolPlugIn
 Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs
 Eclipse-BuddyPolicy: global
 Export-Package: org.wcs.smart.patrol,
+ org.wcs.smart.patrol.external.control,
  org.wcs.smart.patrol.internal.ui.importwp.gpsbabel;x-friends:="org.wcs.smart.patrol.test",
  org.wcs.smart.patrol.model,
  org.wcs.smart.patrol.ui

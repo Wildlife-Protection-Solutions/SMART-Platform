@@ -205,6 +205,7 @@ public class Messages extends NLS {
 	public static String LeaderPilotComposite_LeaderLabel;
 	public static String LeaderPilotComposite_PilotLabel;
 	public static String LeaderPilotComposite_Title;
+	public static String LoadPatrolIdJob_Name;
 	public static String MandateDeleteAdvisor_DeleteError_Patrol;
 	public static String MandateDeleteAdvisor_DeleteError_Team;
 	public static String MandateDeleteAdvisor_InvalidObjectType;
@@ -316,6 +317,7 @@ public class Messages extends NLS {
 	public static String PatrolFilterDialog_PatrolIdGroupLabel;
 	public static String PatrolFilterDialog_PatrolIdLabel;
 	public static String PatrolFilterDialog_PatrolTypesGroupLabel;
+	public static String PatrolFilteredComboViewerComposite_Filter_Tooltip;
 //	public static String PatrolFilterDialog_Reset_Button;
 	public static String PatrolHibernateManager_20;
 	public static String PatrolHibernateManager_21;

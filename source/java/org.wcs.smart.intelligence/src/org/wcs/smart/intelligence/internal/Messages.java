@@ -140,8 +140,6 @@ public class Messages extends NLS {
 
     public static String IntelligenceWizard_Title;
 
-	public static String LoadPatrolIdJob_Name;
-
 	public static String MotivationIntelligenceContribution_Motivated_Label;
 
 	public static String MotivationIntelligenceContribution_Name;
