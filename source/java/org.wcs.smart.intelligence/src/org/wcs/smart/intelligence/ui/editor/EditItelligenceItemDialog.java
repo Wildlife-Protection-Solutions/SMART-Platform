@@ -75,6 +75,7 @@ public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 		content = IntelligenceCompositeFactory.getInstance().createComposite(parent, SWT.NONE, panelType);
 		content.initFromModel(intelligence);
 		content.addInputChangeListener(inputChangeListener);
+		setChangesMade(false);
 		setMessage(content.getMessage());
 		return content;
 	}
