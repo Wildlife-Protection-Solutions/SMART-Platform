@@ -21,12 +21,6 @@
  */
 package org.wcs.smart.intelligence.ui.panel;
 
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -41,13 +35,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSourceType;
+import org.wcs.smart.patrol.external.control.PatrolFilteredComboViewer;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -64,15 +57,10 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     private ComboViewer sourceType;
     
     private Label patrolLabel;
-    private ComboViewer patrolId;
+    private PatrolFilteredComboViewer patrolId;
 
     private ControlDecoration patrolIdDecoration;
 
-	/*
-	 * job to load all patrol ids
-	 */
-	private LoadPatrolIdJob loadPatrolIdJob = new LoadPatrolIdJob();
-	
 	/**
 	 * @param parent
 	 * @param style
@@ -103,7 +91,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				boolean isPatrolSelected = IntelligenceSourceType.PATROL.equals(getSelectedSourceType());
 				patrolLabel.setVisible(isPatrolSelected);
-				patrolId.getControl().setVisible(isPatrolSelected);
+				patrolId.setVisible(isPatrolSelected);
 				refreshPatrolDecoration();
 				fireDataValidStateListeners();
 				fireInputChangeListeners();				
@@ -114,11 +102,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         patrolLabel.setText(Messages.IntelligenceSource_PatrolId_Label);
         patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        //NOTE: data for patrolId is filled with loadPatrolIdJob
-        patrolId = new ComboViewer(this, SWT.READ_ONLY);
-        patrolId.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        patrolId.setContentProvider(ArrayContentProvider.getInstance());
-        patrolId.setLabelProvider(new PatrolIDLabelProvider());
+        patrolId = new PatrolFilteredComboViewer(this);
         patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -135,7 +119,6 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         patrolIdDecoration.setDescriptionText(ERROR_PATROL_ID_REQUIRED);
 
         
-        loadPatrolIdJob.schedule();
 	}
 
 	private void refreshPatrolDecoration() {
@@ -172,9 +155,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	    	sourceType.setSelection(new StructuredSelection(intelligence.getSource()));
 	    }
 	    if (intelligence.getPatrol() != null) {
-	    	//in case data is not loaded yet we will make it as default selection after data is loaded
-	    	loadPatrolIdJob.setDefaultPatrolId(intelligence.getPatrol());
-	    	patrolId.setSelection(new StructuredSelection(intelligence.getPatrol()));
+	    	patrolId.setSelection(intelligence.getPatrol());
 	    }
 	}
     
@@ -199,52 +180,9 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     }
 
     private Patrol getSelectedPatrol() {
-		ISelection patrolSelection = patrolId.getSelection();
-		if (patrolSelection instanceof IStructuredSelection) {
-			return (Patrol)((IStructuredSelection)patrolSelection).getFirstElement();
-		}
-		return null;
+    	return patrolId.getSelection();
     }
 	
-   /**
-     * Job is used to fill some list viewer with data
-     * 
-     * @author elitvin
-     *
-     */
-    private class LoadPatrolIdJob extends Job {
- 
-        private Patrol defaultPatrolId;
-    	
-        public LoadPatrolIdJob() {
-            super(Messages.LoadPatrolIdJob_Name);
-        }
-
-        @Override
-        protected IStatus run(IProgressMonitor monitor) {
-            if (patrolId == null || patrolId.getControl().isDisposed()){
-                return Status.OK_STATUS;
-            }
-            final List<Patrol> data = IntelligenceHibernateManager.getPatrols();
-            Display.getDefault().asyncExec(new Runnable(){
-                @Override
-                public void run() {
-                    if (patrolId.getControl().isDisposed()){
-                        return ;
-                    }
-                    patrolId.add(data.toArray());
-                    if (defaultPatrolId != null) {
-                    	patrolId.setSelection(new StructuredSelection(defaultPatrolId));
-                    }
-                }});
-            return Status.OK_STATUS;
-        }
-        
-        public void setDefaultPatrolId(Patrol defaultPatrolId) {
-			this.defaultPatrolId = defaultPatrolId;
-		}
-    }
-
     /**
      * LabelProvider used to display enum values from {@link IntelligenceSourceType}
      * 
@@ -261,20 +199,4 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     	}
     }
 
-    /**
-     * LabelProvider used to display {@link Patrol} IDs values
-     * 
-     * @author elitvin
-     *
-     */
-    private class PatrolIDLabelProvider extends LabelProvider {
-    	@Override
-    	public String getText(Object element) {
-    		if (element instanceof Patrol) {
-    			return ((Patrol)element).getId();
-    		}
-    		return super.getText(element);
-    	}
-    }    
-	
 }

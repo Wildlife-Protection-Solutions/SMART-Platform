@@ -96,6 +96,11 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 * Image descriptor key for patrol mandate icon
 	 */
 	public static final String PATROL_MANDATE_ICON = "org.wsc.smart.patrol.PATROL_MANDATE"; //$NON-NLS-1$
+
+	/**
+	 * Image descriptor key for patrol filetr icon
+	 */
+	public static final String PATROL_FILTER_ICON = "org.wsc.smart.patrol.PATROL_FILTER"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor
@@ -115,6 +120,8 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		reg.put(PATROL_MEMBER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_member.png")); //$NON-NLS-1$
 		reg.put(PATROL_PILOT_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_pilot.png")); //$NON-NLS-1$
 		reg.put(PATROL_MANDATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mandate.png")); //$NON-NLS-1$			
+
+		reg.put(PATROL_FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/patrol_filter.png")); //$NON-NLS-1$			
     }
 	
 	/*
