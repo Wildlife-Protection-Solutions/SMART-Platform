@@ -62,7 +62,7 @@ import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceListView extends ViewPart {
+public class IntelligenceListView extends ViewPart implements IIntelligenceFilteringView {
 
 	public static final String ID = "org.wcs.smart.intelligence.IntelligenceListView"; //$NON-NLS-1$
 

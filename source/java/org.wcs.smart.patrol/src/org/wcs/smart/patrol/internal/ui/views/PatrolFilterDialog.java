@@ -53,7 +53,6 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 
 	//current filter
 	private PatrolViewFilter currentFilter;
-	private PatrolListView view;
 	
 	private DateFilterComposite dateFilterCmp;
 	private StringFilterComposite patrolIdFilterCmp;
@@ -68,10 +67,9 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	 * @param parent parent shell
 	 * @param filter the filter to update
 	 */
-	public PatrolFilterDialog(Shell parent, PatrolListView view) {
-		super(parent);
+	public PatrolFilterDialog(Shell parent, IPatrolFilteringView view) {
+		super(parent, view);
 		currentFilter = view.getFilter();
-		this.view = view;
 	}
 	
 	@Override
@@ -83,11 +81,6 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	@Override
 	protected void resetFilterModel() {
 		currentFilter.setDefaults();
-	}
-	
-	@Override
-	protected void applyFilterToView(){
-		this.view.updateContent();
 	}
 	
 	/*

@@ -41,15 +41,13 @@ import org.wcs.smart.intelligence.internal.Messages;
 public class IntelligenceFilterDialog extends SmartFilterDialog {
 
 	private IntelligenceViewFilter currentFilter;
-	private IntelligenceListView view;
 	
 	private DateFilterComposite receivedDateCmp;
 	private DateFilterComposite relevantDateCmp;
 	private StringFilterComposite nameCmp;
 
-	public IntelligenceFilterDialog(Shell parentShell, IntelligenceListView view) {
-		super(parentShell);
-		this.view = view;
+	public IntelligenceFilterDialog(Shell parentShell, IIntelligenceFilteringView view) {
+		super(parentShell, view);
 		currentFilter = view.getFilter();
 	}
 
@@ -105,11 +103,6 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 				currentFilter.getRelevantDateStart(), currentFilter.getRelevantDateEnd());
 		
 		nameCmp.applyState(currentFilter.getNameComparison(), currentFilter.getName());
-	}
-
-	@Override
-	protected void applyFilterToView() {
-		this.view.updateContent();
 	}
 
 	@Override

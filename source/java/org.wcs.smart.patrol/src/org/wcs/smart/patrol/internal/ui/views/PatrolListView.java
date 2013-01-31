@@ -72,7 +72,7 @@ import org.wcs.smart.patrol.model.PatrolType;
  * @author Emily
  *
  */
-public class PatrolListView extends ViewPart {
+public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView"; //$NON-NLS-1$
 	private TableViewer patrolListViewer;
