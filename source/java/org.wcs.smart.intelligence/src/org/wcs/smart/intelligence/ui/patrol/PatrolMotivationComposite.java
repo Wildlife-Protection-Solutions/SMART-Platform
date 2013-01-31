@@ -36,9 +36,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
-import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
@@ -54,12 +52,11 @@ public class PatrolMotivationComposite extends Composite {
 
 	private Button btnMotivated;
 	private Label selectLabel;
-	private MultipleSelectComposite<Intelligence> selectComposite;
+	private IntelligenceFilteredSelectComposite selectComposite;
 	
 	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
 	private String errorMessage;
 
-	private List<Intelligence> allIntelligences;
 	private List<Intelligence> selectedIntelligences = new ArrayList<Intelligence>();
 	
 	/**
@@ -86,14 +83,8 @@ public class PatrolMotivationComposite extends Composite {
         
 		selectLabel = new Label(this, SWT.NONE);
 		selectLabel.setText(Messages.PatrolMotivationComposite_Selector_Label);
-		
-		selectComposite = new MultipleSelectComposite<Intelligence>(this, SWT.NONE);
-		selectComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		selectComposite.setLabelProvider(new IntelligenceLabelProvider());
-		selectComposite.setItemComparator(new IntelligenceComparator());
-		selectComposite.setLabelAllText(Messages.PatrolMotivationComposite_Selector_All_Label);
-		selectComposite.setLabelSelectedText(Messages.PatrolMotivationComposite_Selector_Selected_Label);
-		
+
+		selectComposite = new IntelligenceFilteredSelectComposite(this, SWT.NONE);
 		selectComposite.addSelectionChangedListener(new IListChanged<Intelligence>() {
 			@Override
 			public void listChanged(List<Intelligence> items) {
@@ -123,13 +114,10 @@ public class PatrolMotivationComposite extends Composite {
 	}
 
 	public void initFromModel(Patrol p, Session session, Collection<Intelligence> selectedItems) {
-		if (allIntelligences == null) {
-			allIntelligences = IntelligenceHibernateManager.getIntelligences(session);
-		}
 		if (selectedItems != null) {
 			selectedIntelligences.addAll(selectedItems);
+			selectComposite.setSelectedIntelligences(selectedIntelligences);
 		}
-		selectComposite.setItemsData(allIntelligences, selectedIntelligences);
 		btnMotivated.setSelection(!selectedIntelligences.isEmpty());
 		applyCurrentState();
 	}
