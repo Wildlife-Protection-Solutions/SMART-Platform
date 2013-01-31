@@ -26,15 +26,21 @@ import java.util.List;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.intelligence.IntelligenceEventManager;
+import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
+import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -50,21 +56,41 @@ import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
  */
 public class MotivationIntelligenceContribution implements IPatrolEditorContribution {
 
+	private Patrol patrol;
+
+	private Composite main;
+	
 	private Label label;
 	private Hyperlink labelLink;
 	
 	private TableViewer tableViewer;
 	private Hyperlink tableLink;
 
+	List<Intelligence> intelligenceList;
+
+	/**
+	 * listener for intelligence change events.
+	 */
+	private IIntelligenceEventListener intelligenceListener = new IIntelligenceEventListener(){
+		@Override
+		public void eventFired(int type, Intelligence source) {
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					updateControls();
+				}
+			});
+		}
+	};
+	
 	public MotivationIntelligenceContribution() {}
 
 	@Override
 	public Composite createControl(FormToolkit toolkit, Composite parent) {
-		Composite main = toolkit.createComposite(parent);
+		main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout(2, false));
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
-		//toolkit.createLabel(main, ""); //$NON-NLS-1$
 		labelLink = createEditLink(toolkit, main);
 		
 		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -74,32 +100,49 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		reportedTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		tableLink = createEditLink(toolkit, main);
+
+		//listeners
+		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
+		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_DELETED, intelligenceListener);
+		main.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
+				IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_DELETED, intelligenceListener);
+			}
+		});
 		
 		return main;
 	}
 
 	@Override
 	public String getName() {
-		return "Motivation Intelligence";
+		return Messages.MotivationIntelligenceContribution_Name;
 	}
 
 	@Override
 	public void setPatrol(Patrol patrol) {
-		List<Intelligence> data = IntelligenceHibernateManager.getMotivatedIntelligences(patrol);
-		if (data.isEmpty()) {
-			label.setText("This patrol was not motivated by intelligence.");
+		this.patrol = patrol;
+		updateControls();
+	}
+
+	protected void updateControls() {
+		intelligenceList = IntelligenceHibernateManager.getMotivatedIntelligences(patrol);
+		if (intelligenceList.isEmpty()) {
+			label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
 			tableViewer.getControl().setVisible(false);
 			labelLink.setVisible(true);
 			tableLink.setVisible(false);
 		} else {
-			label.setText("Intelligence that motivated this patrol:");
+			label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
 			tableViewer.getControl().setVisible(true);
-			tableViewer.setInput(data.toArray());
+			tableViewer.setInput(intelligenceList.toArray());
 			labelLink.setVisible(false);
 			tableLink.setVisible(true);
 		}
+		main.layout(true, true);
 	}
-
+	
 	/**
 	 * Creates an edit hyperlink button
 	 * @param toolkit toolkit
@@ -121,7 +164,11 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	 * Displays and edit dialog 
 	 */
 	private void showEditDialog() {
-		// TODO Auto-generated method stub
+		final EditPatrolMotivationDialog editDialog = new EditPatrolMotivationDialog(Display.getDefault().getActiveShell(), patrol, intelligenceList);
+		editDialog.open();
+		if (editDialog.isSavePerformed()) {
+			updateControls();
+		}
 	}
 	
 }

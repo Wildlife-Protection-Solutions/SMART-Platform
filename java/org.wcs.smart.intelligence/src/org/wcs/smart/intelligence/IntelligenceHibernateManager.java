@@ -151,7 +151,16 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
+	/**
+	 * Saves patrol motivation intelligences to database.
+	 * This call will also remove intelligence object previously assigned to patrol if they are not in provided list.
+	 * 
+	 * @param session
+	 * @param patrol
+	 * @param intelligences
+	 */
 	public static void savePatrolIntelligences(Session session, Patrol patrol, List<Intelligence> intelligences) {
+		deletePatrolIntelligences(session, patrol, intelligences);
 		for (Intelligence intelligence : intelligences) {
 			PatrolIntelligence pi = new PatrolIntelligence();
 			pi.setPatrol(patrol);
@@ -160,6 +169,31 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
+	/**
+	 * Removes all intelligence records from {@link PatrolIntelligence} table associated with given patrol
+	 * excluding items in provided list
+	 * 
+	 * @param session
+	 * @param patrol
+	 * @param exclude
+	 */
+	private static void deletePatrolIntelligences(Session session, Patrol patrol, List<Intelligence> exclude) {
+		if (patrol.getUuid() == null) {
+			return; //patrol is just created and there will be no records related to it
+		}
+		String queryString = "DELETE FROM PatrolIntelligence WHERE id.patrol = :patrol"; //$NON-NLS-1$
+		boolean hasExcludes = exclude != null && !exclude.isEmpty();
+		if (hasExcludes) {
+			queryString += " AND id.intelligence not in (:exclude)"; //$NON-NLS-1$
+		}
+		Query query = session.createQuery(queryString);
+		query.setParameter("patrol", patrol); //$NON-NLS-1$
+		if (hasExcludes) {
+			query.setParameterList("exclude", exclude); //$NON-NLS-1$
+		}
+		query.executeUpdate();
+	}
+	
 	/**
 	 * Returns the list of intelligences reported by this patrol
 	 * 
@@ -188,7 +222,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
 		Session session = SmartHibernateManager.openSession();
 		try {
-			Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol"); //$NON-NLS-1$
+			Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol ORDER BY pi.id.intelligence.shortName asc"); //$NON-NLS-1$
 			query.setParameter("patrol", patrol); //$NON-NLS-1$
 			@SuppressWarnings("unchecked")
 			List<Intelligence> list = query.list();

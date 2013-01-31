@@ -22,6 +22,8 @@
 package org.wcs.smart.intelligence.ui.patrol;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -119,18 +121,23 @@ public class PatrolMotivationComposite extends Composite {
 		}
 		return true;
 	}
-    
-	public void initFromModel(Patrol p, Session session) {
+
+	public void initFromModel(Patrol p, Session session, Collection<Intelligence> selectedItems) {
 		if (allIntelligences == null) {
 			allIntelligences = IntelligenceHibernateManager.getIntelligences(session);
 		}
-    	selectComposite.setItemsData(allIntelligences, selectedIntelligences);
+		if (selectedItems != null) {
+			selectedIntelligences.addAll(selectedItems);
+		}
+		selectComposite.setItemsData(allIntelligences, selectedIntelligences);
+		btnMotivated.setSelection(!selectedIntelligences.isEmpty());
+		applyCurrentState();
 	}
 
-	public List<Intelligence> getSelectedIntelligences() {
-		return selectedIntelligences;
+	public List<Intelligence> getCurrentIntelligences() {
+		return btnMotivated.getSelection() ? Collections.unmodifiableList(selectedIntelligences) : Collections.<Intelligence>emptyList();
 	}
-	
+
     private void handleInputChanged() {
     	validate();
     	fireInputChangeListeners();

@@ -72,11 +72,11 @@ public class IntelligencePatrolWizardPage extends NewPatrolWizardPage {
 
 	@Override
 	public void initModel(Patrol p, Session session) {
-		content.initFromModel(p, session);
+		content.initFromModel(p, session, null);
 	}
 
 	@Override
 	public void save(Patrol p, Session session) throws Exception {
-		IntelligenceHibernateManager.savePatrolIntelligences(session, p, content.getSelectedIntelligences());
+		IntelligenceHibernateManager.savePatrolIntelligences(session, p, content.getCurrentIntelligences());
 	}
 }

@@ -32,6 +32,10 @@ public class Messages extends NLS {
 
 	public static String DeleteIntelligenceHandler_ConfirmationDialog_Title;
 
+	public static String EditPatrolMotivationDialog_Save_Error;
+
+	public static String EditPatrolMotivationDialog_Title;
+
 	public static String IntelligenceAttachments_Attachments_Label;
 
     public static String IntelligenceAttachments_Message;
@@ -138,6 +142,12 @@ public class Messages extends NLS {
 
 	public static String LoadPatrolIdJob_Name;
 
+	public static String MotivationIntelligenceContribution_Motivated_Label;
+
+	public static String MotivationIntelligenceContribution_Name;
+
+	public static String MotivationIntelligenceContribution_NotMotivated_Label;
+
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
 	public static String PatrolDeleteHandler_Task_DeleteFilestore;
@@ -155,6 +165,14 @@ public class Messages extends NLS {
 	public static String PatrolMotivationComposite_Selector_Label;
 
 	public static String PatrolMotivationComposite_Selector_Selected_Label;
+
+	public static String ReportedIntelligenceContribution_IntelligenceReported_Label;
+
+	public static String ReportedIntelligenceContribution_Name;
+
+	public static String ReportedIntelligenceContribution_NothingReported_Label;
+
+	public static String ReportedIntelligenceContribution_Open_Button;
 
 	public static String ShowIntelligencePersepctiveHandler_Error;
     static {
