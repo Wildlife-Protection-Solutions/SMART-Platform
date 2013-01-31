@@ -80,6 +80,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceFilterDialog_Title;
 
+	public static String IntelligenceFilteredSelectComposite_Filter_Tooltip;
+
 	public static String IntelligenceHandler_LoadingErrorMessage;
 
 	public static String IntelligenceHandler_LoadPerspective_Error;

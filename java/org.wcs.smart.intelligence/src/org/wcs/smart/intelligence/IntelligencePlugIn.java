@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -43,11 +44,22 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	private static IntelligencePlugIn plugin;
 
 	/**
+	 * Image descriptor key for intelligence filter icon
+	 */
+	public static final String INTELLIGENCE_FILTER_ICON = "org.wsc.smart.intelligence.INTELLIGENCE_FILTER"; //$NON-NLS-1$
+	
+	/**
 	 * The constructor
 	 */
 	public IntelligencePlugIn() {
 	}
 
+	@Override
+	protected void initializeImageRegistry(ImageRegistry reg) {
+		super.initializeImageRegistry(reg);
+		reg.put(INTELLIGENCE_FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/filter.png")); //$NON-NLS-1$			
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
