@@ -170,7 +170,7 @@ public class IntelligenceViewFilter {
 	}
 	
 	public void resetDefaults() {
-		this.receivedDateFilter = DateFilter.LAST_30_DAYS;
+		this.receivedDateFilter = DateFilter.LAST_60_DAYS;
 		this.receivedDateStart = null;
 		this.receivedDateEnd = null;
 
