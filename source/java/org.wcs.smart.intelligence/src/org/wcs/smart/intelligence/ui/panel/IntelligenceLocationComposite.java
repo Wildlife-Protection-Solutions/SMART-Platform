@@ -75,7 +75,7 @@ public class IntelligenceLocationComposite extends IntelligenceComposite impleme
 	 */
 	@Override
 	public boolean updateModel(Intelligence intelligence) {
-		//create a copu of points array from composite (we don't want to remove from original array as this will effect gui)
+		//create a copy of points array from composite (we don't want to remove from original array as this will effect gui)
 		List<IntelligencePoint> points = new ArrayList<IntelligencePoint>(locationSelect.getPoints());
 		//Update the points
 		if (intelligence.getPoints() == null) {
