@@ -33,8 +33,10 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -68,6 +70,9 @@ public class MultipleSelectComposite<T> extends Composite {
 	
 	private Label labelAll;
 	private Label labelSelected;
+	
+	private Button btnAdd;
+	private Button btnRemove;
 
 	private List<IListChanged<T>> changeListeners = new ArrayList<IListChanged<T>>();
 
@@ -128,25 +133,34 @@ public class MultipleSelectComposite<T> extends Composite {
 				addItems();
 			}
 		});
+		itemsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateButtonsState();
+			}
+		});
+		
 		Composite btnComposite = new Composite(this, SWT.NONE);
 		btnComposite.setLayout(new GridLayout(1, false));
 		btnComposite.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 
-		Button btnAdd = new Button(btnComposite, SWT.PUSH);
+		btnAdd = new Button(btnComposite, SWT.PUSH);
 		btnAdd.setText(Messages.MultipleSelectComposite_Button_Add);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				addItems();
+				updateButtonsState();
 			}
 
 		});
-		Button btnRemove = new Button(btnComposite, SWT.PUSH);
+		btnRemove = new Button(btnComposite, SWT.PUSH);
 		btnRemove.setText(Messages.MultipleSelectComposite_Button_Remove);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				removeItems();
+				updateButtonsState();
 			}
 		});
 
@@ -155,6 +169,14 @@ public class MultipleSelectComposite<T> extends Composite {
 		selectedItemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		selectedItemsListViewer.setInput(selectedItems);
 		((GridData)selectedItemsListViewer.getControl().getLayoutData()).widthHint = 100;
+		selectedItemsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateButtonsState();
+			}
+		});
+
+		updateButtonsState();
 	}
 
 	private Label createFromSectionLabel(Composite parent) {
@@ -186,6 +208,11 @@ public class MultipleSelectComposite<T> extends Composite {
 		// nothing by default
 	}
 
+	private void updateButtonsState() {
+		btnAdd.setEnabled(!itemsListViewer.getSelection().isEmpty());
+		btnRemove.setEnabled(!selectedItemsListViewer.getSelection().isEmpty());
+	}
+	
 	/**
 	 * Moves items from the list of all to the list of selected.
 	 */
