@@ -23,6 +23,7 @@ package org.wcs.smart.intelligence.ui.handlers;
 
 import java.text.MessageFormat;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -66,21 +67,38 @@ public class DeleteIntelligenceHandler extends AbstractHandler {
 			Object selected = iterator.next();
 			if (selected instanceof IntelligenceEditorInput) {
 				final IntelligenceEditorInput editorInput = (IntelligenceEditorInput) selected;
-				Display.getDefault().syncExec(new Runnable(){
+				Display.getDefault().syncExec(new Runnable() {
 					@Override
 					public void run() {
 						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
 								Messages.DeleteIntelligenceHandler_ConfirmationDialog_Title,
 								null,
-								MessageFormat.format(Messages.DeleteIntelligenceHandler_ConfirmationDialog_Message, new Object[]{editorInput.getName()}),
+								MessageFormat.format(Messages.DeleteIntelligenceHandler_ConfirmationDialog_Message, editorInput.getName()),
 								MessageDialog.CONFIRM, 
 								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 						
-						if (dialog.open() == MessageDialog.OK) {
+						if (dialog.open() == MessageDialog.OK && checkIsPatrolSource(editorInput)) {
 							DeleteIntelligenceJob deleteJob = new DeleteIntelligenceJob(editorInput.getUuid());
 							deleteJob.schedule();
 						}
-					}});
+					}
+
+					private boolean checkIsPatrolSource(IntelligenceEditorInput input) {
+						List<?> items = IntelligenceHibernateManager.fetchRelatedPatrolIDs(input.getUuid());
+						if (items== null || items.isEmpty()) {
+							return true;
+						}
+						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+								Messages.DeleteIntelligenceHandler_ConfirmationDialog_Title,
+								null,
+								MessageFormat.format(Messages.DeleteIntelligenceHandler_ConfirmationDialog_PatrolChanges_Message, items.toString(), editorInput.getName()),
+								MessageDialog.CONFIRM, 
+								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
+						
+						return dialog.open() == MessageDialog.OK;
+					}
+					
+				});
 			}
 		}
 		return null;
