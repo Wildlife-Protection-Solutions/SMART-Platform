@@ -136,6 +136,24 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	/**
+	 * Returns Patrol IDs that were motivated by given intelligence
+	 * 
+	 * @param uuid uuid of the intelligence
+	 * @return list of Patrol IDs
+	 */
+	public static List<?> fetchRelatedPatrolIDs(byte[] intelligenceUuid) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			Query query = session.createQuery("SELECT pi.id.patrol.id FROM PatrolIntelligence pi WHERE pi.id.intelligence.uuid = :uuid ORDER BY pi.id.patrol.id asc"); //$NON-NLS-1$
+			query.setParameter("uuid", intelligenceUuid); //$NON-NLS-1$
+			List<?> list = query.list();
+			return list;
+		} finally {
+			session.close();
+		}
+	}
+	
+	/**
 	 * Delete a filestore for given intelligence.
 	 * 
 	 * @param intelligence who's filestore to delete

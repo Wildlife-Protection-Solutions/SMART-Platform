@@ -30,6 +30,8 @@ public class Messages extends NLS {
 
 	public static String DeleteIntelligenceHandler_ConfirmationDialog_Message;
 
+	public static String DeleteIntelligenceHandler_ConfirmationDialog_PatrolChanges_Message;
+
 	public static String DeleteIntelligenceHandler_ConfirmationDialog_Title;
 
 	public static String EditPatrolMotivationDialog_Save_Error;
