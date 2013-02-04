@@ -1,2 +1,3 @@
 net\.refractions\.udig\.project\.ui,plugin\.xml,/net.refractions.udig.project.ui.xslt
 net\.refractions\.udig\.catalog\.ui,plugin\.xml,/net.refractions.udig.catalog.ui.xslt
+eu\.udig\.style\.advanced,plugin\.xml,/eu.udig.style.advanced.xslt
