@@ -8,10 +8,10 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.plan.menu">
          <menu
                id="org.wcs.smart.intelligence.menu"
-               label="%intelligence.menu.label">
+               label="%menu.create.label">
             <command
                   commandId="org.wcs.smart.intelligence.NewIntelligence"
-                  label="%intelligence.command.label"
+                  label="%command.create.label"
                   style="push">
             </command>
          </menu>
@@ -22,9 +22,9 @@
          <command
                commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
                icon="images/etool16/intelligence.png"
-               label="Show Intelligence Persepctive"
+               label="%command.perspective.label"
                style="push"
-               tooltip="Show Intelligence Persepctive">
+               tooltip="%command.perspective.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -33,16 +33,16 @@
          <command
                commandId="org.wcs.smart.intelligence.DeleteIntelligence"
                icon="images/etool16/delete.png"
-               label="Delete Intelligence"
+               label="%command.delete.label"
                style="push"
-               tooltip="Delete selected inteligence">
+               tooltip="%command.delete.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.intelligence.ShowIntelligenceFilter"
                icon="images/etool16/filter.png"
-               label="Show Intelligence Filter"
+               label="%command.filter.label"
                style="push"
-               tooltip="Filter intelligences displayed in this list">
+               tooltip="%command.filter.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -61,19 +61,19 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.intelligence.NewIntelligence"
-            name="%intelligence.command.name">
+            name="%command.create.name">
       </command>
       <command
             id="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
-            name="Show Intelligence Persepctive">
+            name="%command.perspective.name">
       </command>
       <command
             id="org.wcs.smart.intelligence.DeleteIntelligence"
-            name="Delete Intelligence">
+            name="%command.delete.name">
       </command>
       <command
             id="org.wcs.smart.intelligence.ShowIntelligenceFilter"
-            name="Show Intelligence Filter">
+            name="%command.filter.name">
       </command>
    </extension>
    <extension
@@ -119,7 +119,7 @@
             class="org.wcs.smart.intelligence.ui.IntelligencePerspective"
             icon="images/etool16/intelligence.png"
             id="org.wcs.smart.intelligence.IntelligencePerspective"
-            name="Intelligence Perspective">
+            name="%perspective.name">
       </perspective>
    </extension>
    <extension
@@ -128,7 +128,7 @@
             class="org.wcs.smart.intelligence.ui.IntelligenceListView"
             icon="images/etool16/intelligence.png"
             id="org.wcs.smart.intelligence.IntelligenceListView"
-            name="Intelligence List View"
+            name="%view.name"
             restorable="true">
       </view>
    </extension>
@@ -140,7 +140,7 @@
             icon="images/etool16/intelligence.png"
             id="org.wcs.smart.intelligence.IntelligenceEditor"
             matchingStrategy="org.wcs.smart.intelligence.ui.editor.IntelligenceEditorMatchingStrategy"
-            name="Intelligence Editor">
+            name="%editor.name">
       </editor>
    </extension>
    <extension
