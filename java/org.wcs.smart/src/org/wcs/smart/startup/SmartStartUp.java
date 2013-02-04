@@ -24,6 +24,7 @@ package org.wcs.smart.startup;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -51,6 +52,8 @@ public class SmartStartUp {
 	public static void initDb(){
 		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 	}
+	
+	
 	/**
 	 * Gets a list of conservation areas from the database.  
 	 * 
@@ -60,22 +63,47 @@ public class SmartStartUp {
 	 * 
 	 * @return list of conservation areas in the database
 	 */
-	public static List<ConservationArea>  getConservationAreas(){
+	public static List<ConservationArea> getConservationAreas(){
 		//check that the database exists
 		if (!SmartDB.dbExists()){
 			//log error message and exit
 			throw new IllegalStateException(
 				MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
 		}
-		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
 		try{
-			return HibernateManager.getConservationAreas(session);
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try{
+				return HibernateManager.getConservationAreas(session);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
+			}
+		}catch (Exception ex){
+			if (checkAlreadyRunning(ex)){
+				throw new IllegalStateException(Messages.SmartStartUp_MultiConnectError);
+			}else{
+				throw new IllegalStateException(Messages.SmartStartUp_ConnectError + ex.getLocalizedMessage(), ex);
+			}
 		}
+	}
+	
+	/*
+	 * Check for specific error code that is thrown if multiple
+	 * applications trying to open the same database connection.
+	 */
+	private static boolean checkAlreadyRunning(Throwable ex){
+		if (ex instanceof EmbedSQLException){
+			EmbedSQLException sqlex = (EmbedSQLException) ex;
+			if (sqlex.getSQLState().equalsIgnoreCase("XSDB6") && sqlex.getErrorCode() == 45000){ //$NON-NLS-1$
+				return true;
+			}
+			
+		}
+		if (ex.getCause() == null){
+			return false;
+		}
+		return checkAlreadyRunning(ex.getCause());
 	}
 	
 	/**
