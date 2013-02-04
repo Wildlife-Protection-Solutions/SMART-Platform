@@ -681,10 +681,12 @@ public class Messages extends NLS {
 	public static String SmartServiceInfo_Keyword1;
 	public static String SmartServiceInfo_Keyword2;
 	public static String SmartServiceInfo_Title;
+	public static String SmartStartUp_ConnectError;
 	public static String SmartStartUp_Error_LoginError;
 	public static String SmartStartUp_Error_LoginFail;
 	public static String SmartStartUp_Error_NoSmartDb;
 	public static String SmartStartUp_ErrorDialog_Title;
+	public static String SmartStartUp_MultiConnectError;
 	public static String SmartUtils_Error_CouldNotCopy;
 	public static String SmartUtils_Error_CouldNotCreateDir;
 	public static String SmartUtils_Error_CouldNotCreateTempDir;
