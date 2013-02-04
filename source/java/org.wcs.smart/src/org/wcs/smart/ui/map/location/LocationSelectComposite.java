@@ -22,9 +22,13 @@
 package org.wcs.smart.ui.map.location;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.project.render.IViewportModelListener;
+import net.refractions.udig.project.render.ViewportModelEvent;
+import net.refractions.udig.project.render.ViewportModelEvent.EventType;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.tool.Tool;
 
@@ -47,11 +51,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.map.location.SmartPointLabelProvider.ICrsProvider;
 import org.wcs.smart.ui.map.location.tool.IMapPointSelectionListener;
 import org.wcs.smart.ui.map.location.tool.SelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Composite to select certain points on the map.
@@ -60,7 +72,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class LocationSelectComposite<T extends ISmartPoint> extends Composite implements IMapPointSelectionListener {
+public abstract class LocationSelectComposite<T extends ISmartPoint> extends Composite implements IMapPointSelectionListener, ICrsProvider {
 
 	private TableViewer pointsListViewer;
 
@@ -71,6 +83,8 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 
 	private Button addButton;
 	private Button removeButton;
+	
+	private MapComposite mapComposite;
 
 	private List<ILocationPointsChangeListener> pointsChangeListeners = new ArrayList<ILocationPointsChangeListener>();
 	
@@ -141,7 +155,10 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 				Double x = convertToDouble(xCoordText.getText(), Messages.LocationSelectComposite_X_Invalid_Error);
 				Double y = convertToDouble(yCoordText.getText(), Messages.LocationSelectComposite_Y_Invalid_Error);
 				if (x != null && y != null) {
-					handleAddPoint(x, y);
+					Point p = convertToDBCrs(x, y);
+					if (p != null) {
+						handleAddPoint(p.getX(), p.getY());
+					}
 				}
 			}
 		});
@@ -158,6 +175,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 						points.remove(iterator.next());
 					}
+					mapComposite.updatePointsLayer(getPoints());
 					fireLocationPointsChangeListeners();
 				}
 				pointsListViewer.refresh();
@@ -165,7 +183,21 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 		});
 
 		//========map part========
-		new MapComposite(this, SWT.NONE);
+		mapComposite = new MapComposite(this, SWT.NONE);
+		mapComposite.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
+			@Override
+			public void changed(ViewportModelEvent event) {
+				if (EventType.CRS.equals(event.getType())) {
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							pointsListViewer.refresh(true);
+						}
+					});
+				}
+					
+			}
+		});
 
 		//========register required listeners========
 		Tool selectionTool = ApplicationGIS.getToolManager().findTool(SelectionTool.ID);
@@ -203,7 +235,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 	}
 
 	protected IBaseLabelProvider createLabelProvider() {
-		return new SmartPointLabelProvider();
+		return new SmartPointLabelProvider(this);
 	}
 
 	protected void handleAddPoint(double x, double y) {
@@ -211,16 +243,40 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 		point.setX(x);
 		point.setY(y);
 		points.add(point);
+		mapComposite.updatePointsLayer(getPoints());
 		fireLocationPointsChangeListeners();
 	}
 
+	private Point convertToDBCrs(double x, double y) {
+		try {
+			CoordinateReferenceSystem sourceCrs = getCurrentCrs();
+			Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
+			return (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(null, Messages.LocationSelectComposite_PointConversion_Error, e);
+		}
+		return null;
+		
+	}
+
+	@Override
+	public CoordinateReferenceSystem getCurrentCrs() {
+		return mapComposite.getMap().getViewportModelInternal().getCRS();
+	}
+	
 	protected abstract ISmartPoint createNewPoint();
 
 	@SuppressWarnings("unchecked")
 	public List<T> getPoints() {
-		return points;
+		return Collections.unmodifiableList(points);
 	}
 
+	public void setPoints(List<? extends T> pointList) {
+		points.clear();
+		points.addAll(pointList);
+		mapComposite.updatePointsLayer(getPoints());
+	}
+	
 	public void addLocationPointsChangeListener(ILocationPointsChangeListener listener) {
 		pointsChangeListeners.add(listener);
 	}

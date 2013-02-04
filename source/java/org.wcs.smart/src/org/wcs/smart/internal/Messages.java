@@ -568,6 +568,7 @@ public class Messages extends NLS {
 	public static String LoadDefaultLayersJob_Error_AddingLayers;
 	public static String LoadDefaultLayersJob_Error_ParsingCrs;
 	public static String LoadDefaultLayersJob_JobName;
+	public static String LocationSelectComposite_PointConversion_Error;
 	public static String LocationSelectComposite_Points_Label;
 	public static String LocationSelectComposite_X_Invalid_Error;
 	public static String LocationSelectComposite_X_Label;
@@ -575,6 +576,8 @@ public class Messages extends NLS {
 	public static String LocationSelectComposite_Y_Label;
 	public static String MapComposite_Map_Name;
 	public static String MapComposite_MapResizeJob_Title;
+	public static String MapComposite_PointLayer_Add_Error;
+	public static String MapComposite_PointLayer_Update_Error;
 	public static String MapSettings_Error_CreateMapLayer;
 	public static String MapSettings_Error_SaveBasemap;
 	public static String SmartMapEditorPart_Error_SettingMapProjection;
@@ -675,6 +678,7 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_GPSBabel_LocationLabel;
 	public static String SmartInstallationInfoPage_SystemLang_Label;
 	public static String SmartPlugIn_Error_Dialog_Title;
+	public static String SmartPointLabelProvider_ConversionFail_Label;
 	public static String SmartProperties_InvalidProperty;
 	public static String SmartService_Error_DisposingService;
 	public static String SmartServiceInfo_Description;

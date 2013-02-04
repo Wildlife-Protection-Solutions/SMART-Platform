@@ -22,7 +22,15 @@
 package org.wcs.smart.ui.map.location;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * LabelProvider for {@link ISmartPoint}
@@ -31,12 +39,59 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
  * @since 1.0.0
  */
 public class SmartPointLabelProvider extends LabelProvider {
+	
+	private ICrsProvider crsProvider;
+	
+	public SmartPointLabelProvider(ICrsProvider provider) {
+		super();
+		this.crsProvider = provider;
+	}
+
+	public SmartPointLabelProvider() {
+		this(null);
+	}
+	
 	@Override
 	public String getText(Object element) {
 		if (element instanceof ISmartPoint) {
-			ISmartPoint p = (ISmartPoint) element;
-			return p.getX() + SmartMapEditorPart.COORDINATE_XYSEPARATOR + p.getY();
+			ISmartPoint smartPoint = (ISmartPoint) element;
+			Point p = convert(smartPoint.getX(), smartPoint.getY());
+			if (p != null) {
+				return p.getX() + SmartMapEditorPart.COORDINATE_XYSEPARATOR + p.getY();
+			}
+			return Messages.SmartPointLabelProvider_ConversionFail_Label+ smartPoint.getX() + SmartMapEditorPart.COORDINATE_XYSEPARATOR + smartPoint.getY();
 		}
 		return super.getText(element);
+	}
+	
+	private Point convert(double x, double y) {
+		Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
+		if (crsProvider == null) {
+			return point; //no conversion required
+		}
+
+		try {
+			CoordinateReferenceSystem destCrs = crsProvider.getCurrentCrs();
+			if (destCrs == null) {
+				return point;
+			}
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(SmartDB.DATABASE_CRS, destCrs));
+			return p;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Clients must implement and pass this interface to {@link SmartPointLabelProvider}
+	 * if it is required to display points in user defined {@link CoordinateReferenceSystem}
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	public interface ICrsProvider {
+		
+		public CoordinateReferenceSystem getCurrentCrs();
+		
 	}
 }
