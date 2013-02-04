@@ -19,20 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.map.location.tool;
+package org.wcs.smart.ui.map.location;
+
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
- * Listener used by {@link SelectionTool} to fire map point selection event.
+ * Provider for {@link GeometryFactory}
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public interface IMapPointSelectionListener {
+public class GeometryFactoryProvider {
 
-	/**
-	 * @param x - X coordinate of selected point in lat long coordinate system
-	 * @param y - Y coordinate of selected point in lat long coordinate system
-	 */
-	public void pointSelected(double x, double y);
-	
+	private static final GeometryFactory gf = new GeometryFactory();
+
+	public static GeometryFactory getFactory() {
+		return gf;
+	}
 }

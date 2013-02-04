@@ -100,8 +100,7 @@ public class IntelligenceLocationComposite extends IntelligenceComposite impleme
 
 	@Override
 	public void initFromModel(Intelligence intelligence) {
-		locationSelect.getPoints().clear();
-		locationSelect.getPoints().addAll(intelligence.getPoints());
+		locationSelect.setPoints(intelligence.getPoints());
 	}
 
 	@Override

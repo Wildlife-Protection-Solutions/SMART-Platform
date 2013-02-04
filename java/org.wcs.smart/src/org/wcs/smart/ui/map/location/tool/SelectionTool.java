@@ -24,12 +24,21 @@ package org.wcs.smart.ui.map.location.tool;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.ViewportPane;
 import net.refractions.udig.project.ui.tool.AbstractModalTool;
 
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
+
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Tool used to select points on a map
@@ -43,7 +52,6 @@ public class SelectionTool extends AbstractModalTool {
 	
 	private List<IMapPointSelectionListener> listeners = new ArrayList<IMapPointSelectionListener>();
 
-	
 	public SelectionTool() {
 		super();
 	}
@@ -52,9 +60,26 @@ public class SelectionTool extends AbstractModalTool {
 	public void mousePressed(MapMouseEvent e) {
 		super.mousePressed(e);
 		MapPart mapEditor = ((ViewportPane) e.source).getMapEditor();
-		Coordinate c = mapEditor.getMap().getViewportModelInternal().pixelToWorld(e.x, e.y);
+		ViewportModel viewportModel = mapEditor.getMap().getViewportModelInternal();
+		Coordinate c = viewportModel.pixelToWorld(e.x, e.y);
+		if (viewportModel.isSetCRS()) {
+			try {
+				CoordinateReferenceSystem sourceCrs = viewportModel.getCRS();
+				Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(c.x, c.y));
+				Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+				fireListeners(p.getX(), p.getY());
+			} catch (Exception exception) {
+				SmartPlugIn.displayLog(null, "Error while selecting a point. Point conversion failed", exception);
+			}
+		} else {
+			//assume that we are in lat long coordinate system
+			fireListeners(c.x, c.y);
+		}
+	}
+	
+	private void fireListeners(double x, double y) {
 		for (IMapPointSelectionListener listener : listeners) {
-			listener.pointSelected(c.x, c.y);
+			listener.pointSelected(x, y);
 		}
 	}
 	
