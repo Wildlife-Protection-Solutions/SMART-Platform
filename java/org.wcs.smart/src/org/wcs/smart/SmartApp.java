@@ -38,7 +38,6 @@ public class SmartApp implements IApplication {
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
-
 		WorkbenchAdvisor workbenchAdvisor = new SmartWorkbenchAdvisor();
 		Display display = PlatformUI.createDisplay();
 		
@@ -53,7 +52,6 @@ public class SmartApp implements IApplication {
 		} finally {
 			display.dispose();
 		}
-
 	}
 
 	@Override
