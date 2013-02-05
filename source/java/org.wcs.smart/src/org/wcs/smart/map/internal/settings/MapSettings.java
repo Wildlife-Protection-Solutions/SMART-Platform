@@ -323,7 +323,7 @@ public class MapSettings {
 
 			// determine which layers need to be added/removed
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-			final HashMap<IGeoResource, LayerRegister> definitionMap = new HashMap<IGeoResource, LayerRegister>();
+			final HashMap<URL, LayerRegister> definitionMap = new HashMap<URL, LayerRegister>();
 
 			synchronized (currentMapLayers) {
 				for (LayerRegister basemapLayer : userMap.getLayerList()) {
@@ -337,7 +337,7 @@ public class MapSettings {
 									layersToRemove.remove(mapLayer);
 								}
 								basemapLayers.add(mapLayer);
-								definitionMap.put(mapLayer.getGeoResource(), basemapLayer);
+								definitionMap.put(mapLayer.getID(), basemapLayer);
 								break;
 
 							}
@@ -354,7 +354,7 @@ public class MapSettings {
 						if (resources != null) {
 							toAdd.addAll(resources);
 							for (IGeoResource geo : resources) {
-								definitionMap.put(geo, basemapLayer);
+								definitionMap.put(geo.getIdentifier(), basemapLayer);
 							}
 						}
 					}
@@ -391,15 +391,7 @@ public class MapSettings {
 				//than the georesource used to create the layer
 				//and currently in the definition map
 				for (ILayer l : addedLayers){
-					for (IGeoResource r : toAdd){
-						try{
-							IGeoResource fnd = (IGeoResource)l.getGeoResource().resolve(r.getClass(), null);
-							if (fnd != null && fnd == r){
-								definitionMap.put(l.getGeoResource(), definitionMap.get(r));
-								break;
-							}
-						}catch (Exception ex){}
-					}
+					definitionMap.put(l.getID(), definitionMap.get(l.getGeoResource().getIdentifier()));
 				}
 			}
 
@@ -438,7 +430,7 @@ public class MapSettings {
 			updateMap(currentMap, userMap);
 
 			for (ILayer layer : basemapLayers) {
-				LayerRegister info = definitionMap.get(layer.findGeoResource(IGeoResource.class));
+				LayerRegister info = definitionMap.get(layer.getID());
 
 				((Layer) layer).setVisible(info.getVisible());
 				((Layer) layer).eSetDeliver(false);
