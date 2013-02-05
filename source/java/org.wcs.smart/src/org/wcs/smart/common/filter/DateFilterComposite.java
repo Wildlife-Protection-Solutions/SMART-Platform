@@ -27,6 +27,7 @@ import java.util.GregorianCalendar;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -79,6 +80,8 @@ public class DateFilterComposite extends Composite {
 	public enum DateFilter {
 		LAST_30_DAYS(Messages.DateFilter_Last30Days),
 		LAST_60_DAYS(Messages.DateFilter_Last60Days),
+		NEXT_30_DAYS(Messages.DateFilter_Next30Days),
+		NEXT_60_DAYS(Messages.DateFilter_Next60Days),
 		YEAR_TO_DATE(Messages.DateFilter_YearToDate),
 		MONTH_TO_DATE(Messages.DateFilter_MonthToDate),
 		CUSTOM(Messages.DateFilter_Custom);
@@ -144,8 +147,8 @@ public class DateFilterComposite extends Composite {
 				return super.getText(element);
 			}
 		});
-		dateViewer.setInput(DateFilter.values());
-		dateViewer.setSelection(new StructuredSelection(DateFilter.LAST_30_DAYS));		
+		dateViewer.setInput(getDefaultDateViewerInput());
+		dateViewer.setSelection(getDefaultDateViewerSelection());		
 		dateViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -184,6 +187,20 @@ public class DateFilterComposite extends Composite {
 		});
 	}
 
+	protected DateFilter[] getDefaultDateViewerInput() {
+		return new DateFilter[] {
+				DateFilter.LAST_30_DAYS,
+				DateFilter.LAST_60_DAYS,
+				DateFilter.YEAR_TO_DATE,
+				DateFilter.MONTH_TO_DATE,
+				DateFilter.CUSTOM
+		};
+	}
+
+	protected ISelection getDefaultDateViewerSelection() {
+		return new StructuredSelection(DateFilter.LAST_30_DAYS);
+	}
+	
 	private void validate(){
 		dialog.setErrorMessage(null);
 		if (btnFilterDate.getSelection()){
@@ -231,7 +248,7 @@ public class DateFilterComposite extends Composite {
 				dtEnd.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
 			}
 		} else {
-			dateViewer.setSelection(new StructuredSelection(DateFilter.LAST_30_DAYS));
+			dateViewer.setSelection(getDefaultDateViewerSelection());
 		}
 		setFilteringEnabled(enabled);
 		
