@@ -31,6 +31,10 @@ import org.wcs.smart.common.filter.IUpdatableView;
  */
 public interface IPatrolFilteringView extends IUpdatableView {
 
+	/**
+	 * 
+	 * @return the current active filter
+	 */
 	public PatrolViewFilter getFilter();
 	
 }

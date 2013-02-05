@@ -22,14 +22,15 @@
 package org.wcs.smart.patrol.internal.ui.properties;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.collections.comparators.NullComparator;
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -82,7 +83,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
-	private WritableList mandates = null;
+	private List<PatrolMandate> mandates = null;
 	private HashSet<PatrolMandate> toDelete = new HashSet<PatrolMandate>();
 	
 	/*
@@ -117,8 +118,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected Composite createContent(Composite parent) {
 
-		mandates = new WritableList(PatrolHibernateManager.getMandates(ca,
-				getSession()), PatrolMandate.class);
+		mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(ca, getSession()));
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -138,15 +138,16 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		((GridData)composite2.getLayoutData()).heightHint = 150;
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		composite2.setLayout(tableLayout);
 
 		tableViewer = new TableViewer(composite2, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-
+		
 		createColumns(tableViewer);
 
-		tableViewer.setContentProvider(new ObservableListContentProvider());
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setInput(mandates);
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
@@ -211,7 +212,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				deleteMandate();
 			}
 		});
-
+		setTitle(Messages.PatrolMandatePropertyPage_PageName);
 		setMessage(Messages.PatrolMandatePropertyPage_Dialog_Message);
 		return container;
 	}
@@ -266,6 +267,10 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		if (mandate == null){
 			return;
 		}
+		if (!MessageDialog.openConfirm(getShell(), Messages.PatrolMandatePropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.PatrolMandatePropertyPage_ConfirmDeleteMessage, new Object[]{mandate.getName()}))){
+			return;
+		}
+			
 
 		try{
 			if (mandate.getUuid() != null){
@@ -328,7 +333,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			if (!findLangValue(type, mnd).equals(newValue)){
 				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolMandate.MAX_NAME_LENGTH)){
 					Integer matches = 0;
-					for (@SuppressWarnings("unchecked")	Iterator<PatrolMandate> itr = mandates.iterator(); itr.hasNext();) {
+					for (Iterator<PatrolMandate> itr = mandates.iterator(); itr.hasNext();) {
 						PatrolMandate a = itr.next();
 						if( a != mnd && a.findName(cmbLanguage.getCurrentSelection()).equals(newValue.trim())){
 							matches++;

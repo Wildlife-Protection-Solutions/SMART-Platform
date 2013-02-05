@@ -218,7 +218,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			this.patrol = (Patrol) session.load(Patrol.class, puuid);
 			this.patrol.getLegs().size();
 			this.patrol.getPatrolDatastorePath();
-			List<Projection> tmp = HibernateManager.getCaProjectinList(session);
+			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 			this.projections = tmp.toArray(new Projection[tmp.size()]);
 			session.getTransaction().commit();
 			ops = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);

@@ -221,6 +221,7 @@ public class Messages extends NLS {
 	public static String MultiLegWizardPage_Title;
 	public static String MultiPatrolExportDialog_AttachmentInfoLabel;
 	public static String MultiPatrolExportDialog_BrowseButton;
+	public static String MultiPatrolExportDialog_ChangeFilter;
 	public static String MultiPatrolExportDialog_DeselectAll_Label;
 	public static String MultiPatrolExportDialog_DestinationFolderLabel;
 	public static String MultiPatrolExportDialog_ExportButton;
@@ -230,6 +231,7 @@ public class Messages extends NLS {
 	public static String MultiPatrolExportDialog_LoadPatrolJobName;
 	public static String MultiPatrolExportDialog_Message;
 	public static String MultiPatrolExportDialog_OverwriteWarningLabel;
+	public static String MultiPatrolExportDialog_PageTitle;
 	public static String MultiPatrolExportDialog_SelectAllLabel;
 	public static String MultiPatrolExportDialog_ShowAllResults_Label;
 	public static String MultiPatrolExportDialog_Title;
@@ -476,6 +478,8 @@ public class Messages extends NLS {
 	public static String PatrolMandateComposite_Error_LoadingMandates;
 	public static String PatrolMandateComposite_Mandate_Label;
 	public static String PatrolMandateComposite_Title;
+	public static String PatrolMandatePropertyPage_ConfirmDeleteMessage;
+	public static String PatrolMandatePropertyPage_ConfirmDeleteTitle;
 	public static String PatrolMandatePropertyPage_DefaultNewMandateName;
 	public static String PatrolMandatePropertyPage_Dialog_Message;
 	public static String PatrolMandatePropertyPage_Dialog_Title;
@@ -485,6 +489,7 @@ public class Messages extends NLS {
 	public static String PatrolMandatePropertyPage_Error_SavingUpdates;
 	public static String PatrolMandatePropertyPage_InvalidName_DialogTitle;
 	public static String PatrolMandatePropertyPage_Language_Label;
+	public static String PatrolMandatePropertyPage_PageName;
 	public static String PatrolMandateWizardPage_PageMessage;
 	public static String PatrolMandateWizardPage_Title;
 	public static String PatrolMapPageEditor_AddLayersJobName;
@@ -506,6 +511,7 @@ public class Messages extends NLS {
 	public static String PatrolOptionsPropertyPage_Error_EditTime;
 	public static String PatrolOptionsPropertyPage_Error_EditTimeNotInteger;
 	public static String PatrolOptionsPropertyPage_Error_InvalidInteger;
+	public static String PatrolOptionsPropertyPage_PageName;
 	public static String PatrolOptionsPropertyPage_PatrolEditOptions_DaysLabel;
 	public static String PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel;
 	public static String PatrolOptionsPropertyPage_PatrolEditOptions_Label;
@@ -571,6 +577,7 @@ public class Messages extends NLS {
 	public static String PatrolTypePropertyPage_Error_SavingChanges;
 	public static String PatrolTypePropertyPage_InvalidType_DialogTitle;
 	public static String PatrolTypePropertyPage_LanguageLabel;
+	public static String PatrolTypePropertyPage_PageName;
 	public static String PatrolTypePropertyPage_PatrolType_ColumnHeader;
 	public static String PatrolTypePropertyPage_TransportOptionsLabel;
 	public static String PatrolTypePropertyPage_TransportType_ColumnHeader;
@@ -612,6 +619,8 @@ public class Messages extends NLS {
 	public static String TeamComposite_Title;
 	public static String TeamDeleteAdvisor_DeleteError;
 	public static String TeamDeleteAdvisor_Error_InvalidObjectType;
+	public static String TeamPropertyPage_ConfirmDeleteMessage;
+	public static String TeamPropertyPage_ConfirmDeleteTitle;
 	public static String TeamPropertyPage_DefaultNewTeamDescription;
 	public static String TeamPropertyPage_DefaultNewTeamName;
 	public static String TeamPropertyPage_Dialog_Message;
@@ -621,6 +630,7 @@ public class Messages extends NLS {
 	public static String TeamPropertyPage_Error_LoadingTeams;
 	public static String TeamPropertyPage_Error_SavingUpdates;
 	public static String TeamPropertyPage_Language_Label;
+	public static String TeamPropertyPage_PageName;
 	public static String TrackPointDialog_DialogMessage;
 	public static String TrackPointDialog_DialogTitle;
 	public static String TrackPointDialog_XColumnName;
