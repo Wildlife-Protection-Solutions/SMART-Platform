@@ -616,7 +616,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * area
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Projection> getCaProjectinList(Session session){
+	public static List<Projection> getCaProjectionList(Session session){
 		return ((List<Projection>)session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list()); //$NON-NLS-1$
 	}
 

@@ -21,13 +21,15 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import net.refractions.udig.ui.CRSChooserDialog;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -61,7 +63,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog implements SelectionListener{
 
 	private ListViewer lstViewer;
-	private WritableList projections;
+	private List<Projection> projections;
 	
 	private Button btnAdd;
 	private Button btnRemove;
@@ -98,7 +100,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		lstViewer = new ListViewer(main, SWT.BORDER | SWT.MULTI);
 		lstViewer.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lstViewer.setContentProvider(new ObservableListContentProvider());
+		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
 		lstViewer.setLabelProvider(new LabelProvider(){
 			
 			@Override
@@ -126,8 +128,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				btnDefault.setEnabled(enabled);
 			}
 		});
-		projections = new WritableList();
-		projections.addAll(HibernateManager.getCaProjectinList(getSession()));
+		projections = new ArrayList<Projection>(HibernateManager.getCaProjectionList(getSession()));
 		lstViewer.setInput(projections);
 		
 		Composite buttonPnl = new Composite(main, SWT.NONE);
@@ -159,6 +160,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		btnDefault.setEnabled(false);
 		
 		getShell().setText(Messages.ProjectionPropertyDialog_Dialog_Name);
+		setTitle(Messages.ProjectionPropertyDialog_PageTitle);
 		setMessage(Messages.ProjectionPropertyDialog_Dialog_Message);
 		return main;
 	}
@@ -173,6 +175,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		}
 		currentTransaction = getSession().beginTransaction();
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		super.setChangesMade(false);
 		return true;
 	}
 	
@@ -185,6 +188,8 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			setErrorMessage(null);
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(enabled);		
+		lstViewer.refresh();
+		super.setChangesMade(true);
 	}
 	
 	
@@ -211,6 +216,9 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	}
 	
 	private void removeSelected(){
+		if (!MessageDialog.openConfirm(getShell(), Messages.ProjectionPropertyDialog_ConfirmDeleteTitle, Messages.ProjectionPropertyDialog_ConfirmDeleteMessage)){
+			return;
+		}
 		IStructuredSelection selection= (IStructuredSelection) lstViewer.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object type = (Object) iterator.next();
@@ -218,10 +226,9 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				Projection p = (Projection)type;
 				projections.remove(p);
 				getSession().delete(p);
-				listModified();
 			}
-			
 		}
+		listModified();
 	}
 	
 	private void editSelected(){

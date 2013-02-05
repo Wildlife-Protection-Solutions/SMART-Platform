@@ -22,15 +22,16 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.collections.comparators.NullComparator;
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -85,7 +86,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 
-	private WritableList stations = null;
+	private List<Station> stations = null;
 	private HashSet<Station> toDelete = new HashSet<Station>();
 
 	private LanguageViewer cmbLanguage;
@@ -140,9 +141,11 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	@Override
 	public Composite createContent(Composite parent) {
 		getSession().beginTransaction();
-		stations = new WritableList(HibernateManager.getStations(ca,
-				getSession()), Station.class);
-		getSession().getTransaction().rollback();
+		try{
+			stations = new ArrayList<Station>(HibernateManager.getStations(ca,getSession()));
+		}finally{
+			getSession().getTransaction().rollback();
+		}
 
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -164,20 +167,21 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		((GridData)composite2.getLayoutData()).heightHint = 150;
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		composite2.setLayout(tableLayout);
-
+		
 		tableViewer = new TableViewer(composite2, SWT.BORDER | SWT.MULTI
-				| SWT.FULL_SELECTION);
+				| SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 
 		createColumns(tableViewer);
 
-		tableViewer.setContentProvider(new ObservableListContentProvider());
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setInput(stations);
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
-
+		
 		sorter = new StationSorter();
 		tableViewer.setComparator(sorter);
 		
@@ -246,6 +250,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
+		setTitle(Messages.StationListPropertyPage_PageName);
 		setMessage(Messages.StationListPropertyPage_Dialog_Message);
 		return container;
 
@@ -255,6 +260,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private void deleteStation(){
 		Station s = (Station) ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 		if (s == null){
+			return;
+		}
+		if (!MessageDialog.openConfirm(getShell(), Messages.StationListPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.StationListPropertyPage_ConfirmDeleteMessage, new Object[]{s.getName()}))){
 			return;
 		}
 
@@ -290,6 +298,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		setChangesMade(true);
 		
 		tableViewer.setSelection(new StructuredSelection(x));
+		tableViewer.refresh();
 		
 	}
 
@@ -334,7 +343,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 
 				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_NAME_LENGTH)){
 					Integer matches = 0;
-					for (@SuppressWarnings("unchecked")	Iterator<Station> itr = stations.iterator(); itr.hasNext();) {
+					for (Iterator<Station> itr = stations.iterator(); itr.hasNext();) {
 						Station a = itr.next();
 						if( a != stn && a.findName(cmbLanguage.getCurrentSelection()).equals(newValue.trim())){
 							matches++;
@@ -455,19 +464,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 		return false;
 	}
-
-	
-	@Override
-	public boolean close() {
-		boolean ret = super.close();
-		if (ret){
-			if (stations != null) {
-				stations.dispose();
-			}	
-		}
-		return ret;		
-	}
-
 
 	private class TextTableEditor extends EditingSupport {
 		private Column column;
