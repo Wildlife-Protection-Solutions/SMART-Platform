@@ -768,10 +768,11 @@
       <modalTool
             categoryId="org.wcs.smart.location.maptools"
             class="org.wcs.smart.ui.map.location.tool.SelectionTool"
-            icon="images/icons/etool16/cursor.png"
+            icon="images/icons/etool16/add_point.png"
             id="org.wcs.smart.ui.map.location.tool.SelectionTool"
             name="%tool.selectPoint.name"
             onToolbar="true"
+            toolCursorId="selectPointCursor"
             tooltip="%tool.selectPoint.tooltip">
       </modalTool>
       <category
@@ -806,6 +807,12 @@
             toolCursorId="move"
             tooltip="Pans the map">
       </modalTool>
+      <toolCursor
+            hotspotX="10"
+            hotspotY="10"
+            id="selectPointCursor"
+            image="images/pointers/addpoint_cursor.gif">
+      </toolCursor>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">
