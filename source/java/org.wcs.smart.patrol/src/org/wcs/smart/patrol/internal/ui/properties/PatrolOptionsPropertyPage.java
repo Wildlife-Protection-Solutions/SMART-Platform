@@ -24,10 +24,14 @@ package org.wcs.smart.patrol.internal.ui.properties;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -52,20 +56,21 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 
-
-	
 	private PatrolOptions patrolOption = null;
 	private Text txtEditTime;
 	private Button btnTrackDistanceDirection;
+	
+	private Font boldFont;
+	
 	/**
 	 * @param parent
 	 * @param title
 	 */
 	public PatrolOptionsPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.PatrolOptionsPropertyPage_DialogTitle);
-		
 		patrolOption = PatrolHibernateManager.getPatrolOptions(ca, getSession());
 	}
+	
 
 	@Override
 	public boolean  close(){
@@ -85,6 +90,16 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		g.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_OpLabel);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		FontData fd = g.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(getShell().getDisplay(), fd);
+		parent.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				boldFont.dispose();	
+			}
+		});
+		g.setFont(boldFont);
 		
 		Label lbl = new Label(g, SWT.WRAP);
 		lbl.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel);
@@ -110,6 +125,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 		g.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_Label);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setFont(boldFont);
 		
 		lbl = new Label(g, SWT.WRAP);
 		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel);
@@ -150,6 +166,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		}
 		
+		setTitle(Messages.PatrolOptionsPropertyPage_PageName);
 		setMessage(Messages.PatrolOptionsPropertyPage_DialogMessage);
 		setChangesMade(false);
 		return container;

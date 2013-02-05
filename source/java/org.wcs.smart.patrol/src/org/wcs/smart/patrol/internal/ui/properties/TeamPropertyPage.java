@@ -22,15 +22,16 @@
 package org.wcs.smart.patrol.internal.ui.properties;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.collections.comparators.NullComparator;
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -88,7 +89,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
-	private WritableList teams = null;
+	private List<Team> teams = null;
 	private HashSet<Team> toDelete = new HashSet<Team>();
 	private PatrolMandate[] mandates = null;
 	
@@ -156,7 +157,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	protected Composite createContent(Composite parent) {
 		getSession().beginTransaction();
 		try{
-			teams = new WritableList(PatrolHibernateManager.getTeams(ca, getSession()), Team.class);
+			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(ca, getSession()));
 			getSession().getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingTeams, ex);
@@ -183,15 +184,17 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 		Composite composite2 = new Composite(container, SWT.NONE);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-
+		((GridData)composite2.getLayoutData()).heightHint = 200;
+		
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		composite2.setLayout(tableLayout);
+		
 
 		tableViewer = new TableViewer(composite2, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 
 		createColumns(tableViewer);
 
-		tableViewer.setContentProvider(new ObservableListContentProvider());
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setInput(teams);
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
@@ -257,6 +260,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
+		setTitle(Messages.TeamPropertyPage_PageName);
 		setMessage(Messages.TeamPropertyPage_Dialog_Message);
 		return container;
 	}
@@ -266,7 +270,9 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (team == null){
 			return;
 		}
-
+		if (!MessageDialog.openConfirm(getShell(), Messages.TeamPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.TeamPropertyPage_ConfirmDeleteMessage, new Object[]{team.getName()}))){
+			return;
+		}
 		try{
 			if (team.getUuid() != null){
 				if (DeleteManager.canDelete(team, getSession())){

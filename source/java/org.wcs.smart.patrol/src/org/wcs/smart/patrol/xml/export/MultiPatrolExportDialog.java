@@ -2,7 +2,6 @@ package org.wcs.smart.patrol.xml.export;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,10 +39,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.internal.ui.views.IPatrolFilteringView;
+import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
+import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
 
 /**
  * Dialog to allow users to export multiple patrols at once.
@@ -51,15 +52,10 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author egouge
  *
  */
-public class MultiPatrolExportDialog extends TitleAreaDialog {
+public class MultiPatrolExportDialog extends TitleAreaDialog implements IPatrolFilteringView {
 
 	private static final String LOADING_TEXT = Messages.MultiPatrolExportDialog_LoadingText;
 
-	private static final int MAX_RESULTS = 20; 
-	
-	private static final String SHOW_ALL_RESULTS = MessageFormat.format(Messages.MultiPatrolExportDialog_ShowAllResults_Label, new Object[]{MAX_RESULTS});
-	private static final String SHOW_RESULTS = MessageFormat.format(Messages.MultiPatrolExportDialog_FilterResults_Label, new Object[]{MAX_RESULTS} );
-	
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
 	
@@ -75,6 +71,8 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 	private boolean includeAttachements;
 	private List<byte[]> patrolUuids;
 
+	private PatrolViewFilter currentFilter = new PatrolViewFilter();
+	
 	/**
 	 * Creates a new dialog
 	 * @param parentShell parent shell
@@ -82,7 +80,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 	 */
 	public MultiPatrolExportDialog(Shell parentShell) {
 		super(parentShell);
-
+		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
 	}
 
 	/**
@@ -195,26 +193,16 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 		btnIncludeAttachments.setLayoutData(gd);
 		
-		
-		final Link lnk = new Link(main, SWT.NONE);
+		Link lnk2 = new Link(main, SWT.NONE);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
-		lnk.setLayoutData(gd);
-		lnk.setText(SHOW_ALL_RESULTS);
-		lnk.addListener(SWT.Selection, new Listener() {
-			
+		lnk2.setLayoutData(gd);
+		lnk2.setText(Messages.MultiPatrolExportDialog_ChangeFilter);
+		
+		lnk2.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				String[][] loadingdata = {{LOADING_TEXT, null}}; 
-				patrols.setInput( loadingdata );
-				patrols.refresh();
-			
-				if (lnk.getText().equals(SHOW_ALL_RESULTS)){
-					loadPatrols(true);
-					lnk.setText(SHOW_RESULTS);
-				}else{
-					loadPatrols(false);
-					lnk.setText(SHOW_ALL_RESULTS);
-				}
+				PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), MultiPatrolExportDialog.this);
+				pfd.open();
 			}
 		});
 		
@@ -255,7 +243,7 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		patrols.setContentProvider(ArrayContentProvider.getInstance());
 		String[][] loadingdata = {{LOADING_TEXT, null}}; 
 		patrols.setInput( loadingdata );
-		loadPatrols(false);
+		loadPatrols();
 		
 		Composite lowerComp = new Composite(main, SWT.NONE);
 		GridLayout gl = new GridLayout(3, false);
@@ -294,32 +282,28 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 		lbl.setText("**" + Messages.MultiPatrolExportDialog_AttachmentInfoLabel); //$NON-NLS-1$
 		lbl.setLayoutData(gd);
 		
+		setTitle(Messages.MultiPatrolExportDialog_PageTitle);
 		setMessage(Messages.MultiPatrolExportDialog_Message);
 		getShell().setText(Messages.MultiPatrolExportDialog_Title);
 		return composite;
 
 	}
 	
-	private void loadPatrols(final boolean loadAll){
+	private void loadPatrols(){
 		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
-					String query = "SELECT uuid, id, startDate, endDate FROM " + Patrol.class.getSimpleName() + " WHERE conservationArea = :ca ORDER BY startDate Desc"; //$NON-NLS-1$ //$NON-NLS-2$
-					Query q = s.createQuery(query);
-					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					if (!loadAll){
-						q.setMaxResults(MAX_RESULTS);
-					}
+					Query q = currentFilter.buildQuery(s);
 					List<?> results = q.list();
 					final Object[][] data = new Object[results.size()][2];
 					int counter = 0;
 					for(Object x : results){
 						Object[] row = (Object[])x;
 						
-						String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[2]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[3]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[3]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[4]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						Object[] thisdata = {pname, (byte[])row[0]};
 						data[counter++] = thisdata;
 					}
@@ -349,5 +333,15 @@ public class MultiPatrolExportDialog extends TitleAreaDialog {
 	@Override
 	public boolean isResizable(){
 		return true;
+	}
+
+	@Override
+	public void updateContent() {
+		loadPatrols();
+	}
+
+	@Override
+	public PatrolViewFilter getFilter() {
+		return currentFilter;
 	}
 }

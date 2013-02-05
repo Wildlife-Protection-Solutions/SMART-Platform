@@ -139,6 +139,13 @@ public class PatrolViewFilter {
 		this.patrolIdFilter = text;
 	}
 	
+	/**
+	 * Builds a query that returns the following patrol fields:
+	 * patrol uuid, patrol id, patrol type, start date, end date
+	 * 
+	 * @param s
+	 * @return
+	 */
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
