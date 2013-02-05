@@ -38,6 +38,8 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
@@ -131,14 +133,14 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		if (intelligenceList.isEmpty()) {
 			label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
 			tableViewer.getControl().setVisible(false);
-			labelLink.setVisible(true);
+			labelLink.setVisible(canEdit());
 			tableLink.setVisible(false);
 		} else {
 			label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
 			tableViewer.getControl().setVisible(true);
 			tableViewer.setInput(intelligenceList.toArray());
 			labelLink.setVisible(false);
-			tableLink.setVisible(true);
+			tableLink.setVisible(canEdit());
 		}
 		main.layout(true, true);
 	}
@@ -151,6 +153,11 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	 */
 	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent) {
 		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
+
+		boolean canEdit = canEdit();
+		editLink.setEnabled(canEdit);
+		editLink.setVisible(canEdit);
+
 		editLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -158,6 +165,11 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 			}
 		});
 		return editLink;
+	}
+
+	private boolean canEdit() {
+		//analyst users can never edit
+		return SmartDB.getCurrentEmployee().getSmartUserLevel() != Employee.SmartUserLevel.ANALYST;
 	}
 
 	/**
