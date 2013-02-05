@@ -177,11 +177,7 @@ public class PatrolViewFilter {
 				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			if (dateFilter != DateFilter.CUSTOM){
-				str.append(" p.endDate >= :date1 "); //$NON-NLS-1$
-			}else{
-				str.append(" ( p.endDate > :date1 and p.startDate < :date2 ) "); //$NON-NLS-1$
-			}
+			str.append(" ( p.endDate >= :date1 and p.startDate <= :date2 ) "); //$NON-NLS-1$
 		}
 		if (!and){
 			str.append(")"); //$NON-NLS-1$
@@ -206,18 +202,22 @@ public class PatrolViewFilter {
 				Calendar cal = Calendar.getInstance();
 				cal.add(Calendar.DAY_OF_MONTH, -30);
 				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
+				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.LAST_60_DAYS) {
 				Calendar cal = Calendar.getInstance();
 				cal.add(Calendar.DAY_OF_MONTH, -60);
 				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
+				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.YEAR_TO_DATE) {
 				Calendar cal = Calendar.getInstance();
 				cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
 				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
+				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.MONTH_TO_DATE) {
 				Calendar cal = Calendar.getInstance();
 				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
 				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
+				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
 			} else if (dateFilter == DateFilter.CUSTOM) {
 				query.setParameter("date1", startDate); //$NON-NLS-1$
 				query.setParameter("date2", endDate); //$NON-NLS-1$
@@ -226,4 +226,10 @@ public class PatrolViewFilter {
 		}
 		return query;
 	}
+	
+	private Date getCurrentDate() {
+		Calendar cal = Calendar.getInstance();
+		return cal.getTime();
+	}
+	
 }

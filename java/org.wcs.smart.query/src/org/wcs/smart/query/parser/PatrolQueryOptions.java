@@ -103,26 +103,27 @@ public class PatrolQueryOptions {
 		 */
 		public Date[] getDates(){
 			GregorianCalendar cal = new GregorianCalendar();
+			java.sql.Date currentDate = new java.sql.Date(cal.getTimeInMillis());
 
 			if (this == LAST_30_DAYS) {
 				cal.setTimeInMillis((long) (cal.getTime().getTime() - (30 * 24 * 60 * 60 * 1000.0)));
 				java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-				return new java.sql.Date[] { d };
+				return new java.sql.Date[] { d, currentDate };
 			} else if (this == LAST_60_DAYS) {
 				cal.setTimeInMillis((long) (cal.getTime().getTime() - (60 * 24 * 60 * 60 * 1000.0)));
 				java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-				return new java.sql.Date[] { d };
+				return new java.sql.Date[] { d, currentDate };
 
 			} else if (this == MONTH_TO_DATE) {
 				cal.set(Calendar.DAY_OF_MONTH, 1);
 				java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-				return new java.sql.Date[] { d };
+				return new java.sql.Date[] { d, currentDate };
 
 			} else if (this == YEAR_TO_DATE) {
 				cal.set(Calendar.MONTH, 0);
 				cal.set(Calendar.DAY_OF_MONTH, 1);
 				java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-				return new java.sql.Date[] { d };
+				return new java.sql.Date[] { d, currentDate };
 			} else if (this == LAST_MONTH){
 				int year = cal.get(Calendar.YEAR);
 				int month = cal.get(Calendar.MONTH);
@@ -146,7 +147,11 @@ public class PatrolQueryOptions {
 				int month = ((cal.get(Calendar.MONTH)) / 3) * 3;
 				cal.set(Calendar.MONTH, month);
 				cal.set(Calendar.DAY_OF_MONTH, 1);
-				return new java.sql.Date[]{new java.sql.Date(cal.getTimeInMillis())};
+				java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
+				
+				cal.set(Calendar.MONTH, month + 3);
+				java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
+				return new java.sql.Date[]{d1, d2};
 			} else if (this == LAST_QUARTER){
 				int thisQuarter = ((cal.get(Calendar.MONTH)) / 3);
 				cal.set(Calendar.MONTH, thisQuarter*3);

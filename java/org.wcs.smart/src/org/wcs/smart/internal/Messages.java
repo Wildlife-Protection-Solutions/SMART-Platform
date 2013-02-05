@@ -325,6 +325,8 @@ public class Messages extends NLS {
 	public static String DateFilter_Last30Days;
 	public static String DateFilter_Last60Days;
 	public static String DateFilter_MonthToDate;
+	public static String DateFilter_Next30Days;
+	public static String DateFilter_Next60Days;
 	public static String DateFilter_YearToDate;
 	public static String DateFilterComposite_ContainsDate_Label_A;
 	public static String DateFilterComposite_ContainsDate_Label_B;

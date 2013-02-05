@@ -66,20 +66,12 @@ public class IntelligenceViewFilter {
 
 		//received date
 		if (receivedDateFilter != null) {
-			if (receivedDateFilter != DateFilter.CUSTOM) {
-				str.append("AND i.receivedDate >= :receivedStart "); //$NON-NLS-1$
-			} else {
-				str.append("AND i.receivedDate >= :receivedStart AND i.receivedDate <= :receivedEnd "); //$NON-NLS-1$
-			}
+			str.append("AND i.receivedDate >= :receivedStart AND i.receivedDate <= :receivedEnd "); //$NON-NLS-1$
 		}
 
 		//relevant date
 		if (relevantDateFilter != null) {
-			if (relevantDateFilter != DateFilter.CUSTOM) {
-				str.append("AND coalesce(i.toDate, i.fromDate) >= :relevantStart "); //$NON-NLS-1$
-			} else {
-				str.append("AND coalesce(i.toDate, i.fromDate) >= :relevantStart AND i.fromDate <= :relevantEnd "); //$NON-NLS-1$
-			}
+			str.append("AND coalesce(i.toDate, i.fromDate) >= :relevantStart AND i.fromDate <= :relevantEnd "); //$NON-NLS-1$
 		}
 		
 		
@@ -96,16 +88,20 @@ public class IntelligenceViewFilter {
 		if (receivedDateFilter != null) {
 			switch (receivedDateFilter) {
 			case LAST_30_DAYS:
-				query.setParameter("receivedStart", getLastXDays(DAYS_30)); //$NON-NLS-1$
+				query.setParameter("receivedStart", getShiftXDays(-DAYS_30)); //$NON-NLS-1$
+				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case LAST_60_DAYS:
-				query.setParameter("receivedStart", getLastXDays(DAYS_60)); //$NON-NLS-1$
+				query.setParameter("receivedStart", getShiftXDays(-DAYS_60)); //$NON-NLS-1$
+				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case MONTH_TO_DATE:
 				query.setParameter("receivedStart", getMothToDate()); //$NON-NLS-1$
+				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case YEAR_TO_DATE:
 				query.setParameter("receivedStart", getYearToDate()); //$NON-NLS-1$
+				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case CUSTOM:
 				query.setParameter("receivedStart", receivedDateStart); //$NON-NLS-1$
@@ -117,17 +113,29 @@ public class IntelligenceViewFilter {
 		//relevant date
 		if (relevantDateFilter != null) {
 			switch (relevantDateFilter) {
+			case NEXT_30_DAYS:
+				query.setParameter("relevantStart", getCurrentDate()); //$NON-NLS-1$
+				query.setParameter("relevantEnd", getShiftXDays(DAYS_30)); //$NON-NLS-1$
+				break;
+			case NEXT_60_DAYS:
+				query.setParameter("relevantStart", getCurrentDate()); //$NON-NLS-1$
+				query.setParameter("relevantEnd", getShiftXDays(DAYS_60)); //$NON-NLS-1$
+				break;
 			case LAST_30_DAYS:
-				query.setParameter("relevantStart", getLastXDays(DAYS_30)); //$NON-NLS-1$
+				query.setParameter("relevantStart", getShiftXDays(-DAYS_30)); //$NON-NLS-1$
+				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case LAST_60_DAYS:
-				query.setParameter("relevantStart", getLastXDays(DAYS_60)); //$NON-NLS-1$
+				query.setParameter("relevantStart", getShiftXDays(-DAYS_60)); //$NON-NLS-1$
+				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case MONTH_TO_DATE:
 				query.setParameter("relevantStart", getMothToDate()); //$NON-NLS-1$
+				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case YEAR_TO_DATE:
 				query.setParameter("relevantStart", getYearToDate()); //$NON-NLS-1$
+				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
 				break;
 			case CUSTOM:
 				query.setParameter("relevantStart", relevantDateStart); //$NON-NLS-1$
@@ -151,9 +159,14 @@ public class IntelligenceViewFilter {
 		return query;
 	}	
 
-	private Date getLastXDays(int amount) {
+	private Date getCurrentDate() {
 		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DAY_OF_MONTH, -amount);
+		return cal.getTime();
+	}
+	
+	private Date getShiftXDays(int amount) {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_MONTH, amount);
 		return cal.getTime();
 	}
 

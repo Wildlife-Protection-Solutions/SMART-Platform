@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -66,7 +68,24 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 		receivedDateCmp = new DateFilterComposite(receivedGrp, SWT.NONE, this);
 		
 		Composite relevantGrp = createGroupComposite(Messages.IntelligenceFilterDialog_RelevantGroup_Label, composite);
-		relevantDateCmp = new DateFilterComposite(relevantGrp, SWT.NONE, this);
+		relevantDateCmp = new DateFilterComposite(relevantGrp, SWT.NONE, this) {
+			@Override
+			protected DateFilter[] getDefaultDateViewerInput() {
+				return new DateFilter[] {
+						DateFilter.NEXT_30_DAYS,
+						DateFilter.NEXT_60_DAYS,
+						DateFilter.LAST_30_DAYS,
+						DateFilter.LAST_60_DAYS,
+						DateFilter.YEAR_TO_DATE,
+						DateFilter.MONTH_TO_DATE,
+						DateFilter.CUSTOM
+				};
+			}
+			@Override
+			protected ISelection getDefaultDateViewerSelection() {
+				return new StructuredSelection(DateFilter.NEXT_30_DAYS);
+			}
+		};
 
 		Composite nameGrp = createGroupComposite(Messages.IntelligenceFilterDialog_NameGroup_Label, composite);
 		nameCmp = new StringFilterComposite(nameGrp, SWT.NONE);
