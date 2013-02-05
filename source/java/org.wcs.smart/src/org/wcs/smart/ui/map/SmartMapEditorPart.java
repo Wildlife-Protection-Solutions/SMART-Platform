@@ -362,7 +362,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				if (lblSRID.isDisposed()) return;
+				if (lblSRID == null || lblSRID.isDisposed()) return;
 				lblSRID.setText(getMap().getViewportModel().getCRS().getName()
 						.getCode());
 				lblSRID.getParent().layout();

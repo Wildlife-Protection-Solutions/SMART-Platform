@@ -23,13 +23,13 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -73,7 +73,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 
 	private CaInfoComposite caComposite = null;
 	
-	private WritableList languages = new WritableList();
+	private List<Language> languages = new ArrayList<Language>();
 	private ListViewer lstLang;
 	
 	/**
@@ -119,10 +119,10 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 				return ""; //$NON-NLS-1$
 			}
 		});
-		languages = new WritableList(ca.getLanguages(), Language.class);
+		languages = new ArrayList<Language>(ca.getLanguages());
 		languages.remove(ca.getDefaultLanguage());
 		
-		lstLang.setContentProvider(new ObservableListContentProvider());
+		lstLang.setContentProvider(ArrayContentProvider.getInstance());
 		lstLang.setInput(languages);
 		
 		Composite btnComp = new Composite(langComp, SWT.NONE);
@@ -251,6 +251,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		
+		setTitle(Messages.CaPropertyPage_PageName);
 		setMessage(Messages.CaPropertyPage_DialogMessage);
 		
 		return caComposite;

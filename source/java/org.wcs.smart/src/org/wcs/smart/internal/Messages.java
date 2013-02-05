@@ -210,6 +210,7 @@ public class Messages extends NLS {
 	public static String CaPropertyPage_Error_SavingChanages;
 	public static String CaPropertyPage_ErrorDialogTitle;
 	public static String CaPropertyPage_LocaleToAddLabel;
+	public static String CaPropertyPage_PageName;
 	public static String CaPropertyPage_SupportedLanguages_Label;
 	public static String CaPropertyPage_UniqueID_Label;
 	public static String CategoryDialogPage_DialogTitle;
@@ -462,6 +463,7 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_Import_Button;
 	public static String EmployeePropertyPage_InActiveFlag;
 	public static String EmployeePropertyPage_Op_IncludeInActive;
+	public static String EmployeePropertyPage_PageTitle;
 	public static String ExportEmployeeDialog_AllFilesFilterName;
 	public static String ExportEmployeeDialog_BrowseButton;
 	public static String ExportEmployeeDialog_CSVFileName;

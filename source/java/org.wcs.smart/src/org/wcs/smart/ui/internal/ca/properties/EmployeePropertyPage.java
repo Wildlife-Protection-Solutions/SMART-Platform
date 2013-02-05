@@ -35,10 +35,9 @@ import java.util.Set;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -102,7 +101,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private EmployeeActiveFilter activeFilter;
 
 	/* agencies and rank lists */
-	private WritableList employees = null;
+	private List<Employee> employees = null;
 	private List<Agency> agencies;
 	  
 	EmployeeViewSorter sorter = new EmployeeViewSorter();
@@ -285,19 +284,23 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		refreshEmployeeList();
+		setTitle(Messages.EmployeePropertyPage_PageTitle);
 		setMessage(Messages.EmployeePropertyPage_DIalog_Message);
 		return container;
 	}
 
-	private void refreshEmployeeList(){
+	@SuppressWarnings("unchecked")
+	private void refreshEmployeeList() {
 		Session s = getSession();
 		s.beginTransaction();
-		employees = new WritableList(getSession().createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(), Employee.class); //$NON-NLS-1$
+		employees = getSession().createCriteria(Employee.class)
+				.add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
 		s.getTransaction().rollback();
-		
 		tblEmployee.setInput(employees);
 		tblEmployee.refresh();
+
 	}
+	
 	/*
 	 * gets agencies for current conservation area
 	 */
@@ -410,7 +413,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 
 		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		tableViewer.getTable().setLayoutData(layoutData);
-		tableViewer.setContentProvider(new ObservableListContentProvider());
+		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
@@ -439,20 +442,14 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			case FAMILY_NAME: return element.getFamilyName();
 			case GIVEN_NAME: return element.getGivenName();
 			case AGENCY:
-				Session s = getSession();
-				s.beginTransaction();
 				if (element.getAgency() == null){
 					return null;
 				}
-				s.getTransaction().commit();
 				return element.getAgency().getName();
 			case RANK:
-				s = getSession();
-				s.beginTransaction();
 				if (element.getRank() == null){
 					return null;
 				}
-				s.getTransaction().commit();
 				return element.getRank().getName();
 			case GENDER: return String.valueOf(element.getGender());
 			case BIRTHDATE: return DateFormat.getDateInstance().format(element.getBirthDate());
@@ -510,7 +507,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (s2 == null){
 			return 1;
 		}
-		return Collator.getInstance().compare(s1, s2);
+		return s1.compareTo(s2);
 	}
 	/**
 	 * Compares two employee objects by a given column.
@@ -557,61 +554,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	protected boolean  performSave() {
 		//Does nothing
 		return true;
-		
 	}
 
-//	/**
-//	 * Saves all modifications to the employee list.
-//	 * 
-//	 * @return
-//	 */
-//	protected void performSave(){
-//		//caComposite.updateConservationArea(ca);
-//		Transaction tx = session.beginTransaction();
-//		try{
-//			for (Employee e : ca.getEmployees()) {
-//				if (e.getId() == null){
-//					HibernateManager.generateEmployeeId(e, session);
-//				}
-//				session.saveOrUpdate(e);	
-//			}
-//			tx.commit();
-//		}catch (RuntimeException ex){
-//			tx.rollback();
-//			session.close();
-//			SmartPlugIn.displayLog("Error saving employees: " + ex.getMessage(), ex);
-//		}
-//	}
-//
-//	
-
-//	/**
-//	 * Reverts all changes to the emploe list
-//	 */
-//	@Override
-//	public void performDefaults() {
-//		Transaction tx = session.beginTransaction();
-//		try{
-//			Set<Employee> toremove = new HashSet<Employee>();
-//			for (Employee e : ca.getEmployees()) {
-//				if (e.getUuid() == null){
-//					toremove.add(e);
-//				}else{
-//					session.refresh(e);
-//				}
-//			}
-//			ca.getEmployees().removeAll(toremove);	//added employees
-//		}catch (RuntimeException ex){
-//			tx.rollback();
-//			session.close();
-//			SmartPlugIn.displayLog("Error saving employees: " + ex.getMessage(), ex);
-//		}
-//		
-//		employees.clear();
-//		employees.addAll(ca.getEmployees());
-//		tblEmployee.refresh();
-//	}
-	
 	
 	/**
 	 * A column in the employee table
@@ -690,13 +634,20 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			int width = 0;
 			Point extent = gc.textExtent(column.name);
 			width = extent.x;
-			for (Iterator<?> iterator = EmployeePropertyPage.this.employees.iterator(); iterator.hasNext();) {
-				Employee e = (Employee) iterator.next();
-				String str = getText(e);
-				if (str != null){
-					int tmp = gc.textExtent(getText(e)).x;
-					if ( tmp > width){
-						width = tmp;
+			if (EmployeePropertyPage.this.employees != null) {
+				int cnt = 0;
+				for (Iterator<?> iterator = EmployeePropertyPage.this.employees
+						.iterator(); iterator.hasNext();) {
+					cnt++;
+					if (cnt > 100)	//only size to the first 100 employees
+						break;
+					Employee e = (Employee) iterator.next();
+					String str = getText(e);
+					if (str != null) {
+						int tmp = gc.textExtent(getText(e)).x;
+						if (tmp > width) {
+							width = tmp;
+						}
 					}
 				}
 			}
