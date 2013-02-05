@@ -49,6 +49,7 @@ import org.hibernate.persister.entity.Joinable;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -324,7 +325,15 @@ public class HibernateManager extends SmartHibernateManager{
 		return people;		
 	}
 	
-	
+	public static List<Rank> getRanksByAgency(ConservationArea ca, Session s,Agency agt){
+		Criteria st = null;
+		st = s.createCriteria(Agency.class);
+		st.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		st.add( Restrictions.eq("Agency", agt)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Rank> ranks = st.list();		
+		return ranks;		
+	}
 
 	private static NumberFormat ID_FORMATTER = new DecimalFormat("00000"); //$NON-NLS-1$
 	

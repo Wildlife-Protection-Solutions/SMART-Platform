@@ -76,6 +76,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
+import org.wcs.smart.ui.internal.ca.ExportEmployeeDialog;
 import org.wcs.smart.ui.internal.ca.ImportEmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -258,6 +259,22 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				
 			}
 		});
+		
+		Button btnExport = new Button(composite, SWT.NONE);
+		btnExport.setText("Export...");//Messages.EmployeePropertyPage_Import_Button);
+		btnExport.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				ExportEmployeeDialog dialog = new ExportEmployeeDialog(getShell());
+				int ret = dialog.open();
+				if (ret == IDialogConstants.CANCEL_ID){
+					return;
+				}else{
+					refreshEmployeeList();
+				}
+			}
+		});
+		
 		container.addPaintListener(new PaintListener() {
 			boolean called =false;
 			@Override

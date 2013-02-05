@@ -78,6 +78,7 @@ public class ConservationArea {
 	
 	private String srs;
 	private List<Employee> employees;
+	private List<Agency> agencies;
 	private Set<Language> languages;
 	
 	public ConservationArea(){
@@ -137,7 +138,16 @@ public class ConservationArea {
 	public void setEmployees(List<Employee> employees){
 		this.employees = employees;
 	}
-
+	
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public List<Agency> getAgencies() {
+		return this.agencies;
+	}
+	public void setAgencies(List<Agency> agencies){
+		this.agencies = agencies;
+	}
+	
 	@OneToMany(fetch = FetchType.EAGER, cascade={javax.persistence.CascadeType.ALL}, mappedBy="ca", orphanRemoval=true)
 	public Set<Language> getLanguages(){
 		return this.languages;
