@@ -166,3 +166,20 @@ GRANT ALL PRIVILEGES ON smart.REPORT_QUERY to manager;
 GRANT ALL PRIVILEGES ON smart.REPORT_FOLDER to analyst;
 GRANT ALL PRIVILEGES  ON smart.REPORT to analyst;
 GRANT ALL PRIVILEGES ON smart.REPORT_QUERY to analyst;
+
+
+-- INTELLIGENCE
+GRANT ALL PRIVILEGES ON smart.intelligence to data_entry;
+GRANT ALL PRIVILEGES ON smart.intelligence_point to data_entry;
+GRANT ALL PRIVILEGES ON smart.intelligence_attachment to data_entry;
+GRANT ALL PRIVILEGES ON smart.patrol_intelligence to data_entry;
+
+GRANT ALL PRIVILEGES ON smart.intelligence to manager;
+GRANT ALL PRIVILEGES ON smart.intelligence_point to manager;
+GRANT ALL PRIVILEGES ON smart.intelligence_attachment to manager;
+GRANT ALL PRIVILEGES ON smart.patrol_intelligence to manager;
+
+GRANT SELECT ON smart.intelligence to analyst;
+GRANT SELECT ON smart.intelligence_point to analyst;
+GRANT SELECT ON smart.intelligence_attachment to analyst;
+GRANT SELECT ON smart.patrol_intelligence to analyst;
