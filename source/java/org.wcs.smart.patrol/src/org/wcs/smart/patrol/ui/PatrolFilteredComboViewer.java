@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.external.control;
+package org.wcs.smart.patrol.ui;
 
 import java.util.ArrayList;
 import java.util.Iterator;
