@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -113,6 +115,12 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 				btnOpen.setEnabled(!tableViewer.getSelection().isEmpty());
 			}
 		});
+		tableViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				openCurrentItem();
+			}
+		});
 
 		btnOpen = new Button(main, SWT.PUSH);
 		btnOpen.setText(Messages.ReportedIntelligenceContribution_Open_Button);
@@ -120,9 +128,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		btnOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection)tableViewer.getSelection();
-				Intelligence intelligence = (Intelligence) sel.getFirstElement();
-				openEditor(intelligence);
+				openCurrentItem();
 			}
 		});
 		btnOpen.setEnabled(false);
@@ -169,6 +175,12 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		main.layout(true, true);
 	}
 
+	private void openCurrentItem() {
+		IStructuredSelection sel = (IStructuredSelection)tableViewer.getSelection();
+		Intelligence intelligence = (Intelligence) sel.getFirstElement();
+		openEditor(intelligence);
+	}
+	
 	private void openEditor(Intelligence intelligence) {
 		Assert.isNotNull(intelligence);
 		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName());
