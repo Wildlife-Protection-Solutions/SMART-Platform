@@ -40,8 +40,8 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSourceType;
-import org.wcs.smart.patrol.external.control.PatrolFilteredComboViewer;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 
 /**
  * Composite for collecting the intelligence source information
