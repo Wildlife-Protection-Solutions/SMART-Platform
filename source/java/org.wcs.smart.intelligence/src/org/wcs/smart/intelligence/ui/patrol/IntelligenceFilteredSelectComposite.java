@@ -70,7 +70,7 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
 		super(parent, style);
 
 		setLabelProvider(new IntelligenceLabelProvider());
-		setItemComparator(new IntelligenceComparator());
+		setItemComparator(new IntelligenceNameComparator());
 		setLabelAllText(Messages.PatrolMotivationComposite_Selector_All_Label);
 		setLabelSelectedText(Messages.PatrolMotivationComposite_Selector_Selected_Label);
 		
