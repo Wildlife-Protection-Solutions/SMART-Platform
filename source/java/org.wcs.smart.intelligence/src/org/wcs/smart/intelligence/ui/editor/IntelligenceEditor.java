@@ -44,8 +44,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
@@ -276,14 +278,9 @@ public class IntelligenceEditor extends EditorPart {
 	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent, final PanelType panelType) {
 		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
 		
-		if (!canEdit()) {
-			editLink.setEnabled(false);
-			editLink.setVisible(false);
-//		}else {
-//			if (partEditor != null){
-//				editLink.setToolTipText(MessageFormat.format("Edit {0}", new Object[]{partEditor.getTitle()}));
-//			}
-		}
+		boolean canEdit = canEdit();
+		editLink.setEnabled(canEdit);
+		editLink.setVisible(canEdit);
 		
 		if (panelType != null){
 			editLink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -297,7 +294,8 @@ public class IntelligenceEditor extends EditorPart {
 	}
 	
 	private boolean canEdit() {
-		return true;
+		//analyst users can never edit
+		return SmartDB.getCurrentEmployee().getSmartUserLevel() != Employee.SmartUserLevel.ANALYST;
 	}
 
 	/**
