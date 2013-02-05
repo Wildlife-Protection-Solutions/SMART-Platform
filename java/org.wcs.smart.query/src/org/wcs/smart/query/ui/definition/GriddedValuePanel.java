@@ -84,7 +84,7 @@ public class GriddedValuePanel {
 			s.beginTransaction();
 			final List<Projection> projs = new ArrayList<Projection>();
 			try{
-				projs.addAll(HibernateManager.getCaProjectinList(s));
+				projs.addAll(HibernateManager.getCaProjectionList(s));
 			}finally{
 				try{
 					s.getTransaction().commit();
