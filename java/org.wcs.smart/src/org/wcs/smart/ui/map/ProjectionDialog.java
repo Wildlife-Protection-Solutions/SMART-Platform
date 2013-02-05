@@ -46,7 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
 /**
- * Dialog for selecting projection.
+ * Dialog for select the map projection.
  * @author egouge
  *
  */
@@ -98,7 +98,7 @@ public class ProjectionDialog extends TitleAreaDialog {
 				Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
-					final Object[] ps = HibernateManager.getCaProjectinList(s).toArray();
+					final Object[] ps = HibernateManager.getCaProjectionList(s).toArray();
 					getShell().getDisplay().asyncExec(new Runnable(){
 
 						@Override

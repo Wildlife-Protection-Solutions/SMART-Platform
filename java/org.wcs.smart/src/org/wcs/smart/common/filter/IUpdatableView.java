@@ -29,6 +29,10 @@ package org.wcs.smart.common.filter;
  */
 public interface IUpdatableView {
 
+	/**
+	 * Called when the filter is applied and
+	 * your component should be updated. 
+	 */
 	public void updateContent();
 	
 }

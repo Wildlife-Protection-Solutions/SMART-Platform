@@ -163,10 +163,13 @@ public class Messages extends NLS {
 	public static String BackupHandler_BackupFailed_DialogTitle;
 	public static String BackupHandler_Error_BackupError;
 	public static String BasemapLabelProvider_SessionDefault;
+	public static String BasemapPropertyPage_ConfirmDeleteMessage;
+	public static String BasemapPropertyPage_ConfirmDeleteTitle;
 	public static String BasemapPropertyPage_DefaultLabel;
 	public static String BasemapPropertyPage_Dialog_Message;
 	public static String BasemapPropertyPage_Dialog_Title;
 	public static String BasemapPropertyPage_Error_CouldNotSave;
+	public static String BasemapPropertyPage_PageName;
 	public static String BasemapPropertyPage_Progress_Loading;
 	public static String BasemapPropertyPage_RenameButton;
 	public static String BasemapPropertyPage_SetDefaultButton;
@@ -312,6 +315,7 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_ModifyWarning_DialogTitle;
 	public static String DataModelPropertyPage_OverwriteFile_DialogMessage;
 	public static String DataModelPropertyPage_OverwriteFile_DialogTitle;
+	public static String DataModelPropertyPage_PageTitle;
 	public static String DataModelPropertyPage_Progress_ConvertingXml;
 	public static String DataModelPropertyPage_Progress_ExportingXml;
 	public static String DataModelPropertyPage_Progress_WritingXml;
@@ -625,12 +629,15 @@ public class Messages extends NLS {
 	public static String ProjectionDialog_DialogTitle;
 	public static String ProjectionDialog_Error_LoadProjectionMessage;
 	public static String ProjectionDialog_LoadProjection_JobName;
+	public static String ProjectionPropertyDialog_ConfirmDeleteMessage;
+	public static String ProjectionPropertyDialog_ConfirmDeleteTitle;
 	public static String ProjectionPropertyDialog_DefaultProjection_text;
 	public static String ProjectionPropertyDialog_Dialog_Message;
 	public static String ProjectionPropertyDialog_Dialog_Name;
 	public static String ProjectionPropertyDialog_Dialog_Title;
 	public static String ProjectionPropertyDialog_Error_AtLeastOneProjectionRequired;
 	public static String ProjectionPropertyDialog_Error_CouldNotSave;
+	public static String ProjectionPropertyDialog_PageTitle;
 	public static String ProjectionPropertyDialog_ProjectionList_Label;
 	public static String ProjectionPropertyDialog_SetDefault_Button;
 	public static String ProjectionPropertyDialog_UnknownCode;
@@ -730,6 +737,8 @@ public class Messages extends NLS {
 	public static String Station_Description_Label;
 	public static String Station_Id_Label;
 	public static String Station_Name_Label;
+	public static String StationListPropertyPage_ConfirmDeleteMessage;
+	public static String StationListPropertyPage_ConfirmDeleteTitle;
 	public static String StationListPropertyPage_Default_NewStationName;
 	public static String StationListPropertyPage_Dialog_Message;
 	public static String StationListPropertyPage_Dialog_Title;
@@ -741,6 +750,7 @@ public class Messages extends NLS {
 	public static String StationListPropertyPage_InvalidDescription_DialogTitle;
 	public static String StationListPropertyPage_InvalidName_DialogTitle;
 	public static String StationListPropertyPage_LanguageLabel;
+	public static String StationListPropertyPage_PageName;
 	public static String StringComparison_Contains;
 	public static String StringComparison_Equals;
 	public static String StringFilterComposite_Filter_Label;

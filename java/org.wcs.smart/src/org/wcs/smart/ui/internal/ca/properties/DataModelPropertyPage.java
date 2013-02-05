@@ -378,6 +378,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		});
 			
 		viewer.refresh();
+		setTitle(Messages.DataModelPropertyPage_PageTitle);
 		setMessage(Messages.DataModelPropertyPage_Dialog_Message);
 		
 		return thisparent;
