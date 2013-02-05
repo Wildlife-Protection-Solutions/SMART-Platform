@@ -31,7 +31,7 @@ import org.wcs.smart.intelligence.model.Intelligence;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceComparator implements Comparator<Intelligence> {
+public class IntelligenceNameComparator implements Comparator<Intelligence> {
 
 	@Override
 	public int compare(Intelligence i1, Intelligence i2) {
