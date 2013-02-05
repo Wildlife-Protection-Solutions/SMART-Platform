@@ -127,6 +127,7 @@ public class MultipleSelectComposite<T> extends Composite {
 		itemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		itemsListViewer.setInput(allItems);
 		((GridData)itemsListViewer.getControl().getLayoutData()).widthHint = 100;
+		((GridData)itemsListViewer.getControl().getLayoutData()).heightHint = 150;
 		itemsListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -169,6 +170,7 @@ public class MultipleSelectComposite<T> extends Composite {
 		selectedItemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		selectedItemsListViewer.setInput(selectedItems);
 		((GridData)selectedItemsListViewer.getControl().getLayoutData()).widthHint = 100;
+		((GridData)selectedItemsListViewer.getControl().getLayoutData()).heightHint = 150;
 		selectedItemsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

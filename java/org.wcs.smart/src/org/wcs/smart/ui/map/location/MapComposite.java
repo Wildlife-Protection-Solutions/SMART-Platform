@@ -27,6 +27,8 @@ import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.ILayer;
+import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
@@ -44,6 +46,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -84,7 +88,8 @@ public class MapComposite extends Composite implements MapPart {
 	private SimpleFeatureType featureType;
 	private ListFeatureCollection featureCollection;
 	private FeatureStore<SimpleFeatureType,SimpleFeature> store;
-	
+	private Layer pointLayer = null;
+	private IGeoResource pointResource;
 	
 	private MapViewer mapViewer;
 	private Map map;
@@ -141,9 +146,11 @@ public class MapComposite extends Composite implements MapPart {
 				map.getRenderManager().refresh(null);
 			}
 		});
-		defaultLayer.schedule();
 		
 		addPointsLayer();
+		defaultLayer.schedule();
+		
+		
 
 		getShell().addListener(SWT.Resize, new Listener(){
 			Job j = new Job(Messages.MapComposite_MapResizeJob_Title){
@@ -160,18 +167,30 @@ public class MapComposite extends Composite implements MapPart {
 			}
 		});
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private void addPointsLayer() {
         try {
 			featureType = DataUtilities.createType(SMART_POINT_TYPE_NAME, SMART_POINT_SPEC);
 			featureCollection = new ListFeatureCollection(featureType);
-			IGeoResource resource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
-	        store = resource.resolve(FeatureStore.class, null);
-//			store.addFeatures(featureCollection);
+			pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
+		
+			//dispose of temporary layer when composite is disposed
+			super.addDisposeListener(new DisposeListener() {
+				@Override
+				public void widgetDisposed(DisposeEvent e) {
+					try{
+						CatalogPlugin.getDefault().getLocalCatalog().remove(pointLayer.getGeoResource().service(null));
+					}catch (Exception ex){
+						SmartPlugIn.log("Error removing service", ex); //$NON-NLS-1$
+					}
+					
+				}
+			});
+	        store = pointResource.resolve(FeatureStore.class, null);
 
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
-			layers.add(resource);
+			layers.add(pointResource);
 			
 			AddLayersCommand command = new AddLayersCommand(layers, 0);
 			getMap().sendCommandASync(command);
@@ -193,7 +212,17 @@ public class MapComposite extends Composite implements MapPart {
 		} catch (IOException e) {
 			SmartPlugIn.displayLog(null, Messages.MapComposite_PointLayer_Update_Error, e);
 		}
-		getMap().getRenderManager().refresh(null);
+		//refresh map - only refresh point layer 
+		if (pointLayer == null){
+			for (ILayer layer : getMap().getMapLayers()){
+				if (layer.getGeoResource().getID().equals(pointResource.getID())){
+					pointLayer = (Layer)layer;
+				}
+			}
+		}
+		if (pointLayer != null){
+			pointLayer.refresh(null);
+		}
 		return;
 	}
 	

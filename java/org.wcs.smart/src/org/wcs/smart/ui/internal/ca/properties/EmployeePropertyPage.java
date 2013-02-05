@@ -405,7 +405,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 * 
 	 */
 	private TableViewer createEmployeeTableViewer(Composite parent){
-		TableViewer tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL );
+		TableViewer tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.VIRTUAL );
+		
 
 		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		tableViewer.getTable().setLayoutData(layoutData);
