@@ -156,7 +156,7 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 			
 			updateControlsValues();
 		} finally {
-			session.getTransaction().commit();
+			session.getTransaction().rollback();
 			session.close();
 		}
 		
