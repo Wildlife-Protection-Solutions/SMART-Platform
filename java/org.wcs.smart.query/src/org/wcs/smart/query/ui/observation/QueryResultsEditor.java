@@ -266,6 +266,12 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			return;
 		}
 		
+		//clear existing results
+		if (query.getLastResults() != null){
+			query.getLastResults().clear();
+		}
+		page1.getQueryResultsTable().setInput(null);
+		
 		//show progress area
 		page1.showProgressArea();
 		
