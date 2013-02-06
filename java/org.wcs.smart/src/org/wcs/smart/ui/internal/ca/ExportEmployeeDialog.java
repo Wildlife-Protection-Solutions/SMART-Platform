@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.ca;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -47,6 +48,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.in.EmployeeCsvImporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -94,7 +96,7 @@ public class ExportEmployeeDialog extends TitleAreaDialog {
 		fd.setFileName(Messages.ExportEmployeeDialog_CSVFileName);
 		fd.setFilterNames(new String[]{Messages.ExportEmployeeDialog_CSVFilterName, Messages.ExportEmployeeDialog_AllFilesFilterName});
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.ExportEmployeeDialog_FileLabe);
+		lbl.setText(Messages.ExportEmployeeDialog_FileLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.addListener(SWT.Modify, new Listener() {
@@ -129,7 +131,10 @@ public class ExportEmployeeDialog extends TitleAreaDialog {
 		Text txtinfo = new Text(main, SWT.NONE | SWT.READ_ONLY);
 		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		txtinfo.setText(Messages.ExportEmployeeDialog_CSVFormat_1
-				+ Messages.ExportEmployeeDialog_CSVFormat_2
+				+ SmartUtils.LINE_SEPARATOR
+				+ MessageFormat.format(
+						Messages.ExportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
+				+ SmartUtils.LINE_SEPARATOR
 				+ Messages.ExportEmployeeDialog_CSVFormat_3);
 		getShell().setText(Messages.ExportEmployeeDialog_DialogTitle);
 		setMessage(Messages.ExportEmployeeDialog_DialogMessage);
