@@ -480,7 +480,7 @@ public class Messages extends NLS {
 	public static String ExportEmployeeDialog_Error_FailedMessage;
 	public static String ExportEmployeeDialog_ExportButton;
 	public static String ExportEmployeeDialog_FailureMessage;
-	public static String ExportEmployeeDialog_FileLabe;
+	public static String ExportEmployeeDialog_FileLabel;
 	public static String ExportEmployeeDialog_IncludeHaderOp;
 	public static String ExportEmployeeDialog_InfoDialog_Title;
 	public static String ExportEmployeeDialog_SuccessMessage;
