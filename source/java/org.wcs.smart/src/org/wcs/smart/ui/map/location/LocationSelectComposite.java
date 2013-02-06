@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -72,8 +74,10 @@ import com.vividsolutions.jts.geom.Point;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class LocationSelectComposite<T extends ISmartPoint> extends Composite implements IMapPointSelectionListener, ICrsProvider {
+public abstract class LocationSelectComposite<T extends ISmartPoint> extends SashForm implements IMapPointSelectionListener, ICrsProvider {
 
+	private static final int MAP_MIN_WIDTH = 280;
+	
 	private TableViewer pointsListViewer;
 
 	private WritableList points = new WritableList();
@@ -93,13 +97,15 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 	 * @param style
 	 */
 	public LocationSelectComposite(Composite parent, int style) {
-		super(parent, style);
+		super(parent, SWT.HORIZONTAL | style);
 		createControls();
+		setWeights(new int[] {1, 2});
 	}
 
 	private void createControls(){
-		setLayout(new GridLayout(2, false));
-		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
+//		setLayout(new GridLayout(2, false));
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		setBackground(getDisplay().getSystemColor(SWT.COLOR_GRAY));
 
 		//========points part========
 		Composite pointsComposite = new Composite(this, SWT.NONE);
@@ -183,7 +189,13 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Com
 		});
 
 		//========map part========
-		mapComposite = new MapComposite(this, SWT.NONE);
+		ScrolledComposite mapScrollCmp = new ScrolledComposite(this, SWT.H_SCROLL);
+		mapComposite = new MapComposite(mapScrollCmp, SWT.NONE);
+		mapScrollCmp.setContent(mapComposite);
+		mapScrollCmp.setExpandVertical(true);
+		mapScrollCmp.setExpandHorizontal(true);
+		mapScrollCmp.setMinWidth(MAP_MIN_WIDTH);
+		
 		mapComposite.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
 			@Override
 			public void changed(ViewportModelEvent event) {
