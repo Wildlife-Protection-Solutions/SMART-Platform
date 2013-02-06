@@ -95,6 +95,7 @@ public class QueryResultItemComparator extends ViewerComparator{
 	 * @param s2
 	 * @return
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private int compareValue(Object s1, Object s2){
 		if (s1 == null && s2 == null){
 			return 0;
@@ -108,6 +109,7 @@ public class QueryResultItemComparator extends ViewerComparator{
 		Object data2 = column.getColumn().getValue((IResultItem)s2);
 		
 		ColumnType type = column.getColumn().getType();
+
 		Comparator compare = null;
 		if (type == ColumnType.INTEGER){
 			compare = SmartUtils.nullIntegerComparator;
