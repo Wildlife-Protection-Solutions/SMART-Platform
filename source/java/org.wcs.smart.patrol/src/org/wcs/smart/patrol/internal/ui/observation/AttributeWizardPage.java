@@ -238,6 +238,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			
 		}
 		scComp.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		setTitle(Messages.AttributeWizardPage_PageTitle);
 		setMessage(MessageFormat.format(Messages.AttributeWizardPage_PageMessage, new Object[]{currentCategory.getFullCategoryName()}));
 		validate();
 	}

@@ -101,6 +101,8 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		});
 		
 		setMessage(Messages.ObservationWizardPage_PageMessage);
+		setTitle(Messages.ObservationWizardPage_PageTitle);
+		
 		setPageComplete(searchTree.selectedList.size() > 0);
 		((ObservationWizard)getWizard()).setCanFinish(canFinish());
 		setControl(main);

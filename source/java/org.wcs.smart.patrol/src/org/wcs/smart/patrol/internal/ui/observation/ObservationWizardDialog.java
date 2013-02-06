@@ -27,6 +27,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 
@@ -61,6 +62,16 @@ public class ObservationWizardDialog extends WizardDialog {
 		});
 	}
 
+	/**
+	 * Sets a maximum width of 700
+	 */
+	@Override
+	protected Point getInitialSize() {
+		Point p = super.getInitialSize();
+		p.x = Math.min(p.x, 700);
+		return p;
+	}
+	
 	/**
 	 * Attempts to set focus on the next button of the 
 	 * wizard dialog.

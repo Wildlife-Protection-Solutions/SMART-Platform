@@ -289,6 +289,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 */
 	@Override
     public void addPages() {
+		
 		((WizardDialog)getContainer()).addPageChangingListener(this);
 		if (observations.size() == 0){
 			new ObservationWizardPage(this);

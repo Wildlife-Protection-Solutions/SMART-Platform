@@ -95,7 +95,6 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
 		HashMap<Category, List<WaypointObservation>> obs = ((ObservationWizard)getWizard()).getAllObservations();
 		for (Iterator<Entry<Category, List<WaypointObservation>>> iterator = obs.entrySet().iterator(); iterator.hasNext();) {
 			final Entry<Category, List<WaypointObservation>> ob =  iterator.next();
@@ -182,15 +181,14 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			}
 		}
 		
+		setTitle(Messages.ObservationSummaryWizardPage_PageTitle);
 		super.setMessage(Messages.ObservationSummaryWizardPage_PageMessage);
 		super.setPageComplete(true);
 		((ObservationWizard)getWizard()).setCanFinish(true);
 		
 		scrolled.setContent(main);
 		setControl(scrolled);
-		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		
+		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));	
 	}
 	
 	
