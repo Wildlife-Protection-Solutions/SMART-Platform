@@ -64,6 +64,7 @@ public class QueryResultsTable {
 		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		table.getTable().setHeaderVisible(true);
 		table.getTable().setLinesVisible(true);
+		table.setContentProvider(ArrayContentProvider.getInstance());
 		
 		table.setItemCount(0);
 		sorter = new QueryResultItemComparator(table);
@@ -84,7 +85,6 @@ public class QueryResultsTable {
 					@Override
 					public void run() {
 						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
-						table.setContentProvider(ArrayContentProvider.getInstance());
 					}
 				});
 				return Status.OK_STATUS;
@@ -107,7 +107,6 @@ public class QueryResultsTable {
 					@Override
 					public void run() {
 						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
-						table.setContentProvider(ArrayContentProvider.getInstance());
 					}
 				});
 				return Status.OK_STATUS;
@@ -133,7 +132,7 @@ public class QueryResultsTable {
 				table.setInput(new Object[]{});
 			}else{
 				table.setItemCount(items.size());
-				table.setInput(items.toArray());
+				table.setInput(items);
 			}
 		}
 	}

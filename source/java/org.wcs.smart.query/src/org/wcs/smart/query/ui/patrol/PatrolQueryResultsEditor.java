@@ -266,6 +266,12 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			return;
 		}
 		
+		//clear current results
+		if (query.getLastResults() != null){
+			query.getLastResults().clear();
+		}
+		page1.getQueryResultsTable().setInput(null);
+		
 		//show progress area
 		page1.showProgressArea();
 		
