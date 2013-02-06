@@ -77,6 +77,7 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView"; //$NON-NLS-1$
 	private TableViewer patrolListViewer;
 	private PatrolViewFilter filter = new PatrolViewFilter();
+	private Object[] loadingInput = new Object[]{Messages.PatrolListView_LoadingLabel};
 	
 	
 	private IPartListener2 partListener = new IPartListener2() {
@@ -121,6 +122,14 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask(Messages.PatrolListView_Progress_LoadingPatrols, 1);
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					patrolListViewer.setInput(loadingInput);
+					patrolListViewer.refresh();
+				}
+			});
+			
 			Session s = PatrolHibernateManager.openSession();
 			s.beginTransaction();
 			try{
@@ -221,7 +230,7 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 			}
 		});
 		patrolListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		patrolListViewer.setInput(new Object[]{Messages.PatrolListView_LoadingLabel});
+		patrolListViewer.setInput(loadingInput);
 		patrolListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		updateContent();
 		

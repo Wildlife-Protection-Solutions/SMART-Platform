@@ -48,6 +48,7 @@ public class Messages extends NLS {
 	public static String AttributeWizardPage_PageMessage;
 	public static String AttributeWizardPage_PageName;
 	public static String AttributeWizardPage_PageNumberLabel;
+	public static String AttributeWizardPage_PageTitle;
 	public static String AttributeWizardPage_SaveModificationsWarningMessage;
 	public static String AttributeWizardPage_UpdateObsButton;
 	public static String AttributeWizardPage_Warning_DialogTitle;
@@ -244,11 +245,13 @@ public class Messages extends NLS {
 	public static String ObservationCellEditor_NoObservations_Label;
 	public static String ObservationSummaryWizardPage_PageMessage;
 	public static String ObservationSummaryWizardPage_PageName;
+	public static String ObservationSummaryWizardPage_PageTitle;
 	public static String ObservationWizard_ConfirmCancel_DialogMessage;
 	public static String ObservationWizard_ConfirmCancel_DialogTitle;
 	public static String ObservationWizard_PageName;
 	public static String ObservationWizardPage_PageMessage;
 	public static String ObservationWizardPage_PageName;
+	public static String ObservationWizardPage_PageTitle;
 	public static String Patrol_SystemGenerateId_Name;
 	public static String PatrolArmedWizardPage_PageMessage;
 	public static String PatrolArmedWizardPage_Title;
