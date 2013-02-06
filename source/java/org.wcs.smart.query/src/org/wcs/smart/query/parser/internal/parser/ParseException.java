@@ -11,6 +11,7 @@ package org.wcs.smart.query.parser.internal.parser;
  * You can modify this class to customize your error reporting
  * mechanisms so long as you retain the public fields.
  */
+@SuppressWarnings("nls")
 public class ParseException extends Exception {
 
   /**
@@ -85,7 +86,8 @@ public class ParseException extends Exception {
    * from the parser) the correct error message
    * gets displayed.
    */
-  private static String initialise(Token currentToken,
+  
+private static String initialise(Token currentToken,
                            int[][] expectedTokenSequences,
                            String[] tokenImage) {
     String eol = System.getProperty("line.separator", "\n");

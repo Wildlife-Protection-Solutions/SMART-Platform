@@ -28,7 +28,7 @@ import org.wcs.smart.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.ValuePart;
 
-
+@SuppressWarnings({"nls", "unused"})
 public class Parser implements ParserConstants {
 
 /* ------------ Expressions ----------------------*/
@@ -79,7 +79,8 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public GridQueryDefinition GridQuery() throws ParseException {
+  
+final public GridQueryDefinition GridQuery() throws ParseException {
         IValueItem value = null;
         IFilter valueFilter = null;
         IFilter rateFilter = null;

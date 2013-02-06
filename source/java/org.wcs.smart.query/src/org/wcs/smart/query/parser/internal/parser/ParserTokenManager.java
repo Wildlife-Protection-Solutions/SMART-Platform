@@ -2,6 +2,7 @@
 package org.wcs.smart.query.parser.internal.parser;
 
 /** Token Manager. */
+@SuppressWarnings({"nls", "unused"})
 public class ParserTokenManager implements ParserConstants
 {
 
