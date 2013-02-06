@@ -180,7 +180,9 @@ public class MapComposite extends Composite implements MapPart {
 				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					try{
-						CatalogPlugin.getDefault().getLocalCatalog().remove(pointLayer.getGeoResource().service(null));
+						if (pointLayer != null){
+							CatalogPlugin.getDefault().getLocalCatalog().remove(pointLayer.getGeoResource().service(null));
+						}
 					}catch (Exception ex){
 						SmartPlugIn.log("Error removing service", ex); //$NON-NLS-1$
 					}
