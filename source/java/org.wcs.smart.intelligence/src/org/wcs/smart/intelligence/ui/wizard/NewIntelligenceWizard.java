@@ -99,7 +99,7 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
         	IntelligenceEventManager.getInstance().intelligenceAdded(intelligence);
         	
     		// open in editor
-    		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName());
+    		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName(), intelligence.getReceivedDate());
     		try {
     			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
     					.getActivePage().openEditor(input, IntelligenceEditor.ID);

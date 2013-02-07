@@ -60,7 +60,7 @@ public class IntelligenceViewFilter {
 	public Query buildQuery(Session s) { 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT i.uuid, i.shortName "); //$NON-NLS-1$
+		str.append("SELECT i.uuid, i.shortName, i.receivedDate "); //$NON-NLS-1$
 		str.append("FROM Intelligence i "); //$NON-NLS-1$
 		str.append("WHERE i.conservationArea = :ca " ); //$NON-NLS-1$
 

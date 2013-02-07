@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.patrol;
 
+import java.text.DateFormat;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.wcs.smart.intelligence.model.Intelligence;
 
@@ -35,7 +37,8 @@ public class IntelligenceLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof Intelligence) {
-			return ((Intelligence)element).getShortName();
+			Intelligence i = (Intelligence)element;
+			return i.getShortName() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( i.getReceivedDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.getText(element);
 	}

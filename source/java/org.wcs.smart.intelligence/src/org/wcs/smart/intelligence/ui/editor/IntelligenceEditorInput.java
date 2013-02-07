@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.ui.editor;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -37,13 +38,15 @@ public class IntelligenceEditorInput implements IEditorInput {
 
 	private byte[] uuid;
 	private String shortName;
+	private Date receivedDate;
 	
 	/**
 	 * Constructor
 	 */
-	public IntelligenceEditorInput(byte[] uuid, String shortName) {
+	public IntelligenceEditorInput(byte[] uuid, String shortName, Date receivedDate) {
 		this.uuid = uuid;
 		this.shortName = shortName;
+		this.receivedDate = receivedDate;
 	}
 
 	/**
@@ -86,6 +89,10 @@ public class IntelligenceEditorInput implements IEditorInput {
 		return shortName;
 	}
 
+	public Date getReceivedDate() {
+		return receivedDate;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IEditorInput#getPersistable()
 	 */
