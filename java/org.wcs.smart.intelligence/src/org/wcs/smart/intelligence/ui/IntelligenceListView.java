@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -42,7 +43,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -71,7 +76,7 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 	private IntelligenceViewFilter filter = new IntelligenceViewFilter();
 	
 
-//	private IPartListener2 partListener = new IntelligencePartListener();
+	private IPartListener2 partListener = new IntelligencePartListener();
 
 	/**
 	 * listener for intelligence change events.
@@ -87,11 +92,11 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 	 * Default constructor
 	 */
 	public IntelligenceListView() {
-//		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
 	}
 
 	public void dispose() {		
-//		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_ADDED, intelligenceListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_DELETED, intelligenceListener);
@@ -241,37 +246,37 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
    	
     }
  	
-//    private class IntelligencePartListener implements IPartListener2 {
-//		@Override
-//		public void partVisible(IWorkbenchPartReference partRef) {}
-//		
-//		@Override
-//		public void partOpened(IWorkbenchPartReference partRef) {}
-//		
-//		@Override
-//		public void partInputChanged(IWorkbenchPartReference partRef) {}
-//		
-//		@Override
-//		public void partHidden(IWorkbenchPartReference partRef) {}
-//		
-//		@Override
-//		public void partDeactivated(IWorkbenchPartReference partRef) {}
-//		
-//		@Override
-//		public void partClosed(IWorkbenchPartReference partRef) {}
-//		
-//		@Override
-//		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
-//		
-//		@Override
-//		public void partActivated(IWorkbenchPartReference partRef) {
-//			if (partRef.getId().equals(IntelligenceEditor.ID)){
-//				IWorkbenchPart part = partRef.getPart(false);
-//				if (part instanceof IntelligenceEditor){
-//					intelligenceListViewer.setSelection(new StructuredSelection( ((IntelligenceEditor) part).getEditorInput()));
-//				}
-//			}
-//		}
-//    }
+    private class IntelligencePartListener implements IPartListener2 {
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef) {
+			if (partRef.getId().equals(IntelligenceEditor.ID)){
+				IWorkbenchPart part = partRef.getPart(false);
+				if (part instanceof IntelligenceEditor){
+					intelligenceListViewer.setSelection(new StructuredSelection( ((IntelligenceEditor) part).getEditorInput()));
+				}
+			}
+		}
+    }
     
 }
