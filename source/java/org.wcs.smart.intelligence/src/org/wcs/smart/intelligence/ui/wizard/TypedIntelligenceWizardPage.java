@@ -61,6 +61,7 @@ public class TypedIntelligenceWizardPage extends IntelligenceWizardPage {
 		setPageComplete(composite.isDataValid());
 		composite.addInputChangeListener(new ControlChangeListener());
 		setControl(composite);
+		setTitle(IntelligenceCompositeFactory.getInstance().getTitle(panelType));
 		setMessage(composite.getMessage());
 	}
 
