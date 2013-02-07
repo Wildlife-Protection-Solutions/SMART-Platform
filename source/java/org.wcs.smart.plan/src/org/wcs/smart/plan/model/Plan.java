@@ -73,6 +73,9 @@ public class Plan {
 		private PlanType(String guiName){
 			this.guiName = guiName;
 		}
+		public String getName(){
+			return this.guiName;
+		}
 	}
 	
 	private byte[] uuid;
@@ -342,4 +345,12 @@ public class Plan {
 		}
 		return false;
 	}
+
+	public void deleteTarget(PlanTarget t) {
+		if(targets == null){
+			targets = new ArrayList<PlanTarget>();
+		}
+		targets.remove(t);
+	}
+
 }

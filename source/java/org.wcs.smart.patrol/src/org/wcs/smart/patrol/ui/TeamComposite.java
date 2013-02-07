@@ -192,5 +192,8 @@ public class TeamComposite extends PatrolItemComposite{
 		}
 	}
 	
+	public ComboViewer getViewer(){
+		return teamList;
+	}
 }
 

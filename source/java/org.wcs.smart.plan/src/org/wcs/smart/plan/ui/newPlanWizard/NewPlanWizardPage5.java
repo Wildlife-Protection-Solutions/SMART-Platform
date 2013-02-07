@@ -21,24 +21,11 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.Calendar;
-
-import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
-import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.plan.ui.panel.IInputChangeListener;
+import org.wcs.smart.plan.ui.panel.PlanDatesComposite;
 
 /**
  * Wizard page for collecting the plan dates
@@ -46,14 +33,10 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class NewPlanWizardPage5 extends NewPlanWizardPage implements SelectionListener {
+public class NewPlanWizardPage5 extends NewPlanWizardPage {
 
 	
-	
-	private DateTime dtStartDate;
-	private DateTime dtEndDate;
-
-	private ControlDecoration cdEndDate;
+	private PlanDatesComposite panel;
 	/**
 	 * 
 	 */
@@ -68,101 +51,36 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage implements SelectionLi
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		panel =  new PlanDatesComposite(parent, SWT.NONE); 
 		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Plan Start Date:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
-		
-		lbl = new Label(center, SWT.NONE);
-		lbl.setText("Plan End Date:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)dtEndDate.getLayoutData()).horizontalIndent = 10;
-		cdEndDate = new ControlDecoration(lbl, SWT.RIGHT);
-		cdEndDate.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
-		cdEndDate.hide();
-		
-		dtEndDate.addSelectionListener(this);
-		dtStartDate.addSelectionListener(this);
-		
-		setControl(center);
-		setMessage("Enter a name and description for the new Plan:");
-	
-		Listener validate = new Listener() {
+		panel.addInputChangeListener(new IInputChangeListener(){
 			@Override
-			public void handleEvent(Event event) {
-				validate();
+			public void inputChanged() {
+				if(!panel.isDataValid()){
+					((CreatePlanWizard) getWizard()).setCanFinish(false);
+					setPageComplete(false);
+				}else{
+					((CreatePlanWizard) getWizard()).validate();
+					setPageComplete(true);
+				}
 			}
-		};
-		dtStartDate.addListener(SWT.Selection, validate);
-		dtEndDate.addListener(SWT.Selection, validate);
-
+		
+		});
+		
+		setControl(panel);
+		setMessage("Enter a name and description for the new Plan:");
 	}
 	
-	protected void validate() {
-		boolean isValid = true;
-		cdEndDate.hide();
-		if(dtStartDate == null || dtEndDate == null){
-			isValid = false;
-			cdEndDate.show();
-			cdEndDate.setDescriptionText("You must select valid dates.");
-			((CreatePlanWizard)getWizard()).setCanFinish(false);
-		}
-
-		if( (SmartUtils.getDate(dtEndDate)).before(SmartUtils.getDate(dtStartDate)) ){
-			isValid = false;
-			cdEndDate.show();
-			cdEndDate.setDescriptionText("End date must be after the start date.");
-			((CreatePlanWizard)getWizard()).setCanFinish(false);
-		}
-		
-		if(isValid){
-			((CreatePlanWizard)getWizard()).validate();
-		}
-
-	}
-
 
 	@Override
 	public boolean updateModel(Plan p) {
-		p.setEndDate(SmartUtils.getDate(dtEndDate));
-		p.setStartDate(SmartUtils.getDate(dtStartDate));
+		panel.updateModel(p);
 		return true;
 	}
 	
 	@Override
-	void initModel(Plan p, Session session) {
-		try{
-			Calendar startDate = SmartUtils.convertDate(p.getStartDate());
-			Calendar endDate = SmartUtils.convertDate(p.getEndDate());
-			dtStartDate.setDate(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH), startDate.get(Calendar.DATE));
-			dtEndDate.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
-		}catch (Exception e) {
-			// OK, no data to update will give us Exceptions
-		}
-	}
-	
-	
-	/**
-	 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-	 */
-	@Override
-	public void widgetDefaultSelected(SelectionEvent e) {
+	void initModel(Plan p) {
+		panel.initFromModel(p);
 	}
 
-
-	@Override
-	public void widgetSelected(SelectionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 }

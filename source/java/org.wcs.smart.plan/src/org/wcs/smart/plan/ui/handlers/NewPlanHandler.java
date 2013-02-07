@@ -36,9 +36,10 @@ import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
 
 
 /**
- * Handler to display new patrol wizard.
+ * Handler to display new planwizard.
  * 
  * @author Emily
+ * @author jeffloun
  *
  */
 public class NewPlanHandler extends AbstractHandler {

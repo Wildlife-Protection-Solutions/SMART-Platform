@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -43,8 +43,9 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Wizard page for collecting the patrol comment
+ * Wizard page for collecting the plan template
  * @author egouge
+ * @author jeffloun
  * @since 1.0.0
  */
 public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionListener {
@@ -117,13 +118,15 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 	 * A job that initializes the query 
 	 * filter options
 	 */
-	public void initModel(Plan p, Session session){
-		List roots = PlanHibernateManager.getAllRootPlans(session);
+	public void initModel(Plan p){
+		List roots = PlanHibernateManager.getAllRootPlans(HibernateManager.openSession());
 		planTreeViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
 		lastSelection = p.getTemplatePlan();
 		if (lastSelection != null){
 			planTreeViewer.setSelection(lastSelection);
-		}			
+		}
+		
+
 	}
 
 	

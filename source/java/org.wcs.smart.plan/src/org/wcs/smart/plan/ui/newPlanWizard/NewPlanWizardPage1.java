@@ -27,7 +27,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -56,15 +55,7 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		main.setLayout(new GridLayout(1, false));
-
-		Composite center = new Composite(main, SWT.NONE);
-		center.setLayout(new GridLayout(1, false));
-		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-
-		Composite buttonPanel = new Composite(center, SWT.NONE);
+		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
 		buttonPanel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true,
 				false));
@@ -79,7 +70,7 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 		btnExisting.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		setMessage("When creating a new plan, you can use an existing plan as a template, or simply create a new, blank plan.");
-		super.setControl(main);
+		super.setControl(buttonPanel);
 
 	}
 	
@@ -90,7 +81,7 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 	}
 	
 	@Override
-	void initModel(Plan p, Session session) {
+	void initModel(Plan p) {
 		//nothing to do on this page.
 	}
 	

@@ -21,35 +21,22 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
-import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.ui.StationComposite;
-import org.wcs.smart.patrol.ui.TeamComposite;
 import org.wcs.smart.plan.model.Plan;
-
-
+import org.wcs.smart.plan.ui.panel.PlanStationTeamComposite;
 
 
 /**
  * Wizard page for collecting the plan team
  * and station.
  * 
- * @author egouge
+ * @author jeffloun
  * @since 1.0.0
  */
 public class NewPlanWizardPage4 extends NewPlanWizardPage {
-
 	
-	private TeamComposite teamList;
-	private StationComposite stationList;
+	private PlanStationTeamComposite panel;
 	
 	/**
 	 * 
@@ -65,17 +52,9 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(1, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-				
-		teamList = new TeamComposite();
-		teamList.createComponent(center, SWT.NONE);
+		panel =  new PlanStationTeamComposite(parent, SWT.NONE); 
 		
-		stationList = new StationComposite();
-		stationList.createComponent(center,  SWT.NONE);
-		
-		setControl(center);
+		setControl(panel);
 		setMessage("Select the associated Team and/or Station for this plan, if applicable:");
 
 	}
@@ -83,39 +62,13 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
-		p.setStation(stationList.getSelectedStation());
-		p.setTeam(teamList.getSelectedTeam());
+		panel.updateModel(p);
 		return true;
 	}
 	
 	@Override
-	void initModel(Plan p, Session session) {
-		
-		//Set team values, 
-		List<? extends Object> teams = null;
-		List<? extends Object> stations = null;
-		try{
-			teams =  PatrolHibernateManager.getActiveTeams(p.getConservationArea(), session);
-			stations = PatrolHibernateManager.getActiveStations(p.getConservationArea(), session);
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog("Could not load teams and stations.", ex);
-			session.close();
-		}
-		
-		teamList.setInput(teams, p.getTeam());
-		stationList.setInput(stations, p.getStation());		
-		
-		try{
-			teamList.setSelectedTeam(p.getTeam());			
-		}catch (Exception e){
-			//do nothing, probably just no template so we can't set the values to anything
-		}
-		try{
-			stationList.setSelectedStation(p.getStation() );
-		}catch (Exception e){
-			//eat me
-		}
-		
+	void initModel(Plan p) {
+		panel.initFromModel(p);
 		
 	}
 }

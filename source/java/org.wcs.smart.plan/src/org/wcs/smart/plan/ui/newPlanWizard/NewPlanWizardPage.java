@@ -25,14 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.wizard.WizardPage;
-import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
 
 
 /**
- * An abstract class for new patrol wizard pages.
+ * An abstract class for new plan wizard pages.
  * 
  * @author Emily
+ * @author jeffloun
  * @since 1.0.0
  */
 public abstract class NewPlanWizardPage extends WizardPage {
@@ -62,7 +62,7 @@ public abstract class NewPlanWizardPage extends WizardPage {
 	 * @param p patrol to use when updating gui components
 	 * @param session the current hibernate session
 	 */
-	abstract void initModel(Plan p, Session session);
+	abstract void initModel(Plan p);
 	
 	/**
 	 * Fires all registered listeners

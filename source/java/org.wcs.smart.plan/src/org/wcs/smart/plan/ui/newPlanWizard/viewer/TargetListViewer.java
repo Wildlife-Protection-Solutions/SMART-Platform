@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard.viewer;
 
+import java.util.List;
+
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -29,30 +31,34 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
-import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 
 /**
- * Creates a new larget list viewer.
+ * Creates a new target list viewer.
  * 
- * @author Jeff
+ * @author jeffloun
  *
  */
-public class TargetListViewer {
+public class TargetListViewer{
 	
 	private TableViewer v;
 	
 
-	public TargetListViewer(Composite parent, Plan p) {
-		v = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+	public TargetListViewer(Composite parent) {
+		Composite table = new Composite(parent, SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		
+		v = new TableViewer(table, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		v.getTable().setHeaderVisible(true);
 		v.getTable().setLinesVisible(true);
 		
+	
 		TableViewerColumn viewerColumn = new TableViewerColumn(v,SWT.NONE);
 		TableColumn column = viewerColumn.getColumn();
-		TableColumnLayout layout = (TableColumnLayout) v.getTable().getParent().getLayout();
+
 		layout.setColumnData(column, new ColumnWeightData(34,ColumnWeightData.MINIMUM_WIDTH, true));
 		column.setText("Target Name");
 		column.setResizable(true);
@@ -71,7 +77,6 @@ public class TargetListViewer {
 		
 		viewerColumn = new TableViewerColumn(v,SWT.NONE);
 		column = viewerColumn.getColumn();
-		layout = (TableColumnLayout) v.getTable().getParent().getLayout();
 		layout.setColumnData(column, new ColumnWeightData(66,ColumnWeightData.MINIMUM_WIDTH, true));
 		column.setText("Summary");
 		column.setResizable(true);
@@ -87,11 +92,9 @@ public class TargetListViewer {
 			}			 
 		});
 		v.setContentProvider(ArrayContentProvider.getInstance());
-		if(p.getTargets() != null){
-			v.setInput(p.getTargets().toArray());
-		}
 
-		
+		table.setLayout(layout);
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
 	
 	
@@ -99,9 +102,9 @@ public class TargetListViewer {
 		return this.v;
 	}
 	
-	public void updateModel(Plan p) {
-		if(p.getTargets() != null){
-			v.setInput(p.getTargets().toArray());
+	public void updateModel(List<PlanTarget> t) {
+		if(t != null){
+			v.setInput(t);
 			v.refresh();
 		}
 	}
@@ -109,6 +112,13 @@ public class TargetListViewer {
 
 	public IStructuredSelection getSelection() {
 		return (IStructuredSelection) v.getSelection();
+	}
+
+
+	public void initValues(List<PlanTarget> targets) {
+		if(targets != null){
+			v.setInput(targets.toArray());
+		}
 	}
 	
 

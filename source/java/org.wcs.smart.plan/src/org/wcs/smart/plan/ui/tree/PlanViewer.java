@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -123,9 +124,12 @@ public class PlanViewer {
 	 * 
 	 * @return the viewer control
 	 */
-	public Composite getControl(){
-		
+
+	public Control getControl(){
 		return planViewer.getTree();
+	}
+	public TreeViewer getViewer(){
+		return this.planViewer;
 	}
 	
 }

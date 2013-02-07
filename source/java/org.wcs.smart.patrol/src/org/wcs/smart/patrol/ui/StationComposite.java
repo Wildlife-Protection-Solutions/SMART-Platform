@@ -186,5 +186,8 @@ public class StationComposite extends PatrolItemComposite{
 		}
 		
 	}
+	public ComboViewer getViewer(){
+		return stationList;
+	}
 }
 

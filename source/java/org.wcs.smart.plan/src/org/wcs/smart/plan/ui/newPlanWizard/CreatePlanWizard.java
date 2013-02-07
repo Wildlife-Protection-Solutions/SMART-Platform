@@ -166,7 +166,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		super.addPage(new NewPlanWizardPage3()); // id/name/desc
 		super.addPage(new NewPlanWizardPage4()); //team/station
 		super.addPage(new NewPlanWizardPage5()); // dates
-		super.addPage(new NewPlanWizardPage6(plan)); //targets
+		super.addPage(new NewPlanWizardPage6()); //targets
 		super.addPage(new NewPlanWizardPage7()); //parent
 		
 	}
@@ -174,7 +174,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	@Override
 	 public void createPageControls(Composite pageContainer) {
 		 super.createPageControls(pageContainer);
-		 page1.initModel(plan, getSession());
+		 page1.initModel(plan);
 	 }
 
 	/**
@@ -243,7 +243,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			}
 		}
 		if (event.getTargetPage() instanceof NewPlanWizardPage) {
-			((NewPlanWizardPage) event.getTargetPage()).initModel(plan, getSession());
+			((NewPlanWizardPage) event.getTargetPage()).initModel(plan);
 		}
 
 		if (event.doit) {

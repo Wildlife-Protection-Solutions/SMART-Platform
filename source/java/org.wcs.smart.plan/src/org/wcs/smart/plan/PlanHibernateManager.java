@@ -29,7 +29,6 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -126,8 +125,24 @@ public class PlanHibernateManager{
 		return true;
 	}
 	
+	//the 3rd paremeter indicates that the plan is saved and in the database already, so we will definitely get 1-duplicate
+	public static boolean isDuplicatePlanId(Session s, String id, boolean isSaved) {
+		int count = numberPlanId(s, id);
+		if (count > 1) {
+			return true;
+		}
+		return false;
+	}
 	public static boolean isDuplicatePlanId(Session s, String id) {
-		double count =99;
+		int count = numberPlanId(s, id);
+		if (count > 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	private static int numberPlanId(Session s, String id){
+		int count =99;
 		s.beginTransaction();
 		try {
 			Query q = s
@@ -138,13 +153,13 @@ public class PlanHibernateManager{
 		}finally{
 			s.getTransaction().rollback();
 		}
-
-		if (count > 0) {
-			return true;
-		}
-		
-		return false;
-
+		return count;
 	}
-	
+
+
+	public static Plan deletePlan(byte[] uuid) {
+		// TODO Actually delete the plan...
+		return null;
+	}
+		
 }
