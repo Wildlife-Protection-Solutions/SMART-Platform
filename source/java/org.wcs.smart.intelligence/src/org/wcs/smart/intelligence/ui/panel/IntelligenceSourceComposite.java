@@ -53,6 +53,8 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 
 	private static final String ERROR_SOURCE_REQUIRED = Messages.IntelligenceSource_Error_SourceRequired;
 	private static final String ERROR_PATROL_ID_REQUIRED = Messages.IntelligenceSource_Error_PatrolIdRequired;
+
+	private static final int DECORATION_MARGIN = 2;
 	
     private ComboViewer sourceType;
     
@@ -103,6 +105,8 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         patrolId = new PatrolFilteredComboViewer(this);
+        //below line is to fix decorator truncation issue
+        ((GridLayout)patrolId.getLayout()).marginLeft = DECORATION_MARGIN;
         patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
