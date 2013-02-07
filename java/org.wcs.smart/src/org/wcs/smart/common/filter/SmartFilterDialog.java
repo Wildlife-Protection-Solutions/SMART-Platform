@@ -93,8 +93,14 @@ public abstract class SmartFilterDialog extends TitleAreaDialog {
 	}
 	
 
+	/**
+	 * Updates the current filter values
+	 */
 	protected abstract void updateFilterModel();
 
+	/**
+	 * Resets the filter values to the default
+	 */
 	protected abstract void resetFilterModel();
 	
 	/**

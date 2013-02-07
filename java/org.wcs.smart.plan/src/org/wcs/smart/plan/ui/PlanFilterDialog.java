@@ -23,7 +23,9 @@ package org.wcs.smart.plan.ui;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -131,8 +133,26 @@ public class PlanFilterDialog extends SmartFilterDialog {
 
 			Composite dateFilterExpComp = createGroupComposite(
 					"Plan Date Filter", composite);
+			
 			dateFilterCmp = new DateFilterComposite(dateFilterExpComp,
-					SWT.NONE, this);
+					SWT.NONE, this){
+			
+				@Override
+				protected DateFilter[] getDefaultDateViewerInput() {
+					return new DateFilter[] {
+							DateFilter.RANGE_30_DAYS,
+							DateFilter.RANGE_60_DAYS,
+							DateFilter.CURRENT_YEAR,
+							DateFilter.CURRENT_MONTH,
+							DateFilter.CUSTOM
+					};
+				}
+				@Override
+				protected ISelection getDefaultDateViewerSelection() {
+					return new StructuredSelection(DateFilter.RANGE_30_DAYS);
+				}
+
+			};
 
 			Composite patrolType = createGroupComposite("Plan Type Filter",
 					composite);

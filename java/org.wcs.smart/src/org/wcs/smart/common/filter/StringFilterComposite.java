@@ -51,6 +51,8 @@ public class StringFilterComposite extends Composite {
 	private Label lblValue;
 	private ComboViewer comparatorViewer;
 	private Text txtFilter;
+	
+	private TextField[] searchFields;
 
 	/**
 	 * Types of comparation.
@@ -130,14 +132,26 @@ public class StringFilterComposite extends Composite {
 		});
 	}
 
+	/**
+	 * Sets the "include all" label
+	 * @param text
+	 */
 	public void setIncludeAllRadioLabel(String text) {
 		btnIncludeAll.setText(text);
 	}
 
+	/**
+	 * Sets the filter link radio label
+	 * @param text
+	 */
 	public void setFilterRadioLabel(String text) {
 		btnFilter.setText(text);
 	}
 	
+	/**
+	 * Sets the 
+	 * @param text
+	 */
 	public void setValueLabel(String text) {
 		lblValue.setText(text);
 	}
@@ -192,4 +206,18 @@ public class StringFilterComposite extends Composite {
 		return txtFilter;
 	}
 
+	public class TextField{
+		private String guiName;
+		private String dbName;
+		public TextField(String guiName, String dbFieldName){
+			this.guiName = guiName;
+			this.dbName = dbName;
+		}
+		public String getGuiName(){
+			return this.guiName;
+		}
+		public String getDbFieldName(){
+			return this.dbName;
+		}
+	}
 }

@@ -84,6 +84,10 @@ public class DateFilterComposite extends Composite {
 		NEXT_60_DAYS(Messages.DateFilter_Next60Days),
 		YEAR_TO_DATE(Messages.DateFilter_YearToDate),
 		MONTH_TO_DATE(Messages.DateFilter_MonthToDate),
+		RANGE_30_DAYS("+- 30 Days"),
+		RANGE_60_DAYS("+- 60 Days"),
+		CURRENT_YEAR("Current Year"),
+		CURRENT_MONTH("Current Month"),
 		CUSTOM(Messages.DateFilter_Custom);
 		
 		private String guiName;
@@ -94,6 +98,61 @@ public class DateFilterComposite extends Composite {
 		public String getGuiName(){
 			return this.guiName;
 		}
+		
+		/**
+		 * 
+		 * @return the start date associated with the filter or
+		 * <code>null</code> if start date cannot be computed
+		 * for filter value (for custom values).
+		 */
+		public Date getStartDate(){
+			Calendar cal = Calendar.getInstance();
+			if (this == LAST_30_DAYS || this == RANGE_30_DAYS){
+				cal.add(Calendar.DAY_OF_MONTH, -30);
+				return cal.getTime(); 	
+			}else if (this == LAST_60_DAYS || this == RANGE_60_DAYS){
+				cal.add(Calendar.DAY_OF_MONTH, -60);
+				return cal.getTime();
+			}else if (this == NEXT_30_DAYS || this == NEXT_60_DAYS){
+				return cal.getTime();
+			}else if (this == YEAR_TO_DATE || this == CURRENT_YEAR){
+				cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
+				return cal.getTime();
+			}else if (this == MONTH_TO_DATE || this == CURRENT_MONTH){
+				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
+				return cal.getTime();
+			}
+			return null;
+		}
+		
+		/**
+		 * 
+		 * @return the end date associated with the filter or
+		 * <code>null</code> if end date cannot be computed
+		 * for filter value (for custom values).
+		 */
+		public Date getEndDate(){
+			Calendar cal = Calendar.getInstance();
+			if (this == LAST_30_DAYS || this == LAST_60_DAYS 
+					|| this == YEAR_TO_DATE
+					|| this == MONTH_TO_DATE){
+				return cal.getTime(); 	
+			}else if (this == NEXT_30_DAYS || this == RANGE_30_DAYS){
+				cal.add(Calendar.DAY_OF_MONTH, 30);
+				return cal.getTime();
+			}else if (this == NEXT_60_DAYS || this == RANGE_60_DAYS){
+				cal.add(Calendar.DAY_OF_MONTH, 60);
+				return cal.getTime();
+			}else if (this == CURRENT_YEAR){
+				cal.set(cal.get(Calendar.YEAR), 11, 31, 23, 59, 59);
+				return cal.getTime();
+			}else if (this == CURRENT_MONTH){
+				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.MONTH), 23, 59, 59);
+				return cal.getTime();
+			}
+			return null;
+		}
+		
 	}
 	
 	public DateFilterComposite(Composite parent, int style, SmartFilterDialog dialog) {

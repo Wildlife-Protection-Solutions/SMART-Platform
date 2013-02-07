@@ -1,6 +1,26 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.plan.filter;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.hibernate.Query;
@@ -8,14 +28,20 @@ import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.model.Plan.PlanType;
 
+/**
+ * Filter for filtering
+ * planning objects.
+ *  
+ * @author Emily
+ *
+ */
 public class PlanFilter {
 	
+	public static DateFilter DEFAULT_DATE_FILTER = DateFilter.RANGE_30_DAYS; 
 	private Plan.PlanType[] types = null;
-	private DateFilter dateFilter = DateFilter.LAST_30_DAYS;
+	private DateFilter dateFilter = DEFAULT_DATE_FILTER;
 	private String planIdFilter = null;
 	private StringComparison stringComparator = null;
 	
@@ -71,7 +97,7 @@ public class PlanFilter {
 	 * Resets all values to the default
 	 */
 	public void setDefaults(){
-		this.dateFilter = DateFilter.LAST_30_DAYS;
+		this.dateFilter = DEFAULT_DATE_FILTER;
 		this.planIdFilter = null;
 		this.stringComparator = null;
 		this.types = null;
@@ -177,38 +203,17 @@ public class PlanFilter {
 			}
 		}
 		if (dateFilter != null) {
-
-			if (dateFilter == DateFilter.LAST_30_DAYS) {
-				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.DAY_OF_MONTH, -30);
-				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
-				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
-			} else if (dateFilter == DateFilter.LAST_60_DAYS) {
-				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.DAY_OF_MONTH, -60);
-				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
-				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
-			} else if (dateFilter == DateFilter.YEAR_TO_DATE) {
-				Calendar cal = Calendar.getInstance();
-				cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
-				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
-				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
-			} else if (dateFilter == DateFilter.MONTH_TO_DATE) {
-				Calendar cal = Calendar.getInstance();
-				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
-				query.setParameter("date1", cal.getTime()); //$NON-NLS-1$
-				query.setParameter("date2", getCurrentDate()); //$NON-NLS-1$
-			} else if (dateFilter == DateFilter.CUSTOM) {
-				query.setParameter("date1", startDate); //$NON-NLS-1$
-				query.setParameter("date2", endDate); //$NON-NLS-1$
+			Date start = dateFilter.getStartDate();
+			if (start == null){
+				start = startDate;
 			}
-
+			Date end = dateFilter.getEndDate();
+			if (end == null){
+				end = endDate;
+			}
+			query.setParameter("date1", start); //$NON-NLS-1$
+			query.setParameter("date2", end); //$NON-NLS-1$
 		}
 		return query;
-	}
-	
-	private Date getCurrentDate() {
-		Calendar cal = Calendar.getInstance();
-		return cal.getTime();
 	}
 }
