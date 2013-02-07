@@ -36,6 +36,8 @@ import org.wcs.smart.intelligence.model.Intelligence;
 public abstract class IntelligenceComposite extends Composite implements IIntelligenceModifier {
 
 	private String message;
+	private String errorMessage;
+	
 	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
 
 	/**
@@ -51,10 +53,18 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 	 * <code>true</code> by default
 	 */
 	@Override
-	public boolean isDataValid() {
-		return true; //default value
+	public final boolean isDataValid() {
+		return getErrorMessage() == null;
 	}
 
+	/**
+	 * Subclasses must implement this method and properly set error message
+	 * if validation is required for the component
+	 */
+	protected void validate() {
+		//nothing by default
+	}
+	
 	public void addInputChangeListener(IInputChangeListener listener) {
 		inputListeners.add(listener);
 	}
@@ -64,6 +74,7 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 	}
 	
 	protected void fireInputChangeListeners() {
+		validate();
 		for (IInputChangeListener listener : inputListeners) {
 			listener.inputChanged(this);
 		}
@@ -77,4 +88,12 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 		this.message = message;
 	}
 
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	protected void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	
 }

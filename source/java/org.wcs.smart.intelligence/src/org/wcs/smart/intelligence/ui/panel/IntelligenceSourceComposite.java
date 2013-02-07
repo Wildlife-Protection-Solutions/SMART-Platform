@@ -71,6 +71,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 		super(parent, style);
 		setMessage(Messages.IntelligenceSource_Message);
 		createControls();
+		validate();
 	}
 
 	private void createControls() {
@@ -162,17 +163,19 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	}
     
     @Override
-    public boolean isDataValid() {
+    protected void validate() {
     	IntelligenceSourceType source = getSelectedSourceType();
 		if (source == null) {
-			return false;
+			setErrorMessage(ERROR_SOURCE_REQUIRED);
+			return;
 		}
-		if (IntelligenceSourceType.PATROL.equals(source)) {
-			return getSelectedPatrol() != null;
+		if (IntelligenceSourceType.PATROL.equals(source) && getSelectedPatrol() == null) {
+			setErrorMessage(ERROR_PATROL_ID_REQUIRED);
+			return;
 		}
-		return true;
-    }
-    
+		setErrorMessage(null);
+    } 
+
     private IntelligenceSourceType getSelectedSourceType() {
 		ISelection sourceSelection = sourceType.getSelection();
 		if (sourceSelection instanceof IStructuredSelection) {

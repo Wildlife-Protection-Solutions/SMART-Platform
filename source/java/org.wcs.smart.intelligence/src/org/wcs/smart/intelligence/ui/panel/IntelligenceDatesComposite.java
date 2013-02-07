@@ -61,6 +61,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
 		super(parent, style);
 		setMessage(Messages.IntelligenceDates_Message);
 		createControls();
+		validate();
 	}
 
 	private void createControls() {
@@ -148,8 +149,12 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
 	}
     
 	@Override
-	public boolean isDataValid() {
-		return isDateRangeValid();
+	protected void validate() {
+		if (!isDateRangeValid()) {
+			setErrorMessage(Messages.IntelligenceDatesComposite_DateRange_Error);
+			return;
+		}
+		setErrorMessage(null);
 	}
 	
 	private boolean isDateRangeValid() {

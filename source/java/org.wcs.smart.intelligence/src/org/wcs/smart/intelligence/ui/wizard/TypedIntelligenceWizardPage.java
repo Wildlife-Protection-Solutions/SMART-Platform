@@ -84,6 +84,7 @@ public class TypedIntelligenceWizardPage extends IntelligenceWizardPage {
 		@Override
 		public void inputChanged(IntelligenceComposite source) {
 			TypedIntelligenceWizardPage.this.setPageComplete(source.isDataValid());
+			TypedIntelligenceWizardPage.this.setErrorMessage(source.getErrorMessage());
 		}
 	}
 
