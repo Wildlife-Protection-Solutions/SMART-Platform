@@ -70,11 +70,8 @@ public class IntelligenceLocationComposite extends IntelligenceComposite impleme
         locationSelect.addLocationPointsChangeListener(this);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.intelligence.ui.panel.IIntelligenceModifier#updateModel(org.wcs.smart.intelligence.model.Intelligence)
-	 */
 	@Override
-	public boolean updateModel(Intelligence intelligence) {
+	protected void updateModelInternal(Intelligence intelligence) {
 		//create a copy of points array from composite (we don't want to remove from original array as this will effect gui)
 		List<IntelligencePoint> points = new ArrayList<IntelligencePoint>(locationSelect.getPoints());
 		//Update the points
@@ -95,7 +92,6 @@ public class IntelligenceLocationComposite extends IntelligenceComposite impleme
 			pt.setIntelligence(intelligence);
 			intelligence.getPoints().add(pt);
 		}
-		return true;
 	}
 
 	@Override

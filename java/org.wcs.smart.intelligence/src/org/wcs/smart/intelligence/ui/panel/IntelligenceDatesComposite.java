@@ -127,11 +127,10 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
     }	
 
 	@Override
-	public boolean updateModel(Intelligence intelligence) {
+	protected void updateModelInternal(Intelligence intelligence) {
         intelligence.setFromDate(SmartUtils.getDate(dtFromDate));
         Date toDate = multipleDays.getSelection() ? SmartUtils.getDate(dtToDate) : null;
         intelligence.setToDate(toDate);
-        return true;
 	}
 
 	@Override

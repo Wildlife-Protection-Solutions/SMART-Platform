@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.model.Intelligence;
 
 /**
@@ -59,11 +60,30 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 
 	/**
 	 * Subclasses must implement this method and properly set error message
-	 * if validation is required for the component
+	 * if validation is required for the component. <br/>
+	 * Example: <br/><code>
+	 * if (isValid()) { <br/>
+	 * 	  setErrorMessage(null); <br/>
+	 * } else { <br/>
+	 *    setErrorMessage("Data is not valid"); <br/>
+	 * } </code>
 	 */
 	protected void validate() {
 		//nothing by default
 	}
+	
+	@Override
+	public final boolean updateModel(Intelligence intelligence) {
+		validate();
+		if (isDataValid()) {
+			updateModelInternal(intelligence);
+			return true;
+		}
+		IntelligencePlugIn.displayLog(getErrorMessage(), null);
+        return false;
+	}
+
+	protected abstract void updateModelInternal(Intelligence intelligence);
 	
 	public void addInputChangeListener(IInputChangeListener listener) {
 		inputListeners.add(listener);
