@@ -24,6 +24,13 @@ package org.wcs.smart.ui.map.tool;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.tools.internal.Zoom;
 
+/**
+ * Wrapper around zoom tool for using tool in dialog box.
+ * 
+ * @author Emily
+ *
+ */
+
 public class ZoomTool extends Zoom {
 
 	public static final String ID = "org.wcs.smart.ui.map.tool.ZoomTool"; //$NON-NLS-1$

@@ -69,7 +69,7 @@ public class SelectionTool extends AbstractModalTool {
 				Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 				fireListeners(p.getX(), p.getY());
 			} catch (Exception exception) {
-				SmartPlugIn.displayLog(null, "Error while selecting a point. Point conversion failed", exception);
+				SmartPlugIn.displayLog(null, "Error while selecting a point. Point conversion failed", exception); //$NON-NLS-1$
 			}
 		} else {
 			//assume that we are in lat long coordinate system

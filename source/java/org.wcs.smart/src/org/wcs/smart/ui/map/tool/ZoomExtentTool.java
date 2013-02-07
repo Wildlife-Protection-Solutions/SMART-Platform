@@ -28,6 +28,13 @@ import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import net.refractions.udig.project.ui.tool.AbstractActionTool;
 
+/**
+ * Wrapper around zoom to extent tool for using
+ * in dialog box.
+ * 
+ * @author Emily
+ *
+ */
 public class ZoomExtentTool extends AbstractActionTool {
 
 	public static final String ID = "org.wcs.smart.ui.map.tool.ZoomExtentsTool"; //$NON-NLS-1$
