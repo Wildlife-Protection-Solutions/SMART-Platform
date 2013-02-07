@@ -51,7 +51,8 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 		panel =  new PlanTargetComposite(parent, SWT.NONE); 
 		
 		setControl(panel);
-		setMessage("Add plan targets by selecting the \"Add new target\" button. Click the edit button beside an existing target to make changes to it:");
+		setTitle("Targets");
+		setMessage("Add plan targets by selecting the \"Add Target...\" button. Use the \"Edit Target ...\" to edit the selected target and \"Delete Target\" to remove a target.");
 	}
 	
 

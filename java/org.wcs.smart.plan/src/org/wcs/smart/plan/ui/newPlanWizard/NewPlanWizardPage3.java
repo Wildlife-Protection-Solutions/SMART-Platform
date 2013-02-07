@@ -74,7 +74,8 @@ public class NewPlanWizardPage3 extends NewPlanWizardPage {
 		});
 		
 		setControl(panel);
-		setMessage("Enter a name and description for the new Plan:");
+		setTitle("Plan Information");
+		setMessage("Enter a name and description for the new plan.");
 		
 	}
 

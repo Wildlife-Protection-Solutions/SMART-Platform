@@ -22,6 +22,8 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.IInputChangeListener;
@@ -51,7 +53,12 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		panel =  new PlanDatesComposite(parent, SWT.NONE); 
+		
+		Composite center = new Composite(parent, SWT.NONE);
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		
+		panel =  new PlanDatesComposite(center, SWT.NONE); 
 		
 		panel.addInputChangeListener(new IInputChangeListener(){
 			@Override
@@ -66,9 +73,9 @@ public class NewPlanWizardPage5 extends NewPlanWizardPage {
 			}
 		
 		});
-		
-		setControl(panel);
-		setMessage("Enter a name and description for the new Plan:");
+		setControl(center);
+		setTitle("Plan Dates");
+		setMessage("Enter start and end date for the new plan.");
 	}
 	
 

@@ -22,6 +22,8 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.IInputChangeListener;
@@ -55,7 +57,12 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		panel =  new PlanTypeEmployeesComposite(parent, SWT.NONE); 
+
+		Composite center = new Composite(parent, SWT.NONE);
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		
+		panel =  new PlanTypeEmployeesComposite(center, SWT.NONE); 
 		
 		panel.addInputChangeListener(new IInputChangeListener(){
 			@Override
@@ -71,8 +78,9 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 		
 		});
 		
-		setControl(panel);
-		setMessage("Select the Type of Plan that you wish to create:");
+		setControl(center);
+		setTitle("Plan Type");
+		setMessage("Select the type of plan that you wish to create.");
 		
 
 	}

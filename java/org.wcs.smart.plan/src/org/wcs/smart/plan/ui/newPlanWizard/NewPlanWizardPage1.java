@@ -56,19 +56,24 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout(1, false));
+		buttonPanel.setLayout(new GridLayout());
 		buttonPanel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true,
-				false));
+				true));
 
-		btnNew = new Button(buttonPanel, SWT.RADIO);
+		Composite center = new Composite(buttonPanel, SWT.NONE);
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		
+		btnNew = new Button(center, SWT.RADIO);
 		btnNew.setText("Create a New Plan from Scratch");
-		btnNew.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		btnNew.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnNew.setSelection(true);
 		
-		btnExisting = new Button(buttonPanel, SWT.RADIO);
+		btnExisting = new Button(center, SWT.RADIO);
 		btnExisting.setText("Use an existing Plan as a template");
-		btnExisting.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		btnExisting.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
+		setTitle("Template");
 		setMessage("When creating a new plan, you can use an existing plan as a template, or simply create a new, blank plan.");
 		super.setControl(buttonPanel);
 
