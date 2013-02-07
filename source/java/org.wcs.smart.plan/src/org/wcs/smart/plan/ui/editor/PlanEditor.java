@@ -48,6 +48,7 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.newPlanWizard.viewer.TargetListViewer;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
@@ -264,8 +265,16 @@ public class PlanEditor extends EditorPart {
 	 */
 	private void initValues() {
 		Plan plan = getPlan();
-		setPartName(plan.getId());		
-		form.setText(plan.getId());
+		
+		String name = "[" + plan.getId() + "]";
+		if (plan.getName() != null){
+			name = plan.getName() + " " + name;
+		}
+//		((PlanEditorInput)getEditorInput()).setName(name);
+		setPartName(name);
+		
+		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().get(plan.getType().getIconKey()));
+		form.setText(name);
 		String none = "<none>";
 		
 		if(plan.getStation() != null){
@@ -286,8 +295,12 @@ public class PlanEditor extends EditorPart {
 			txtParentPlanId.setText(none);
 		}
 		txtPlanID.setText(plan.getId());
-		txtName.setText(plan.getName());
-		txtDescription.setText(plan.getDescription());
+		if (plan.getName() != null){
+			txtName.setText(plan.getName());
+		}
+		if (plan.getDescription() != null){
+			txtDescription.setText(plan.getDescription());
+		}
 		txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getStartDate()));
 		txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getEndDate()));
 
@@ -372,9 +385,6 @@ public class PlanEditor extends EditorPart {
 //			PatrolEventManager.getInstance().patrolChanged(comp.getAttribute(), editor.getPatrol());
 //			this.initValues();
 //			
-//			PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-//			input.setId(editor.getPatrol().getId());
-//			editor.updatePartName();
 			
 			return true;
 		}

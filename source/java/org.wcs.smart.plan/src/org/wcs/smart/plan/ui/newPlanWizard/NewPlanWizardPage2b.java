@@ -104,7 +104,7 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 		
 
 		planTreeViewer = new PlanViewer(center);
-		planTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
+		planTreeViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		
 		super.setTitle("Patrol Plan");
 		
@@ -155,7 +155,7 @@ public class NewPlanWizardPage2b extends NewPlanWizardPage implements SelectionL
 	
 	@Override
 	public boolean updateModel(Plan p) {
-		Plan t = planTreeViewer.getSelectedPlan();
+		Plan t = (Plan) planTreeViewer.getSelectedPlan();
 		p.setTemplatePlan(t);
 		
 		//init our current plan with the values from the template selected

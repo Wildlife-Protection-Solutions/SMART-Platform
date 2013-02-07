@@ -44,9 +44,12 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 
 /**
  * Represents a patrol object
@@ -63,18 +66,23 @@ public class Plan {
 	 * 
 	 */
 	public enum PlanType{
-		CA("Conservation Area Plan"),
-		STATION("Station Plan"),
-		TEAM("Team Plan"),
-		PATROL("Patrol Plan");
+		CA("Conservation Area Plan", SmartPlanPlugIn.CA_PLAN_ICON),
+		STATION("Station Plan", SmartPlanPlugIn.STATION_PLAN_ICON),
+		TEAM("Team Plan",SmartPlanPlugIn.TEAM_PLAN_ICON),
+		PATROL("Patrol Plan",SmartPlanPlugIn.PATROL_PLAN_ICON);
 		
 		public String guiName;
+		public String iconKey;
 		
-		private PlanType(String guiName){
+		private PlanType(String guiName, String iconKey){
 			this.guiName = guiName;
+			this.iconKey = iconKey;
 		}
 		public String getName(){
 			return this.guiName;
+		}
+		public String getIconKey(){
+			return this.iconKey;
 		}
 	}
 	

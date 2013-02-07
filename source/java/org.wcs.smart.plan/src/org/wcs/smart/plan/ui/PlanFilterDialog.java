@@ -1,0 +1,202 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.plan.ui;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.common.filter.DateFilterComposite;
+import org.wcs.smart.common.filter.SmartFilterDialog;
+import org.wcs.smart.common.filter.StringFilterComposite;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.perspective.PlanListView;
+
+/**
+ * Dialog for filtering plans.
+ * 
+ * @author Emily
+ *
+ */
+public class PlanFilterDialog extends SmartFilterDialog {
+
+	private PlanFilter currentFilter;
+
+	private DateFilterComposite dateFilterCmp;
+	private StringFilterComposite planIdFilter;
+
+	// type filter
+	private Button btnFilterTypes;
+	private Button btnIncludeAllTypes;
+	private CheckboxTableViewer planTypeTableViewer;
+
+	public PlanFilterDialog(Shell parent,
+			PlanListView view) {
+		super(parent, view);
+		this.currentFilter = view.getCurrentFilter();
+	}
+
+	@Override
+	protected void updateFilterModel() {
+		// TODO Auto-generated method stub
+		currentFilter.setDateFilter(dateFilterCmp.getDateFilterForModel(),
+				dateFilterCmp.getStartDateForModel(),
+				dateFilterCmp.getEndDateForModel());
+		currentFilter.setPatrolIdFilter(planIdFilter.getComparisonForModel(),
+				planIdFilter.getFilterValueForModel());
+
+		if (btnIncludeAllTypes.getSelection()){
+			currentFilter.setPlanTypes(null);
+		}else{
+			Plan.PlanType types[] = new Plan.PlanType[planTypeTableViewer.getCheckedElements().length];
+			System.arraycopy(planTypeTableViewer.getCheckedElements(), 0, types, 0, types.length);
+			currentFilter.setPlanTypes(types);
+		}
+	}
+
+	@Override
+	protected void resetFilterModel() {
+		currentFilter.setDefaults();
+	}
+
+	@Override
+	protected void updateControlsValues() {
+		// patrol type
+		boolean enabled = currentFilter.getPlanTypeFilters() != null;
+		btnFilterTypes.setSelection(enabled);
+		btnIncludeAllTypes.setSelection(!enabled);
+		planTypeTableViewer.getTable().setEnabled(enabled);
+		if (enabled) {
+			planTypeTableViewer.setCheckedElements(currentFilter
+					.getPlanTypeFilters());
+		} else {
+			planTypeTableViewer.setAllChecked(true);
+		}
+
+		// date
+		dateFilterCmp.applyState(currentFilter.getDateFilter(),
+				currentFilter.getStartDate(), currentFilter.getEndDate());
+
+		// patrol id
+		planIdFilter.applyState(currentFilter.getPlanIdComparator(),
+				currentFilter.getPlanIdFilter());
+	}
+
+	/**
+	 * Create contents of the dialog.
+	 */
+	protected Control createDialogArea(Composite parent) {
+		final Composite filter = (Composite) super.createDialogArea(parent);
+		setTitle("Plan Filter");
+		setMessage("Filters plans based on the following fields.");
+		getShell().setText("Plan Filter");
+
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			Composite composite = new Composite((Composite) filter, SWT.NONE);
+			composite.setLayout(new GridLayout(1, false));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+					false));
+
+			Composite dateFilterExpComp = createGroupComposite(
+					"Plan Date Filter", composite);
+			dateFilterCmp = new DateFilterComposite(dateFilterExpComp,
+					SWT.NONE, this);
+
+			Composite patrolType = createGroupComposite("Plan Type Filter",
+					composite);
+			createPatrolType(session, patrolType);
+
+			Composite planIdComp = createGroupComposite("Plan Id", composite);
+			planIdFilter = new StringFilterComposite(planIdComp, SWT.NONE);
+			planIdFilter.setIncludeAllRadioLabel("Include All");
+			planIdFilter.setFilterRadioLabel("Filter Plan Id");
+			planIdFilter.setValueLabel("Plan Id:");
+
+			updateControlsValues();
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
+		}
+
+		return filter;
+
+	}
+
+	/*
+	 * Creates the patrol type filter section
+	 */
+	private Composite createPatrolType(Session session, Composite parent) {
+		Composite patrolTypeComp = new Composite(parent, SWT.NONE);
+		patrolTypeComp.setLayout(new GridLayout(1, false));
+		patrolTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+				false));
+
+		btnIncludeAllTypes = new Button(patrolTypeComp, SWT.RADIO);
+		btnIncludeAllTypes.setText("Include All");
+
+		btnFilterTypes = new Button(patrolTypeComp, SWT.RADIO);
+		btnFilterTypes.setText("Plan Type Filter ");
+
+		planTypeTableViewer = CheckboxTableViewer.newCheckList(patrolTypeComp,
+				SWT.BORDER | SWT.FULL_SELECTION);
+		planTypeTableViewer.getTable().setLayoutData(
+				new GridData(SWT.FILL, SWT.FILL, true, false));
+		planTypeTableViewer.setContentProvider(ArrayContentProvider
+				.getInstance());
+		planTypeTableViewer.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof Plan.PlanType) {
+					return ((Plan.PlanType) element).guiName;
+				}
+				return super.getText(element);
+			}
+		});
+		planTypeTableViewer.setInput(Plan.PlanType.values());
+
+		btnFilterTypes.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				planTypeTableViewer.getTable().setEnabled(true);
+			}
+		});
+		btnIncludeAllTypes.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				planTypeTableViewer.getTable().setEnabled(false);
+			}
+		});
+		return patrolTypeComp;
+	}
+}

@@ -23,14 +23,21 @@ package org.wcs.smart.plan;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Extension of the smart hibernate manager for plan related data.
@@ -58,6 +65,56 @@ public class PlanHibernateManager{
 		}
 	}
 	
+	/**
+	 * 
+	 * @param s
+	 * @return an array of plans without any parents.
+	 */
+	public static List<PlanEditorInput> getRootPlans(Session s, PlanFilter filter){
+		s.beginTransaction();
+		try{
+			Query filterQuery = filter.buildQuery(s);
+			
+			List<Object[]> results = filterQuery.list();
+			
+			Map<String, PlanEditorInput> inputs = new HashMap<String, PlanEditorInput>();
+			Map<String, String>parents = new HashMap<String,String>();
+			
+			for (Object[] data : results){
+				String uuid = SmartUtils.encodeHex((byte[]) data[0]);
+				String name = "[" + (String) data[1] + "]";
+				if (data[2] != null){
+					name = data[2]  + " " + name;
+				}				
+				
+				inputs.put(uuid, new PlanEditorInput((byte[])data[0], name, (Plan.PlanType)data[3]));
+				
+				if (data[4] != null){
+					parents.put(uuid, SmartUtils.encodeHex((byte[])data[4]));
+				}
+			}
+			List<PlanEditorInput> all = new ArrayList<PlanEditorInput>();
+			for(PlanEditorInput in : inputs.values()){
+				String parent = parents.get(SmartUtils.encodeHex(in.getUuid()));
+				if (parent != null){
+					PlanEditorInput pparent = inputs.get(parent);
+					if (pparent != null){
+						in.setParent(pparent);
+						pparent.addKid(in);
+					}else{
+						//parent not present
+						all.add(in);
+					}
+				}else{
+					all.add(in);
+				}
+			}
+			
+			return all;
+		}finally{
+			s.getTransaction().rollback();
+		}
+	}
 		
 	/**
 	 * Computes the next plan id;
@@ -159,7 +216,7 @@ public class PlanHibernateManager{
 
 
 	public static Plan deletePlan(byte[] uuid) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		Plan plan = null;
 		try {
 			session.beginTransaction();
