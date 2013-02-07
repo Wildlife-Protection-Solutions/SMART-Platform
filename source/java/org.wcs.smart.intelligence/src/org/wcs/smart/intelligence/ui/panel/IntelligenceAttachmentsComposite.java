@@ -69,7 +69,7 @@ public class IntelligenceAttachmentsComposite extends IntelligenceComposite impl
 	}
 
 	@Override
-	public boolean updateModel(Intelligence intelligence) {
+	protected void updateModelInternal(Intelligence intelligence) {
 		//create a copy of attachments array 
 		//(we don't want to remove from original array as this will effect gui)
 		List<IntelligenceAttachment> attachments = new ArrayList<IntelligenceAttachment>(attachmentComposite.getAttchments());
@@ -91,7 +91,6 @@ public class IntelligenceAttachmentsComposite extends IntelligenceComposite impl
 			att.setIntelligence(intelligence);
 			intelligence.getAttachments().add(att);
 		}
-		return true;
 	}
 
 	@Override

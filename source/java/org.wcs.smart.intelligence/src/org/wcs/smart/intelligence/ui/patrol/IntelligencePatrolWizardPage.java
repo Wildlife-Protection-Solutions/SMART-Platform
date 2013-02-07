@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
 import org.wcs.smart.intelligence.ui.patrol.PatrolMotivationComposite.IPartolMotivationChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;

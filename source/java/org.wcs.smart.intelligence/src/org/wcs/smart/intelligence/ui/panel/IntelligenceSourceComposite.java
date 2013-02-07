@@ -36,7 +36,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSourceType;
@@ -133,23 +132,11 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	}
 	
     @Override
-    public boolean updateModel(Intelligence intelligence) {
+    protected void updateModelInternal(Intelligence intelligence) {
     	IntelligenceSourceType source = getSelectedSourceType();
-    	if (source == null) {
-    		IntelligencePlugIn.displayLog(ERROR_SOURCE_REQUIRED, null);
-    		return false;
-    	}
-    	Patrol patrol = null;
-    	if (IntelligenceSourceType.PATROL.equals(source)) {
-    		patrol = getSelectedPatrol();
-    		if (patrol == null) {
-    			IntelligencePlugIn.displayLog(ERROR_PATROL_ID_REQUIRED, null);
-    			return false;
-    		}
-    	}
-    	intelligence.setSource(source);
+    	Patrol patrol = IntelligenceSourceType.PATROL.equals(source) ? getSelectedPatrol() : null;
+       	intelligence.setSource(source);
 		intelligence.setPatrol(patrol);
-    	return true;
     }
 
 	@Override

@@ -31,7 +31,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 
@@ -114,14 +113,9 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 	}
 	
 	@Override
-	public boolean updateModel(Intelligence intelligence) {
-		if (!isShortNameValid()) {
-			IntelligencePlugIn.displayLog(Messages.IntelligenceDesc_NameRequired_Error, null);
-	        return false;
-		}
+	protected void updateModelInternal(Intelligence intelligence) {
     	intelligence.setShortName(shortName.getText());
     	intelligence.setDescription(description.getText());
-        return true;
 	}
 
 	@Override
