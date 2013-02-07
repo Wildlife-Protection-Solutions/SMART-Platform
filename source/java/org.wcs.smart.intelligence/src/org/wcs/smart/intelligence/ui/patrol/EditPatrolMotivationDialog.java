@@ -31,7 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
+import org.wcs.smart.intelligence.ui.patrol.PatrolMotivationComposite.IPartolMotivationChangeListener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -60,7 +60,7 @@ public class EditPatrolMotivationDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected Composite createContent(Composite parent) {
 		content = new PatrolMotivationComposite(parent, SWT.NONE);
-		content.addInputChangeListener(new IInputChangeListener() {
+		content.addInputChangeListener(new IPartolMotivationChangeListener() {
 			@Override
 			public void inputChanged() {
 				setChangesMade(true);

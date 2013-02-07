@@ -24,7 +24,7 @@ package org.wcs.smart.intelligence.ui.wizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.ui.panel.IDataValidStateListener;
+import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceComposite;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
@@ -59,7 +59,7 @@ public class TypedIntelligenceWizardPage extends IntelligenceWizardPage {
 	public void createControl(Composite parent) {
 		composite = IntelligenceCompositeFactory.getInstance().createComposite(parent, SWT.NONE, panelType);
 		setPageComplete(composite.isDataValid());
-		composite.addDataValidStateListener(new DataValidStateListener());
+		composite.addInputChangeListener(new ControlChangeListener());
 		setControl(composite);
 		setMessage(composite.getMessage());
 	}
@@ -79,10 +79,10 @@ public class TypedIntelligenceWizardPage extends IntelligenceWizardPage {
 	/**
 	 * @author elitvin
 	 */
-	private class DataValidStateListener implements IDataValidStateListener {
+	private class ControlChangeListener implements IInputChangeListener {
 		@Override
-		public void stateChanged(boolean isDataValid) {
-			TypedIntelligenceWizardPage.this.setPageComplete(isDataValid);
+		public void inputChanged(IntelligenceComposite source) {
+			TypedIntelligenceWizardPage.this.setPageComplete(source.isDataValid());
 		}
 	}
 

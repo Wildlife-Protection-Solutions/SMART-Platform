@@ -22,13 +22,13 @@
 package org.wcs.smart.intelligence.ui.panel;
 
 /**
- * Change listener for IntelligenceComposite.
+ * Change listener for {@link IntelligenceComposite}.
  * 
  * @author elitvin
  * @since 1.0.0
  */
 public interface IInputChangeListener {
 
-	public void inputChanged();
+	public void inputChanged(IntelligenceComposite source);
 	
 }

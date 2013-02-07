@@ -50,11 +50,11 @@ public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 
 	IInputChangeListener inputChangeListener = new IInputChangeListener() {			
 		@Override
-		public void inputChanged() {
+		public void inputChanged(IntelligenceComposite source) {
 			setChangesMade(true);
 //			EditItelligenceItemDialog.this.setErrorMessage(item.getErrorMessage());
-			if (getButton(IDialogConstants.OK_ID) != null){
-				getButton(IDialogConstants.OK_ID).setEnabled(content.isDataValid());
+			if (getButton(IDialogConstants.OK_ID) != null) {
+				getButton(IDialogConstants.OK_ID).setEnabled(source.isDataValid());
 			}
 		}
 	};

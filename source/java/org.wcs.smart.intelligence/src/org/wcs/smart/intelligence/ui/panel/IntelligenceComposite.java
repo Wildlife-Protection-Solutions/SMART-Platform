@@ -36,7 +36,6 @@ import org.wcs.smart.intelligence.model.Intelligence;
 public abstract class IntelligenceComposite extends Composite implements IIntelligenceModifier {
 
 	private String message;
-	private List<IDataValidStateListener> stateListeners = new ArrayList<IDataValidStateListener>();
 	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
 
 	/**
@@ -56,20 +55,6 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 		return true; //default value
 	}
 
-	public void addDataValidStateListener(IDataValidStateListener listener) {
-		stateListeners.add(listener);
-	}
-
-	public void removeDataValidStateListener(IDataValidStateListener listener) {
-		stateListeners.remove(listener);
-	}
-	
-	protected void fireDataValidStateListeners() {
-		for (IDataValidStateListener listener : stateListeners) {
-			listener.stateChanged(isDataValid());
-		}
-	}
-
 	public void addInputChangeListener(IInputChangeListener listener) {
 		inputListeners.add(listener);
 	}
@@ -80,7 +65,7 @@ public abstract class IntelligenceComposite extends Composite implements IIntell
 	
 	protected void fireInputChangeListeners() {
 		for (IInputChangeListener listener : inputListeners) {
-			listener.inputChanged();
+			listener.inputChanged(this);
 		}
 	}
 	

@@ -95,7 +95,6 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 				patrolLabel.setVisible(isPatrolSelected);
 				patrolId.setVisible(isPatrolSelected);
 				refreshPatrolDecoration();
-				fireDataValidStateListeners();
 				fireInputChangeListeners();				
 			}
 		});
@@ -111,7 +110,6 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				refreshPatrolDecoration();
-				fireDataValidStateListeners();
 				fireInputChangeListeners();
 			}
 		});
