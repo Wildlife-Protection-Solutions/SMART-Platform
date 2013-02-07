@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.intelligence.ui;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -189,7 +191,9 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 		@Override
 		public String getText(Object element) {
 			if (element instanceof IntelligenceEditorInput){
-				return ((IntelligenceEditorInput)element).getName();
+				IntelligenceEditorInput i = (IntelligenceEditorInput)element;
+				return i.getName()+ "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format(i.getReceivedDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				
 			}
 			return super.getText(element);
 		}
@@ -219,7 +223,7 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 			final List<IntelligenceEditorInput> inputData = new ArrayList<IntelligenceEditorInput>();
 			for (Object obj : result) {
 				Object[] data = (Object[]) obj;
-				inputData.add(new IntelligenceEditorInput((byte[])data[0], (String)data[1]));
+				inputData.add(new IntelligenceEditorInput((byte[])data[0], (String)data[1], (Date)data[2]));
 			}
 			monitor.internalWorked(0.8);
 			

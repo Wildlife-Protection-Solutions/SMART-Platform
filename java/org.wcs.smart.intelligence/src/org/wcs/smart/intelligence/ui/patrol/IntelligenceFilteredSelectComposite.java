@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.ui.patrol;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -134,6 +135,7 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
     			Intelligence i = new Intelligence();
     			i.setUuid((byte[])data[0]);
     			i.setShortName((String)data[1]);
+    			i.setReceivedDate((Date)data[2]);
     			intelligences.add(i);
     		}
     		return intelligences;

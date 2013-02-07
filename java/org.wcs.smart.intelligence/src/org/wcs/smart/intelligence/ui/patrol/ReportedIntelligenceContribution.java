@@ -183,7 +183,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 	
 	private void openEditor(Intelligence intelligence) {
 		Assert.isNotNull(intelligence);
-		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName());
+		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName(), intelligence.getReceivedDate());
 		try {
 			IWorkbench wb = PlatformUI.getWorkbench();
 			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
