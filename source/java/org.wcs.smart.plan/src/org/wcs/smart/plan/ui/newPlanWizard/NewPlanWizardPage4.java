@@ -22,6 +22,8 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.PlanStationTeamComposite;
@@ -52,10 +54,15 @@ public class NewPlanWizardPage4 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		panel =  new PlanStationTeamComposite(parent, SWT.NONE); 
+		Composite center = new Composite(parent, SWT.NONE);
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
-		setControl(panel);
-		setMessage("Select the associated Team and/or Station for this plan, if applicable:");
+		panel =  new PlanStationTeamComposite(center, SWT.NONE); 
+		
+		setControl(center);
+		setTitle("Team/Station");
+		setMessage("Select the associated Team and/or Station for this plan, if applicable.");
 
 	}
 	

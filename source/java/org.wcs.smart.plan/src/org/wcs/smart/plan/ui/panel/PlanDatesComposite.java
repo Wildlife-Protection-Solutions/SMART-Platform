@@ -68,7 +68,7 @@ public class PlanDatesComposite extends PlanComposite {
 
 	private void createControls() {
         this.setLayout(new GridLayout(2, false));
-        this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        this.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
         
         Label lbl = new Label(this, SWT.NONE);
 		lbl.setText("Plan Start Date:");
