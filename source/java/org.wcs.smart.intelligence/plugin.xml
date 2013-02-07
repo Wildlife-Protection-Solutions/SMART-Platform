@@ -31,6 +31,16 @@
                   </or>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.intelligence.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
+                  label="%view.command.label"
+                  style="push"
+                  tooltip="%command.perspective.tooltip">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -38,7 +48,6 @@
             locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
          <command
                commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
-               icon="images/etool16/intelligence.png"
                label="%command.perspective.label"
                style="push"
                tooltip="%command.perspective.tooltip">
@@ -72,6 +81,28 @@
             </visibleWhen>
          </command>
          <command
+               commandId="org.wcs.smart.intelligence.NewIntelligence"
+               label="%command.create.label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
                commandId="org.wcs.smart.intelligence.ShowIntelligenceFilter"
                icon="images/etool16/filter.png"
                label="%command.filter.label"
@@ -85,9 +116,9 @@
          <command
                commandId="org.wcs.smart.intelligence.DeleteIntelligence"
                icon="images/etool16/delete.png"
-               label="Delete Intelligence"
+               label="%delete.command.label"
                style="push"
-               tooltip="Delete selected inteligence">
+               tooltip="%delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -210,6 +241,17 @@
             id="newpatrol.intelligence"
             location="after=newpatrol.patrolid">
       </wizardpage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.intelligence.NewIntelligence"
+            icon="images/etool16/intelligence_add.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
+            icon="images/etool16/intelligence.png">
+      </image>
    </extension>
 
 </plugin>
