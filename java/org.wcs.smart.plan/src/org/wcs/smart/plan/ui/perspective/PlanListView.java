@@ -32,6 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
@@ -75,11 +76,11 @@ public class PlanListView extends ViewPart {
 	 * Default constructor
 	 */
 	public PlanListView() {
-//		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
+
 	}
 
 	public void dispose() {		
-//		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
+
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_ADDED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_MODIFIED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_DELETED, planListener);
@@ -115,7 +116,7 @@ public class PlanListView extends ViewPart {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				//Load the plan into the main view window.
-				PlanEditorInput input = new PlanEditorInput(planViewer.getSelectedPlan().getUuid(), planViewer.getSelectedPlan().getName() );
+				PlanEditorInput input = new PlanEditorInput(planViewer.getSelectedPlan().getUuid(), planViewer.getSelectedPlan().getId() );
 				
 				if (input != null){
 					try {
@@ -133,10 +134,10 @@ public class PlanListView extends ViewPart {
 				
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
-		Menu menu = menuManager.createContextMenu(planViewer.getControl());
+		Menu menu = menuManager.createContextMenu(planViewer.getViewer().getControl());
 		planViewer.getControl().setMenu(menu);
-//		getSite().registerContextMenu(menuManager,  planViewer);
-//		getSite().setSelectionProvider(planViewer);
+		getSite().registerContextMenu(menuManager,  planViewer.getViewer());
+		getSite().setSelectionProvider(planViewer.getViewer());
 	}
 
 	
@@ -146,7 +147,7 @@ public class PlanListView extends ViewPart {
 	 */
 	public void initTree(){
 		Session session = SmartHibernateManager.openSession();
-		List roots = PlanHibernateManager.getAllRootPlans(session);
+		List<Plan> roots = PlanHibernateManager.getAllRootPlans(session);
 		planViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
 	}
 	
@@ -154,7 +155,15 @@ public class PlanListView extends ViewPart {
 	 * Refreshes the Plan list
 	 */
 	public void updateContent(){
-		planViewer.refresh();
+		
+		
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				planViewer.refresh();
+			}
+		});
+		
 	}
 	
 	/* (non-Javadoc)

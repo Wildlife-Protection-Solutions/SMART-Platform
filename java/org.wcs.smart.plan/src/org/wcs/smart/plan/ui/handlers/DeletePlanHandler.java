@@ -46,6 +46,7 @@ import org.wcs.smart.plan.ui.editor.PlanEditorInput;
  * Handler for handling "Delete Plan" command
  *
  * @author elitvin
+ * @author jeffloun
  * @since 1.0.0
  */
 public class DeletePlanHandler extends AbstractHandler {
@@ -63,20 +64,20 @@ public class DeletePlanHandler extends AbstractHandler {
 		
 		for (Iterator<?> iterator = lastSelection.iterator(); iterator.hasNext();) {
 			Object selected = iterator.next();
-			if (selected instanceof PlanEditorInput) {
-				final PlanEditorInput editorInput = (PlanEditorInput) selected;
+			if (selected instanceof Plan) {
+				final Plan selectedPlan = (Plan) selected;
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
 								"Are you sure you wish to delete this Plan?",
 								null,
-								MessageFormat.format("Are you sure you wish to delete this Plan?", new Object[]{editorInput.getName()}),
+								MessageFormat.format("Are you sure you wish to delete this Plan? All sub-plans will also be deleted if you do so.", new Object[]{selectedPlan.getId()}),
 								MessageDialog.CONFIRM, 
 								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 						
 						if (dialog.open() == MessageDialog.OK) {
-							DeletePlanJob deleteJob = new DeletePlanJob(editorInput.getUuid());
+							DeletePlanJob deleteJob = new DeletePlanJob(selectedPlan.getUuid());
 							deleteJob.schedule();
 						}
 					}});
@@ -89,6 +90,7 @@ public class DeletePlanHandler extends AbstractHandler {
      * Job is used to delete plan object
      * 
      * @author elitvin
+     * @author jeffloun
      *
      */
     private class DeletePlanJob extends Job {

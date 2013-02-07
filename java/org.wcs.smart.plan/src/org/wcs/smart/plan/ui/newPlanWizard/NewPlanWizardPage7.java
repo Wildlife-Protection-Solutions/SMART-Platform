@@ -69,7 +69,6 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage {
 	
 	@Override
 	void initModel(Plan p) {
-		((CreatePlanWizard) getWizard()).setSeenAll(true);
 		panel.initFromModel(p);
 	}
 	

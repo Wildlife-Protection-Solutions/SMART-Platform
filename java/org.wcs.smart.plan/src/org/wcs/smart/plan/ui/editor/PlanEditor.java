@@ -264,8 +264,8 @@ public class PlanEditor extends EditorPart {
 	 */
 	private void initValues() {
 		Plan plan = getPlan();
-		setPartName(plan.getName());		
-		form.setText(plan.getName());
+		setPartName(plan.getId());		
+		form.setText(plan.getId());
 		String none = "<none>";
 		
 		if(plan.getStation() != null){
@@ -334,10 +334,6 @@ public class PlanEditor extends EditorPart {
 		if (!canEdit()) {
 			editLink.setEnabled(false);
 			editLink.setVisible(false);
-//		}else {
-//			if (partEditor != null){
-//				editLink.setToolTipText(MessageFormat.format("Edit {0}", new Object[]{partEditor.getTitle()}));
-//			}
 		}
 		
 		if (panelType != null){

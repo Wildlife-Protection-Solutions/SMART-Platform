@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -90,6 +91,7 @@ public class PlanTargetComposite extends PlanComposite {
 			    if (dia.open() == Window.CANCEL){
 			    	//do nothing
 				}else{
+
 					targetTable.updateModel(targets);
 					fireInputChangeListeners();
 				}
@@ -181,12 +183,19 @@ public class PlanTargetComposite extends PlanComposite {
 	@Override
 	public void initFromModel(Plan plan) {
 		targets = plan.getTargets();
+		if(targets == null){
+			targets = new ArrayList<PlanTarget>();
+		}
 		targetTable.initValues(targets);
 	}
 
 	@Override
 	public boolean isDataValid() {
 		return true;
+	}
+	
+	public List<PlanTarget> getTargets(){
+		return this.targets;
 	}
 	
 }

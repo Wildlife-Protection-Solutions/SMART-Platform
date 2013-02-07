@@ -50,6 +50,7 @@ import org.wcs.smart.util.SmartUtils;
  * Page for collecting numeric plan target information.
  * 
  * @author Emily
+ * @author jeffloun
  *
  */
 public class NumericPlanTargetPropertyPage implements ITargetPage {
@@ -123,7 +124,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 			}
 		});
 		targetOp.setInput(NumericPlanTarget.Operator.values());
-		targetOp.setSelection(new StructuredSelection(NumericPlanTarget.Operator.LESS));
+		targetOp.setSelection(new StructuredSelection(NumericPlanTarget.Operator.GREATER));
 		
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText("Target Value:");
@@ -255,7 +256,6 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	@Override
 	public void updateTarget(PlanTarget pt){
 		NumericPlanTarget target = (NumericPlanTarget)pt;
-		
 		target.setValue(getTargetValue());
 		target.setName(getTargetName());
 		target.setType(getTargetType());

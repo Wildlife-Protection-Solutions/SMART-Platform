@@ -31,19 +31,20 @@ import org.eclipse.ui.IPersistableElement;
  * Plan EditorInput
  * 
  * @author elitvin
+ * @author jeffloun
  * @since 1.0.0
  */
 public class PlanEditorInput implements IEditorInput {
 
 	private byte[] uuid;
-	private String shortName;
+	private String planId;
 	
 	/**
 	 * Constructor
 	 */
-	public PlanEditorInput(byte[] uuid, String shortName) {
+	public PlanEditorInput(byte[] uuid, String planId) {
 		this.uuid = uuid;
-		this.shortName = shortName;
+		this.planId = planId;
 	}
 
 	/**
@@ -83,7 +84,7 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
-		return shortName;
+		return planId;
 	}
 
 	/* (non-Javadoc)
@@ -99,7 +100,7 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return shortName;
+		return planId;
 	}
 
 	@Override
