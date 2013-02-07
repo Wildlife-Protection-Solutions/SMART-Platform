@@ -39,7 +39,6 @@ import org.hibernate.Session;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -54,7 +53,7 @@ public class PatrolMotivationComposite extends Composite {
 	private Label selectLabel;
 	private IntelligenceFilteredSelectComposite selectComposite;
 	
-	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
+	private List<IPartolMotivationChangeListener> inputListeners = new ArrayList<IPartolMotivationChangeListener>();
 	private String errorMessage;
 
 	private List<Intelligence> selectedIntelligences = new ArrayList<Intelligence>();
@@ -149,18 +148,29 @@ public class PatrolMotivationComposite extends Composite {
 		this.errorMessage = errorMessage;
 	}
 
-	public void addInputChangeListener(IInputChangeListener listener) {
+	public void addInputChangeListener(IPartolMotivationChangeListener listener) {
 		inputListeners.add(listener);
 	}
 
-	public void removeInputChangeListener(IInputChangeListener listener) {
+	public void removeInputChangeListener(IPartolMotivationChangeListener listener) {
 		inputListeners.remove(listener);
 	}
 	
 	protected void fireInputChangeListeners() {
-		for (IInputChangeListener listener : inputListeners) {
+		for (IPartolMotivationChangeListener listener : inputListeners) {
 			listener.inputChanged();
 		}
 	}
-	
+
+	/**
+	 * Change listener for {@link PatrolMotivationComposite}.
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	public interface IPartolMotivationChangeListener {
+
+		public void inputChanged();
+		
+	}	
 }

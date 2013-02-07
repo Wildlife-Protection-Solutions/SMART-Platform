@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.ui.panel.IInputChangeListener;
+import org.wcs.smart.intelligence.ui.patrol.PatrolMotivationComposite.IPartolMotivationChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
@@ -50,7 +51,7 @@ public class IntelligencePatrolWizardPage extends NewPatrolWizardPage {
 		content = new PatrolMotivationComposite(parent, SWT.NONE);
 		setTitle(Messages.IntelligencePatrolWizardPage_PageTitle);
 		setMessage(Messages.IntelligencePatrolWizardPage_Message);
-		content.addInputChangeListener(new IInputChangeListener() {
+		content.addInputChangeListener(new IPartolMotivationChangeListener() {
 			@Override
 			public void inputChanged() {
 				if (content.getErrorMessage() == null) {

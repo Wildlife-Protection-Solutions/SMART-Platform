@@ -78,7 +78,6 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 				} else {
 					shortNameDecoration.hide();
 				}
-				fireDataValidStateListeners();
 				fireInputChangeListeners();
 			}
 		});
