@@ -73,6 +73,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
         		applyCurrentState();
+				fireDataValidStateListeners();
         		fireInputChangeListeners();
         	}
 		});
@@ -90,6 +91,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         dtFromDate.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
+				fireDataValidStateListeners();
         		fireInputChangeListeners();
         	}
 		});
@@ -105,6 +107,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         dtToDate.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
+				fireDataValidStateListeners();
         		fireInputChangeListeners();
         	}
 		});
@@ -147,4 +150,17 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
 	    applyCurrentState();
 	}
     
+	@Override
+	public boolean isDataValid() {
+		return isDateRangeValid();
+	}
+	
+	private boolean isDateRangeValid() {
+		if (multipleDays.getSelection()) {
+			Date from = SmartUtils.getDate(dtFromDate);
+			Date to = SmartUtils.getDate(dtToDate);
+			return from.compareTo(to) <= 0; //from <= to
+		}
+		return true;
+	}
 }
