@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.wcs.smart.plan.model.AdministrativePlanTarget;
+import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 
 
@@ -80,6 +82,7 @@ public class TargetPropertyPage extends Dialog {
 
 		this.toUpdate = toUpdate;
 		this.parentTargets = parentTargets;
+		
 		if (toUpdate == null){
 			title = "Create Target";
 		}else{
@@ -191,18 +194,27 @@ public class TargetPropertyPage extends Dialog {
 	 */
 	private boolean performSave(){
 		PlanTarget pt;
-		ITargetPage target = tabs.get(tabFolder.getSelectionIndex());
+		ITargetPage target; 
 		
 		//create new target if necessary
 		if (toUpdate == null){
+			target = tabs.get(tabFolder.getSelectionIndex());
 			pt = target.createTarget();
 			//pt.setPlan(parentPlan);
 			parentTargets.add(pt);
+			target.updateTarget(pt);
 		}else{
-			pt = toUpdate;
+			//some hacked code here because we drop the other tabs from target types we are not editing, so the tabFolder.getSelectionIndex()
+			// will always return 0 even though we need to know if it's a numeric, admin , or map target type... 
+			if(toUpdate instanceof NumericPlanTarget){
+				target = tabs.get(0);
+			}else if(toUpdate instanceof AdministrativePlanTarget){
+				target = tabs.get(1);
+			}else{
+				target = tabs.get(2);
+			}
+			target.updateTarget(toUpdate);
 		}
-		//update target info
-		target.updateTarget(pt);
 		return true;
 	}
 

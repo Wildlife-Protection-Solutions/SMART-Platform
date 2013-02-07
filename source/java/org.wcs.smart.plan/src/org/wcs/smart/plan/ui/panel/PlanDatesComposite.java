@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.panel;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -48,7 +49,12 @@ public class PlanDatesComposite extends PlanComposite {
 	private DateTime dtStartDate;
 	private DateTime dtEndDate;
 
+	
+	private Date parentStartDate;
+	private Date parentEndDate;
+	
 	private ControlDecoration cdEndDate;
+	private ControlDecoration cdStartDate;
 
 	/**
 	 * @param parent
@@ -86,6 +92,12 @@ public class PlanDatesComposite extends PlanComposite {
         cdEndDate.setShowHover(true);
 		cdEndDate.hide();
 		
+		cdStartDate = new ControlDecoration(dtStartDate, SWT.LEFT);
+		cdStartDate.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+        cdStartDate.setShowHover(true);
+		cdStartDate.hide();
+
 		Listener validate = new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -111,9 +123,21 @@ public class PlanDatesComposite extends PlanComposite {
 			Calendar endDate = SmartUtils.convertDate(plan.getEndDate());
 			dtStartDate.setDate(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH), startDate.get(Calendar.DATE));
 			dtEndDate.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
+			if(plan.getParent() != null){
+				parentStartDate = plan.getParent().getStartDate();
+			}else{
+				parentStartDate = null;
+			}
+			
+			if(plan.getParent() != null){
+				parentEndDate = plan.getParent().getEndDate();
+			}else{
+				parentEndDate = null;
+			}
 		}catch (Exception e) {
 			// OK, no data to update will give us Exceptions
 		}
+		isDataValid();
 
 	}
     
@@ -135,6 +159,17 @@ public class PlanDatesComposite extends PlanComposite {
 			isValid = false;
 			cdEndDate.show();
 			cdEndDate.setDescriptionText("End date must be after the start date.");
+		}
+		
+		if(parentEndDate != null && (SmartUtils.getDate(dtEndDate)).after(parentEndDate) ){
+			isValid = false;
+			cdEndDate.show();
+			cdEndDate.setDescriptionText("End date must not be after the Parent Plan's end date(" + parentEndDate + ")");
+		}
+		if(parentEndDate != null && (SmartUtils.getDate(dtStartDate)).before(parentStartDate) ){
+			isValid = false;
+			cdStartDate.show();
+			cdStartDate.setDescriptionText("Start date must not be before the Parent Plan's end date(" + parentStartDate + ")");
 		}
 		return isValid;
 	}

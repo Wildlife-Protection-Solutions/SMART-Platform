@@ -29,6 +29,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -158,8 +159,23 @@ public class PlanHibernateManager{
 
 
 	public static Plan deletePlan(byte[] uuid) {
-		// TODO Actually delete the plan...
-		return null;
+		Session session = SmartHibernateManager.openSession();
+		Plan plan = null;
+		try {
+			session.beginTransaction();
+			try {
+				plan = (Plan) session.load(Plan.class, uuid);
+				session.delete(plan);
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				SmartPlanPlugIn.displayLog("Error Deleting Plan" + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return null;
+			}
+		} finally {
+			session.close();
+		}
+		return plan;
 	}
 		
 }

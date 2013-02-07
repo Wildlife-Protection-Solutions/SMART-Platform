@@ -59,12 +59,15 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 	@Override
 	public boolean updateModel(Plan p) {
 		panel.updateModel(p);
+		p.setTargets(panel.getTargets());
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p) {
 		panel.initFromModel(p);
+		//the user has seen all the pages now, used in calculating whether to show the wizard finish button.
+		((CreatePlanWizard) getWizard()).setSeenAll(true);
 	}
 
 	

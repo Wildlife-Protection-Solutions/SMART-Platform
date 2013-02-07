@@ -31,6 +31,7 @@ import org.wcs.smart.plan.model.Plan;
  * Event manager for managing Plan events.
  * 
  * @author elitvin
+ * @author jeffloun
  * @since 1.0.0
  */
 public class PlanEventManager {
@@ -63,7 +64,7 @@ public class PlanEventManager {
 	/**
 	 * Fires a Plan added event
 	 */
-	public void PlanAdded(Plan plan){
+	public void planAdded(Plan plan){
 		fireListeners(EventType.PLAN_ADDED, -1, plan);
 	}
 		

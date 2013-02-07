@@ -29,12 +29,19 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.ui.editor.PlanEditor;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.plan.ui.perspective.PlanPerspective;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -163,11 +170,12 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		super.addPage(page1); //choose a template or not
 		super.addPage(new NewPlanWizardPage2b()); //template selector
 		super.addPage(new NewPlanWizardPage2()); //choose type
-		super.addPage(new NewPlanWizardPage3()); // id/name/desc
-		super.addPage(new NewPlanWizardPage4()); //team/station
-		super.addPage(new NewPlanWizardPage5()); // dates
-		super.addPage(new NewPlanWizardPage6()); //targets
 		super.addPage(new NewPlanWizardPage7()); //parent
+		super.addPage(new NewPlanWizardPage3()); //id/name/desc
+		super.addPage(new NewPlanWizardPage4()); //team/station
+		super.addPage(new NewPlanWizardPage5()); //dates
+		super.addPage(new NewPlanWizardPage6()); //targets
+
 		
 	}
 	
@@ -207,26 +215,21 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			}
 		}
 
-
-		//TODO: make the following 8 lines work:
 		boolean ret = PlanHibernateManager.savePlan(p,getSession());
 		
 		 // fire events
-		 //PlanEventManager.getInstance().planAdded(getPlan());
+		PlanEventManager.getInstance().planAdded(getPlan());
 		
-		// open in editor
-		//TODO:open in an editor once we have one. 
-/*		PatrolEditorInput input = new PatrolEditorInput(this.patrol.getUuid(),
-				this.patrol.getId(), this.patrol.getPatrolType(),
-				this.patrol.getStartDate(), this.patrol.getEndDate());
-
+		//Open Plan Perspective and the plan you just created.
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().openEditor(input, PatrolEditor.ID);
-		} catch (PartInitException e) {
-			throw new RuntimeException(e);
+
+			PlanEditorInput input = new PlanEditorInput(p.getUuid(), p.getId());
+
+			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PlanEditor.ID);
+		} catch (WorkbenchException e) {
+			SmartPatrolPlugIn.displayLog("Failed to Load Plan Perspective", e);
 		}
-*/
 		return ret;
 	}
 

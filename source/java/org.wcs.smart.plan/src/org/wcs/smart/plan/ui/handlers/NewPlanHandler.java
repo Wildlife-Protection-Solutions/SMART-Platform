@@ -48,19 +48,6 @@ public class NewPlanHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		//Open Patrol Perspective
-//		try {
-//			
-			//TODO: change to Plan perspective when there is one
-//			HandlerUtil
-//					.getActiveWorkbenchWindow(event)
-//					.getWorkbench()
-//					.showPerspective(PatrolPerspective.ID,
-//							HandlerUtil.getActiveWorkbenchWindow(event));
-//		} catch (WorkbenchException e) {
-//			SmartPatrolPlugIn
-//					.displayLog("Error loading patrol perspective.", e);
-//		}
 
 		//Show Create Patrol Wizard
 		final CreatePlanWizard wizard = new CreatePlanWizard();
