@@ -90,6 +90,7 @@ public class PlanListView extends ViewPart implements IUpdatableView {
 					public void run() {
 						planViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
 						planViewer.refresh();
+						planViewer.getViewer().expandAll();
 					}
 				});
 			}finally{

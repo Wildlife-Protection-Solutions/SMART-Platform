@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.intelligence.ui;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.hibernate.Query;
@@ -37,11 +36,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceViewFilter {
-	
-	private static final int DAYS_30 = 30;
-	private static final int DAYS_60 = 60;
-	
+public class IntelligenceViewFilter {	
 	private DateFilter receivedDateFilter;
 	private Date receivedDateStart;
 	private Date receivedDateEnd;
@@ -86,62 +81,30 @@ public class IntelligenceViewFilter {
 
 		//received date
 		if (receivedDateFilter != null) {
-			switch (receivedDateFilter) {
-			case LAST_30_DAYS:
-				query.setParameter("receivedStart", getShiftXDays(-DAYS_30)); //$NON-NLS-1$
-				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case LAST_60_DAYS:
-				query.setParameter("receivedStart", getShiftXDays(-DAYS_60)); //$NON-NLS-1$
-				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case MONTH_TO_DATE:
-				query.setParameter("receivedStart", getMothToDate()); //$NON-NLS-1$
-				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case YEAR_TO_DATE:
-				query.setParameter("receivedStart", getYearToDate()); //$NON-NLS-1$
-				query.setParameter("receivedEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case CUSTOM:
-				query.setParameter("receivedStart", receivedDateStart); //$NON-NLS-1$
-				query.setParameter("receivedEnd", receivedDateEnd); //$NON-NLS-1$
-				break;
+			Date start = receivedDateFilter.getStartDate();
+			if (start == null){
+				start = receivedDateStart;
 			}
+			Date end = receivedDateFilter.getEndDate();
+			if (end == null){
+				end = receivedDateStart;
+			}
+			query.setParameter("receivedStart", start); //$NON-NLS-1$
+			query.setParameter("receivedEnd", end); //$NON-NLS-1$
 		}
 
 		//relevant date
 		if (relevantDateFilter != null) {
-			switch (relevantDateFilter) {
-			case NEXT_30_DAYS:
-				query.setParameter("relevantStart", getCurrentDate()); //$NON-NLS-1$
-				query.setParameter("relevantEnd", getShiftXDays(DAYS_30)); //$NON-NLS-1$
-				break;
-			case NEXT_60_DAYS:
-				query.setParameter("relevantStart", getCurrentDate()); //$NON-NLS-1$
-				query.setParameter("relevantEnd", getShiftXDays(DAYS_60)); //$NON-NLS-1$
-				break;
-			case LAST_30_DAYS:
-				query.setParameter("relevantStart", getShiftXDays(-DAYS_30)); //$NON-NLS-1$
-				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case LAST_60_DAYS:
-				query.setParameter("relevantStart", getShiftXDays(-DAYS_60)); //$NON-NLS-1$
-				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case MONTH_TO_DATE:
-				query.setParameter("relevantStart", getMothToDate()); //$NON-NLS-1$
-				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case YEAR_TO_DATE:
-				query.setParameter("relevantStart", getYearToDate()); //$NON-NLS-1$
-				query.setParameter("relevantEnd", getCurrentDate()); //$NON-NLS-1$
-				break;
-			case CUSTOM:
-				query.setParameter("relevantStart", relevantDateStart); //$NON-NLS-1$
-				query.setParameter("relevantEnd", relevantDateEnd); //$NON-NLS-1$
-				break;
+			Date start = relevantDateFilter.getStartDate();
+			if (start == null){
+				start = relevantDateStart;
 			}
+			Date end = relevantDateFilter.getEndDate();
+			if (end == null){
+				end = relevantDateEnd;
+			}
+			query.setParameter("relevantStart", start); //$NON-NLS-1$
+			query.setParameter("relevantEnd", end); //$NON-NLS-1$
 		}
 		
 		//name
@@ -159,29 +122,6 @@ public class IntelligenceViewFilter {
 		return query;
 	}	
 
-	private Date getCurrentDate() {
-		Calendar cal = Calendar.getInstance();
-		return cal.getTime();
-	}
-	
-	private Date getShiftXDays(int amount) {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DAY_OF_MONTH, amount);
-		return cal.getTime();
-	}
-
-	private Date getMothToDate() {
-		Calendar cal = Calendar.getInstance();
-		cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
-		return cal.getTime();
-	}
-
-	private Date getYearToDate() {
-		Calendar cal = Calendar.getInstance();
-		cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
-		return cal.getTime();
-	}
-	
 	public void resetDefaults() {
 		this.receivedDateFilter = DateFilter.LAST_60_DAYS;
 		this.receivedDateStart = null;
