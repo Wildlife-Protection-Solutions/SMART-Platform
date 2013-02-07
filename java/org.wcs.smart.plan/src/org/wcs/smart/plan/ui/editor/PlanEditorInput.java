@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.ui.editor;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -100,4 +102,26 @@ public class PlanEditorInput implements IEditorInput {
 		return shortName;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(uuid);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PlanEditorInput other = (PlanEditorInput) obj;
+		if (!Arrays.equals(uuid, other.uuid))
+			return false;
+		return true;
+	}
+	
 }
