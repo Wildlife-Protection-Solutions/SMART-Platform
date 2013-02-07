@@ -23,10 +23,13 @@ package org.wcs.smart.plan.ui.perspective;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -37,12 +40,14 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
@@ -54,13 +59,45 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  * @author jeffloun
  * @since 1.0.0
  */
-public class PlanListView extends ViewPart {
+public class PlanListView extends ViewPart implements IUpdatableView {
 
 	public static final String ID = "org.wcs.smart.plan.PlanListView"; //$NON-NLS-1$
 
 	private PlanViewer planViewer;
-
-
+	private PlanFilter currentFilter;
+	private Object[] loadingInput = new Object[]{"Loading"};
+	
+	/*
+	 * Job that updates the patrol list based on the current filter
+	 */
+	private Job updateJob = new Job("Loading Plans") {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			monitor.beginTask("Loading Plans", 1);
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					planViewer.setRootPlans(loadingInput);
+					planViewer.refresh();
+				}
+			});
+			Session session = SmartHibernateManager.openSession();
+			try{
+				final List<PlanEditorInput> roots = PlanHibernateManager.getRootPlans(session, currentFilter);
+				monitor.internalWorked(0.5);
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						planViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
+						planViewer.refresh();
+					}
+				});
+			}finally{
+				session.close();
+			}
+			return Status.OK_STATUS;
+		}
+	};
 
 	/**
 	 * listener for Plan change events.
@@ -76,11 +113,14 @@ public class PlanListView extends ViewPart {
 	 * Default constructor
 	 */
 	public PlanListView() {
-
+		this.currentFilter = new PlanFilter();
+	}
+	
+	public PlanFilter getCurrentFilter(){
+		return this.currentFilter;
 	}
 
 	public void dispose() {		
-
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_ADDED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_MODIFIED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_DELETED, planListener);
@@ -104,7 +144,7 @@ public class PlanListView extends ViewPart {
 		
 
 		planViewer = new PlanViewer(main);
-		planViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
+		planViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		
 		PlanEventManager.getInstance().addListener(EventType.PLAN_ADDED, planListener);
 		PlanEventManager.getInstance().addListener(EventType.PLAN_MODIFIED, planListener);
@@ -116,8 +156,7 @@ public class PlanListView extends ViewPart {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				//Load the plan into the main view window.
-				PlanEditorInput input = new PlanEditorInput(planViewer.getSelectedPlan().getUuid(), planViewer.getSelectedPlan().getId() );
-				
+				PlanEditorInput input = (PlanEditorInput) planViewer.getSelectedPlan();
 				if (input != null){
 					try {
 						IWorkbenchPage page = getSite().getPage();
@@ -130,40 +169,26 @@ public class PlanListView extends ViewPart {
 			}
 		});
 		
-		initTree();
+		planViewer.setRootPlans(loadingInput);
+		updateJob.schedule();
 				
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
 		Menu menu = menuManager.createContextMenu(planViewer.getViewer().getControl());
-		planViewer.getControl().setMenu(menu);
+		planViewer.getViewer().getControl().setMenu(menu);
+		
 		getSite().registerContextMenu(menuManager,  planViewer.getViewer());
 		getSite().setSelectionProvider(planViewer.getViewer());
 	}
 
-	
-	/**
-	 * A job that initializes the query 
-	 * filter options
-	 */
-	public void initTree(){
-		Session session = SmartHibernateManager.openSession();
-		List<Plan> roots = PlanHibernateManager.getAllRootPlans(session);
-		planViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
-	}
+
 	
 	/**
 	 * Refreshes the Plan list
 	 */
 	public void updateContent(){
-		
-		
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				planViewer.refresh();
-			}
-		});
-		
+		updateJob.cancel();
+		updateJob.schedule();
 	}
 	
 	/* (non-Javadoc)
@@ -171,27 +196,8 @@ public class PlanListView extends ViewPart {
 	 */
 	@Override
 	public void setFocus() {
-		planViewer.getControl().setFocus();
+		planViewer.getViewer().getControl().setFocus();
 
 	}
-
-
-    /**
-     * Label provider for Plan editor input objects.
-     * 
-     * @author jeffloun
-     *
-     */
-	private class PlanEditorInputLabelProvider extends LabelProvider {
-		@Override
-		public String getText(Object element) {
-			if (element instanceof PlanEditorInput){
-				return ((PlanEditorInput)element).getName();
-			}
-			return super.getText(element);
-		}
-		
-	}
-
     
 }

@@ -3,6 +3,7 @@ package org.wcs.smart.plan;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -18,6 +19,27 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 
 	// The shared instance
 	private static SmartPlanPlugIn plugin;
+	
+	/**
+	 * Image descriptor key for conservation area plan 
+	 */
+	public static final String CA_PLAN_ICON = "org.wsc.smart.patrol.CA_PLAN"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor key for conservation area plan 
+	 */
+	public static final String TEAM_PLAN_ICON = "org.wsc.smart.patrol.TEAM_PLAN"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor key for conservation area plan 
+	 */
+	public static final String STATION_PLAN_ICON = "org.wsc.smart.patrol.STATION_PLAN"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor key for conservation area plan 
+	 */
+	public static final String PATROL_PLAN_ICON = "org.wsc.smart.patrol.PATROL_PLAN"; //$NON-NLS-1$
+
 	
 	private PlanCaDeleteHandler deleteCa;
 	/**
@@ -97,5 +119,13 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", message);
 		System.exit(1);
 	}
+	
+	@Override
+    protected void initializeImageRegistry(ImageRegistry reg) {
+		reg.put(CA_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/ca_plan.png")); //$NON-NLS-1$
+		reg.put(STATION_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station_plan.png")); //$NON-NLS-1$
+		reg.put(TEAM_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/team_plan.png")); //$NON-NLS-1$
+		reg.put(PATROL_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_plan.png")); //$NON-NLS-1$			
+    }
 	
 }

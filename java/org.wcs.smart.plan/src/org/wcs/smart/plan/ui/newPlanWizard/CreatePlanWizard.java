@@ -223,7 +223,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		//Open Plan Perspective and the plan you just created.
 		try {
 
-			PlanEditorInput input = new PlanEditorInput(p.getUuid(), p.getId());
+			PlanEditorInput input = new PlanEditorInput(p.getUuid(), p.getId(), p.getType());
 
 			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PlanEditor.ID);

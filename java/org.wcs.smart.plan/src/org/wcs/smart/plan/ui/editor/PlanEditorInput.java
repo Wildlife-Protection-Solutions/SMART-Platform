@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.plan.ui.editor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.model.Plan;
 
 /**
  * Plan EditorInput
@@ -37,14 +41,21 @@ import org.eclipse.ui.IPersistableElement;
 public class PlanEditorInput implements IEditorInput {
 
 	private byte[] uuid;
-	private String planId;
+	private String shortName;
+	
+	private List<PlanEditorInput> kids;
+	private PlanEditorInput parent;
+	private Plan.PlanType planType;
 	
 	/**
 	 * Constructor
 	 */
-	public PlanEditorInput(byte[] uuid, String planId) {
+	public PlanEditorInput(byte[] uuid, String shortName, Plan.PlanType type) {
 		this.uuid = uuid;
-		this.planId = planId;
+		this.shortName = shortName;
+		this.planType = type;
+		
+		this.kids = new ArrayList<PlanEditorInput>();
 	}
 
 	/**
@@ -76,6 +87,9 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public ImageDescriptor getImageDescriptor() {
+		if (planType != null){
+			return SmartPlanPlugIn.getDefault().getImageRegistry().getDescriptor(planType.getIconKey());
+		}
 		return null;
 	}
 
@@ -84,7 +98,7 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
-		return planId;
+		return shortName;
 	}
 
 	/* (non-Javadoc)
@@ -100,7 +114,7 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return planId;
+		return shortName;
 	}
 
 	@Override
@@ -123,6 +137,35 @@ public class PlanEditorInput implements IEditorInput {
 		if (!Arrays.equals(uuid, other.uuid))
 			return false;
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @return the parent plan
+	 */
+	public PlanEditorInput getParent(){
+		return this.parent;
+	}
+	/**
+	 * 
+	 * @return the children plans
+	 */
+	public List<PlanEditorInput> getChildren(){
+		return this.kids;
+	}
+	/**
+	 * Adds a kid plan
+	 * @param kid
+	 */
+	public void addKid(PlanEditorInput kid){
+		this.kids.add(kid);
+	}
+	/**
+	 * 
+	 * @param parent the parent plan
+	 */
+	public void setParent(PlanEditorInput parent){
+		this.parent = parent;
 	}
 	
 }

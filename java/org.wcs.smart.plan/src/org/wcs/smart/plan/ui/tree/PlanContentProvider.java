@@ -8,6 +8,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 
 /**
  * @author Emily
@@ -48,15 +49,22 @@ public class PlanContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (!(parentElement instanceof Plan)){
-			return null;
+		if (parentElement instanceof Plan){
+			Plan p = (Plan)parentElement;
+			List<Plan> kids = p.getChildren();
+			if (kids == null || kids.size() == 0){
+				return null;
+			}
+			return kids.toArray(new Plan[kids.size()]);
+		}else if (parentElement instanceof PlanEditorInput){
+			PlanEditorInput p = (PlanEditorInput)parentElement;
+			List<PlanEditorInput> kids = p.getChildren();
+			if (kids == null || kids.size() == 0){
+				return null;
+			}
+			return kids.toArray(new PlanEditorInput[kids.size()]);
 		}
-		Plan p = (Plan)parentElement;
-		List<Plan> kids = p.getChildren();
-		if (kids == null || kids.size() == 0){
-			return null;
-		}
-		return kids.toArray(new Plan[kids.size()]);
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -64,10 +72,12 @@ public class PlanContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object getParent(Object element) {
-		if (!(element instanceof Plan)){
-			return null;
+		if (element instanceof Plan){
+			return ((Plan)element).getParent();
+		}else if (element instanceof PlanEditorInput){
+			return ((PlanEditorInput) element).getParent();
 		}
-		return ((Plan)element).getParent();
+		return null;
 	}
 
 	/**
@@ -75,11 +85,8 @@ public class PlanContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public boolean hasChildren(Object element) {
-		if (!(element instanceof Plan)){
-			return false;
-		}
-		Plan p = (Plan)element;
-		if (p.getChildren() == null || p.getChildren().size() == 0){
+		Object[] kids = getChildren(element);
+		if (kids == null || kids.length == 0){
 			return false;
 		}
 		return true;

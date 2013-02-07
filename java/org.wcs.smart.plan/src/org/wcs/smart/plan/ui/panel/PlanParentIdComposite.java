@@ -107,7 +107,7 @@ public class PlanParentIdComposite extends PlanComposite {
 		cdEndDate.hide();
 		
 		planTreeViewer = new PlanViewer(this);
-		planTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
+		planTreeViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		
 		
 		btnNoParent.addSelectionListener(new SelectionAdapter() {
@@ -132,7 +132,7 @@ public class PlanParentIdComposite extends PlanComposite {
 		boolean areVisible = !btnNoParent.getSelection();
 		dtEndDate.setEnabled(areVisible);
 		dtStartDate.setEnabled(areVisible);
-		planTreeViewer.getControl().setEnabled(areVisible);
+		planTreeViewer.getViewer().getControl().setEnabled(areVisible);
 	}
 
 	
@@ -140,7 +140,7 @@ public class PlanParentIdComposite extends PlanComposite {
 	public boolean updateModel(Plan plan) {
 		if(!btnNoParent.getSelection()){
 			try{
-				Plan tmp = planTreeViewer.getSelectedPlan();
+				Plan tmp = (Plan) planTreeViewer.getSelectedPlan();
 				plan.setParent(tmp);
 			}catch (Exception e) {
 			// nothing to update if those are null

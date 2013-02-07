@@ -137,8 +137,14 @@ public class PlanIdNameDescComposite extends PlanComposite {
 	@Override
 	public boolean updateModel(Plan plan) {
 		plan.setId(id.getText());
-    	plan.setName(name.getText());
-    	plan.setDescription(description.getText());
+		if (name.getText().trim().length() == 0){
+			plan.setName(null);
+		}else{
+			plan.setName(name.getText());
+		}
+		if (name.getText().trim().length() == 0){
+			plan.setDescription(description.getText());
+		}
         return true;
 	}
 

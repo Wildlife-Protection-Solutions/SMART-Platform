@@ -42,12 +42,43 @@
                tooltip="Show Planning Perspective">
          </command>
       </menuContribution>
+
       <menuContribution
-            allPopups="true"
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.plan.PlanListView">
+         <command
+               commandId="org.wcs.smart.plan.DeletePlan"
+               label="Delete Plan"
+               style="push"
+               tooltip="%delete.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.plan.ShowPlanFilter"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
             locationURI="popup:org.wcs.smart.plan.PlanListView">
          <command
                commandId="org.wcs.smart.plan.DeletePlan"
-               icon="images/etool16/delete.png"
                label="Delete Plan"
                style="push"
                tooltip="%delete.command.tooltip">
@@ -82,6 +113,10 @@
             commandId="org.wcs.smart.plan.ShowPlanPerspective">
       </handler>
       <handler
+            class="org.wcs.smart.plan.ui.handlers.ShowPlanFilter"
+            commandId="org.wcs.smart.plan.ShowPlanFilter">
+      </handler>
+      <handler
             class="org.wcs.smart.plan.ui.handlers.DeletePlanHandler"
             commandId="org.wcs.smart.plan.DeletePlan">
       </handler>
@@ -97,8 +132,12 @@
             name="Show Planning Perspective">
       </command>
       <command
+            id="org.wcs.smart.plan.ShowPlanFilter"
+            name="Show Plan Filter">
+      </command>
+      <command
             id="org.wcs.smart.plan.DeletePlan"
-            name="%command.delete.name">
+            name="Delete Plan">
       </command>
    </extension>
 
@@ -143,6 +182,7 @@
          point="org.eclipse.ui.views">
       <view
             class="org.wcs.smart.plan.ui.perspective.PlanListView"
+            icon="images/icons/view16/plan.png"
             id="org.wcs.smart.plan.PlanListView"
             name="Plan List View"
             restorable="true">
@@ -153,9 +193,21 @@
       <editor
             class="org.wcs.smart.plan.ui.editor.PlanEditor"
             default="false"
+            icon="images/icons/view16/plan.png"
             id="org.wcs.smart.plan.ui.editor.PlanEditor"
             name="PlanEditor">
       </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.plan.ShowPlanFilter"
+            icon="images/icons/etool16/plan_filter.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.DeletePlan"
+            icon="images/icons/etool16/delete.png">
+      </image>
    </extension>
 
 </plugin>

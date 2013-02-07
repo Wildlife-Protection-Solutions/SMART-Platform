@@ -28,13 +28,19 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 
 /**
  * A tree viewer for viewing plans in a tree
- * structure.
+ * structure.  The input for
+ * the editor can be either Plan objects
+ * or PlanEditorInput objects.  Will
+ * also correctly work with string objects.
  * 
  * @author Emily
  *
@@ -60,16 +66,39 @@ public class PlanViewer {
 			public String getText(Object element){
 				if (element instanceof Plan){
 					return ((Plan)element).getName() + " [" + ((Plan)element).getId() + "]";
+				}else if (element instanceof PlanEditorInput){
+					return ((PlanEditorInput) element).getName();
 				}
 				return super.getText(element);
 			}
 			
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof Plan){
+					return SmartPlanPlugIn.getDefault().getImageRegistry().get(((Plan) element).getType().getIconKey());
+				}else if (element instanceof PlanEditorInput){
+					return ((PlanEditorInput) element).getImageDescriptor().createImage();
+				}
+				return null;
+			}
+			
 		});
+		
+		//TODO: review this code as I am not sure what this will sort
+		//also needs to be setup to work with planeditorinput
 		planViewer.setComparator(new ViewerComparator() {					
 		    @Override
 		    public int compare(Viewer viewer, Object e1, Object e2) {
-		    	if (e1 instanceof Plan && e2 instanceof Plan){	        	
-		            return Collator.getInstance().compare(((Plan) e1).getName(), (((Plan) e2).getName()));
+		    	if (e1 instanceof Plan && e2 instanceof Plan){	  
+		    		String a = ((Plan)e1).getName();
+		    		String b = ((Plan)e2).getName();
+		    		if (a == null){
+		    			a = "";
+		    		}
+		    		if (b == null){
+		    			b = "";
+		    		}
+		            return Collator.getInstance().compare(a,b);
 		    	}else if (e1 instanceof Plan ){
 		    		return 1;
 		    	}else if (e2 instanceof Plan){
@@ -83,17 +112,15 @@ public class PlanViewer {
 	
 	/**
 	 * 
-	 * @return the select plan in the plan viewer
+	 * @return the selected object in the plan viewer or
+	 * <code>null</code> if no selection
 	 */
-	public Plan getSelectedPlan(){
+	public Object getSelectedPlan(){
 		if (planViewer.getSelection().isEmpty()){
 			return null;
 		}
 		Object selectedElement = ((StructuredSelection)planViewer.getSelection()).getFirstElement();
-		if (selectedElement instanceof Plan){
-			return (Plan) selectedElement;
-		}
-		return null;
+		return selectedElement;
 	}
 
 	/**
@@ -119,15 +146,11 @@ public class PlanViewer {
 	public void refresh(){
 		planViewer.refresh();
 	}
-	
+		
 	/**
 	 * 
-	 * @return the viewer control
+	 * @return the backing tree viewer
 	 */
-
-	public Control getControl(){
-		return planViewer.getTree();
-	}
 	public TreeViewer getViewer(){
 		return this.planViewer;
 	}

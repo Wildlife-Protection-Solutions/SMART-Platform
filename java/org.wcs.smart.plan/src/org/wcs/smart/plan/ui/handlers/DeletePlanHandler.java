@@ -64,20 +64,33 @@ public class DeletePlanHandler extends AbstractHandler {
 		
 		for (Iterator<?> iterator = lastSelection.iterator(); iterator.hasNext();) {
 			Object selected = iterator.next();
+			byte[] planUuid = null;
+			String name = null;
 			if (selected instanceof Plan) {
-				final Plan selectedPlan = (Plan) selected;
+				planUuid = ((Plan) selected).getUuid();
+				name = "[" + ((Plan)selected).getId() + "]";
+				if (((Plan)selected).getName() != null){
+					name = ((Plan) selected).getName() + " " + name;
+				}
+			}else if (selected instanceof PlanEditorInput){
+				planUuid = ((PlanEditorInput)selected).getUuid();
+				name = ((PlanEditorInput) selected).getName();
+			}
+			if (planUuid != null){
+				final byte[] uuid = planUuid;
+				final String thisname = name;
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
 								"Are you sure you wish to delete this Plan?",
 								null,
-								MessageFormat.format("Are you sure you wish to delete this Plan? All sub-plans will also be deleted if you do so.", new Object[]{selectedPlan.getId()}),
+								MessageFormat.format("Are you sure you wish to delete the plan {0}? All sub-plans will also be deleted if you do so.", new Object[]{thisname}),
 								MessageDialog.CONFIRM, 
 								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 						
 						if (dialog.open() == MessageDialog.OK) {
-							DeletePlanJob deleteJob = new DeletePlanJob(selectedPlan.getUuid());
+							DeletePlanJob deleteJob = new DeletePlanJob(uuid);
 							deleteJob.schedule();
 						}
 					}});

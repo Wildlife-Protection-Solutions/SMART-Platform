@@ -58,7 +58,7 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 		main.setLayout(new GridLayout(1, false));
 
 		pv = new PlanViewer(main);
-		pv.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		pv.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		super.setTitle("Patrol Plan");
 		super.setMessage(MessageFormat.format(
@@ -67,7 +67,7 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 	}
 
 	private Plan getSelectedPlan(){
-		return pv.getSelectedPlan();
+		return (Plan) pv.getSelectedPlan();
 	}
 	
 	@Override
