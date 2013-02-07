@@ -52,7 +52,7 @@ public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 		@Override
 		public void inputChanged(IntelligenceComposite source) {
 			setChangesMade(true);
-//			EditItelligenceItemDialog.this.setErrorMessage(item.getErrorMessage());
+//			EditItelligenceItemDialog.this.setErrorMessage(source.getErrorMessage());
 			if (getButton(IDialogConstants.OK_ID) != null) {
 				getButton(IDialogConstants.OK_ID).setEnabled(source.isDataValid());
 			}
@@ -76,6 +76,7 @@ public class EditItelligenceItemDialog extends AbstractPropertyJHeaderDialog {
 		content.initFromModel(intelligence);
 		content.addInputChangeListener(inputChangeListener);
 		setChangesMade(false);
+		setTitle(IntelligenceCompositeFactory.getInstance().getTitle(panelType));
 		setMessage(content.getMessage());
 		return content;
 	}
