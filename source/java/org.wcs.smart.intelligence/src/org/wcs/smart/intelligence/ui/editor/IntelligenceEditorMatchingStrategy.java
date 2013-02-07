@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
-import java.util.Arrays;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorMatchingStrategy;
 import org.eclipse.ui.IEditorReference;
@@ -44,11 +42,7 @@ public class IntelligenceEditorMatchingStrategy implements IEditorMatchingStrate
 		if (input instanceof IntelligenceEditorInput) {
 			try {
 				IEditorInput editorInput = editorRef.getEditorInput();
-				if (editorInput instanceof IntelligenceEditorInput) {
-					byte[] uuid = ((IntelligenceEditorInput)input).getUuid();
-					byte[] edit_uuid = ((IntelligenceEditorInput)editorInput).getUuid();
-					return Arrays.equals(uuid, edit_uuid);
-				}
+				return input.equals(editorInput);
 			} catch (PartInitException e) {
 				e.printStackTrace();
 			}

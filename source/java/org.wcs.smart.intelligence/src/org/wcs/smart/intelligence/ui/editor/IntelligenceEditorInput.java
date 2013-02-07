@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -98,6 +100,27 @@ public class IntelligenceEditorInput implements IEditorInput {
 	@Override
 	public String getToolTipText() {
 		return shortName;
+	}
+	
+	@Override
+	public int hashCode() {
+		if (uuid != null) {
+			return Arrays.hashCode(uuid);
+		}
+		return super.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof IntelligenceEditorInput) {
+			IntelligenceEditorInput i = (IntelligenceEditorInput) other;
+			if (i.getUuid() == null && this.getUuid() == null) {
+				return super.equals(i);
+			} else if (i.getUuid() != null && this.getUuid() != null) {
+				return Arrays.equals(i.getUuid(), this.getUuid());
+			}
+		}
+		return false;
 	}
 
 }
