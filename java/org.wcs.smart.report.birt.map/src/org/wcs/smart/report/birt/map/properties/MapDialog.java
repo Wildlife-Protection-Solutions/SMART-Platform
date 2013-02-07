@@ -29,10 +29,14 @@ import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.render.RenderPackage;
 import net.refractions.udig.project.internal.render.ViewportModel;
+import net.refractions.udig.project.render.displayAdapter.IMapDisplayListener;
+import net.refractions.udig.project.render.displayAdapter.MapDisplayEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
+import net.refractions.udig.project.ui.render.displayAdapter.MapMouseWheelEvent;
+import net.refractions.udig.project.ui.render.displayAdapter.MapMouseWheelListener;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
@@ -56,9 +60,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.SmartPlugIn;
@@ -86,6 +88,14 @@ public class MapDialog extends Dialog implements MapPart{
 	private Label lblCoordinates;
 	private byte[] basemapUuid = null;
 	private ReferencedEnvelope  bounds = null;
+	
+	private Job refreshJob = new Job(Messages.MapDialog_ResizeJobName){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			map.getRenderManager().refresh(null);
+			return Status.OK_STATUS;
+		}
+	};
 	
 	protected MapDialog(Shell parentShell, byte[] basemapUuid, ReferencedEnvelope mapBounds) {
 		super(parentShell);
@@ -176,20 +186,20 @@ public class MapDialog extends Dialog implements MapPart{
 		tools.selectTool(PanTool.ID);
 		
 		getShell().setText(Messages.MapDialog_DialogTitle);
-		super.getShell().addListener(SWT.Resize, new Listener(){
-			Job j = new Job(Messages.MapDialog_ResizeJobName){
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					map.getRenderManager().refresh(null);
-					return Status.OK_STATUS;
-				}
-			};
+		viewer.getViewport().addPaneListener(new IMapDisplayListener() {
+			@Override
+			public void sizeChanged(MapDisplayEvent event) {
+				refreshJob.schedule();
+			}
+		});
+		viewer.getViewport().addMouseWheelListener(new MapMouseWheelListener() {
 			
 			@Override
-			public void handleEvent(Event event) {
-				j.schedule(500);
-			}});
-
+			public void mouseWheelMoved(MapMouseWheelEvent e) {
+				refreshJob.cancel();
+				refreshJob.schedule(600);
+			}
+		});
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		tools.selectTool(PanTool.ID);
 //		setModalTool(PanTool.ID); 

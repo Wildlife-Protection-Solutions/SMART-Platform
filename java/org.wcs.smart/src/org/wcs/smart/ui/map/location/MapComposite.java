@@ -33,8 +33,12 @@ import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.render.ViewportModel;
+import net.refractions.udig.project.render.displayAdapter.IMapDisplayListener;
+import net.refractions.udig.project.render.displayAdapter.MapDisplayEvent;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.render.displayAdapter.MapMouseWheelEvent;
+import net.refractions.udig.project.ui.render.displayAdapter.MapMouseWheelListener;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
@@ -52,8 +56,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
@@ -94,6 +96,14 @@ public class MapComposite extends Composite implements MapPart {
 	private MapViewer mapViewer;
 	private Map map;
 	
+	private Job refreshJob = new Job(Messages.MapComposite_MapResizeJob_Title){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			map.getRenderManager().refresh(null);
+			return Status.OK_STATUS;
+		}
+	};
+	
 	/**
 	 * @param parent
 	 * @param style
@@ -102,7 +112,7 @@ public class MapComposite extends Composite implements MapPart {
 		super(parent, style);
 		createControls();
 	}
-
+	
 	private void createControls() {
 
 		GridLayout gd = new GridLayout(2, false);
@@ -149,23 +159,22 @@ public class MapComposite extends Composite implements MapPart {
 		
 		addPointsLayer();
 		defaultLayer.schedule();
-		
-		
-
-		getShell().addListener(SWT.Resize, new Listener(){
-			Job j = new Job(Messages.MapComposite_MapResizeJob_Title){
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					map.getRenderManager().refresh(null);
-					return Status.OK_STATUS;
-				}
-			};
-
+	
+		mapViewer.getViewport().addPaneListener(new IMapDisplayListener() {
 			@Override
-			public void handleEvent(Event event) {
-				j.schedule(500);
+			public void sizeChanged(MapDisplayEvent event) {
+				refreshJob.schedule();
 			}
 		});
+		mapViewer.getViewport().addMouseWheelListener(new MapMouseWheelListener() {
+			
+			@Override
+			public void mouseWheelMoved(MapMouseWheelEvent e) {
+				refreshJob.cancel();
+				refreshJob.schedule(600);
+			}
+		});
+
 	}
 	
 	@SuppressWarnings("unchecked")
