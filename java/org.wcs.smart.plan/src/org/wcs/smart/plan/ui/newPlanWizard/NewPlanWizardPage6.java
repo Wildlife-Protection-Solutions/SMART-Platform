@@ -21,26 +21,10 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.HashMap;
-
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.hibernate.Session;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.model.PlanTarget;
-import org.wcs.smart.plan.ui.newPlanWizard.viewer.TargetListViewer;
+import org.wcs.smart.plan.ui.panel.PlanTargetComposite;
 
 /**
  * Wizard page for collecting the plan targets
@@ -50,14 +34,11 @@ import org.wcs.smart.plan.ui.newPlanWizard.viewer.TargetListViewer;
  */
 public class NewPlanWizardPage6 extends NewPlanWizardPage {
 
-	private TargetListViewer targetTable;
-	private Plan plan;
-	private NewPlanWizardPage6 thisPage;
+	private PlanTargetComposite panel;
+
 	
-	protected NewPlanWizardPage6(Plan plan) {
+	protected NewPlanWizardPage6() {
 		super("Plan Targets");
-		this.plan = plan;
-		this.thisPage = this;
 	}
 
 
@@ -67,85 +48,23 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		panel =  new PlanTargetComposite(parent, SWT.NONE); 
 		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Plan Targets:");
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		
-		Composite table = new Composite(center, SWT.NONE);
-		table.setLayout(new TableColumnLayout());
-		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		targetTable  = new TargetListViewer(table, plan);
-		
-		Composite buttonPnl = new Composite(center, SWT.NONE);
-		buttonPnl.setLayout(new GridLayout());
-		buttonPnl.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
-		
-		Button btnNew = new Button(buttonPnl, SWT.NONE);
-		btnNew.setText("Add Target...");
-		btnNew.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, null); 
-			    if (dia.open() == Window.CANCEL){
-			    	//do nothing
-				}else{
-					targetTable.updateModel(plan);
-				}
-			}
-			
-		});
-		
-		
-		final Button btnEdit = new Button(buttonPnl, SWT.NONE);
-		btnEdit.setText("Edit Target...");
-		btnEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sec = (IStructuredSelection)targetTable.getSelection();
-		        if (sec.isEmpty()){
-		            return;
-		        }
-		        
-		        PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
-				TargetPropertyPage dia = new TargetPropertyPage(getShell(), plan, selected); 
-			    if (dia.open() == Window.CANCEL){
-			    	//do nothing
-				}else{
-					targetTable.updateModel(plan);
-					validate();
-				}
-			}
-			
-		});
-		btnEdit.setEnabled(false);
-		targetTable.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				btnEdit.setEnabled(!targetTable.getSelection().isEmpty());
-				
-			}
-		});
-		
-		setControl(center);
-		setMessage("Add all of the plan targets by selecting the \"Add new target\" button. Click the edit button beside an existing target to make change to it:");
+		setControl(panel);
+		setMessage("Add plan targets by selecting the \"Add new target\" button. Click the edit button beside an existing target to make changes to it:");
 	}
 	
 
 
 	@Override
 	public boolean updateModel(Plan p) {
-		targetTable.updateModel(plan);
+		panel.updateModel(p);
 		return true;
 	}
 	
 	@Override
-	void initModel(Plan p, Session session) {
-		targetTable.updateModel(plan);
+	void initModel(Plan p) {
+		panel.initFromModel(p);
 	}
 
 	

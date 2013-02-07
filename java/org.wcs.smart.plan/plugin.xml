@@ -32,6 +32,16 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
+         <command
+               commandId="org.wcs.smart.plan.ShowPlanPerspective"
+               label="Show Planning Perspective"
+               style="push"
+               tooltip="Show Planning Perspective">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -39,12 +49,20 @@
             class="org.wcs.smart.plan.ui.handlers.NewPlanHandler"
             commandId="org.wcs.smart.plan.NewPlan">
       </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ShowPlanPersepctiveHandler"
+            commandId="org.wcs.smart.plan.ShowPlanPerspective">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.plan.NewPlan"
             name="Create New Plan">
+      </command>
+      <command
+            id="org.wcs.smart.plan.ShowPlanPerspective"
+            name="Show Planning Perspective">
       </command>
    </extension>
 
@@ -76,6 +94,32 @@
       <contribution
             class="org.wcs.smart.plan.internal.ui.patrol.PatrolPlanContribution">
       </contribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.wcs.smart.plan.ui.perspective.PlanPerspective"
+            id="org.wcs.smart.plan.planPerspective"
+            name="Planning Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.plan.ui.perspective.PlanListView"
+            id="org.wcs.smart.plan.PlanListView"
+            name="Plan List View"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.plan.ui.editor.PlanEditor"
+            default="false"
+            id="org.wcs.smart.plan.ui.editor.PlanEditor"
+            name="PlanEditor">
+      </editor>
    </extension>
 
 </plugin>

@@ -45,7 +45,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 
 
@@ -59,7 +58,7 @@ import org.wcs.smart.plan.model.PlanTarget;
  */
 public class TargetPropertyPage extends Dialog {
 
-	private Plan parentPlan;
+	private List<PlanTarget> parentTargets;
 	private PlanTarget toUpdate;
 	
 	private String title = null;
@@ -76,11 +75,11 @@ public class TargetPropertyPage extends Dialog {
 	 * @param style
 	 */
 	public TargetPropertyPage(Shell parent,  
-		Plan parentPlan, PlanTarget toUpdate) {
+		List<PlanTarget> parentTargets, PlanTarget toUpdate) {
 		super(parent);
 
 		this.toUpdate = toUpdate;
-		this.parentPlan = parentPlan;
+		this.parentTargets = parentTargets;
 		if (toUpdate == null){
 			title = "Create Target";
 		}else{
@@ -197,8 +196,8 @@ public class TargetPropertyPage extends Dialog {
 		//create new target if necessary
 		if (toUpdate == null){
 			pt = target.createTarget();
-			pt.setPlan(parentPlan);
-			parentPlan.addTarget(pt);
+			//pt.setPlan(parentPlan);
+			parentTargets.add(pt);
 		}else{
 			pt = toUpdate;
 		}
