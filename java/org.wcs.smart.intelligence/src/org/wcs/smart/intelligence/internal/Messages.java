@@ -56,6 +56,8 @@ public class Messages extends NLS {
 
     public static String IntelligenceDates_To_Label;
 
+	public static String IntelligenceDatesComposite_DateRange_Error;
+
     public static String IntelligenceDesc_Description_Label;
 
     public static String IntelligenceDesc_Message;

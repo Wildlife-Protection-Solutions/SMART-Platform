@@ -58,6 +58,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 		super(parent, style);
 		setMessage(Messages.IntelligenceDesc_Message);
 		createControls();
+		validate();
 	}
 
 	private void createControls() {
@@ -130,8 +131,12 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 	}
 
 	@Override
-	public boolean isDataValid() {
-		return isShortNameValid();
+	protected void validate() {
+		if (!isShortNameValid()) {
+			setErrorMessage(Messages.IntelligenceDesc_NameRequired_Error);
+			return;
+		}
+		setErrorMessage(null);
 	}
 	
 	private boolean isShortNameValid() {
