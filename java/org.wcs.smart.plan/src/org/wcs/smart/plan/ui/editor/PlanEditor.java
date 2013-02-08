@@ -51,8 +51,8 @@ import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.newPlanWizard.viewer.TargetListViewer;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
+import org.wcs.smart.plan.ui.targets.TargetListViewer;
 
 /**
  * The Plan Editor

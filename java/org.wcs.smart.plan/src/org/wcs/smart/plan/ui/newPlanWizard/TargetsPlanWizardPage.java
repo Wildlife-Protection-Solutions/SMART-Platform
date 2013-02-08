@@ -59,9 +59,9 @@ public class TargetsPlanWizardPage extends PlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
-		panel.updateModel(p);
+		boolean res = panel.updateModel(p);
 		p.setTargets(panel.getTargets());
-		return true;
+		return res;
 	}
 	
 	@Override

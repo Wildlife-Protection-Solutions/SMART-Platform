@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package org.wcs.smart.plan.ui.newPlanWizard;
+package org.wcs.smart.plan.ui.targets;
 
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -44,6 +44,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
 import org.wcs.smart.util.SmartUtils;
 
 /**

@@ -62,6 +62,7 @@ public class LoadPlanJob extends Job {
 	
 	public void setDefaultSelection(PlanEditorInput defaultSelection){
 		this.currentSelection = defaultSelection;
+		planViewer.setSelection(currentSelection);
 	}
 	
 	@Override

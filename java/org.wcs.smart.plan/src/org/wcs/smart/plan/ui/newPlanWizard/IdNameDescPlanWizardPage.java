@@ -53,7 +53,7 @@ public class IdNameDescPlanWizardPage extends PlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		panel =  new PlanIdNameDescComposite(parent, SWT.NONE); 
+		panel =  new PlanIdNameDescComposite(parent, SWT.NONE, false); 
 		
 		panel.addInputChangeListener(new IInputChangeListener(){
 			@Override
@@ -79,8 +79,7 @@ public class IdNameDescPlanWizardPage extends PlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
-		panel.updateModel(p);
-		return true;
+		return panel.updateModel(p); 
 	}
 	
 	@Override

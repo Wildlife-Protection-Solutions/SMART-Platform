@@ -157,7 +157,6 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	public Session getSession() {
 		if (session == null || !session.isOpen()) {
 			session = PatrolHibernateManager.openSession();
-			session.update(plan.getConservationArea());
 		}
 		return session;
 	}
@@ -204,9 +203,10 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		}
 
 		Plan p = getPlan();
-		if (p.getParent() != null){
-			p.getParent().getChildren().add(p);
-		}
+//		if (p.getParent() != null){
+//			p.getParent().getChildren().add(p);
+//		}
+//causes lazy errors, don't think this is really necessary anymore with other plan loading changes.
 
 		if(p.getTargets() != null){
 			List<PlanTarget> tars = p.getTargets();
@@ -238,9 +238,10 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	 */
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
+		
 		if (event.getCurrentPage() instanceof PlanWizardPage) {
-			if (!((PlanWizardPage) event.getCurrentPage())
-					.updateModel(plan)) {
+			boolean result = ((PlanWizardPage) event.getCurrentPage()).updateModel(plan);
+			if (!result){
 				event.doit = false;
 				return;
 			}

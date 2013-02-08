@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.plan.ui.newPlanWizard.viewer;
+package org.wcs.smart.plan.ui.targets;
 
 import java.util.List;
 
