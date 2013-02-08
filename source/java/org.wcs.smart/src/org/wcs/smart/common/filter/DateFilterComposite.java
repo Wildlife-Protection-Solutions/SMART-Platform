@@ -84,10 +84,10 @@ public class DateFilterComposite extends Composite {
 		NEXT_60_DAYS(Messages.DateFilter_Next60Days),
 		YEAR_TO_DATE(Messages.DateFilter_YearToDate),
 		MONTH_TO_DATE(Messages.DateFilter_MonthToDate),
-		RANGE_30_DAYS("+- 30 Days"),
-		RANGE_60_DAYS("+- 60 Days"),
-		CURRENT_YEAR("Current Year"),
-		CURRENT_MONTH("Current Month"),
+		RANGE_30_DAYS(Messages.DateFilterComposite_30DayRangeOption),
+		RANGE_60_DAYS(Messages.DateFilterComposite_60DayRangeOption),
+		CURRENT_YEAR(Messages.DateFilterComposite_CurrentYear),
+		CURRENT_MONTH(Messages.DateFilterComposite_CurrentMonth),
 		CUSTOM(Messages.DateFilter_Custom);
 		
 		private String guiName;

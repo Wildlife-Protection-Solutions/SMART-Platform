@@ -25,6 +25,7 @@ import java.util.Date;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
@@ -40,8 +41,17 @@ import org.wcs.smart.plan.model.Plan;
 public class PlanFilter {
 	
 	public static DateFilter DEFAULT_DATE_FILTER = DateFilter.RANGE_30_DAYS; 
+	
+	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {
+			new StringFilterComposite.TextField("Plan Id", "id"),
+			new StringFilterComposite.TextField("Plan Name", "name")
+	};
+	
+	
 	private Plan.PlanType[] types = null;
 	private DateFilter dateFilter = DEFAULT_DATE_FILTER;
+	
+	private StringFilterComposite.TextField searchField = null;
 	private String planIdFilter = null;
 	private StringComparison stringComparator = null;
 	
@@ -69,6 +79,13 @@ public class PlanFilter {
 		return this.planIdFilter;
 	}
 	
+	/**
+	 * 
+	 * @return the id or name field to search
+	 */
+	public StringFilterComposite.TextField getSearchField(){
+		return this.searchField;
+	}
 	/**
 	 * 
 	 * @return start date for custom date filter
@@ -133,9 +150,10 @@ public class PlanFilter {
 	 * @param stringComparitor the types of string comparison or null
 	 * @param text the text to compare or null
 	 */
-	public void setPatrolIdFilter(StringComparison stringComparitor, String text){
+	public void setPatrolIdFilter(StringComparison stringComparitor, String text, StringFilterComposite.TextField field){
 		this.stringComparator = stringComparitor;
 		this.planIdFilter = text;
+		this.searchField = field;
 	}
 	
 	/**
@@ -162,7 +180,7 @@ public class PlanFilter {
 			or = true;
 			str.append(" p.type IN (:pt) "); //$NON-NLS-1$
 		}
-		if (stringComparator != null && planIdFilter != null){
+		if (stringComparator != null && planIdFilter != null && searchField != null){
 			if (and){
 				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
@@ -171,7 +189,7 @@ public class PlanFilter {
 				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			str.append(" lower(p.id) like :pid "); //$NON-NLS-1$
+			str.append(" lower(p." + searchField.getDbFieldName() + ") like :pid "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}
 		if (dateFilter != null){

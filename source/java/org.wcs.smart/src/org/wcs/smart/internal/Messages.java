@@ -333,8 +333,12 @@ public class Messages extends NLS {
 	public static String DateFilter_Next30Days;
 	public static String DateFilter_Next60Days;
 	public static String DateFilter_YearToDate;
+	public static String DateFilterComposite_30DayRangeOption;
+	public static String DateFilterComposite_60DayRangeOption;
 	public static String DateFilterComposite_ContainsDate_Label_A;
 	public static String DateFilterComposite_ContainsDate_Label_B;
+	public static String DateFilterComposite_CurrentMonth;
+	public static String DateFilterComposite_CurrentYear;
 	public static String DateFilterComposite_DateRequired_Error;
 	public static String DateFilterComposite_EndDateRange_Error;
 	public static String DateFilterComposite_FilterDates_Label;

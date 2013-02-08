@@ -88,9 +88,8 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 		};
 
 		Composite nameGrp = createGroupComposite(Messages.IntelligenceFilterDialog_NameGroup_Label, composite);
-		nameCmp = new StringFilterComposite(nameGrp, SWT.NONE);
-		nameCmp.setValueLabel(Messages.IntelligenceFilterDialog_NameValue_Label);
-		
+		nameCmp = new StringFilterComposite(nameGrp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IntelligenceFilterDialog_NameValue_Label, "name")}); //$NON-NLS-1$
+
 		updateControlsValues();
 		
 		return filter;
@@ -121,7 +120,7 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 		relevantDateCmp.applyState(currentFilter.getRelevantDateFilter(),
 				currentFilter.getRelevantDateStart(), currentFilter.getRelevantDateEnd());
 		
-		nameCmp.applyState(currentFilter.getNameComparison(), currentFilter.getName());
+		nameCmp.applyState(currentFilter.getNameComparison(), currentFilter.getName(), null);
 	}
 
 	@Override
