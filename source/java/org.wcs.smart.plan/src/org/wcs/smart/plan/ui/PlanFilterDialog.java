@@ -42,7 +42,6 @@ import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.perspective.PlanListView;
 
 /**
  * Dialog for filtering plans.
@@ -63,9 +62,9 @@ public class PlanFilterDialog extends SmartFilterDialog {
 	private CheckboxTableViewer planTypeTableViewer;
 
 	public PlanFilterDialog(Shell parent,
-			PlanListView view) {
+			IPlanFilterItem view) {
 		super(parent, view);
-		this.currentFilter = view.getCurrentFilter();
+		this.currentFilter = view.getPlanFilter();
 	}
 
 	@Override

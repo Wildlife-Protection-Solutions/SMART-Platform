@@ -21,12 +21,6 @@
  */
 package org.wcs.smart.plan.ui.perspective;
 
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -35,20 +29,17 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
-import org.hibernate.Session;
-import org.wcs.smart.common.filter.IUpdatableView;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
-import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.IPlanFilterItem;
+import org.wcs.smart.plan.ui.LoadPlanJob;
 import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
@@ -59,46 +50,14 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  * @author jeffloun
  * @since 1.0.0
  */
-public class PlanListView extends ViewPart implements IUpdatableView {
+public class PlanListView extends ViewPart implements IPlanFilterItem {
 
 	public static final String ID = "org.wcs.smart.plan.PlanListView"; //$NON-NLS-1$
 
 	private PlanViewer planViewer;
 	private PlanFilter currentFilter;
-	private Object[] loadingInput = new Object[]{"Loading"};
+	private LoadPlanJob updateJob;
 	
-	/*
-	 * Job that updates the patrol list based on the current filter
-	 */
-	private Job updateJob = new Job("Loading Plans") {
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("Loading Plans", 1);
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					planViewer.setRootPlans(loadingInput);
-					planViewer.refresh();
-				}
-			});
-			Session session = SmartHibernateManager.openSession();
-			try{
-				final List<PlanEditorInput> roots = PlanHibernateManager.getRootPlans(session, currentFilter);
-				monitor.internalWorked(0.5);
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						planViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
-						planViewer.refresh();
-						planViewer.getViewer().expandAll();
-					}
-				});
-			}finally{
-				session.close();
-			}
-			return Status.OK_STATUS;
-		}
-	};
 
 	/**
 	 * listener for Plan change events.
@@ -117,9 +76,6 @@ public class PlanListView extends ViewPart implements IUpdatableView {
 		this.currentFilter = new PlanFilter();
 	}
 	
-	public PlanFilter getCurrentFilter(){
-		return this.currentFilter;
-	}
 
 	public void dispose() {		
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_ADDED, planListener);
@@ -169,8 +125,7 @@ public class PlanListView extends ViewPart implements IUpdatableView {
 				
 			}
 		});
-		
-		planViewer.setRootPlans(loadingInput);
+		updateJob = new LoadPlanJob(planViewer, currentFilter);
 		updateJob.schedule();
 				
 		/* add right click context menu */
@@ -199,6 +154,11 @@ public class PlanListView extends ViewPart implements IUpdatableView {
 	public void setFocus() {
 		planViewer.getViewer().getControl().setFocus();
 
+	}
+
+	@Override
+	public PlanFilter getPlanFilter() {
+		return this.currentFilter;
 	}
     
 }
