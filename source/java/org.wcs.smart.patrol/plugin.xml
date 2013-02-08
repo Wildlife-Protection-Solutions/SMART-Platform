@@ -138,6 +138,18 @@
                   </test>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.patrol.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.patrol.PatrolPerspective"
+                  icon="images/icons/etool16/patrol.png"
+                  label="%showpatrolperspective.command.label"
+                  mnemonic="%showpatrolperspectivecommand.mnemonic"
+                  style="push"
+                  tooltip="%showpatrolperspectivecommand.tooltip">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution

@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
 

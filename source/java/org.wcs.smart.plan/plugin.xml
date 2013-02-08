@@ -12,6 +12,7 @@
                mnemonic="P">
             <command
                   commandId="org.wcs.smart.plan.NewPlan"
+                  icon="images/icons/view16/plan_add.png"
                   label="Create New Plan"
                   mnemonic="c"
                   style="push"
@@ -27,8 +28,23 @@
                            property="org.wcs.smart.smartAdminUser"
                            value="manager">
                      </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
                   </or>
                </visibleWhen>
+            </command>
+            <separator
+                  name="org.wcs.smart.plan.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.plan.ShowPlanPerspective"
+                  icon="images/icons/view16/plan.png"
+                  label="View Planning Records"
+                  style="push"
+                  tooltip="View Plans">
             </command>
          </menu>
       </menuContribution>
@@ -37,9 +53,31 @@
             locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
          <command
                commandId="org.wcs.smart.plan.ShowPlanPerspective"
+               icon="images/icons/view16/plan.png"
                label="Show Planning Perspective"
                style="push"
                tooltip="Show Planning Perspective">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
       </menuContribution>
 
@@ -48,6 +86,7 @@
             locationURI="toolbar:org.wcs.smart.plan.PlanListView">
          <command
                commandId="org.wcs.smart.plan.DeletePlan"
+               icon="images/icons/etool16/delete.png"
                label="Delete Plan"
                style="push"
                tooltip="Delete the Selected Plan">
@@ -60,11 +99,35 @@
                   </test>
                   <test
                         property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
                         value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.plan.NewPlan"
+               icon="images/icons/view16/plan_add.png"
+               label="Create Plan"
+               style="push"
+               tooltip="Add a New Plan">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
                   </test>
                   <test
                         property="org.wcs.smart.smartAdminUser"
                         value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
                   </test>
                </or>
             </visibleWhen>
@@ -79,6 +142,7 @@
             locationURI="popup:org.wcs.smart.plan.PlanListView">
          <command
                commandId="org.wcs.smart.plan.DeletePlan"
+               icon="images/icons/etool16/delete.png"
                label="Delete Plan"
                style="push"
                tooltip="Delete the Selected Plan">
@@ -91,11 +155,11 @@
                   </test>
                   <test
                         property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
+                        value="manager">
                   </test>
                   <test
                         property="org.wcs.smart.smartAdminUser"
-                        value="manager">
+                        value="dataentry">
                   </test>
                </or>
             </visibleWhen>
