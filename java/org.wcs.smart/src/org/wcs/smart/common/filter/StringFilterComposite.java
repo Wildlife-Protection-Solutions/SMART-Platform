@@ -53,6 +53,7 @@ public class StringFilterComposite extends Composite {
 	private Text txtFilter;
 	
 	private TextField[] searchFields;
+	private ComboViewer searchField;
 
 	/**
 	 * Types of comparation.
@@ -74,8 +75,9 @@ public class StringFilterComposite extends Composite {
 	 * @param parent
 	 * @param style
 	 */
-	public StringFilterComposite(Composite parent, int style) {
+	public StringFilterComposite(Composite parent, int style, TextField[] searchFields) {
 		super(parent, style);
+		this.searchFields = searchFields;
 		createControls();
 	}
 
@@ -96,7 +98,21 @@ public class StringFilterComposite extends Composite {
 		Composite comp = new Composite(this, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		comp.setLayout(new GridLayout(3, false));
-		lblValue = new Label(comp, SWT.NONE);
+		
+		if (searchFields.length <= 1){
+			lblValue = new Label(comp, SWT.NONE);
+			lblValue.setText(searchFields[0].getGuiName());
+		}else{
+			searchField = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+			searchField.setContentProvider(ArrayContentProvider.getInstance());
+			searchField.setInput(searchFields);
+			searchField.setLabelProvider(new LabelProvider(){
+				public String getText(Object element){
+					return ((TextField)element).getGuiName();
+				}
+			});
+			searchField.setSelection(new StructuredSelection(searchFields[0]));
+		}
 		
 		comparatorViewer = new ComboViewer(comp, SWT.READ_ONLY);
 		comparatorViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -117,17 +133,13 @@ public class StringFilterComposite extends Composite {
 		btnFilter.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				comparatorViewer.getCombo().setEnabled(true);
-				txtFilter.setEnabled(true);
-				lblValue.setEnabled(true);
+				setFilteringEnabled(true);
 			}
 		});
 		btnIncludeAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				comparatorViewer.getCombo().setEnabled(false);
-				txtFilter.setEnabled(false);
-				lblValue.setEnabled(false);
+				setFilteringEnabled(false);
 			}
 		});
 	}
@@ -147,16 +159,14 @@ public class StringFilterComposite extends Composite {
 	public void setFilterRadioLabel(String text) {
 		btnFilter.setText(text);
 	}
-	
-	/**
-	 * Sets the 
-	 * @param text
-	 */
-	public void setValueLabel(String text) {
-		lblValue.setText(text);
-	}
 
-	public void applyState(StringComparison comparison, String text) {
+	/**
+	 * Updates the controls to the given values 
+	 * @param comparison comparison operator
+	 * @param text search value
+	 * @param field field to search, can be <code>null</code> if only one field to search
+	 */
+	public void applyState(StringComparison comparison, String text, TextField field) {
 		boolean enabled = comparison != null && text != null;
 		if (enabled) {
 			txtFilter.setText(text);
@@ -165,7 +175,9 @@ public class StringFilterComposite extends Composite {
 			comparatorViewer.setSelection(new StructuredSelection(StringComparison.CONTAINS));
 		}
 		setFilteringEnabled(enabled);
-		
+		if (field != null && searchField != null){
+			searchField.setSelection(new StructuredSelection(field));
+		}
 	}
 	
 	private void setFilteringEnabled(boolean enabled) {
@@ -173,9 +185,18 @@ public class StringFilterComposite extends Composite {
 		btnIncludeAll.setSelection(!enabled);
 		txtFilter.setEnabled(enabled);
 		comparatorViewer.getControl().setEnabled(enabled);
-		lblValue.setEnabled(enabled);
+		if (lblValue != null){
+			lblValue.setEnabled(enabled);
+		}
+		if (searchField != null){
+			searchField.getCombo().setEnabled(enabled);
+		}
 	}
 
+	/**
+	 * 
+	 * @return the string comparison operator
+	 */
 	public StringComparison getComparisonForModel() {
 		if (btnFilter.getSelection()) {
 			return (StringComparison)((IStructuredSelection)comparatorViewer.getSelection()).getFirstElement();
@@ -183,6 +204,10 @@ public class StringFilterComposite extends Composite {
 		return null;
 	}
 
+	/**
+	 * 
+	 * @return the filter value
+	 */
 	public String getFilterValueForModel() {
 		if (btnFilter.getSelection()) {
 			return txtFilter.getText();
@@ -190,28 +215,35 @@ public class StringFilterComposite extends Composite {
 		return null;
 	}
 	
-	public Button getBtnIncludeAll() {
-		return btnIncludeAll;
+	/**
+	 * 
+	 * @return the field selected for searching
+	 */
+	public TextField getSelectedField(){
+		if (searchField != null){
+			return (TextField) ((IStructuredSelection)searchField.getSelection()).getFirstElement();
+		}else{
+			return searchFields[0];
+		}
 	}
 
-	public Button getBtnFilter() {
-		return btnFilter;
-	}
-
-	public ComboViewer getComparatorViewer() {
-		return comparatorViewer;
-	}
-
-	public Text getTxtFilter() {
-		return txtFilter;
-	}
-
-	public class TextField{
+	/**
+	 * Class to describe the field fields.
+	 * @author Emily
+	 *
+	 */
+	public static class TextField{
 		private String guiName;
 		private String dbName;
+		/**
+		 * 
+		 * @param guiName the name to display to the user
+		 * @param dbFieldName the hibernate object field to
+		 * use when generating hql
+		 */
 		public TextField(String guiName, String dbFieldName){
 			this.guiName = guiName;
-			this.dbName = dbName;
+			this.dbName = dbFieldName;
 		}
 		public String getGuiName(){
 			return this.guiName;

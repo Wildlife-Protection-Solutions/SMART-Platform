@@ -126,7 +126,7 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		dateFilterCmp.applyState(currentFilter.getDateFilter(), currentFilter.getStartDate(), currentFilter.getEndDate());
 		
 		//patrol id
-		patrolIdFilterCmp.applyState(currentFilter.getPatrolIdComparator(), currentFilter.getPatrolIdFilter());
+		patrolIdFilterCmp.applyState(currentFilter.getPatrolIdComparator(), currentFilter.getPatrolIdFilter(), null);
 	}
 	/**
 	 * Create contents of the dialog.
@@ -149,10 +149,9 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 			createPatrolType(session, patrolType);
 
 			Composite patrolIdComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolIdGroupLabel, composite);
-			patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE);
+			patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.PatrolFilterDialog_PatrolIdLabel, "id")}); //$NON-NLS-1$
 			patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
 			patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
-			patrolIdFilterCmp.setValueLabel(Messages.PatrolFilterDialog_PatrolIdLabel);
 			
 			updateControlsValues();
 		} finally {

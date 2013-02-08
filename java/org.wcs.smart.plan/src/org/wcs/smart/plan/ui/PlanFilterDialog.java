@@ -69,12 +69,11 @@ public class PlanFilterDialog extends SmartFilterDialog {
 
 	@Override
 	protected void updateFilterModel() {
-		// TODO Auto-generated method stub
 		currentFilter.setDateFilter(dateFilterCmp.getDateFilterForModel(),
 				dateFilterCmp.getStartDateForModel(),
 				dateFilterCmp.getEndDateForModel());
 		currentFilter.setPatrolIdFilter(planIdFilter.getComparisonForModel(),
-				planIdFilter.getFilterValueForModel());
+				planIdFilter.getFilterValueForModel(), planIdFilter.getSelectedField());
 
 		if (btnIncludeAllTypes.getSelection()){
 			currentFilter.setPlanTypes(null);
@@ -110,7 +109,7 @@ public class PlanFilterDialog extends SmartFilterDialog {
 
 		// patrol id
 		planIdFilter.applyState(currentFilter.getPlanIdComparator(),
-				currentFilter.getPlanIdFilter());
+				currentFilter.getPlanIdFilter(), currentFilter.getSearchField());
 	}
 
 	/**
@@ -157,11 +156,12 @@ public class PlanFilterDialog extends SmartFilterDialog {
 					composite);
 			createPatrolType(session, patrolType);
 
-			Composite planIdComp = createGroupComposite("Plan Id", composite);
-			planIdFilter = new StringFilterComposite(planIdComp, SWT.NONE);
+			Composite planIdComp = createGroupComposite("Plan Id or Name", composite);
+			
+			planIdFilter = new StringFilterComposite(planIdComp, SWT.NONE, PlanFilter.SEARCH_FIELDS);
 			planIdFilter.setIncludeAllRadioLabel("Include All");
-			planIdFilter.setFilterRadioLabel("Filter Plan Id");
-			planIdFilter.setValueLabel("Plan Id:");
+			planIdFilter.setFilterRadioLabel("Filter Plan Id or Name");
+			
 
 			updateControlsValues();
 		} finally {
