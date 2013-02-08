@@ -76,6 +76,7 @@ public class EditPlanItemDialog extends AbstractPropertyJHeaderDialog {
 		content = PlanCompositeFactory.getInstance().createComposite(parent, SWT.NONE, panelType);
 		content.initFromModel(plan);
 		content.addInputChangeListener(inputChangeListener);
+		setTitle(content.getTitle());
 		setMessage(content.getMessage());
 		return content;
 	}

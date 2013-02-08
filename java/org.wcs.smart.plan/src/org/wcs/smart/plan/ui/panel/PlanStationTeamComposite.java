@@ -127,4 +127,9 @@ public class PlanStationTeamComposite extends PlanComposite {
 		return true; //nothing to validate on this page
 	}
 	
+	@Override
+	public String getTitle() {
+		return "Station/Team";
+	}
+	
 }

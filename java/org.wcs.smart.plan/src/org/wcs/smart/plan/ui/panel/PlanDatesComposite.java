@@ -173,4 +173,9 @@ public class PlanDatesComposite extends PlanComposite {
 		}
 		return isValid;
 	}
+
+	@Override
+	public String getTitle() {
+		return "Plan Dates";
+	}
 }

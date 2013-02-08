@@ -79,7 +79,7 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 		});
 		
 		setControl(center);
-		setTitle("Plan Type");
+		setTitle(panel.getTitle());
 		setMessage("Select the type of plan that you wish to create.");
 		
 

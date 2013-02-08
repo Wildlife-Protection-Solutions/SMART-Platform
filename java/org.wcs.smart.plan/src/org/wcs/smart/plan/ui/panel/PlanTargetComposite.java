@@ -198,4 +198,9 @@ public class PlanTargetComposite extends PlanComposite {
 		return this.targets;
 	}
 	
+	@Override
+	public String getTitle() {
+		return "Plan Targets";
+	}
+	
 }

@@ -44,6 +44,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
@@ -264,47 +265,59 @@ public class PlanEditor extends EditorPart {
 	 * Updates the widgets with the value from the plan.
 	 */
 	private void initValues() {
-		Plan plan = getPlan();
-		
-		String name = "[" + plan.getId() + "]";
-		if (plan.getName() != null){
-			name = plan.getName() + " " + name;
-		}
-//		((PlanEditorInput)getEditorInput()).setName(name);
-		setPartName(name);
-		
-		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().get(plan.getType().getIconKey()));
-		form.setText(name);
-		String none = "<none>";
-		
-		if(plan.getStation() != null){
-			txtStation.setText(plan.getStation().getName());
-		}else{
-			txtStation.setText(none);
-		}
-		if(plan.getTeam() != null){
-			txtTeam.setText(plan.getTeam().getName());
-		}else{
-			txtTeam.setText(none);
-		}
-		txtType.setText(plan.getType().getName());
-		txtUnavailableEmployees.setText(plan.getUnavailableEmployees().toString());
-		if(plan.getParent() != null){
-			txtParentPlanId.setText(plan.getParent().getId());
-		}else{
-			txtParentPlanId.setText(none);
-		}
-		txtPlanID.setText(plan.getId());
-		if (plan.getName() != null){
-			txtName.setText(plan.getName());
-		}
-		if (plan.getDescription() != null){
-			txtDescription.setText(plan.getDescription());
-		}
-		txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getStartDate()));
-		txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getEndDate()));
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			Plan plan = getPlan();
+			session.update(plan);
 
-		targetList.initValues(plan.getTargets());
+			String name = "[" + plan.getId() + "]";
+			if (plan.getName() != null) {
+				name = plan.getName() + " " + name;
+			}
+			// ((PlanEditorInput)getEditorInput()).setName(name);
+			setPartName(name);
+
+			setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry()
+					.get(plan.getType().getIconKey()));
+			form.setText(name);
+			String none = "<none>";
+
+			if (plan.getStation() != null) {
+				txtStation.setText(plan.getStation().getName());
+			} else {
+				txtStation.setText(none);
+			}
+			if (plan.getTeam() != null) {
+				txtTeam.setText(plan.getTeam().getName());
+			} else {
+				txtTeam.setText(none);
+			}
+			txtType.setText(plan.getType().getName());
+			txtUnavailableEmployees.setText(plan.getUnavailableEmployees()
+					.toString());
+			if (plan.getParent() != null) {
+				txtParentPlanId.setText(plan.getParent().getId());
+			} else {
+				txtParentPlanId.setText(none);
+			}
+			txtPlanID.setText(plan.getId());
+			if (plan.getName() != null) {
+				txtName.setText(plan.getName());
+			}
+			if (plan.getDescription() != null) {
+				txtDescription.setText(plan.getDescription());
+			}
+			txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
+					.format(plan.getStartDate()));
+			txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
+					.format(plan.getEndDate()));
+
+			targetList.initValues(plan.getTargets());
+			session.getTransaction().rollback();
+		} finally {
+			session.close();
+		}
 		
 	}
 

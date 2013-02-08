@@ -186,4 +186,9 @@ public class PlanIdNameDescComposite extends PlanComposite {
 		}
     	return true;
 	}
+
+	@Override
+	public String getTitle() {
+		return "Plan Information";
+	}
 }
