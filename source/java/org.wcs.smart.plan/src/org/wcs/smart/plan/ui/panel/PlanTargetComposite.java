@@ -39,8 +39,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
-import org.wcs.smart.plan.ui.newPlanWizard.TargetPropertyPage;
-import org.wcs.smart.plan.ui.newPlanWizard.viewer.TargetListViewer;
+import org.wcs.smart.plan.ui.targets.TargetListViewer;
+import org.wcs.smart.plan.ui.targets.TargetPropertyPage;
 
 /**
  * Composite for editing plan targets

@@ -52,15 +52,17 @@ public class PlanIdNameDescComposite extends PlanComposite {
     private Text description;
 
     private ControlDecoration idDecoration;
+    private boolean isAlreadySaved; //tells us whether we should expect to see 0 or 1 of this plan.id in teh DB already when checking for duplicate names
     
 	/**
 	 * @param parent
 	 * @param style
 	 */
-	public PlanIdNameDescComposite(Composite parent, int style) {
+	public PlanIdNameDescComposite(Composite parent, int style, boolean isAlreadySaved) {
 		super(parent, style);
 		setMessage("Edit Plan Id");
 		createControls();
+		this.isAlreadySaved = isAlreadySaved;
 	}
 
 	private void createControls() {
@@ -171,7 +173,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
 				32, 2);
 
-		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), true)){
+		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), isAlreadySaved)){
 			idDecoration.show();
 			idDecoration.setDescriptionText("Plan Id is already in the database, choose a unique ID");
 //			setPageComplete(false);

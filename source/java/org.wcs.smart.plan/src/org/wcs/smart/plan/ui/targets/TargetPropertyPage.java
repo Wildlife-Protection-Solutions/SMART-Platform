@@ -28,7 +28,7 @@
  * @since 1.0.0
  */
 
-package org.wcs.smart.plan.ui.newPlanWizard;
+package org.wcs.smart.plan.ui.targets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
 
 
 /**

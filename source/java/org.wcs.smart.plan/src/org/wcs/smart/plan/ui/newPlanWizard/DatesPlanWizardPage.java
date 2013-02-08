@@ -81,8 +81,7 @@ public class DatesPlanWizardPage extends PlanWizardPage {
 
 	@Override
 	public boolean updateModel(Plan p) {
-		panel.updateModel(p);
-		return true;
+		return panel.updateModel(p); 
 	}
 	
 	@Override

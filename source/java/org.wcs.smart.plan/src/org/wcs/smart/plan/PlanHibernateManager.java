@@ -186,8 +186,14 @@ public class PlanHibernateManager{
 	//the 3rd paremeter indicates that the plan is saved and in the database already, so we will definitely get 1-duplicate
 	public static boolean isDuplicatePlanId(Session s, String id, boolean isSaved) {
 		int count = numberPlanId(s, id);
-		if (count > 1) {
-			return true;
+		if(isSaved){
+			if (count > 1) {
+				return true;
+			}
+		}else{
+			if (count > 0) {
+				return true;
+			}
 		}
 		return false;
 	}
