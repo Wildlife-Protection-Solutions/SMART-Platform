@@ -194,4 +194,8 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		return true;
 	}
 
+	@Override
+	public String getTitle() {
+		return "Plan Type";
+	}
 }

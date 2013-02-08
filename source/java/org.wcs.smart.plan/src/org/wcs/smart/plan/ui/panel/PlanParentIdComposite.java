@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
-import java.util.List;
+import java.util.Arrays;
 
-import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,13 +33,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Link;
+import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.IPlanFilterItem;
+import org.wcs.smart.plan.ui.LoadPlanJob;
+import org.wcs.smart.plan.ui.PlanFilterDialog;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
 
 /**
@@ -46,74 +50,72 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  * @author jeffloun
  * @since 1.0.0
  */
-public class PlanParentIdComposite extends PlanComposite {
+public class PlanParentIdComposite extends PlanComposite implements IPlanFilterItem {
 
-	private DateTime dtStartDate;
-	private DateTime dtEndDate;
+
 	private Button btnNoParent;
 	private Button btnUseSelected;
-	private ControlDecoration cdEndDate;
-	
-	private PlanViewer planTreeViewer;
 
-    
+	private PlanFilter currentFilter = new PlanFilter();
+	private PlanViewer planTreeViewer;
+	private LoadPlanJob updateJob;
+    private Link filterLink;
 	/**
 	 * @param parent
 	 * @param style
 	 */
 	public PlanParentIdComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Select the plan's parent:");
+		setMessage("Select the plan's parent.");
 
 		createControls();
 	}
 
 	private void createControls() {
-        this.setLayout(new GridLayout(4, false));
+        this.setLayout(new GridLayout(1, false));
         this.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, true));
         
         Composite buttonPanel = new Composite(this, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
-		buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 4, 1));
+		buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		btnNoParent = new Button(buttonPanel, SWT.RADIO);
-		btnNoParent.setText("No Parent Plan");
+		btnNoParent.setText("No parent plan");
 		btnNoParent.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnNoParent.setSelection(true);
 		
 		btnUseSelected = new Button(buttonPanel, SWT.RADIO);
-		btnUseSelected.setText("Set the following to be the plan Parent:");
+		btnUseSelected.setText("Use the following plan as the parent");
 		btnUseSelected.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 				
-		Label lbl = new Label(this, SWT.NONE);
-		lbl.setText("Only show plans from:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		((GridData)lbl.getLayoutData()).horizontalIndent = 10;
+		filterLink = new Link(this, SWT.NONE);
+		filterLink.setText("Click <a>here</a> to change the plan filter.");
+		filterLink.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		((GridData)filterLink.getLayoutData()).horizontalIndent = 10;
+		filterLink.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PlanFilterDialog d = new PlanFilterDialog(getShell(), PlanParentIdComposite.this);
+				d.open();
+			}
+		});
 		
-		dtStartDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtStartDate.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-		
-		
-		
-		lbl = new Label(this, SWT.NONE);
-		lbl.setText(" to ");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		dtEndDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtEndDate.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-		
-		cdEndDate = new ControlDecoration(lbl, SWT.RIGHT);
-		cdEndDate.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
-		cdEndDate.hide();
 		
 		planTreeViewer = new PlanViewer(this);
 		planTreeViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
-		
+		planTreeViewer.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fireChangeListeners();
+			}
+		});
 		
 		btnNoParent.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateVisibility();
+				fireChangeListeners();
 			}
 			
 		});
@@ -122,29 +124,54 @@ public class PlanParentIdComposite extends PlanComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateVisibility();
+				fireChangeListeners();
 			}
 			
 		});
+		updateJob = new LoadPlanJob(planTreeViewer, currentFilter);
+		updateJob.schedule();
 		updateVisibility();
+	}
+	
+	private void fireChangeListeners(){
+		fireDataValidStateListeners();
+		fireInputChangeListeners();
 	}
 	
 	private void updateVisibility(){
 		boolean areVisible = !btnNoParent.getSelection();
-		dtEndDate.setEnabled(areVisible);
-		dtStartDate.setEnabled(areVisible);
 		planTreeViewer.getViewer().getControl().setEnabled(areVisible);
+		filterLink.setEnabled(areVisible);
 	}
 
 	
 	@Override
 	public boolean updateModel(Plan plan) {
 		if(!btnNoParent.getSelection()){
-			try{
-				Plan tmp = (Plan) planTreeViewer.getSelectedPlan();
-				plan.setParent(tmp);
-			}catch (Exception e) {
-			// nothing to update if those are null
+			if (planTreeViewer.getSelectedPlan() == null){
+				MessageDialog.openInformation(getShell(), "Plan", "You must select a plan.");
+				return false;
 			}
+			
+			PlanEditorInput tmp = (PlanEditorInput) planTreeViewer.getSelectedPlan();
+			if (Arrays.equals(tmp.getUuid(), plan.getUuid())){
+				MessageDialog.openError(getShell(), "Plan", "You cannot make this plan a child of itself.");
+				return false;
+			}
+			Plan parent = null;
+			Session session = HibernateManager.openSession();
+			try{
+				session.beginTransaction();
+				parent = (Plan) session.load(Plan.class, tmp.getUuid());
+				session.getTransaction().rollback();
+			}finally{
+				session.close();
+			}
+			if (parent == null){
+				MessageDialog.openInformation(getShell(), "Plan", "The selected plan could not found.");
+				return false;
+			}
+			plan.setParent(parent);
 		}else{
 			plan.setParent(null);
 		}
@@ -153,11 +180,11 @@ public class PlanParentIdComposite extends PlanComposite {
 
 	@Override
 	public void initFromModel(Plan plan) {
-		List<Plan> roots = PlanHibernateManager.getAllRootPlans(HibernateManager.openSession());
-		planTreeViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
+		
 		Plan parent = plan.getParent();
 		if (parent != null){
-			planTreeViewer.setSelection(parent);
+			//TODO: fix this
+//			planTreeViewer.setSelection(parent);
 			btnNoParent.setSelection(false);
 			btnUseSelected.setSelection(true);
 		}else{
@@ -170,6 +197,21 @@ public class PlanParentIdComposite extends PlanComposite {
 	@Override
 	public boolean isDataValid() {
 		return true;
+	}
+
+	@Override
+	public void updateContent() {
+		updateJob.schedule();
+	}
+
+	@Override
+	public PlanFilter getPlanFilter() {
+		return currentFilter;
+	}
+	
+	@Override
+	public String getTitle() {
+		return "Parent Plan";
 	}
 	
 }

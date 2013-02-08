@@ -65,12 +65,12 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		btnNew = new Button(center, SWT.RADIO);
-		btnNew.setText("Create a New Plan from Scratch");
+		btnNew.setText("Create a new plan from scratch");
 		btnNew.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnNew.setSelection(true);
 		
 		btnExisting = new Button(center, SWT.RADIO);
-		btnExisting.setText("Use an existing Plan as a template");
+		btnExisting.setText("Use an existing plan as a template");
 		btnExisting.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
 		setTitle("Template");

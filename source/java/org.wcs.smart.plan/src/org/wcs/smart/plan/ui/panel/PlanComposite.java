@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public abstract class PlanComposite extends Composite implements PlanModifier {
 
+	private String title;
 	private String message;
 	private List<IDataValidStateListener> stateListeners = new ArrayList<IDataValidStateListener>();
 	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
@@ -90,5 +91,6 @@ public abstract class PlanComposite extends Composite implements PlanModifier {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-
+	
+	public abstract String getTitle();
 }
