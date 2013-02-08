@@ -46,6 +46,8 @@ public class LoadPlanJob extends Job {
 	private PlanViewer planViewer;
 	private PlanFilter currentFilter;
 	
+	private PlanEditorInput currentSelection;
+	
 	/**
 	 * Creates a new job that updates the given viewer
 	 * based on the values of the given filter.
@@ -58,6 +60,9 @@ public class LoadPlanJob extends Job {
 		this.currentFilter = currentFilter;
 	}
 	
+	public void setDefaultSelection(PlanEditorInput defaultSelection){
+		this.currentSelection = defaultSelection;
+	}
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
@@ -79,6 +84,9 @@ public class LoadPlanJob extends Job {
 					planViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
 					planViewer.refresh();
 					planViewer.getViewer().expandAll();
+					if (currentSelection != null){
+						planViewer.setSelection(currentSelection);
+					}
 				}
 			});
 		}finally{

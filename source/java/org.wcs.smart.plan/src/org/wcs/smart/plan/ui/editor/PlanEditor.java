@@ -265,17 +265,16 @@ public class PlanEditor extends EditorPart {
 	 * Updates the widgets with the value from the plan.
 	 */
 	private void initValues() {
+		Plan plan = getPlan();
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			Plan plan = getPlan();
 			session.update(plan);
 
 			String name = "[" + plan.getId() + "]";
 			if (plan.getName() != null) {
 				name = plan.getName() + " " + name;
 			}
-			// ((PlanEditorInput)getEditorInput()).setName(name);
 			setPartName(name);
 
 			setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry()
@@ -341,7 +340,7 @@ public class PlanEditor extends EditorPart {
 			if(t != null){
 				t.getName();
 			}
-			session.getTransaction().commit();
+			session.getTransaction().rollback();
 			session.close();
 		}
 		return plan;

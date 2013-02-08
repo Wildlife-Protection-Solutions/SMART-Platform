@@ -60,6 +60,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 	private PlanViewer planTreeViewer;
 	private LoadPlanJob updateJob;
     private Link filterLink;
+    
 	/**
 	 * @param parent
 	 * @param style
@@ -183,8 +184,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		
 		Plan parent = plan.getParent();
 		if (parent != null){
-			//TODO: fix this
-//			planTreeViewer.setSelection(parent);
+			updateJob.setDefaultSelection(new PlanEditorInput(parent.getUuid(), null, null));
 			btnNoParent.setSelection(false);
 			btnUseSelected.setSelection(true);
 		}else{
