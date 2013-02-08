@@ -40,13 +40,13 @@ import org.wcs.smart.plan.ui.panel.PlanIdNameDescComposite;
  * @author egouge
  * @since 1.0.0
  */
-public class NewPlanWizardPage3 extends NewPlanWizardPage {
+public class IdNameDescPlanWizardPage extends PlanWizardPage {
 
 	private PlanIdNameDescComposite panel;
 	/**
 	 * 
 	 */
-	protected NewPlanWizardPage3() {
+	protected IdNameDescPlanWizardPage() {
 		super("Plan Details");
 		
 	}
@@ -74,7 +74,7 @@ public class NewPlanWizardPage3 extends NewPlanWizardPage {
 		});
 		
 		setControl(panel);
-		setTitle(panel.getTitle());
+		setTitle("Plan Information");
 		setMessage("Enter a name and description for the new plan.");
 		
 	}

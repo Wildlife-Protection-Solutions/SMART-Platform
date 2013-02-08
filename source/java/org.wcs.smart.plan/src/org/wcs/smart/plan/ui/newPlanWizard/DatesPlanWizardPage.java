@@ -21,31 +21,29 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.panel.IInputChangeListener;
+import org.wcs.smart.plan.ui.panel.PlanDatesComposite;
 
 /**
- * Wizard page for determining if plan is to be
- * create from a template or not.
+ * Wizard page for collecting the plan dates
  * 
  * @author egouge
  * @since 1.0.0
  */
-public class NewPlanWizardPage1 extends NewPlanWizardPage {
+public class DatesPlanWizardPage extends PlanWizardPage {
 
-	private Button btnExisting;
-	private Button btnNew;
-
+	
+	private PlanDatesComposite panel;
 	/**
 	 * 
 	 */
-	protected NewPlanWizardPage1() {
-		super("New Plan");
+	protected DatesPlanWizardPage() {
+		super("Plan Dates");
 		
 	}
 
@@ -55,52 +53,41 @@ public class NewPlanWizardPage1 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		Composite buttonPanel = new Composite(parent, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout());
-		buttonPanel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true,
-				true));
-
-		Composite center = new Composite(buttonPanel, SWT.NONE);
+		
+		Composite center = new Composite(parent, SWT.NONE);
 		center.setLayout(new GridLayout());
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
-		btnNew = new Button(center, SWT.RADIO);
-		btnNew.setText("Create a new plan from scratch");
-		btnNew.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		btnNew.setSelection(true);
+		panel =  new PlanDatesComposite(center, SWT.NONE); 
 		
-		btnExisting = new Button(center, SWT.RADIO);
-		btnExisting.setText("Use an existing plan as a template");
-		btnExisting.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		panel.addInputChangeListener(new IInputChangeListener(){
+			@Override
+			public void inputChanged() {
+				if(!panel.isDataValid()){
+					((CreatePlanWizard) getWizard()).setCanFinish(false);
+					setPageComplete(false);
+				}else{
+					((CreatePlanWizard) getWizard()).validate();
+					setPageComplete(true);
+				}
+			}
 		
-		setTitle("Template");
-		setMessage("When creating a new plan, you can use an existing plan as a template, or simply create a new, blank plan.");
-		super.setControl(buttonPanel);
-
+		});
+		setControl(center);
+		setTitle("Plan Dates");
+		setMessage("Enter start and end date for the new plan.");
 	}
 	
-	//nothing to update, just determines if we use a plan template or start afresh
+
 	@Override
 	public boolean updateModel(Plan p) {
+		panel.updateModel(p);
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p) {
-		//nothing to do on this page.
+		panel.initFromModel(p);
 	}
-	
-	@Override
-    public IWizardPage getNextPage() {
-        if (getWizard() == null) {
-			return null;
-		}
-        
-        if( btnExisting.getSelection() == true){
-        	return getWizard().getPage(NewPlanWizardPage2b.PAGENAME);
-        }
-        return getWizard().getPage(NewPlanWizardPage2.PAGENAME);
-    }
-	
 
 }

@@ -50,7 +50,7 @@
                commandId="org.wcs.smart.plan.DeletePlan"
                label="Delete Plan"
                style="push"
-               tooltip="%delete.command.tooltip">
+               tooltip="Delete the Selected Plan">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -81,7 +81,7 @@
                commandId="org.wcs.smart.plan.DeletePlan"
                label="Delete Plan"
                style="push"
-               tooltip="%delete.command.tooltip">
+               tooltip="Delete the Selected Plan">
             <visibleWhen
                   checkEnabled="false">
                <or>
