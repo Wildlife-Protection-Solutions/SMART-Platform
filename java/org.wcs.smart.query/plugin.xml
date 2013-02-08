@@ -409,6 +409,37 @@
                   </test>
                </or>
             </visibleWhen>
+            <separator
+                  name="org.wcs.smart.query.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.query.QueryPerspective"
+                  icon="images/icons/view16/querypatrol.gif"
+                  label="%perspectivetoolbar.showquery.command.label"
+                  style="push"
+                  tooltip="%perspectivetoolbar.showquery.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
          </menu>
       </menuContribution>
       <menuContribution

@@ -27,14 +27,13 @@ import java.util.List;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * Composite used to create controls that work with {@link Intelligence} object
+ * Composite used to create controls that work with {@link Plan} object
  * 
  * @author jeffloun
  * @since 1.0.0
  */
 public abstract class PlanComposite extends Composite implements PlanModifier {
 
-	private String title;
 	private String message;
 	private List<IDataValidStateListener> stateListeners = new ArrayList<IDataValidStateListener>();
 	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();

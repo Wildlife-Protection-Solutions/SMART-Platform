@@ -42,9 +42,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
@@ -373,7 +374,8 @@ public class PlanEditor extends EditorPart {
 	}
 	
 	private boolean canEdit() {
-		return true;
+		//analyst users can never edit
+		return SmartDB.getCurrentEmployee().getSmartUserLevel() != Employee.SmartUserLevel.ANALYST;
 	}
 
 	/**

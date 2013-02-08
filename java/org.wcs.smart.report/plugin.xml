@@ -633,6 +633,38 @@
                   </test>
                </or>
             </visibleWhen>
+            <separator
+                  name="org.wcs.smart.report.separator9"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.report.ShowReportViewer"
+                  icon="images/icons/etool16/report_view.png"
+                  label="%showreportperspective.menu.label"
+                  mnemonic="%showreportperspective.menu.mnemonic"
+                  style="push"
+                  tooltip="%showreportperspective.menu.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
          </menu>
       </menuContribution>
    </extension>
