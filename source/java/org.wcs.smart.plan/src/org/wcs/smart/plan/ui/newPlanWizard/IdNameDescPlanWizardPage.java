@@ -22,11 +22,7 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.IInputChangeListener;
 import org.wcs.smart.plan.ui.panel.PlanIdNameDescComposite;
@@ -74,7 +70,7 @@ public class IdNameDescPlanWizardPage extends PlanWizardPage {
 		});
 		
 		setControl(panel);
-		setTitle("Plan Information");
+		setTitle(panel.getTitle());
 		setMessage("Enter a name and description for the new plan.");
 		
 	}

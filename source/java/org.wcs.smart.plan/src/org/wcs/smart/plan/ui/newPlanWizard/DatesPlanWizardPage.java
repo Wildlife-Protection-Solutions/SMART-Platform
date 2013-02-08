@@ -74,7 +74,7 @@ public class DatesPlanWizardPage extends PlanWizardPage {
 		
 		});
 		setControl(center);
-		setTitle("Plan Dates");
+		setTitle(panel.getTitle());
 		setMessage("Enter start and end date for the new plan.");
 	}
 	

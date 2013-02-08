@@ -24,23 +24,23 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.plan.PlanHibernateManager;
+import org.eclipse.swt.widgets.Link;
+import org.hibernate.Session;
+import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.ui.IPlanFilterItem;
+import org.wcs.smart.plan.ui.LoadPlanJob;
+import org.wcs.smart.plan.ui.PlanFilterDialog;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Wizard page for collecting the plan template
@@ -48,17 +48,14 @@ import org.wcs.smart.util.SmartUtils;
  * @author jeffloun
  * @since 1.0.0
  */
-public class TemplateSelectPlanWizardPage extends PlanWizardPage implements SelectionListener {
+public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPlanFilterItem {
 
 	public static final String PAGENAME = "PlanTemplate";
 	
-	private DateTime dtStartDate;
-	private DateTime dtEndDate;
-	private ControlDecoration cdEndDate;
-	
 	private PlanViewer planTreeViewer;
-	private Plan lastSelection = null;
 	
+	private PlanFilter currentFilter = new PlanFilter();
+	private LoadPlanJob updateJob;
 	
 	/**
 	 * 
@@ -76,40 +73,29 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements Sele
 	public void createControl(Composite parent) {
 		
 		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(4, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-
-
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Only show plans from:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		((GridData)lbl.getLayoutData()).horizontalIndent = 10;
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
-		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		Link lnkFilter = new Link(center, SWT.NONE);
+		lnkFilter.setText("Click <a>here</a> to change filter associated with the plans below.</a>");
+		lnkFilter.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PlanFilterDialog dialog = new PlanFilterDialog(getShell(), TemplateSelectPlanWizardPage.this);
+				dialog.open();
+			}
+		});
 		
-		lbl = new Label(center, SWT.NONE);
-		lbl.setText(" to ");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
-		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		
-		cdEndDate = new ControlDecoration(lbl, SWT.RIGHT);
-		cdEndDate.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
-		cdEndDate.hide();
-		
-		dtEndDate.addSelectionListener(this);
-		dtStartDate.addSelectionListener(this);
-		
-
 		planTreeViewer = new PlanViewer(center);
 		planTreeViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
+		planTreeViewer.refresh();
 		
-		super.setTitle("Patrol Plan");
+		updateJob = new LoadPlanJob(planTreeViewer, currentFilter);
+		updateJob.schedule();
 		
 		setControl(center);
-		setMessage("Select the Plan to use as a template:");
+		super.setTitle("Template Plan");
+		setMessage("Select the plan to use as a template.");
 	
 	}
 	
@@ -119,76 +105,65 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements Sele
 	 * filter options
 	 */
 	public void initModel(Plan p){
-		List roots = PlanHibernateManager.getAllRootPlans(HibernateManager.openSession());
-		planTreeViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
-		lastSelection = p.getTemplatePlan();
-		if (lastSelection != null){
-			planTreeViewer.setSelection(lastSelection);
-		}
 		
-
 	}
 
-	
-	/**
-	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-	 */
-	@Override
-	public void widgetSelected(SelectionEvent e) {
-
-		
-		String error = null;
-		cdEndDate.hide();
-		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
-			error = "End date must be after the start date.";
-		}
-		setErrorMessage(error);
-		fireChangeListeners();
-	}
-	
-	/**
-	 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-	 */
-	@Override
-	public void widgetDefaultSelected(SelectionEvent e) {
-	}
 	
 	@Override
 	public boolean updateModel(Plan p) {
-		Plan t = (Plan) planTreeViewer.getSelectedPlan();
-		p.setTemplatePlan(t);
+		Plan source = null;
+	
+		Session s = ((CreatePlanWizard)getWizard()).getSession();
 		
-		//init our current plan with the values from the template selected
-		//exceptions occur if there is no values yet, which is fine.
-		try{
-			p.setName(t.getName());
-			p.setId(t.getId());
-			p.setDescription(t.getDescription());
-			p.setStartDate(t.getStartDate());
-			p.setEndDate(t.getEndDate());
-			p.setStation(t.getStation());
-			p.setTeam(t.getTeam());
-			Plan tmp = t.getParent();
-			p.setParent(tmp);
-			p.setType(t.getType());
-			p.setUnavailableEmployees(t.getUnavailableEmployees());
-			
-			List<PlanTarget> tars = t.getTargets();
-			List<PlanTarget> newTars = new ArrayList<PlanTarget>();
-			for(PlanTarget x : tars){
-//				x.setPlan(p);
-//can't do this yet as the plan doesn't really exist? Hibernate unsaved transient issues.
-// it is done in the performFinish() method of the wizard
-				
-				newTars.add(x.clone());
-			}
-			p.setTargets(newTars);
-		}catch(Exception e){
-			//SmartPlanPlugIn.displayLog("Could not clone Plan. " + e.getMessage(), e);
-			//this will occur sometimes if you hit next or back without selecting anything, which is not a problem
+		
+		PlanEditorInput inputPlan  = (PlanEditorInput) planTreeViewer.getSelectedPlan();
+		if (inputPlan == null){
+			return true;
 		}
-		
+		s.beginTransaction();
+		try{
+			source = (Plan) s.load(Plan.class, inputPlan.getUuid());
+		}finally{
+			s.getTransaction().rollback();
+		}
+
+		if (source == null){
+			SmartPlanPlugIn.displayLog("Could not find plan in database.  Please close and re-open the wizard and try again.", null);
+			return false;
+		}
+		p.setTemplatePlan(source);
+		p.setName(source.getName());
+		p.setId(source.getId());
+		p.setDescription(source.getDescription());
+		p.setStartDate(source.getStartDate());
+		p.setEndDate(source.getEndDate());
+		p.setStation(source.getStation());
+		p.setTeam(source.getTeam());
+			
+		p.setParent(source.getParent());
+		p.setType(source.getType());
+		p.setUnavailableEmployees(source.getUnavailableEmployees());
+			
+		//clone the targets
+		List<PlanTarget> tars = source.getTargets();
+		List<PlanTarget> newTars = new ArrayList<PlanTarget>();
+		for(PlanTarget x : tars){
+			newTars.add(x.clone());
+		}
+		p.setTargets(newTars);
 		return true;
+	}
+
+
+	@Override
+	public void updateContent() {
+		updateJob.schedule();
+	}
+
+
+	@Override
+	public PlanFilter getPlanFilter() {
+		return currentFilter;
 	}
 	
 }
