@@ -21,61 +21,57 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.panel.PlanStationTeamComposite;
 
 
 /**
- * Wizard page for collecting the plan team
- * and station.
+ * An abstract class for new plan wizard pages.
  * 
+ * @author Emily
  * @author jeffloun
  * @since 1.0.0
  */
-public class NewPlanWizardPage4 extends NewPlanWizardPage {
+public abstract class PlanWizardPage extends WizardPage {
 	
-	private PlanStationTeamComposite panel;
-	
+	private List<IPlanItemChanged> listeners = new ArrayList<IPlanItemChanged>();
+
 	/**
+	 * @param pageName the name of the patrol wizard page
+	 */
+	protected PlanWizardPage(String pageName) {
+		super(pageName);
+	}
+
+	/**
+	 * Updates the current patrol with the new values inputed
+	 * in the patrol page.
 	 * 
+	 * @param p patrol to update
+	 * @return <code>true</code> of model updated; <code>false</code> if error 
 	 */
-	protected NewPlanWizardPage4() {
-		super("Plan Station/Team");
-		
-	}
+	abstract boolean updateModel(Plan p);
 
+	/**
+	 * Updates the current page gui components with the values
+	 * from the patrol
+	 * 
+	 * @param p patrol to use when updating gui components
+	 * @param session the current hibernate session
+	 */
+	abstract void initModel(Plan p);
 	
 	/**
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 * Fires all registered listeners
 	 */
-	@Override
-	public void createControl(Composite parent) {
-		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout());
-		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		
-		panel =  new PlanStationTeamComposite(center, SWT.NONE); 
-		
-		setControl(center);
-		setTitle(panel.getTitle());
-		setMessage("Select the associated Team and/or Station for this plan, if applicable.");
-
+	protected void fireChangeListeners(){
+		for(IPlanItemChanged listener : listeners){
+			listener.itemChanged();
+		}
 	}
 	
 
-	@Override
-	public boolean updateModel(Plan p) {
-		panel.updateModel(p);
-		return true;
-	}
-	
-	@Override
-	void initModel(Plan p) {
-		panel.initFromModel(p);
-		
-	}
 }

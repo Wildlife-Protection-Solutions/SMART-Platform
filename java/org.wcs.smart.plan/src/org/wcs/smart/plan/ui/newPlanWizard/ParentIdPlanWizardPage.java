@@ -21,57 +21,56 @@
  */
 package org.wcs.smart.plan.ui.newPlanWizard;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
-
+import org.wcs.smart.plan.ui.panel.PlanParentIdComposite;
 
 /**
- * An abstract class for new plan wizard pages.
+ * Wizard page for selecting a parent plan
  * 
- * @author Emily
- * @author jeffloun
+ * @author jeff
+ * @author egouge
  * @since 1.0.0
  */
-public abstract class NewPlanWizardPage extends WizardPage {
-	
-	private List<IPlanItemChanged> listeners = new ArrayList<IPlanItemChanged>();
+public class ParentIdPlanWizardPage extends PlanWizardPage {
 
+
+	private PlanParentIdComposite panel;
+
+	
 	/**
-	 * @param pageName the name of the patrol wizard page
+	 * 
 	 */
-	protected NewPlanWizardPage(String pageName) {
-		super(pageName);
+	protected ParentIdPlanWizardPage() {
+		super("Plan Parent");
 	}
 
-	/**
-	 * Updates the current patrol with the new values inputed
-	 * in the patrol page.
-	 * 
-	 * @param p patrol to update
-	 * @return <code>true</code> of model updated; <code>false</code> if error 
-	 */
-	abstract boolean updateModel(Plan p);
-
-	/**
-	 * Updates the current page gui components with the values
-	 * from the patrol
-	 * 
-	 * @param p patrol to use when updating gui components
-	 * @param session the current hibernate session
-	 */
-	abstract void initModel(Plan p);
 	
 	/**
-	 * Fires all registered listeners
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
-	protected void fireChangeListeners(){
-		for(IPlanItemChanged listener : listeners){
-			listener.itemChanged();
-		}
+	@Override
+	public void createControl(Composite parent) {
+		panel =  new PlanParentIdComposite(parent, SWT.NONE);
+		
+		setControl(panel);
+		setTitle("Parent Plan");		
+		setMessage("A parent plan allows you to group patrol plans into team, station and conservation area plans." +
+				"Create the conservation area plan first, then select it in this window when creating each each patrol, " +
+				"station or team plan you want to include in the Conservation area plan. Use the same method to create station or team plans.");
+	
+	}
+
+	@Override
+	public boolean updateModel(Plan p) {
+		panel.updateModel(p);
+		return true;
 	}
 	
-
+	@Override
+	void initModel(Plan p) {
+		panel.initFromModel(p);
+	}
+	
 }

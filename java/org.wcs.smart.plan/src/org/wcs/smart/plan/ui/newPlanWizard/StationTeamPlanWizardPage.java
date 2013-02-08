@@ -22,25 +22,31 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.panel.PlanTargetComposite;
+import org.wcs.smart.plan.ui.panel.PlanStationTeamComposite;
+
 
 /**
- * Wizard page for collecting the plan targets
- * @author jeff
- * @author egouge
+ * Wizard page for collecting the plan team
+ * and station.
+ * 
+ * @author jeffloun
  * @since 1.0.0
  */
-public class NewPlanWizardPage6 extends NewPlanWizardPage {
-
-	private PlanTargetComposite panel;
-
+public class StationTeamPlanWizardPage extends PlanWizardPage {
 	
-	protected NewPlanWizardPage6() {
-		super("Plan Targets");
+	private PlanStationTeamComposite panel;
+	
+	/**
+	 * 
+	 */
+	protected StationTeamPlanWizardPage() {
+		super("Plan Station/Team");
+		
 	}
-
 
 	
 	/**
@@ -48,32 +54,28 @@ public class NewPlanWizardPage6 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		panel =  new PlanTargetComposite(parent, SWT.NONE); 
+		Composite center = new Composite(parent, SWT.NONE);
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
-		setControl(panel);
-		setTitle(panel.getTitle());
-		setMessage("Add plan targets by selecting the \"Add Target...\" button. Use the \"Edit Target ...\" to edit the selected target and \"Delete Target\" to remove a target.");
+		panel =  new PlanStationTeamComposite(center, SWT.NONE); 
+		
+		setControl(center);
+		setTitle("Team/Station");
+		setMessage("Select the associated Team and/or Station for this plan, if applicable.");
+
 	}
 	
-
 
 	@Override
 	public boolean updateModel(Plan p) {
 		panel.updateModel(p);
-		p.setTargets(panel.getTargets());
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p) {
 		panel.initFromModel(p);
-		//the user has seen all the pages now, used in calculating whether to show the wizard finish button.
-		((CreatePlanWizard) getWizard()).setSeenAll(true);
+		
 	}
-
-	
-	public void validate(){
-		((CreatePlanWizard)getWizard()).validate();
-	}
-	
 }

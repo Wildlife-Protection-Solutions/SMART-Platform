@@ -61,7 +61,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	private boolean canFinish = false;
 	private IWizardPage lastPage = null;
 
-	private NewPlanWizardPage1 page1;
+	private UseTemplatePlanWizardPage page1;
 
 	//set once all pages are seen, I don't want to allow the user to "finish" without actually seeing the options to set a parent plan etc.
 	//overridden if the user selects a template however.
@@ -165,16 +165,16 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	@Override
 	public void addPages() {
 		((WizardDialog) getContainer()).addPageChangingListener(this);
-		page1 = new NewPlanWizardPage1();
+		page1 = new UseTemplatePlanWizardPage();
 		
 		super.addPage(page1); //choose a template or not
-		super.addPage(new NewPlanWizardPage2b()); //template selector
-		super.addPage(new NewPlanWizardPage2()); //choose type
-		super.addPage(new NewPlanWizardPage7()); //parent
-		super.addPage(new NewPlanWizardPage3()); //id/name/desc
-		super.addPage(new NewPlanWizardPage4()); //team/station
-		super.addPage(new NewPlanWizardPage5()); //dates
-		super.addPage(new NewPlanWizardPage6()); //targets
+		super.addPage(new TemplateSelectPlanWizardPage()); //template selector
+		super.addPage(new TypeEmployeePlanWizardPage()); //choose type
+		super.addPage(new ParentIdPlanWizardPage()); //parent
+		super.addPage(new IdNameDescPlanWizardPage()); //id/name/desc
+		super.addPage(new StationTeamPlanWizardPage()); //team/station
+		super.addPage(new DatesPlanWizardPage()); //dates
+		super.addPage(new TargetsPlanWizardPage()); //targets
 
 		
 	}
@@ -199,8 +199,8 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	 */
 	@Override
 	public boolean performFinish() {
-		if (lastPage instanceof NewPlanWizardPage) {
-			((NewPlanWizardPage) lastPage).updateModel(this.plan);
+		if (lastPage instanceof PlanWizardPage) {
+			((PlanWizardPage) lastPage).updateModel(this.plan);
 		}
 
 		Plan p = getPlan();
@@ -238,15 +238,15 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	 */
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (event.getCurrentPage() instanceof NewPlanWizardPage) {
-			if (!((NewPlanWizardPage) event.getCurrentPage())
+		if (event.getCurrentPage() instanceof PlanWizardPage) {
+			if (!((PlanWizardPage) event.getCurrentPage())
 					.updateModel(plan)) {
 				event.doit = false;
 				return;
 			}
 		}
-		if (event.getTargetPage() instanceof NewPlanWizardPage) {
-			((NewPlanWizardPage) event.getTargetPage()).initModel(plan);
+		if (event.getTargetPage() instanceof PlanWizardPage) {
+			((PlanWizardPage) event.getTargetPage()).initModel(plan);
 		}
 
 		if (event.doit) {

@@ -22,34 +22,25 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.panel.IInputChangeListener;
-import org.wcs.smart.plan.ui.panel.PlanTypeEmployeesComposite;
-
+import org.wcs.smart.plan.ui.panel.PlanTargetComposite;
 
 /**
- * Wizard page for collecting the plan type,
- * employees information
- * 
+ * Wizard page for collecting the plan targets
  * @author jeff
  * @author egouge
  * @since 1.0.0
  */
-public class NewPlanWizardPage2 extends NewPlanWizardPage {
+public class TargetsPlanWizardPage extends PlanWizardPage {
 
-	public static final String PAGENAME = "Plan Type"; //$NON-NLS-1$
-		
-	private PlanTypeEmployeesComposite panel; 
-	/**
-	 * 
-	 */
-	protected NewPlanWizardPage2() {
-		super(PAGENAME);
-		
+	private PlanTargetComposite panel;
+
+	
+	protected TargetsPlanWizardPage() {
+		super("Plan Targets");
 	}
+
 
 	
 	/**
@@ -57,43 +48,32 @@ public class NewPlanWizardPage2 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-
-		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout());
-		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		panel =  new PlanTargetComposite(parent, SWT.NONE); 
 		
-		panel =  new PlanTypeEmployeesComposite(center, SWT.NONE); 
-		
-		panel.addInputChangeListener(new IInputChangeListener(){
-			@Override
-			public void inputChanged() {
-				if(!panel.isDataValid()){
-					((CreatePlanWizard) getWizard()).setCanFinish(false);
-					setPageComplete(false);
-				}else{
-					((CreatePlanWizard) getWizard()).validate();
-					setPageComplete(true);
-				}
-			}
-		
-		});
-		
-		setControl(center);
-		setTitle(panel.getTitle());
-		setMessage("Select the type of plan that you wish to create.");
-		
-
+		setControl(panel);
+		setTitle("Targets");
+		setMessage("Add plan targets by selecting the \"Add Target...\" button. Use the \"Edit Target ...\" to edit the selected target and \"Delete Target\" to remove a target.");
 	}
 	
+
 
 	@Override
 	public boolean updateModel(Plan p) {
 		panel.updateModel(p);
+		p.setTargets(panel.getTargets());
 		return true;
 	}
 	
 	@Override
 	void initModel(Plan p) {
 		panel.initFromModel(p);
+		//the user has seen all the pages now, used in calculating whether to show the wizard finish button.
+		((CreatePlanWizard) getWizard()).setSeenAll(true);
 	}
+
+	
+	public void validate(){
+		((CreatePlanWizard)getWizard()).validate();
+	}
+	
 }

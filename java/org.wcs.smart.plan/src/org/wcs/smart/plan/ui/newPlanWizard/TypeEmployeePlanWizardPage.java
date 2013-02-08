@@ -22,28 +22,33 @@
 package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.panel.PlanParentIdComposite;
+import org.wcs.smart.plan.ui.panel.IInputChangeListener;
+import org.wcs.smart.plan.ui.panel.PlanTypeEmployeesComposite;
+
 
 /**
- * Wizard page for selecting a parent plan
+ * Wizard page for collecting the plan type,
+ * employees information
  * 
  * @author jeff
  * @author egouge
  * @since 1.0.0
  */
-public class NewPlanWizardPage7 extends NewPlanWizardPage {
+public class TypeEmployeePlanWizardPage extends PlanWizardPage {
 
-
-	private PlanParentIdComposite panel;
-
-	
+	public static final String PAGENAME = "Plan Type"; //$NON-NLS-1$
+		
+	private PlanTypeEmployeesComposite panel; 
 	/**
 	 * 
 	 */
-	protected NewPlanWizardPage7() {
-		super("Plan Parent");
+	protected TypeEmployeePlanWizardPage() {
+		super(PAGENAME);
+		
 	}
 
 	
@@ -52,15 +57,34 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		panel =  new PlanParentIdComposite(parent, SWT.NONE);
+
+		Composite center = new Composite(parent, SWT.NONE);
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
-		setControl(panel);
-		setTitle(panel.getTitle());		
-		setMessage("A parent plan allows you to group patrol plans into team, station and conservation area plans." +
-				"Create the conservation area plan first, then select it in this window when creating each each patrol, " +
-				"station or team plan you want to include in the Conservation area plan. Use the same method to create station or team plans.");
-	
+		panel =  new PlanTypeEmployeesComposite(center, SWT.NONE); 
+		
+		panel.addInputChangeListener(new IInputChangeListener(){
+			@Override
+			public void inputChanged() {
+				if(!panel.isDataValid()){
+					((CreatePlanWizard) getWizard()).setCanFinish(false);
+					setPageComplete(false);
+				}else{
+					((CreatePlanWizard) getWizard()).validate();
+					setPageComplete(true);
+				}
+			}
+		
+		});
+		
+		setControl(center);
+		setTitle("Plan Type");
+		setMessage("Select the type of plan that you wish to create.");
+		
+
 	}
+	
 
 	@Override
 	public boolean updateModel(Plan p) {
@@ -72,5 +96,4 @@ public class NewPlanWizardPage7 extends NewPlanWizardPage {
 	void initModel(Plan p) {
 		panel.initFromModel(p);
 	}
-	
 }
