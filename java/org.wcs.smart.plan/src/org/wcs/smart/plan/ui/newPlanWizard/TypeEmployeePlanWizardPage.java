@@ -79,7 +79,7 @@ public class TypeEmployeePlanWizardPage extends PlanWizardPage {
 		});
 		
 		setControl(center);
-		setTitle("Plan Type");
+		setTitle(panel.getTitle());
 		setMessage("Select the type of plan that you wish to create.");
 		
 

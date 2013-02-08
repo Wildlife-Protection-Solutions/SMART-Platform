@@ -55,7 +55,7 @@ public class ParentIdPlanWizardPage extends PlanWizardPage {
 		panel =  new PlanParentIdComposite(parent, SWT.NONE);
 		
 		setControl(panel);
-		setTitle("Parent Plan");		
+		setTitle(panel.getTitle());		
 		setMessage("A parent plan allows you to group patrol plans into team, station and conservation area plans." +
 				"Create the conservation area plan first, then select it in this window when creating each each patrol, " +
 				"station or team plan you want to include in the Conservation area plan. Use the same method to create station or team plans.");

@@ -61,7 +61,7 @@ public class StationTeamPlanWizardPage extends PlanWizardPage {
 		panel =  new PlanStationTeamComposite(center, SWT.NONE); 
 		
 		setControl(center);
-		setTitle("Team/Station");
+		setTitle(panel.getTitle());
 		setMessage("Select the associated Team and/or Station for this plan, if applicable.");
 
 	}
