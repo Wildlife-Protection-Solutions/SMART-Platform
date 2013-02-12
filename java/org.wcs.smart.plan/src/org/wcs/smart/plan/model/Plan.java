@@ -319,6 +319,17 @@ public class Plan {
 	}
 
 	/**
+	 * Combines the plan id and name to generate a single label for
+	 * the gui.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public String getLabel(){
+		return generateLabel(getId(), getName());
+	}
+	
+	/**
 	 * 
 	 * @return plan template
 	 */
@@ -352,11 +363,20 @@ public class Plan {
 		return false;
 	}
 
-	public void deleteTarget(PlanTarget t) {
-		if(targets == null){
-			targets = new ArrayList<PlanTarget>();
+	/**
+	 * Generate a label in the form of
+	 * "name [id]" for the gui.  If name is null
+	 * then it is not included.
+	 * 
+	 * @param id plan id
+	 * @param name plan name
+	 * @return formatted label
+	 */
+	public static String generateLabel(String id, String name){
+		String label = "[" + id + "]";
+		if (name != null){
+			label = name + " " + label;
 		}
-		targets.remove(t);
+		return label;
 	}
-
 }

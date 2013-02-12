@@ -43,7 +43,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class EditPlanItemDialog extends AbstractPropertyJHeaderDialog {
 
-	private PlanComposite content;
+	protected PlanComposite content;
 	
 	private PanelType panelType;
 	private Plan plan;

@@ -42,11 +42,13 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  */
 public class LoadPlanJob extends Job {
 	public static Object[] LOADING_PLANS = new Object[]{"Loading..."};
+	public static final String NONE_LABEL = "(None)";
 	
 	private PlanViewer planViewer;
 	private PlanFilter currentFilter;
 	
-	private PlanEditorInput currentSelection;
+	private Object currentSelection;
+	private boolean addNone;
 	
 	/**
 	 * Creates a new job that updates the given viewer
@@ -55,12 +57,23 @@ public class LoadPlanJob extends Job {
 	 * @param currentFilter
 	 */
 	public LoadPlanJob (PlanViewer planViewer, PlanFilter currentFilter){
+		this(planViewer, currentFilter, false);
+	}
+	
+	/**
+	 * Creates a new job that updates the given viewer
+	 * based on the values of the given filter.
+	 * @param planViewer
+	 * @param currentFilter
+	 */
+	public LoadPlanJob (PlanViewer planViewer, PlanFilter currentFilter, boolean addNone){
 		super("Load Plan Job");
 		this.planViewer = planViewer;
 		this.currentFilter = currentFilter;
+		this.addNone = addNone;
 	}
 	
-	public void setDefaultSelection(PlanEditorInput defaultSelection){
+	public void setDefaultSelection(Object defaultSelection){
 		this.currentSelection = defaultSelection;
 		planViewer.setSelection(currentSelection);
 	}
@@ -77,7 +90,10 @@ public class LoadPlanJob extends Job {
 		});
 		Session session = SmartHibernateManager.openSession();
 		try{
-			final List<PlanEditorInput> roots = PlanHibernateManager.getRootPlans(session, currentFilter);
+			final List roots = PlanHibernateManager.getRootPlans(session, currentFilter);
+			if (addNone){
+				roots.add(0, NONE_LABEL);
+			}
 			monitor.internalWorked(0.5);
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override

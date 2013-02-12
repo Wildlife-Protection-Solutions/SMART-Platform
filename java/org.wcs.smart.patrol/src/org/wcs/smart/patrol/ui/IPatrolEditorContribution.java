@@ -44,9 +44,10 @@ public interface IPatrolEditorContribution {
 	 * 
 	 * @param toolkit
 	 * @param parent
+	 * @param canEdit true if the patrol can be edited, false otherwise
 	 * @return
 	 */
-	Composite createControl(FormToolkit toolkit, Composite parent);
+	Composite createControl(FormToolkit toolkit, Composite parent, boolean canEdit);
 	
 	/**
 	 * 

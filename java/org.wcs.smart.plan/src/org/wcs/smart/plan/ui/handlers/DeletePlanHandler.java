@@ -68,10 +68,7 @@ public class DeletePlanHandler extends AbstractHandler {
 			String name = null;
 			if (selected instanceof Plan) {
 				planUuid = ((Plan) selected).getUuid();
-				name = "[" + ((Plan)selected).getId() + "]";
-				if (((Plan)selected).getName() != null){
-					name = ((Plan) selected).getName() + " " + name;
-				}
+				name = ((Plan)selected).getLabel();
 			}else if (selected instanceof PlanEditorInput){
 				planUuid = ((PlanEditorInput)selected).getUuid();
 				name = ((PlanEditorInput) selected).getName();

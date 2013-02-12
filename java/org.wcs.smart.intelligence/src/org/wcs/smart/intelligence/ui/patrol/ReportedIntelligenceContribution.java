@@ -97,7 +97,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 	public ReportedIntelligenceContribution() {}
 
 	@Override
-	public Composite createControl(FormToolkit toolkit, Composite parent) {
+	public Composite createControl(FormToolkit toolkit, Composite parent, boolean canEdit) {
 		main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout(2, false));
 		

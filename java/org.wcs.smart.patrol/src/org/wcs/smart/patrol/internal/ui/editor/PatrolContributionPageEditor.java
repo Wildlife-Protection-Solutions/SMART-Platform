@@ -119,7 +119,7 @@ public class PatrolContributionPageEditor extends EditorPart{
 				}
 			});
 			sec.setText(part.getName());
-			Composite info = part.createControl(toolkit, sec);
+			Composite info = part.createControl(toolkit, sec, editor.canEdit()==null);
 			sec.setClient(info);
 			part.setPatrol(editor.getPatrol());
 		}

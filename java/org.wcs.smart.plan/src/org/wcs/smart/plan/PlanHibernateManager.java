@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.util.SmartUtils;
@@ -81,10 +82,7 @@ public class PlanHibernateManager{
 			
 			for (Object[] data : results){
 				String uuid = SmartUtils.encodeHex((byte[]) data[0]);
-				String name = "[" + (String) data[1] + "]";
-				if (data[2] != null){
-					name = data[2]  + " " + name;
-				}				
+				String name = Plan.generateLabel((String)data[1], (String)data[2]);
 				
 				inputs.put(uuid, new PlanEditorInput((byte[])data[0], name, (Plan.PlanType)data[3]));
 				
@@ -227,6 +225,11 @@ public class PlanHibernateManager{
 			session.beginTransaction();
 			try {
 				plan = (Plan) session.load(Plan.class, uuid);
+				
+				String queryString = "DELETE FROM PatrolPlan WHERE id.plan = :plan"; //$NON-NLS-1$
+				Query q = session.createQuery(queryString).setParameter("plan", plan);
+				q.executeUpdate();
+				
 				session.delete(plan);
 				session.getTransaction().commit();
 			} catch (Exception ex) {

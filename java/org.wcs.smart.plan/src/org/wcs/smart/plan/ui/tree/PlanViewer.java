@@ -64,7 +64,7 @@ public class PlanViewer {
 		planViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof Plan){
-					return ((Plan)element).getName() + " [" + ((Plan)element).getId() + "]";
+					return ((Plan)element).getLabel();
 				}else if (element instanceof PlanEditorInput){
 					return ((PlanEditorInput) element).getName();
 				}

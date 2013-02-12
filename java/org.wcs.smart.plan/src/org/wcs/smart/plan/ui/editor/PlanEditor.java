@@ -271,16 +271,11 @@ public class PlanEditor extends EditorPart {
 		session.beginTransaction();
 		try {
 			session.update(plan);
-
-			String name = "[" + plan.getId() + "]";
-			if (plan.getName() != null) {
-				name = plan.getName() + " " + name;
-			}
-			setPartName(name);
+			setPartName(plan.getLabel());
 
 			setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry()
 					.get(plan.getType().getIconKey()));
-			form.setText(name);
+			form.setText(plan.getLabel());
 			String none = "<none>";
 
 			if (plan.getStation() != null) {
