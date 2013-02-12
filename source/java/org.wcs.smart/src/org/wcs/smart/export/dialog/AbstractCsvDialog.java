@@ -19,11 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.ca;
+package org.wcs.smart.export.dialog;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -45,59 +44,45 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.in.EmployeeCsvImporter;
+import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.internal.Messages;
-
 
 /**
- * Dialog for selecting a CSV file to import.
+ * Dialog for exporting/importing into/from CSV file
  * 
- * @author egouge
+ * @author elitvin
  * @since 1.0.0
  */
-@Deprecated
-public class ImportEmployeeDialog extends TitleAreaDialog {
+public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
+	private ICsvDialogConfig config;
 	
 	private Text txtFile;
-	private String fileName = null;
-	private boolean skipHeader = false;
-	private Button btnSkipHeader;
+	private Button btnHasHeader;
 	
 	/**
-	 * Create the dialog.
-	 * 
-	 * @param parent
-	 * 
+	 * @param parentShell
 	 */
-	public ImportEmployeeDialog(Shell parent) {
-		super(parent);
-	
+	public AbstractCsvDialog(Shell parentShell, ICsvDialogConfig config) {
+		super(parentShell);
+		this.config = config;
 	}
 
-	@Override
-	protected boolean isResizable() {
-		return true;
-	}
-
-	
-	
 	/**
 	 * Create contents of the dialog.
 	 */
 	@Override
-	public Control createDialogArea(Composite parent){
+	public Control createDialogArea(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		main.setLayout(new GridLayout(3, false));
 		
 		final FileDialog fd = new FileDialog(getShell());
 		fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{Messages.ImportEmployeeDialog_CSVFilterName, Messages.ImportEmployeeDialog_AllFilesFilterName});
+		fd.setFilterNames(new String[]{"Comma Separated Values (*.csv)", "All Files (*.*)"});
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.ImportEmployeeDialog_FileLabe);
+		lbl.setText("File:");
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtFile = new Text(main, SWT.BORDER);
@@ -115,7 +100,7 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText(Messages.ImportEmployeeDialog_BrowseButton);
+		btnBrowse.setText("Browse...");
 		btnBrowse.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -129,53 +114,40 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		btnSkipHeader = new Button(main, SWT.CHECK);
-		btnSkipHeader.setText(Messages.ImportEmployeeDialog_IncludeHaderOp);
-		btnSkipHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		btnHasHeader = new Button(main, SWT.CHECK);
+		String hasHeaderText = config.getHasHeaderText();
+		if (hasHeaderText == null) {
+			hasHeaderText = ""; //$NON-NLS-1$
+		}
+		btnHasHeader.setText(hasHeaderText);
+		btnHasHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		btnHasHeader.setVisible(config.includeHasHeader());
 		
 		Text txtinfo = new Text(main, SWT.WRAP | SWT.READ_ONLY);
 		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		((GridData)txtinfo.getLayoutData()).widthHint = 250;
-		txtinfo.setText(Messages.ImportEmployeeDialog_CSVFormat_1 + "\n" //$NON-NLS-1$
-				+ MessageFormat.format(
-						Messages.ImportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
-				+ "\n\n" //$NON-NLS-1$
-				+ Messages.ImportEmployeeDialog_CSVFormat_3);
+		txtinfo.setText(config.getInfo());
 		
-		getShell().setText(Messages.ImportEmployeeDialog_DialogTitle);
-		setMessage(Messages.ImportEmployeeDialog_DialogMessage);
+		getShell().setText(config.getTitle());
+		setTitle(config.getTitle());
+		setMessage(config.getMessage());
 		return parent;
 		
 	}
 	
-	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button btn = createButton(parent, IDialogConstants.OK_ID, Messages.ImportEmployeeDialog_ImportButton, true);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, config.getActionButtonText(), true);
 		btn.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
-	
-	/**
-	 * @return the selected filename
-	 */
-	private String getFileName(){
-		return this.fileName;
-	}
-	/**
-	 * @return if the first line is to be skipped or not
-	 */
-	public boolean getSkipHeader(){
-		return this.skipHeader;
-	}
-	
+
 	@Override
 	protected void buttonPressed(int buttonId) {
-		fileName = txtFile.getText();
-		skipHeader = btnSkipHeader.getSelection();
+		String fileName = txtFile.getText();
 		if (IDialogConstants.OK_ID == buttonId) {
-			if (loadData()){
+			if (process(fileName)){
 				setReturnCode(OK);
 				close();
 			}
@@ -184,59 +156,76 @@ public class ImportEmployeeDialog extends TitleAreaDialog {
 			close();
 		}
 	}
-	
-	/**
-	 * Loads employee data into the database.
-	 */
-	private boolean loadData(){
-		final boolean[] rcode = {false};
-		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
-		try{
-		dialog.run(true, true, new IRunnableWithProgress() {
-			
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException,
-					InterruptedException {
-				Session session = HibernateManager.openSession();
-				try{
-					EmployeeCsvImporter importer = new EmployeeCsvImporter();
-					final boolean ok =importer.importCsvFile(new File(getFileName()), getSkipHeader(), monitor, session);
-					getShell().getDisplay().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							if(ok){
-								MessageDialog.openInformation(getShell(), Messages.ImportEmployeeDialog_InfoDialog_Title, Messages.ImportEmployeeDialog_SuccessMessage);
-								rcode[0] = true;
-							}else{
-								MessageDialog.openError(getShell(), Messages.ImportEmployeeDialog_InfoDialog_Title, Messages.ImportEmployeeDialog_FailureMessage);
-								rcode[0] = false;
-							}
-							
-						}
-					});
-					
-				}catch (final Exception ex){
-					getShell().getDisplay().syncExec(new Runnable(){
 
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getLocalizedMessage(), ex);
-							rcode[0] = false;
-						}						
-					});
-							
-				}finally{
-					session.close();
-				}
-				
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+
+	protected boolean process(final String fileName) {
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+		try {
+			boolean headers = btnHasHeader != null && btnHasHeader.getSelection();
+			ProcessingRunnable processRunnable = new ProcessingRunnable(fileName, headers);
+			dialog.run(true, true, processRunnable);
+			if (processRunnable.isSuccess()) {
+				MessageDialog.openInformation(getShell(), config.getTitle(), config.getSuccessMessage());
+				return true;
+			}else{
+				MessageDialog.openError(getShell(), config.getTitle(), config.getFailMessage());
+				return false;
 			}
-		});
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.ImportEmployeeDialog_Error_FailedMessage + ex.getLocalizedMessage(), ex);
-			rcode[0] = false;
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(getShell(), config.getFailMessage() + ex.getLocalizedMessage(), ex);
+			return false;
 		}
-		return rcode[0];
+	}
+
+	protected abstract boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
+
+	/**
+	 * Inner class responsible for wrapping import/export operation into {@link IRunnableWithProgress}
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	private class ProcessingRunnable implements IRunnableWithProgress {
+		private final String file;
+		private final boolean headers;
+		private boolean success;
+
+		private ProcessingRunnable(String file, boolean headers) {
+			this.file = file;
+			this.headers = headers;
+		}
+
+		@Override
+		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			Session session = HibernateManager.openSession();
+			try {
+				boolean ok = performAction(new File(file), headers, monitor, session);
+				setSuccess(ok);
+			} catch (final Exception ex) {
+				setSuccess(false);
+				getShell().getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(getShell(), "Operation falied.\n" + ex.getLocalizedMessage(), ex);
+					}						
+				});
+			} finally {
+				session.close();
+			}
+		}
+
+		public boolean isSuccess() {
+			return success;
+		}
+
+		private void setSuccess(boolean success) {
+			this.success = success;
+		}
+		
 	}
 	
-
 }

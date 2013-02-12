@@ -71,6 +71,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.export.config.impl.EmployeeCsvImportConfig;
+import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -247,7 +249,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		btnImport.setText(Messages.EmployeePropertyPage_Import_Button);
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
-			public void widgetSelected(SelectionEvent e){
+			public void widgetSelected(SelectionEvent e) {
+//				CsvImportDialog dialog = new CsvImportDialog(getShell(), new EmployeeCsvImportConfig());
 				ImportEmployeeDialog dialog = new ImportEmployeeDialog(getShell());
 				int ret = dialog.open();
 				if (ret == IDialogConstants.CANCEL_ID){
@@ -264,7 +267,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		btnExport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				ExportEmployeeDialog dialog = new ExportEmployeeDialog(getShell());
+//				ExportEmployeeDialog dialog = new ExportEmployeeDialog(getShell());
+				CsvImportDialog dialog = new CsvImportDialog(getShell(), new EmployeeCsvImportConfig());
 				int ret = dialog.open();
 				if (ret == IDialogConstants.CANCEL_ID){
 					return;
