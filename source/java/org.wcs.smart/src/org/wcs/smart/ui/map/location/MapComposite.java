@@ -22,7 +22,9 @@
 package org.wcs.smart.ui.map.location;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
@@ -41,6 +43,7 @@ import net.refractions.udig.project.ui.render.displayAdapter.MapMouseWheelEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseWheelListener;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.viewers.MapViewer;
+import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -56,10 +59,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.XMLMemento;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.styling.Style;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -84,7 +89,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class MapComposite extends Composite implements MapPart {
 
-	private static final String SMART_POINT_SPEC = "fid:String,id:Integer,geom:Point:srid=4326"; //$NON-NLS-1$
+	private static final String SMART_POINT_SPEC = "fid:String,id:Integer,selected:Boolean,geom:Point:srid=4326"; //$NON-NLS-1$
 	private static final String SMART_POINT_TYPE_NAME = "smart.ISmartPoint"; //$NON-NLS-1$
 
 	private SimpleFeatureType featureType;
@@ -95,6 +100,8 @@ public class MapComposite extends Composite implements MapPart {
 	
 	private MapViewer mapViewer;
 	private Map map;
+
+	private ISmartPointDataProvider dataProvider;
 	
 	private Job refreshJob = new Job(Messages.MapComposite_MapResizeJob_Title){
 		@Override
@@ -203,7 +210,19 @@ public class MapComposite extends Composite implements MapPart {
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
 			layers.add(pointResource);
 			
-			AddLayersCommand command = new AddLayersCommand(layers, 0);
+			AddLayersCommand command = new AddLayersCommand(layers, 0) {
+				@Override
+				public void run(IProgressMonitor monitor) throws Exception {
+					super.run(monitor);
+					//set custom style for points layer
+					Layer pointLayerEx = getLayers().get(0);
+					String sld = getStylingConfig();
+					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
+					SLDContent c = new SLDContent();
+					Style style = (Style)c.load(memento);
+					pointLayerEx.getStyleBlackboard().put(SLDContent.ID, style);
+				}
+			};
 			getMap().sendCommandASync(command);
         } catch (Exception exception) {
 			SmartPlugIn.displayLog(null, Messages.MapComposite_PointLayer_Add_Error, exception);
@@ -211,13 +230,13 @@ public class MapComposite extends Composite implements MapPart {
 		
 	}
 
-	public void updatePointsLayer(List<? extends ISmartPoint> points) {
+	public void updatePointsLayer() {
 		if (store == null) {
 			return; //most likely we failed to add points layer
 		}
 		try {
 			featureCollection.clear();
-			featureCollection.addAll(getSmartPointAsFeatures(points, featureType));
+			featureCollection.addAll(getSmartPointAsFeatures(featureType));
 			store.removeFeatures(Filter.INCLUDE);
 			store.addFeatures(featureCollection);
 		} catch (IOException e) {
@@ -237,19 +256,32 @@ public class MapComposite extends Composite implements MapPart {
 		return;
 	}
 	
-	private List<SimpleFeature> getSmartPointAsFeatures(List<? extends ISmartPoint> points, SimpleFeatureType ftype) {
+	private List<SimpleFeature> getSmartPointAsFeatures(SimpleFeatureType ftype) {
+		if (getDataProvider() == null) {
+			return Collections.emptyList();
+		}
+		List<? extends ISmartPoint> points = getDataProvider().getPoints();
 		int size = points.size();
 		List<SimpleFeature> features = new ArrayList<SimpleFeature>(size);
 		for (int i = 0; i < size; i++) {
 			ISmartPoint point = points.get(i);
-			Object data[] = new Object[3];
+			Object data[] = new Object[4];
 			String name = ftype.getName() + "." + i; //$NON-NLS-1$
 			data[0] = name;
 			data[1] = i;
-			data[2] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(point.getX(), point.getY()));
+			data[2] = getDataProvider().isSelected(point);
+			data[3] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(point.getX(), point.getY()));
 			features.add(SimpleFeatureBuilder.build(ftype, data, name));
 		}
 		return features;
+	}
+
+	public void setDataProvider(ISmartPointDataProvider dataProvider) {
+		this.dataProvider = dataProvider;
+	}
+	
+	protected ISmartPointDataProvider getDataProvider() {
+		return dataProvider;
 	}
 	
 	@Override
@@ -280,4 +312,72 @@ public class MapComposite extends Composite implements MapPart {
 		return null;
 	}
 
+	private String getStylingConfig() {
+		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
+		"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
+		"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
+		"	&lt;sld:UserStyle xmlns=\"http://www.opengis.net/sld\""+ //$NON-NLS-1$
+		"		xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\""+ //$NON-NLS-1$
+		"		xmlns:gml=\"http://www.opengis.net/gml\"&gt;"+ //$NON-NLS-1$
+		"		&lt;sld:Name&gt;Default Styler&lt;/sld:Name&gt;"+ //$NON-NLS-1$
+		"		&lt;sld:Title /&gt;"+ //$NON-NLS-1$
+		"		&lt;sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
+		"			&lt;sld:Name&gt;simple&lt;/sld:Name&gt;"+ //$NON-NLS-1$
+		"			&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;"+ //$NON-NLS-1$
+		"			&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
+		"			&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
+
+		//rule for not selected points (same as default)
+		"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
+		"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
+		"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+		"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
+		"                            &lt;ogc:Literal&gt;false&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
+		"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+		"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
+		"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+		"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
+		"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
+		"							&lt;sld:Fill /&gt;"+ //$NON-NLS-1$
+		"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
+		"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
+		"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
+		"							&lt;sld:Fill&gt;"+ //$NON-NLS-1$
+		"								&lt;sld:CssParameter name=\"fill\"&gt;#1B9E77&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
+		"							&lt;/sld:Fill&gt;"+ //$NON-NLS-1$
+		"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
+		"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
+		"						&lt;sld:Size&gt;6.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
+		"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
+		"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+		"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
+		
+		//rule for selected points
+		"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
+		"				&lt;ogc:Filter&gt;"+ //$NON-NLS-1$
+		"                        &lt;ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+		"                            &lt;ogc:PropertyName&gt;selected&lt;/ogc:PropertyName&gt;"+ //$NON-NLS-1$
+		"                            &lt;ogc:Literal&gt;true&lt;/ogc:Literal&gt;"+ //$NON-NLS-1$
+		"                        &lt;/ogc:PropertyIsEqualTo&gt;"+ //$NON-NLS-1$
+		"				&lt;/ogc:Filter&gt;"+ //$NON-NLS-1$
+		"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+		"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
+		"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
+		"							&lt;sld:Fill&gt;"+ //$NON-NLS-1$
+		"								&lt;sld:CssParameter name=\"fill\"&gt;#FF000&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
+		"							&lt;/sld:Fill&gt;"+ //$NON-NLS-1$
+		"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
+		"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
+		"						&lt;sld:Size&gt;6.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
+		"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
+		"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
+		"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
+		
+		
+		"		&lt;/sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
+		"	&lt;/sld:UserStyle&gt;"+ //$NON-NLS-1$
+		"</styleEntry>"; //$NON-NLS-1$
+	
+	}
+	
 }

@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -74,7 +75,7 @@ import com.vividsolutions.jts.geom.Point;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class LocationSelectComposite<T extends ISmartPoint> extends SashForm implements IMapPointSelectionListener, ICrsProvider {
+public abstract class LocationSelectComposite<T extends ISmartPoint> extends SashForm implements IMapPointSelectionListener, ICrsProvider, ISmartPointDataProvider {
 
 	private static final int MAP_MIN_WIDTH = 280;
 	
@@ -124,6 +125,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		pointsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				updateMapConposite();				
 				removeButton.setEnabled(!pointsListViewer.getSelection().isEmpty());
 			}
 		});
@@ -181,7 +183,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 						points.remove(iterator.next());
 					}
-					mapComposite.updatePointsLayer(getPoints());
+					updateMapConposite();
 					fireLocationPointsChangeListeners();
 				}
 				pointsListViewer.refresh();
@@ -191,6 +193,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		//========map part========
 		ScrolledComposite mapScrollCmp = new ScrolledComposite(this, SWT.H_SCROLL);
 		mapComposite = new MapComposite(mapScrollCmp, SWT.NONE);
+		mapComposite.setDataProvider(this);
 		mapScrollCmp.setContent(mapComposite);
 		mapScrollCmp.setExpandVertical(true);
 		mapScrollCmp.setExpandHorizontal(true);
@@ -255,7 +258,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		point.setX(x);
 		point.setY(y);
 		points.add(point);
-		mapComposite.updatePointsLayer(getPoints());
+		updateMapConposite();
 		fireLocationPointsChangeListeners();
 	}
 
@@ -279,14 +282,31 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	protected abstract ISmartPoint createNewPoint();
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public List<T> getPoints() {
 		return Collections.unmodifiableList(points);
 	}
 
+	@Override
+	public boolean isSelected(ISmartPoint point) {
+		StructuredSelection selection = (StructuredSelection) pointsListViewer.getSelection();
+		for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+			Object obj = (Object) i.next();
+			if (point.equals(obj)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public void setPoints(List<? extends T> pointList) {
 		points.clear();
 		points.addAll(pointList);
-		mapComposite.updatePointsLayer(getPoints());
+		updateMapConposite();
+	}
+	
+	private void updateMapConposite() {
+		mapComposite.updatePointsLayer();
 	}
 	
 	public void addLocationPointsChangeListener(ILocationPointsChangeListener listener) {
