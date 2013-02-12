@@ -36,6 +36,7 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -52,7 +53,7 @@ import com.ibm.icu.text.SimpleDateFormat;
  * @author egouge
  * @since 1.0.0
  */
-public class EmployeeCsvImporter {
+public class EmployeeCsvImporter implements ICsvDataImporter {
 	public static final String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 
 	/* to export employees from derby in correct format:
@@ -91,7 +92,8 @@ public class EmployeeCsvImporter {
 	 * @return true if data loaded, false if data not loaded (monitor cancelled)
 	 * @throws Exception if there are any issues with the data in the csv file
 	 */
-	public boolean importCsvFile(File file, boolean skipHeader, IProgressMonitor monitor, Session session) throws Exception{
+	@Override
+	public boolean importCsvFile(File file, boolean skipHeader, IProgressMonitor monitor, Session session) throws Exception {
 		if (!file.exists()){
 			throw new IOException(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist + file.toString() );
 		}

@@ -59,7 +59,10 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
-import org.wcs.smart.export.AgencyCsvExport;
+import org.wcs.smart.export.config.impl.AgencyCsvExportConfig;
+import org.wcs.smart.export.config.impl.AgencyCsvImportConfig;
+import org.wcs.smart.export.dialog.CsvExportDialog;
+import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -246,43 +249,34 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		enableRank(false);
 		
 		tblAgencies.refresh();
-		Button Export = new Button(container, SWT.NONE);
-		Export.setText("Export");
-		Export.addSelectionListener(new SelectionAdapter(){
+		Button btnExport = new Button(container, SWT.NONE);
+		btnExport.setText("Export");
+		btnExport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				AgencyCsvExport agencyExporter;
-				try {
-					agencyExporter = new AgencyCsvExport();
-					if (agencyExporter.export()==true){
-						 System.out.println("true");
-					 }else{
-						 System.out.println("false");
-					 }
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				 
+				CsvExportDialog dialog = new CsvExportDialog(getShell(), new AgencyCsvExportConfig());
+				dialog.open();
 			}
 		});
-		Button Import = new Button(container, SWT.NONE);
-		Import.setText("Import");
-		Import.addSelectionListener(new SelectionAdapter(){
+		Button btnImport = new Button(container, SWT.NONE);
+		btnImport.setText("Import");
+		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				AgencyCsvExport agencyExporter;
-				try {
-					agencyExporter = new AgencyCsvExport();
-					if (agencyExporter.export()==true){
-						 System.out.println("true");
-					 }else{
-						 System.out.println("false");
-					 }
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				CsvImportDialog dialog = new CsvImportDialog(getShell(), new AgencyCsvImportConfig());
+				dialog.open();
+//				AgencyCsvExport agencyExporter;
+//				try {
+//					agencyExporter = new AgencyCsvExport();
+//					if (agencyExporter.export()==true){
+//						 System.out.println("true");
+//					 }else{
+//						 System.out.println("false");
+//					 }
+//				} catch (Exception e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
 				 
 			}
 		});
