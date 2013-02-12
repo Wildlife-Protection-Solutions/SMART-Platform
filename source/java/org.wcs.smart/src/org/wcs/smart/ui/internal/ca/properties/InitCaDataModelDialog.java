@@ -336,15 +336,6 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							}
 							code = (String)((IStructuredSelection)lsd.getSelection()).getFirstElement();
 						}
-//						for (Iterator iterator = dmToClone.getAttributes().iterator(); iterator.hasNext();) {
-//							Attribute type = (Attribute) iterator.next();
-//							if (type.getTree() != null){
-//								for (AttributeTreeNode node : type.getTree()){
-//									System.out.println(node.getName());
-//								}
-//							}
-//							
-//						}
 						dm = dmToClone.clone(ca, code);
 					}else if (btnBlank.getSelection()){
 						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());

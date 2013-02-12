@@ -203,11 +203,6 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		}
 
 		Plan p = getPlan();
-//		if (p.getParent() != null){
-//			p.getParent().getChildren().add(p);
-//		}
-//causes lazy errors, don't think this is really necessary anymore with other plan loading changes.
-
 		if(p.getTargets() != null){
 			List<PlanTarget> tars = p.getTargets();
 			for(PlanTarget x : tars){
@@ -223,7 +218,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		//Open Plan Perspective and the plan you just created.
 		try {
 
-			PlanEditorInput input = new PlanEditorInput(p.getUuid(), p.getId(), p.getType());
+			PlanEditorInput input = new PlanEditorInput(p.getUuid(), p.getLabel(), p.getType());
 
 			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PlanEditor.ID);

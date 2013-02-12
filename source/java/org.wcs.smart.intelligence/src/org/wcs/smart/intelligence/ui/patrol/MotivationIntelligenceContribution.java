@@ -61,12 +61,8 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	private Patrol patrol;
 
 	private Composite main;
-	
 	private Label label;
-	private Hyperlink labelLink;
-	
 	private TableViewer tableViewer;
-	private Hyperlink tableLink;
 
 	List<Intelligence> intelligenceList;
 
@@ -88,12 +84,15 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	public MotivationIntelligenceContribution() {}
 
 	@Override
-	public Composite createControl(FormToolkit toolkit, Composite parent) {
+	public Composite createControl(FormToolkit toolkit, Composite parent, boolean canEdit) {
 		main = toolkit.createComposite(parent);
-		main.setLayout(new GridLayout(2, false));
+		main.setLayout(new GridLayout((canEdit?2:1), false));
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
-		labelLink = createEditLink(toolkit, main);
+		if (canEdit){
+			Hyperlink lnk = createEditLink(toolkit, main);
+			lnk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,1,2));
+		}
 		
 		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL);
 		tableViewer = new TableViewer(reportedTable);
@@ -101,7 +100,6 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		tableViewer.setLabelProvider(new IntelligenceLabelProvider());
 		reportedTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
-		tableLink = createEditLink(toolkit, main);
 
 		//listeners
 		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
@@ -133,14 +131,10 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		if (intelligenceList.isEmpty()) {
 			label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
 			tableViewer.getControl().setVisible(false);
-			labelLink.setVisible(canEdit());
-			tableLink.setVisible(false);
 		} else {
 			label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
 			tableViewer.getControl().setVisible(true);
 			tableViewer.setInput(intelligenceList.toArray());
-			labelLink.setVisible(false);
-			tableLink.setVisible(canEdit());
 		}
 		main.layout(true, true);
 	}
@@ -153,11 +147,6 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	 */
 	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent) {
 		Hyperlink editLink = toolkit.createHyperlink(parent, Messages.IntelligenceEditor_Edit_LinkLabel, SWT.WRAP);
-
-		boolean canEdit = canEdit();
-		editLink.setEnabled(canEdit);
-		editLink.setVisible(canEdit);
-
 		editLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -167,10 +156,6 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		return editLink;
 	}
 
-	private boolean canEdit() {
-		//analyst users can never edit
-		return SmartDB.getCurrentEmployee().getSmartUserLevel() != Employee.SmartUserLevel.ANALYST;
-	}
 
 	/**
 	 * Displays and edit dialog 

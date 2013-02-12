@@ -41,7 +41,7 @@ import org.wcs.smart.plan.model.Plan;
 public class PlanEditorInput implements IEditorInput {
 
 	private byte[] uuid;
-	private String shortName;
+	private String label;
 	
 	private List<PlanEditorInput> kids;
 	private PlanEditorInput parent;
@@ -50,9 +50,9 @@ public class PlanEditorInput implements IEditorInput {
 	/**
 	 * Constructor
 	 */
-	public PlanEditorInput(byte[] uuid, String shortName, Plan.PlanType type) {
+	public PlanEditorInput(byte[] uuid, String label, Plan.PlanType type) {
 		this.uuid = uuid;
-		this.shortName = shortName;
+		this.label = label;
 		this.planType = type;
 		
 		this.kids = new ArrayList<PlanEditorInput>();
@@ -98,7 +98,7 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
-		return shortName;
+		return label;
 	}
 
 	/* (non-Javadoc)
@@ -114,7 +114,7 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return shortName;
+		return label;
 	}
 
 	@Override

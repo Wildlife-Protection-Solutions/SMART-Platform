@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.panel;
 
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.ui.patrol.PatrolPlanComposite;
 
 
 /**
@@ -52,6 +53,7 @@ public class PlanCompositeFactory {
 		case TYPE:    return new PlanTypeEmployeesComposite(parent, style);
 		case STATION:    return new PlanStationTeamComposite(parent, style);
 		case PLANPARENTID:    return new PlanParentIdComposite(parent, style);
+		case PATROLPLAN: return new PatrolPlanComposite(parent, style);
 		
 		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
 		}
@@ -66,6 +68,8 @@ public class PlanCompositeFactory {
 		case TYPE: return "Plan Type";
 		case STATION: return "Plan Station";
 		case PLANPARENTID: return "Parent ID";
+		case PATROLPLAN: return PatrolPlanComposite.TITLE;
+		
 		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
 		}
 	}
@@ -80,7 +84,8 @@ public class PlanCompositeFactory {
 		STATION,
 		STARTDATE,
 		ENDDATE,
-		TARGETS;
+		TARGETS,
+		PATROLPLAN;
 	}
 
 }

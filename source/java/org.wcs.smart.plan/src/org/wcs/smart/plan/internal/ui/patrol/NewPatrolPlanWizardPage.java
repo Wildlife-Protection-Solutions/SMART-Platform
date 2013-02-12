@@ -21,19 +21,24 @@
  */
 package org.wcs.smart.plan.internal.ui.patrol;
 
-import java.text.MessageFormat;
-import java.util.List;
 
+import java.text.MessageFormat;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Station;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
-import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.ui.tree.PlanViewer;
+import org.wcs.smart.plan.ui.LoadPlanJob;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 
 /**
  * Wizard page for the new patrol wizard that collects
@@ -44,42 +49,57 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  */
 public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 
-	private static final String NONE_LABEL = "(None)";
-	private PlanViewer pv;
-	private Plan lastSelection = null;
+	private PatrolPlanComposite ppComp;
+	private PlanEditorInput lastSelection = null;
 	
 	public NewPatrolPlanWizardPage() {
 		super("PlanPage"); //$NON-NLS-1$
+		
 	}
 
 	@Override
 	public void createControl(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(1, false));
-
-		pv = new PlanViewer(main);
-		pv.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		ppComp = new PatrolPlanComposite(parent, SWT.NONE);
+		ppComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		super.setTitle("Patrol Plan");
 		super.setMessage(MessageFormat.format(
-				"Select the plan associated with this patrol or select {0} if no plan associated with this patrol.", new String[]{NONE_LABEL}));
-		super.setControl(main);
+				"Select the plan associated with this patrol or select {0} if no plan associated with this patrol.", new String[]{LoadPlanJob.NONE_LABEL}));
+		super.setControl(ppComp);
 	}
 
-	private Plan getSelectedPlan(){
-		return (Plan) pv.getSelectedPlan();
+	private PlanEditorInput getSelectedPlan(){
+		if (ppComp.getViewer().getSelectedPlan() instanceof PlanEditorInput){
+			return (PlanEditorInput)ppComp.getViewer().getSelectedPlan();
+		}else{
+			return null;
+		}
 	}
 	
 	@Override
 	public boolean updateModel(Patrol p) {
 		lastSelection = getSelectedPlan();
-		if (lastSelection != null){
-			if (lastSelection.getStation() != null){
-				p.setStation(lastSelection.getStation());
+		if (lastSelection != null) {
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try {
+				Plan plan = (Plan) s.get(Plan.class, lastSelection.getUuid());
+				if (plan != null) {
+					if (plan.getStation() != null) {
+						Station x = plan.getStation();
+						x.getName();	//ensure item loaded
+						p.setStation(x);
+					}
+					if (plan.getTeam() != null) {
+						Team x = plan.getTeam();
+						x.getName();
+						p.setTeam(x);
+					}
+				}
+			} finally {
+				s.close();
 			}
-			if (lastSelection.getTeam() != null){
-				p.setTeam(lastSelection.getTeam());
-			}
+
 		}
 		return true;
 	}
@@ -93,23 +113,31 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 	 * @throws Exception if error occurs while saving 
 	 */
 	public void save(Patrol p, Session session) throws Exception{
-		//TODO save link to plan somewhere in the database
-		//Patrol = p
-		//Plan = lastSelection
+		if (lastSelection != null){
+			Plan plan = (Plan)session.load(Plan.class, lastSelection.getUuid());
+			if (plan == null){
+				MessageDialog.openError(getShell(), "Error", 
+						MessageFormat.format("Could not find the plan {0}.  This patrol will not have a plan associated with id.", new String[]{lastSelection.getName()}));				
+			}
+			
+			PatrolPlan pp = new PatrolPlan();
+			pp.setPatrol(p);
+			pp.setPlan(plan);
+			session.save(pp);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initModel(Patrol p, Session session) {
-		List roots = PlanHibernateManager.getAllRootPlans(session);
-		roots.add(0, NONE_LABEL);
-		pv.setRootPlans(roots.toArray(new Object[roots.size()]));
 		if (lastSelection != null){
-			pv.setSelection(lastSelection);
+			ppComp.setDefaultSelection(lastSelection);
 		}else{
-			pv.setSelection(NONE_LABEL);
+			ppComp.setDefaultSelection(LoadPlanJob.NONE_LABEL);
 		}
 		
 	}
+
+	
 
 }

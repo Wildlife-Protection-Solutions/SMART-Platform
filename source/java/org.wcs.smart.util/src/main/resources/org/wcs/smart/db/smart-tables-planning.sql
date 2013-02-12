@@ -6,7 +6,7 @@ CREATE TABLE smart.plan
 	id VARCHAR(32) NOT NULL,
 	start_date DATE NOT NULL,
 	end_date DATE,
-	type VARCHAR(32),
+	type VARCHAR(32) NOT NULL,
 	name VARCHAR(32),
 	description VARCHAR(256),
 	ca_uuid CHAR(16) FOR BIT DATA NOT NULL,
@@ -49,19 +49,40 @@ ALTER TABLE smart.plan
 CREATE TABLE smart.plan_target
 (
 	uuid CHAR(16) FOR BIT DATA,
-	name VARCHAR(32),
+	name VARCHAR(32) NOT NULL,
 	description VARCHAR(256),
 	value double,
 	op VARCHAR(10),
 	type VARCHAR(32),
 	plan_uuid CHAR(16) FOR BIT DATA NOT NULL,
-	category varchar(16),
+	category varchar(16) NOT NULL,
 	PRIMARY KEY (UUID)
 );
 
 ALTER TABLE smart.plan_Target
 	ADD CONSTRAINT target_plan_uuid_fk FOREIGN KEY (PLAN_UUID)
 	REFERENCES smart.Plan (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+CREATE TABLE smart.patrol_plan
+(
+	patrol_uuid char(16) for bit data,
+	plan_uuid char(16) for bit data,
+	PRIMARY KEY (patrol_uuid, plan_uuid)
+);
+
+ALTER TABLE smart.patrol_plan
+	ADD CONSTRAINT patrol_plan_patrol_uuid_fk FOREIGN KEY (PATROL_UUID)
+	REFERENCES SMART.PATROL (UUID)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+ALTER TABLE smart.patrol_plan
+	ADD CONSTRAINT patrol_plan_plan_uuid_fk FOREIGN KEY (PLAN_UUID)
+	REFERENCES SMART.PLAN (UUID)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;

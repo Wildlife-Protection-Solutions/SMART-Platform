@@ -185,7 +185,6 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	public void writeQuery(String fileName, String query){
 		SQLQuery sqlQuery = getSession().createSQLQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
 				createFileName(getExportLocation(), fileName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" ); //$NON-NLS-1$ //$NON-NLS-2$
-		System.out.println(sqlQuery.toString());
 		sqlQuery.executeUpdate();
 	}
 	

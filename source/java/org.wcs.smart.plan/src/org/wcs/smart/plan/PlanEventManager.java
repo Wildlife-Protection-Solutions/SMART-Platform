@@ -88,7 +88,11 @@ public class PlanEventManager {
 			ArrayList<IPlanEventListener> localListeners = new ArrayList<IPlanEventListener>();
 			localListeners.addAll(listeners.get(type));
 			for (IPlanEventListener listener : localListeners){
-				listener.eventFired(attributeChange, source);
+				try{
+					listener.eventFired(attributeChange, source);
+				}catch (Exception ex){
+					SmartPlanPlugIn.displayLog("Error firing event listeners.  It is recommended you restart the application." + ex.getLocalizedMessage(), ex);
+				}
 			}
 		}
 	}

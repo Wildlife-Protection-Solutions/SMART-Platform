@@ -1,13 +1,20 @@
 package org.wcs.smart.plan;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.patrol.IPatrolDeleteHandler;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolManager;
+import org.wcs.smart.patrol.model.Patrol;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -42,6 +49,20 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 
 	
 	private PlanCaDeleteHandler deleteCa;
+	
+	private IPatrolDeleteHandler deletePatrol =  new IPatrolDeleteHandler() {
+		@Override
+		public void beforeDelete(Patrol patrol, Session session,
+				IProgressMonitor monitor) throws Exception {
+			Query q = session.createQuery("DELETE FROM PatrolPlan where id.patrol = :patrol").setParameter("patrol", patrol);
+			q.executeUpdate();
+		}
+		
+		@Override
+		public void afterDelete(Patrol patrol, IProgressMonitor monitor) {
+		}
+	};
+	
 	/**
 	 * The constructor
 	 */
@@ -58,6 +79,7 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		
 		deleteCa = new PlanCaDeleteHandler();
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCa,PlanCaDeleteHandler.EXECUTE_ORDER );
+		PatrolManager.getInstance().addDeleteHandler(deletePatrol,0 );
 	}
 
 	/*
@@ -67,6 +89,8 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+		
+		
 	}
 
 	/**

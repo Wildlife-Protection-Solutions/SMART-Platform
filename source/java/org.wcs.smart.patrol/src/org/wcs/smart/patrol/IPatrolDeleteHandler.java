@@ -38,7 +38,7 @@ public interface IPatrolDeleteHandler {
 	 * should be cancelled.
 	 * 
 	 * @param patrol the patrol to delete
-	 * @param session the delete session
+	 * @param session the delete session in transaction
 	 * @param monitor the progress monitor
 	 * @throws Exception if error occurs and the patrol information could not be removed
 	 */
