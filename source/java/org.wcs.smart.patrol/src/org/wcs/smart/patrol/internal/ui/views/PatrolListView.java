@@ -242,7 +242,11 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				PatrolEditorInput p = (PatrolEditorInput)((IStructuredSelection)patrolListViewer.getSelection()).getFirstElement();
+				Object selection = ((IStructuredSelection)patrolListViewer.getSelection()).getFirstElement();;
+				if (!(selection instanceof PatrolEditorInput)){
+					return;
+				}
+				PatrolEditorInput p = (PatrolEditorInput)selection;
 				if (p != null){
 					IWorkbenchPage page = null;
 					try {
