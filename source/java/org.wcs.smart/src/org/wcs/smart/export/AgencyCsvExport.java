@@ -23,6 +23,7 @@ package org.wcs.smart.export;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +50,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @since 1.0.0
  */
 public class AgencyCsvExport implements ICsvDataExporter {
-	protected Set<Language> languages;
+	protected List<Language> languages;
 	public ConservationArea ca;
 	
 	/**
@@ -64,7 +65,7 @@ public class AgencyCsvExport implements ICsvDataExporter {
 		CSVWriter writer = null;
 		try {
 			ca = SmartDB.getCurrentConservationArea();
-			languages = ca.getLanguages();
+			languages = new ArrayList<Language>(ca.getLanguages());
 			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
 			List<Agency> agencies = getAgencies(session);
 
@@ -115,7 +116,7 @@ public class AgencyCsvExport implements ICsvDataExporter {
 		}
 	}
 	
-	private String[] createColumns(Set<Language> langs) {
+	private String[] createColumns(List<Language> langs) {
 		String[] agtcols = new String[(2*langs.size())];
 		
 		int i=0;
@@ -133,7 +134,7 @@ public class AgencyCsvExport implements ICsvDataExporter {
 
 	private int findcolumnIndex(Label lbl){
 		int i = 0;
-		for (Language lng : languages) { //TODO: fix!!!! index based on iteration over set!!!
+		for (Language lng : languages) {
 			if (lbl.getLanguage().getCode().equals(lng.getCode())){
 				return i;
 			}
