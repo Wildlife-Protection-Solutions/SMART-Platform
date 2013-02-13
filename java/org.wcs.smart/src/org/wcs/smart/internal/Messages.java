@@ -31,6 +31,8 @@ public class Messages extends NLS {
 	public static String AgencyRankPropertyPage_Add_Button;
 	public static String AgencyRankPropertyPage_AddRank_Button;
 	public static String AgencyRankPropertyPage_Agencies_Label;
+	public static String AgencyRankPropertyPage_Button_Export;
+	public static String AgencyRankPropertyPage_Button_Import;
 	public static String AgencyRankPropertyPage_DefaultAgencyName;
 	public static String AgencyRankPropertyPage_DefaultRankName;
 	public static String AgencyRankPropertyPage_Delete_Button;
