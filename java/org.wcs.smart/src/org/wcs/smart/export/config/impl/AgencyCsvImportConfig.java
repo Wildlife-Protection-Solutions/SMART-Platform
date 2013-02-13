@@ -26,6 +26,8 @@ import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.export.config.ICsvImportDialogConfig;
 import org.wcs.smart.export.dialog.CsvImportDialog;
+import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Configuration for current {@link CsvImportDialog} to import
@@ -55,30 +57,34 @@ public class AgencyCsvImportConfig implements ICsvImportDialogConfig {
 
 	@Override
 	public String getInfo() {
-		return "Agency & rank importing info";
+		return Messages.CsvConfig_Agency_Import_Info + SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Import_Info_Content +
+				SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Example_Label +
+				SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Example_HeaderRow +
+				SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Example_ContentRow;
 	}
 
 	@Override
 	public String getTitle() {
-		return "Import Agencies and Ranks";
+		return Messages.CsvConfig_Agency_Import_Title;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.export.config.ICsvDialogConfig#getMessage()
-	 */
 	@Override
 	public String getMessage() {
-		return "Import Agencies and Ranks from csv file";
+		return Messages.CsvConfig_Agency_Import_Message;
 	}
 
 	@Override
 	public String getSuccessMessage() {
-		return "Agencies and Ranks successfully imported.";
+		return Messages.CsvConfig_Agency_Import_Success;
 	}
 
 	@Override
 	public String getFailMessage() {
-		return "Failed to import Agencies and Ranks.";
+		return Messages.CsvConfig_Agency_Import_Fail;
 	}
 
 	@Override

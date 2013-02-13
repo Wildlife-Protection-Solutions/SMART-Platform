@@ -84,7 +84,7 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 		while( (row = reader.readNext()) != null ) {
 			if (monitor.isCanceled()) return false;
 			if (row.length != size) {
-				throw new Exception(MessageFormat.format("Invalid number of fields on line {0}. Contains {1}, required {2} (based on first line).", new Object[]{line, row.length, size}));
+				throw new Exception(MessageFormat.format(Messages.AgencyCsvImporter_Error_IncorrectFieldsNumber, new Object[]{line, row.length, size}));
 			}
 			
 			agency = handleAgency(row, langCodes);
@@ -118,7 +118,7 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 			}
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			throw new Exception("Failed to save parsed agencies and ranks." + ex.getLocalizedMessage(), ex);
+			throw new Exception(Messages.AgencyCsvImporter_Error_DatabaseSaveFailed + ex.getLocalizedMessage(), ex);
 		}
 		return true;
 	}
