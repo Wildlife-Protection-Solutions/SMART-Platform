@@ -251,7 +251,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				CsvImportDialog dialog = new CsvImportDialog(getShell(), new EmployeeCsvImportConfig());
-//				ImportEmployeeDialog dialog = new ImportEmployeeDialog(getShell());
 				int ret = dialog.open();
 				if (ret == IDialogConstants.CANCEL_ID){
 					return;
@@ -263,19 +262,12 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		});
 		
 		Button btnExport = new Button(composite, SWT.NONE);
-		btnExport.setText("Export...");//Messages.EmployeePropertyPage_Import_Button);
+		btnExport.setText(Messages.EmployeePropertyPage_Export_Button);
 		btnExport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
-//				ExportEmployeeDialog dialog = new ExportEmployeeDialog(getShell());
 				CsvExportDialog dialog = new CsvExportDialog(getShell(), new EmployeeCsvExportConfig());
 				dialog.open();
-//				int ret = dialog.open();
-//				if (ret == IDialogConstants.CANCEL_ID){
-//					return;
-//				}else{
-//					refreshEmployeeList();
-//				}
 			}
 		});
 		
