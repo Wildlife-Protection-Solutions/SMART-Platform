@@ -46,6 +46,8 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for exporting/importing into/from CSV file
@@ -79,10 +81,10 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 		
 		final FileDialog fd = new FileDialog(getShell());
 		fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{"Comma Separated Values (*.csv)", "All Files (*.*)"});
+		fd.setFilterNames(new String[]{Messages.AbstractCsvDialog_FileFilter_Csv, Messages.AbstractCsvDialog_FileFilter_All});
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("File:");
+		lbl.setText(Messages.AbstractCsvDialog_File_Label);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtFile = new Text(main, SWT.BORDER);
@@ -100,7 +102,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse...");
+		btnBrowse.setText(Messages.AbstractCsvDialog_Browse_Button);
 		btnBrowse.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -210,7 +212,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 				getShell().getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						SmartPlugIn.displayLog(getShell(), "Operation falied.\n" + ex.getLocalizedMessage(), ex);
+						SmartPlugIn.displayLog(getShell(), Messages.AbstractCsvDialog_Fail_Error + SmartUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
 					}						
 				});
 			} finally {

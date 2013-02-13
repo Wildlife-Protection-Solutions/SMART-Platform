@@ -4,6 +4,11 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.internal.messages"; //$NON-NLS-1$
+	public static String AbstractCsvDialog_Browse_Button;
+	public static String AbstractCsvDialog_Fail_Error;
+	public static String AbstractCsvDialog_File_Label;
+	public static String AbstractCsvDialog_FileFilter_All;
+	public static String AbstractCsvDialog_FileFilter_Csv;
 	public static String AbstractPropertyJHeaderDialog_ConfirmClose_DialogMessage;
 	public static String AbstractPropertyJHeaderDialog_ConfirmClose_DialogTitle;
 	public static String AbstractPropertyJHeaderDialog_ConfirmSave_DialogMessage;
