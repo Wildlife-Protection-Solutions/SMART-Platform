@@ -44,7 +44,11 @@ public class AdministrativePlanTarget extends PlanTarget{
 	public static final String TARGET_GUI_NAME = "Administrative";
 	
 	private String targetDesc;
+	private boolean targetCompleted;
 	
+	public AdministrativePlanTarget(){
+		this.targetCompleted = false;//always default to false
+	}
 
 	@Column(name = "description")
 	public String getTargetDesc() {
@@ -54,11 +58,20 @@ public class AdministrativePlanTarget extends PlanTarget{
 		this.targetDesc = targetDesc;
 	}
 	
+	@Column(name = "completed")
+	public boolean getTargetCompleted() {
+		return targetCompleted;
+	}
+	public void setTargetCompleted(boolean targetCompleted) {
+		this.targetCompleted = targetCompleted;
+	}
+	
 	@Override
 	public AdministrativePlanTarget clone() {
 		AdministrativePlanTarget n = new AdministrativePlanTarget();
 		super.clone(n);//method in Superclass, adds the shared values to n (name, category, plan)
 		n.targetDesc = this.targetDesc;
+		n.targetCompleted= this.targetCompleted;
 		return n;
 	}
 	
@@ -67,6 +80,13 @@ public class AdministrativePlanTarget extends PlanTarget{
 	public String getSummary() {
 		return "[Admin] " + this.getName();
 	}
-	
+	@Override
+	@Transient
+	public String getStatus() {
+		if(targetCompleted == true){
+			return "Completed";
+		}else{
+			return "Incomplete";
+		}
+	}
 }
-

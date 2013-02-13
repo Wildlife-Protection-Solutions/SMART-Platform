@@ -31,6 +31,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -52,6 +53,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 	
 	private Text targetDesc;
 	private Text targetName;
+	private Button targetIsComplete;
 	
 	private ControlDecoration cdTargetName;
 	
@@ -100,7 +102,16 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		targetDesc.setLayoutData(createGridDataWithIndent());
 		((GridData)targetDesc.getLayoutData()).widthHint = 100;
 		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
+
 		
+		Label lblt = new Label(center, SWT.NONE);
+		lblt.setText("Target has been achieved:");
+		lblt.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		targetIsComplete = new Button(center, SWT.CHECK);
+	//	targetIsComplete.setText("Target achieved");
+
+
 		KeyListener validate = new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -172,6 +183,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
 		this.targetName.setText(pt.getName());
 		this.targetDesc.setText(pt.getTargetDesc());
+		this.targetIsComplete.setSelection(pt.getTargetCompleted());
 		validate();
 	}
 	
@@ -191,7 +203,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		AdministrativePlanTarget target = (AdministrativePlanTarget)pt;
 		target.setName(getTargetName());
 		target.setTargetDesc(getTargetDesc());
-		
+		target.setTargetCompleted(targetIsComplete.getSelection());
 	}
 
 }
