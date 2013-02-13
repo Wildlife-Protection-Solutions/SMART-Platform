@@ -201,6 +201,19 @@ public class HibernateManager extends SmartHibernateManager{
 	}
 
 	/**
+	 * Gets all active employees for a given conservation area.
+	 * 
+	 * @param ca
+	 * @param s
+	 * @return
+	 */
+	public static List<Employee> getAllEmployees(ConservationArea ca, Session s){
+		@SuppressWarnings("unchecked")
+		List<Employee> results = s.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+		return results;
+	}
+	
+	/**
 	 * Opens a session and validates that no other users
 	 * for the given conservation area have the username.
 	 * 

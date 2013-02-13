@@ -23,29 +23,31 @@ package org.wcs.smart.export.config.impl;
 
 import java.text.MessageFormat;
 
+import org.wcs.smart.export.EmployeeCsvExporter;
 import org.wcs.smart.export.EmployeeCsvImporter;
-import org.wcs.smart.export.config.ICsvDataImporter;
+import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDialogConfig;
-import org.wcs.smart.export.config.ICsvImportDialogConfig;
-import org.wcs.smart.export.dialog.CsvImportDialog;
+import org.wcs.smart.export.config.ICsvExportDialogConfig;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
- * Configuration for current {@link CsvImportDialog} to import
- * employee into csv file
+ * Configuration for current {@link CsvExportDialog} to export
+ * employees into csv file
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public class EmployeeCsvImportConfig implements ICsvImportDialogConfig {
+public class EmployeeCsvExportConfig implements ICsvExportDialogConfig {
 
-	private EmployeeCsvImporter importer = new EmployeeCsvImporter();
-	
+	private EmployeeCsvExporter exporter = new EmployeeCsvExporter();
+
 	@Override
-	public ICsvDataImporter getImporter() {
-		return importer;
+	public ICsvDataExporter getExporter() {
+		return exporter;
 	}
-
+	
 	@Override
 	public boolean includeHasHeader() {
 		return true;
@@ -53,41 +55,42 @@ public class EmployeeCsvImportConfig implements ICsvImportDialogConfig {
 
 	@Override
 	public String getHasHeaderText() {
-		return Messages.ImportEmployeeDialog_IncludeHaderOp;
+		return Messages.ExportEmployeeDialog_IncludeHaderOp;
 	}
 
 	@Override
 	public String getInfo() {
-		return Messages.ImportEmployeeDialog_CSVFormat_1 + "\n" //$NON-NLS-1$
+		return Messages.ExportEmployeeDialog_CSVFormat_1
+				+ SmartUtils.LINE_SEPARATOR
 				+ MessageFormat.format(
-						Messages.ImportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
-				+ "\n\n" //$NON-NLS-1$
-				+ Messages.ImportEmployeeDialog_CSVFormat_3;
+						Messages.ExportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
+				+ SmartUtils.LINE_SEPARATOR
+				+ Messages.ExportEmployeeDialog_CSVFormat_3;
 	}
 
 	@Override
 	public String getTitle() {
-		return Messages.ImportEmployeeDialog_DialogTitle;
+		return Messages.ExportEmployeeDialog_DialogTitle;
 	}
 
 	@Override
 	public String getMessage() {
-		return Messages.ImportEmployeeDialog_DialogMessage;
+		return Messages.ExportEmployeeDialog_DialogMessage;
 	}
 
 	@Override
 	public String getSuccessMessage() {
-		return Messages.ImportEmployeeDialog_SuccessMessage;
+		return Messages.ExportEmployeeDialog_SuccessMessage;
 	}
 
 	@Override
 	public String getFailMessage() {
-		return Messages.ImportEmployeeDialog_FailureMessage;
+		return Messages.ExportEmployeeDialog_FailureMessage;
 	}
 
 	@Override
 	public String getActionButtonText() {
-		return ICsvDialogConfig.IMPORT_ACTION_TEXT;
+		return ICsvDialogConfig.EXPORT_ACTION_TEXT;
 	}
 
 }

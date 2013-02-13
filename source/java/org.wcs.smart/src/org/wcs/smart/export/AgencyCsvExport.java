@@ -66,7 +66,7 @@ public class AgencyCsvExport implements ICsvDataExporter {
 			ca = SmartDB.getCurrentConservationArea();
 			languages = ca.getLanguages();
 			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
-			List<Agency> agencies = getAgencies();
+			List<Agency> agencies = getAgencies(session);
 
 			// WriteHeaders
 			String[] agencyCols = createColumns(languages);
@@ -133,7 +133,7 @@ public class AgencyCsvExport implements ICsvDataExporter {
 
 	private int findcolumnIndex(Label lbl){
 		int i = 0;
-		for (Language lng : languages) {
+		for (Language lng : languages) { //TODO: fix!!!! index based on iteration over set!!!
 			if (lbl.getLanguage().getCode().equals(lng.getCode())){
 				return i;
 			}
@@ -149,10 +149,9 @@ public class AgencyCsvExport implements ICsvDataExporter {
 		return Collections.emptyList();
 	}
 
-	private List<Agency> getAgencies() {
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		return HibernateManager.getAgencies(ca, s);
+	private List<Agency> getAgencies(Session session) {
+		session.beginTransaction();
+		return HibernateManager.getAgencies(ca, session);
 	}
 
 }

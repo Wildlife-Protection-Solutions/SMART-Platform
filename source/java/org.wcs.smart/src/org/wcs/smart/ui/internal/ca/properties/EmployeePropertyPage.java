@@ -71,14 +71,14 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.export.config.impl.EmployeeCsvExportConfig;
 import org.wcs.smart.export.config.impl.EmployeeCsvImportConfig;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
-import org.wcs.smart.ui.internal.ca.ExportEmployeeDialog;
-import org.wcs.smart.ui.internal.ca.ImportEmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -250,8 +250,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				CsvImportDialog dialog = new CsvImportDialog(getShell(), new EmployeeCsvImportConfig());
-				ImportEmployeeDialog dialog = new ImportEmployeeDialog(getShell());
+				CsvImportDialog dialog = new CsvImportDialog(getShell(), new EmployeeCsvImportConfig());
+//				ImportEmployeeDialog dialog = new ImportEmployeeDialog(getShell());
 				int ret = dialog.open();
 				if (ret == IDialogConstants.CANCEL_ID){
 					return;
@@ -268,13 +268,14 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			@Override
 			public void widgetSelected(SelectionEvent e){
 //				ExportEmployeeDialog dialog = new ExportEmployeeDialog(getShell());
-				CsvImportDialog dialog = new CsvImportDialog(getShell(), new EmployeeCsvImportConfig());
-				int ret = dialog.open();
-				if (ret == IDialogConstants.CANCEL_ID){
-					return;
-				}else{
-					refreshEmployeeList();
-				}
+				CsvExportDialog dialog = new CsvExportDialog(getShell(), new EmployeeCsvExportConfig());
+				dialog.open();
+//				int ret = dialog.open();
+//				if (ret == IDialogConstants.CANCEL_ID){
+//					return;
+//				}else{
+//					refreshEmployeeList();
+//				}
 			}
 		});
 		
