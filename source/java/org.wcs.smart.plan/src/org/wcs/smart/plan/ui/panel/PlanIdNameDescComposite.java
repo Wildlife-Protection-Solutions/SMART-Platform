@@ -144,7 +144,9 @@ public class PlanIdNameDescComposite extends PlanComposite {
 		}else{
 			plan.setName(name.getText());
 		}
-		if (name.getText().trim().length() == 0){
+		if (description.getText().trim().length() == 0){
+			plan.setDescription(null);
+		}else{
 			plan.setDescription(description.getText());
 		}
         return true;
