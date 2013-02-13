@@ -64,7 +64,7 @@ public class EmployeeCsvExportConfig implements ICsvExportDialogConfig {
 				+ SmartUtils.LINE_SEPARATOR
 				+ MessageFormat.format(
 						Messages.ExportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
-				+ SmartUtils.LINE_SEPARATOR
+				+ SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR
 				+ Messages.ExportEmployeeDialog_CSVFormat_3;
 	}
 

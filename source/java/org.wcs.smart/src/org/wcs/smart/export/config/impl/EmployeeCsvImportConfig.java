@@ -29,6 +29,7 @@ import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.export.config.ICsvImportDialogConfig;
 import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Configuration for current {@link CsvImportDialog} to import
@@ -58,10 +59,11 @@ public class EmployeeCsvImportConfig implements ICsvImportDialogConfig {
 
 	@Override
 	public String getInfo() {
-		return Messages.ImportEmployeeDialog_CSVFormat_1 + "\n" //$NON-NLS-1$
+		return Messages.ImportEmployeeDialog_CSVFormat_1
+				+ SmartUtils.LINE_SEPARATOR
 				+ MessageFormat.format(
 						Messages.ImportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
-				+ "\n\n" //$NON-NLS-1$
+				+ SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR
 				+ Messages.ImportEmployeeDialog_CSVFormat_3;
 	}
 

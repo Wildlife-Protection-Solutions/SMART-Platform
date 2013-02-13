@@ -5,6 +5,8 @@ import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.export.dialog.CsvExportDialog;
+import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Configuration for current {@link CsvExportDialog} to export
@@ -29,32 +31,40 @@ public class AgencyCsvExportConfig implements ICsvExportDialogConfig {
 
 	@Override
 	public String getHasHeaderText() {
-		return "Include header";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getInfo() {
-		return "Agency and rank info";
+		return Messages.CsvConfig_Agency_Export_Info +
+				SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Export_Info_Content +
+				SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Example_Label +
+				SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Example_HeaderRow +
+				SmartUtils.LINE_SEPARATOR +
+				Messages.CsvConfig_Agency_Example_ContentRow;
 	}
 
 	@Override
 	public String getTitle() {
-		return "Export Agencies and Ranks";
+		return Messages.CsvConfig_Agency_Export_Title;
 	}
 
 	@Override
 	public String getMessage() {
-		return "Export Agencies and Ranks into csv file";
+		return Messages.CsvConfig_Agency_Export_Message;
 	}
 
 	@Override
 	public String getSuccessMessage() {
-		return "Agencies and Ranks successfully exported.";
+		return Messages.CsvConfig_Agency_Export_Success;
 	}
 
 	@Override
 	public String getFailMessage() {
-		return "Failed to export Agencies and Ranks.";
+		return Messages.CsvConfig_Agency_Export_Fail;
 	}
 
 	@Override
