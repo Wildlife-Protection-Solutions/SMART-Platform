@@ -130,7 +130,7 @@ public abstract class PlanTarget{
 
 
 	/**
-	 * Clone the give plan tagart.
+	 * Clone the give plan target.
 	 */
 	public abstract PlanTarget clone();
 	
@@ -148,5 +148,10 @@ public abstract class PlanTarget{
 		pt.plan = this.plan;
 		return pt;
 	}
+
+	// Returns a string that returns the status of the target, something like: Completed, in-progress, 55% Complete, incomplete, depending on 
+	//what makes sense for that target subclass.
+	@Transient
+	public abstract String getStatus();
 	
 }

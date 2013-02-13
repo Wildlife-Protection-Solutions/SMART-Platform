@@ -56,6 +56,7 @@ CREATE TABLE smart.plan_target
 	type VARCHAR(32),
 	plan_uuid CHAR(16) FOR BIT DATA NOT NULL,
 	category varchar(16) NOT NULL,
+	completed boolean,
 	PRIMARY KEY (UUID)
 );
 

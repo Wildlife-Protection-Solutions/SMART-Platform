@@ -26,9 +26,13 @@ import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -55,6 +59,8 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.targets.TargetListViewer;
+import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
+import org.wcs.smart.plan.ui.targets.TargetPropertyPage;
 
 /**
  * The Plan Editor
@@ -84,7 +90,7 @@ public class PlanEditor extends EditorPart {
 	private Text txtDescription;
 	private Text txtStartDate;
 	private Text txtEndDate;
-	private TargetListViewer targetList;
+	private TargetProgressViewer targetList;
 
 	/**
 	 * listener for plan change events.
@@ -262,9 +268,26 @@ public class PlanEditor extends EditorPart {
 		lbl4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
 		
 		toolkit.createLabel(content, "Plan Targets:");
-		targetList  = new TargetListViewer(content);
-		createEditLink(toolkit, content, PanelType.TARGETS); 
+		targetList  = new TargetProgressViewer(content);
 
+		
+		Composite targetButtons = toolkit.createComposite(content, SWT.NONE);
+		targetButtons.setLayout(new GridLayout(1, false));
+		targetButtons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+		
+		createEditLink(toolkit, targetButtons, PanelType.TARGETS); 
+
+		Button btnRefresh = new Button(targetButtons, SWT.NONE);
+		btnRefresh.setText("Refresh");
+		btnRefresh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				initValues();
+			}
+			
+		});
+		
 		initValues();
 	}
 

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
@@ -237,5 +240,126 @@ public class PlanHibernateManager{
 		}
 		return plan;
 	}
+	
+
+	/**
+	 * Returns the value of the target type for all patrols associated with this
+	 * one plan. Does not recurse through the plan tree, that is done in the
+	 * plantarget classes such as NumericPlanTarget.
+	 * 
+	 * @param type
+	 *            the variable we are interested in, distance, patrol days,
+	 *            etc...
+	 * @param plan
+	 *            the plan we are querying
+	 * 
+	 * @return the total calculated value from all associated patrols.
+	 */
+
+
+	public static Double getTargetTotalValue(TargetType type, Plan plan) {
+		Double targetTotal;
+		StringBuilder sql = new StringBuilder();
+		targetTotal = 0.0;
 		
+		if (type == TargetType.DISTANCE) {
+			sql.append(" SELECT "); //$NON-NLS-1$
+			sql.append(" sum(t.distance) "); //$NON-NLS-1$
+			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
+			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
+			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
+			sql.append(" JOIN pld.tracks as t"); //$NON-NLS-1$
+			sql.append(" WHERE pp.id.plan  =:uuid ");
+
+			Session session = HibernateManager.openSession();
+			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			q.setParameter("uuid", plan); //$NON-NLS-1$
+
+			List rs = q.list();
+			targetTotal = (Double)rs.get(0);
+
+		}else if (type == TargetType.PATROL_DAYS) {
+			sql.append(" SELECT "); //$NON-NLS-1$
+			sql.append(" p.endDate, p.startDate "); //$NON-NLS-1$
+			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
+			sql.append(" JOIN pp.id.patrol p"); //$NON-NLS-1$
+			sql.append(" WHERE pp.id.plan  =:uuid ");
+
+			Session session = HibernateManager.openSession();
+			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			q.setParameter("uuid", plan); //$NON-NLS-1$
+
+			List list = q.list();
+
+			Iterator it = list.iterator();
+			if(it.hasNext()){
+		        while(it.hasNext()){
+		          Object[] row = (Object[])it.next();
+		          Timestamp t1 = (Timestamp)row[0];
+		          Timestamp t2 = (Timestamp)row[1];
+		          Long milDiff = t1.getTime() - t2.getTime();
+		          targetTotal += Math.round(milDiff / 1000 /60 /60 / 24) + 1; 
+		        }
+		     }
+		}else if (type == TargetType.PATROL_HOURS) {
+			sql.append(" SELECT "); //$NON-NLS-1$
+			sql.append(" pld.endTime, pld.startTime "); //$NON-NLS-1$
+			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
+			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
+			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
+			sql.append(" WHERE pp.id.plan  =:uuid ");
+			
+			Session session = HibernateManager.openSession();
+			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			q.setParameter("uuid", plan); //$NON-NLS-1$
+
+			List list = q.list();
+
+			Iterator it = list.iterator();
+			if(it.hasNext()){
+		        while(it.hasNext()){
+		          Object[] row = (Object[])it.next();
+		          Time t1 = (Time)row[0];
+		          Time t2 = (Time)row[1];
+		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
+		          targetTotal += Math.round(milDiff / 1000 /60 / 60); 
+		        }
+		    }
+
+		}else if (type == TargetType.PATROL_MANHOURS) {
+			sql.append(" SELECT "); //$NON-NLS-1$
+			sql.append(" pld.endTime, pld.startTime, m.isLeader "); //$NON-NLS-1$
+			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
+			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
+			sql.append(" JOIN pl.members m"); //$NON-NLS-1$
+			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
+			sql.append(" WHERE pp.id.plan  =:uuid ");
+			
+			Session session = HibernateManager.openSession();
+			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			q.setParameter("uuid", plan); //$NON-NLS-1$
+
+			List list = q.list();
+
+			Iterator it = list.iterator();
+			if(it.hasNext()){
+		        while(it.hasNext()){
+		          Object[] row = (Object[])it.next();
+		          Time t1 = (Time)row[0];
+		          Time t2 = (Time)row[1];
+		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
+		          targetTotal += Math.round(milDiff / 1000 /60 / 60); 
+		        }
+		    }
+
+		} else {
+			return 1.0;
+		}
+
+
+
+		if(targetTotal== null)targetTotal = 0.0;
+		return targetTotal;
+
+	}
 }

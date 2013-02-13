@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Transient;
+import java.util.List;
+import org.wcs.smart.plan.PlanHibernateManager;
 
 /**
  * Represents a NumericPlanTarget object
@@ -32,6 +34,10 @@ public class NumericPlanTarget extends PlanTarget {
 		private TargetType(String guiName){
 			this.guiName = guiName;
 		}
+		public String getName(){
+			return guiName;
+		}
+		
 	}
 	
 	/*
@@ -97,5 +103,47 @@ public class NumericPlanTarget extends PlanTarget {
 		return n;
 	}
 
+	@Override
+	@Transient
+	public String getStatus() {
+		
+		Double total = calculateTargetStatusValue(this.getPlan());
+
+		if(op == Operator.EQUAL){
+			if(total == value){
+				return "Target Completed(" + total + ")";
+			}else{
+				return "Incomplete ("+ total + ")";
+			}
+		}else if(op == Operator.GREATER){
+			if(total > value){
+				return "Target Completed (" + total + ")";
+			}else{
+				return "Incomplete ("+ total + ")";
+			}
+		}else if(op == Operator.LESS){
+			if(total < value){
+				return "Target Completed (" + total + ")";
+			}else{
+				return "Target Missed(" + total + ")";
+			}
+		}else if(op == Operator.NOEQUAL){
+			if(total != value){
+				return "Target Completed (" + total + ")";
+			}else{
+				return "Incomplete (" + total + ")";
+			}
+		}
+		return "Unsupported Target Type";
+	}
+
+	private Double calculateTargetStatusValue(Plan plan){
+		List<Plan> children = plan.getChildren();
+		Double total = PlanHibernateManager.getTargetTotalValue(this.type, plan);
+		for (Plan p : children){
+			total += calculateTargetStatusValue(p);
+		}
+		return total;
+	}
 
 }

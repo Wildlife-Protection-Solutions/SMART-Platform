@@ -27,8 +27,10 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -43,6 +45,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
+import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
 import org.wcs.smart.util.SmartUtils;
@@ -66,7 +69,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	
 	private ControlDecoration cdTargetValue;
 	private ControlDecoration cdTargetName;
-	
+	private PlanTarget planTarget;
 	
 	/**
 	 * Creates new editor page
@@ -93,14 +96,6 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 	
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Target Name:");
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
-		targetName.setTextLimit(PlanTarget.MAX_NAME_LENGTH);
-		targetName.setLayoutData(createGridDataWithIndent());
-		
 		Label lbl2 = new Label(center, SWT.NONE);
 		lbl2.setText("Target Type:");
 		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -115,7 +110,17 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		});
 		targetType.setInput(NumericPlanTarget.TargetType.values());
 		targetType.setSelection(new StructuredSelection(NumericPlanTarget.TargetType.DISTANCE));
-		
+
+		targetType.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if(planTarget == null || planTarget.getName() == null || planTarget.getName() == ""){
+					targetName.setText( getTargetType().getName() );
+				}
+				
+			}
+		});
 		
 		Label lbl3 = new Label(center, SWT.NONE);
 		lbl3.setText("Operator:");
@@ -140,7 +145,16 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetValue.setTextLimit(32);
 		targetValue.setLayoutData(createGridDataWithIndent());
 		
-		
+
+		Label lbl = new Label(center, SWT.NONE);
+		lbl.setText("Target Name:");
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
+		targetName.setTextLimit(32);
+
+		targetName.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
+		targetName.setText( getTargetType().getName() );
 		
 		KeyListener validate = new KeyAdapter() {
 			@Override
@@ -278,7 +292,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
 		this.targetType.setSelection(new StructuredSelection(pt.getType()));
 		this.targetValue.setText(pt.getValue().toString());
-		
+		this.planTarget = p;
 		validate();
 	}
 	
