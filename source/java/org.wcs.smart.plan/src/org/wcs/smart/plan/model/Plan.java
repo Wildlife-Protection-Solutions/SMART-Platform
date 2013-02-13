@@ -59,6 +59,9 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
 @Table(name="smart.plan")
 public class Plan {
 
+	public static final int MAX_ID_LENGTH = 32;
+	public static final int MAX_DESC_LENGTH = 256;
+	
 	/**
 	 * Various plan types
 	 * 

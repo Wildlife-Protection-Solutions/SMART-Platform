@@ -38,7 +38,9 @@ import javax.persistence.Transient;
 @Entity
 @DiscriminatorValue("ADMINISTRATIVE")
 public class AdministrativePlanTarget extends PlanTarget{
-
+	
+	public static final int MAX_DESC_LENGTH = 256;
+	
 	public static final String TARGET_GUI_NAME = "Administrative";
 	
 	private String targetDesc;

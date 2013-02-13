@@ -49,7 +49,7 @@ public class PlanCompositeFactory {
 		case STARTDATE:    return new PlanDatesComposite(parent, style);
 		case ENDDATE:    return new PlanDatesComposite(parent, style);
 		case TARGETS:    return new PlanTargetComposite(parent, style);
-		case PLANID:    return new PlanIdNameDescComposite(parent, style, true);
+		case PLANID:    return new PlanIdNameDescComposite(parent, style);
 		case TYPE:    return new PlanTypeEmployeesComposite(parent, style);
 		case STATION:    return new PlanStationTeamComposite(parent, style);
 		case PLANPARENTID:    return new PlanParentIdComposite(parent, style);
