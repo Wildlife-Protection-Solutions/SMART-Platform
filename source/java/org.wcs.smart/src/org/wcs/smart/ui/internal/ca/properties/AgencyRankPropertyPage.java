@@ -250,7 +250,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		tblAgencies.refresh();
 		Button btnExport = new Button(container, SWT.NONE);
-		btnExport.setText("Export");
+		btnExport.setText(Messages.AgencyRankPropertyPage_Button_Export);
 		btnExport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -259,25 +259,13 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		Button btnImport = new Button(container, SWT.NONE);
-		btnImport.setText("Import");
+		btnImport.setText(Messages.AgencyRankPropertyPage_Button_Import);
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				CsvImportDialog dialog = new CsvImportDialog(getShell(), new AgencyCsvImportConfig());
 				dialog.open();
-//				AgencyCsvExport agencyExporter;
-//				try {
-//					agencyExporter = new AgencyCsvExport();
-//					if (agencyExporter.export()==true){
-//						 System.out.println("true");
-//					 }else{
-//						 System.out.println("false");
-//					 }
-//				} catch (Exception e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-				 
+				//TODO: refresh after import
 			}
 		});
 		setMessage(Messages.AgencyRankPropertyPage_DialogMessage);
