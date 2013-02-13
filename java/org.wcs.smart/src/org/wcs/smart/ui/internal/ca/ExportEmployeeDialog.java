@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.in.EmployeeCsvImporter;
+import org.wcs.smart.export.EmployeeCsvImporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;

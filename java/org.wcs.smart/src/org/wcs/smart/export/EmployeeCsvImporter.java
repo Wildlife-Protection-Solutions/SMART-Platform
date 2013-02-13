@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ca.in;
+package org.wcs.smart.export;
 
 import java.io.File;
 import java.io.FileReader;
