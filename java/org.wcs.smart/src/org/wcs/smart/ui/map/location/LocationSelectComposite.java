@@ -45,6 +45,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -141,6 +143,12 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 
 		xCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
 		xCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		xCoordText.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				updateAddButtonState();
+			}
+		});
 
 		Label yLabel = new Label(coordsComposite, SWT.NONE);
 		yLabel.setText(Messages.LocationSelectComposite_Y_Label);
@@ -148,6 +156,12 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 
 		yCoordText = new Text(coordsComposite, SWT.BORDER | SWT.LEFT);
 		yCoordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		yCoordText.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				updateAddButtonState();
+			}
+		});
 		
 		//========buttons part part========
 		Composite buttonsComposite = new Composite(pointsComposite, SWT.NONE);
@@ -157,6 +171,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		addButton = new Button(buttonsComposite, SWT.PUSH);
 		addButton.setText(DialogConstants.ADD_BUTTON_TEXT);
 		addButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		addButton.setEnabled(false);
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -303,6 +318,12 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		points.clear();
 		points.addAll(pointList);
 		updateMapConposite();
+	}
+
+	private void updateAddButtonState() {
+		String x = xCoordText.getText();
+		String y = yCoordText.getText();
+		addButton.setEnabled(x != null && !x.isEmpty() && y != null && !y.isEmpty());
 	}
 	
 	private void updateMapConposite() {
