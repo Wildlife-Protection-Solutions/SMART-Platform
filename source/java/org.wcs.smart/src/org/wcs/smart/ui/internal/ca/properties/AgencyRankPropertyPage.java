@@ -27,6 +27,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellEditor;
@@ -249,6 +250,23 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		enableRank(false);
 		
 		tblAgencies.refresh();
+		Button btnImport = new Button(container, SWT.NONE);
+		btnImport.setText(Messages.AgencyRankPropertyPage_Button_Import);
+		btnImport.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CsvImportDialog dialog = new CsvImportDialog(getShell(), new AgencyCsvImportConfig());
+				int ret = dialog.open();
+				if (ret == IDialogConstants.CANCEL_ID) {
+					return;
+				} else {
+					resetAgencyList();
+					tblAgencies.setInput(agencies);
+					tblAgencies.refresh();
+					tblRank.refresh();
+				}
+			}
+		});
 		Button btnExport = new Button(container, SWT.NONE);
 		btnExport.setText(Messages.AgencyRankPropertyPage_Button_Export);
 		btnExport.addSelectionListener(new SelectionAdapter(){
@@ -258,18 +276,15 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				dialog.open();
 			}
 		});
-		Button btnImport = new Button(container, SWT.NONE);
-		btnImport.setText(Messages.AgencyRankPropertyPage_Button_Import);
-		btnImport.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				CsvImportDialog dialog = new CsvImportDialog(getShell(), new AgencyCsvImportConfig());
-				dialog.open();
-				//TODO: refresh after import
-			}
-		});
 		setMessage(Messages.AgencyRankPropertyPage_DialogMessage);
 		return container;
+	}
+
+	private void resetAgencyList() {
+		Session s = getSession();
+		s.beginTransaction();
+		agencies = new WritableList(HibernateManager.getAgencies(ca, s), Agency.class);
+		s.getTransaction().rollback();
 	}
 	
 	/**
@@ -393,10 +408,11 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		tableViewer.setContentProvider(new ObservableListContentProvider());
 		
-		Session s = getSession();
-		s.beginTransaction();
-		agencies = new WritableList(HibernateManager.getAgencies(ca, s), Agency.class);
-		s.getTransaction().rollback();
+//		Session s = getSession();
+//		s.beginTransaction();
+//		agencies = new WritableList(HibernateManager.getAgencies(ca, s), Agency.class);
+//		s.getTransaction().rollback();
+		resetAgencyList();
 		
 		tableViewer.setInput(agencies);
 		
