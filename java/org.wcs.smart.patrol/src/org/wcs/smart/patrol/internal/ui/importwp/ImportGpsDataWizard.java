@@ -39,7 +39,6 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.Messages;
@@ -64,7 +63,6 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	
 	private boolean completedOK = false;
 	private boolean canFinish = false;
-	private Session session = null;
 	private Date currentDay;
 	
 	//a track or a list of waypoints

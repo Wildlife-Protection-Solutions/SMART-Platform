@@ -46,7 +46,6 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.Team;
 
 /**
  * Patrol Item composite for selecting patrol station.
