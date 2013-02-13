@@ -61,6 +61,7 @@ import org.wcs.smart.plan.ui.editor.EditPlanItemDialog;
 import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
+import org.wcs.smart.plan.ui.perspective.PlanPerspective;
 
 /**
  * Contribution item for the patrol editor.
@@ -157,44 +158,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			edit.addHyperlinkListener(new HyperlinkAdapter(){
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					EditPlanItemDialog dialog = new EditPlanItemDialog(main.getShell(), PanelType.PATROLPLAN, currentPlan){
-						@Override
-						protected boolean performSave() {
-							Plan newPlan = null;
-							Session s = HibernateManager.openSession();
-							s.beginTransaction();
-							try{
-								String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol";
-								Query q = s.createQuery(hql).setParameter("patrol", currentPatrol);
-								q.executeUpdate();
-								byte[] planuuid = ((PatrolPlanComposite)content).getSelection();
-								if (planuuid != null){
-									PatrolPlan pp = new PatrolPlan();
-									pp.setPatrol(currentPatrol);
-									newPlan = (Plan)s.get(Plan.class, planuuid);
-									Plan parent = newPlan.getParent();
-									while(parent != null){
-										parent = parent.getParent();
-									}
-									pp.setPlan(newPlan);
-									s.save(pp);
-								}
-								s.getTransaction().commit();
-								currentPlan = newPlan;
-								setChangesMade(false);
-								return true;
-							}catch (Exception ex){
-								s.getTransaction().rollback();
-								SmartPlanPlugIn.displayLog("Could not save changes to patrol plan. " + ex.getLocalizedMessage(), ex);
-								return false;
-							}finally{
-								s.close();
-							}
-						
-						}
-					};
-					dialog.open();
-					initContent();
+					editPlan();
 				}
 			});
 		}
@@ -214,6 +178,47 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 		return outer;
 	}
 
+	private void editPlan(){
+		EditPlanItemDialog dialog = new EditPlanItemDialog(main.getShell(), PanelType.PATROLPLAN, currentPlan){
+			@Override
+			protected boolean performSave() {
+				Plan newPlan = null;
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try{
+					String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol";
+					Query q = s.createQuery(hql).setParameter("patrol", currentPatrol);
+					q.executeUpdate();
+					byte[] planuuid = ((PatrolPlanComposite)content).getSelection();
+					if (planuuid != null){
+						PatrolPlan pp = new PatrolPlan();
+						pp.setPatrol(currentPatrol);
+						newPlan = (Plan)s.get(Plan.class, planuuid);
+						Plan parent = newPlan.getParent();
+						while(parent != null){
+							parent = parent.getParent();
+						}
+						pp.setPlan(newPlan);
+						s.save(pp);
+					}
+					s.getTransaction().commit();
+					currentPlan = newPlan;
+					setChangesMade(false);
+					return true;
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					SmartPlanPlugIn.displayLog("Could not save changes to patrol plan. " + ex.getLocalizedMessage(), ex);
+					return false;
+				}finally{
+					s.close();
+				}
+			
+			}
+		};
+		dialog.open();
+		initContent();
+	}
+	
 	@Override
 	public void setPatrol(Patrol patrol) {
 		this.currentPatrol = patrol;
@@ -243,6 +248,23 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 
 	}
 
+	private void openPlan(){
+		// TODO Auto-generated method stub
+		PlanEditorInput in = new PlanEditorInput(currentPlan
+				.getUuid(), currentPlan.getLabel(), currentPlan
+				.getType());
+		try {
+			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, 
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+					.getActivePage().openEditor(in, PlanEditor.ID);
+		} catch (Exception e1) {
+			SmartPlanPlugIn.displayLog(
+					"Could not open plan. "
+							+ e1.getLocalizedMessage(), e1);
+		}
+	}
+	
 	private void initContent() {
 		for (Control child : main.getChildren()) {
 			child.dispose();
@@ -263,18 +285,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			lnk.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					// TODO Auto-generated method stub
-					PlanEditorInput in = new PlanEditorInput(currentPlan
-							.getUuid(), currentPlan.getLabel(), currentPlan
-							.getType());
-					try {
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-								.getActivePage().openEditor(in, PlanEditor.ID);
-					} catch (PartInitException e1) {
-						SmartPlanPlugIn.displayLog(
-								"Could not open plan. "
-										+ e1.getLocalizedMessage(), e1);
-					}
+					openPlan();
 				}
 			});
 

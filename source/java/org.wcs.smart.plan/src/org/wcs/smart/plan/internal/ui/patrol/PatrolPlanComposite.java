@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.internal.ui.patrol;
 
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -52,7 +54,7 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 	private PlanViewer pv;
 	
 	private LoadPlanJob updateJob;
-
+	
 	public PatrolPlanComposite(Composite parent, int style) {
 		super(parent, style);
 		setMessage("Set the plan associated with this patrol.");
@@ -76,13 +78,7 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 		});
 		pv = new PlanViewer(this);
 		pv.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		pv.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				fireInputChangeListeners();
-			}
-		});
+		
 		updateJob = new LoadPlanJob(pv, currentFilter, true);
 		updateJob.schedule();
 		
@@ -115,8 +111,17 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 	@Override
 	public void initFromModel(Plan plan) {
 		if (plan != null){
-			pv.setSelection(new PlanEditorInput(plan.getUuid(), plan.getLabel(), plan.getType()));
-			updateJob.setDefaultSelection(new PlanEditorInput(plan.getUuid(), plan.getLabel(), plan.getType()));
+			final PlanEditorInput defaultInput = new PlanEditorInput(plan.getUuid(), plan.getLabel(), plan.getType());
+			updateJob.setDefaultSelection(defaultInput);
+			pv.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (pv.getSelectedPlan() == null || !pv.getSelectedPlan().equals(defaultInput)){
+						fireInputChangeListeners();
+					}
+					
+				}
+			});
 		}
 	}
 
