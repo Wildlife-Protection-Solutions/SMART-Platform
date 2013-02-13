@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.editor;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -91,7 +92,12 @@ public class PlanEditor extends EditorPart {
 	private IPlanEventListener planListener = new IPlanEventListener(){
 		@Override
 		public void eventFired(int type, Plan source) {
-			initValues();
+			if (Arrays.equals(source.getUuid(), getPlan().getUuid())){
+				//if this is our plan we want to update our object
+				//with the new one.
+				plan = source;
+				initValues();
+			}
 		}
 	};
 
@@ -315,33 +321,44 @@ public class PlanEditor extends EditorPart {
 		}
 		
 	}
-
-	public Plan getPlan(){
+	/**
+	 * 
+	 * @return the current plan associated with the editor
+	 */
+	private Plan getPlan(){
 		if (plan == null){
-			byte[] puuid = ((PlanEditorInput) getEditorInput()).getUuid();
-			Session session = HibernateManager.openSession();
-			//load parent plan so don't have lazy loading issues later.
-			session.beginTransaction();
-			plan = (Plan) session.load(Plan.class, puuid);
-			if (plan.getParent() != null) {
-				plan.getParent().getId();
-			}
-			plan.getTargets().size();
-			Station st = plan.getStation();
-			if(st != null){
-				st.getName();
-			}
-			plan.getTeam();
-			Team t = plan.getTeam();
-			if(t != null){
-				t.getName();
-			}
-			session.getTransaction().rollback();
-			session.close();
+			plan = loadPlan();
 		}
 		return plan;
 	}
 
+	/*
+	 * loads the plan and all lazy fields from the database.
+	 * Will always get a new object.
+	 */
+	private Plan loadPlan(){
+		byte[] puuid = ((PlanEditorInput) getEditorInput()).getUuid();
+		Session session = HibernateManager.openSession();
+		//load parent plan so don't have lazy loading issues later.
+		session.beginTransaction();
+		plan = (Plan) session.load(Plan.class, puuid);
+		if (plan.getParent() != null) {
+			plan.getParent().getId();
+		}
+		plan.getTargets().size();
+		Station st = plan.getStation();
+		if(st != null){
+			st.getName();
+		}
+		plan.getTeam();
+		Team t = plan.getTeam();
+		if(t != null){
+			t.getName();
+		}
+		session.getTransaction().rollback();
+		session.close();
+		return plan;
+	}
 	/**
 	 * Creates an edit hyperlink button
 	 * @param tolkit toolkit
@@ -384,17 +401,18 @@ public class PlanEditor extends EditorPart {
 		
 		int ret = -1;
 		try {
-			final EditPlanItemDialog editDialog = new EditPlanItemDialog(getEditorSite().getShell(), panelType, getPlan());
+			//get a copy to edit incase something goes wrong
+			Plan copy = loadPlan();
+			final EditPlanItemDialog editDialog = new EditPlanItemDialog(
+					getEditorSite().getShell(), 
+					panelType, copy);
+			
 			ret = editDialog.open();
 		} finally {
 			
 		}
 		
 		if (ret == IDialogConstants.OK_ID){
-//			PatrolEventManager.getInstance().patrolChanged(comp.getAttribute(), editor.getPatrol());
-//			this.initValues();
-//			
-			
 			return true;
 		}
 		return false;

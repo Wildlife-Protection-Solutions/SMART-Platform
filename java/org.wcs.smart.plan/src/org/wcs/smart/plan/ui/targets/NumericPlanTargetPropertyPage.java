@@ -81,6 +81,12 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		return NumericPlanTarget.TARGET_GUI_NAME;
 	}
 	
+	private GridData createGridDataWithIndent(){
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalIndent = 8;
+		return gd;
+	}
+	
 	@Override
 	public Composite createComponent(Composite parent, int style) {
 		Composite center = new Composite(parent, SWT.NONE);
@@ -92,16 +98,15 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
-		targetName.setTextLimit(32);
-
-		targetName.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
+		targetName.setTextLimit(PlanTarget.MAX_NAME_LENGTH);
+		targetName.setLayoutData(createGridDataWithIndent());
 		
 		Label lbl2 = new Label(center, SWT.NONE);
 		lbl2.setText("Target Type:");
 		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		targetType= new ComboViewer(center, SWT.READ_ONLY);
-		targetType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		targetType.getControl().setLayoutData(createGridDataWithIndent());
 		targetType.setContentProvider(ArrayContentProvider.getInstance());
 		targetType.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -117,7 +122,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		lbl3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		targetOp= new ComboViewer(center, SWT.READ_ONLY);
-		targetOp.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		targetOp.getControl().setLayoutData(createGridDataWithIndent());
 		targetOp.setContentProvider(ArrayContentProvider.getInstance());
 		targetOp.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -133,7 +138,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 
 		targetValue = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetValue.setTextLimit(32);
-		targetValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		targetValue.setLayoutData(createGridDataWithIndent());
 		
 		
 		
@@ -173,7 +178,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		if (targetName.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(targetName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
 			cdTargetName.show();
-			cdTargetName.setDescriptionText("Name cannot be empty or use the following characters: " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX);
+			cdTargetName.setDescriptionText("Name cannot be empty and must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}else{
 			cdTargetName.hide();

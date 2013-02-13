@@ -52,17 +52,16 @@ public class PlanIdNameDescComposite extends PlanComposite {
     private Text description;
 
     private ControlDecoration idDecoration;
-    private boolean isAlreadySaved; //tells us whether we should expect to see 0 or 1 of this plan.id in teh DB already when checking for duplicate names
+    private Plan currentPlan;
     
 	/**
 	 * @param parent
 	 * @param style
 	 */
-	public PlanIdNameDescComposite(Composite parent, int style, boolean isAlreadySaved) {
+	public PlanIdNameDescComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Edit Plan Id");
+		setMessage("Edit Plan Id, Name, and Description");
 		createControls();
-		this.isAlreadySaved = isAlreadySaved;
 	}
 
 	private void createControls() {
@@ -74,7 +73,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
         idLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         id = new Text(this, SWT.BORDER | SWT.LEFT);
-        id.setTextLimit(32);
+        id.setTextLimit(Plan.MAX_ID_LENGTH);
 
         id.addModifyListener(new ModifyListener() {
 			@Override
@@ -118,8 +117,10 @@ public class PlanIdNameDescComposite extends PlanComposite {
         description = new Text(this, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
         gd.heightHint = 80;
+        gd.widthHint = 100;
         gd.horizontalIndent = 8;
-
+        description.setTextLimit(Plan.MAX_DESC_LENGTH);
+        
         description.setLayoutData(gd);
         description.addModifyListener(new ModifyListener() {
 			@Override
@@ -154,6 +155,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 
 	@Override
 	public void initFromModel(Plan plan) {
+		this.currentPlan = plan;
 		if(plan.getName() != null){
 			name.setText(plan.getName());
 		}
@@ -175,18 +177,15 @@ public class PlanIdNameDescComposite extends PlanComposite {
 				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
 				32, 2);
 
-		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), isAlreadySaved)){
+		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), currentPlan.getUuid())){
 			idDecoration.show();
 			idDecoration.setDescriptionText("Plan Id is already in the database, choose a unique ID");
-//			setPageComplete(false);
 			return false;
 		}else if(id.getText() == null || !idIsSimple){
 			idDecoration.show();
 			idDecoration.setDescriptionText("Plan ID Cannot contain characters other than a-Z 0-9 _ : & ' and spaces");
-//			setPageComplete(false);
 			return false;
 		}else{
-//			setPageComplete(true);
 		}
     	return true;
 	}

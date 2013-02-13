@@ -70,6 +70,12 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		return AdministrativePlanTarget.TARGET_GUI_NAME;
 	}
 	
+	private GridData createGridDataWithIndent(){
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalIndent = 8;
+		return gd;
+	}
+	
 	@Override
 	public Composite createComponent(Composite parent, int style) {
 		Composite center = new Composite(parent, SWT.NONE);
@@ -80,19 +86,21 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		lbl.setText("Target Name:");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
-		targetName.setTextLimit(32);
-		targetName.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
+		targetName = new Text(center, SWT.BORDER );
+		targetName.setTextLimit(PlanTarget.MAX_NAME_LENGTH);
+		targetName.setLayoutData( createGridDataWithIndent());
+		
 		
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText("Target Description:");
 		lbl4.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 
-		targetDesc= new Text(center, SWT.BORDER | SWT.LEFT);
-		targetDesc.setTextLimit(2048);
-		targetDesc.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
+		targetDesc= new Text(center, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
+		targetDesc.setTextLimit(AdministrativePlanTarget.MAX_DESC_LENGTH);
+		targetDesc.setLayoutData(createGridDataWithIndent());
+		((GridData)targetDesc.getLayoutData()).widthHint = 100;
+		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
 		
-
 		KeyListener validate = new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -127,7 +135,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		if (targetName.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(targetName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
 			cdTargetName.show();
-			cdTargetName.setDescriptionText("Name cannot be empty or use the following characters: " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX);
+			cdTargetName.setDescriptionText("Name cannot be empty and must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}else{
 			cdTargetName.hide();

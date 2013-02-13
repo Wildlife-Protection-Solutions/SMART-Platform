@@ -29,8 +29,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projection;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
@@ -181,43 +184,35 @@ public class PlanHibernateManager{
 	}
 	
 	//the 3rd paremeter indicates that the plan is saved and in the database already, so we will definitely get 1-duplicate
-	public static boolean isDuplicatePlanId(Session s, String id, boolean isSaved) {
-		int count = numberPlanId(s, id);
-		if(isSaved){
-			if (count > 1) {
-				return true;
-			}
-		}else{
-			if (count > 0) {
-				return true;
-			}
+	/**
+	 * Determines if the given id is already used in the database.
+	 * @param s current session
+	 * @param id the id to check
+	 * @param excludePlanUuid the plan uuid to exclude when checking for duplicates, <code>null</code>
+	 * if no plans to be excluded.
+	 * 
+	 * @return
+	 */
+	public static boolean isDuplicatePlanId(Session s, String id, byte[] excludePlanUuid) {
+		Criteria c = s.createCriteria(Plan.class).add(Restrictions.eq("id", id));
+		if (excludePlanUuid != null){
+			c.add(Restrictions.ne("uuid", excludePlanUuid));
 		}
-		return false;
-	}
-	public static boolean isDuplicatePlanId(Session s, String id) {
-		int count = numberPlanId(s, id);
-		if (count > 0) {
+		c.setProjection(Projections.rowCount());
+		Long cnt = (Long)c.list().get(0);
+		if (cnt == 0){
+			return false;
+		}else{
 			return true;
 		}
-		return false;
 	}
 	
-	private static int numberPlanId(Session s, String id){
-		int count =99;
-		s.beginTransaction();
-		try {
-			Query q = s
-					.createQuery("SELECT count(*) FROM Plan WHERE id = '" + id + "'");
 
-			count = Integer.parseInt(q.list().get(0).toString());
-
-		}finally{
-			s.getTransaction().rollback();
-		}
-		return count;
-	}
-
-
+	/**
+	 * Deletes the plan with the given uuid
+	 * @param uuid
+	 * @return the deleted plan
+	 */
 	public static Plan deletePlan(byte[] uuid) {
 		Session session = HibernateManager.openSession();
 		Plan plan = null;

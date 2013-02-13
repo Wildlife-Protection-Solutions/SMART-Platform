@@ -51,6 +51,8 @@ import org.hibernate.annotations.GenericGenerator;
 @DiscriminatorColumn(name="Category" , discriminatorType=DiscriminatorType.STRING)
 public abstract class PlanTarget{
 
+	public static final int MAX_NAME_LENGTH = 32;
+	
 
 	private String name;
 	private PlanTarget.TargetCategory cat;
