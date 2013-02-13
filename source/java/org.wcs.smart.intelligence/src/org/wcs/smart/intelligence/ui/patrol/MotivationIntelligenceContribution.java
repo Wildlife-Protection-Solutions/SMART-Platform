@@ -23,7 +23,11 @@ package org.wcs.smart.intelligence.ui.patrol;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -34,18 +38,24 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.IntelligencePerspective;
+import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
+import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 
@@ -85,7 +95,7 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 
 	@Override
 	public Composite createControl(FormToolkit toolkit, Composite parent, boolean canEdit) {
-		main = toolkit.createComposite(parent);
+		main = toolkit.createComposite(parent, SWT.NONE);
 		main.setLayout(new GridLayout((canEdit?2:1), false));
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
@@ -99,7 +109,12 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setLabelProvider(new IntelligenceLabelProvider());
 		reportedTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		
+		tableViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				openCurrentItem();
+			}
+		});
 
 		//listeners
 		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
@@ -131,12 +146,16 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		if (intelligenceList.isEmpty()) {
 			label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
 			tableViewer.getControl().setVisible(false);
+			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 0;
+			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
 		} else {
 			label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
 			tableViewer.getControl().setVisible(true);
 			tableViewer.setInput(intelligenceList.toArray());
+			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 75;
+			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
 		}
-		main.layout(true, true);
+		main.getParent().getParent().layout(true,true);
 	}
 	
 	/**
@@ -165,6 +184,26 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 		editDialog.open();
 		if (editDialog.isSavePerformed()) {
 			updateControls();
+		}
+	}
+	
+	private void openCurrentItem() {
+		IStructuredSelection sel = (IStructuredSelection)tableViewer.getSelection();
+		Intelligence intelligence = (Intelligence) sel.getFirstElement();
+		openEditor(intelligence);
+	}
+	
+	private void openEditor(Intelligence intelligence) {
+		Assert.isNotNull(intelligence);
+		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName(), intelligence.getReceivedDate());
+		try {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			wb.showPerspective(IntelligencePerspective.ID, win);
+			IWorkbenchPage page = win.getActivePage();
+			page.openEditor(input, IntelligenceEditor.ID);						
+		} catch (Throwable t) {
+			IntelligencePlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
 	}
 	

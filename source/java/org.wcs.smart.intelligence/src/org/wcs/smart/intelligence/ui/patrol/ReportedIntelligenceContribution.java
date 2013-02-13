@@ -166,13 +166,17 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			label.setText(Messages.ReportedIntelligenceContribution_NothingReported_Label);
 			tableViewer.getControl().setVisible(false);
 			btnOpen.setVisible(false);
+			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 0;
+			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
 		} else {
 			label.setText(Messages.ReportedIntelligenceContribution_IntelligenceReported_Label);
 			tableViewer.getControl().setVisible(true);
 			tableViewer.setInput(data.toArray());
 			btnOpen.setVisible(true);
+			((GridData)tableViewer.getControl().getLayoutData()).heightHint = 75;
+			((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
 		}
-		main.layout(true, true);
+		main.getParent().getParent().layout(true, true);
 	}
 
 	private void openCurrentItem() {
