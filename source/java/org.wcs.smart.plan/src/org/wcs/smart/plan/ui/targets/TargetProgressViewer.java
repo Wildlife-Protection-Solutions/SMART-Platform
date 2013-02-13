@@ -30,11 +30,21 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.eclipse.swt.widgets.Label;
+
+
 
 /**
  * Creates a new target list viewer.
@@ -45,10 +55,22 @@ import org.wcs.smart.plan.model.PlanTarget;
 public class TargetProgressViewer{
 	
 	private TableViewer v;
+	private int totalCompleteTargets;
+	private int totalTargets;
+	private Label lbl;
+	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 
 	public TargetProgressViewer(Composite parent) {
-		Composite table = new Composite(parent, SWT.NONE);
+		totalCompleteTargets = 0;
+		totalTargets = 0;
+		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(1, false));
+		container.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		
+		lbl = toolkit.createLabel(container, "Total Targets Complete: " + totalTargets + "/" + totalTargets);
+		
+		Composite table = new Composite(container, SWT.NONE);
 		TableColumnLayout layout = new TableColumnLayout();
 		
 		v = new TableViewer(table, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
@@ -108,13 +130,53 @@ public class TargetProgressViewer{
 				return x;
 			}			 
 		});
+		
+		
+		viewerColumn = new TableViewerColumn(v,SWT.NONE);
+		column = viewerColumn.getColumn();
+		layout.setColumnData(column, new ColumnWeightData(10,10, false));
+		column.setText("");
+		column.setResizable(true);
+		column.setMoveable(true);
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+            @Override
+            public void update(ViewerCell cell) {
+            	String status = ((PlanTarget)cell.getElement()).getStatus();
+            	
+            	int colour = 0xFF00;
+            	if(status.toLowerCase().contains("incom")){
+            		colour = 0x00FF;
+            	}else{
+            		
+            		totalCompleteTargets++;
+            	}
+            	totalTargets++;
+            	lbl.setText("Total Targets Complete: " + totalCompleteTargets + "/" + totalTargets);            	
+            	Image image;
+          	    PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
+          	    ImageData imageData = new ImageData(10, 10, 24, palette);
+            	   	for (int x = 0; x < 10; x++) {
+            	   		for (int y = 0; y < 10; y++) {
+            	   			imageData.setPixel(x, y, colour);
+            	   		}
+            	   	}
+            	image = new Image(Display.getDefault(), imageData);
+            	if(cell != null){
+            		cell.setImage(image);
+            	}
+
+            }
+		});
+
+		
+		
 		v.setContentProvider(ArrayContentProvider.getInstance());
+		
 
 		table.setLayout(layout);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
-	
-	
+		
 	public TableViewer getViewer(){
 		return this.v;
 	}

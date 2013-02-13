@@ -154,7 +154,9 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetName.setTextLimit(32);
 
 		targetName.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
-		targetName.setText( getTargetType().getName() );
+		if(planTarget == null){
+			targetName.setText( getTargetType().getName() );
+		}
 		
 		KeyListener validate = new KeyAdapter() {
 			@Override
@@ -288,11 +290,12 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	@Override
 	public void initPage(PlanTarget p) {
 		NumericPlanTarget pt = (NumericPlanTarget) p;
-		this.targetName.setText(pt.getName());
+
 		this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
 		this.targetType.setSelection(new StructuredSelection(pt.getType()));
 		this.targetValue.setText(pt.getValue().toString());
 		this.planTarget = p;
+		this.targetName.setText(pt.getName());
 		validate();
 	}
 	

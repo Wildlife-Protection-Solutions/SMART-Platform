@@ -273,7 +273,7 @@ public class PlanEditor extends EditorPart {
 		
 		Composite targetButtons = toolkit.createComposite(content, SWT.NONE);
 		targetButtons.setLayout(new GridLayout(1, false));
-		targetButtons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		targetButtons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		
 		createEditLink(toolkit, targetButtons, PanelType.TARGETS); 
