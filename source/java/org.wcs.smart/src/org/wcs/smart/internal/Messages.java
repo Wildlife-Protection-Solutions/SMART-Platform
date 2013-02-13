@@ -26,6 +26,8 @@ public class Messages extends NLS {
 	public static String Agency_AgencyName;
 	public static String AgencyCsvImporter_Error_DatabaseSaveFailed;
 	public static String AgencyCsvImporter_Error_IncorrectFieldsNumber;
+	public static String AgencyCsvImporter_LanguageDialog_Message;
+	public static String AgencyCsvImporter_LanguageDialog_Title;
 	public static String AgencyDeleteAdvisor_Error_AgencyReferenced;
 	public static String AgencyDeleteAdvisor_Error_NotAgency;
 	public static String AgencyRankPropertyPage_Add_Button;
