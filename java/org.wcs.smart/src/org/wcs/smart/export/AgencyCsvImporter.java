@@ -33,10 +33,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.common.control.OptionSelectionDialog;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -67,11 +72,7 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 			throw new IOException(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist + file.toString() );
 		}
 
-		code2Language = null;
-		record2Agency = new HashMap<String, Agency>();
-
 		CSVReader reader = new CSVReader(new FileReader(file));
-		
 		
 		//reading the first line with language codes
 		String[] row = reader.readNext();
@@ -79,6 +80,12 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 		int langNumber = size/2;
 		List<String> langCodes = getLanguageCodes(row);
 
+		code2Language = createCode2Language(langCodes);
+		if (code2Language == null) {
+			return false;
+		}
+		record2Agency = new HashMap<String, Agency>();
+		
 		int line = 2;
 		Agency agency = null;
 		while( (row = reader.readNext()) != null ) {
@@ -111,13 +118,13 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 
 		Collection<Agency> agencies = record2Agency.values();
 		if (monitor.isCanceled()) return false;
-		try{
+		try {
 			session.beginTransaction();
 			for (Agency a : agencies) {
 				session.saveOrUpdate(a);
 			}
 			session.getTransaction().commit();
-		}catch (Exception ex){
+		} catch (Exception ex) {
 			throw new Exception(Messages.AgencyCsvImporter_Error_DatabaseSaveFailed + ex.getLocalizedMessage(), ex);
 		}
 		return true;
@@ -151,7 +158,7 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 	}
 
 	private Language getLanguage(String code) {
-		return getCode2Language().get(code);
+		return code2Language.get(code);
 	}
 
 	private List<String> getLanguageCodes(String[] columns) {
@@ -164,19 +171,85 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 		return result;
 	}
 
-	private Map<String, Language> getCode2Language() {
-		if (code2Language == null) {
-			code2Language = createCode2Language();
-		}
-		return code2Language;
-	}
-
-	private Map<String, Language> createCode2Language() {
+	private Map<String, Language> createCode2Language(List<String> langCodes) {
 		Map<String, Language> result = new HashMap<String, Language>();
-		Set<Language> languages = SmartDB.getCurrentConservationArea().getLanguages();
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		Set<Language> languages = ca.getLanguages();
 		for (Language language : languages) {
 			result.put(language.getCode(), language);
 		}
+		//need to check if default language present in importing file,
+		//cause default language values must be set anyway
+		String defaultCode = ca.getDefaultLanguage().getCode();
+		if (!langCodes.contains(defaultCode)) {
+			//if it is not present than asking user which language to use as default
+			LanguageDialogRunnable runnable = new LanguageDialogRunnable(defaultCode, langCodes.toArray(new String[0]));
+			Display.getDefault().syncExec(runnable);
+			String code = runnable.getResult();
+			if (code == null) {
+				return null; //no default code specified
+			}
+			//make a fake correspondence of selected code with default language
+			result.put(code, ca.getDefaultLanguage());
+		}
 		return result;
+	}
+
+	/**
+	 * 
+	 * Class is responsible for launching {@link DefaultLanguageSelectDialog} in
+	 * GUI thread and provide back selected result.
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	private class LanguageDialogRunnable implements Runnable {
+		private final String defaultCode;
+		private final String[] options;
+		private String result;
+
+		private LanguageDialogRunnable(String defaultCode, String[] options) {
+			this.defaultCode = defaultCode;
+			this.options = options;
+		}
+
+		@Override
+		public void run() {
+			Shell shell = Display.getDefault().getActiveShell();
+			DefaultLanguageSelectDialog dialog = new DefaultLanguageSelectDialog(shell, options, defaultCode);
+			if (dialog.open() != IDialogConstants.OK_ID) {
+				setResult(null);
+				return;
+			}
+			setResult(dialog.getSelectedOption());
+		}
+		
+		public String getResult() {
+			return result;
+		}
+		
+		public void setResult(String result) {
+			this.result = result;
+		}
+	}
+
+	/**
+	 * Dialog that allows user to select which language will be used as default
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	private class DefaultLanguageSelectDialog extends OptionSelectionDialog {
+
+		public DefaultLanguageSelectDialog(Shell shell, String[] options, String defaultCode) {
+			super(shell, options);
+			setDialogMessage(MessageFormat.format(Messages.AgencyCsvImporter_LanguageDialog_Message, defaultCode));
+		}
+		
+		@Override
+		protected void configureShell(Shell shell) {
+			super.configureShell(shell);
+			shell.setText(Messages.AgencyCsvImporter_LanguageDialog_Title);
+		}
 	}
 }
