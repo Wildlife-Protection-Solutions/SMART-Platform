@@ -23,28 +23,10 @@ package org.wcs.smart.ui.internal.ca;
 
 import java.text.MessageFormat;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.control.OptionSelectionDialog;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
 /**
  * 
@@ -53,132 +35,19 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
  * @author Emily
  * @since 1.0.0
  */
-public class LanguageSelectionDialog extends Dialog {
-	private TableViewer fTableViewer;
-	private ConservationArea ca;
-	private String[] options;
-	private IStructuredSelection selection;
+public class LanguageSelectionDialog extends OptionSelectionDialog {
 	
 	/**
 	 * @param parentShell
 	 */
 	public LanguageSelectionDialog(Shell shell, ConservationArea ca, String[] options) {
-		super(shell);
-		this.ca = ca;
-		this.options = options;
+		super(shell, options);
+		setDialogMessage(MessageFormat.format(Messages.LanguageSelectionDialog_MissingLanguageMessage, new Object[]{ ca.getDefaultLanguage().getCode()}));
 	}
-	@Override
-	protected void okPressed() {
-		this.selection = (IStructuredSelection) fTableViewer.getSelection();
-		super.okPressed();
-	}
-	public ISelection getSelection(){
-		return selection;
-	}
-	@Override
-	protected Point getInitialSize() {
-		Point p = super.getInitialSize();
-		if (p.x > 500) {
-			p.x = 500;
-		}
-		if (p.y < 400) {
-			p.y = 400;
-		}
-		return p;
-	}
-
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
-	}
-
-	protected boolean isResizable() {
-		return true;
-	}
-
+	
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(Messages.LanguageSelectionDialog_Dialog_Title);
 	}
-
-	private Image getWarningIcon() {
-		Shell shell = getShell();
-		final Display display;
-		if (shell == null || shell.isDisposed()) {
-			shell = getParentShell();
-		}
-		if (shell == null || shell.isDisposed()) {
-			display = Display.getCurrent();
-			Assert.isNotNull(display,
-					"The dialog should be created in UI thread"); //$NON-NLS-1$
-		} else {
-			display = shell.getDisplay();
-		}
-
-		final Image[] image = new Image[1];
-		display.syncExec(new Runnable() {
-			public void run() {
-				image[0] = display
-						.getSystemImage(SWT.ICON_WARNING);
-			}
-		});
-
-		return image[0];
-	}
-
-	@Override
-	protected Control createDialogArea(Composite container) {
-
-		Composite parent = (Composite) super
-				.createDialogArea(container);
-		GridLayout gl = new GridLayout(1, false);
-		int margin = 15;
-		gl.marginHeight = margin;
-		gl.marginWidth = margin;
-
-		parent.setLayout(gl);
-
-		Composite header = new Composite(parent, SWT.NONE);
-		header.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,
-				true, false));
-		header.setLayout(new GridLayout(2, false));
-		Label imageLabel = new Label(header, SWT.NULL);
-		imageLabel.setImage(getWarningIcon());
-		imageLabel.setLayoutData(new GridData(SWT.LEFT,
-				SWT.CENTER, false, false));
-
-		Label lbl = new Label(header, SWT.WRAP);
-		lbl.setText(MessageFormat.format(Messages.LanguageSelectionDialog_MissingLanguageMessage, new Object[]{ ca.getDefaultLanguage().getCode()}));
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,
-				false));
-
-		fTableViewer = new TableViewer(parent,
-				SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL
-						| SWT.BORDER);
-		fTableViewer
-				.setContentProvider(ArrayContentProvider.getInstance());
-		fTableViewer.setLabelProvider(new LabelProvider() {
-
-			public String getText(Object element) {
-				if (element instanceof LanguageType) {
-					return ((LanguageType) element).getCode();
-							
-				}
-				return super.getText(element);
-			}
-		});
-		
-		fTableViewer.setInput(options);
-		fTableViewer.getTable().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
-		fTableViewer.setSelection(new StructuredSelection(options[0]));
-		return parent;
-
-	}
-
 };
