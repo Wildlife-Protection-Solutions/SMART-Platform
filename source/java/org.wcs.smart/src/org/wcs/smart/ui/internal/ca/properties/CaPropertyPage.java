@@ -272,6 +272,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			ca.getLanguages().clear();
 			ca.getLanguages().add(def);
 			ca.getLanguages().addAll(languages);
+			session.saveOrUpdate(ca);
 			tx.commit();
 			setChangesMade(false);
 			return true;
