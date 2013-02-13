@@ -1,6 +1,6 @@
 package org.wcs.smart.export.config.impl;
 
-import org.wcs.smart.export.AgencyCsvExport;
+import org.wcs.smart.export.AgencyCsvExporter;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
@@ -17,7 +17,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AgencyCsvExportConfig implements ICsvExportDialogConfig {
 
-	private AgencyCsvExport exporter = new AgencyCsvExport();
+	private AgencyCsvExporter exporter = new AgencyCsvExporter();
 
 	@Override
 	public ICsvDataExporter getExporter() {

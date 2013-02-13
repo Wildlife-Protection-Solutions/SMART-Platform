@@ -49,14 +49,14 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @author elitvin
  * @since 1.0.0
  */
-public class AgencyCsvExport implements ICsvDataExporter {
+public class AgencyCsvExporter implements ICsvDataExporter {
 	protected List<Language> languages;
 	public ConservationArea ca;
 	
 	/**
 	 * Creates a new exporter that exports Agencies and their Ranks to csv format
 	 */
-	public AgencyCsvExport() {
+	public AgencyCsvExporter() {
 		//nothing
 	}
 
