@@ -111,25 +111,25 @@ public class NumericPlanTarget extends PlanTarget {
 
 		if(op == Operator.EQUAL){
 			if(total == value){
-				return "Target Completed(" + total + ")";
+				return "Completed (" + total + ")";
 			}else{
 				return "Incomplete ("+ total + ")";
 			}
 		}else if(op == Operator.GREATER){
 			if(total > value){
-				return "Target Completed (" + total + ")";
+				return "Completed (" + total + ")";
 			}else{
 				return "Incomplete ("+ total + ")";
 			}
 		}else if(op == Operator.LESS){
 			if(total < value){
-				return "Target Completed (" + total + ")";
+				return "Completed (" + total + ")";
 			}else{
-				return "Target Missed(" + total + ")";
+				return "Missed (" + total + ")";
 			}
 		}else if(op == Operator.NOEQUAL){
 			if(total != value){
-				return "Target Completed (" + total + ")";
+				return "Completed (" + total + ")";
 			}else{
 				return "Incomplete (" + total + ")";
 			}
