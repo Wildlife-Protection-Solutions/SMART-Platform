@@ -32,6 +32,8 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.wcs.smart.plan.internal.Messages;
+
 /**
  * Represents a SpatialPlanTarget object
  * 
@@ -70,7 +72,7 @@ public class SpatialPlanTarget extends PlanTarget {
 	@Transient
 	@Override
 	public String getSummary() {
-		return "[Spatial] " + getName() + " (" + getPoints().size() + " point(s))";
+		return "["+Messages.SpatialPlanTarget_CategoryName+"] " + getName() + " (" + getPoints().size() + Messages.SpatialPlanTarget_Points_Label+")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	@Override
