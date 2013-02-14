@@ -231,6 +231,14 @@
             ca_property=".id.plan.conservationArea"
             class="org.wcs.smart.plan.model.PatrolPlan">
       </class>
+      <class
+            ca_property=".plan.conservationArea"
+            class="org.wcs.smart.plan.model.SpatialPlanTarget">
+      </class>
+      <class
+            ca_property=".planTarget.plan.conservationArea"
+            class="org.wcs.smart.plan.model.SpatialPlanTargetPoint">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.patrol.editorContribution">
