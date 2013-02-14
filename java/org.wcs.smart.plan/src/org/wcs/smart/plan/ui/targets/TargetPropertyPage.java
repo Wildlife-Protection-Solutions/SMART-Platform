@@ -61,6 +61,9 @@ import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
  */
 public class TargetPropertyPage extends Dialog {
 
+	private static final int TAB_FOLDER_HEIGHT_HINT = 340;
+	private static final int TAB_FOLDER_WIDTH_HINT = 400;
+	
 	private List<PlanTarget> parentTargets;
 	private PlanTarget toUpdate;
 	
@@ -93,6 +96,7 @@ public class TargetPropertyPage extends Dialog {
 		tabs = new ArrayList<ITargetPage>();
 		tabs.add(new NumericPlanTargetPropertyPage(this));
 		tabs.add(new AdministrativePlanTargetPropertyPage(this));
+		tabs.add(new SpatialPlanTargetPropertyPage(this));
 	
 	}
 
@@ -142,8 +146,8 @@ public class TargetPropertyPage extends Dialog {
 	public Control createDialogArea(Composite parent){
 		tabFolder = new TabFolder(parent, SWT.BORDER);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)tabFolder.getLayoutData()).widthHint = 400;
-		((GridData)tabFolder.getLayoutData()).heightHint = 200;
+		((GridData)tabFolder.getLayoutData()).widthHint = TAB_FOLDER_WIDTH_HINT;
+		((GridData)tabFolder.getLayoutData()).heightHint = TAB_FOLDER_HEIGHT_HINT;
 		for (ITargetPage page : tabs){
 			TabItem item = new TabItem(tabFolder, SWT.NONE);
 			item.setText(page.getPageName());
