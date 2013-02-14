@@ -56,7 +56,7 @@ CREATE TABLE smart.plan_target
 	type VARCHAR(32),
 	plan_uuid CHAR(16) FOR BIT DATA NOT NULL,
 	category varchar(16) NOT NULL,
-	completed boolean NOT NULL Default false;,
+	completed boolean NOT NULL Default false,
 	PRIMARY KEY (UUID)
 );
 
@@ -87,3 +87,20 @@ ALTER TABLE smart.patrol_plan
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;
+
+CREATE TABLE smart.plan_target_point
+(
+	UUID CHAR(16) for bit data NOT NULL,
+	PLAN_TARGET_UUID CHAR(16) for bit data  NOT NULL,
+	X DOUBLE NOT NULL,
+	Y DOUBLE NOT NULL,
+	PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.plan_target_point
+	ADD CONSTRAINT plan_target_point_plan_target_uuid_fk FOREIGN KEY (PLAN_TARGET_UUID)
+	REFERENCES smart.plan_target(UUID)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
+
