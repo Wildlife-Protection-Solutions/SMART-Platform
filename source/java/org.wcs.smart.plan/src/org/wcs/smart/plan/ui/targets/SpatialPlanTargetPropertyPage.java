@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
@@ -80,7 +81,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
 		Label nameLabel = new Label(center, SWT.NONE);
-		nameLabel.setText("Target Name:");
+		nameLabel.setText(Messages.SpatialPlanTargetPropertyPage_Name_Label);
 		nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
 		targetName = new Text(center, SWT.BORDER );
@@ -102,10 +103,10 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		nameDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		nameDecoration.setShowHover(true);
-		nameDecoration.setDescriptionText("Target Name is required.");
+		nameDecoration.setDescriptionText(Messages.SpatialPlanTargetPropertyPage_Name_Required_Error);
 		
 		Label descrLabel = new Label(center, SWT.NONE);
-		descrLabel.setText("Target Description:");
+		descrLabel.setText(Messages.SpatialPlanTargetPropertyPage_Description_Label);
 		descrLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
 		targetDesc= new Text(center, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
@@ -122,7 +123,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 			}
         };
         locationSelect.addLocationPointsChangeListener(this);
-        locationSelect.getDecoration().setDescriptionText("At least one point is required.");
+        locationSelect.getDecoration().setDescriptionText(Messages.SpatialPlanTargetPropertyPage_Description_Required_Error);
         locationSelect.getDecoration().show();
 
         scrollCmp.setContent(main);
@@ -140,7 +141,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 	
 	@Override
 	public String getPageName() {
-		return "Spatial";
+		return Messages.SpatialPlanTargetPropertyPage_PageName;
 	}
 	
 	@Override
