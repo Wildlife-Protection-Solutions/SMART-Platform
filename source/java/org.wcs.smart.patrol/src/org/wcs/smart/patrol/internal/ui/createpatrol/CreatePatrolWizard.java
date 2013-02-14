@@ -42,10 +42,10 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
+import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
 /**
  * Wizard to create a new patrol.

@@ -35,7 +35,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective;
+import org.wcs.smart.patrol.ui.PatrolPerspective;
 
 /**
  * Handler to display new patrol wizard.

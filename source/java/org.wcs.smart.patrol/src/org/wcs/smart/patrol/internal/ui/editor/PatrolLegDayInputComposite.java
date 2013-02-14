@@ -96,6 +96,7 @@ import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;

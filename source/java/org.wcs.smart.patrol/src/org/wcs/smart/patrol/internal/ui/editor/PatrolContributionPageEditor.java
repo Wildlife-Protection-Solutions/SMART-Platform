@@ -45,6 +45,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
+import org.wcs.smart.patrol.ui.PatrolEditor;
 
 /**
  * The contribution page of the patrol editor.  This page

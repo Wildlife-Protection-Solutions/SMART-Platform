@@ -48,6 +48,8 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.udig.catalog.PatrolService;
+import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 

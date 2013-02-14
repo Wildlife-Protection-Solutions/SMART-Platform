@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.editor;
+package org.wcs.smart.patrol.ui;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
