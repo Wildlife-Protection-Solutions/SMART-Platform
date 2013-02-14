@@ -25,8 +25,8 @@ import java.text.MessageFormat;
 
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.common.control.OptionSelectionDialog;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.internal.OptionSelectionDialog;
 
 /**
  * 
@@ -41,13 +41,9 @@ public class LanguageSelectionDialog extends OptionSelectionDialog {
 	 * @param parentShell
 	 */
 	public LanguageSelectionDialog(Shell shell, ConservationArea ca, String[] options) {
-		super(shell, options);
-		setDialogMessage(MessageFormat.format(Messages.LanguageSelectionDialog_MissingLanguageMessage, new Object[]{ ca.getDefaultLanguage().getCode()}));
+		super(shell, options,
+			Messages.LanguageSelectionDialog_Dialog_Title,
+			MessageFormat.format(Messages.LanguageSelectionDialog_MissingLanguageMessage, ca.getDefaultLanguage().getCode()));
 	}
 	
-	@Override
-	protected void configureShell(Shell shell) {
-		super.configureShell(shell);
-		shell.setText(Messages.LanguageSelectionDialog_Dialog_Title);
-	}
-};
+}
