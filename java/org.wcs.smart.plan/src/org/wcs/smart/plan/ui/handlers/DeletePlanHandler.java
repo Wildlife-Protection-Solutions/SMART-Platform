@@ -82,7 +82,7 @@ public class DeletePlanHandler extends AbstractHandler {
 						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
 								"Are you sure you wish to delete this Plan?",
 								null,
-								MessageFormat.format("WARNING: All sub-plans(plans with this plan as their parent, and their children etc) will also be deleted if you continue. Are you sure you wish to delete this plan {0}? ", new Object[]{thisname}),
+								MessageFormat.format("WARNING: The entire plan tree below this plan (plans with this plan as their parent, their children etc.) will also be deleted if you continue. Are you sure you wish to delete this plan {0}? ", new Object[]{thisname}),
 								MessageDialog.CONFIRM, 
 								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 						

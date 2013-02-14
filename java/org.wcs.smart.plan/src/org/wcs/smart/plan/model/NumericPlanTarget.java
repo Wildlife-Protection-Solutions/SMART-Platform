@@ -1,12 +1,14 @@
 package org.wcs.smart.plan.model;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Transient;
-import java.util.List;
+
 import org.wcs.smart.plan.PlanHibernateManager;
 
 /**
@@ -58,7 +60,13 @@ public class NumericPlanTarget extends PlanTarget {
 	private Double value;
 	private Operator op;
 	private TargetType type;
+	public PlanTargetStatus status;
 
+	public void NumericPlanTarget(){
+		status = new PlanTargetStatus(false);
+	}
+	
+	
 	@Override
 	@Transient
 	public String getSummary() {
@@ -103,38 +111,45 @@ public class NumericPlanTarget extends PlanTarget {
 		return n;
 	}
 
-	@Override
 	@Transient
-	public String getStatus() {
-		
-		Double total = calculateTargetStatusValue(this.getPlan());
+	public boolean computeStatus() {
+			Double total = calculateTargetStatusValue(this.getPlan());
 
-		if(op == Operator.EQUAL){
-			if(total == value){
-				return "Completed (" + total + ")";
-			}else{
-				return "Incomplete ("+ total + ")";
+			if(op == Operator.EQUAL){
+				if(total == value){
+					status = new PlanTargetStatus(true);
+					status.setDisplayString("Complete (" + total + ")");
+				}else{
+					status = new PlanTargetStatus(false);
+					status.setDisplayString("Incomplete (" + total + ")");
+				}
+			}else if(op == Operator.GREATER){
+				if(total > value){
+					status = new PlanTargetStatus(true);
+					status.setDisplayString("Complete (" + total + ")");
+				}else{
+					status = new PlanTargetStatus(false);
+					status.setDisplayString("Incomplete (" + total + ")");
+				}
+			}else if(op == Operator.LESS){
+				if(total < value){
+					status = new PlanTargetStatus(true);
+					status.setDisplayString("Complete (" + total + ")");
+				}else{
+					status = new PlanTargetStatus(false);
+					status.setDisplayString("Missed (" + total + ")");
+				}
+			}else if(op == Operator.NOEQUAL){
+				if(total != value){
+					status = new PlanTargetStatus(true);
+					status.setDisplayString("Complete (" + total + ")");
+				}else{
+					status = new PlanTargetStatus(false);
+					status.setDisplayString("InComplete (" + total + ")");
+				}
 			}
-		}else if(op == Operator.GREATER){
-			if(total > value){
-				return "Completed (" + total + ")";
-			}else{
-				return "Incomplete ("+ total + ")";
-			}
-		}else if(op == Operator.LESS){
-			if(total < value){
-				return "Completed (" + total + ")";
-			}else{
-				return "Missed (" + total + ")";
-			}
-		}else if(op == Operator.NOEQUAL){
-			if(total != value){
-				return "Completed (" + total + ")";
-			}else{
-				return "Incomplete (" + total + ")";
-			}
-		}
-		return "Unsupported Target Type";
+			return status.getStatus();
+
 	}
 
 	private Double calculateTargetStatusValue(Plan plan){
@@ -144,6 +159,15 @@ public class NumericPlanTarget extends PlanTarget {
 			total += calculateTargetStatusValue(p);
 		}
 		return total;
+	}
+
+	@Transient
+	@Override
+	public String getStatusDisplayString() {
+		if(status == null){
+			computeStatus();
+		}
+		return status.getDisplayString();
 	}
 
 }
