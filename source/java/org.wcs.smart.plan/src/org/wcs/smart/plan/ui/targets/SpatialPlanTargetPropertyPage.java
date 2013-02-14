@@ -89,10 +89,10 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		targetName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (!isTargetNameValid()) {
-					nameDecoration.show();
-				} else {
+				if (isTargetNameValid()) {
 					nameDecoration.hide();
+				} else {
+					nameDecoration.show();
 				}
 				applyCurrentState();
 			}
@@ -122,6 +122,8 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 			}
         };
         locationSelect.addLocationPointsChangeListener(this);
+        locationSelect.getDecoration().setDescriptionText("At least one point is required.");
+        locationSelect.getDecoration().show();
 
         scrollCmp.setContent(main);
 		scrollCmp.setExpandVertical(true);
@@ -186,14 +188,23 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 	private boolean isTargetNameValid() {
     	return targetName != null && targetName.getText() != null && !targetName.getText().isEmpty();
 	}
+
+	private boolean isLocationPointsValid() {
+    	return !locationSelect.getPoints().isEmpty();
+	}
 	
 	@Override
 	public boolean validate() {
-		return isTargetNameValid() && !locationSelect.getPoints().isEmpty();
+		return isTargetNameValid() && isLocationPointsValid();
 	}
 
 	@Override
 	public void locationPointsChanged() {
+		if (isLocationPointsValid()) {
+			locationSelect.getDecoration().hide();
+		} else {
+			locationSelect.getDecoration().show();
+		}
 		applyCurrentState();
 	}
 

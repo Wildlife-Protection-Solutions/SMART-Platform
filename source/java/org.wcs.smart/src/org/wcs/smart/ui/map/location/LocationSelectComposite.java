@@ -34,6 +34,8 @@ import net.refractions.udig.project.ui.tool.Tool;
 
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -81,6 +83,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 
 	private static final int MAP_MIN_WIDTH = 280;
 	
+	private ControlDecoration decoration;
 	private TableViewer pointsListViewer;
 
 	private WritableList points = new WritableList();
@@ -115,8 +118,13 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		pointsComposite.setLayout(new GridLayout(1, false));
 		pointsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
-		Label label = new Label(pointsComposite, SWT.NONE);
-		label.setText(Messages.LocationSelectComposite_Points_Label);
+		Label pointsLabel = new Label(pointsComposite, SWT.NONE);
+		pointsLabel.setText(Messages.LocationSelectComposite_Points_Label);
+		decoration = new ControlDecoration(pointsLabel, SWT.RIGHT);
+		decoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		decoration.setShowHover(true);
+		decoration.hide();
 
 		pointsListViewer = new TableViewer(pointsComposite, SWT.MULTI | SWT.BORDER);
 		pointsListViewer.setContentProvider(new ObservableListContentProvider());
@@ -318,6 +326,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		points.clear();
 		points.addAll(pointList);
 		updateMapConposite();
+		fireLocationPointsChangeListeners();
 	}
 
 	private void updateAddButtonState() {
@@ -330,6 +339,10 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		mapComposite.updatePointsLayer();
 	}
 	
+	public ControlDecoration getDecoration() {
+		return decoration;
+	}
+
 	public void addLocationPointsChangeListener(ILocationPointsChangeListener listener) {
 		pointsChangeListeners.add(listener);
 	}
@@ -343,5 +356,5 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 			listener.locationPointsChanged();
 		}
 	}
-	
+
 }
