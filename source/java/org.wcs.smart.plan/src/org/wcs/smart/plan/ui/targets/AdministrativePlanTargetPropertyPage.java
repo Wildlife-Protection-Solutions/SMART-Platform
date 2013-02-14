@@ -183,7 +183,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
 		this.targetName.setText(pt.getName());
 		this.targetDesc.setText(pt.getTargetDesc());
-		this.targetIsComplete.setSelection(pt.getTargetCompleted());
+		this.targetIsComplete.setSelection(pt.getStatus());
 		validate();
 	}
 	
@@ -203,7 +203,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		AdministrativePlanTarget target = (AdministrativePlanTarget)pt;
 		target.setName(getTargetName());
 		target.setTargetDesc(getTargetDesc());
-		target.setTargetCompleted(targetIsComplete.getSelection());
+		target.setStatus(targetIsComplete.getSelection());
 	}
 
 }

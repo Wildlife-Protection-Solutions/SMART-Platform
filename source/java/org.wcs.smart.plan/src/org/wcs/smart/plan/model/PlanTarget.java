@@ -58,6 +58,7 @@ public abstract class PlanTarget{
 	private PlanTarget.TargetCategory cat;
 	private Plan plan;
 	private byte[] uuid;
+
 	
 	public static enum TargetCategory {
 		ALPHANUMERIC, SPATIAL, ADMIN; 
@@ -149,9 +150,10 @@ public abstract class PlanTarget{
 		return pt;
 	}
 
-	// Returns a string that returns the status of the target, something like: Completed, in-progress, 55% Complete, incomplete, depending on 
-	//what makes sense for that target subclass.
+	
 	@Transient
-	public abstract String getStatus();
+	public abstract String getStatusDisplayString();
+	@Transient
+	public abstract boolean computeStatus();
 	
 }

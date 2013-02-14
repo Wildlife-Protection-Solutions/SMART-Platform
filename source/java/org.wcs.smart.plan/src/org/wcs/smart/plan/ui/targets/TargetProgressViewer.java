@@ -39,10 +39,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.plan.model.PlanTarget;
-import org.eclipse.swt.widgets.Label;
 
 
 
@@ -55,20 +55,17 @@ import org.eclipse.swt.widgets.Label;
 public class TargetProgressViewer{
 	
 	private TableViewer v;
-	private int totalCompleteTargets;
-	private int totalTargets;
 	private Label lbl;
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 
 	public TargetProgressViewer(Composite parent) {
-		totalCompleteTargets = 0;
-		totalTargets = 0;
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
-		lbl = toolkit.createLabel(container, "Total Targets Complete: " + totalTargets + "/" + totalTargets);
+		Composite container = toolkit.createComposite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(1, false));
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lbl = toolkit.createLabel(container, "Total Targets Complete: 100/100"); 
 		
 		Composite table = new Composite(container, SWT.NONE);
 		TableColumnLayout layout = new TableColumnLayout();
@@ -117,13 +114,14 @@ public class TargetProgressViewer{
 		viewerColumn = new TableViewerColumn(v,SWT.NONE);
 		column = viewerColumn.getColumn();
 		layout.setColumnData(column, new ColumnWeightData(66,ColumnWeightData.MINIMUM_WIDTH, true));
-		column.setText("Target Status (Includes Sub-plan Progress)");
+		column.setText("Target Status");
+		column.setToolTipText("These totals include values from all patrols associated with the Plan as well as with sub-plans.");
 		column.setResizable(true);
 		column.setMoveable(true);
 		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element) {
-				String x = ((PlanTarget)element).getStatus();
+				String x = ((PlanTarget)element).getStatusDisplayString();
 				if (x == null){
 					return ""; //$NON-NLS-1$
 				}
@@ -141,17 +139,12 @@ public class TargetProgressViewer{
 		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
             @Override
             public void update(ViewerCell cell) {
-            	String status = ((PlanTarget)cell.getElement()).getStatus();
-            	
             	int colour = 0xFF00;
-            	if(status.toLowerCase().contains("incom")){
+            	if( ! ((PlanTarget)cell.getElement()).computeStatus()){
             		colour = 0x00FF;
-            	}else{
-            		
-            		totalCompleteTargets++;
             	}
-            	totalTargets++;
-            	lbl.setText("Total Targets Complete: " + totalCompleteTargets + "/" + totalTargets);            	
+            		
+            	            	
             	Image image;
           	    PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
           	    ImageData imageData = new ImageData(10, 10, 24, palette);
@@ -181,13 +174,6 @@ public class TargetProgressViewer{
 		return this.v;
 	}
 	
-	public void updateModel(List<PlanTarget> t) {
-		if(t != null){
-			v.setInput(t);
-			v.refresh();
-		}
-	}
-
 
 	public IStructuredSelection getSelection() {
 		return (IStructuredSelection) v.getSelection();
@@ -198,7 +184,13 @@ public class TargetProgressViewer{
 		if(targets != null){
 			v.setInput(targets.toArray());
 		}
+		int totalCompleteTargets = 0;
+		for (PlanTarget pt : targets){
+			if (pt.computeStatus()){
+				totalCompleteTargets++;
+			}
+		}
+		lbl.setText("Total Targets Complete: " + totalCompleteTargets + "/" + targets.size());
 	}
 	
-
 }

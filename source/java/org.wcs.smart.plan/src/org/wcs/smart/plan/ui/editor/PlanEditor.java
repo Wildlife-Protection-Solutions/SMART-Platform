@@ -22,11 +22,12 @@
 package org.wcs.smart.plan.ui.editor;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -57,10 +58,9 @@ import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
-import org.wcs.smart.plan.ui.targets.TargetListViewer;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
-import org.wcs.smart.plan.ui.targets.TargetPropertyPage;
 
 /**
  * The Plan Editor
@@ -91,6 +91,7 @@ public class PlanEditor extends EditorPart {
 	private Text txtStartDate;
 	private Text txtEndDate;
 	private TargetProgressViewer targetList;
+	private TargetProgressViewer targetList2; //the child plan's targets
 
 	/**
 	 * listener for plan change events.
@@ -164,7 +165,7 @@ public class PlanEditor extends EditorPart {
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
 		toolkit.paintBordersFor(container);
-		container.setLayout(new GridLayout(1, false));
+		container.setLayout(new GridLayout(1, true));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		form = toolkit.createForm(container);
@@ -172,12 +173,23 @@ public class PlanEditor extends EditorPart {
 
 		form.getBody().setLayout(new GridLayout(1, true));
 
-		Composite content = toolkit.createComposite(form.getBody(), SWT.NONE);
+		Composite container2 = toolkit.createComposite(form.getBody(), SWT.NONE);
+		container2.setLayout(new GridLayout(2, true));
+		container2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite content = toolkit.createComposite(container2, SWT.NONE);
 		GridLayout leftLayout = new GridLayout(3, false);
 		leftLayout.verticalSpacing = 10;
 		content.setLayout(leftLayout);
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)content.getLayout()).marginRight = 10;
+		
+		Composite rightContent = toolkit.createComposite(container2, SWT.NONE);
+		GridLayout rightLayout = new GridLayout(3, false);
+		rightLayout.verticalSpacing = 10;
+		rightContent.setLayout(rightLayout);
+		rightContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)rightContent.getLayout()).marginRight = 10;
 		
 		
 		toolkit.createLabel(content, "Plan ID:");
@@ -203,52 +215,48 @@ public class PlanEditor extends EditorPart {
 		Label lbl = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
 		
-		toolkit.createLabel(content, "Plan Type:");
-		txtType = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(rightContent, "Plan Type:");
+		txtType = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtType.setEditable(false);
 		txtType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.TYPE);
+		createEditLink(toolkit, rightContent, PanelType.TYPE);
 
-		toolkit.createLabel(content, "Unavailable Employees:");
-		txtUnavailableEmployees = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(rightContent, "Unavailable Employees:");
+		txtUnavailableEmployees = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtUnavailableEmployees.setEditable(false);
 		txtUnavailableEmployees.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(content, "");
+		toolkit.createLabel(rightContent, "");
 
 		//spacer row for grouping items
-		toolkit.createLabel(content, "");
+		toolkit.createLabel(rightContent, "");
 
-		Label lbl1 = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label lbl1 = toolkit.createSeparator(rightContent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
 		
-		toolkit.createLabel(content, "Station:");
-		txtStation = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(rightContent, "Station:");
+		txtStation = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStation.setEditable(false);
 		txtStation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.STATION); 
+		createEditLink(toolkit, rightContent, PanelType.STATION); 
 
-		toolkit.createLabel(content, "Team:");
-		txtTeam = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(rightContent, "Team:");
+		txtTeam = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtTeam.setEditable(false);
 		txtTeam.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(content, "");
+		toolkit.createLabel(rightContent, "");
 
 		//spacer row for grouping items
-		toolkit.createLabel(content, "");
-		Label lbl2 = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
-
+		toolkit.createLabel(rightContent, "");
+		Label lbl3 = toolkit.createSeparator(rightContent, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
 				
-		toolkit.createLabel(content, "Parent ID:");
-		txtParentPlanId = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(rightContent, "Parent ID:");
+		txtParentPlanId = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtParentPlanId.setEditable(false);
 		txtParentPlanId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.PLANPARENTID);
+		createEditLink(toolkit, rightContent, PanelType.PLANPARENTID);
 
-		//spacer row for grouping items
-		toolkit.createLabel(content, "");
-		Label lbl3 = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
+		
 		
 		toolkit.createLabel(content, "Start Date:");
 		txtStartDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
@@ -256,22 +264,26 @@ public class PlanEditor extends EditorPart {
 		txtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, content, PanelType.STARTDATE);
 
-		toolkit.createLabel(content, "Unavailable Employees:");
+		toolkit.createLabel(content, "End Date:");
 		txtEndDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtEndDate.setEditable(false);
 		txtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, "");
 
-		//spacer row for grouping items
-		toolkit.createLabel(content, "");
-		Label lbl4 = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
 		
-		toolkit.createLabel(content, "Plan Targets:");
-		targetList  = new TargetProgressViewer(content);
+		Composite targetContent = toolkit.createComposite(container2, SWT.NONE);
+		GridLayout targetLayout = new GridLayout(3, false);
+		targetLayout.verticalSpacing = 10;
+		targetContent.setLayout(targetLayout);
+		targetContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
+		((GridLayout)targetContent.getLayout()).marginRight = 10;
+		
+		
+		toolkit.createLabel(targetContent, "Plan Targets:");
+		targetList  = new TargetProgressViewer(targetContent );
 
 		
-		Composite targetButtons = toolkit.createComposite(content, SWT.NONE);
+		Composite targetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		targetButtons.setLayout(new GridLayout(1, false));
 		targetButtons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
@@ -287,6 +299,28 @@ public class PlanEditor extends EditorPart {
 			}
 			
 		});
+		
+		
+		toolkit.createLabel(targetContent, "Child Plan Targets:");
+		targetList2  = new TargetProgressViewer(targetContent );
+
+		
+		Composite targetButtons2 = toolkit.createComposite(targetContent, SWT.NONE);
+		targetButtons2.setLayout(new GridLayout(1, false));
+		targetButtons2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+		
+		Button btnRefresh2 = new Button(targetButtons2, SWT.NONE);
+		btnRefresh2.setText("Refresh");
+		btnRefresh2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				initValues();
+			}
+			
+		});
+
+		
 		
 		initValues();
 	}
@@ -338,6 +372,18 @@ public class PlanEditor extends EditorPart {
 					.format(plan.getEndDate()));
 
 			targetList.initValues(plan.getTargets());
+			
+			List<Plan> children = plan.getChildren();
+			List<PlanTarget> childTargets = new ArrayList();
+			for(Plan p : children){
+				List<PlanTarget> tars = p.getTargets();
+				for(PlanTarget pt : tars){
+					childTargets.add(pt);
+				}
+			}
+			targetList2.initValues(childTargets);
+			
+			
 			session.getTransaction().rollback();
 		} finally {
 			session.close();
@@ -368,7 +414,9 @@ public class PlanEditor extends EditorPart {
 		if (plan.getParent() != null) {
 			plan.getParent().getId();
 		}
-		plan.getTargets().size();
+		if(plan.getTargets() != null){
+			plan.getTargets().size();
+		}
 		Station st = plan.getStation();
 		if(st != null){
 			st.getName();

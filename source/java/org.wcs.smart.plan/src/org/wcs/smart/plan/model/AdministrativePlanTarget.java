@@ -44,10 +44,10 @@ public class AdministrativePlanTarget extends PlanTarget{
 	public static final String TARGET_GUI_NAME = "Administrative";
 	
 	private String targetDesc;
-	private boolean targetCompleted;
+	private boolean status;
 	
 	public AdministrativePlanTarget(){
-		this.targetCompleted = false;//always default to false
+		status = false;//always default to false 
 	}
 
 	@Column(name = "description")
@@ -58,20 +58,12 @@ public class AdministrativePlanTarget extends PlanTarget{
 		this.targetDesc = targetDesc;
 	}
 	
-	@Column(name = "completed")
-	public boolean getTargetCompleted() {
-		return targetCompleted;
-	}
-	public void setTargetCompleted(boolean targetCompleted) {
-		this.targetCompleted = targetCompleted;
-	}
-	
 	@Override
 	public AdministrativePlanTarget clone() {
 		AdministrativePlanTarget n = new AdministrativePlanTarget();
 		super.clone(n);//method in Superclass, adds the shared values to n (name, category, plan)
 		n.targetDesc = this.targetDesc;
-		n.targetCompleted= this.targetCompleted;
+		n.status = this.status;
 		return n;
 	}
 	
@@ -80,13 +72,31 @@ public class AdministrativePlanTarget extends PlanTarget{
 	public String getSummary() {
 		return "[Admin] " + this.getName();
 	}
-	@Override
+	
+	@Column(name = "completed")
+	public boolean getStatus(){
+		return status;
+	}
+	
+	public void setStatus(boolean s) {
+		status = s;
+	}
+
 	@Transient
-	public String getStatus() {
-		if(targetCompleted == true){
-			return "Completed";
+	@Override
+	public String getStatusDisplayString() {
+		if(status){
+			return "Complete";
 		}else{
 			return "Incomplete";
 		}
 	}
+
+	@Transient
+	@Override
+	public boolean computeStatus() {
+		return status;
+	}
+
+
 }
