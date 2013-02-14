@@ -24,6 +24,7 @@ package org.wcs.smart.plan.ui.editor;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -52,15 +54,23 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.patrol.ui.PatrolPerspective;
 import org.wcs.smart.plan.PlanEventManager;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
+import org.wcs.smart.plan.ui.perspective.PlanPerspective;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
+
 
 /**
  * The Plan Editor
@@ -90,9 +100,13 @@ public class PlanEditor extends EditorPart {
 	private Text txtDescription;
 	private Text txtStartDate;
 	private Text txtEndDate;
+
 	private TargetProgressViewer targetList;
 	private TargetProgressViewer targetList2; //the child plan's targets
 
+	private Composite content;
+	
+	private Plan currentPlan = null;
 	/**
 	 * listener for plan change events.
 	 */
@@ -177,7 +191,7 @@ public class PlanEditor extends EditorPart {
 		container2.setLayout(new GridLayout(2, true));
 		container2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Composite content = toolkit.createComposite(container2, SWT.NONE);
+		content = toolkit.createComposite(container2, SWT.NONE);
 		GridLayout leftLayout = new GridLayout(3, false);
 		leftLayout.verticalSpacing = 10;
 		content.setLayout(leftLayout);
@@ -269,6 +283,13 @@ public class PlanEditor extends EditorPart {
 		txtEndDate.setEditable(false);
 		txtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, "");
+
+		//spacer row for grouping items
+		toolkit.createLabel(content, "");
+		Label lbl33 = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
+		lbl33.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
+		
+		toolkit.createLabel(content, "Associated Patrols:\n(c) = child plan's");
 
 		
 		Composite targetContent = toolkit.createComposite(container2, SWT.NONE);
@@ -371,10 +392,49 @@ public class PlanEditor extends EditorPart {
 			txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
 					.format(plan.getEndDate()));
 
+			List<Patrol> myPatrols = PlanHibernateManager.getPatrols(plan);
+			List<Patrol> childPatrols = getChildPlanPatrols(plan);
+			
+			
+			Composite patrolLinks = toolkit.createComposite(content);
+			patrolLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			patrolLinks.setLayout(new GridLayout(2, false));
+
+			if (myPatrols.size() == 0 && childPatrols.size() == 0) {
+				toolkit.createLabel(patrolLinks,
+						"No patrols yet.");
+			} else {
+				for (Patrol x : myPatrols){
+					Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getId(),
+							SWT.WRAP);
+					final Patrol tmp = x;
+					lnk.addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
+						public void linkActivated(HyperlinkEvent e) {
+							openPatrol(tmp);
+						}
+					});
+				}
+				for (Patrol x : childPatrols){
+					Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getId() + "(c)",
+							SWT.WRAP);
+					final Patrol tmp = x;
+					lnk.addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
+						public void linkActivated(HyperlinkEvent e) {
+							openPatrol(tmp);
+						}
+					});
+				}
+
+			}
+			
+			
+			
 			targetList.initValues(plan.getTargets());
 			
 			List<Plan> children = plan.getChildren();
-			List<PlanTarget> childTargets = new ArrayList();
+			List<PlanTarget> childTargets = new ArrayList<PlanTarget>();
 			for(Plan p : children){
 				List<PlanTarget> tars = p.getTargets();
 				for(PlanTarget pt : tars){
@@ -390,6 +450,39 @@ public class PlanEditor extends EditorPart {
 		}
 		
 	}
+	private void openPatrol(Patrol p){
+		PatrolEditorInput in = new PatrolEditorInput(p.getUuid(), p.getId(), p.getPatrolType(), p.getStartDate(), p.getEndDate());
+		try {
+			PlatformUI.getWorkbench().showPerspective(PatrolPerspective.ID, 
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+					.getActivePage().openEditor(in, PatrolEditor.ID);
+		} catch (Exception e1) {
+			SmartPlanPlugIn.displayLog(
+					"Could not open plan. "
+							+ e1.getLocalizedMessage(), e1);
+		}
+	}
+
+	
+	/**
+	 * 
+	 * @return the current plan associated with the editor
+	 */
+	private List<Patrol> getChildPlanPatrols(Plan plan){
+		List<Patrol> patrols = new ArrayList<Patrol>();
+		if(plan.getChildren() == null){
+			return patrols;
+		}
+		for (Plan p : plan.getChildren()){
+			List<Patrol> curPatrols = PlanHibernateManager.getPatrols(p);
+			for(Patrol x : curPatrols){
+				patrols.add(x);
+			}
+		}
+		return patrols;
+	}
+
 	/**
 	 * 
 	 * @return the current plan associated with the editor

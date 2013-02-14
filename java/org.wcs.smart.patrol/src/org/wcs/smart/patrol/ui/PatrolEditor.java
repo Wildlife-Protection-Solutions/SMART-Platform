@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.internal.ui.editor;
+package org.wcs.smart.patrol.ui;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -57,6 +57,12 @@ import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.editor.CombinedSelectionProvider;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolContributionPageEditor;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditor;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditorInput;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolMapPageEditor;
+import org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolOptions;

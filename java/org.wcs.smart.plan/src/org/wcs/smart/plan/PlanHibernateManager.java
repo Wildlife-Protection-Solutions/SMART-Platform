@@ -38,6 +38,7 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PatrolPlan;
@@ -361,5 +362,31 @@ public class PlanHibernateManager{
 		if(targetTotal== null)targetTotal = 0.0;
 		return targetTotal;
 
+	}
+
+	public static List<Patrol> getPatrols(Plan plan) {
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" pp.id.patrol"); //$NON-NLS-1$
+		sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
+		sql.append(" WHERE pp.id.plan  =:uuid ");
+		
+		Session session = HibernateManager.openSession();
+		Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("uuid", plan); //$NON-NLS-1$
+
+		List list = q.list();
+
+		List<Patrol> patrols = new ArrayList<Patrol>();
+		Iterator it = list.iterator();
+		if(it.hasNext()){
+	        while(it.hasNext()){
+	        	//Object[] row = (Object[])it.next();
+	        	Patrol row = (Patrol)it.next();
+	        	patrols.add(row);
+	        }
+	    }
+
+		return patrols;
 	}
 }

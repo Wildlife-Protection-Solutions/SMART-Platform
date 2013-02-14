@@ -45,10 +45,10 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolEditor;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.patrol.ui.PatrolPerspective;
 
 /**
  * Command handler for importing patrol data from xml file.

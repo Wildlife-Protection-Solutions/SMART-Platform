@@ -19,7 +19,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
 public class DeletePatrolHandler extends AbstractHandler {
 	

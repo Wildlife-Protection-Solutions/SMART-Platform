@@ -477,7 +477,7 @@
                      ifEmpty="false"
                      operator="or">
                   <instanceof
-                        value="org.wcs.smart.patrol.internal.ui.editor.PatrolEditorInput">
+                        value="org.wcs.smart.patrol.ui.PatrolEditorInput">
                   </instanceof>
                </iterate>
             </with>
@@ -561,7 +561,7 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="org.wcs.smart.patrol.internal.ui.editor.PatrolPerspective"
+            class="org.wcs.smart.patrol.ui.PatrolPerspective"
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.PatrolPerspective"
             name="%patrol.perspective.name">
@@ -570,7 +570,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.patrol.internal.ui.editor.PatrolEditor"
+            class="org.wcs.smart.patrol.ui.PatrolEditor"
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolEditor"
             name="%patrol.editor.name">
