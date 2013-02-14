@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.common.control;
+package org.wcs.smart.ui.internal;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
 
 /**
  * 
@@ -54,15 +53,23 @@ public class OptionSelectionDialog extends Dialog {
 	private TableViewer fTableViewer;
 	private String[] options;
 	private IStructuredSelection selection;
-	private Label messageLabel;
-	private String messageText = ""; //$NON-NLS-1$
+	private String title;
+	private String message;
 	
 	/**
 	 * @param parentShell
 	 */
-	public OptionSelectionDialog(Shell shell, String[] options) {
+	public OptionSelectionDialog(Shell shell, String[] options, String title, String message) {
 		super(shell);
 		this.options = options;
+		this.title = title;
+		this.message = message;
+	}
+
+	@Override
+	protected void configureShell(Shell shell) {
+		super.configureShell(shell);
+		shell.setText(title);
 	}
 	
 	@Override
@@ -146,22 +153,14 @@ public class OptionSelectionDialog extends Dialog {
 		imageLabel.setLayoutData(new GridData(SWT.LEFT,
 				SWT.CENTER, false, false));
 
-		messageLabel = new Label(header, SWT.WRAP);
-		messageLabel.setText(getMessageText());
+		Label messageLabel = new Label(header, SWT.WRAP);
+		messageLabel.setText(message);
 		messageLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
 		fTableViewer = new TableViewer(parent,
 				SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		fTableViewer.setContentProvider(ArrayContentProvider.getInstance());
-		fTableViewer.setLabelProvider(new LabelProvider() {
-
-			public String getText(Object element) {
-				if (element instanceof LanguageType) {
-					return ((LanguageType) element).getCode();
-				}
-				return super.getText(element);
-			}
-		});
+		fTableViewer.setLabelProvider(new LabelProvider());
 		
 		fTableViewer.setInput(options);
 		fTableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -169,15 +168,4 @@ public class OptionSelectionDialog extends Dialog {
 		return parent;
 	}
 
-	protected String getMessageText() {
-		return messageText;
-	}
-	
-	public void setDialogMessage(String text) {
-		messageText = text;
-		if (messageLabel != null) {
-			messageLabel.setText(messageText);
-		}
-	}
-	
 };

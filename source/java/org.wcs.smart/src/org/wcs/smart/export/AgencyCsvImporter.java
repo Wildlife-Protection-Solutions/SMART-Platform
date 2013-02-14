@@ -41,10 +41,10 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Rank;
-import org.wcs.smart.common.control.OptionSelectionDialog;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.internal.OptionSelectionDialog;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -216,7 +216,10 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 		@Override
 		public void run() {
 			Shell shell = Display.getDefault().getActiveShell();
-			DefaultLanguageSelectDialog dialog = new DefaultLanguageSelectDialog(shell, options, defaultCode);
+			OptionSelectionDialog dialog = new OptionSelectionDialog(shell, options,
+					Messages.AgencyCsvImporter_LanguageDialog_Title,
+					MessageFormat.format(Messages.AgencyCsvImporter_LanguageDialog_Message, defaultCode));
+			
 			if (dialog.open() != IDialogConstants.OK_ID) {
 				setResult(null);
 				return;
@@ -233,23 +236,4 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 		}
 	}
 
-	/**
-	 * Dialog that allows user to select which language will be used as default
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private class DefaultLanguageSelectDialog extends OptionSelectionDialog {
-
-		public DefaultLanguageSelectDialog(Shell shell, String[] options, String defaultCode) {
-			super(shell, options);
-			setDialogMessage(MessageFormat.format(Messages.AgencyCsvImporter_LanguageDialog_Message, defaultCode));
-		}
-		
-		@Override
-		protected void configureShell(Shell shell) {
-			super.configureShell(shell);
-			shell.setText(Messages.AgencyCsvImporter_LanguageDialog_Title);
-		}
-	}
 }
