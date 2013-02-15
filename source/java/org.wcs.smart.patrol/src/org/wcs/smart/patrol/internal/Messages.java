@@ -113,7 +113,6 @@ public class Messages extends NLS {
 	public static String EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees;
 	public static String EmployeeLeaderPilotComposite_Title;
 	public static String EmployeeSelectComposite_AddEmployee_Label;
-	public static String EmployeeSelectComposite_SelectedEmployees_Label;
 	public static String ExportPatrolHandler_Error_CouldNotFindPatrol;
 	public static String ExportPatrolHandler_Error_ExportingPatrol;
 	public static String ExportPatrolHandler_Error_NothingToExport;
@@ -226,7 +225,6 @@ public class Messages extends NLS {
 	public static String MultiPatrolExportDialog_DeselectAll_Label;
 	public static String MultiPatrolExportDialog_DestinationFolderLabel;
 	public static String MultiPatrolExportDialog_ExportButton;
-	public static String MultiPatrolExportDialog_FilterResults_Label;
 	public static String MultiPatrolExportDialog_IncludeAttachmentsLabel;
 	public static String MultiPatrolExportDialog_LoadingText;
 	public static String MultiPatrolExportDialog_LoadPatrolJobName;
@@ -234,7 +232,6 @@ public class Messages extends NLS {
 	public static String MultiPatrolExportDialog_OverwriteWarningLabel;
 	public static String MultiPatrolExportDialog_PageTitle;
 	public static String MultiPatrolExportDialog_SelectAllLabel;
-	public static String MultiPatrolExportDialog_ShowAllResults_Label;
 	public static String MultiPatrolExportDialog_Title;
 	public static String NewPatrolHandler_Error_LoadingWizard;
 	public static String NewPatrolHandler_ErrorLoadingPerspective;
