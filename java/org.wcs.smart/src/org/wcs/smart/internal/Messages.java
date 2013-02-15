@@ -505,11 +505,9 @@ public class Messages extends NLS {
 	public static String ExportEmployeeDialog_CSVFormat_3;
 	public static String ExportEmployeeDialog_DialogMessage;
 	public static String ExportEmployeeDialog_DialogTitle;
-	public static String ExportEmployeeDialog_Error_FailedMessage;
 	public static String ExportEmployeeDialog_FailureMessage;
 	public static String ExportEmployeeDialog_IncludeHaderOp;
 	public static String ExportEmployeeDialog_SuccessMessage;
-	public static String ExportEmployeeDialog_waa;
 	public static String ExportCaHandler_DialogMessage;
 	public static String ExportCaHandler_DialogTitle;
 	public static String ExportCaHandler_Error_ExportFailedMessage;
@@ -561,10 +559,8 @@ public class Messages extends NLS {
 	public static String ImportEmployeeDialog_CSVFormat_3;
 	public static String ImportEmployeeDialog_DialogMessage;
 	public static String ImportEmployeeDialog_DialogTitle;
-	public static String ImportEmployeeDialog_Error_FailedMessage;
 	public static String ImportEmployeeDialog_FailureMessage;
 	public static String ImportEmployeeDialog_IncludeHaderOp;
-	public static String ImportEmployeeDialog_InfoDialog_Title;
 	public static String ImportEmployeeDialog_SuccessMessage;
 	public static String InitCaDataModelDialog_AllFiles_FilterName;
 	public static String InitCaDataModelDialog_Dialog_Title;
@@ -708,19 +704,8 @@ public class Messages extends NLS {
 	public static String SmartDataSourceFactory_SmartDataSourceName;
 	public static String SmartDB_Error_NoSmartDatabase;
 	public static String SmartDB_Error_ReadingDefaultCRS;
-
 	public static String SmartFilterDialog_Apply_Button;
-	public static String SmartFilterDialog_Error_DateMustBeSelected;
-	public static String SmartFilterDialog_Error_EndDateBeforeStart;
-	public static String SmartFilterDialog_OpContainDatesLabel_A;
-	public static String SmartFilterDialog_OpContainDatesLabel_B;
-	public static String SmartFilterDialog_OpFilterDatesLabel;
-	public static String SmartFilterDialog_OpFilterPatrolIdLabel;
-	public static String SmartFilterDialog_OpIncludeAllDatesLabel;
-	public static String SmartFilterDialog_OpIncludeAllPatrolsIdsLabel;
 	public static String SmartFilterDialog_Reset_Button;
-	
-	
 	public static String SmartGeoResourceInfo_Error_ComputingBounds;
 	public static String SmartInstallationInfoPage_DBLocation_Label;
 	public static String SmartInstallationInfoPage_DefaultLang_Label;
