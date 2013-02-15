@@ -34,6 +34,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PlanTarget;
 
 /**
@@ -60,7 +61,7 @@ public class TargetListViewer{
 		TableColumn column = viewerColumn.getColumn();
 
 		layout.setColumnData(column, new ColumnWeightData(34,ColumnWeightData.MINIMUM_WIDTH, true));
-		column.setText("Target Name");
+		column.setText(Messages.TargetListViewer_TargetName_Label);
 		column.setResizable(true);
 		column.setMoveable(true);
 		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
@@ -78,7 +79,7 @@ public class TargetListViewer{
 		viewerColumn = new TableViewerColumn(v,SWT.NONE);
 		column = viewerColumn.getColumn();
 		layout.setColumnData(column, new ColumnWeightData(66,ColumnWeightData.MINIMUM_WIDTH, true));
-		column.setText("Summary");
+		column.setText(Messages.TargetListViewer_Summary_Label);
 		column.setResizable(true);
 		column.setMoveable(true);
 		viewerColumn.setLabelProvider(new ColumnLabelProvider(){

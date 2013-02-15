@@ -31,7 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
-import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
 
 /**
@@ -41,8 +41,8 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  *
  */
 public class LoadPlanJob extends Job {
-	public static Object[] LOADING_PLANS = new Object[]{"Loading..."};
-	public static final String NONE_LABEL = "(None)";
+	public static Object[] LOADING_PLANS = new Object[]{Messages.LoadPlanJob_Loading};
+	public static final String NONE_LABEL = Messages.LoadPlanJob_None;
 	
 	private PlanViewer planViewer;
 	private PlanFilter currentFilter;
@@ -67,7 +67,7 @@ public class LoadPlanJob extends Job {
 	 * @param currentFilter
 	 */
 	public LoadPlanJob (PlanViewer planViewer, PlanFilter currentFilter, boolean addNone){
-		super("Load Plan Job");
+		super(Messages.LoadPlanJob_Title);
 		this.planViewer = planViewer;
 		this.currentFilter = currentFilter;
 		this.addNone = addNone;
@@ -80,7 +80,7 @@ public class LoadPlanJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask("Loading Plans", 1);
+		monitor.beginTask(Messages.LoadPlanJob_LoadPlans_Task, 1);
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {

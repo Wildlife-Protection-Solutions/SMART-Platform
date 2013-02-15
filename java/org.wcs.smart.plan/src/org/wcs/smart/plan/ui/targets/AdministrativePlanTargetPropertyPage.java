@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
@@ -85,7 +86,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 	
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Target Name:");
+		lbl.setText(Messages.AdministrativePlanTargetPropertyPage_Name_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetName = new Text(center, SWT.BORDER );
@@ -94,7 +95,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		
 		
 		Label lbl4 = new Label(center, SWT.NONE);
-		lbl4.setText("Target Description:");
+		lbl4.setText(Messages.AdministrativePlanTargetPropertyPage_Description_Label);
 		lbl4.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 
 		targetDesc= new Text(center, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
@@ -105,7 +106,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 
 		
 		Label lblt = new Label(center, SWT.NONE);
-		lblt.setText("Target has been achieved:");
+		lblt.setText(Messages.AdministrativePlanTargetPropertyPage_Achieved_Label);
 		lblt.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetIsComplete = new Button(center, SWT.CHECK);
@@ -146,7 +147,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		if (targetName.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(targetName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
 			cdTargetName.show();
-			cdTargetName.setDescriptionText("Name cannot be empty and must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdTargetName.setDescriptionText(Messages.AdministrativePlanTargetPropertyPage_EmptyName_Error + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}else{
 			cdTargetName.hide();

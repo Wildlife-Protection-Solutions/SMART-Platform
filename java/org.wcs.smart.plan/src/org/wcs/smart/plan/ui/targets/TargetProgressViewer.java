@@ -42,8 +42,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.PlanTargetStatus;
 import org.wcs.smart.plan.model.PlanTargetStatus.Status;
@@ -59,11 +58,11 @@ import org.wcs.smart.plan.model.PlanTargetStatus.Status;
 public class TargetProgressViewer{
 	
 	private enum TargetTableColumn{
-		PLANNAME("Plan",15),
-		TARGETNAME("Target Name", 20),
-		SUMMARY("Summary",45),
-		STATUS("Target Status", 30),
-		STATUS_ICON("", 5);
+		PLANNAME(Messages.TargetProgressViewer_Column_Plan,15),
+		TARGETNAME(Messages.TargetProgressViewer_Column_Name, 20),
+		SUMMARY(Messages.TargetProgressViewer_Column_Summary,45),
+		STATUS(Messages.TargetProgressViewer_Column_Status, 30),
+		STATUS_ICON("", 5); //$NON-NLS-1$
 		
 		public String guiName;
 		public int defaultWidth;
@@ -85,13 +84,13 @@ public class TargetProgressViewer{
 			}else if (this == STATUS){
 				PlanTargetStatus status = target.getCurrentStatus();
 				if (status == null){
-					value = "Computing...";
+					value = Messages.TargetProgressViewer_Computing_Label;
 				}else{
 					value = status.getDisplayString();
 				}
 			}
 			if (value == null){
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return value.trim();
 		}
@@ -139,7 +138,7 @@ public class TargetProgressViewer{
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lbl = toolkit.createLabel(container, "Total Targets Complete: 100/100"); 
+		lbl = toolkit.createLabel(container, Messages.TargetProgressViewer_TargetsComplete_Label); 
 		
 		Composite table = new Composite(container, SWT.NONE);
 		TableColumnLayout layout = new TableColumnLayout();
@@ -155,7 +154,7 @@ public class TargetProgressViewer{
 		//note this needs testing on mac.
 		TableViewerColumn viewerColumn = new TableViewerColumn(v,SWT.NONE);
 		TableColumn column = viewerColumn.getColumn();
-		column.setText("");
+		column.setText(""); //$NON-NLS-1$
 		column.setResizable(false);
 		column.setMoveable(false);
 		column.setWidth(0);
@@ -163,7 +162,7 @@ public class TargetProgressViewer{
 		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element) {
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		 
 		});
@@ -239,6 +238,7 @@ public class TargetProgressViewer{
 	public void refreshStatus(){
 		Object x = v.getInput();
 		if (x != null && x instanceof List){
+			@SuppressWarnings("unchecked")
 			List<PlanTarget> targets = (List<PlanTarget>)x;
 			for (PlanTarget pt : targets){
 				pt.clearCurrentStatus();
@@ -252,13 +252,14 @@ public class TargetProgressViewer{
 	/*
 	 * recomputes target status
 	 */
-	Job computeStatus = new Job("Compute Target Status"){
+	Job computeStatus = new Job(Messages.TargetProgressViewer_ComputeTargetStatus_JobTitle){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Object x = v.getInput();
 			int totalCompleteTargets = 0;
 			if (x != null && x instanceof List){
+				@SuppressWarnings("unchecked")
 				final List<PlanTarget> targets = (List<PlanTarget>)x;
 
 				for (PlanTarget pt : targets){
@@ -271,7 +272,7 @@ public class TargetProgressViewer{
 				Display.getDefault().asyncExec(new Runnable(){
 					public void run(){
 						v.refresh();
-						lbl.setText("Total Targets Complete: " + total + "/" + targets.size());
+						lbl.setText(Messages.TargetProgressViewer_TargetsComplete_Label + " " + total + "/" + targets.size()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				});
 			}

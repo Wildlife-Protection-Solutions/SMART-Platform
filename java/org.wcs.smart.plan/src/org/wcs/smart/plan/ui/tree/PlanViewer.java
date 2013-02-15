@@ -92,10 +92,10 @@ public class PlanViewer {
 		    		String a = ((Plan)e1).getName();
 		    		String b = ((Plan)e2).getName();
 		    		if (a == null){
-		    			a = "";
+		    			a = ""; //$NON-NLS-1$
 		    		}
 		    		if (b == null){
-		    			b = "";
+		    			b = ""; //$NON-NLS-1$
 		    		}
 		            return Collator.getInstance().compare(a,b);
 		    	}else if (e1 instanceof Plan ){

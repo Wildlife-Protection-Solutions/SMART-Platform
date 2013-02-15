@@ -27,6 +27,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.ui.perspective.PlanPerspective;
 
 
@@ -44,7 +45,7 @@ public class ShowPlanPersepctiveHandler extends AbstractHandler {
 			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench()
 					.showPerspective(PlanPerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
 		} catch (WorkbenchException e) {
-			SmartPlanPlugIn.displayLog("Error Loading the Plan Perspective", e);
+			SmartPlanPlugIn.displayLog(Messages.ShowPlanPersepctiveHandler_Load_Error, e);
 		}
 		return null;
 	}
