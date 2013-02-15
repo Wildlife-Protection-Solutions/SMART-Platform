@@ -24,17 +24,25 @@ package org.wcs.smart.plan.ui.editor;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -42,18 +50,20 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -102,8 +112,111 @@ public class PlanEditor extends EditorPart {
 	private TargetProgressViewer targetList2; //the child plan's targets
 
 	private Composite content;
+	private Composite patrolLinks;
 	
-	private Plan currentPlan = null;
+	/*
+	 * refreshes the children targets.  This is done in a separate job
+	 * as it may take time and requires an active hibernate session
+	 */
+	Job refreshPlanTargets = new Job("Refresh Children Targets"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			final List<PlanTarget> childTargets = new ArrayList<PlanTarget>();
+			
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try {
+				Plan thisPlan = (Plan) session.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
+				getChildTargets(thisPlan, childTargets);
+			}finally{
+				session.close();
+			}
+			Display.getDefault().asyncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					targetList2.initValues(childTargets);
+					
+				}});
+			
+			
+			return Status.OK_STATUS;
+		}
+		
+	};
+	
+	/*
+	 * job to load the patrol links; done inside a job
+	 * as it may take time and requies an active hibernate session
+	 */
+	private Job loadPatrolsLinksJob = new Job("Loading Patrols"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Display.getDefault().syncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					for (Control kid : patrolLinks.getChildren()){
+						kid.dispose();
+					}
+					toolkit.createLabel(patrolLinks, "Loading...");
+					form.layout();
+				}});
+			
+			final List<PatrolEditorInput> myPatrols = PlanHibernateManager.getPatrols(plan);
+			final Set<PatrolEditorInput> childPatrols = new HashSet<PatrolEditorInput>();
+			
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				Plan thisPlan = (Plan) s.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
+				getChildPlanPatrols(thisPlan, childPatrols);
+			}finally{
+				s.close();
+			}
+			
+			Display.getDefault().syncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					for (Control kid : patrolLinks.getChildren()){
+						kid.dispose();
+					}
+					
+					
+					if (myPatrols.size() == 0 && childPatrols.size() == 0) {
+						toolkit.createLabel(patrolLinks,
+								"None");
+					} else {
+						for (final PatrolEditorInput x : myPatrols){
+							Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getPatrolId(), SWT.WRAP);
+							lnk.addHyperlinkListener(new HyperlinkAdapter() {
+								@Override
+								public void linkActivated(HyperlinkEvent e) {
+									openPatrol(x);
+								}
+							});
+						}
+						for (final PatrolEditorInput x : childPatrols){
+							Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getPatrolId() + "(c)",
+									SWT.WRAP);
+							lnk.addHyperlinkListener(new HyperlinkAdapter() {
+								@Override
+								public void linkActivated(HyperlinkEvent e) {
+									openPatrol(x);
+								}
+							});
+						}
+					}
+					form.layout();
+						
+				}});
+			return Status.OK_STATUS;
+
+		}};
+	
 	/**
 	 * listener for plan change events.
 	 */
@@ -173,59 +286,65 @@ public class PlanEditor extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		Composite container = toolkit.createComposite(parent, SWT.NONE);
-
-		toolkit.paintBordersFor(container);
-		container.setLayout(new GridLayout(1, true));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		form = toolkit.createForm(container);
+		form = toolkit.createForm(parent);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		form.getBody().setLayout(new GridLayout(1, true));
 
-		Composite container2 = toolkit.createComposite(form.getBody(), SWT.NONE);
-		container2.setLayout(new GridLayout(2, true));
-		container2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		final Section summary = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE );
+		summary.setLayout(new GridLayout(2, false));
+		summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		summary.setText("Plan Summary");
+		summary.addExpansionListener(new ExpansionAdapter() {
+			
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				if (summary.isExpanded()){
+					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
+				}else{
+					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				}
+				summary.getParent().layout();
+			}
+		});
+		
+		content = toolkit.createComposite(summary, SWT.NONE);
+		
+		summary.setClient(content);
 
-		content = toolkit.createComposite(container2, SWT.NONE);
-		GridLayout leftLayout = new GridLayout(3, false);
-		leftLayout.verticalSpacing = 10;
-		content.setLayout(leftLayout);
-		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)content.getLayout()).marginRight = 10;
+		content.setLayout(new GridLayout(2, false));
+		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Composite rightContent = toolkit.createComposite(container2, SWT.NONE);
-		GridLayout rightLayout = new GridLayout(3, false);
-		rightLayout.verticalSpacing = 10;
-		rightContent.setLayout(rightLayout);
-		rightContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)rightContent.getLayout()).marginRight = 10;
+		Composite leftContent = toolkit.createComposite(content, SWT.NONE);
+		leftContent.setLayout(new GridLayout(3, false));
+		leftContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		Composite rightContent = toolkit.createComposite(content, SWT.NONE);
+		rightContent.setLayout(new GridLayout(3, false));
+		rightContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)rightContent.getLayout()).marginLeft = 20;
 		
-		toolkit.createLabel(content, "Plan ID:");
-		txtPlanID= toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		//left
+		toolkit.createLabel(leftContent, "Plan ID:");
+		txtPlanID= toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtPlanID.setEditable(false);
 		txtPlanID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.PLANID);
+		toolkit.createLabel(leftContent, ""); 
 		
-		toolkit.createLabel(content, "Plan Name:");
-		txtName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(leftContent, "Plan Name:");
+		txtName = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(content, "");
+		toolkit.createLabel(leftContent, "");
 		
-		toolkit.createLabel(content, "Description:");
-		txtDescription = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(leftContent, "Description:");
+		txtDescription = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtDescription.setEditable(false);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(content, ""); 
-
-		//spacer row for grouping items
-		toolkit.createLabel(content, "");
-		Label lbl = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
+		((GridData)txtDescription.getLayoutData()).widthHint = 100;
+		createEditLink(toolkit, leftContent, PanelType.PLANID);
 		
+		// - right
 		toolkit.createLabel(rightContent, "Plan Type:");
 		txtType = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtType.setEditable(false);
@@ -236,113 +355,143 @@ public class PlanEditor extends EditorPart {
 		txtUnavailableEmployees = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtUnavailableEmployees.setEditable(false);
 		txtUnavailableEmployees.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(rightContent, "");
-
-		//spacer row for grouping items
-		toolkit.createLabel(rightContent, "");
-
-		Label lbl1 = toolkit.createSeparator(rightContent, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
+		createEditLink(toolkit, rightContent, PanelType.TYPE);
 		
-		toolkit.createLabel(rightContent, "Station:");
-		txtStation = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
-		txtStation.setEditable(false);
-		txtStation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, rightContent, PanelType.STATION); 
-
-		toolkit.createLabel(rightContent, "Team:");
-		txtTeam = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
-		txtTeam.setEditable(false);
-		txtTeam.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(rightContent, "");
-
-		//spacer row for grouping items
-		toolkit.createLabel(rightContent, "");
-		Label lbl3 = toolkit.createSeparator(rightContent, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
-				
-		toolkit.createLabel(rightContent, "Parent ID:");
+		toolkit.createLabel(rightContent, "Parent Plan:");
 		txtParentPlanId = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
 		txtParentPlanId.setEditable(false);
 		txtParentPlanId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, rightContent, PanelType.PLANPARENTID);
 
+		// left
+		Label lbl = toolkit.createLabel(leftContent, "");
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,1));
 		
-		
-		toolkit.createLabel(content, "Start Date:");
-		txtStartDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(leftContent, "Start Date:");
+		txtStartDate = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtStartDate.setEditable(false);
 		txtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(toolkit, content, PanelType.STARTDATE);
+		toolkit.createLabel(leftContent, "");
 
-		toolkit.createLabel(content, "End Date:");
-		txtEndDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
+		toolkit.createLabel(leftContent, "End Date:");
+		txtEndDate = toolkit.createText(leftContent, "", SWT.NONE); //$NON-NLS-1$
 		txtEndDate.setEditable(false);
 		txtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(content, "");
+		
+		createEditLink(toolkit, leftContent, PanelType.STARTDATE);
+		
+		//right
+		Label lbl1 = toolkit.createLabel(rightContent, "");
+		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,1));
+		
+		toolkit.createLabel(rightContent, "Station:");
+		txtStation = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
+		txtStation.setEditable(false);
+		txtStation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		toolkit.createLabel(rightContent, ""); 
 
-		//spacer row for grouping items
-		toolkit.createLabel(content, "");
-		Label lbl33 = toolkit.createSeparator(content, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl33.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
+		toolkit.createLabel(rightContent, "Team:");
+		txtTeam = toolkit.createText(rightContent, "", SWT.NONE); //$NON-NLS-1$
+		txtTeam.setEditable(false);
+		txtTeam.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(toolkit, rightContent, PanelType.STATION);
 		
-		toolkit.createLabel(content, "Associated Patrols:\n(c) = child plan's");
+		//bottom
+		Composite bottomContent = toolkit.createComposite(content, SWT.NONE);
+		bottomContent.setLayout(new GridLayout(2, false));
+		bottomContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label l = toolkit.createLabel(bottomContent, "Patrols:" + "*");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		((GridData)l.getLayoutData()).verticalIndent = 4;
+		patrolLinks  = toolkit.createComposite(bottomContent);
+		patrolLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		//patrolLinks.setLayout(new FillLayout(SWT.HORIZONTAL));
+		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
+		layout.wrap = true;
+		layout.spacing = 5;
+		patrolLinks.setLayout(layout);
+		
+		Label lc = toolkit.createLabel(content, "* (c) - child plans patrols");
+		lc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
+		final Section targetSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+		targetSection.setText("Targets");
+		targetSection.setLayout(new GridLayout(3, false));
+		targetSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		targetSection.addExpansionListener(new ExpansionAdapter() {
+			
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				if (targetSection.isExpanded()){
+					targetSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
+				}else{
+					targetSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				}
+				targetSection.getParent().layout();
+			}
+		});
+	
+		Composite targetContent = toolkit.createComposite(targetSection);
+		targetSection.setClient(targetContent);
 		
-		Composite targetContent = toolkit.createComposite(container2, SWT.NONE);
-		GridLayout targetLayout = new GridLayout(3, false);
-		targetLayout.verticalSpacing = 10;
-		targetContent.setLayout(targetLayout);
-		targetContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
-		((GridLayout)targetContent.getLayout()).marginRight = 10;
+		targetContent.setLayout(new GridLayout(2, false));
+		targetContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Label ll2 = toolkit.createLabel(targetContent, "Plan Targets");
+		ll2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		FontData fd = ll2.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		final Font boldFont = new Font(Display.getDefault(),fd);
+		form.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				boldFont.dispose();
+				
+			}
+		});
+		ll2.setFont(boldFont);
 		
 		
-		toolkit.createLabel(targetContent, "Plan Targets:");
 		targetList  = new TargetProgressViewer(targetContent );
 
-		
 		Composite targetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		targetButtons.setLayout(new GridLayout(1, false));
-		targetButtons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-
-		
-		createEditLink(toolkit, targetButtons, PanelType.TARGETS); 
-
-		Button btnRefresh = new Button(targetButtons, SWT.NONE);
-		btnRefresh.setText("Refresh");
-		btnRefresh.addSelectionListener(new SelectionAdapter() {
+		targetButtons.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+	
+		Hyperlink lnkRefresh = toolkit.createHyperlink(targetButtons, "Refresh", SWT.NONE);
+		lnkRefresh.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				initValues();
+			public void linkActivated(HyperlinkEvent e) {
+				targetList.refreshStatus();
 			}
-			
 		});
+		createEditLink(toolkit, targetButtons, PanelType.TARGETS);
+
 		
+		Label ll = toolkit.createLabel(targetContent, "Child Plan Targets");
+		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		ll.setFont(boldFont);
 		
-		toolkit.createLabel(targetContent, "Child Plan Targets:");
 		targetList2  = new TargetProgressViewer(targetContent );
 
-		
-		Composite targetButtons2 = toolkit.createComposite(targetContent, SWT.NONE);
-		targetButtons2.setLayout(new GridLayout(1, false));
-		targetButtons2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-
-		
-		Button btnRefresh2 = new Button(targetButtons2, SWT.NONE);
-		btnRefresh2.setText("Refresh");
-		btnRefresh2.addSelectionListener(new SelectionAdapter() {
+		Composite childTargetButtons = toolkit.createComposite(targetContent, SWT.NONE);
+		childTargetButtons.setLayout(new GridLayout(1, false));
+		childTargetButtons.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+	
+		Hyperlink lnkRefreshChild = toolkit.createHyperlink(childTargetButtons, "Refresh", SWT.NONE);
+		lnkRefreshChild.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				initValues();
+			public void linkActivated(HyperlinkEvent e) {
+				refreshPlanTargets.schedule();
 			}
-			
 		});
-
-		
-		
+				
 		initValues();
 	}
 
+	
+	
 	/**
 	 * Updates the widgets with the value from the plan.
 	 */
@@ -389,56 +538,14 @@ public class PlanEditor extends EditorPart {
 			txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
 					.format(plan.getEndDate()));
 
-			List<Patrol> myPatrols = PlanHibernateManager.getPatrols(plan);
-			List<Patrol> childPatrols = getChildPlanPatrols(plan);
-			
-			
-			Composite patrolLinks = toolkit.createComposite(content);
-			patrolLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			patrolLinks.setLayout(new GridLayout(2, false));
-
-			if (myPatrols.size() == 0 && childPatrols.size() == 0) {
-				toolkit.createLabel(patrolLinks,
-						"No patrols yet.");
-			} else {
-				for (Patrol x : myPatrols){
-					Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getId(),
-							SWT.WRAP);
-					final Patrol tmp = x;
-					lnk.addHyperlinkListener(new HyperlinkAdapter() {
-						@Override
-						public void linkActivated(HyperlinkEvent e) {
-							openPatrol(tmp);
-						}
-					});
-				}
-				for (Patrol x : childPatrols){
-					Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getId() + "(c)",
-							SWT.WRAP);
-					final Patrol tmp = x;
-					lnk.addHyperlinkListener(new HyperlinkAdapter() {
-						@Override
-						public void linkActivated(HyperlinkEvent e) {
-							openPatrol(tmp);
-						}
-					});
-				}
-
+			for (Control kid : patrolLinks.getChildren()){
+				kid.dispose();
 			}
-			
-			
 			
 			targetList.initValues(plan.getTargets());
 			
-			List<Plan> children = plan.getChildren();
-			List<PlanTarget> childTargets = new ArrayList<PlanTarget>();
-			for(Plan p : children){
-				List<PlanTarget> tars = p.getTargets();
-				for(PlanTarget pt : tars){
-					childTargets.add(pt);
-				}
-			}
-			targetList2.initValues(childTargets);
+			loadPatrolsLinksJob.schedule();
+			refreshPlanTargets.schedule();
 			
 			
 			session.getTransaction().rollback();
@@ -447,13 +554,19 @@ public class PlanEditor extends EditorPart {
 		}
 		
 	}
-	private void openPatrol(Patrol p){
-		PatrolEditorInput in = new PatrolEditorInput(p.getUuid(), p.getId(), p.getPatrolType(), p.getStartDate(), p.getEndDate());
+	
+	private void getChildTargets(Plan parent, List<PlanTarget> targets){
+		for(Plan p : parent.getChildren()){
+			targets.addAll(p.getTargets());
+			getChildTargets(p, targets);
+		}
+	}
+	private void openPatrol(PatrolEditorInput p){
 		try {
 			PlatformUI.getWorkbench().showPerspective(PatrolPerspective.ID, 
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().openEditor(in, PatrolEditor.ID);
+					.getActivePage().openEditor(p, PatrolEditor.ID);
 		} catch (Exception e1) {
 			SmartPlanPlugIn.displayLog(
 					"Could not open plan. "
@@ -466,18 +579,13 @@ public class PlanEditor extends EditorPart {
 	 * 
 	 * @return the current plan associated with the editor
 	 */
-	private List<Patrol> getChildPlanPatrols(Plan plan){
-		List<Patrol> patrols = new ArrayList<Patrol>();
+	private void getChildPlanPatrols(Plan plan, Set<PatrolEditorInput> kids){
 		if(plan.getChildren() == null){
-			return patrols;
+			return;
 		}
 		for (Plan p : plan.getChildren()){
-			List<Patrol> curPatrols = PlanHibernateManager.getPatrols(p);
-			for(Patrol x : curPatrols){
-				patrols.add(x);
-			}
+			kids.addAll(PlanHibernateManager.getPatrols(p));
 		}
-		return patrols;
 	}
 
 	/**
@@ -586,6 +694,7 @@ public class PlanEditor extends EditorPart {
 
 	@Override
 	public void setFocus() {
+		//TODO: fix me
 		txtPlanID.setFocus();
 	}
 

@@ -52,18 +52,14 @@ import org.hibernate.annotations.GenericGenerator;
 public abstract class PlanTarget{
 
 	public static final int MAX_NAME_LENGTH = 32;
-	
 
 	private String name;
-	private PlanTarget.TargetCategory cat;
 	private Plan plan;
 	private byte[] uuid;
 
-	
-	public static enum TargetCategory {
-		ALPHANUMERIC, SPATIAL, ADMIN; 
-	}
-	
+	@Transient
+	private PlanTargetStatus currentStatus = null;
+
 	/**
 	 * 
 	 * @return String representation of the target
@@ -121,14 +117,6 @@ public abstract class PlanTarget{
 		this.name = name;
 	}
 	
-	/* Don't think we need this, the discriminator at the top seems to add it automagically?
-	@Column(name = "category")
-	*/
-	@Transient
-	public PlanTarget.TargetCategory getCat(){
-		return this.cat;
-	}
-
 
 	/**
 	 * Clone the give plan target.
@@ -145,15 +133,36 @@ public abstract class PlanTarget{
 	 */
 	public PlanTarget clone(PlanTarget pt){
 		pt.name = this.name;
-		pt.cat = this.cat;
 		pt.plan = this.plan;
 		return pt;
 	}
 
 	
+	/**
+	 * 
+	 * @return the last computed target status
+	 */
 	@Transient
-	public abstract String getStatusDisplayString();
-	@Transient
-	public abstract boolean computeStatus();
+	public PlanTargetStatus getCurrentStatus(){
+		return this.currentStatus;
+	}
 	
+	/**
+	 * Recomputes the target status
+	 */
+	@Transient
+	public void refreshStatus(){
+		this.currentStatus = PlanTargetEngine.getInstance().computeTargetStatus(this);
+	}
+	
+	/**
+	 * Clears the targets current status
+	 */
+	@Transient
+	public void clearCurrentStatus(){
+		this.currentStatus = null;
+		
+	}
+
+
 }

@@ -86,17 +86,4 @@ public class SpatialPlanTarget extends PlanTarget {
 		return spt;
 	}
 
-	@Transient
-	@Override
-	public String getStatusDisplayString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean computeStatus() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

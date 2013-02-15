@@ -153,7 +153,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetName.setTextLimit(32);
 
-		targetName.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
+		targetName.setLayoutData(createGridDataWithIndent());
 		if(planTarget == null){
 			targetName.setText( getTargetType().getName() );
 		}

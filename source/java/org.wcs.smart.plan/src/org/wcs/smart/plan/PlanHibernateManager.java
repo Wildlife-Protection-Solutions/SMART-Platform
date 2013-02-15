@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,8 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PatrolPlan;
@@ -364,12 +367,17 @@ public class PlanHibernateManager{
 
 	}
 
-	public static List<Patrol> getPatrols(Plan plan) {
+	/**
+	 * Returns all patrols directory associated with a given plan.
+	 *  
+	 * @param plan
+	 * @return a list of {@link PatrolEditorInput} directly associated with the plan.
+	 */
+	public static List<PatrolEditorInput> getPatrols(Plan plan){
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
-		sql.append(" pp.id.patrol"); //$NON-NLS-1$
+		sql.append(" SELECT pp.id.patrol.uuid, pp.id.patrol.id, pp.id.patrol.patrolType, pp.id.patrol.startDate, pp.id.patrol.endDate"); //$NON-NLS-1$
 		sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
-		sql.append(" WHERE pp.id.plan  =:uuid ");
+		sql.append(" WHERE pp.id.plan  =:uuid ");  //$NON-NLS-1$
 		
 		Session session = HibernateManager.openSession();
 		Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -377,16 +385,14 @@ public class PlanHibernateManager{
 
 		List list = q.list();
 
-		List<Patrol> patrols = new ArrayList<Patrol>();
-		Iterator it = list.iterator();
-		if(it.hasNext()){
-	        while(it.hasNext()){
-	        	//Object[] row = (Object[])it.next();
-	        	Patrol row = (Patrol)it.next();
-	        	patrols.add(row);
-	        }
-	    }
-
-		return patrols;
+		List<PatrolEditorInput> patrols = new ArrayList<PatrolEditorInput>();
+		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
+			Object[] data = (Object[]) iterator.next();
+			
+			PatrolEditorInput pi = new PatrolEditorInput((byte[])data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3], (Date)data[4]);
+			patrols.add(pi);
+		}
+		return patrols;		
 	}
+	
 }
