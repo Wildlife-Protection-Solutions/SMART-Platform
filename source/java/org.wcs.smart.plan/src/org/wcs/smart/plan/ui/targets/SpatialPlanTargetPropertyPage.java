@@ -78,7 +78,10 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData centerLayout = new GridData(SWT.FILL, SWT.FILL, true, true);
+		centerLayout.grabExcessVerticalSpace = false;
+		centerLayout.heightHint = 90;
+		center.setLayoutData(centerLayout);
 	
 		Label nameLabel = new Label(center, SWT.NONE);
 		nameLabel.setText(Messages.SpatialPlanTargetPropertyPage_Name_Label);
