@@ -34,8 +34,13 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.model.PlanTargetStatus;
+import org.wcs.smart.plan.model.PlanTargetStatus.Status;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -117,26 +122,46 @@ public class PlanDatesComposite extends PlanComposite {
 	}
 
 	@Override
-	public void initFromModel(Plan plan) {
-		try{
-			Calendar startDate = SmartUtils.convertDate(plan.getStartDate());
-			Calendar endDate = SmartUtils.convertDate(plan.getEndDate());
+	public void initFromModel(Plan plan){
+		Plan thisParentPlan = null;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			if(plan.getParent() != null){
+				thisParentPlan = (Plan) session.load(Plan.class, plan.getParent().getUuid());
+			}
+
+			Calendar startDate; 
+			Calendar endDate; 
+			if(plan.getStartDate() != null){
+				startDate = SmartUtils.convertDate(plan.getStartDate());
+			}else{
+				startDate = SmartUtils.convertDate(new Date());
+			}
+			if(plan.getEndDate() != null){
+				endDate = SmartUtils.convertDate(plan.getEndDate());
+			}else{
+				endDate = SmartUtils.convertDate(new Date()); 
+			}
 			dtStartDate.setDate(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH), startDate.get(Calendar.DATE));
 			dtEndDate.setDate(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DATE));
-			if(plan.getParent() != null){
-				parentStartDate = plan.getParent().getStartDate();
+			if(thisParentPlan != null){
+				parentStartDate = thisParentPlan.getStartDate();
 			}else{
 				parentStartDate = null;
 			}
 			
-			if(plan.getParent() != null){
-				parentEndDate = plan.getParent().getEndDate();
+			if(thisParentPlan != null){
+				parentEndDate = thisParentPlan.getEndDate();
 			}else{
 				parentEndDate = null;
 			}
-		}catch (Exception e) {
-			// OK, no data to update will give us Exceptions
+			session.getTransaction().rollback();
+		} finally {
+			session.close();
+
 		}
+
 		isDataValid();
 
 	}
@@ -149,6 +174,7 @@ public class PlanDatesComposite extends PlanComposite {
 	private boolean isValidDates() {
 		boolean isValid = true;
 		cdEndDate.hide();
+		cdStartDate.hide();
 		if(dtStartDate == null || dtEndDate == null){
 			isValid = false;
 			cdEndDate.show();
@@ -169,7 +195,7 @@ public class PlanDatesComposite extends PlanComposite {
 		if(parentEndDate != null && (SmartUtils.getDate(dtStartDate)).before(parentStartDate) ){
 			isValid = false;
 			cdStartDate.show();
-			cdStartDate.setDescriptionText(Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + parentStartDate + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			cdStartDate.setDescriptionText(Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + parentStartDate + ")---"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return isValid;
 	}

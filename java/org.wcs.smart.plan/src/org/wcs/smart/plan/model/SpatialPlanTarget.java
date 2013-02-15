@@ -94,7 +94,7 @@ public class SpatialPlanTarget extends PlanTarget {
 	@Transient
 	public int getDistanceForCompletion() {
 		//TODO make this a property value, or possible a configuration for each spatial target created, or both...
-		return 100;
+		return 250;
 	}
 
 }

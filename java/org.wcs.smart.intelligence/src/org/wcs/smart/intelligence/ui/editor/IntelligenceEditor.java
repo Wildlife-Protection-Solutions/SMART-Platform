@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
@@ -189,13 +190,15 @@ public class IntelligenceEditor extends EditorPart {
 		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(toolkit, content, PanelType.DESCRIPTION); 
 		
-		toolkit.createLabel(content, Messages.IntelligenceDesc_Description_Label);
+		Label descLbl = toolkit.createLabel(content, Messages.IntelligenceDesc_Description_Label);
+		descLbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		txtDescription = toolkit.createText(content, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtDescription.setEditable(false);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)txtDescription.getLayoutData()).heightHint=80;
 //		((GridData)txtDescription.getLayoutData()).widthHint=100;
-		createEditLink(toolkit, content, PanelType.DESCRIPTION); 
+		Hyperlink descLink = createEditLink(toolkit, content, PanelType.DESCRIPTION); 
+		descLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
 		toolkit.createLabel(content, Messages.IntelligenceDates_From_Label);
 		txtFromDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
@@ -209,21 +212,25 @@ public class IntelligenceEditor extends EditorPart {
 		txtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
-		toolkit.createLabel(content, Messages.IntelligenceLocation_Location_Label);
+		Label locLbl = toolkit.createLabel(content, Messages.IntelligenceLocation_Location_Label);
+		locLbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		Table pointsTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
 		pointsList = new TableViewer(pointsTable);
 		pointsList.setContentProvider(ArrayContentProvider.getInstance());
 		pointsList.setLabelProvider(new SmartPointLabelProvider());
 		pointsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		createEditLink(toolkit, content, PanelType.LOCATION); 
+		Hyperlink locLink = createEditLink(toolkit, content, PanelType.LOCATION);
+		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 
-		toolkit.createLabel(content, Messages.IntelligenceAttachments_Attachments_Label);
+		Label attachLbl = toolkit.createLabel(content, Messages.IntelligenceAttachments_Attachments_Label);
+		attachLbl .setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		Table attachTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
 		attachmentsList = new TableViewer(attachTable);
 		attachmentsList.setContentProvider(ArrayContentProvider.getInstance());
 		attachmentsList.setLabelProvider(new SmartAttachmentLabelProvider());
 		attachTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		createEditLink(toolkit, content, PanelType.ATTACHMENTS); 
+		Hyperlink attachLink = createEditLink(toolkit, content, PanelType.ATTACHMENTS);
+		attachLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
 		initValues();
 	}
