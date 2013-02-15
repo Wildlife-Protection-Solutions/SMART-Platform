@@ -90,7 +90,7 @@ public class PlanTargetEngine {
 			List<SpatialPlanTargetPoint> points= target.getPoints();
 			for(SpatialPlanTargetPoint n : points){
 				//as soon as we see one point was not met, just break so we close the transaction properly;
-				if(!pointHasBeenVisited(thisTarget.getDistanceForCompletion(), thisTarget.getPlan(), n )){
+				if(!pointHasBeenVisited(thisTarget.getDistanceForCompletion(), thisTarget.getPlan(), n, session)){
 					result.setStatus(Status.INCOMPLETE);
 					break;
 				}
@@ -185,19 +185,19 @@ public class PlanTargetEngine {
 	}
 
 
-	private boolean pointHasBeenVisited(int distanceForCompletion, Plan plan, SpatialPlanTargetPoint spt) {
+	private boolean pointHasBeenVisited(int distanceForCompletion, Plan plan, SpatialPlanTargetPoint spt, Session session) {
 		GeometryFactory fact = new GeometryFactory();
 		Coordinate c = new Coordinate(spt.getX(), spt.getY());
         Point point = fact.createPoint(c);
         
-		for(Track t : PlanHibernateManager.getAllTracks(plan) ){
+		for(Track t : PlanHibernateManager.getAllTracks(plan, session) ){
 			if(GeometryUtils.distanceInMeters(t.getLineString(), point) <= distanceForCompletion ){
 				return true;
 			}
 		}
 		
 		for(Plan x: plan.getChildren() ){
-			if(pointHasBeenVisited(distanceForCompletion, x, spt) ){
+			if(pointHasBeenVisited(distanceForCompletion, x, spt, session) ){
 				return true;
 			}
 		}

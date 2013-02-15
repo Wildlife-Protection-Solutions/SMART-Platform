@@ -30,6 +30,8 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -147,6 +149,7 @@ public class TargetProgressViewer{
 		v.getTable().setHeaderVisible(true);
 		v.getTable().setLinesVisible(true);
 		
+	
 		
 		//create a blank empty column that is hidden
 		//see: 
