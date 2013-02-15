@@ -50,6 +50,8 @@ public class PlanCaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
+		monitor.subTask(Messages.PlanCaDeleteHandler_DeletePatrolPlan_SubTasl);
+		deletePatrolPlan(ca, session);
 		monitor.subTask(Messages.PlanCaDeleteHandler_DeleteTargets_SubTask);
 		deletePlanTargets(ca, session);
 		monitor.subTask(Messages.PlanCaDeleteHandler_DeletePlans_SubTask);
@@ -57,6 +59,12 @@ public class PlanCaDeleteHandler implements ICaDeleteHandler{
 				
 	}
 
+	private void deletePatrolPlan(ConservationArea ca, Session session) throws Exception{
+		Query q = session.createQuery("delete PatrolPlan p where p.id.plan in (select pp.id.plan from PatrolPlan pp where pp.id.plan.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	}
+	
 	private void deletePlans(ConservationArea ca, Session session) throws Exception{
 		Query q = session.createQuery("delete from Plan where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$

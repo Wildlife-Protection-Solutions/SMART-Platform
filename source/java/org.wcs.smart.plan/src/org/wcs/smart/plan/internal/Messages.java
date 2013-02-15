@@ -57,6 +57,7 @@ public class Messages extends NLS {
 	public static String PatrolPlanContribution_PlanId_Label;
 	public static String PatrolPlanContribution_RefreshJob_Title;
 	public static String PatrolPlanContribution_Save_Error;
+	public static String PlanCaDeleteHandler_DeletePatrolPlan_SubTasl;
 	public static String PlanCaDeleteHandler_DeletePlans_SubTask;
 	public static String PlanCaDeleteHandler_DeleteTargets_SubTask;
 	public static String PlanCompositeFactory_Title_EndDate;
