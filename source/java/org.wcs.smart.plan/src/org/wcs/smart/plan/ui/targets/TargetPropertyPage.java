@@ -36,6 +36,9 @@ import java.util.List;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -155,6 +158,14 @@ public class TargetPropertyPage extends Dialog {
 		}
 		
 		tabFolder.pack();
+		tabFolder.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				int index = tabFolder.getSelectionIndex();
+				if (index >= 0 && index < tabs.size()) {
+					enableOK(tabs.get(index).validate());
+				}
+			}
+		});
 		
 		init();
 		return parent;
