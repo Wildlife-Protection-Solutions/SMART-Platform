@@ -65,8 +65,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class TargetPropertyPage extends Dialog {
 
-	private static final int TAB_FOLDER_HEIGHT_HINT = 340;
-	private static final int TAB_FOLDER_WIDTH_HINT = 400;
+	private static final int TAB_FOLDER_HEIGHT_HINT = 480;
+	private static final int TAB_FOLDER_WIDTH_HINT = 600;
 	
 	private List<PlanTarget> parentTargets;
 	private PlanTarget toUpdate;
