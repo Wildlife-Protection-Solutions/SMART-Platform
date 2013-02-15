@@ -203,7 +203,7 @@ public class TargetProgressViewer{
 
 		table.setLayout(layout);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)table.getLayoutData()).heightHint = 120;
+		((GridData)table.getLayoutData()).heightHint = 80;
 	}
 	public TableViewer getViewer(){
 		return this.v;

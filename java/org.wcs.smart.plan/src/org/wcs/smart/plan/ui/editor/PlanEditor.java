@@ -34,10 +34,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -96,8 +101,6 @@ public class PlanEditor extends EditorPart {
 	
 	private boolean isDirty;
 	private Form form;
-
-	
 	private Text txtStation;
 	private Text txtTeam;
 	private Text txtType;
@@ -115,6 +118,8 @@ public class PlanEditor extends EditorPart {
 	private Composite content;
 	private Composite patrolLinks;
 	
+	private ScrolledComposite summaryScroll;
+	
 	/*
 	 * refreshes the children targets.  This is done in a separate job
 	 * as it may take time and requires an active hibernate session
@@ -131,6 +136,7 @@ public class PlanEditor extends EditorPart {
 				Plan thisPlan = (Plan) session.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
 				getChildTargets(thisPlan, childTargets);
 			}finally{
+				session.getTransaction().rollback();
 				session.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
@@ -210,9 +216,9 @@ public class PlanEditor extends EditorPart {
 								}
 							});
 						}
-					}
-					form.layout(true, true);
-						
+					}					
+			        form.layout();
+	
 				}});
 			return Status.OK_STATUS;
 
@@ -298,14 +304,14 @@ public class PlanEditor extends EditorPart {
 
 		final Section summary = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE );
 		summary.setLayout(new GridLayout(2, false));
-		summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		summary.setText(Messages.PlanEditor_Summary_Label);
 		summary.addExpansionListener(new ExpansionAdapter() {
 			
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				if (summary.isExpanded()){
-					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
+					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));			
 				}else{
 					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}
@@ -313,18 +319,32 @@ public class PlanEditor extends EditorPart {
 			}
 		});
 		
-		content = toolkit.createComposite(summary, SWT.NONE);
+		summaryScroll = new ScrolledComposite(summary, SWT.V_SCROLL | SWT.H_SCROLL );
 		
-		summary.setClient(content);
+		summaryScroll.setExpandHorizontal(true);
+		summaryScroll.setExpandVertical(true);
+		toolkit.adapt(summaryScroll);
+		
+		content = toolkit.createComposite(summaryScroll, SWT.NONE);
+		summaryScroll.setContent(content);
+		summary.setClient(summaryScroll);
 
-		content.setLayout(new GridLayout(2, false));
-		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		GridLayout layout1 = new GridLayout(2, false);
+		layout1.marginHeight = 0;
+		content.setLayout(layout1);
+		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite leftContent = toolkit.createComposite(content, SWT.NONE);
+		final Composite topContent = toolkit.createComposite(content, SWT.NONE);
+		GridLayout layout2 = new GridLayout(2, false);
+		layout2.marginHeight = 0;
+		topContent.setLayout(layout1);
+		topContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite leftContent = toolkit.createComposite(topContent, SWT.NONE);
 		leftContent.setLayout(new GridLayout(3, false));
 		leftContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Composite rightContent = toolkit.createComposite(content, SWT.NONE);
+		Composite rightContent = toolkit.createComposite(topContent, SWT.NONE);
 		rightContent.setLayout(new GridLayout(3, false));
 		rightContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)rightContent.getLayout()).marginLeft = 20;
@@ -402,25 +422,38 @@ public class PlanEditor extends EditorPart {
 		createEditLink(toolkit, rightContent, PanelType.STATION);
 		
 		//bottom
-		Composite bottomContent = toolkit.createComposite(content, SWT.NONE);
+		final Composite bottomContent = toolkit.createComposite(content, SWT.NONE);
 		bottomContent.setLayout(new GridLayout(2, false));
 		bottomContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
 		
 		Label l = toolkit.createLabel(bottomContent, Messages.PlanEditor_PatrolLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridData)l.getLayoutData()).verticalIndent = 4;
 		patrolLinks  = toolkit.createComposite(bottomContent);
 		patrolLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		//patrolLinks.setLayout(new FillLayout(SWT.HORIZONTAL));
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		layout.wrap = true;
 		layout.spacing = 5;
+		
 		patrolLinks.setLayout(layout);
 		
-		Label lc = toolkit.createLabel(content, "*" + Messages.PlanEditor_ChildPatrolLabel); //$NON-NLS-1$
+		final Label lc = toolkit.createLabel(bottomContent, "*" + Messages.PlanEditor_ChildPatrolLabel); //$NON-NLS-1$
 		lc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
+		summaryScroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		summaryScroll.addControlListener(new ControlAdapter() {
+		      public void controlResized(ControlEvent e) {    	 
+		        Rectangle r = summaryScroll.getClientArea();
+		        Point p2 = topContent.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		        
+		        int newHeight = content.computeSize(r.width, SWT.DEFAULT).y;
+		        int newWidth = p2.x;
+		        summaryScroll.setMinSize(newWidth, newHeight);
+		      }
+		    });
+		
+		/* --- target section --- */
 		final Section targetSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
 		targetSection.setText(Messages.PlanEditor_Targets_Label);
 		targetSection.setLayout(new GridLayout(3, false));
@@ -438,8 +471,15 @@ public class PlanEditor extends EditorPart {
 			}
 		});
 	
-		Composite targetContent = toolkit.createComposite(targetSection);
-		targetSection.setClient(targetContent);
+		ScrolledComposite scroll = new ScrolledComposite(targetSection, SWT.V_SCROLL | SWT.H_SCROLL );
+		
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		toolkit.adapt(scroll);
+		
+		Composite targetContent = toolkit.createComposite(scroll);
+		targetSection.setClient(scroll);
+		scroll.setContent(targetContent);
 		
 		targetContent.setLayout(new GridLayout(2, false));
 		targetContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -480,6 +520,7 @@ public class PlanEditor extends EditorPart {
 		ll.setFont(boldFont);
 		
 		targetList2  = new TargetProgressViewer(targetContent, true);
+		
 
 		Composite childTargetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		childTargetButtons.setLayout(new GridLayout(1, false));
@@ -492,11 +533,11 @@ public class PlanEditor extends EditorPart {
 				refreshPlanTargets.schedule();
 			}
 		});
-				
+		scroll.setMinSize(targetContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		
 		initValues();
 	}
-
-	
 	
 	/**
 	 * Updates the widgets with the value from the plan.
