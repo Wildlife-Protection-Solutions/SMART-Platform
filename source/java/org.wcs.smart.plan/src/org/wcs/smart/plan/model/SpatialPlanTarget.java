@@ -47,6 +47,7 @@ public class SpatialPlanTarget extends PlanTarget {
 	private String description;
 	private List<SpatialPlanTargetPoint> points;
 	
+	
 	@Column(name = "description")
 	public String getDescription() {
 		return description;
@@ -84,6 +85,16 @@ public class SpatialPlanTarget extends PlanTarget {
 		spt.setPoints(new ArrayList<SpatialPlanTargetPoint>(getPoints()));
 		spt.setDescription(getDescription());
 		return spt;
+	}
+
+	/** 
+	 * 
+	 * @return the distance in meters a patrol must come within to consider this target achieved.
+	 */
+	@Transient
+	public int getDistanceForCompletion() {
+		//TODO make this a property value, or possible a configuration for each spatial target created, or both...
+		return 100;
 	}
 
 }

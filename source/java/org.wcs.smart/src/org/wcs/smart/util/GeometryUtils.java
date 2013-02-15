@@ -56,9 +56,12 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.linearref.LinearLocation;
+import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 /**
  * A collection of geometry functions for
@@ -230,4 +233,40 @@ public class GeometryUtils {
 		}
 		return distance;
 	}
+	
+	
+	/**
+	 * Computes the minimum distance in meters from between a point and a linestring
+	 * in 4326 projections.
+	 * @param ls
+	 * @param p
+	 * @return
+	 * @throws TransformException
+	 */
+	public static double distanceInMeters(LineString ls, Point p) {
+        LocationIndexedLine li = new LocationIndexedLine(ls);
+        LinearLocation loc = li.project(p.getCoordinate());
+        Coordinate c = li.extractPoint(loc);
+       
+        GeometryFactory fact = new GeometryFactory();
+        Point closestPoint = fact.createPoint(c);
+
+		return distanceInMeters(closestPoint, p);
+	}
+
+	/**
+	 * Computes the distance in meters of the two points
+	 * in 4326 projections.
+	 * @param ls
+	 * @return
+	 * @throws TransformException
+	 */
+	private static double distanceInMeters(Point closestPoint, Point p) {
+		GeodeticCalculator cal = new GeodeticCalculator();
+		cal.setStartingGeographicPoint(closestPoint.getX(),closestPoint.getY());
+		cal.setDestinationGeographicPoint(p.getX(), p.getY());
+		return cal.getOrthodromicDistance();
+		
+	}
+
 }
