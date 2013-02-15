@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.plan.internal.ui.patrol;
 
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -33,6 +31,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.IPlanFilterItem;
 import org.wcs.smart.plan.ui.LoadPlanJob;
@@ -48,7 +47,7 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  *
  */
 public class PatrolPlanComposite extends PlanComposite implements IPlanFilterItem  {
-	public static final String TITLE = "Patrol Plan";
+	public static final String TITLE = Messages.PatrolPlanComposite_Title;
 	
 	private PlanFilter currentFilter; 
 	private PlanViewer pv;
@@ -57,7 +56,7 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 	
 	public PatrolPlanComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Set the plan associated with this patrol.");
+		setMessage(Messages.PatrolPlanComposite_Message);
 		currentFilter = new PlanFilter();
 		createControl();
 	}
@@ -67,7 +66,7 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 	     this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Link lnk = new Link(this, SWT.NONE);
-		lnk.setText("Click <a>here</a> to change the plan filter.");
+		lnk.setText(Messages.PatrolPlanComposite_Filter_Link);
 		lnk.addSelectionListener(new SelectionAdapter() {
 			
 			@Override

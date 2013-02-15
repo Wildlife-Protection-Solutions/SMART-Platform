@@ -27,7 +27,6 @@ import java.text.MessageFormat;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
@@ -35,6 +34,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.LoadPlanJob;
@@ -62,9 +62,9 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 		
 		ppComp = new PatrolPlanComposite(parent, SWT.NONE);
 		ppComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		super.setTitle("Patrol Plan");
+		super.setTitle(Messages.NewPatrolPlanWizardPage_Title);
 		super.setMessage(MessageFormat.format(
-				"Select the plan associated with this patrol or select {0} if no plan associated with this patrol.", new String[]{LoadPlanJob.NONE_LABEL}));
+				Messages.NewPatrolPlanWizardPage_Message, LoadPlanJob.NONE_LABEL));
 		super.setControl(ppComp);
 	}
 
@@ -116,8 +116,8 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 		if (lastSelection != null){
 			Plan plan = (Plan)session.load(Plan.class, lastSelection.getUuid());
 			if (plan == null){
-				MessageDialog.openError(getShell(), "Error", 
-						MessageFormat.format("Could not find the plan {0}.  This patrol will not have a plan associated with id.", new String[]{lastSelection.getName()}));				
+				MessageDialog.openError(getShell(), Messages.NewPatrolPlanWizardPage_ErrorDialog_Title, 
+						MessageFormat.format(Messages.NewPatrolPlanWizardPage_ErrorDialog_Message, lastSelection.getName()));				
 			}
 			
 			PatrolPlan pp = new PatrolPlan();
@@ -127,7 +127,6 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void initModel(Patrol p, Session session) {
 		if (lastSelection != null){
