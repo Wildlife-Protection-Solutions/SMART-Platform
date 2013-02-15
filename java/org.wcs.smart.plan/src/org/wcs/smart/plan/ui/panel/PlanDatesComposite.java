@@ -37,10 +37,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.internal.Messages;
-import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.plan.model.PlanTargetStatus;
-import org.wcs.smart.plan.model.PlanTargetStatus.Status;
 import org.wcs.smart.util.SmartUtils;
 
 /**

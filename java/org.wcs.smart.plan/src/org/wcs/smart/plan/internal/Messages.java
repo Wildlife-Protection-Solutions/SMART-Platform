@@ -88,7 +88,6 @@ public class Messages extends NLS {
 	public static String PlanEditor_None_Text;
 	public static String PlanEditor_ParentPlan_Label;
 	public static String PlanEditor_PatrolLabel;
-	public static String PlanEditor_Patrols_Label;
 	public static String PlanEditor_PlanId_Label;
 	public static String PlanEditor_PlanTarges_Label;
 	public static String PlanEditor_Refresh_Link_Label;
