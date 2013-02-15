@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.IInputChangeListener;
 import org.wcs.smart.plan.ui.panel.PlanTypeEmployeesComposite;
@@ -40,7 +41,7 @@ import org.wcs.smart.plan.ui.panel.PlanTypeEmployeesComposite;
  */
 public class TypeEmployeePlanWizardPage extends PlanWizardPage {
 
-	public static final String PAGENAME = "Plan Type"; //$NON-NLS-1$
+	public static final String PAGENAME = Messages.TypeEmployeePlanWizardPage_PageName;
 		
 	private PlanTypeEmployeesComposite panel; 
 	/**
@@ -80,7 +81,7 @@ public class TypeEmployeePlanWizardPage extends PlanWizardPage {
 		
 		setControl(center);
 		setTitle(panel.getTitle());
-		setMessage("Select the type of plan that you wish to create.");
+		setMessage(Messages.TypeEmployeePlanWizardPage_Message);
 		
 
 	}

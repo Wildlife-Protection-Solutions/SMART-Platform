@@ -23,6 +23,7 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.PlanTargetComposite;
 
@@ -38,7 +39,7 @@ public class TargetsPlanWizardPage extends PlanWizardPage {
 
 	
 	protected TargetsPlanWizardPage() {
-		super("Plan Targets");
+		super(Messages.TargetsPlanWizardPage_PageName);
 	}
 
 
@@ -52,7 +53,7 @@ public class TargetsPlanWizardPage extends PlanWizardPage {
 		
 		setControl(panel);
 		setTitle(panel.getTitle());
-		setMessage("Add plan targets by selecting the \"Add Target...\" button. Use the \"Edit Target ...\" to edit the selected target and \"Delete Target\" to remove a target.");
+		setMessage(Messages.TargetsPlanWizardPage_Message);
 	}
 	
 

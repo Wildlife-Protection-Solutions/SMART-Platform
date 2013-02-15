@@ -10,9 +10,15 @@ public class Messages extends NLS {
 	public static String AdministrativePlanTargetPropertyPage_Description_Label;
 	public static String AdministrativePlanTargetPropertyPage_EmptyName_Error;
 	public static String AdministrativePlanTargetPropertyPage_Name_Label;
+	public static String CreatePlanWizard_LoadPerspective_Error;
+	public static String CreatePlanWizard_Title;
+	public static String DatesPlanWizardPage_Message;
+	public static String DatesPlanWizardPage_PageName;
 	public static String DeletePlanHandler_Confirmation_Message;
 	public static String DeletePlanHandler_Confirmation_Warning;
 	public static String DeletePlanHandler_DeleteJob_Title;
+	public static String IdNameDescPlanWizardPage_Message;
+	public static String IdNameDescPlanWizardPage_PageName;
 	public static String LoadPlanJob_Loading;
 	public static String LoadPlanJob_LoadPlans_Task;
 	public static String LoadPlanJob_None;
@@ -35,6 +41,8 @@ public class Messages extends NLS {
 	public static String NumericPlanTargetPropertyPage_TargetName_Label;
 	public static String NumericPlanTargetPropertyPage_TargetType_Label;
 	public static String NumericPlanTargetPropertyPage_TargetValue_Label;
+	public static String ParentIdPlanWizardPage_Message;
+	public static String ParentIdPlanWizardPage_PageName;
 	public static String PatrolPlanComposite_Filter_Link;
 	public static String PatrolPlanComposite_Message;
 	public static String PatrolPlanComposite_Title;
@@ -156,6 +164,8 @@ public class Messages extends NLS {
 	public static String SpatialPlanTargetPropertyPage_Name_Label;
 	public static String SpatialPlanTargetPropertyPage_Name_Required_Error;
 	public static String SpatialPlanTargetPropertyPage_PageName;
+	public static String StationTeamPlanWizardPage_Message;
+	public static String StationTeamPlanWizardPage_PageName;
 	public static String TargetListViewer_Summary_Label;
 	public static String TargetListViewer_TargetName_Label;
 	public static String TargetProgressViewer_Column_Name;
@@ -167,6 +177,20 @@ public class Messages extends NLS {
 	public static String TargetProgressViewer_TargetsComplete_Label;
 	public static String TargetPropertyPage_Create_Title;
 	public static String TargetPropertyPage_Update_Title;
+	public static String TargetsPlanWizardPage_Message;
+	public static String TargetsPlanWizardPage_PageName;
+	public static String TemplateSelectPlanWizardPage_Filter_Link;
+	public static String TemplateSelectPlanWizardPage_Message;
+	public static String TemplateSelectPlanWizardPage_PageName;
+	public static String TemplateSelectPlanWizardPage_PlanNotFound_Error;
+	public static String TemplateSelectPlanWizardPage_Title;
+	public static String TypeEmployeePlanWizardPage_Message;
+	public static String TypeEmployeePlanWizardPage_PageName;
+	public static String UseTemplatePlanWizardPage_FromScratch_Label;
+	public static String UseTemplatePlanWizardPage_Message;
+	public static String UseTemplatePlanWizardPage_PageName;
+	public static String UseTemplatePlanWizardPage_Title;
+	public static String UseTemplatePlanWizardPage_UseTemplate_Label;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
