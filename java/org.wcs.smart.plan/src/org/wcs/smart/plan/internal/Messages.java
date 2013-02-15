@@ -52,6 +52,7 @@ public class Messages extends NLS {
 	public static String PlanIdNameDescComposite_Name;
 	public static String PlanIdNameDescComposite_PlanId;
 	public static String PlanIdNameDescComposite_Title;
+	public static String PlanParentIdComposite_Filter_Link_Text;
 	public static String PlanParentIdComposite_InfoDialog_PlanNotFound_Message;
 	public static String PlanParentIdComposite_InfoDialog_PlanRequired_Message;
 	public static String PlanParentIdComposite_InfoDialog_ReferItself_Message;
