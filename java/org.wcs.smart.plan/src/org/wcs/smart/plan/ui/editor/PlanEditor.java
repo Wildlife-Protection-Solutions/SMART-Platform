@@ -196,6 +196,7 @@ public class PlanEditor extends EditorPart {
 					if (myPatrols.size() == 0 && childPatrols.size() == 0) {
 						toolkit.createLabel(patrolLinks,
 								Messages.PlanEditor_None_Text);
+						patrolLinks.layout();
 					} else {
 						for (final PatrolEditorInput x : myPatrols){
 							Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getPatrolId(), SWT.WRAP);
