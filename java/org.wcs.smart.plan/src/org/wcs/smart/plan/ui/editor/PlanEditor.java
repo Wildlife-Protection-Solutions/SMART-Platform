@@ -33,6 +33,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
@@ -501,6 +503,14 @@ public class PlanEditor extends EditorPart {
 		
 		
 		targetList  = new TargetProgressViewer(targetContent);
+		targetList.getViewer().addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				if (canEdit()) {
+					showEditDialog(PanelType.TARGETS);
+				}
+			}
+		});
 
 		Composite targetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		targetButtons.setLayout(new GridLayout(1, false));

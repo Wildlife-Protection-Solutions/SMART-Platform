@@ -24,6 +24,8 @@ package org.wcs.smart.plan.ui.panel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -78,6 +80,13 @@ public class PlanTargetComposite extends PlanComposite {
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		targetTable  = new TargetListViewer(table);
+		targetTable.getViewer().addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				editCurrentSelectedTarget();
+			}
+			
+		});
 		
 		Composite buttonPnl = new Composite(this, SWT.NONE);
 		buttonPnl.setLayout(new GridLayout());
@@ -106,20 +115,7 @@ public class PlanTargetComposite extends PlanComposite {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sec = (IStructuredSelection)targetTable.getSelection();
-		        if (sec.isEmpty()){
-		            return;
-		        }
-		        
-		        PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
-				TargetPropertyPage dia = new TargetPropertyPage(getShell(), targets, selected); 
-			    if (dia.open() == Window.CANCEL){
-			    	//do nothing
-				}else{
-					targetTable.updateModel(targets);
-					isDataValid();
-					fireInputChangeListeners();
-				}
+				editCurrentSelectedTarget();
 			}
 			
 		});
@@ -167,6 +163,23 @@ public class PlanTargetComposite extends PlanComposite {
 			}
 		});
 		       
+	}
+
+	private void editCurrentSelectedTarget() {
+		IStructuredSelection sec = (IStructuredSelection)targetTable.getSelection();
+        if (sec.isEmpty()) {
+            return;
+        }
+        
+        PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
+		TargetPropertyPage dia = new TargetPropertyPage(getShell(), targets, selected); 
+	    if (dia.open() == Window.CANCEL) {
+	    	//do nothing
+		} else {
+			targetTable.updateModel(targets);
+			isDataValid();
+			fireInputChangeListeners();
+		}
 	}
 	
 	@Override
