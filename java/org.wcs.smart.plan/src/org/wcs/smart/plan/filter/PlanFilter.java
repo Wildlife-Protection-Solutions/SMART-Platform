@@ -29,6 +29,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -43,8 +44,8 @@ public class PlanFilter {
 	public static DateFilter DEFAULT_DATE_FILTER = DateFilter.RANGE_30_DAYS; 
 	
 	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {
-			new StringFilterComposite.TextField("Plan Id", "id"),
-			new StringFilterComposite.TextField("Plan Name", "name")
+			new StringFilterComposite.TextField(Messages.PlanFilter_PlanId, "id"), //$NON-NLS-1$
+			new StringFilterComposite.TextField(Messages.PlanFilter_PlanName, "name") //$NON-NLS-1$
 	};
 	
 	

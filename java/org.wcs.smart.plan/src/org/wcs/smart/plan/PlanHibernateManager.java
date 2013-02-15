@@ -422,10 +422,10 @@ public class PlanHibernateManager{
 
 		
 		Session session = HibernateManager.openSession();
-		Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		Query q = session.createQuery(sql.toString());
 		q.setParameter("uuid", plan); //$NON-NLS-1$
 
-		List list = q.list();
+		List<?> list = q.list();
 
 		List<Track> tracks = new ArrayList<Track>();
 		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {

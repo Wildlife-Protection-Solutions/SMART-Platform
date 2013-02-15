@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -53,8 +52,8 @@ import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
-import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.EditPlanItemDialog;
@@ -102,7 +101,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			}
 			if (Arrays.equals(source.getUuid(), currentPlan.getUuid())){
 			
-				Job j = new Job("Refresh"){
+				Job j = new Job(Messages.PatrolPlanContribution_RefreshJob_Title){
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
@@ -140,7 +139,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 
 	@Override
 	public String getName() {
-		return "Plan";
+		return Messages.PatrolPlanContribution_Name;
 	}
 
 	@Override
@@ -153,7 +152,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		if (canEdit){
-			Hyperlink edit = toolkit.createHyperlink(outer, "edit", SWT.NONE);
+			Hyperlink edit = toolkit.createHyperlink(outer, Messages.PatrolPlanContribution_Edit_Link, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			edit.addHyperlinkListener(new HyperlinkAdapter(){
 				@Override
@@ -187,8 +186,8 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 				Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
-					String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol";
-					Query q = s.createQuery(hql).setParameter("patrol", currentPatrol);
+					String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol"; //$NON-NLS-1$
+					Query q = s.createQuery(hql).setParameter("patrol", currentPatrol); //$NON-NLS-1$
 					q.executeUpdate();
 					byte[] planuuid = ((PatrolPlanComposite)content).getSelection();
 					if (planuuid != null){
@@ -216,7 +215,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 					return true;
 				}catch (Exception ex){
 					s.getTransaction().rollback();
-					SmartPlanPlugIn.displayLog("Could not save changes to patrol plan. " + ex.getLocalizedMessage(), ex);
+					SmartPlanPlugIn.displayLog(Messages.PatrolPlanContribution_Save_Error + ex.getLocalizedMessage(), ex);
 					return false;
 				}finally{
 					s.close();
@@ -235,8 +234,8 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			List plans = session.createCriteria(PatrolPlan.class)
-					.add(Restrictions.eq("id.patrol", patrol)).list();
+			List<?> plans = session.createCriteria(PatrolPlan.class)
+					.add(Restrictions.eq("id.patrol", patrol)).list(); //$NON-NLS-1$
 
 			if (plans.size() == 1) {
 				this.currentPlan = ((PatrolPlan) plans.get(0)).getPlan();
@@ -258,10 +257,8 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 	}
 
 	private void openPlan(){
-		// TODO Auto-generated method stub
-		PlanEditorInput in = new PlanEditorInput(currentPlan
-				.getUuid(), currentPlan.getLabel(), currentPlan
-				.getType());
+		PlanEditorInput in = new PlanEditorInput(currentPlan.getUuid(), 
+				currentPlan.getLabel(), currentPlan.getType());
 		try {
 			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, 
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow());
@@ -269,7 +266,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 					.getActivePage().openEditor(in, PlanEditor.ID);
 		} catch (Exception e1) {
 			SmartPlanPlugIn.displayLog(
-					"Could not open plan. "
+					Messages.PatrolPlanContribution_Open_Error
 							+ e1.getLocalizedMessage(), e1);
 		}
 	}
@@ -281,13 +278,13 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 
 		if (currentPlan == null) {
 			toolkit.createLabel(main,
-					"There are no plans associated with this patrol.");
+					Messages.PatrolPlanContribution_NoAssociatedPlan_Label);
 		} else {
 			Composite planc = toolkit.createComposite(main);
 			planc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			planc.setLayout(new GridLayout(2, false));
 
-			Label lbl = toolkit.createLabel(planc, "Plan Id:");
+			Label lbl = toolkit.createLabel(planc, Messages.PatrolPlanContribution_PlanId_Label);
 			lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			Hyperlink lnk = toolkit.createHyperlink(planc, currentPlan.getId(),
 					SWT.WRAP);
@@ -298,11 +295,11 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 				}
 			});
 
-			lbl = toolkit.createLabel(planc, "Plan Name:");
+			lbl = toolkit.createLabel(planc, Messages.PatrolPlanContribution_Name_Label);
 			lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			toolkit.createLabel(planc, currentPlan.getName());
 
-			lbl = toolkit.createLabel(planc, "Plan Description:");
+			lbl = toolkit.createLabel(planc, Messages.PatrolPlanContribution_Description_Label);
 			lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			Text txt = toolkit.createText(planc, currentPlan.getDescription(),
 					SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
@@ -311,7 +308,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			((GridData) txt.getLayoutData()).heightHint = 80;
 			((GridData) txt.getLayoutData()).widthHint = 100;
 
-			lbl = toolkit.createLabel(planc, "Plan Parents:");
+			lbl = toolkit.createLabel(planc, Messages.PatrolPlanContribution_Parents_Label);
 			lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			StringBuilder sb = new StringBuilder();
 			Plan parent = currentPlan.getParent();
@@ -319,11 +316,11 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 				sb.append(parent.getLabel());
 				parent = parent.getParent();
 				if (parent != null) {
-					sb.append("\n");
+					sb.append("\n"); //$NON-NLS-1$
 				}
 			}
 			if (sb.length() == 0) {
-				toolkit.createLabel(planc, "None");
+				toolkit.createLabel(planc, Messages.PatrolPlanContribution_None_Label);
 			} else {
 				toolkit.createLabel(planc, sb.toString());
 			}
