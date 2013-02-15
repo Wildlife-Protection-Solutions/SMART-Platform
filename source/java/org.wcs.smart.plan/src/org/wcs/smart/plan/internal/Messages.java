@@ -6,16 +6,35 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.plan.internal.messages"; //$NON-NLS-1$
 	public static String AdministrativePlanTarget_CategoryName;
 	public static String AdministrativePlanTarget_GuiName;
+	public static String AdministrativePlanTargetPropertyPage_Achieved_Label;
+	public static String AdministrativePlanTargetPropertyPage_Description_Label;
+	public static String AdministrativePlanTargetPropertyPage_EmptyName_Error;
+	public static String AdministrativePlanTargetPropertyPage_Name_Label;
+	public static String DeletePlanHandler_Confirmation_Message;
+	public static String DeletePlanHandler_Confirmation_Warning;
+	public static String DeletePlanHandler_DeleteJob_Title;
+	public static String LoadPlanJob_Loading;
+	public static String LoadPlanJob_LoadPlans_Task;
+	public static String LoadPlanJob_None;
+	public static String LoadPlanJob_Title;
 	public static String NewPatrolPlanWizardPage_ErrorDialog_Message;
 	public static String NewPatrolPlanWizardPage_ErrorDialog_Title;
 	public static String NewPatrolPlanWizardPage_Message;
 	public static String NewPatrolPlanWizardPage_Title;
+	public static String NewPlanHandler_LoadWizard_Error;
+	public static String NewPlanHandler_LoadWizard_TaskName;
 	public static String NumericPlanTarget_CategoryName;
 	public static String NumericPlanTarget_GuiName;
 	public static String NumericPlanTarget_TargetType_DistanceTraveled;
 	public static String NumericPlanTarget_TargetType_PatrolDays;
 	public static String NumericPlanTarget_TargetType_PatrolHours;
 	public static String NumericPlanTarget_TargetType_PatrolManHours;
+	public static String NumericPlanTargetPropertyPage_InvalidName_Error;
+	public static String NumericPlanTargetPropertyPage_InvalidValue_Error;
+	public static String NumericPlanTargetPropertyPage_Operator_Label;
+	public static String NumericPlanTargetPropertyPage_TargetName_Label;
+	public static String NumericPlanTargetPropertyPage_TargetType_Label;
+	public static String NumericPlanTargetPropertyPage_TargetValue_Label;
 	public static String PatrolPlanComposite_Filter_Link;
 	public static String PatrolPlanComposite_Message;
 	public static String PatrolPlanComposite_Title;
@@ -75,6 +94,14 @@ public class Messages extends NLS {
 	public static String PlanEventManager_FireListeners_Error;
 	public static String PlanFilter_PlanId;
 	public static String PlanFilter_PlanName;
+	public static String PlanFilterDialog_FilterIdName_Label;
+	public static String PlanFilterDialog_FilterType_Label;
+	public static String PlanFilterDialog_IncludeAll_Label;
+	public static String PlanFilterDialog_Message;
+	public static String PlanFilterDialog_PlanDateFilter_Label;
+	public static String PlanFilterDialog_PlanIdName_Label;
+	public static String PlanFilterDialog_PlanTypeFilter_Label;
+	public static String PlanFilterDialog_Title;
 	public static String PlanHibernateManager_DeletePlan_Error;
 	public static String PlanHibernateManager_SavePlan_Error;
 	public static String PlanIdNameDescComposite_Description;
@@ -120,6 +147,7 @@ public class Messages extends NLS {
 	public static String PlanTypeEmployeesComposite_UnavailableRangers_Label;
 	public static String PlanTypeEmployeesComposite_Unknown_Label;
 	public static String PlanTypeEmployeesComposite_VacationSickness_Label;
+	public static String ShowPlanPersepctiveHandler_Load_Error;
 	public static String SmartPlanPlugIn_Error;
 	public static String SpatialPlanTarget_CategoryName;
 	public static String SpatialPlanTarget_Points_Label;
@@ -128,6 +156,17 @@ public class Messages extends NLS {
 	public static String SpatialPlanTargetPropertyPage_Name_Label;
 	public static String SpatialPlanTargetPropertyPage_Name_Required_Error;
 	public static String SpatialPlanTargetPropertyPage_PageName;
+	public static String TargetListViewer_Summary_Label;
+	public static String TargetListViewer_TargetName_Label;
+	public static String TargetProgressViewer_Column_Name;
+	public static String TargetProgressViewer_Column_Plan;
+	public static String TargetProgressViewer_Column_Status;
+	public static String TargetProgressViewer_Column_Summary;
+	public static String TargetProgressViewer_ComputeTargetStatus_JobTitle;
+	public static String TargetProgressViewer_Computing_Label;
+	public static String TargetProgressViewer_TargetsComplete_Label;
+	public static String TargetPropertyPage_Create_Title;
+	public static String TargetPropertyPage_Update_Title;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

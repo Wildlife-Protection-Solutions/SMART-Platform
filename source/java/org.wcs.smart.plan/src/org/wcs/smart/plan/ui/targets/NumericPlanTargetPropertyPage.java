@@ -43,9 +43,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
-import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
 import org.wcs.smart.util.SmartUtils;
@@ -97,7 +97,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 	
 		Label lbl2 = new Label(center, SWT.NONE);
-		lbl2.setText("Target Type:");
+		lbl2.setText(Messages.NumericPlanTargetPropertyPage_TargetType_Label);
 		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		targetType= new ComboViewer(center, SWT.READ_ONLY);
@@ -115,7 +115,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if(planTarget == null || planTarget.getName() == null || planTarget.getName() == ""){
+				if(planTarget == null || planTarget.getName() == null || planTarget.getName().isEmpty()){
 					targetName.setText( getTargetType().getName() );
 				}
 				
@@ -123,7 +123,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		});
 		
 		Label lbl3 = new Label(center, SWT.NONE);
-		lbl3.setText("Operator:");
+		lbl3.setText(Messages.NumericPlanTargetPropertyPage_Operator_Label);
 		lbl3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		targetOp= new ComboViewer(center, SWT.READ_ONLY);
@@ -138,7 +138,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetOp.setSelection(new StructuredSelection(NumericPlanTarget.Operator.GREATER));
 		
 		Label lbl4 = new Label(center, SWT.NONE);
-		lbl4.setText("Target Value:");
+		lbl4.setText(Messages.NumericPlanTargetPropertyPage_TargetValue_Label);
 		lbl4.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetValue = new Text(center, SWT.BORDER | SWT.LEFT);
@@ -147,7 +147,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		
 
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText("Target Name:");
+		lbl.setText(Messages.NumericPlanTargetPropertyPage_TargetName_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
@@ -194,7 +194,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		if (targetName.getText().trim().isEmpty()
 				|| ! SmartUtils.isSimpleString(targetName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
 			cdTargetName.show();
-			cdTargetName.setDescriptionText("Name cannot be empty and must only contain " + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+			cdTargetName.setDescriptionText(Messages.NumericPlanTargetPropertyPage_InvalidName_Error + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
 		}else{
 			cdTargetName.hide();
@@ -206,7 +206,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 			cdTargetValue.hide();
 		}catch(Exception e){
 			cdTargetValue.show();
-			cdTargetValue.setDescriptionText("Value must be a numeric value");
+			cdTargetValue.setDescriptionText(Messages.NumericPlanTargetPropertyPage_InvalidValue_Error);
 			isComplete = false;
 		}
 

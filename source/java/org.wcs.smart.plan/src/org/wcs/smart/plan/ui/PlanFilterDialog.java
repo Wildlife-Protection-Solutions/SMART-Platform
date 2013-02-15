@@ -41,6 +41,7 @@ import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -117,9 +118,9 @@ public class PlanFilterDialog extends SmartFilterDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite) super.createDialogArea(parent);
-		setTitle("Plan Filter");
-		setMessage("Filters plans based on the following fields.");
-		getShell().setText("Plan Filter");
+		setTitle(Messages.PlanFilterDialog_Title);
+		setMessage(Messages.PlanFilterDialog_Message);
+		getShell().setText(Messages.PlanFilterDialog_Title);
 
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -130,7 +131,7 @@ public class PlanFilterDialog extends SmartFilterDialog {
 					false));
 
 			Composite dateFilterExpComp = createGroupComposite(
-					"Plan Date Filter", composite);
+					Messages.PlanFilterDialog_PlanDateFilter_Label, composite);
 			
 			dateFilterCmp = new DateFilterComposite(dateFilterExpComp,
 					SWT.NONE, this){
@@ -152,15 +153,15 @@ public class PlanFilterDialog extends SmartFilterDialog {
 
 			};
 
-			Composite patrolType = createGroupComposite("Plan Type Filter",
+			Composite patrolType = createGroupComposite(Messages.PlanFilterDialog_PlanTypeFilter_Label,
 					composite);
 			createPatrolType(session, patrolType);
 
-			Composite planIdComp = createGroupComposite("Plan Id or Name", composite);
+			Composite planIdComp = createGroupComposite(Messages.PlanFilterDialog_PlanIdName_Label, composite);
 			
 			planIdFilter = new StringFilterComposite(planIdComp, SWT.NONE, PlanFilter.SEARCH_FIELDS);
-			planIdFilter.setIncludeAllRadioLabel("Include All");
-			planIdFilter.setFilterRadioLabel("Filter Plan Id or Name");
+			planIdFilter.setIncludeAllRadioLabel(Messages.PlanFilterDialog_IncludeAll_Label);
+			planIdFilter.setFilterRadioLabel(Messages.PlanFilterDialog_FilterIdName_Label);
 			
 
 			updateControlsValues();
@@ -183,10 +184,10 @@ public class PlanFilterDialog extends SmartFilterDialog {
 				false));
 
 		btnIncludeAllTypes = new Button(patrolTypeComp, SWT.RADIO);
-		btnIncludeAllTypes.setText("Include All");
+		btnIncludeAllTypes.setText(Messages.PlanFilterDialog_IncludeAll_Label);
 
 		btnFilterTypes = new Button(patrolTypeComp, SWT.RADIO);
-		btnFilterTypes.setText("Plan Type Filter ");
+		btnFilterTypes.setText(Messages.PlanFilterDialog_FilterType_Label);
 
 		planTypeTableViewer = CheckboxTableViewer.newCheckList(patrolTypeComp,
 				SWT.BORDER | SWT.FULL_SELECTION);

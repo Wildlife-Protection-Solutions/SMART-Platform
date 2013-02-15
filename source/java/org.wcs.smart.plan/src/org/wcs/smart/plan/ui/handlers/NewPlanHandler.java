@@ -32,6 +32,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
 
 
@@ -59,7 +60,7 @@ public class NewPlanHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName("Loading Wizard");
+					monitor.setTaskName(Messages.NewPlanHandler_LoadWizard_TaskName);
 					dialog = new WizardDialog(
 							HandlerUtil.getActiveShell(event), wizard);
 
@@ -67,7 +68,7 @@ public class NewPlanHandler extends AbstractHandler {
 			});
 		} catch (Exception ex) {
 			dialog = null;
-			SmartPatrolPlugIn.displayLog("Error loading new plan wizard. "
+			SmartPatrolPlugIn.displayLog(Messages.NewPlanHandler_LoadWizard_Error
 					+ ex.getMessage(), ex);
 		}
 		if (dialog != null) {

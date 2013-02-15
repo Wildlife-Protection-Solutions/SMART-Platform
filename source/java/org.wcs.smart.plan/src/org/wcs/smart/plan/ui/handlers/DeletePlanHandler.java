@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 
@@ -80,9 +81,9 @@ public class DeletePlanHandler extends AbstractHandler {
 					@Override
 					public void run() {
 						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
-								"Are you sure you wish to delete this Plan?",
+								Messages.DeletePlanHandler_Confirmation_Message,
 								null,
-								MessageFormat.format("WARNING: The entire plan tree below this plan (plans with this plan as their parent, their children etc.) will also be deleted if you continue. Are you sure you wish to delete this plan {0}? ", new Object[]{thisname}),
+								MessageFormat.format(Messages.DeletePlanHandler_Confirmation_Warning, new Object[]{thisname}),
 								MessageDialog.CONFIRM, 
 								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 						
@@ -108,7 +109,7 @@ public class DeletePlanHandler extends AbstractHandler {
     	private byte[] uuid;
   
         public DeletePlanJob(byte[] uuid) {
-            super("Delete Plan");
+            super(Messages.DeletePlanHandler_DeleteJob_Title);
             this.uuid = uuid;
         }
 

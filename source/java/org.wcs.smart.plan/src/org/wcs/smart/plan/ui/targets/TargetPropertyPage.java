@@ -38,7 +38,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -48,10 +47,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 
 /**
@@ -91,9 +92,9 @@ public class TargetPropertyPage extends Dialog {
 		this.parentTargets = parentTargets;
 		
 		if (toUpdate == null){
-			title = "Create Target";
+			title = Messages.TargetPropertyPage_Create_Title;
 		}else{
-			title = "Update Target: " + toUpdate.getName();
+			title = Messages.TargetPropertyPage_Update_Title + " " + toUpdate.getName(); //$NON-NLS-1$
 		}
 		
 		tabs = new ArrayList<ITargetPage>();
@@ -184,11 +185,11 @@ public class TargetPropertyPage extends Dialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button btnOk = createButton(parent, IDialogConstants.OK_ID, "Save", true);
+		Button btnOk = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		if(toUpdate == null){
 			btnOk.setEnabled(false);
 		}
-		createButton(parent, IDialogConstants.CANCEL_ID, "Cancel", false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		
 	}
 	
