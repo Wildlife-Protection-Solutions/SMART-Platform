@@ -40,14 +40,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * Represents a patrol object
@@ -67,10 +65,10 @@ public class Plan {
 	 * 
 	 */
 	public enum PlanType{
-		CA("Conservation Area Plan", SmartPlanPlugIn.CA_PLAN_ICON),
-		STATION("Station Plan", SmartPlanPlugIn.STATION_PLAN_ICON),
-		TEAM("Team Plan",SmartPlanPlugIn.TEAM_PLAN_ICON),
-		PATROL("Patrol Plan",SmartPlanPlugIn.PATROL_PLAN_ICON);
+		CA(Messages.PlanType_ConservationArea, SmartPlanPlugIn.CA_PLAN_ICON),
+		STATION(Messages.PlanType_Station, SmartPlanPlugIn.STATION_PLAN_ICON),
+		TEAM(Messages.PlanType_Team,SmartPlanPlugIn.TEAM_PLAN_ICON),
+		PATROL(Messages.PlanType_Patrol,SmartPlanPlugIn.PATROL_PLAN_ICON);
 		
 		public String guiName;
 		public String iconKey;
@@ -374,9 +372,9 @@ public class Plan {
 	 * @return formatted label
 	 */
 	public static String generateLabel(String id, String name){
-		String label = "[" + id + "]";
+		String label = "[" + id + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (name != null){
-			label = name + " " + label;
+			label = name + " " + label; //$NON-NLS-1$
 		}
 		return label;
 	}
