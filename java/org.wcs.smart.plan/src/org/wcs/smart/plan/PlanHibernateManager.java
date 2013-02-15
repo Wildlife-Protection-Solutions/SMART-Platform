@@ -228,11 +228,8 @@ public class PlanHibernateManager{
 			try {
 				plan = (Plan) session.load(Plan.class, uuid);
 				
-				String queryString = "DELETE FROM PatrolPlan WHERE id.plan = :plan"; //$NON-NLS-1$
-				Query q = session.createQuery(queryString).setParameter("plan", plan);
-				q.executeUpdate();
+				deleteChildrenPlans(plan, session);
 				
-				session.delete(plan);
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -245,6 +242,26 @@ public class PlanHibernateManager{
 		return plan;
 	}
 	
+	private static void deleteChildrenPlans(Plan parent, Session session){
+		//delete all children
+		for (Iterator<Plan> iterator = parent.getChildren().iterator(); iterator.hasNext();) {
+			Plan child = iterator.next();
+			child.setParent(null);
+			iterator.remove();
+			deleteChildrenPlans(child, session);	
+		}
+		parent.getChildren().clear();
+		//then delete me
+		String queryString = "DELETE FROM PatrolPlan WHERE id.plan = :plan"; //$NON-NLS-1$
+		Query q = session.createQuery(queryString).setParameter("plan", parent);
+		q.executeUpdate();
+			
+		
+		session.delete(parent);
+		session.flush();
+		
+		
+	}
 
 	/**
 	 * Returns the value of the target type for all patrols associated with this
