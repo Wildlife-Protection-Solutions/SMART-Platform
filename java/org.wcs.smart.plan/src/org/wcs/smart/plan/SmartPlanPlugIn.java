@@ -47,6 +47,15 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String PATROL_PLAN_ICON = "org.wsc.smart.patrol.PATROL_PLAN"; //$NON-NLS-1$
 
+	/**
+	 * Image descriptor key for conservation area plan 
+	 */
+	public static final String STATUS_COMPLETE = "org.wsc.smart.patrol.STATUS_COMPLETE"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor key for conservation area plan 
+	 */
+	public static final String STATUS_INCOMPLETE = "org.wsc.smart.patrol.STATUS_INCOMPLETE"; //$NON-NLS-1$
 	
 	private PlanCaDeleteHandler deleteCa;
 	
@@ -149,7 +158,10 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		reg.put(CA_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/ca_plan.png")); //$NON-NLS-1$
 		reg.put(STATION_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station_plan.png")); //$NON-NLS-1$
 		reg.put(TEAM_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/team_plan.png")); //$NON-NLS-1$
-		reg.put(PATROL_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_plan.png")); //$NON-NLS-1$			
+		reg.put(PATROL_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_plan.png")); //$NON-NLS-1$
+		
+		reg.put(STATUS_COMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_complete.png")); //$NON-NLS-1$
+		reg.put(STATUS_INCOMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_incomplete.png")); //$NON-NLS-1$
     }
 	
 }

@@ -82,21 +82,4 @@ public class AdministrativePlanTarget extends PlanTarget{
 		status = s;
 	}
 
-	@Transient
-	@Override
-	public String getStatusDisplayString() {
-		if(status){
-			return "Complete";
-		}else{
-			return "Incomplete";
-		}
-	}
-
-	@Transient
-	@Override
-	public boolean computeStatus() {
-		return status;
-	}
-
-
 }

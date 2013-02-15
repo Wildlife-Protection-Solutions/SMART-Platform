@@ -321,5 +321,6 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 		}
 		main.layout();
 		main.getParent().layout();
+		main.getParent().getParent().layout(true, true);
 	}
 }

@@ -1,15 +1,11 @@
 package org.wcs.smart.plan.model;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Transient;
-
-import org.wcs.smart.plan.PlanHibernateManager;
 
 /**
  * Represents a NumericPlanTarget object
@@ -60,10 +56,8 @@ public class NumericPlanTarget extends PlanTarget {
 	private Double value;
 	private Operator op;
 	private TargetType type;
-	public PlanTargetStatus status;
 
 	public void NumericPlanTarget(){
-		status = new PlanTargetStatus(false);
 	}
 	
 	
@@ -111,63 +105,5 @@ public class NumericPlanTarget extends PlanTarget {
 		return n;
 	}
 
-	@Transient
-	public boolean computeStatus() {
-			Double total = calculateTargetStatusValue(this.getPlan());
-
-			if(op == Operator.EQUAL){
-				if(total == value){
-					status = new PlanTargetStatus(true);
-					status.setDisplayString("Complete (" + total + ")");
-				}else{
-					status = new PlanTargetStatus(false);
-					status.setDisplayString("Incomplete (" + total + ")");
-				}
-			}else if(op == Operator.GREATER){
-				if(total > value){
-					status = new PlanTargetStatus(true);
-					status.setDisplayString("Complete (" + total + ")");
-				}else{
-					status = new PlanTargetStatus(false);
-					status.setDisplayString("Incomplete (" + total + ")");
-				}
-			}else if(op == Operator.LESS){
-				if(total < value){
-					status = new PlanTargetStatus(true);
-					status.setDisplayString("Complete (" + total + ")");
-				}else{
-					status = new PlanTargetStatus(false);
-					status.setDisplayString("Missed (" + total + ")");
-				}
-			}else if(op == Operator.NOEQUAL){
-				if(total != value){
-					status = new PlanTargetStatus(true);
-					status.setDisplayString("Complete (" + total + ")");
-				}else{
-					status = new PlanTargetStatus(false);
-					status.setDisplayString("InComplete (" + total + ")");
-				}
-			}
-			return status.getStatus();
-
-	}
-
-	private Double calculateTargetStatusValue(Plan plan){
-		List<Plan> children = plan.getChildren();
-		Double total = PlanHibernateManager.getTargetTotalValue(this.type, plan);
-		for (Plan p : children){
-			total += calculateTargetStatusValue(p);
-		}
-		return total;
-	}
-
-	@Transient
-	@Override
-	public String getStatusDisplayString() {
-		if(status == null){
-			computeStatus();
-		}
-		return status.getDisplayString();
-	}
-
+	
 }

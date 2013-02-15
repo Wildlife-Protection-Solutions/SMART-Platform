@@ -110,19 +110,25 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 
 	@Override
 	public void initFromModel(Plan plan) {
+		Object defaultSelection = null;
 		if (plan != null){
-			final PlanEditorInput defaultInput = new PlanEditorInput(plan.getUuid(), plan.getLabel(), plan.getType());
-			updateJob.setDefaultSelection(defaultInput);
-			pv.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					if (pv.getSelectedPlan() == null || !pv.getSelectedPlan().equals(defaultInput)){
-						fireInputChangeListeners();
-					}
-					
-				}
-			});
+			defaultSelection = new PlanEditorInput(plan.getUuid(), plan.getLabel(), plan.getType());
+		}else{
+			defaultSelection = LoadPlanJob.NONE_LABEL;
 		}
+		
+		final Object initSelection = defaultSelection;
+		updateJob.setDefaultSelection(defaultSelection);
+		pv.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (pv.getSelectedPlan() == null || !pv.getSelectedPlan().equals(initSelection)){
+					fireInputChangeListeners();
+				}
+				
+			}
+		});
+		
 	}
 
 	@Override

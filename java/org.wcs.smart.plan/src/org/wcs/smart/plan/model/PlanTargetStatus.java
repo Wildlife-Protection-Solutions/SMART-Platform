@@ -22,7 +22,8 @@
 package org.wcs.smart.plan.model;
 
 
-import javax.persistence.Transient;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 
 /**
  * Represents a PlanTarget Status 
@@ -32,33 +33,81 @@ import javax.persistence.Transient;
  */
 public class PlanTargetStatus{
 
-	private boolean isComplete;
-	private String displayText;
-	
-	
-	
-	public PlanTargetStatus(boolean s){
-		isComplete= s;
-		displayText = "Incomplete";
+	/**
+	 * Status options
+	 * @author Emily
+	 *
+	 */
+	public enum Status{
+		COMPLETE ("Complete", SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_COMPLETE)),
+		INCOMPLETE("Incomplete", SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_INCOMPLETE));
+		
+		public String guiName;
+		public Image guiImage;
+		
+		private Status (String defaultGuiValue, Image guiImage){
+			this.guiName = defaultGuiValue;
+			this.guiImage = guiImage;
+		}
+		
+		
 	}
+	
+	private Status status = Status.INCOMPLETE;
+	private String displayText = null;
+	
+	/**
+	 * Creates a new status with custom display string
+	 * @param status
+	 * @param displayString
+	 */
+	public PlanTargetStatus(Status status, String displayString){
+		this(status);
+		this.displayText = displayString;
+	}
+	
+	/**
+	 * Creates as new status using the default display string
+	 * @param status
+	 */
+	public PlanTargetStatus(Status status){
+		this.status = status;
+	}
+	
 	/**
 	 * 
 	 * @return String representation of the target
 	 */
-	@Transient
-	public boolean getStatus(){
-		return isComplete;
+	public Status getStatus(){
+		return status;
 	}
 
-
+	/**
+	 * If the display string is not set then it returns
+	 * the default value associated with the status.
+	 * 
+	 * @return the string to display to the gui
+	 */
 	public String getDisplayString(){
+		if (this.displayText == null){
+			return this.status.guiName;
+		}
 		return this.displayText;
 	}
 	
+	/**
+	 * Sets the display string to show on the gui
+	 * @param name
+	 */
 	public void setDisplayString(String name){
 		this.displayText = name;
 	}
-	public void setStatus(boolean s) {
-		this.isComplete= s;
+	
+	/**
+	 * Sets the status
+	 * @param s
+	 */
+	public void setStatus(Status status) {
+		this.status = status;
 	}	
 }
