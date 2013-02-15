@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
 
@@ -60,7 +61,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 	 */
 	public PlanIdNameDescComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Edit Plan Id, Name, and Description");
+		setMessage(Messages.PlanIdNameDescComposite_Message);
 		createControls();
 	}
 
@@ -69,7 +70,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
         this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
         idLabel = new Label(this, SWT.NONE);
-        idLabel.setText("Plan ID:");
+        idLabel.setText(Messages.PlanIdNameDescComposite_PlanId);
         idLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         id = new Text(this, SWT.BORDER | SWT.LEFT);
@@ -93,7 +94,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
         id.setLayoutData(idgd);
                 
         nameLabel = new Label(this, SWT.NONE);
-        nameLabel.setText("Plan Name:");
+        nameLabel.setText(Messages.PlanIdNameDescComposite_Name);
         nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         name = new Text(this, SWT.BORDER | SWT.LEFT);
@@ -111,7 +112,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
         name.setLayoutData(data);
         
         Label descLabel = new Label(this, SWT.NONE);
-        descLabel.setText("Description:");
+        descLabel.setText(Messages.PlanIdNameDescComposite_Description);
         descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         description = new Text(this, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
@@ -133,7 +134,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
         idDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
         idDecoration.setShowHover(true);
-        idDecoration.setDescriptionText("Invalid Name");
+        idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_InvalidName_Error);
         
 	}
 	
@@ -179,11 +180,11 @@ public class PlanIdNameDescComposite extends PlanComposite {
 
 		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), currentPlan.getUuid())){
 			idDecoration.show();
-			idDecoration.setDescriptionText("Plan Id is already in the database, choose a unique ID");
+			idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_IdExists_Error);
 			return false;
 		}else if(id.getText() == null || !idIsSimple){
 			idDecoration.show();
-			idDecoration.setDescriptionText("Plan ID Cannot contain characters other than a-Z 0-9 _ : & ' and spaces");
+			idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_InvalidId_Error);
 			return false;
 		}else{
 		}
@@ -192,6 +193,6 @@ public class PlanIdNameDescComposite extends PlanComposite {
 
 	@Override
 	public String getTitle() {
-		return "Plan Information";
+		return Messages.PlanIdNameDescComposite_Title;
 	}
 }

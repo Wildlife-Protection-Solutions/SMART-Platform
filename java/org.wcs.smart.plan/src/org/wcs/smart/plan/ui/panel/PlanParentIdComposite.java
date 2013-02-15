@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Link;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.IPlanFilterItem;
 import org.wcs.smart.plan.ui.LoadPlanJob;
@@ -67,7 +68,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 	 */
 	public PlanParentIdComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Select the plan's parent.");
+		setMessage(Messages.PlanParentIdComposite_Message);
 
 		createControls();
 	}
@@ -81,12 +82,12 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		btnNoParent = new Button(buttonPanel, SWT.RADIO);
-		btnNoParent.setText("No parent plan");
+		btnNoParent.setText(Messages.PlanParentIdComposite_NoParentPlan_Label);
 		btnNoParent.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnNoParent.setSelection(true);
 		
 		btnUseSelected = new Button(buttonPanel, SWT.RADIO);
-		btnUseSelected.setText("Use the following plan as the parent");
+		btnUseSelected.setText(Messages.PlanParentIdComposite_UseParent_Label);
 		btnUseSelected.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 				
 		filterLink = new Link(this, SWT.NONE);
@@ -150,13 +151,13 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 	public boolean updateModel(Plan plan) {
 		if(!btnNoParent.getSelection()){
 			if (planTreeViewer.getSelectedPlan() == null){
-				MessageDialog.openInformation(getShell(), "Plan", "You must select a plan.");
+				MessageDialog.openInformation(getShell(), Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanRequired_Message);
 				return false;
 			}
 			
 			PlanEditorInput tmp = (PlanEditorInput) planTreeViewer.getSelectedPlan();
 			if (Arrays.equals(tmp.getUuid(), plan.getUuid())){
-				MessageDialog.openError(getShell(), "Plan", "You cannot make this plan a child of itself.");
+				MessageDialog.openError(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_ReferItself_Message);
 				return false;
 			}
 			Plan parent = null;
@@ -169,7 +170,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 				session.close();
 			}
 			if (parent == null){
-				MessageDialog.openInformation(getShell(), "Plan", "The selected plan could not found.");
+				MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanNotFound_Message);
 				return false;
 			}
 			plan.setParent(parent);
@@ -211,7 +212,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 	
 	@Override
 	public String getTitle() {
-		return "Parent Plan";
+		return Messages.PlanParentIdComposite_Title;
 	}
 	
 }

@@ -35,6 +35,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.ui.StationComposite;
 import org.wcs.smart.patrol.ui.TeamComposite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -55,7 +56,7 @@ public class PlanStationTeamComposite extends PlanComposite {
 	 */
 	public PlanStationTeamComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Select the associated Team and/or Station for this plan, if applicable:");
+		setMessage(Messages.PlanStationTeamComposite_Message);
 		createControls();
 	}
 
@@ -103,7 +104,7 @@ public class PlanStationTeamComposite extends PlanComposite {
 				teams =  PatrolHibernateManager.getActiveTeams(plan.getConservationArea(), session);
 				stations = PatrolHibernateManager.getActiveStations(plan.getConservationArea(), session);
 			}catch (Exception ex){
-				SmartPatrolPlugIn.displayLog("Could not load teams and stations.", ex);
+				SmartPatrolPlugIn.displayLog(Messages.PlanStationTeamComposite_TeamStation_NotFound_Error, ex);
 				session.close();
 			}
 			
@@ -129,7 +130,7 @@ public class PlanStationTeamComposite extends PlanComposite {
 	
 	@Override
 	public String getTitle() {
-		return "Station/Team";
+		return Messages.PlanStationTeamComposite_Title;
 	}
 	
 }
