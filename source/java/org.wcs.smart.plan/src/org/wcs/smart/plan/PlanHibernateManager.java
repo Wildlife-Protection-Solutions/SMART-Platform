@@ -384,52 +384,52 @@ public class PlanHibernateManager{
 	 * @param plan
 	 * @return a list of {@link PatrolEditorInput} directly associated with the plan.
 	 */
-	public static List<PatrolEditorInput> getPatrols(Plan plan){
+	public static List<PatrolEditorInput> getPatrols(Plan plan, Session session){
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT pp.id.patrol.uuid, pp.id.patrol.id, pp.id.patrol.patrolType, pp.id.patrol.startDate, pp.id.patrol.endDate"); //$NON-NLS-1$
 		sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
 		sql.append(" WHERE pp.id.plan  =:uuid ");  //$NON-NLS-1$
 		
-		Session session = HibernateManager.openSession();
+		List<PatrolEditorInput> patrols = new ArrayList<PatrolEditorInput>();
+
 		Query q = session.createQuery(sql.toString());
 		q.setParameter("uuid", plan); //$NON-NLS-1$
 
 		List<?> list = q.list();
 
-		List<PatrolEditorInput> patrols = new ArrayList<PatrolEditorInput>();
 		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
 			Object[] data = (Object[]) iterator.next();
-			
-			PatrolEditorInput pi = new PatrolEditorInput((byte[])data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3], (Date)data[4]);
+
+			PatrolEditorInput pi = new PatrolEditorInput((byte[]) data[0],
+					(String) data[1], (PatrolType.Type) data[2],
+					(Date) data[3], (Date) data[4]);
 			patrols.add(pi);
 		}
-		return patrols;		
+		return patrols;
 	}
 	
 	/**
 	 * Returns all tracks directory associated with a given plan.
 	 *  
-	 * @param plan
+	 * @param plan the plan you want all the tracks from
+	 * @param session the session/transaction that is already open and being used with this plan
 	 * @return a list of {@link PatrolEditorInput} directly associated with the plan.
 	 */
-	public static List<Track> getAllTracks(Plan plan){
+	public static List<Track> getAllTracks(Plan plan, Session session){
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT pld.tracks"); //$NON-NLS-1$
 		sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
 		sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
 		sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 		sql.append(" WHERE pp.id.plan  =:uuid ");//$NON-NLS-1$
-
 		
-		Session session = HibernateManager.openSession();
+		List<Track> tracks = new ArrayList<Track>();
 		Query q = session.createQuery(sql.toString());
 		q.setParameter("uuid", plan); //$NON-NLS-1$
 
 		List<?> list = q.list();
-
-		List<Track> tracks = new ArrayList<Track>();
 		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
-			tracks.add( (Track)iterator.next() );
+			tracks.add((Track) iterator.next());
 		}
 		return tracks;		
 

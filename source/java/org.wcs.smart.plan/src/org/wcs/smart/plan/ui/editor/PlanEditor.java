@@ -174,17 +174,19 @@ public class PlanEditor extends EditorPart {
 					form.layout();
 				}});
 			
-			final List<PatrolEditorInput> myPatrols = PlanHibernateManager.getPatrols(plan);
-			final Set<PatrolEditorInput> childPatrols = new HashSet<PatrolEditorInput>();
-			
+
+			final Set<PatrolEditorInput> childPatrols = new HashSet<PatrolEditorInput>(); 
+			final List<PatrolEditorInput> myPatrols;
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
+				myPatrols = PlanHibernateManager.getPatrols(plan, s);
 				Plan thisPlan = (Plan) s.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
-				getChildPlanPatrols(thisPlan, childPatrols);
+				getChildPlanPatrols(thisPlan, childPatrols, s);
 			}finally{
 				s.close();
 			}
+
 			
 			Display.getDefault().syncExec(new Runnable(){
 
@@ -514,8 +516,10 @@ public class PlanEditor extends EditorPart {
 
 		Composite targetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		targetButtons.setLayout(new GridLayout(1, false));
-		targetButtons.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+		targetButtons.setLayoutData(new GridData(SWT.TOP, SWT.BOTTOM, false, false));
 	
+		Hyperlink tarLink = createEditLink(toolkit, targetButtons, PanelType.TARGETS);
+		
 		Hyperlink lnkRefresh = toolkit.createHyperlink(targetButtons, Messages.PlanEditor_Refresh_Link_Label, SWT.NONE);
 		lnkRefresh.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -523,7 +527,7 @@ public class PlanEditor extends EditorPart {
 				targetList.refreshStatus();
 			}
 		});
-		createEditLink(toolkit, targetButtons, PanelType.TARGETS);
+
 
 		
 		Label ll = toolkit.createLabel(targetContent, Messages.PlanEditor_ChildPlanTarges_Label);
@@ -535,7 +539,7 @@ public class PlanEditor extends EditorPart {
 
 		Composite childTargetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		childTargetButtons.setLayout(new GridLayout(1, false));
-		childTargetButtons.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+		childTargetButtons.setLayoutData(new GridData(SWT.TOP, SWT.BOTTOM, false, false));
 	
 		Hyperlink lnkRefreshChild = toolkit.createHyperlink(childTargetButtons, Messages.PlanEditor_Refresh_Link_Label, SWT.NONE);
 		lnkRefreshChild.addHyperlinkListener(new HyperlinkAdapter() {
@@ -637,12 +641,12 @@ public class PlanEditor extends EditorPart {
 	 * 
 	 * @return the current plan associated with the editor
 	 */
-	private void getChildPlanPatrols(Plan plan, Set<PatrolEditorInput> kids){
+	private void getChildPlanPatrols(Plan plan, Set<PatrolEditorInput> kids, Session session){
 		if(plan.getChildren() == null){
 			return;
 		}
 		for (Plan p : plan.getChildren()){
-			kids.addAll(PlanHibernateManager.getPatrols(p));
+			kids.addAll(PlanHibernateManager.getPatrols(p, session));
 		}
 	}
 
