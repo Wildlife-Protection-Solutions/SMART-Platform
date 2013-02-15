@@ -41,6 +41,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
@@ -54,7 +55,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PlanHibernateManager{
 	
-	private static NumberFormat PLAN_ID_FORMATTER = new DecimalFormat("000000");
+	private static NumberFormat PLAN_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
 
 	
 	/**
@@ -65,7 +66,8 @@ public class PlanHibernateManager{
 	public static List<Plan> getAllRootPlans(Session s){
 		s.beginTransaction();
 		try{
-			List<Plan> plans = s.createCriteria(Plan.class).add(Restrictions.isNull("parent")).list();
+			@SuppressWarnings("unchecked")
+			List<Plan> plans = s.createCriteria(Plan.class).add(Restrictions.isNull("parent")).list(); //$NON-NLS-1$
 			return plans;
 		}finally{
 			s.getTransaction().rollback();
@@ -82,6 +84,7 @@ public class PlanHibernateManager{
 		try{
 			Query filterQuery = filter.buildQuery(s);
 			
+			@SuppressWarnings("unchecked")
 			List<Object[]> results = filterQuery.list();
 			
 			Map<String, PlanEditorInput> inputs = new HashMap<String, PlanEditorInput>();
@@ -133,8 +136,8 @@ public class PlanHibernateManager{
 		sb.append(p.getConservationArea().getId());
 
 		Query q = s
-				.createQuery("SELECT id FROM Plan WHERE id like :id ORDER BY id desc");
-		q.setParameter("id", sb.toString() + "%");
+				.createQuery("SELECT id FROM Plan WHERE id like :id ORDER BY id desc"); //$NON-NLS-1$
+		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		long idNumber = 0;
 		List<?> results = q.list();
@@ -150,7 +153,7 @@ public class PlanHibernateManager{
 				s.getTransaction().rollback();
 			}
 		}
-		sb.append("_");
+		sb.append("_"); //$NON-NLS-1$
 		idNumber = (idNumber + 1) % 1000000;
 		if (idNumber <= 0) {
 			idNumber = 1;
@@ -179,7 +182,7 @@ public class PlanHibernateManager{
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			session.getTransaction().rollback();
-			SmartPlanPlugIn.displayLog("Could not save plan. " + ex.getMessage(), ex);
+			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_SavePlan_Error + ex.getMessage(), ex);
 			return false;
 		}finally{
 			session.close();
@@ -198,9 +201,9 @@ public class PlanHibernateManager{
 	 * @return
 	 */
 	public static boolean isDuplicatePlanId(Session s, String id, byte[] excludePlanUuid) {
-		Criteria c = s.createCriteria(Plan.class).add(Restrictions.eq("id", id));
+		Criteria c = s.createCriteria(Plan.class).add(Restrictions.eq("id", id)); //$NON-NLS-1$
 		if (excludePlanUuid != null){
-			c.add(Restrictions.ne("uuid", excludePlanUuid));
+			c.add(Restrictions.ne("uuid", excludePlanUuid)); //$NON-NLS-1$
 		}
 		c.setProjection(Projections.rowCount());
 		Long cnt = (Long)c.list().get(0);
@@ -230,7 +233,7 @@ public class PlanHibernateManager{
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
-				SmartPlanPlugIn.displayLog("Error Deleting Plan" + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_DeletePlan_Error + SmartUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
 				return null;
 			}
 		} finally {
@@ -250,7 +253,7 @@ public class PlanHibernateManager{
 		parent.getChildren().clear();
 		//then delete me
 		String queryString = "DELETE FROM PatrolPlan WHERE id.plan = :plan"; //$NON-NLS-1$
-		Query q = session.createQuery(queryString).setParameter("plan", parent);
+		Query q = session.createQuery(queryString).setParameter("plan", parent); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		session.delete(parent);
@@ -284,13 +287,13 @@ public class PlanHibernateManager{
 			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 			sql.append(" JOIN pld.tracks as t"); //$NON-NLS-1$
-			sql.append(" WHERE pp.id.plan  =:uuid ");
+			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
 			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
-			List rs = q.list();
+			List<?> rs = q.list();
 			targetTotal = (Double)rs.get(0);
 
 		}else if (type == TargetType.PATROL_DAYS) {
@@ -298,15 +301,15 @@ public class PlanHibernateManager{
 			sql.append(" p.endDate, p.startDate "); //$NON-NLS-1$
 			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
 			sql.append(" JOIN pp.id.patrol p"); //$NON-NLS-1$
-			sql.append(" WHERE pp.id.plan  =:uuid ");
+			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
 			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
-			List list = q.list();
+			List<?> list = q.list();
 
-			Iterator it = list.iterator();
+			Iterator<?> it = list.iterator();
 			if(it.hasNext()){
 		        while(it.hasNext()){
 		          Object[] row = (Object[])it.next();
@@ -322,15 +325,15 @@ public class PlanHibernateManager{
 			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
 			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
-			sql.append(" WHERE pp.id.plan  =:uuid ");
+			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
 			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
-			List list = q.list();
+			List<?> list = q.list();
 
-			Iterator it = list.iterator();
+			Iterator<?> it = list.iterator();
 			if(it.hasNext()){
 		        while(it.hasNext()){
 		          Object[] row = (Object[])it.next();
@@ -348,15 +351,15 @@ public class PlanHibernateManager{
 			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
 			sql.append(" JOIN pl.members m"); //$NON-NLS-1$
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
-			sql.append(" WHERE pp.id.plan  =:uuid ");
+			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
 			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
-			List list = q.list();
+			List<?> list = q.list();
 
-			Iterator it = list.iterator();
+			Iterator<?> it = list.iterator();
 			if(it.hasNext()){
 		        while(it.hasNext()){
 		          Object[] row = (Object[])it.next();
@@ -389,10 +392,10 @@ public class PlanHibernateManager{
 		sql.append(" WHERE pp.id.plan  =:uuid ");  //$NON-NLS-1$
 		
 		Session session = HibernateManager.openSession();
-		Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		Query q = session.createQuery(sql.toString());
 		q.setParameter("uuid", plan); //$NON-NLS-1$
 
-		List list = q.list();
+		List<?> list = q.list();
 
 		List<PatrolEditorInput> patrols = new ArrayList<PatrolEditorInput>();
 		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {

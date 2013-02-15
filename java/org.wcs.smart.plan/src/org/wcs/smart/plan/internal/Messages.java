@@ -4,6 +4,16 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.plan.internal.messages"; //$NON-NLS-1$
+	public static String AdministrativePlanTarget_CategoryName;
+	public static String AdministrativePlanTarget_GuiName;
+	public static String NumericPlanTarget_CategoryName;
+	public static String NumericPlanTarget_GuiName;
+	public static String NumericPlanTarget_TargetType_DistanceTraveled;
+	public static String NumericPlanTarget_TargetType_PatrolDays;
+	public static String NumericPlanTarget_TargetType_PatrolHours;
+	public static String NumericPlanTarget_TargetType_PatrolManHours;
+	public static String PlanCaDeleteHandler_DeletePlans_SubTask;
+	public static String PlanCaDeleteHandler_DeleteTargets_SubTask;
 	public static String PlanCompositeFactory_Title_EndDate;
 	public static String PlanCompositeFactory_Title_IdNameDesc;
 	public static String PlanCompositeFactory_Title_ParentId;
@@ -44,6 +54,9 @@ public class Messages extends NLS {
 	public static String PlanEditor_Team_Label;
 	public static String PlanEditor_Type_Label;
 	public static String PlanEditor_UnavailableEmployees_Label;
+	public static String PlanEventManager_FireListeners_Error;
+	public static String PlanHibernateManager_DeletePlan_Error;
+	public static String PlanHibernateManager_SavePlan_Error;
 	public static String PlanIdNameDescComposite_Description;
 	public static String PlanIdNameDescComposite_IdExists_Error;
 	public static String PlanIdNameDescComposite_InvalidId_Error;
@@ -72,6 +85,9 @@ public class Messages extends NLS {
 	public static String PlanTargetComposite_Message;
 	public static String PlanTargetComposite_Targets_Label;
 	public static String PlanTargetComposite_Title;
+	public static String PlanTargetEngine_Missed_Message;
+	public static String PlanTargetStatus_Complete;
+	public static String PlanTargetStatus_Incomplete;
 	public static String PlanType_ConservationArea;
 	public static String PlanType_Patrol;
 	public static String PlanType_Station;
@@ -84,6 +100,7 @@ public class Messages extends NLS {
 	public static String PlanTypeEmployeesComposite_UnavailableRangers_Label;
 	public static String PlanTypeEmployeesComposite_Unknown_Label;
 	public static String PlanTypeEmployeesComposite_VacationSickness_Label;
+	public static String SmartPlanPlugIn_Error;
 	public static String SpatialPlanTarget_CategoryName;
 	public static String SpatialPlanTarget_Points_Label;
 	public static String SpatialPlanTargetPropertyPage_Description_Label;

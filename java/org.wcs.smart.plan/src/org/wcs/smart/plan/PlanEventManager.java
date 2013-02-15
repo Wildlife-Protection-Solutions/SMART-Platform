@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -96,7 +97,7 @@ public class PlanEventManager {
 				try{
 					listener.eventFired(attributeChange, source);
 				}catch (Exception ex){
-					SmartPlanPlugIn.displayLog("Error firing event listeners.  It is recommended you restart the application." + ex.getLocalizedMessage(), ex);
+					SmartPlanPlugIn.displayLog(Messages.PlanEventManager_FireListeners_Error + ex.getLocalizedMessage(), ex);
 				}
 			}
 		}
