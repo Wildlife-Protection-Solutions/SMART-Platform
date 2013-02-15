@@ -30,7 +30,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
@@ -69,6 +72,39 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 		}
 	};
 	
+	 IPartListener2 partListener = new IPartListener2(){
+			@Override
+			public void partVisible(IWorkbenchPartReference partRef) {}
+			
+			@Override
+			public void partOpened(IWorkbenchPartReference partRef) {}
+			
+			@Override
+			public void partInputChanged(IWorkbenchPartReference partRef) {}
+			
+			@Override
+			public void partHidden(IWorkbenchPartReference partRef) {}
+			
+			@Override
+			public void partDeactivated(IWorkbenchPartReference partRef) {}
+			
+			@Override
+			public void partClosed(IWorkbenchPartReference partRef) {}
+			
+			@Override
+			public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+			
+			@Override
+			public void partActivated(IWorkbenchPartReference partRef) {
+				if (partRef.getId().equals(PlanEditor.ID)){
+					IWorkbenchPart part = partRef.getPart(false);
+					if (part instanceof PlanEditor){
+						planViewer.setSelection(((PlanEditor) part).getEditorInput());
+					}
+				}
+			}
+	    };
+	
 	/**
 	 * Default constructor
 	 */
@@ -78,6 +114,7 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 	
 
 	public void dispose() {		
+		getSite().getWorkbenchWindow().getPartService().removePartListener(partListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_ADDED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_MODIFIED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_DELETED, planListener);
@@ -89,6 +126,8 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
+		
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -135,6 +174,7 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 		
 		getSite().registerContextMenu(menuManager,  planViewer.getViewer());
 		getSite().setSelectionProvider(planViewer.getViewer());
+		getSite().getWorkbenchWindow().getPartService().addPartListener(partListener);
 	}
 
 

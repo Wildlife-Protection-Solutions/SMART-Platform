@@ -35,16 +35,13 @@ import java.util.Map;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
-import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.util.SmartUtils;
@@ -255,12 +252,9 @@ public class PlanHibernateManager{
 		String queryString = "DELETE FROM PatrolPlan WHERE id.plan = :plan"; //$NON-NLS-1$
 		Query q = session.createQuery(queryString).setParameter("plan", parent);
 		q.executeUpdate();
-			
 		
 		session.delete(parent);
 		session.flush();
-		
-		
 	}
 
 	/**
@@ -376,9 +370,7 @@ public class PlanHibernateManager{
 		} else {
 			return 1.0;
 		}
-
-
-
+		
 		if(targetTotal== null)targetTotal = 0.0;
 		return targetTotal;
 
