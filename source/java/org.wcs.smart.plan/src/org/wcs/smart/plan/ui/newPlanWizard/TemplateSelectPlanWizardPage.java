@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Link;
 import org.hibernate.Session;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.filter.PlanFilter;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.IPlanFilterItem;
@@ -50,7 +51,7 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  */
 public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPlanFilterItem {
 
-	public static final String PAGENAME = "PlanTemplate";
+	public static final String PAGENAME = Messages.TemplateSelectPlanWizardPage_PageName;
 	
 	private PlanViewer planTreeViewer;
 	
@@ -77,7 +78,7 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Link lnkFilter = new Link(center, SWT.NONE);
-		lnkFilter.setText("Click <a>here</a> to change filter associated with the plans below.</a>");
+		lnkFilter.setText(Messages.TemplateSelectPlanWizardPage_Filter_Link);
 		lnkFilter.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -94,8 +95,8 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 		updateJob.schedule();
 		
 		setControl(center);
-		super.setTitle("Template Plan");
-		setMessage("Select the plan to use as a template.");
+		super.setTitle(Messages.TemplateSelectPlanWizardPage_Title);
+		setMessage(Messages.TemplateSelectPlanWizardPage_Message);
 	
 	}
 	
@@ -128,7 +129,7 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 		}
 
 		if (source == null){
-			SmartPlanPlugIn.displayLog("Could not find plan in database.  Please close and re-open the wizard and try again.", null);
+			SmartPlanPlugIn.displayLog(Messages.TemplateSelectPlanWizardPage_PlanNotFound_Error, null);
 			return false;
 		}
 		p.setTemplatePlan(source);

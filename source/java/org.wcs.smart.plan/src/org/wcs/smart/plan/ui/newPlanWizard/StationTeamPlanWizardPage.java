@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.PlanStationTeamComposite;
 
@@ -44,7 +45,7 @@ public class StationTeamPlanWizardPage extends PlanWizardPage {
 	 * 
 	 */
 	protected StationTeamPlanWizardPage() {
-		super("Plan Station/Team");
+		super(Messages.StationTeamPlanWizardPage_PageName);
 		
 	}
 
@@ -62,7 +63,7 @@ public class StationTeamPlanWizardPage extends PlanWizardPage {
 		
 		setControl(center);
 		setTitle(panel.getTitle());
-		setMessage("Select the associated Team and/or Station for this plan, if applicable.");
+		setMessage(Messages.StationTeamPlanWizardPage_Message);
 
 	}
 	

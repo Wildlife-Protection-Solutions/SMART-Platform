@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.IInputChangeListener;
 import org.wcs.smart.plan.ui.panel.PlanDatesComposite;
@@ -43,7 +44,7 @@ public class DatesPlanWizardPage extends PlanWizardPage {
 	 * 
 	 */
 	protected DatesPlanWizardPage() {
-		super("Plan Dates");
+		super(Messages.DatesPlanWizardPage_PageName);
 		
 	}
 
@@ -75,7 +76,7 @@ public class DatesPlanWizardPage extends PlanWizardPage {
 		});
 		setControl(center);
 		setTitle(panel.getTitle());
-		setMessage("Enter start and end date for the new plan.");
+		setMessage(Messages.DatesPlanWizardPage_Message);
 	}
 	
 

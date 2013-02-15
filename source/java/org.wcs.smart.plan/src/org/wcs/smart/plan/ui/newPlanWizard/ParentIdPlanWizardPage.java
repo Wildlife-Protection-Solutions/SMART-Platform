@@ -23,6 +23,7 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.panel.PlanParentIdComposite;
 
@@ -43,7 +44,7 @@ public class ParentIdPlanWizardPage extends PlanWizardPage {
 	 * 
 	 */
 	protected ParentIdPlanWizardPage() {
-		super("Plan Parent");
+		super(Messages.ParentIdPlanWizardPage_PageName);
 	}
 
 	
@@ -56,9 +57,7 @@ public class ParentIdPlanWizardPage extends PlanWizardPage {
 		
 		setControl(panel);
 		setTitle(panel.getTitle());		
-		setMessage("A parent plan allows you to group patrol plans into team, station and conservation area plans." +
-				"Create the conservation area plan first, then select it in this window when creating each each patrol, " +
-				"station or team plan you want to include in the Conservation area plan. Use the same method to create station or team plans.");
+		setMessage(Messages.ParentIdPlanWizardPage_Message);
 	
 	}
 

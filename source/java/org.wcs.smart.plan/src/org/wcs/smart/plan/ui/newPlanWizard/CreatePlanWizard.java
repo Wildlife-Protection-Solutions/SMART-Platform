@@ -37,6 +37,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.editor.PlanEditor;
@@ -71,7 +72,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	 * Creates a new wizard.
 	 */
 	public CreatePlanWizard() {
-		setWindowTitle("Create New Plan");
+		setWindowTitle(Messages.CreatePlanWizard_Title);
 
 		plan = new Plan();
 		
@@ -223,7 +224,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PlanEditor.ID);
 		} catch (WorkbenchException e) {
-			SmartPatrolPlugIn.displayLog("Failed to Load Plan Perspective", e);
+			SmartPatrolPlugIn.displayLog(Messages.CreatePlanWizard_LoadPerspective_Error, e);
 		}
 		return ret;
 	}

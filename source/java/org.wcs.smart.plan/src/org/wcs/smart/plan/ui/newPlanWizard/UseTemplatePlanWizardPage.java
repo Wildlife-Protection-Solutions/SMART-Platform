@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -45,7 +46,7 @@ public class UseTemplatePlanWizardPage extends PlanWizardPage {
 	 * 
 	 */
 	protected UseTemplatePlanWizardPage() {
-		super("New Plan");
+		super(Messages.UseTemplatePlanWizardPage_PageName);
 		
 	}
 
@@ -65,16 +66,16 @@ public class UseTemplatePlanWizardPage extends PlanWizardPage {
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		btnNew = new Button(center, SWT.RADIO);
-		btnNew.setText("Create a new plan from scratch");
+		btnNew.setText(Messages.UseTemplatePlanWizardPage_FromScratch_Label);
 		btnNew.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnNew.setSelection(true);
 		
 		btnExisting = new Button(center, SWT.RADIO);
-		btnExisting.setText("Use an existing plan as a template");
+		btnExisting.setText(Messages.UseTemplatePlanWizardPage_UseTemplate_Label);
 		btnExisting.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		setTitle("Template");
-		setMessage("When creating a new plan, you can use an existing plan as a template, or simply create a new, blank plan.");
+		setTitle(Messages.UseTemplatePlanWizardPage_Title);
+		setMessage(Messages.UseTemplatePlanWizardPage_Message);
 		super.setControl(buttonPanel);
 
 	}
