@@ -7,6 +7,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Transient;
 
+import org.wcs.smart.plan.internal.Messages;
+
 /**
  * Represents a NumericPlanTarget object
  * 
@@ -17,16 +19,16 @@ import javax.persistence.Transient;
 @DiscriminatorValue("NUMERIC")
 public class NumericPlanTarget extends PlanTarget {
 
-	public final static String TARGET_GUI_NAME = "Numeric";
+	public final static String TARGET_GUI_NAME = Messages.NumericPlanTarget_GuiName;
 	
 	/*
 	 * Valid target types
 	 */
 	public enum TargetType{
-		DISTANCE("Distance Travelled"),
-		PATROL_HOURS("Patrol Hours"),
-		PATROL_DAYS("Patrol Days"),
-		PATROL_MANHOURS("Patrol Man-Hours");
+		DISTANCE(Messages.NumericPlanTarget_TargetType_DistanceTraveled),
+		PATROL_HOURS(Messages.NumericPlanTarget_TargetType_PatrolHours),
+		PATROL_DAYS(Messages.NumericPlanTarget_TargetType_PatrolDays),
+		PATROL_MANHOURS(Messages.NumericPlanTarget_TargetType_PatrolManHours);
 		
 		public String guiName;
 		private TargetType(String guiName){
@@ -42,10 +44,10 @@ public class NumericPlanTarget extends PlanTarget {
 	 * Valid operators
 	 */
 	public enum Operator{
-		GREATER(">"),
-		LESS("<"),
-		EQUAL("="),
-		NOEQUAL("!=");
+		GREATER(">"), //$NON-NLS-1$
+		LESS("<"), //$NON-NLS-1$
+		EQUAL("="), //$NON-NLS-1$
+		NOEQUAL("!="); //$NON-NLS-1$
 
 		public String guiName;
 		private Operator(String guiName){
@@ -57,14 +59,10 @@ public class NumericPlanTarget extends PlanTarget {
 	private Operator op;
 	private TargetType type;
 
-	public void NumericPlanTarget(){
-	}
-	
-	
 	@Override
 	@Transient
 	public String getSummary() {
-		return "[Numeric] " + type.guiName + " " + op.guiName + " " + value;
+		return "[" + Messages.NumericPlanTarget_CategoryName + "] " + type.guiName + " " + op.guiName + " " + value; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 	}
 	
 	@Column(name = "op")

@@ -28,6 +28,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 
+import org.wcs.smart.plan.internal.Messages;
+
 
 /**
  * Represents a Administrative plan target
@@ -41,7 +43,7 @@ public class AdministrativePlanTarget extends PlanTarget{
 	
 	public static final int MAX_DESC_LENGTH = 256;
 	
-	public static final String TARGET_GUI_NAME = "Administrative";
+	public static final String TARGET_GUI_NAME = Messages.AdministrativePlanTarget_GuiName;
 	
 	private String targetDesc;
 	private boolean status;
@@ -70,7 +72,7 @@ public class AdministrativePlanTarget extends PlanTarget{
 	@Override
 	@Transient
 	public String getSummary() {
-		return "[Admin] " + this.getName();
+		return "[" + Messages.AdministrativePlanTarget_CategoryName + "] " + this.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	@Column(name = "completed")

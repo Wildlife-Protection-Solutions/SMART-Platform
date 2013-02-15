@@ -12,9 +12,9 @@ import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.patrol.IPatrolDeleteHandler;
-import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -63,7 +63,7 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		@Override
 		public void beforeDelete(Patrol patrol, Session session,
 				IProgressMonitor monitor) throws Exception {
-			Query q = session.createQuery("DELETE FROM PatrolPlan where id.patrol = :patrol").setParameter("patrol", patrol);
+			Query q = session.createQuery("DELETE FROM PatrolPlan where id.patrol = :patrol").setParameter("patrol", patrol);  //$NON-NLS-1$//$NON-NLS-2$
 			q.executeUpdate();
 		}
 		
@@ -133,7 +133,7 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 
 			@Override
 			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.SmartPlanPlugIn_Error, message);
 			}
 			
 		});
@@ -149,7 +149,7 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLogExit(String message, Throwable t){
 		log(message, t);
-		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", message);
+		MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartPlanPlugIn_Error, message);
 		System.exit(1);
 	}
 	

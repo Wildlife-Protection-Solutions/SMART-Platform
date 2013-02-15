@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.patrol.PatrolCaDeleteHandler;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * Delete handler for deleting all plan information attached 
@@ -49,9 +50,9 @@ public class PlanCaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
-		monitor.subTask("Deleting plan targets");
+		monitor.subTask(Messages.PlanCaDeleteHandler_DeleteTargets_SubTask);
 		deletePlanTargets(ca, session);
-		monitor.subTask("Delete plans");
+		monitor.subTask(Messages.PlanCaDeleteHandler_DeletePlans_SubTask);
 		deletePlans(ca, session);
 				
 	}

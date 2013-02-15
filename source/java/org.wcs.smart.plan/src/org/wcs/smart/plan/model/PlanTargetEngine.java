@@ -26,6 +26,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.NumericPlanTarget.Operator;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTargetStatus.Status;
@@ -98,8 +99,8 @@ public class PlanTargetEngine {
 
 		}
 		
-		String completeMsg = Status.COMPLETE.guiName + " (" + total + ")";
-		String incompleteMsg = Status.INCOMPLETE.guiName + " (" + total + ")";
+		String completeMsg = Status.COMPLETE.guiName + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		String incompleteMsg = Status.INCOMPLETE.guiName + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 
 		boolean complete = false;
 
@@ -121,7 +122,7 @@ public class PlanTargetEngine {
 			if (total < value) {
 				complete = true;
 			} else {
-				incompleteMsg = "Missed (" + total + ")";
+				incompleteMsg = Messages.PlanTargetEngine_Missed_Message + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				complete = false;
 			}
 		} else if (op == Operator.NOEQUAL) {

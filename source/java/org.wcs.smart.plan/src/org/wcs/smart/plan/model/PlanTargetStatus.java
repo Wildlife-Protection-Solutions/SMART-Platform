@@ -24,6 +24,7 @@ package org.wcs.smart.plan.model;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * Represents a PlanTarget Status 
@@ -39,8 +40,8 @@ public class PlanTargetStatus{
 	 *
 	 */
 	public enum Status{
-		COMPLETE ("Complete", SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_COMPLETE)),
-		INCOMPLETE("Incomplete", SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_INCOMPLETE));
+		COMPLETE (Messages.PlanTargetStatus_Complete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_COMPLETE)),
+		INCOMPLETE(Messages.PlanTargetStatus_Incomplete, SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.STATUS_INCOMPLETE));
 		
 		public String guiName;
 		public Image guiImage;
