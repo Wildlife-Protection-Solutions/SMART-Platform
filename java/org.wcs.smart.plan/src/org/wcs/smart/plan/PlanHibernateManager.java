@@ -39,6 +39,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.internal.Messages;
@@ -273,8 +274,6 @@ public class PlanHibernateManager{
 	 * 
 	 * @return the total calculated value from all associated patrols.
 	 */
-
-
 	public static Double getTargetTotalValue(TargetType type, Plan plan) {
 		Double targetTotal;
 		StringBuilder sql = new StringBuilder();
@@ -407,4 +406,32 @@ public class PlanHibernateManager{
 		return patrols;		
 	}
 	
+	/**
+	 * Returns all tracks directory associated with a given plan.
+	 *  
+	 * @param plan
+	 * @return a list of {@link PatrolEditorInput} directly associated with the plan.
+	 */
+	public static List<Track> getAllTracks(Plan plan){
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT pld.tracks"); //$NON-NLS-1$
+		sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
+		sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
+		sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
+		sql.append(" WHERE pp.id.plan  =:uuid ");//$NON-NLS-1$
+
+		
+		Session session = HibernateManager.openSession();
+		Query q = session.createQuery(sql.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("uuid", plan); //$NON-NLS-1$
+
+		List list = q.list();
+
+		List<Track> tracks = new ArrayList<Track>();
+		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
+			tracks.add( (Track)iterator.next() );
+		}
+		return tracks;		
+
+	}
 }

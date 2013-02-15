@@ -25,11 +25,17 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.NumericPlanTarget.Operator;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTargetStatus.Status;
+import org.wcs.smart.util.GeometryUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Computation engine for computing the status of
@@ -63,8 +69,7 @@ public class PlanTargetEngine {
 		}else if (target instanceof NumericPlanTarget){
 			return computeNumericPlanTarget((NumericPlanTarget) target);
 		}else if (target instanceof SpatialPlanTarget){
-			//TODO:
-			return new PlanTargetStatus(Status.COMPLETE);
+			return computeSpatialPlanTarget((SpatialPlanTarget) target);
 		}else{
 			//unknown
 			return new PlanTargetStatus(Status.INCOMPLETE);
@@ -72,6 +77,35 @@ public class PlanTargetEngine {
 	}
 	
 	
+	private PlanTargetStatus computeSpatialPlanTarget(SpatialPlanTarget target) {
+		SpatialPlanTarget thisTarget = null;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		PlanTargetStatus result = new PlanTargetStatus(Status.COMPLETE);
+		try {
+			thisTarget = (SpatialPlanTarget) session.load(SpatialPlanTarget.class, target.getUuid());
+			if (thisTarget == null) {
+				return new PlanTargetStatus(Status.INCOMPLETE);
+			}
+			List<SpatialPlanTargetPoint> points= target.getPoints();
+			for(SpatialPlanTargetPoint n : points){
+				//as soon as we see one point was not met, just break so we close the transaction properly;
+				if(!pointHasBeenVisited(thisTarget.getDistanceForCompletion(), thisTarget.getPlan(), n )){
+					result.setStatus(Status.INCOMPLETE);
+					break;
+				}
+			}
+			session.getTransaction().rollback();
+		} finally {
+			session.close();
+
+		}
+		return result;
+	}
+
+
+
+
 	private PlanTargetStatus computeAdministrativePlanTarget(AdministrativePlanTarget target) {
 		if (target.getStatus()){
 			return new PlanTargetStatus(Status.COMPLETE);
@@ -150,4 +184,23 @@ public class PlanTargetEngine {
 		return total;
 	}
 
+
+	private boolean pointHasBeenVisited(int distanceForCompletion, Plan plan, SpatialPlanTargetPoint spt) {
+		GeometryFactory fact = new GeometryFactory();
+		Coordinate c = new Coordinate(spt.getX(), spt.getY());
+        Point point = fact.createPoint(c);
+        
+		for(Track t : PlanHibernateManager.getAllTracks(plan) ){
+			if(GeometryUtils.distanceInMeters(t.getLineString(), point) <= distanceForCompletion ){
+				return true;
+			}
+		}
+		
+		for(Plan x: plan.getChildren() ){
+			if(pointHasBeenVisited(distanceForCompletion, x, spt) ){
+				return true;
+			}
+		}
+		return false;
+	}
 }
