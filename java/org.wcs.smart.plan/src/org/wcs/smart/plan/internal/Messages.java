@@ -5,6 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.plan.internal.messages"; //$NON-NLS-1$
 	public static String PlanEditor_CannotOpenFile_Error;
+	public static String PlanEditor_ChildPatrolLabel;
 	public static String PlanEditor_ChildPlanTarges_Label;
 	public static String PlanEditor_Description_Label;
 	public static String PlanEditor_Edit_Link_Label;
@@ -15,6 +16,7 @@ public class Messages extends NLS {
 	public static String PlanEditor_None_Label;
 	public static String PlanEditor_None_Text;
 	public static String PlanEditor_ParentPlan_Label;
+	public static String PlanEditor_PatrolLabel;
 	public static String PlanEditor_Patrols_Label;
 	public static String PlanEditor_PlanId_Label;
 	public static String PlanEditor_PlanTarges_Label;
