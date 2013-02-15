@@ -297,8 +297,6 @@ public class Plan {
 	 * @return the children plans
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
-	@BatchSize(size=200)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<Plan> getChildren(){
 		return this.children;
 	}
