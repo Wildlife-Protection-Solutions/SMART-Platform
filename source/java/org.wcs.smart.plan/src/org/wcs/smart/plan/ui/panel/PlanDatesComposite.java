@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
 
@@ -61,7 +62,7 @@ public class PlanDatesComposite extends PlanComposite {
 	 */
 	public PlanDatesComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Enter a name and description for the new Plan:");
+		setMessage(Messages.PlanDatesComposite_Message);
 		createControls();
 	}
 
@@ -70,7 +71,7 @@ public class PlanDatesComposite extends PlanComposite {
         this.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
         
         Label lbl = new Label(this, SWT.NONE);
-		lbl.setText("Plan Start Date:");
+		lbl.setText(Messages.PlanDatesComposite_StartDate);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtStartDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
@@ -78,7 +79,7 @@ public class PlanDatesComposite extends PlanComposite {
 		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
 		
 		lbl = new Label(this, SWT.NONE);
-		lbl.setText("Plan End Date:");
+		lbl.setText(Messages.PlanDatesComposite_EndDate);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtEndDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
@@ -151,30 +152,30 @@ public class PlanDatesComposite extends PlanComposite {
 		if(dtStartDate == null || dtEndDate == null){
 			isValid = false;
 			cdEndDate.show();
-			cdEndDate.setDescriptionText("You must select valid dates.");
+			cdEndDate.setDescriptionText(Messages.PlanDatesComposite_EndDate_Invalid_Error);
 		}
 
 		if( (SmartUtils.getDate(dtEndDate)).before(SmartUtils.getDate(dtStartDate)) ){
 			isValid = false;
 			cdEndDate.show();
-			cdEndDate.setDescriptionText("End date must be after the start date.");
+			cdEndDate.setDescriptionText(Messages.PlanDatesComposite_EndDate_Range_Error);
 		}
 		
 		if(parentEndDate != null && (SmartUtils.getDate(dtEndDate)).after(parentEndDate) ){
 			isValid = false;
 			cdEndDate.show();
-			cdEndDate.setDescriptionText("End date must not be after the Parent Plan's end date(" + parentEndDate + ")");
+			cdEndDate.setDescriptionText(Messages.PlanDatesComposite_EndDate_Range_Parent_Error + " (" + parentEndDate + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if(parentEndDate != null && (SmartUtils.getDate(dtStartDate)).before(parentStartDate) ){
 			isValid = false;
 			cdStartDate.show();
-			cdStartDate.setDescriptionText("Start date must not be before the Parent Plan's end date(" + parentStartDate + ")");
+			cdStartDate.setDescriptionText(Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + parentStartDate + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return isValid;
 	}
 
 	@Override
 	public String getTitle() {
-		return "Plan Dates";
+		return Messages.PlanDatesComposite_Title;
 	}
 }

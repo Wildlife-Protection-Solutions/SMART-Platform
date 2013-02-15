@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.targets.TargetListViewer;
@@ -60,7 +61,7 @@ public class PlanTargetComposite extends PlanComposite {
 	 */
 	public PlanTargetComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Add plan targets by selecting the \"Add new target\" button. Click the edit button beside an existing target to make changes to it:");
+		setMessage(Messages.PlanTargetComposite_Message);
 		createControls();
 	}
 
@@ -69,7 +70,7 @@ public class PlanTargetComposite extends PlanComposite {
         this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
         
         Label lbl = new Label(this, SWT.NONE);
-		lbl.setText("Plan Targets:");
+		lbl.setText(Messages.PlanTargetComposite_Targets_Label);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		
 		Composite table = new Composite(this, SWT.NONE);
@@ -83,7 +84,7 @@ public class PlanTargetComposite extends PlanComposite {
 		buttonPnl.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
 		
 		Button btnNew = new Button(buttonPnl, SWT.NONE);
-		btnNew.setText("Add Target...");
+		btnNew.setText(Messages.PlanTargetComposite_AddTarget_Button);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -101,7 +102,7 @@ public class PlanTargetComposite extends PlanComposite {
 		
 		
 		final Button btnEdit = new Button(buttonPnl, SWT.NONE);
-		btnEdit.setText("Edit Target...");
+		btnEdit.setText(Messages.PlanTargetComposite_EditTarget_Button);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -133,7 +134,7 @@ public class PlanTargetComposite extends PlanComposite {
 		
 		
 		final Button btnDelete = new Button(buttonPnl, SWT.NONE);
-		btnDelete.setText("Delete Target");
+		btnDelete.setText(Messages.PlanTargetComposite_DeleteTarget_Button);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -144,8 +145,8 @@ public class PlanTargetComposite extends PlanComposite {
 		        
 		        PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
 		        MessageBox dialog = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.OK| SWT.CANCEL);
-        		dialog.setText("Delete Target: " + selected.getName());
-        		dialog.setMessage("Do you really want to delete this Target?");
+        		dialog.setText(Messages.PlanTargetComposite_DeleteTarget_Dialog_Text + selected.getName());
+        		dialog.setMessage(Messages.PlanTargetComposite_DeleteTarget_Dialog_Message);
         		int result = dialog.open();
         		if( result == SWT.OK){
         			//delete the target
@@ -200,7 +201,7 @@ public class PlanTargetComposite extends PlanComposite {
 	
 	@Override
 	public String getTitle() {
-		return "Plan Targets";
+		return Messages.PlanTargetComposite_Title;
 	}
 	
 }

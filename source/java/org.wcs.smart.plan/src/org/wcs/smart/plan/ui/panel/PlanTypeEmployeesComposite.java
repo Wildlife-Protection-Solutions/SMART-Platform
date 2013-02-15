@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.Plan.PlanType;
 
@@ -51,6 +52,8 @@ import org.wcs.smart.plan.model.Plan.PlanType;
  */
 public class PlanTypeEmployeesComposite extends PlanComposite {
 
+	private static final String UNAVAILABLE_EMPLOYEES_DEFAULT_VALUE = "0"; //$NON-NLS-1$
+	
 	private ComboViewer planType = null;
 	private Text unavailableEmployees;
 	private Label activeEmployees;
@@ -63,7 +66,7 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 	 */
 	public PlanTypeEmployeesComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage("Edit Plan type and unavailable Resources");
+		setMessage(Messages.PlanTypeEmployeesComposite_Message);
 		createControls();
 	}
 
@@ -72,7 +75,7 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
         this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
 		Label lbl = new Label(this, SWT.NONE);
-		lbl.setText("Plan Type:");
+		lbl.setText(Messages.PlanTypeEmployeesComposite_Type_Label);
 		GridData gd = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd.horizontalIndent = 8;
 		lbl.setLayoutData(gd);
@@ -96,26 +99,26 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		});
 				
 		Label lbl2 = new Label(this, SWT.NONE);
-		lbl2.setText("Active Rangers:");
+		lbl2.setText(Messages.PlanTypeEmployeesComposite_ActiveRangers_Label);
 		GridData gd2 = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd2.horizontalIndent = 8;
 		lbl2.setLayoutData(gd2);
 		
 		activeEmployees = new Label(this, SWT.NONE);
-		activeEmployees.setText("unknown");
+		activeEmployees.setText(Messages.PlanTypeEmployeesComposite_Unknown_Label);
 		GridData gda = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gda.horizontalIndent = 8;
 		activeEmployees.setLayoutData(gda);
 
 		Label lbl4 = new Label(this, SWT.NONE);
-		lbl4.setText("Unavailable Rangers:");
+		lbl4.setText(Messages.PlanTypeEmployeesComposite_UnavailableRangers_Label);
 		GridData gd4 = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd4.horizontalIndent = 8;
 		lbl4.setLayoutData(gd4);
 
 		unavailableEmployees = new Text(this, SWT.BORDER);
 		unavailableEmployees.setTextLimit(5);
-		unavailableEmployees.setText("0");
+		unavailableEmployees.setText(UNAVAILABLE_EMPLOYEES_DEFAULT_VALUE);
 		GridData gdun = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gdun.horizontalIndent = 8;
 		unavailableEmployees.setLayoutData(gdun);
@@ -134,7 +137,7 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 			}
 		});
 		Label lbl5 = new Label(this, SWT.NONE);
-		lbl5.setText("(vacation, sickness, etc)");
+		lbl5.setText(Messages.PlanTypeEmployeesComposite_VacationSickness_Label);
 		GridData gd5 = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd5.horizontalIndent = 8;
 		lbl5.setLayoutData(gd5);
@@ -143,7 +146,7 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
         UeDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
         UeDecoration.setShowHover(true);
-        UeDecoration.setDescriptionText("Invalid Name");
+        UeDecoration.setDescriptionText(Messages.PlanTypeEmployeesComposite_InvalidName_Error);
 
 		
 	}
@@ -163,7 +166,7 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		if(plan.getUnavailableEmployees() != null){
 			unavailableEmployees.setText(plan.getUnavailableEmployees().toString());
 		}else{
-			unavailableEmployees.setText("0");
+			unavailableEmployees.setText(UNAVAILABLE_EMPLOYEES_DEFAULT_VALUE);
 		}
 		if(plan.getType() != null){
 				planType.setSelection(new StructuredSelection(plan.getType()));
@@ -196,6 +199,6 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 
 	@Override
 	public String getTitle() {
-		return "Plan Type";
+		return Messages.PlanTypeEmployeesComposite_Titlle;
 	}
 }

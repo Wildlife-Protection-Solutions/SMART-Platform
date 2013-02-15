@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.panel;
 
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.internal.ui.patrol.PatrolPlanComposite;
 
 
@@ -61,13 +62,13 @@ public class PlanCompositeFactory {
 
 	public String getTitle(PanelType type) {
 		switch (type) {
-		case STARTDATE:    return "Plan Start Date";
-		case ENDDATE:    return "Plan End Date";
-		case TARGETS:    return "Plan Targets";
-		case PLANID:    return "Plan ID, Name, Desc";
-		case TYPE: return "Plan Type";
-		case STATION: return "Plan Station";
-		case PLANPARENTID: return "Parent ID";
+		case STARTDATE:    return Messages.PlanCompositeFactory_Title_StartDate;
+		case ENDDATE:    return Messages.PlanCompositeFactory_Title_EndDate;
+		case TARGETS:    return Messages.PlanCompositeFactory_Title_Targets;
+		case PLANID:    return Messages.PlanCompositeFactory_Title_IdNameDesc;
+		case TYPE: return Messages.PlanCompositeFactory_Title_Type;
+		case STATION: return Messages.PlanCompositeFactory_Title_Station;
+		case PLANPARENTID: return Messages.PlanCompositeFactory_Title_ParentId;
 		case PATROLPLAN: return PatrolPlanComposite.TITLE;
 		
 		default: throw new UnsupportedOperationException(type + "is not supported"); //$NON-NLS-1$
