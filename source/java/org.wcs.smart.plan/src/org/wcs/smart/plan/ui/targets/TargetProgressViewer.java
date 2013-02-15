@@ -58,13 +58,83 @@ import org.wcs.smart.plan.model.PlanTargetStatus.Status;
  */
 public class TargetProgressViewer{
 	
+	private enum TargetTableColumn{
+		PLANNAME("Plan",15),
+		TARGETNAME("Target Name", 20),
+		SUMMARY("Summary",45),
+		STATUS("Target Status", 30),
+		STATUS_ICON("", 5);
+		
+		public String guiName;
+		public int defaultWidth;
+		
+		private TargetTableColumn(String name, int defaultWidth){
+			this.guiName = name;
+			this.defaultWidth = defaultWidth;
+		}
+		
+		public String getValue(PlanTarget target){
+			String value = null;
+		
+			if (this == PLANNAME){
+				value = target.getPlan().getId();
+			}else if (this == TARGETNAME){
+				value = target.getName();
+			}else if (this == SUMMARY){
+				value = target.getSummary();
+			}else if (this == STATUS){
+				PlanTargetStatus status = target.getCurrentStatus();
+				if (status == null){
+					value = "Computing...";
+				}else{
+					value = status.getDisplayString();
+				}
+			}
+			if (value == null){
+				return "";
+			}
+			return value.trim();
+		}
+		
+	}
 	private TableViewer v;
 	private Label lbl;
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private TargetTableColumn[] myColumns = null;
 	
-
+	/**
+	 * Creates a new target progress viewer with
+	 * planName, targetName, summary status and status icon columns.
+	 * 
+	 * @param parent
+	 * @param includePlan if the plan name should be included
+	 */
+	public TargetProgressViewer(Composite parent, boolean includePlan){
+		this(parent, TargetTableColumn.values());
+	}
+	
+	/**
+	 * Creates a new target progress viewer with 
+	 * targetname, summary, status, and status icon columns
+	 * @param parent
+	 */
 	public TargetProgressViewer(Composite parent) {
+		this(parent, new TargetTableColumn[]{
+				TargetTableColumn.TARGETNAME, 
+				TargetTableColumn.SUMMARY, 
+				TargetTableColumn.STATUS, 
+				TargetTableColumn.STATUS_ICON});
 		
+	}
+		
+	private TargetProgressViewer(Composite parent, TargetTableColumn[] columns){
+		this.myColumns = columns;
+		create(parent);
+	}
+	
+	
+	private void create(Composite parent){
+
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -78,86 +148,63 @@ public class TargetProgressViewer{
 		v.getTable().setHeaderVisible(true);
 		v.getTable().setLinesVisible(true);
 		
-	
+		
+		//create a blank empty column that is hidden
+		//see: 
+		//http://stackoverflow.com/questions/12641354/putting-an-image-in-to-a-jface-table-cell-is-causing-gap-for-image-to-appear-in
+		//note this needs testing on mac.
 		TableViewerColumn viewerColumn = new TableViewerColumn(v,SWT.NONE);
 		TableColumn column = viewerColumn.getColumn();
-
-		layout.setColumnData(column, new ColumnWeightData(34,ColumnWeightData.MINIMUM_WIDTH, true));
-		column.setText("Target Name");
-		column.setResizable(true);
-		column.setMoveable(true);
+		column.setText("");
+		column.setResizable(false);
+		column.setMoveable(false);
+		column.setWidth(0);
+		layout.setColumnData(column, new ColumnWeightData(0,0,false));
 		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element) {
-				String x = ((PlanTarget)element).getName();
-				if (x == null){
-					return ""; //$NON-NLS-1$
-				}
-				return x;
+				return "";
 			}
-			 
+		 
 		});
 		
-		viewerColumn = new TableViewerColumn(v,SWT.NONE);
-		column = viewerColumn.getColumn();
-		layout.setColumnData(column, new ColumnWeightData(66,ColumnWeightData.MINIMUM_WIDTH, true));
-		column.setText("Summary");
-		column.setResizable(true);
-		column.setMoveable(true);
-		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
-			@Override
-			public String getText(Object element) {
-				String x = ((PlanTarget)element).getSummary();
-				if (x == null){
-					return ""; //$NON-NLS-1$
-				}
-				return x;
-			}			 
-		});
-		
-		viewerColumn = new TableViewerColumn(v,SWT.NONE);
-		column = viewerColumn.getColumn();
-		layout.setColumnData(column, new ColumnWeightData(66,ColumnWeightData.MINIMUM_WIDTH, true));
-		column.setText("Target Status");
-		column.setToolTipText("These totals include values from all patrols associated with the Plan as well as with sub-plans.");
-		column.setResizable(true);
-		column.setMoveable(true);
-		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
-			@Override
-			public String getText(Object element) {
-				PlanTargetStatus status = ((PlanTarget)element).getCurrentStatus();
-				if (status == null){
-					return "Computing...";
-				}else{
-					return status.getDisplayString();
-				}
-			}			 
-		});
-		
-		
-		viewerColumn = new TableViewerColumn(v,SWT.NONE);
-		column = viewerColumn.getColumn();
-		layout.setColumnData(column, new ColumnWeightData(10,10, false));
-		column.setText(""); //$NON-NLS-1$
-		column.setResizable(true);
-		column.setMoveable(true);
-		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
-            @Override
-            public void update(ViewerCell cell) {
-            	PlanTargetStatus status = ((PlanTarget)cell.getElement()).getCurrentStatus();
-            	if (status != null){
-            		cell.setImage(status.getStatus().guiImage);
-            	}
-            }
-		});
+		for (final TargetTableColumn c : myColumns){
+			viewerColumn = new TableViewerColumn(v,SWT.NONE);
+			column = viewerColumn.getColumn();
 
+			layout.setColumnData(column, new ColumnWeightData(c.defaultWidth,ColumnWeightData.MINIMUM_WIDTH, true));
+			column.setText(c.guiName);
+			column.setResizable(true);
+			column.setMoveable(true);
+			
+			
+			if (c == TargetTableColumn.STATUS_ICON){
+				viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+		            @Override
+		            public void update(ViewerCell cell) {
+		            	PlanTargetStatus status = ((PlanTarget)cell.getElement()).getCurrentStatus();
+		            	if (status != null){
+		            		cell.setImage(status.getStatus().guiImage);
+		            	}
+		            }
+				});
+			}else{
+				viewerColumn.setLabelProvider(new ColumnLabelProvider(){
+					@Override
+					public String getText(Object element) {
+						return c.getValue((PlanTarget)element);
+					}
+				 
+				});
+			}
+		}
+		
 		v.setContentProvider(ArrayContentProvider.getInstance());
 
 		table.setLayout(layout);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)table.getLayoutData()).heightHint = 120;
 	}
-		
 	public TableViewer getViewer(){
 		return this.v;
 	}

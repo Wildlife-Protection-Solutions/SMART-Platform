@@ -38,6 +38,11 @@ public class PlanEventManager {
 
 	private final static PlanEventManager INSTANCE = new PlanEventManager();
 	
+	/**
+	 * event type when the patrol/plan link is changed
+	 */
+	public static final int PATROL_PLAN_ATTRIBUTE = 4;
+	
 	//registered listeners
 	private HashMap<EventType, List<IPlanEventListener>> listeners = new HashMap<EventType, List<IPlanEventListener>>();
 	

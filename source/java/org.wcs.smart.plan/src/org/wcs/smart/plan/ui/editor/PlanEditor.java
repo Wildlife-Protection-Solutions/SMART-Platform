@@ -201,7 +201,7 @@ public class PlanEditor extends EditorPart {
 							});
 						}
 						for (final PatrolEditorInput x : childPatrols){
-							Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getPatrolId() + "(c)",
+							Hyperlink lnk = toolkit.createHyperlink(patrolLinks, x.getPatrolId() + "*", //$NON-NLS-1$
 									SWT.WRAP);
 							lnk.addHyperlinkListener(new HyperlinkAdapter() {
 								@Override
@@ -211,7 +211,7 @@ public class PlanEditor extends EditorPart {
 							});
 						}
 					}
-					form.layout();
+					form.layout(true, true);
 						
 				}});
 			return Status.OK_STATUS;
@@ -225,10 +225,14 @@ public class PlanEditor extends EditorPart {
 		@Override
 		public void eventFired(int type, Plan source) {
 			if (Arrays.equals(source.getUuid(), getPlan().getUuid())){
-				//if this is our plan we want to update our object
-				//with the new one.
-				plan = source;
-				initValues();
+				if (type == PlanEventManager.PATROL_PLAN_ATTRIBUTE){
+					loadPatrolsLinksJob.schedule();
+				}else{
+					//if this is our plan we want to update our object
+					//with the new one.
+					plan = source;
+					initValues();
+				}
 			}
 		}
 	};
@@ -305,7 +309,7 @@ public class PlanEditor extends EditorPart {
 				}else{
 					summary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}
-				summary.getParent().layout();
+				summary.getParent().layout(true, true);
 			}
 		});
 		
@@ -402,18 +406,19 @@ public class PlanEditor extends EditorPart {
 		bottomContent.setLayout(new GridLayout(2, false));
 		bottomContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		Label l = toolkit.createLabel(bottomContent, Messages.PlanEditor_Patrols_Label + "*");
+		Label l = toolkit.createLabel(bottomContent, Messages.PlanEditor_PatrolLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridData)l.getLayoutData()).verticalIndent = 4;
 		patrolLinks  = toolkit.createComposite(bottomContent);
 		patrolLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		//patrolLinks.setLayout(new FillLayout(SWT.HORIZONTAL));
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		layout.wrap = true;
 		layout.spacing = 5;
 		patrolLinks.setLayout(layout);
 		
-		Label lc = toolkit.createLabel(content, "* (c) - child plans patrols");
+		Label lc = toolkit.createLabel(content, "*" + Messages.PlanEditor_ChildPatrolLabel); //$NON-NLS-1$
 		lc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		final Section targetSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
@@ -454,7 +459,7 @@ public class PlanEditor extends EditorPart {
 		ll2.setFont(boldFont);
 		
 		
-		targetList  = new TargetProgressViewer(targetContent );
+		targetList  = new TargetProgressViewer(targetContent);
 
 		Composite targetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		targetButtons.setLayout(new GridLayout(1, false));
@@ -474,7 +479,7 @@ public class PlanEditor extends EditorPart {
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		ll.setFont(boldFont);
 		
-		targetList2  = new TargetProgressViewer(targetContent );
+		targetList2  = new TargetProgressViewer(targetContent, true);
 
 		Composite childTargetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		childTargetButtons.setLayout(new GridLayout(1, false));

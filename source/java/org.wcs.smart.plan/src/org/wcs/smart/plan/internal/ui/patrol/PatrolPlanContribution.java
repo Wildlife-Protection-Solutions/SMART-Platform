@@ -183,6 +183,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			@Override
 			protected boolean performSave() {
 				Plan newPlan = null;
+				Plan oldPlan = currentPlan;
 				Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
@@ -204,6 +205,14 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 					s.getTransaction().commit();
 					currentPlan = newPlan;
 					setChangesMade(false);
+					
+					if (newPlan != null){
+						PlanEventManager.getInstance().planChanged(PlanEventManager.PATROL_PLAN_ATTRIBUTE, newPlan);
+					}
+					if (oldPlan != null){
+						PlanEventManager.getInstance().planChanged(PlanEventManager.PATROL_PLAN_ATTRIBUTE, oldPlan);
+					}
+					
 					return true;
 				}catch (Exception ex){
 					s.getTransaction().rollback();
@@ -319,8 +328,6 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 				toolkit.createLabel(planc, sb.toString());
 			}
 		}
-		main.layout();
-		main.getParent().layout();
-		main.getParent().getParent().layout(true, true);
+		main.getParent().getParent().getParent().layout(true, true);
 	}
 }
