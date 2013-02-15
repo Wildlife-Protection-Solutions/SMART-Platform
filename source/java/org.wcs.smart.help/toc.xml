@@ -34,4 +34,60 @@
       <topic href="html/AdministrativeTasks.html#AutoBackup" label="Automatic Backup">
       </topic>
    </topic>
+   <topic href="html/ComponentsOfSMART.html" label="Components Of Smart">
+      <topic href="html/ComponentsOfSMART.html#Overview" label="Overview">
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#MapView" label="Map Perspective">
+         <topic href="html/ComponentsOfSMART.html#MapNav" label="Map Navigation">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#AddLayer" label="Adding Layers">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#StyleLayer" label="Styling Layers">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#DeleteLayer" label="Deleting Layers">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ExportMap" label="Exporting a Map">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#Basemaps" label="Basemaps">
+         </topic>
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Patrol" label="Patrol Perspective">
+         <topic href="html/ComponentsOfSMART.html#PatrolOp" label="Patrol Options">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolMandates" label="Patrol Mandates">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolTypes" label="PatrolTypes">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolTeams" label="Patrol Teams">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#CreatePatrol" label="Creating Patrols">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ImportWaypoints" label="Importing Waypoints">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ImportTracks" label="Importing Tracks">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#Observations" label="Entering Observations">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ViewPatrols" label="Viewing Patrols">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ExportImportPatrol" label="Exporting / Importing Patrols">
+         </topic>
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Query" label="Query Perspective">
+         <topic href="html/ComponentsOfSMART.html#QueryType" label="Types of Queries">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolObservationQuery" label="Patrol and Observation Queries">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#SummaryQuery" label="SummaryQuery">
+         </topic>
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Reports" label="Report Prespective">
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Plans" label="Plan Prespective">
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Intelligence" label="Intelligence Prespective">
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#DataModel" label="The SMART Data Model">
+      </topic>
+   </topic>
 </toc>
