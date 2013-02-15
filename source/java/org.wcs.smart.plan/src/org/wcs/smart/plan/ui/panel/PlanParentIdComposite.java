@@ -91,7 +91,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		btnUseSelected.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 				
 		filterLink = new Link(this, SWT.NONE);
-		filterLink.setText("Click <a>here</a> to change the plan filter.");
+		filterLink.setText(Messages.PlanParentIdComposite_Filter_Link_Text);
 		filterLink.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		((GridData)filterLink.getLayoutData()).horizontalIndent = 10;
 		filterLink.addSelectionListener(new SelectionAdapter() {
