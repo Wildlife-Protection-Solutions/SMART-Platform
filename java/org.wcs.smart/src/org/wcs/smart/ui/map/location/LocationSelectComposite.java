@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.AbstractIdentifiedObject;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
@@ -92,6 +93,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	private Text yCoordText;
 
 	private Button addButton;
+	private ControlDecoration addButtonDecoration;
 	private Button removeButton;
 	
 	private MapComposite mapComposite;
@@ -193,6 +195,12 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 				}
 			}
 		});
+		addButtonDecoration = new ControlDecoration(addButton, SWT.LEFT);
+		addButtonDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+		addButtonDecoration.setShowHover(true);
+		addButtonDecoration.setDescriptionText(Messages.LocationSelectComposite_CRS_Conversion_Warning);
+		addButtonDecoration.hide();
 
 		removeButton = new Button(buttonsComposite, SWT.PUSH);
 		removeButton.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -230,6 +238,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 						@Override
 						public void run() {
 							pointsListViewer.refresh(true);
+							updateAddButtonDecoration();
 						}
 					});
 				}
@@ -333,6 +342,18 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		String x = xCoordText.getText();
 		String y = yCoordText.getText();
 		addButton.setEnabled(x != null && !x.isEmpty() && y != null && !y.isEmpty());
+		updateAddButtonDecoration();
+		
+	}
+
+	private void updateAddButtonDecoration() {
+		boolean warn = addButton.isEnabled() && (getCurrentCrs() instanceof AbstractIdentifiedObject) &&
+				!((AbstractIdentifiedObject) SmartDB.DATABASE_CRS).equals((AbstractIdentifiedObject)getCurrentCrs(), false);
+		if (warn) {
+			addButtonDecoration.show();
+		} else {
+			addButtonDecoration.hide();
+		}
 	}
 	
 	private void updateMapConposite() {

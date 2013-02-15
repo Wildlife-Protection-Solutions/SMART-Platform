@@ -614,6 +614,7 @@ public class Messages extends NLS {
 	public static String LoadDefaultLayersJob_Error_AddingLayers;
 	public static String LoadDefaultLayersJob_Error_ParsingCrs;
 	public static String LoadDefaultLayersJob_JobName;
+	public static String LocationSelectComposite_CRS_Conversion_Warning;
 	public static String LocationSelectComposite_PointConversion_Error;
 	public static String LocationSelectComposite_Points_Label;
 	public static String LocationSelectComposite_X_Invalid_Error;
