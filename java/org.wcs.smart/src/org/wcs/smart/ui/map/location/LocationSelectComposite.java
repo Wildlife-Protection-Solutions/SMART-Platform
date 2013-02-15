@@ -59,7 +59,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.AbstractIdentifiedObject;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
@@ -347,8 +346,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	}
 
 	private void updateAddButtonDecoration() {
-		boolean warn = addButton.isEnabled() && (getCurrentCrs() instanceof AbstractIdentifiedObject) &&
-				!((AbstractIdentifiedObject) SmartDB.DATABASE_CRS).equals((AbstractIdentifiedObject)getCurrentCrs(), false);
+		boolean warn = addButton.isEnabled() && !CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, getCurrentCrs());
 		if (warn) {
 			addButtonDecoration.show();
 		} else {
