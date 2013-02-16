@@ -34,6 +34,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.plan.internal.Messages;
@@ -125,6 +126,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 				return new SpatialPlanTargetPoint();
 			}
         };
+        locationSelect.setForceBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
         locationSelect.addLocationPointsChangeListener(this);
         locationSelect.getDecoration().setDescriptionText(Messages.SpatialPlanTargetPropertyPage_Description_Required_Error);
         locationSelect.getDecoration().show();
