@@ -64,8 +64,10 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResourceInfo;
@@ -94,8 +96,6 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	private final static String MSG_NOT_SET = Messages.AreaPropertyPage_Area_Underfined;
 	private final static String MSG_ERROR = Messages.AreaPropertyPage_Error_Message;
 
-	
-	
 	// buttons for modifying layers; these are ordered by Area.AreaType.values()
 	private Button[] btnLoad;
 	private Button[] btnClear;
@@ -107,11 +107,12 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	/* map of areatype to label values */
 	private HashMap<Area.AreaType, String> initValues = new HashMap<Area.AreaType, String>();
 
+	private ConservationArea currentCa = null;
 	
 	public AreaPropertyPage() {
 		super(Display.getCurrent().getActiveShell(),
 				Messages.AreaPropertyPage_Dialog_Title);
-
+		currentCa = SmartDB.getCurrentConservationArea();
 	}
 
 	@Override
@@ -152,7 +153,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		// find smart service for given conservation area
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(SmartServiceExtension.CA_UUID_KEY, ca.getUuid());
+		params.put(SmartServiceExtension.CA_UUID_KEY, currentCa.getUuid());
 		URL serviceurl = SmartServiceExtension.createURL(params);
 		SmartService ss = (SmartService) CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor).get(0);
 		
@@ -275,7 +276,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			// remove existing areas
 			String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
 			Query q = AreaPropertyPage.this.getSession().createQuery(query);
-			q.setParameter("ca", AreaPropertyPage.this.ca); //$NON-NLS-1$
+			q.setParameter("ca", currentCa); //$NON-NLS-1$
 			q.setParameter("type", areatype); //$NON-NLS-1$
 			q.executeUpdate();
 			getSession().getTransaction().commit();
@@ -401,7 +402,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						//remove existing areas
 						String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
 						Query q =s.createQuery(query);
-						q.setParameter("ca", ca); //$NON-NLS-1$
+						q.setParameter("ca", currentCa); //$NON-NLS-1$
 						q.setParameter("type", areatype); //$NON-NLS-1$
 						q.executeUpdate();
 
@@ -422,7 +423,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 
 								Area area = new Area();
 								area.setType(areatype);
-								area.setConservationArea(AreaPropertyPage.this.ca);
+								area.setConservationArea(AreaPropertyPage.this.currentCa);
 								//
 								Geometry geom = (Geometry) sf.getDefaultGeometry();
 								geom = JTS.transform(geom, transform);

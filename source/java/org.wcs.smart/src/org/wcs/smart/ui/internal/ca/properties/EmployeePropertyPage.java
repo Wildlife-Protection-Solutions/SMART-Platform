@@ -69,6 +69,7 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.export.config.impl.EmployeeCsvExportConfig;
@@ -106,6 +107,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private List<Employee> employees = null;
 	private List<Agency> agencies;
 	  
+	private ConservationArea currentCa = null;
 	EmployeeViewSorter sorter = new EmployeeViewSorter();
 	
 	/*
@@ -157,6 +159,9 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	public EmployeePropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.EmployeePropertyPage_Dialog_Title);
+
+		//load the current ca
+		this.currentCa = (ConservationArea) getSession().load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
 	}
 
 	@Override
@@ -291,7 +296,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		Session s = getSession();
 		s.beginTransaction();
 		employees = getSession().createCriteria(Employee.class)
-				.add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 		s.getTransaction().rollback();
 		tblEmployee.setInput(employees);
 		tblEmployee.refresh();
@@ -304,7 +309,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private List<Agency> getAgencies(){
 		if (agencies == null){
 			getSession().beginTransaction();
-			agencies = HibernateManager.getAgencies(ca, getSession());
+			agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), getSession());
 			Collections.sort(agencies, new Comparator<Object>(){
 				@Override
 				public int compare(Object o1, Object o2) {
@@ -321,7 +326,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 * user for employee information
 	 */
 	private void createNewEmployee(){
-		EmployeeDialog dia = new EmployeeDialog(getShell(), null, ca, getAgencies(), getSession());
+		EmployeeDialog dia = new EmployeeDialog(getShell(), null, currentCa, getAgencies(), getSession());
 		dia.open();
 		refreshEmployeeList();
 	}
@@ -336,7 +341,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			return;
 		}
 		Employee e = (Employee)sec.getFirstElement();
-		EmployeeDialog dia = new EmployeeDialog(getShell(), e, ca, getAgencies(), getSession());
+		EmployeeDialog dia = new EmployeeDialog(getShell(), e, currentCa, getAgencies(), getSession());
 		dia.open();		
 		tblEmployee.refresh();
 	}

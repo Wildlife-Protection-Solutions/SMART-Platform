@@ -2,7 +2,7 @@
 <feature
       id="org.wms.smart.udig-feature"
       label="Udig"
-      version="1.0.0.qualifier">
+      version="1.0.0">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]

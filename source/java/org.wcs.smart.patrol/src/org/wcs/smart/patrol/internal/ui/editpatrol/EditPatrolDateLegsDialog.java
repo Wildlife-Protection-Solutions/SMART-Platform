@@ -100,7 +100,6 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 	public Session getSession(){
 		if (session == null || !session.isOpen()){
 			session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-			session.update(ca);
 		}
 		return session;
 	}

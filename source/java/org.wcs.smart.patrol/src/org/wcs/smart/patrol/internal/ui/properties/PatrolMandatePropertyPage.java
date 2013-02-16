@@ -56,7 +56,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -85,6 +87,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private List<PatrolMandate> mandates = null;
 	private HashSet<PatrolMandate> toDelete = new HashSet<PatrolMandate>();
+	private ConservationArea currentCa = null;
 	
 	/*
 	 * columns in the station table
@@ -104,6 +107,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	public PatrolMandatePropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.PatrolMandatePropertyPage_Dialog_Title);
+		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
 	@Override
@@ -118,7 +122,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected Composite createContent(Composite parent) {
 
-		mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(ca, getSession()));
+		mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, getSession()));
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -128,7 +132,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				false, 1, 1));
 		lblNewLabel.setText(Messages.PatrolMandatePropertyPage_Language_Label);
 
-		cmbLanguage = new LanguageViewer(container, SWT.NONE, ca);
+		cmbLanguage = new LanguageViewer(container, SWT.NONE, currentCa);
 		cmbLanguage.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -253,10 +257,10 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	private void addMandate(){
 		PatrolMandate mandate = new PatrolMandate();
-		mandate.setConservationArea(ca);
+		mandate.setConservationArea(currentCa);
 		mandate.setIsActive(true);
-		mandate.updateName(ca.getDefaultLanguage(), Messages.PatrolMandatePropertyPage_DefaultNewMandateName);
-		mandate.setName(mandate.findName(ca.getDefaultLanguage()));
+		mandate.updateName(currentCa.getDefaultLanguage(), Messages.PatrolMandatePropertyPage_DefaultNewMandateName);
+		mandate.setName(mandate.findName(currentCa.getDefaultLanguage()));
 		mandates.add(mandate);
 		setChangesMade(true);
 		tableViewer.refresh();

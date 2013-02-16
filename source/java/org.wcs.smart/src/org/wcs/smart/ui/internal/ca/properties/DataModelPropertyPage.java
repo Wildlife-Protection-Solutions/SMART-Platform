@@ -63,6 +63,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -70,6 +71,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
@@ -110,6 +112,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private Transaction currentTransaction = null;
 	private LanguageViewer cmbLanguage = null;
 	
+	private ConservationArea currentCa = SmartDB.getCurrentConservationArea();
 	/**
 	 * Creates new data model property page
 	 */
@@ -202,7 +205,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Composite leftPanel = new Composite(comp, SWT.NONE);
 		leftPanel.setLayout(new GridLayout(1, false));
 		
-		cmbLanguage = new LanguageViewer(leftPanel, SWT.DEFAULT, ca);
+		cmbLanguage = new LanguageViewer(leftPanel, SWT.DEFAULT, currentCa);
 		cmbLanguage.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -658,12 +661,12 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		newCat.setCategoryOrder(0);
 		newCat.setAttributes(null);
 		newCat.setChildren(null);		
-		newCat.setConservationArea(ca);
+		newCat.setConservationArea(currentCa);
 		newCat.setIsActive(true);
 		newCat.setChildren(new ArrayList<Category>());
 		newCat.setIsMultiple(true);
 		
-		CategoryDialogPage dd = new CategoryDialogPage(getShell(), newCat, siblings, ca.getDefaultLanguage());
+		CategoryDialogPage dd = new CategoryDialogPage(getShell(), newCat, siblings, currentCa.getDefaultLanguage());
 		int ret = dd.open();
 		
 		if (ret == Window.CANCEL){
@@ -750,6 +753,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * adds an attribute
 	 */
 	private void addAttribute(){
+		
+		
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (! (o instanceof Category)){
 			return;
@@ -760,7 +765,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 		
 		//show dialog
-		AddAttributeDialog1 d1 = new AddAttributeDialog1(getShell(), parent, (DataModel)viewer.getInput(), ca.getDefaultLanguage());
+		AddAttributeDialog1 d1 = new AddAttributeDialog1(getShell(), parent, (DataModel)viewer.getInput(), currentCa.getDefaultLanguage());
 		int ret = d1.open();
 		if (ret == AddAttributeDialog1.FINISH){
 			refreshTree();
@@ -769,14 +774,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(), att,
 					((DataModel) viewer.getInput()).getAttributes(),
-					ca.getDefaultLanguage(), getSession());
+					currentCa.getDefaultLanguage(), getSession());
 			
 			//show new attribute dialog
 			ret = d2.open();
 			if (ret == Window.CANCEL){
 				return;
 			}
-			att.setConservationArea(ca);
+			att.setConservationArea(currentCa);
 			DataModel dm = (DataModel)viewer.getInput();
 			dm.addNewAttribute(att, parent);
 			session.saveOrUpdate(att);

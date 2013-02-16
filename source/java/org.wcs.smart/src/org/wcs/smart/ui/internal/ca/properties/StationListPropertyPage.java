@@ -66,10 +66,12 @@ import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -86,6 +88,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 
+	private ConservationArea currentCa = null;
 	private List<Station> stations = null;
 	private HashSet<Station> toDelete = new HashSet<Station>();
 
@@ -98,7 +101,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private static NullComparator nullStringComparator = new NullComparator();
 	
 	private UUIDGenerator uuidGenerator = null;
-
+	 
 	
 	/*
 	 * columns in the station table
@@ -122,7 +125,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	public StationListPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.StationListPropertyPage_Dialog_Title);
-		
+		this.currentCa = SmartDB.getCurrentConservationArea();
 		uuidGenerator = UUIDGenerator
 				.buildSessionFactoryUniqueIdentifierGenerator();
 		Properties prop = new Properties();
@@ -142,7 +145,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	public Composite createContent(Composite parent) {
 		getSession().beginTransaction();
 		try{
-			stations = new ArrayList<Station>(HibernateManager.getStations(ca,getSession()));
+			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,getSession()));
 		}finally{
 			getSession().getTransaction().rollback();
 		}
@@ -155,7 +158,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				false, 1, 1));
 		lblNewLabel.setText(Messages.StationListPropertyPage_LanguageLabel);
 
-		cmbLanguage = new LanguageViewer(container, SWT.NONE, ca);
+		cmbLanguage = new LanguageViewer(container, SWT.NONE,currentCa);
 		Combo lblLanguage = cmbLanguage.getCombo();
 		lblLanguage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 2, 1));
@@ -287,12 +290,11 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private void addStation() {
 		sorter.setSortColumn(null, null);	//we want to make sure this is added at the end 
-		
 		final Station x = new Station();
-		x.setConservationArea(ca);
+		x.setConservationArea(currentCa);
 		x.setIsActive(true);
-		x.updateName(ca.getDefaultLanguage(), Messages.StationListPropertyPage_Default_NewStationName);
-		x.setName(x.findName(ca.getDefaultLanguage()));
+		x.updateName(currentCa.getDefaultLanguage(), Messages.StationListPropertyPage_Default_NewStationName);
+		x.setName(x.findName(currentCa.getDefaultLanguage()));
 
 		stations.add(x);
 		setChangesMade(true);

@@ -52,7 +52,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -84,7 +86,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private Button btnDeleteTransport;
 	
 	private List<PatrolType> patrolTypes = null;
-
+	private ConservationArea currentCa = null;
+	
 	private Button btnAddTransport;
 
 	/**
@@ -93,6 +96,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	public PatrolTypePropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.PatrolTypePropertyPage_Dialog_Title);
+		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
 	
@@ -101,7 +105,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		patrolTypes = new ArrayList<PatrolType>(PatrolHibernateManager.getPatrolTypes(ca, getSession()));
+		patrolTypes = new ArrayList<PatrolType>(PatrolHibernateManager.getPatrolTypes(currentCa, getSession()));
 		getSession().beginTransaction();
 		try{
 			for (Object t : patrolTypes){
@@ -119,7 +123,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				false, 1, 1));
 		lblNewLabel.setText(Messages.PatrolTypePropertyPage_LanguageLabel);
 
-		languageViewer = new LanguageViewer(container, SWT.NONE, ca);
+		languageViewer = new LanguageViewer(container, SWT.NONE, currentCa);
 		languageViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		languageViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -250,11 +254,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			public void widgetSelected(SelectionEvent e) {
 				PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
 				PatrolTransportType newPtt = new PatrolTransportType();
-				newPtt.setConservationArea(ca);
+				newPtt.setConservationArea(currentCa);
 				newPtt.setIsActive(true);
 				newPtt.setPatrolType(pt.getType());
-				newPtt.updateName(ca.getDefaultLanguage(), Messages.PatrolTypePropertyPage_DefaultTransportionTypeName);
-				newPtt.setName(newPtt.findName(ca.getDefaultLanguage()));
+				newPtt.updateName(currentCa.getDefaultLanguage(), Messages.PatrolTypePropertyPage_DefaultTransportionTypeName);
+				newPtt.setName(newPtt.findName(currentCa.getDefaultLanguage()));
 				pt.getTransportTypes().add(newPtt);
 				transportTblViewer.refresh();
 				setChangesMade(true);

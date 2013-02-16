@@ -58,6 +58,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.export.config.impl.AgencyCsvExportConfig;
@@ -97,6 +98,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private AgencySorter agencySorter;
 	private RankSorter rankSorter;
 	
+	private ConservationArea currentCa;
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
@@ -132,6 +134,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	public AgencyRankPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.AgencyRankPropertyPage_DialogTitle);
 		toDelete = new HashSet<Agency>();
+		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
 	@Override
@@ -145,7 +148,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		lblNewLabel.setText(Messages.AgencyRankPropertyPage_Language_Label);
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
-		cmbLanguage = new LanguageViewer(container, SWT.NONE,ca);
+		cmbLanguage = new LanguageViewer(container, SWT.NONE,currentCa);
 		Combo lblLanguage = cmbLanguage.getCombo();
 		lblLanguage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 3, 1));
@@ -283,7 +286,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void resetAgencyList() {
 		Session s = getSession();
 		s.beginTransaction();
-		agencies = new WritableList(HibernateManager.getAgencies(ca, s), Agency.class);
+		agencies = new WritableList(HibernateManager.getAgencies(currentCa,s ), Agency.class);
 		s.getTransaction().rollback();
 	}
 	
@@ -555,7 +558,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		lbl.setElement(agency);
 		agency.getNames().add(lbl);
 		agency.setName(lbl.getValue());
-		agency.setConservationArea(ca);
+		agency.setConservationArea(currentCa);
 		agencies.add(agency);
 		
 		tblAgencies.setSelection(new StructuredSelection(agency));

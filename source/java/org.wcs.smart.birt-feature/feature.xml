@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.birtfeature"
       label="Birt-feature"
-      version="1.0.0.qualifier">
+      version="1.0.0">
 
    <description url="http://www.example.com/description">
       The BIRT requirements to support the SMART reporting module

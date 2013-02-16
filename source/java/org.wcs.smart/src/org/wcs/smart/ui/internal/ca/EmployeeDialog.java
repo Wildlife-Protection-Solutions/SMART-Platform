@@ -185,9 +185,8 @@ public class EmployeeDialog extends Dialog {
 			//update employee values 
 			if (toUpdate == null){
 				toUpdate = new Employee();
-				ConservationArea thisCa = (ConservationArea) session.load(ConservationArea.class, ca.getUuid());
-				toUpdate.setConservationArea(thisCa);
-				thisCa.getEmployees().add(toUpdate);
+				toUpdate.setConservationArea(ca);
+				ca.getEmployees().add(toUpdate);
 			}
 			eComposite.updateEmploye(toUpdate);
 			
