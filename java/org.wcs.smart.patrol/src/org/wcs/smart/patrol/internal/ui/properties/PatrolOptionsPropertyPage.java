@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -68,7 +69,7 @@ public class PatrolOptionsPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	public PatrolOptionsPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.PatrolOptionsPropertyPage_DialogTitle);
-		patrolOption = PatrolHibernateManager.getPatrolOptions(ca, getSession());
+		patrolOption = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), getSession());
 	}
 	
 

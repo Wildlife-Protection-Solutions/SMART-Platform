@@ -62,7 +62,7 @@ import org.apache.commons.io.filefilter.IOFileFilter;
  */
 public class Packagei18n {
 
-	public static final String IN_DIR = "C:\\data\\SMART\\Source2\\trunk\\source\\java\\";
+	public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java\\";
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	public static final String LINE_SEP = "\n";
 	

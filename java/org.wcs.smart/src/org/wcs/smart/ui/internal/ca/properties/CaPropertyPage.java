@@ -52,6 +52,7 @@ import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -75,12 +76,13 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	
 	private List<Language> languages = new ArrayList<Language>();
 	private ListViewer lstLang;
-	
+	private ConservationArea ca;
 	/**
 	 * Creates a new dialog
 	 */
 	public CaPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.CaPropertyPage_Dialog_Title);
+		this.ca = SmartDB.getCurrentConservationArea();
 	}
 
 

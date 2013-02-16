@@ -48,7 +48,7 @@ import org.wcs.smart.internal.Messages;
 public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 
 	protected Session session;
-	protected ConservationArea ca;
+//	protected ConservationArea ca;
 	protected boolean changesMade;
 	
 	private String title;
@@ -60,7 +60,7 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 		super(parent);
 		this.title = title;
 		
-		getConservationArea();
+//		getConservationArea();
 		
 	}
 
@@ -78,10 +78,10 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	}
 	
 
-	protected void getConservationArea(){
-		ca = SmartDB.getCurrentConservationArea();
-		getSession();
-	}
+//	protected void getConservationArea(){
+//		ca = SmartDB.getCurrentConservationArea();
+//		getSession();
+//	}
 
 	@Override
 	public Control createDialogArea(Composite parent){

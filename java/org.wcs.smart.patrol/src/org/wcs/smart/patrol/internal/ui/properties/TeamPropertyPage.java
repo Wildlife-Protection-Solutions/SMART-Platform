@@ -63,7 +63,9 @@ import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -92,6 +94,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private List<Team> teams = null;
 	private HashSet<Team> toDelete = new HashSet<Team>();
 	private PatrolMandate[] mandates = null;
+	private ConservationArea currentCa = null;
 	
 	private UUIDGenerator uuidGenerator; //for generating uuids for description field
 	
@@ -118,12 +121,13 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	public TeamPropertyPage() {
 		super(Display.getCurrent().getActiveShell(), Messages.TeamPropertyPage_Dialog_Title);
+		this.currentCa = SmartDB.getCurrentConservationArea();
 		
 		/* get mandates */
 		getSession().beginTransaction();
 		List<PatrolMandate> ms =  null;
 		try{
-			ms = PatrolHibernateManager.getActiveMandates(ca, getSession());
+			ms = PatrolHibernateManager.getActiveMandates(currentCa, getSession());
 			getSession().getTransaction().rollback();
 		}catch (Exception ex){
 			getSession().getTransaction().rollback();
@@ -157,7 +161,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	protected Composite createContent(Composite parent) {
 		getSession().beginTransaction();
 		try{
-			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(ca, getSession()));
+			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(currentCa, getSession()));
 			getSession().getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingTeams, ex);
@@ -173,7 +177,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				false, 1, 1));
 		lblNewLabel.setText(Messages.TeamPropertyPage_Language_Label);
 
-		languageViewer = new LanguageViewer(container, SWT.NONE, ca);
+		languageViewer = new LanguageViewer(container, SWT.NONE, currentCa);
 		languageViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		languageViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -335,14 +339,14 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private void addTeam(){
 		Team team = new Team();
-		team.setConservationArea(ca);
+		team.setConservationArea(currentCa);
 		team.setIsActive(true);
 		team.setMandate(null);
 		
-		team.updateName(ca.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamName);
-		team.setName(team.findName(ca.getDefaultLanguage()));		
-		team.updateDescription(ca.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
-		team.setDescription(team.findDescriptionNull(ca.getDefaultLanguage()));
+		team.updateName(currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamName);
+		team.setName(team.findName(currentCa.getDefaultLanguage()));		
+		team.updateDescription(currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
+		team.setDescription(team.findDescriptionNull(currentCa.getDefaultLanguage()));
 		
 		teams.add(team);
 		setChangesMade(true);
