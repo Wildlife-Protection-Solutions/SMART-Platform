@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,12 +30,15 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -103,6 +107,17 @@ public class PatrolContributionPageEditor extends EditorPart{
 		
 		main.getBody().setLayout(new GridLayout(1, false));
 		main.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		String canEdit = editor.canEdit();
+		if (canEdit != null){
+			Composite warning = toolkit.createComposite(main.getBody());
+			warning.setLayout(new GridLayout(2, false));
+			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
+			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+			lblImage.setImage(x);
+			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
+			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
+		}
 		
 		List<IPatrolEditorContribution> parts = findContributions();
 		for (IPatrolEditorContribution part : parts){

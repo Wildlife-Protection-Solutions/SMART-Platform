@@ -71,12 +71,7 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		super(parent, view);
 		currentFilter = view.getFilter();
 	}
-	
-	@Override
-	protected void configureShell(Shell shell) {
-		super.configureShell(shell);
-		shell.setText(Messages.PatrolFilterDialog_DialogTitle);
-	}
+
 	
 	@Override
 	protected void resetFilterModel() {
@@ -134,6 +129,8 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
 		setMessage(Messages.PatrolFilterDialog_DialogMessage);
+		setTitle(Messages.PatrolFilterDialog_DialogTitle);
+		getShell().setText(Messages.PatrolFilterDialog_DialogTitle);
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
