@@ -154,12 +154,14 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 			}
 		}
 		
-		if (session.isOpen() && session.getTransaction().isActive()){
+		if (session != null){
+			if (session.isOpen() && session.getTransaction().isActive()){
 			//at this point we want to rollback any active transactions
-			session.getTransaction().rollback();
-		}
-		if (session.isOpen()){
-			session.close();
+				session.getTransaction().rollback();
+			}
+			if (session.isOpen()){
+				session.close();
+			}
 		}
 		return super.close();  
 	}
