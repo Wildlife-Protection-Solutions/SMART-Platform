@@ -134,6 +134,10 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
             }
         }
 
+		if (event.getTargetPage() instanceof IntelligenceWizardPage) {
+			((IntelligenceWizardPage) event.getTargetPage()).initFromModel(intelligence);
+		}
+        
         if (event.doit) {
             lastPage = (IWizardPage) event.getTargetPage();
         }

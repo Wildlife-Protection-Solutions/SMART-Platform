@@ -120,8 +120,10 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 
 	@Override
 	public void initFromModel(Intelligence intelligence) {
-		shortName.setText(intelligence.getShortName());
-		description.setText(intelligence.getDescription());
+		String value = intelligence.getShortName() == null ? "" : intelligence.getShortName(); //$NON-NLS-1$
+		shortName.setText(value);
+		value = intelligence.getDescription() == null ? "" : intelligence.getDescription(); //$NON-NLS-1$
+		description.setText(value);
 	}
 
 	@Override

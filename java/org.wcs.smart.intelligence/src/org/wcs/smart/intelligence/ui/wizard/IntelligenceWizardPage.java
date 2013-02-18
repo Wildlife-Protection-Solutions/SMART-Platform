@@ -48,4 +48,11 @@ public abstract class IntelligenceWizardPage extends WizardPage {
      */
     abstract protected boolean updateModel(Intelligence intelligence);
 
+    /**
+     * Updates the current page gui components with the values
+     * from the intelligence
+     * 
+     * @param intelligence intelligence to use when updating gui components
+     */
+    abstract protected void initFromModel(Intelligence intelligence);
 }

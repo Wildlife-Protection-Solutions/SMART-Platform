@@ -77,6 +77,11 @@ public class TypedIntelligenceWizardPage extends IntelligenceWizardPage {
 		return composite.updateModel(intelligence);
 	}
 
+	@Override
+	protected void initFromModel(Intelligence intelligence) {
+		composite.initFromModel(intelligence);
+	}
+	
 	/**
 	 * @author elitvin
 	 */
