@@ -31,17 +31,12 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.config.ICsvDialogConfig;
@@ -58,9 +53,7 @@ import org.wcs.smart.util.SmartUtils;
 public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
 	private ICsvDialogConfig config;
-	
-	private Text txtFile;
-	private Button btnHasHeader;
+	private CsvFileComposite csvComposite;
 	
 	/**
 	 * @param parentShell
@@ -75,66 +68,26 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 	 */
 	@Override
 	public Control createDialogArea(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		main.setLayout(new GridLayout(3, false));
-		
-		final FileDialog fd = new FileDialog(getShell());
-		fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{Messages.AbstractCsvDialog_FileFilter_Csv, Messages.AbstractCsvDialog_FileFilter_All});
-		
-		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.AbstractCsvDialog_File_Label);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		txtFile = new Text(main, SWT.BORDER);
-		txtFile.addListener(SWT.Modify, new Listener() {
+		csvComposite = new CsvFileComposite(parent, SWT.NONE, config);
+		csvComposite.addFileModifyListener(new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				if (txtFile.getText().length() > 0){
+				if (csvComposite.getFileText().length() > 0){
 					getButton(IDialogConstants.OK_ID).setEnabled(true);
 				}else{
 					getButton(IDialogConstants.OK_ID).setEnabled(false);
 				}
-				
 			}
 		});
-		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText(Messages.AbstractCsvDialog_Browse_Button);
-		btnBrowse.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				fd.setFileName(txtFile.getText());
-				String file = fd.open();
-				if (file != null){
-					txtFile.setText(file);
-				}
-				
-			}
-		});
-		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		btnHasHeader = new Button(main, SWT.CHECK);
-		String hasHeaderText = config.getHasHeaderText();
-		if (hasHeaderText == null) {
-			hasHeaderText = ""; //$NON-NLS-1$
-		}
-		btnHasHeader.setText(hasHeaderText);
-		btnHasHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-		btnHasHeader.setVisible(config.includeHasHeader());
-		
-		Text txtinfo = new Text(main, SWT.WRAP | SWT.READ_ONLY);
-		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
-		((GridData)txtinfo.getLayoutData()).widthHint = 250;
-		txtinfo.setText(config.getInfo());
-		
+
+		initDialogLabels();
+		return parent;
+	}
+	
+	protected void initDialogLabels() {
 		getShell().setText(config.getTitle());
 		setTitle(config.getTitle());
 		setMessage(config.getMessage());
-		return parent;
-		
 	}
 	
 	@Override
@@ -147,7 +100,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
 	@Override
 	protected void buttonPressed(int buttonId) {
-		String fileName = txtFile.getText();
+		String fileName = csvComposite.getFileText();
 		if (IDialogConstants.OK_ID == buttonId) {
 			if (process(fileName)){
 				setReturnCode(OK);
@@ -167,7 +120,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 	protected boolean process(final String fileName) {
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try {
-			boolean headers = btnHasHeader != null && btnHasHeader.getSelection();
+			boolean headers = csvComposite.getHeadersSelection();
 			ProcessingRunnable processRunnable = new ProcessingRunnable(fileName, headers);
 			dialog.run(true, true, processRunnable);
 			if (processRunnable.isSuccess()) {
