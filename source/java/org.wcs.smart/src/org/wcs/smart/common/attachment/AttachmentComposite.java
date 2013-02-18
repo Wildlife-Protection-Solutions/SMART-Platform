@@ -38,7 +38,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -151,11 +150,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 			public void widgetSelected(SelectionEvent e) {
 				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
 				ISmartAttachment first = (ISmartAttachment) sel.getFirstElement();
-				if (first.getCopyFromLocation()!= null){
-					launch(first.getCopyFromLocation());
-				}else{
-					launch(first.getFullFile());
-				}
+				AttachmentUtil.openAttachment(first);
 			}
 		});
 		btnOpen.setEnabled(false);
@@ -166,19 +161,11 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 	
 	protected abstract ISmartAttachment createNewAttachement();
 	
-	private void launch(File file){
-		try{
-			Program.launch(file.getCanonicalPath());
-		}catch (Exception ex){
-			Program.launch(file.getAbsolutePath());
-		}
-	}
-	
 	/**
 	 * @return all attachments selected by the user
 	 */
 	@SuppressWarnings("unchecked")
-	public List<T> getAttchments(){
+	public List<T> getAttchments() {
 		return this.attachments;
 	}
 
