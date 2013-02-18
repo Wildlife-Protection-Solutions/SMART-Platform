@@ -26,6 +26,9 @@ import java.text.DateFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -46,6 +49,8 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.attachment.AttachmentUtil;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -228,6 +233,13 @@ public class IntelligenceEditor extends EditorPart {
 		attachmentsList = new TableViewer(attachTable);
 		attachmentsList.setContentProvider(ArrayContentProvider.getInstance());
 		attachmentsList.setLabelProvider(new SmartAttachmentLabelProvider());
+		attachmentsList.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				IStructuredSelection sel = (IStructuredSelection)attachmentsList.getSelection();
+				AttachmentUtil.openAttachment((ISmartAttachment) sel.getFirstElement());
+			}
+		});
 		attachTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		Hyperlink attachLink = createEditLink(toolkit, content, PanelType.ATTACHMENTS);
 		attachLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
