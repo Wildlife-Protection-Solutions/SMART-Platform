@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.model;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -155,6 +156,9 @@ public class Intelligence {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="intelligence", orphanRemoval=true, cascade={CascadeType.ALL})
 //	@BatchSize(size=200)
 	public List<IntelligencePoint> getPoints() {
+		if (points == null) {
+			points = new ArrayList<IntelligencePoint>();
+		}
 		return points;
 	}
 
@@ -164,6 +168,9 @@ public class Intelligence {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="intelligence", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<IntelligenceAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new ArrayList<IntelligenceAttachment>();
+		}
 		return attachments;
 	}
 
