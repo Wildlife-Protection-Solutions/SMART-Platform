@@ -58,7 +58,7 @@ public class CsvFileComposite extends Composite {
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setLayout(new GridLayout(3, false));
 		
-		final FileDialog fd = new FileDialog(getShell());
+		final FileDialog fd = new FileDialog(getShell(), config.getFileDialogStyle());
 		fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setFilterNames(new String[]{Messages.AbstractCsvDialog_FileFilter_Csv, Messages.AbstractCsvDialog_FileFilter_All});
 		

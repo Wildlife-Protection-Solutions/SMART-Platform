@@ -23,6 +23,7 @@ package org.wcs.smart.export.config.impl;
 
 import java.text.MessageFormat;
 
+import org.eclipse.swt.SWT;
 import org.wcs.smart.export.EmployeeCsvImporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.config.ICsvDialogConfig;
@@ -92,4 +93,9 @@ public class EmployeeCsvImportConfig implements ICsvImportDialogConfig {
 		return ICsvDialogConfig.IMPORT_ACTION_TEXT;
 	}
 
+	@Override
+	public int getFileDialogStyle() {
+		return SWT.OPEN;
+	}
+	
 }

@@ -50,5 +50,7 @@ public interface ICsvDialogConfig {
 	public String getFailMessage();
 
 	public String getActionButtonText();
+
+	public int getFileDialogStyle();
 	
 }
