@@ -65,11 +65,12 @@ public class CategoryDMAdvisor implements IDeleteAdvisor {
 					Messages.CategoryDMAdvisor_DeleteError,
 					new Object[]{cnt });
 		}
-		
-		for(Category kid : category.getChildren()){
-			String canDeleteKid = canDelete(kid, session);
-			if (canDeleteKid != null){
-				return canDeleteKid;
+		if (category.getChildren() != null){
+			for(Category kid : category.getChildren()){
+				String canDeleteKid = canDelete(kid, session);
+				if (canDeleteKid != null){
+					return canDeleteKid;
+				}
 			}
 		}
 		return null;

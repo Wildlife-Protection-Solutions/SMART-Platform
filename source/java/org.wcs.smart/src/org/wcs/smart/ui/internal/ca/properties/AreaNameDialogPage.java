@@ -115,7 +115,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			ConservationAreaManager.getInstance().fireAreaChanged(type);
 			getSession().beginTransaction();
 		}catch (Exception ex){
-			SmartPlugIn.log(Messages.AreaNameDialogPage_Error_Save + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(getShell(),Messages.AreaNameDialogPage_Error_Save + ex.getLocalizedMessage(), ex);
 		}
 	}
 	
@@ -299,7 +299,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			close();
 		}else if (buttonId == IDialogConstants.OK_ID){
 			saveAreaTypes();
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			getButton(IDialogConstants.OK_ID).setEnabled(dirty);
 		}
 	}
 		

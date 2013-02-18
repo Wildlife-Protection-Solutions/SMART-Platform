@@ -188,14 +188,14 @@ GRANT SELECT ON smart.patrol_intelligence to analyst;
 GRANT ALL PRIVILEGES ON smart.plan to data_entry;
 GRANT ALL PRIVILEGES ON smart.plan_target to data_entry;
 GRANT ALL PRIVILEGES ON smart.patrol_plan to data_entry;
-GRANT ALL PRIVILEGES ON smart.patrol_target_point to data_entry;
+GRANT ALL PRIVILEGES ON smart.plan_target_point to data_entry;
 
 GRANT ALL PRIVILEGES ON smart.plan to manager;
 GRANT ALL PRIVILEGES ON smart.plan_target to manager;
 GRANT ALL PRIVILEGES ON smart.patrol_plan to manager;
-GRANT ALL PRIVILEGES ON smart.patrol_target_point to manager;
+GRANT ALL PRIVILEGES ON smart.plan_target_point to manager;
 
 GRANT SELECT ON smart.plan to analyst;
 GRANT SELECT ON smart.plan_target to analyst;
 GRANT SELECT ON smart.patrol_plan to analyst;
-GRANT ALL PRIVILEGES ON smart.patrol_target_point to analyst;
+GRANT ALL PRIVILEGES ON smart.plan_target_point to analyst;
