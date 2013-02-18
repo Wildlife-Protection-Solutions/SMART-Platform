@@ -143,6 +143,10 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
         }
     }
 
+    public Intelligence getIntelligence() {
+		return intelligence;
+	}
+    
 	/**
 	 * Closes the active session
 	 */
