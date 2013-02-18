@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -55,9 +56,11 @@ import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligenceSourceType;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
+import org.wcs.smart.intelligence.ui.wizard.NewIntelligenceWizard;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 
@@ -102,7 +105,15 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		main.setLayout(new GridLayout(2, false));
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
-		toolkit.createLabel(main, ""); //$NON-NLS-1$
+		Button btnCreate = new Button(main, SWT.PUSH);
+		btnCreate.setText(Messages.ReportedIntelligenceContribution_Create_Button);
+		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnCreate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				createIntelligence();
+			}
+		});
 		
 		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL);
 		tableViewer = new TableViewer(reportedTable);
@@ -179,6 +190,21 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		main.getParent().getParent().layout(true, true);
 	}
 
+	private void createIntelligence() {
+		try {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			wb.showPerspective(IntelligencePerspective.ID, win);
+			NewIntelligenceWizard wizard = new NewIntelligenceWizard();
+			wizard.getIntelligence().setSource(IntelligenceSourceType.PATROL);
+			wizard.getIntelligence().setPatrol(patrol);
+			WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
+			dialog.open();
+		} catch (Throwable t) {
+			IntelligencePlugIn.displayLog(t.getLocalizedMessage(), t);
+		}
+	}
+	
 	private void openCurrentItem() {
 		IStructuredSelection sel = (IStructuredSelection)tableViewer.getSelection();
 		Intelligence intelligence = (Intelligence) sel.getFirstElement();

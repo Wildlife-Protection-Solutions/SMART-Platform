@@ -170,6 +170,8 @@ public class Messages extends NLS {
 
 	public static String PatrolMotivationComposite_Selector_Selected_Label;
 
+	public static String ReportedIntelligenceContribution_Create_Button;
+
 	public static String ReportedIntelligenceContribution_IntelligenceReported_Label;
 
 	public static String ReportedIntelligenceContribution_Name;
