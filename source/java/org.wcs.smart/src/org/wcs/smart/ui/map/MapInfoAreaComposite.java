@@ -120,8 +120,10 @@ public class MapInfoAreaComposite extends Composite {
 					Display.getDefault().asyncExec(new Runnable(){
 						@Override
 						public void run() {
-							lblSRID.setText(getMap().getViewportModel().getCRS().getName().getCode());
-							lblSRID.getParent().layout();
+							if (lblSRID != null && !lblSRID.isDisposed()) {
+								lblSRID.setText(getMap().getViewportModel().getCRS().getName().getCode());
+								lblSRID.getParent().layout();
+							}
 						}});
 				}
 				

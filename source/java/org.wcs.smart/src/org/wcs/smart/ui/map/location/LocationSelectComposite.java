@@ -238,8 +238,10 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							pointsListViewer.refresh(true);
-							updateAddButtonDecoration();
+							if (pointsListViewer != null && !LocationSelectComposite.this.isDisposed()) {
+								pointsListViewer.refresh(true);
+								updateAddButtonDecoration();
+							}
 						}
 					});
 				}
