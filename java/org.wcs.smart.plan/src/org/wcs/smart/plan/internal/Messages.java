@@ -83,6 +83,7 @@ public class Messages extends NLS {
 	public static String PlanEditor_EndDate_Label;
 	public static String PlanEditor_Loading_Label;
 	public static String PlanEditor_LoadPatrolsJob_Title;
+	public static String PlanEditor_Manage_Link_Label;
 	public static String PlanEditor_Name_Label;
 	public static String PlanEditor_None_Label;
 	public static String PlanEditor_None_Text;

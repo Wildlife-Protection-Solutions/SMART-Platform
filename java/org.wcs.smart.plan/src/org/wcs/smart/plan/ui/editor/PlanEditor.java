@@ -35,6 +35,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
@@ -85,6 +87,7 @@ import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
+import org.wcs.smart.plan.ui.targets.TargetPropertyPage;
 
 
 /**
@@ -508,17 +511,24 @@ public class PlanEditor extends EditorPart {
 		targetList.getViewer().addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				if (canEdit()) {
-					showEditDialog(PanelType.TARGETS);
-				}
+				editCurrentPlanTarget();
 			}
 		});
 
 		Composite targetButtons = toolkit.createComposite(targetContent, SWT.NONE);
 		targetButtons.setLayout(new GridLayout(1, false));
 		targetButtons.setLayoutData(new GridData(SWT.TOP, SWT.BOTTOM, false, false));
-	
-		Hyperlink tarLink = createEditLink(toolkit, targetButtons, PanelType.TARGETS);
+
+		Hyperlink editTargetLink = createEditLink(toolkit, targetButtons, null); //null is on purpose (not to add listener)
+		editTargetLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				editCurrentPlanTarget();
+			}
+		});
+		
+		Hyperlink manageLink = createEditLink(toolkit, targetButtons, PanelType.TARGETS);
+		manageLink.setText(Messages.PlanEditor_Manage_Link_Label);
 		
 		Hyperlink lnkRefresh = toolkit.createHyperlink(targetButtons, Messages.PlanEditor_Refresh_Link_Label, SWT.NONE);
 		lnkRefresh.addHyperlinkListener(new HyperlinkAdapter() {
@@ -670,25 +680,25 @@ public class PlanEditor extends EditorPart {
 		Session session = HibernateManager.openSession();
 		//load parent plan so don't have lazy loading issues later.
 		session.beginTransaction();
-		plan = (Plan) session.load(Plan.class, puuid);
-		if (plan.getParent() != null) {
-			plan.getParent().getId();
+		Plan p = (Plan) session.load(Plan.class, puuid);
+		if (p.getParent() != null) {
+			p.getParent().getId();
 		}
-		if(plan.getTargets() != null){
-			plan.getTargets().size();
+		if(p.getTargets() != null){
+			p.getTargets().size();
 		}
-		Station st = plan.getStation();
+		Station st = p.getStation();
 		if(st != null){
 			st.getName();
 		}
-		plan.getTeam();
-		Team t = plan.getTeam();
+		p.getTeam();
+		Team t = p.getTeam();
 		if(t != null){
 			t.getName();
 		}
 		session.getTransaction().rollback();
 		session.close();
-		return plan;
+		return p;
 	}
 	/**
 	 * Creates an edit hyperlink button
@@ -747,6 +757,22 @@ public class PlanEditor extends EditorPart {
 			return true;
 		}
 		return false;
+	}
+	
+	private void editCurrentPlanTarget() {
+		if (canEdit()) {
+			IStructuredSelection selection = (IStructuredSelection)targetList.getSelection();
+	        if (selection.isEmpty()) {
+	            return;
+	        }
+	        PlanTarget selected = (PlanTarget)selection.getFirstElement(); 
+			TargetPropertyPage dialog = new TargetPropertyPage(getEditorSite().getShell(), plan.getTargets(), selected); 
+		    if (dialog.open() != Window.CANCEL) {
+				if (PlanHibernateManager.savePlan(plan, HibernateManager.openSession())) {
+					PlanEventManager.getInstance().planChanged(0, plan);
+				}
+			}
+		}
 	}
 	
 	@Override
