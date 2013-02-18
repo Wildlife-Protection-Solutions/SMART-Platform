@@ -108,8 +108,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		patrolTypes = new ArrayList<PatrolType>(PatrolHibernateManager.getPatrolTypes(currentCa, getSession()));
 		getSession().beginTransaction();
 		try{
+			//ensure all types are laziy loaded
 			for (Object t : patrolTypes){
-				((PatrolType)t).getTransportTypes().size();
+				if (((PatrolType)t).getTransportTypes() != null){
+					((PatrolType)t).getTransportTypes().size();
+				}
 			}
 		}finally{
 			getSession().getTransaction().rollback();
