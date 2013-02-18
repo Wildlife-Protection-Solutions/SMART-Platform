@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.export.config.impl;
 
+import org.eclipse.swt.SWT;
 import org.wcs.smart.export.AgencyCsvImporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.config.ICsvDialogConfig;
@@ -92,4 +93,9 @@ public class AgencyCsvImportConfig implements ICsvImportDialogConfig {
 		return ICsvDialogConfig.IMPORT_ACTION_TEXT;
 	}
 
+	@Override
+	public int getFileDialogStyle() {
+		return SWT.OPEN;
+	}
+	
 }

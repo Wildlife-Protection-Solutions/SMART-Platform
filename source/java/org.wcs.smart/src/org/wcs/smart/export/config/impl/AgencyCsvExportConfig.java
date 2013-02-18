@@ -1,5 +1,6 @@
 package org.wcs.smart.export.config.impl;
 
+import org.eclipse.swt.SWT;
 import org.wcs.smart.export.AgencyCsvExporter;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDialogConfig;
@@ -70,6 +71,11 @@ public class AgencyCsvExportConfig implements ICsvExportDialogConfig {
 	@Override
 	public String getActionButtonText() {
 		return ICsvDialogConfig.EXPORT_ACTION_TEXT;
+	}
+
+	@Override
+	public int getFileDialogStyle() {
+		return SWT.SAVE;
 	}
 
 }
