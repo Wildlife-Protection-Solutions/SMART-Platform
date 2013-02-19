@@ -111,6 +111,7 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_Aggregations_ToolTip;
 	public static String AttributeInfoPanel_Delete_DialogMessage;
 	public static String AttributeInfoPanel_Delete_DialogTitle;
+	public static String AttributeInfoPanel_DeleteErrorDialogTitle;
 	public static String AttributeInfoPanel_Error_InvalidMaxValue;
 	public static String AttributeInfoPanel_Error_InvalidMinValue;
 	public static String AttributeInfoPanel_Error_MaxValueToBig;
@@ -129,6 +130,9 @@ public class Messages extends NLS {
 	public static String AttributeTree_ConfirmDelete_DialogMessage;
 	public static String AttributeTree_ConfirmDelete_DialogTitle;
 	public static String AttributeTree_Delete_Tooltip;
+	public static String AttributeTree_DeleteMultipleMsg;
+	public static String AttributeTree_DeleteProgress;
+	public static String AttributeTree_DeleteSubProgress;
 	public static String AttributeTree_DisableAll_Tooltip;
 	public static String AttributeTree_DisableButton_ToolTip;
 	public static String AttributeTree_EditButton_Tooltip;
@@ -297,12 +301,6 @@ public class Messages extends NLS {
 	public static String DataModel_Progress_SaveDm;
 	public static String DataModelExporter_Progress_DataModelTables;
 	public static String DataModelLabelProvider_RootNode_Label;
-	public static String DataModelManager_Cancelled_AttributeDelete;
-	public static String DataModelManager_Cancelled_CategoryDelete;
-	public static String DataModelManager_Cancelled_DeleteCatAtt;
-	public static String DataModelManager_Cancelled_DeleteListItem;
-	public static String DataModelManager_Cancelled_DeleteTreeNode;
-	public static String DataModelManager_Cancelled_DialogTitle;
 	public static String DataModelManager_Error_DeleteAttribute;
 	public static String DataModelManager_Error_DeleteCatAtt;
 	public static String DataModelManager_Error_DeleteCategory;
@@ -328,6 +326,7 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_ConfirmDeleteCategory_DialogMessage;
 	public static String DataModelPropertyPage_Delete_DialogTitle;
 	public static String DataModelPropertyPage_Delete_Tooltip;
+	public static String DataModelPropertyPage_DeleteErrorDialogTitle;
 	public static String DataModelPropertyPage_Dialog_Message;
 	public static String DataModelPropertyPage_Dialog_Title;
 	public static String DataModelPropertyPage_Disable_Tooltip;
