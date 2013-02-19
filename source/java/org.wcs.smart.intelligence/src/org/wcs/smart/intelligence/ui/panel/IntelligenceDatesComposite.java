@@ -143,6 +143,8 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
 	    	Calendar cal = SmartUtils.convertDate(intelligence.getToDate());
 	    	dtToDate.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
 	    	multipleDays.setSelection(true);
+	    } else {
+	    	dtToDate.setDate(dtFromDate.getYear(), dtFromDate.getMonth(), dtFromDate.getDay());
 	    }
 	    applyCurrentState();
 	}

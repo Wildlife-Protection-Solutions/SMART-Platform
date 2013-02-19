@@ -77,6 +77,9 @@ public class IntelligenceReceivedComposite extends IntelligenceComposite {
 	@Override
 	protected void updateModelInternal(Intelligence intelligence) {
 		intelligence.setReceivedDate(SmartUtils.getDate(dtReceivedDate));
+		if (intelligence.getFromDate() == null) {
+			intelligence.setFromDate(intelligence.getReceivedDate());
+		}
 	}
 
 	@Override
