@@ -116,7 +116,7 @@ limitations under the License.
    <features>
       <feature id="org.wcs.smart.smart_feature" version="1.0.0"/>
       <feature id="org.eclipse.rcp"/>
-      <feature id="org.wcs.smart.language_feature" version="1.0.0.qualifier"/>
+      <feature id="org.wcs.smart.language_feature" version="1.0.0"/>
    </features>
 
    <configurations>
