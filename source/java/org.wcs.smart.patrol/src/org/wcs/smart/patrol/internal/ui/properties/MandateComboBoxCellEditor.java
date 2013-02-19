@@ -151,7 +151,6 @@ public class MandateComboBoxCellEditor extends CellEditor {
 
 			public void widgetSelected(SelectionEvent event) {
 				selection = comboBox.getSelectionIndex();
-				applyEditorValueAndDeactivate();
 			}
 		});
 
