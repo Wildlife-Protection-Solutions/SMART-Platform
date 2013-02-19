@@ -58,6 +58,7 @@ public class NumericPlanTarget extends PlanTarget {
 	private Double value;
 	private Operator op;
 	private TargetType type;
+	private String description;
 
 	@Override
 	@Transient
@@ -92,7 +93,15 @@ public class NumericPlanTarget extends PlanTarget {
 		
 	}
 
+	@Column(name = "description")
+	public String getDescription() {
+		return description;
+	}
 
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
 	@Override
 	public NumericPlanTarget clone() {
 		NumericPlanTarget n = new NumericPlanTarget();
