@@ -208,7 +208,7 @@ public class PlanFilter {
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		str.append("ORDER BY p.name, p.id desc"); //$NON-NLS-1$
+		str.append(" ORDER BY p.name asc, p.id desc"); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (types != null && types.length > 0){
