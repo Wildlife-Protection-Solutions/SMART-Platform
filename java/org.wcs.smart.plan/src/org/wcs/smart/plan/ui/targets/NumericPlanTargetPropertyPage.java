@@ -173,7 +173,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		cdTargetName = createDecoration(targetName);
 
 		Label descLabel = new Label(center, SWT.NONE);
-		descLabel.setText("Target Description:");
+		descLabel.setText(Messages.NumericPlanTargetPropertyPage_Description_Label);
 		descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 
 		targetDesc = new Text(center, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
