@@ -132,6 +132,14 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 			SmartPlanPlugIn.displayLog(Messages.TemplateSelectPlanWizardPage_PlanNotFound_Error, null);
 			return false;
 		}
+		//fetch real data for nested lazy elements (not lazy bags)
+		if (source.getTeam() != null) {
+			source.getTeam().getName();
+		}
+		if (source.getStation() != null) {
+			source.getStation().getName();
+		}
+		
 		p.setTemplatePlan(source);
 		p.setName(source.getName());
 		p.setId(source.getId());
