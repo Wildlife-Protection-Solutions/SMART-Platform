@@ -391,12 +391,26 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 						@Override
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
-							boolean delete = DataModelManager.getInstance().validateDelete(it, monitor, AttributeInfoPanel.this.currentSession);
-							if (delete){
-								attributeList.remove(it);
-								it.setAttribute(null);
-								lstAttributeList.refresh();
-								validate();
+							try{
+								boolean delete = DataModelManager.getInstance().validateDelete(it, monitor, AttributeInfoPanel.this.currentSession);
+								if (delete){
+									it.setAttribute(null);
+									
+									Display.getDefault().asyncExec(new Runnable(){
+										@Override
+										public void run() {
+											attributeList.remove(it);
+											lstAttributeList.refresh();
+											validate();
+										}});
+
+								}
+							}catch (final Exception ex){
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.AttributeInfoPanel_DeleteErrorDialogTitle, ex.getLocalizedMessage());
+									}});
 							}
 						}
 					});
@@ -522,7 +536,7 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 	private void runInProgressDialog(IRunnableWithProgress runnable){
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try {
-			dialog.run(false, true, runnable);		
+			dialog.run(true, true, runnable);		
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(getShell(), Messages.AttributeInfoPanel_Error_Message, ex);
 		}

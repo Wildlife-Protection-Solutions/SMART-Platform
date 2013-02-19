@@ -26,10 +26,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.internal.Messages;
 
 /**
  * Delete manager for deleting items from the database.
@@ -83,8 +80,7 @@ public class DeleteManager {
 			for (IDeleteAdvisor advisor : items){
 				String error = advisor.canDelete(x, session);
 				if (error != null){
-					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, error);
-					return false;
+					throw new Exception(error);
 				}
 			}
 		}finally{

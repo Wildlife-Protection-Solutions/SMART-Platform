@@ -26,6 +26,8 @@ import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.internal.Messages;
 
+import com.ibm.icu.text.MessageFormat;
+
 /**
  * Advisor for deleting nodes
  * from an attribute tree.
@@ -49,7 +51,7 @@ public class AttributeTreeNodeDMAdvisor implements IDeleteAdvisor {
 		}
 		AttributeTreeNode node = (AttributeTreeNode)object;
 		if (node.getChildren().size() > 0){
-			return Messages.AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;
+			return MessageFormat.format(Messages.AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced, new Object[]{node.getName()});
 		}
 		return null;
 	}

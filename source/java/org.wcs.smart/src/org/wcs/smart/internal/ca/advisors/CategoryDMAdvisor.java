@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.internal.ca.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Category;
@@ -53,9 +55,9 @@ public class CategoryDMAdvisor implements IDeleteAdvisor {
 		}
 		Category category = (Category)object;
 		if (category.getAttributes() != null && category.getAttributes().size() > 0){
-			return Messages.CategoryDMAdvisor_Error_CategoryReferencedByAttributes;
+			return MessageFormat.format(Messages.CategoryDMAdvisor_Error_CategoryReferencedByAttributes, new Object[]{category.getName()});
 		}else if (category.getChildren() != null && category.getChildren().size() > 0){
-			return Messages.CategoryDMAdvisor_Error_CategoryReferencedByChildren;
+			return MessageFormat.format(Messages.CategoryDMAdvisor_Error_CategoryReferencedByChildren, new Object[]{category.getName()});
 		}
 		return null;
 	}

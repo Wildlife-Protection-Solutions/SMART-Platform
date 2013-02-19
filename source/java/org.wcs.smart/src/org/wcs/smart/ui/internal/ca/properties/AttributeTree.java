@@ -22,11 +22,14 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -335,13 +338,17 @@ public class AttributeTree {
 		if(toDelete.size() == 0){
 			return;
 		}
-		itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
-		itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
+		String deleteQuestion = null;
+		if (toDelete.size() > 2){
+			deleteQuestion = MessageFormat.format(Messages.AttributeTree_DeleteMultipleMsg,new Object[]{Integer.valueOf(toDelete.size())}); 
+		}else{
+			itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
+			itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
+			deleteQuestion= MessageFormat.format(Messages.AttributeTree_ConfirmDelete_DialogMessage, new String[]{ itemsToDelete.toString() });
+		}
 				
 				
-		boolean ret = MessageDialog.openConfirm(viewer.getTree().getShell(), Messages.AttributeTree_ConfirmDelete_DialogTitle, 
-						Messages.AttributeTree_ConfirmDelete_DialogMessage + 
-						itemsToDelete.toString() + "?"); //$NON-NLS-1$
+		boolean ret = MessageDialog.openConfirm(viewer.getTree().getShell(), Messages.AttributeTree_ConfirmDelete_DialogTitle, deleteQuestion);
 		if (!ret){
 			return;
 		}
@@ -351,25 +358,47 @@ public class AttributeTree {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 				InterruptedException {
 				Attribute a = (Attribute)viewer.getInput();
+				monitor.beginTask(Messages.AttributeTree_DeleteProgress, toDelete.size());
+				final Display shell = Display.getDefault();
 				for (AttributeTreeNode node : toDelete){
-					boolean delete = DataModelManager.getInstance().validateDelete(node, monitor, AttributeTree.this.currentSession);
-					if (delete){
-						if (node.getParent() != null){
-							node.getParent().getActiveChildren().remove(node);
-							node.getParent().getChildren().remove(node);
-							node.setParent(null);
-							node.setAttribute(null);
-						}else{
-							a.getTree().remove(node);
-							node.getAttribute().getActiveTreeNodes().remove(node);
-							node.getAttribute().getTree().remove(node);
-							node.setAttribute(null);
+					monitor.subTask(Messages.AttributeTree_DeleteSubProgress + node.getName());
+					boolean delete = false;
+					try{
+						delete = DataModelManager.getInstance().validateDelete(node, new NullProgressMonitor(), AttributeTree.this.currentSession);
+						if (delete){
+							if (node.getParent() != null){
+								node.getParent().getActiveChildren().remove(node);
+								node.getParent().getChildren().remove(node);
+								node.setParent(null);
+								node.setAttribute(null);
+							}else{
+								a.getTree().remove(node);
+								node.getAttribute().getActiveTreeNodes().remove(node);
+								node.getAttribute().getTree().remove(node);
+								node.setAttribute(null);
+							}
 						}
+					}catch (final Exception ex){
+						shell.syncExec(new Runnable(){
+							@Override
+							public void run() {
+								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, ex.getMessage());
+							}
+						});
+						
 					}
+					
+					monitor.worked(1);
 				}
 				currentSession.flush();
-				refreshTree();
-				fireChangeListener();
+				shell.syncExec(new Runnable(){
+					@Override
+					public void run() {
+						refreshTree();
+						fireChangeListener();
+					}});
+				
+				
 			}
 		});
 	}
@@ -381,7 +410,7 @@ public class AttributeTree {
 	private void runInProgressDialog(IRunnableWithProgress runnable){
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(viewer.getTree().getShell());
 		try {
-			dialog.run(false, true, runnable);		
+			dialog.run(true, true, runnable);		
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(viewer.getTree().getShell(), Messages.AttributeTree_GenericError, ex);
 		}

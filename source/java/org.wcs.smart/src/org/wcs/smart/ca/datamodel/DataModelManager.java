@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -97,11 +95,7 @@ public class DataModelManager {
 			listener.modified();
 		}
 	}
-	
-	private void cancelWork(String message){
-		MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.DataModelManager_Cancelled_DialogTitle, message);
-	}
-	
+
 	/**
 	 * Verifies that a given category
 	 * can be deleted from the data model by
@@ -113,8 +107,9 @@ public class DataModelManager {
 	 * 
 	 * @return <code>true</code> if category is been validated and can be deleted. <code>false</code> if should
 	 * not be removed.
+	 * @throws exception if data model item cannot be deleted
 	 */
-	public boolean validateDelete(Category category, IProgressMonitor monitor, Session session){
+	public boolean validateDelete(Category category, IProgressMonitor monitor, Session session) throws Exception{
 		monitor.beginTask(Messages.DataModelManager_Progress_DeleteCategory + category.getFullCategoryName(), 1);
 		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 	
@@ -124,15 +119,8 @@ public class DataModelManager {
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteCategory + category.getFullCategoryName() , ex);
-			cancelWork(Messages.DataModelManager_Error_DeleteCategory + category.getFullCategoryName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
-			return false;
+			throw ex;
 		}
-		
-		if (monitor.isCanceled()){
-			cancelWork(Messages.DataModelManager_Cancelled_CategoryDelete + category.getFullCategoryName() );
-			return false;
-		}
-		
 		return true;
 	}
 	
@@ -148,8 +136,9 @@ public class DataModelManager {
 	 * 
 	 * @return <code>true</code> if attribute is been validated and can be deleted. <code>false</code> if should
 	 * not be removed.
+	 * @throws Exception if attribute cannot be deleted
 	 */
-	public boolean validateDelete(Attribute attribute, IProgressMonitor monitor, Session session){
+	public boolean validateDelete(Attribute attribute, IProgressMonitor monitor, Session session) throws Exception{
 		monitor.beginTask(Messages.DataModelManager_Progress_DeleteAttribute + attribute.getName(), 1);
 		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 		
@@ -159,16 +148,9 @@ public class DataModelManager {
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteAttribute + attribute.getName() , ex);
-			cancelWork(Messages.DataModelManager_Error_DeleteAttribute + attribute.getName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
-			return false;
+			throw ex;
 		}
-		
 		monitor.worked(1);
-		if (monitor.isCanceled()){
-			cancelWork(Messages.DataModelManager_Cancelled_AttributeDelete + attribute.getName());
-			return false;
-		}
-		
 		return true;
 	}
 	
@@ -185,8 +167,9 @@ public class DataModelManager {
 	 * @return <code>true</code> if category/attribute is been validated 
 	 * and can be deleted. <code>false</code> if should
 	 * not be removed.
+	 * @throws Exception if data model item cannot be deleted
 	 */
-	public boolean validateDelete(CategoryAttribute categoryAttribute, IProgressMonitor monitor, Session session){
+	public boolean validateDelete(CategoryAttribute categoryAttribute, IProgressMonitor monitor, Session session) throws Exception{
 		String key = categoryAttribute.getCategory().getName() + "/" + categoryAttribute.getAttribute().getName(); //$NON-NLS-1$
 		monitor.beginTask(Messages.DataModelManager_Progress_DeleteCatAtt + key, 1);
 		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
@@ -197,16 +180,10 @@ public class DataModelManager {
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteCatAtt , ex);
-			cancelWork(Messages.DataModelManager_Error_DeleteCatAtt + ex.getLocalizedMessage());
-			return false;
+			throw ex;
 		}
 		
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			cancelWork(Messages.DataModelManager_Cancelled_DeleteCatAtt +  key );
-			return false;
-		}
-		
+		monitor.worked(1);		
 		return true;
 	}
 	
@@ -223,8 +200,9 @@ public class DataModelManager {
 	 * @return <code>true</code> if attribute list item is been validated 
 	 * and can be deleted. <code>false</code> if should
 	 * not be removed.
+	 * @throws Exception if item cannot be deleted
 	 */
-	public boolean validateDelete(AttributeListItem listItem, IProgressMonitor monitor, Session session){
+	public boolean validateDelete(AttributeListItem listItem, IProgressMonitor monitor, Session session) throws Exception{
 
 		monitor.beginTask(Messages.DataModelManager_Progress_DeleteListItem + listItem.getName(), 1);
 		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
@@ -234,15 +212,9 @@ public class DataModelManager {
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteListItem + listItem.getName() , ex);
-			cancelWork(Messages.DataModelManager_Error_DeleteListItem + listItem.getName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
-			return false;
+			throw ex;
 		}
 		monitor.worked(1);
-		if (monitor.isCanceled()){
-			cancelWork(Messages.DataModelManager_Cancelled_DeleteListItem + listItem.getName() );
-			return false;
-		}
-		
 		return true;
 	}
 	
@@ -259,8 +231,9 @@ public class DataModelManager {
 	 * @return <code>true</code> if attribute node is been validated 
 	 * and can be deleted. <code>false</code> if should
 	 * not be removed.
+	 * @throws Exception if cannot delete an item an exception is logged then thrown
 	 */
-	public boolean validateDelete(AttributeTreeNode node, IProgressMonitor monitor, Session session){
+	public boolean validateDelete(AttributeTreeNode node, IProgressMonitor monitor, Session session) throws Exception{
 		monitor.beginTask(Messages.DataModelManager_Progress_DeleteTreeNode + node.getName(), 1);		
 		monitor.subTask(Messages.DataModelManager_Progress_ValidatingDelete);
 		
@@ -270,14 +243,9 @@ public class DataModelManager {
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(Messages.DataModelManager_Error_DeleteTreeNode + node.getName() , ex);
-			cancelWork(Messages.DataModelManager_Error_DeleteTreeNode + node.getName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
-			return false;
+			throw ex;
 		}
 		monitor.worked(1);
-		if (monitor.isCanceled()){
-			cancelWork(Messages.DataModelManager_Cancelled_DeleteTreeNode + node.getName() );
-			return false;
-		}
 		return true;
 	}
 	

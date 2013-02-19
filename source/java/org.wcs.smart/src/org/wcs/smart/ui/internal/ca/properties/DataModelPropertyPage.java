@@ -516,7 +516,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private void runInProgressDialog(IRunnableWithProgress runnable){
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try {
-			dialog.run(false, true, runnable);		
+			dialog.run(true, true, runnable);		
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Unknown + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			try{
@@ -547,20 +547,32 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-					boolean delete = DataModelManager.getInstance().validateDelete(cat, monitor, getSession());
-					if (delete){
-						if (cat.getParent() != null){
-							cat.getParent().getChildren().remove(cat);
-							cat.setParent(null);
-						}else{
-							 ((DataModel) viewer.getInput()).getCategories().remove(cat);
-							 if (cat.getUuid() != null){
-								 getSession().delete(cat);
+					boolean delete = false;
+					try{
+						delete = DataModelManager.getInstance().validateDelete(cat, monitor, getSession());
+					
+						if (delete){
+							if (cat.getParent() != null){
+								cat.getParent().getChildren().remove(cat);
+								cat.setParent(null);
+							}else{
+								((DataModel) viewer.getInput()).getCategories().remove(cat);
+								if (cat.getUuid() != null){
+									getSession().delete(cat);
+								}
+								getSession().flush();
+								getSession().evict(cat);
 							}
-							getSession().flush();
-							getSession().evict(cat);
 						}
-					}
+					}catch (final Exception ex){
+						Display.getDefault().syncExec(new Runnable() {
+								
+							@Override
+							public void run() {
+								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DataModelPropertyPage_DeleteErrorDialogTitle, ex.getLocalizedMessage());
+							}
+						});
+					}	
 				}
 			});
 			
@@ -574,41 +586,61 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					boolean delete = DataModelManager.getInstance().validateDelete(catAtt, monitor, getSession());
-					if (delete){
-						catAtt.getCategory().getAttributes().remove(catAtt);
-						if (catAtt.getCategory().getUuid() == null || catAtt.getAttribute().getUuid() == null){
-							getSession().evict(catAtt);
-							getSession().flush();
-						}else{
-							getSession().delete(catAtt);
-							getSession().flush();
-							getSession().evict(catAtt);
-						}
-						
-						//at this point we should try to delete the attribute as well
-						boolean contains = false;
-						for (Category root :dataModel.getCategories()){
-							if (containsAttribute(root, catAtt.getAttribute())){
-								contains = true;
-								break;
+					try{
+						boolean delete = DataModelManager.getInstance().validateDelete(catAtt, monitor, getSession());
+						if (delete){
+							catAtt.getCategory().getAttributes().remove(catAtt);
+							if (catAtt.getCategory().getUuid() == null || catAtt.getAttribute().getUuid() == null){
+								getSession().evict(catAtt);
+								getSession().flush();
+							}else{
+								getSession().delete(catAtt);
+								getSession().flush();
+								getSession().evict(catAtt);
 							}
-						}
-						if (!contains){
-							MessageDialog dialog = new MessageDialog(getShell(), DELETE_DIALOG_TITLE, null,
-									MessageFormat.format(Messages.DataModelPropertyPage_Confirm_DeleteAttribute, new Object[]{ catAtt.getAttribute() } ), 
-									MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-							int ret = dialog.open();
-							if (ret == 0){  //YES
-								delete = DataModelManager.getInstance().validateDelete(catAtt.getAttribute(), monitor, getSession());
-								if (delete){
-									dataModel.getAttributes().remove(catAtt.getAttribute());
-									if (catAtt.getAttribute().getUuid() != null){
-										getSession().delete(catAtt.getAttribute());
+						
+							//at this point we should try to delete the attribute as well
+							boolean contains = false;
+							for (Category root :dataModel.getCategories()){
+								if (containsAttribute(root, catAtt.getAttribute())){
+									contains = true;
+									break;
+								}
+							}
+							if (!contains){
+								final int[] ret = {-1};
+								Display.getDefault().syncExec(new Runnable(){
+
+									@Override
+									public void run() {
+										MessageDialog dialog = new MessageDialog(getShell(), DELETE_DIALOG_TITLE, null,
+												MessageFormat.format(Messages.DataModelPropertyPage_Confirm_DeleteAttribute, new Object[]{ catAtt.getAttribute().getName() } ), 
+												MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+										ret[0] = dialog.open();
+									}});
+								
+								
+								
+								
+								if (ret[0] == 0){  //YES
+									delete = DataModelManager.getInstance().validateDelete(catAtt.getAttribute(), monitor, getSession());
+									if (delete){
+										dataModel.getAttributes().remove(catAtt.getAttribute());
+										if (catAtt.getAttribute().getUuid() != null){
+											getSession().delete(catAtt.getAttribute());
+										}
 									}
 								}
 							}
 						}
+					}catch (final Exception ex){
+						Display.getDefault().syncExec(new Runnable() {
+								
+							@Override
+							public void run() {
+								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DataModelPropertyPage_DeleteErrorDialogTitle, ex.getLocalizedMessage());
+							}
+						});
 					}
 				}
 			});
