@@ -49,4 +49,6 @@ public interface ICsvDialogConfig {
 
 	public int getFileDialogStyle();
 	
+	public boolean appendFileExtension();
+	
 }
