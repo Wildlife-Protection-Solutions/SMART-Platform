@@ -479,20 +479,22 @@ public class EmployeeComposite extends Composite {
 			cdEmploymentStart.hide();
 		}
 		
-		boolean hide = false;
-		if(dtEmploymentEnd != null && chNotActive.getSelection()){
-			//test for EmploymentEnd being before employment start
-			Calendar start = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay() );
-			Calendar end = new GregorianCalendar(dtEmploymentEnd.getYear(), dtEmploymentEnd.getMonth(), dtEmploymentEnd.getDay() );
-			if(end.before(start)){
-				cdEmploymentEnd.show();
-				cdEmploymentEnd.setDescriptionText(Messages.EmployeeComposite_Error_InvalidEndDate);
-				isComplete = false;
+		if (cdEmploymentEnd != null && dtEmploymentEnd != null){
+			boolean hide = true;
+			if(chNotActive.getSelection()){
+				//test for EmploymentEnd being before employment start
+				Calendar start = new GregorianCalendar(dtEmploymentStart.getYear(), dtEmploymentStart.getMonth(), dtEmploymentStart.getDay() );
+				Calendar end = new GregorianCalendar(dtEmploymentEnd.getYear(), dtEmploymentEnd.getMonth(), dtEmploymentEnd.getDay() );
+				if(end.before(start)){
+					cdEmploymentEnd.show();
+					cdEmploymentEnd.setDescriptionText(Messages.EmployeeComposite_Error_InvalidEndDate);
+					isComplete = false;
+					hide = false;
+				}
 			}
-			hide = true;
-		}
-		if (hide && cdEmploymentEnd != null){
-			cdEmploymentEnd.hide();
+			if (hide){
+				cdEmploymentEnd.hide();
+			}
 		}
 		
 		if (chSmartUser.getSelection()){
@@ -508,7 +510,7 @@ public class EmployeeComposite extends Composite {
 				cdSmartId.hide();
 			}
 			
-			hide = true;
+			boolean hide = true;
 			if (txtSmartPassword.getText().trim().isEmpty()
 					|| ! SmartUtils.isSimpleString(txtSmartPassword.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_PASSWORD_LENGTH)) {
 				cdSmartPassword.show();
