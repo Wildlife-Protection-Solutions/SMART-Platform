@@ -67,7 +67,7 @@ public class AttributeTreeNodeDMAdvisor implements IDeleteAdvisor {
 		}
 		return MessageFormat.format(
 				Messages.AttributeTreeNodeDMAdvisor_DeleteError,
-				new Object[]{ cnt});
+				new Object[]{node.getName(), cnt});
 
 	}
 
