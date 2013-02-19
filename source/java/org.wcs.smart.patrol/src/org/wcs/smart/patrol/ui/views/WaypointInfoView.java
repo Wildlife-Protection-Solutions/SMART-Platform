@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.ui.views;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -55,6 +56,9 @@ import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolEventManager.EventType;
+import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
@@ -79,7 +83,20 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	private Font boldFont = null;
 	private ScrolledForm infoSection = null;
 
-	private Waypoint selectedWaypoint;
+	private Waypoint currentWp;
+	private byte[] selectedWaypointUuid;
+	
+	//listener for modifications to waypoints
+	private IPatrolEventListener waypointListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			Waypoint wp = ((Waypoint)source);
+			if (Arrays.equals(wp.getUuid(), selectedWaypointUuid)){
+				updateUiJob.schedule();
+			}
+			
+		}
+	};
 	
 	// job to update view
 	private Job updateUiJob = new Job(Messages.WaypointInfoView_UpdateJobName){
@@ -87,20 +104,19 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (infoSection.isDisposed()) return Status.OK_STATUS;
-			final Waypoint wp = selectedWaypoint;
-			
-			
 			final HashMap<String, List<List<String[]>>> displayData = new HashMap<String, List<List<String[]>>>();
+			Date wpDate = null;
 			
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
-			Date wpDate = null; 
 			try{
-				s.update(wp);
-				wpDate = wp.getPatrolLegDay().getDate();
+				currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
+				if (currentWp != null){
+			
+				wpDate = currentWp.getPatrolLegDay().getDate();
 				HashMap<Category, List<List<String[]>>> data = new HashMap<Category, List<List<String[]>>>();
-				if (wp.getObservations() != null) {
-					for (WaypointObservation wo : wp.getObservations()) {
+				if (currentWp.getObservations() != null) {
+					for (WaypointObservation wo : currentWp.getObservations()) {
 						List<List<String[]>> ops = data.get(wo.getCategory());
 
 						if (ops == null) {
@@ -122,26 +138,31 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 					Category c = (Category) s.merge(cat.getKey());
 					displayData.put(c.getFullCategoryName(), cat.getValue());
 				}
+				}
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
 			}
+			
 			final Date wpDate2 = wpDate;
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
+					
 					if (lblWaypointId.isDisposed())
 						return;
 
 					for (Control c : infoSection.getBody().getChildren()) {
 						c.dispose();
 					}
-
-					lblWaypointId.setText(String.valueOf(wp.getId()));
+					if (currentWp == null){
+						clearContents();
+					}else{
+					lblWaypointId.setText(String.valueOf(currentWp.getId()));
 					lblDateTime
 							.setText(DateFormat.getDateInstance(
 									DateFormat.SHORT).format(wpDate2)
-									+ " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(wp.getTime())); //$NON-NLS-1$
+									+ " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(currentWp.getTime())); //$NON-NLS-1$
 
 					for (Entry<String, List<List<String[]>>> cat : displayData
 							.entrySet()) {
@@ -178,6 +199,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 						Label l2 = toolkit.createLabel(infoSection.getBody(), "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 						l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 					}
+					}
 					infoSection.getBody().pack();
 					infoSection.getBody().layout();
 					infoSection.reflow(true);
@@ -193,6 +215,8 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	 * Creates new view
 	 */
 	public WaypointInfoView() {
+		PatrolEventManager.getInstance().addListener(EventType.WAYPOINT_DELETED, waypointListener);
+		PatrolEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, waypointListener);
 	}
 
 	/**
@@ -201,6 +225,10 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	@Override
 	public void dispose(){
 		super.dispose();
+		
+		PatrolEventManager.getInstance().removeListener(EventType.WAYPOINT_DELETED, waypointListener);
+		PatrolEventManager.getInstance().removeListener(EventType.WAYPOINT_MODIFIED, waypointListener);
+		
 		getSite().getPage().removeSelectionListener(this);
 		if (boldFont != null && !boldFont.isDisposed()){
 			boldFont.dispose();
@@ -268,7 +296,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	 * @param wp
 	 */
 	private void updateContents(final Waypoint wp){
-		selectedWaypoint = wp;
+		this.selectedWaypointUuid = wp.getUuid();
 		updateUiJob.schedule();
 	}
 	
@@ -276,7 +304,8 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	 * Clears the current contents
 	 */
 	private void clearContents(){
-		selectedWaypoint = null;
+		selectedWaypointUuid = null;
+		currentWp = null;
 		for (Control c : infoSection.getBody().getChildren()) {
 			c.dispose();
 		}

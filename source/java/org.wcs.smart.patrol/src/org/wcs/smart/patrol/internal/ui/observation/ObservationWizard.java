@@ -41,6 +41,8 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
@@ -345,6 +347,12 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 
 		//commit changes
 		getSession().getTransaction().commit();
+		
+		try{
+			PatrolEventManager.getInstance().waypointModified(wp);
+		}catch (Exception ex){
+			SmartPatrolPlugIn.log("Error firing events after waypoint observation modifications", ex); //$NON-NLS-1$
+		}
 		return true;
 	}
 

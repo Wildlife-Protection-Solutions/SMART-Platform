@@ -376,8 +376,14 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
 				}finally{
-					
 					saveSession.close();
+				}
+				for (Waypoint wp : waypoints){
+					try{
+						PatrolEventManager.getInstance().waypointDeleted(wp);
+					}catch (Exception ex){
+						SmartPatrolPlugIn.log("Error firing event after waypoint delete.", ex); //$NON-NLS-1$
+					}
 				}
 				
 				return Status.OK_STATUS;
@@ -570,6 +576,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 										+ ex.getLocalizedMessage(), ex);
 			} finally {
 				saveSession.close();
+			}
+			for (Waypoint wp : waypoints){
+				try{
+					PatrolEventManager.getInstance().waypointModified(wp);
+				}catch (Exception ex){
+					SmartPatrolPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
+				}
 			}
 			return Status.OK_STATUS;
 		}
