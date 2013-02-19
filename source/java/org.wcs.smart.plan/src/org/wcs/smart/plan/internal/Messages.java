@@ -35,6 +35,7 @@ public class Messages extends NLS {
 	public static String NumericPlanTarget_TargetType_PatrolDays;
 	public static String NumericPlanTarget_TargetType_PatrolHours;
 	public static String NumericPlanTarget_TargetType_PatrolManHours;
+	public static String NumericPlanTargetPropertyPage_Description_Label;
 	public static String NumericPlanTargetPropertyPage_InvalidName_Error;
 	public static String NumericPlanTargetPropertyPage_InvalidValue_Error;
 	public static String NumericPlanTargetPropertyPage_Operator_Label;
