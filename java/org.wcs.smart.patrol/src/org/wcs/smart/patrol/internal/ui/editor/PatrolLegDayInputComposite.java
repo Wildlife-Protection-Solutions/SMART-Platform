@@ -96,6 +96,7 @@ import org.wcs.smart.patrol.internal.ui.importwp.ImportGpsDataWizard;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
+import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.util.SmartUtils;
 
@@ -563,7 +564,9 @@ public class PatrolLegDayInputComposite {
 				//ensure minimum is loaded for the patrol mapping service which assumes
 				//to a minimum that this information is already loaded 
 				if (cloned.getObservations() != null && cloned.getObservations().size() > 0){
-					cloned.getObservations().get(0).getCategory().getName();
+					for (WaypointObservation ob : cloned.getObservations()){
+						ob.getCategory().getName();
+					}
 				}
 				
 			}
