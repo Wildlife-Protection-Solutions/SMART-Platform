@@ -23,11 +23,11 @@ package org.wcs.smart.export.config.impl;
 
 import org.eclipse.swt.SWT;
 import org.wcs.smart.export.config.ICsvImportDialogConfig;
-import org.wcs.smart.export.dialog.CsvExportDialog;
+import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.internal.Messages;
 
 /**
- * Basic import configuration for {@link CsvExportDialog}
+ * Basic import configuration for {@link CsvImportDialog}
  * 
  * @author elitvin
  * @since 1.0.0
