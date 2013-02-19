@@ -38,6 +38,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
 import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -67,6 +69,19 @@ public class QueryFolderTreeComposite extends Composite{
 	private Button btnAddFolder;
 	private TreeViewer tblViewer;
 	private boolean includeSharedFolders;
+	
+	private IQueryFolderListener folderChanged = new IQueryFolderListener() {
+		
+		@Override
+		public void folderChanged(int eventType, Object object) {
+			getShell().getDisplay().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					tblViewer.refresh();
+				}});
+			
+		}
+	};
 	/**
 	 * 
 	 */
@@ -92,6 +107,13 @@ public class QueryFolderTreeComposite extends Composite{
 		return (IStructuredSelection) tblViewer.getSelection();
 	}
 	private void createComposite(){
+		QueryEventManager.getInstance().addQueryFolderListener(folderChanged);
+		addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				QueryEventManager.getInstance().removeQueryFolderListener(folderChanged);
+			}
+		});
 		setLayout(new GridLayout(1, false));
 		
 		tblViewer = new TreeViewer(this, SWT.BORDER);
