@@ -53,5 +53,10 @@ public abstract class AbstractCsvImportConfig implements ICsvImportDialogConfig 
 	public int getFileDialogStyle() {
 		return SWT.OPEN;
 	}
+
+	@Override
+	public boolean appendFileExtension() {
+		return false;
+	}
 	
 }

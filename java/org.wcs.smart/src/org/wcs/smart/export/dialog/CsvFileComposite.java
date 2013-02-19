@@ -76,7 +76,10 @@ public class CsvFileComposite extends Composite {
 			public void handleEvent(Event event) {
 				fd.setFileName(txtFile.getText());
 				String file = fd.open();
-				if (file != null){
+				if (file != null) {
+					if (config.appendFileExtension() && !file.endsWith(".csv")) { //$NON-NLS-1$
+						file += ".csv"; //$NON-NLS-1$
+					}
 					txtFile.setText(file);
 				}
 			}

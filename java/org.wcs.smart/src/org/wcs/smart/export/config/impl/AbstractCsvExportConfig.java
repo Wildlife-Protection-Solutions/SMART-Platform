@@ -54,4 +54,9 @@ public abstract class AbstractCsvExportConfig implements ICsvExportDialogConfig 
 		return SWT.SAVE;
 	}
 	
+	@Override
+	public boolean appendFileExtension() {
+		return true;
+	}
+	
 }
