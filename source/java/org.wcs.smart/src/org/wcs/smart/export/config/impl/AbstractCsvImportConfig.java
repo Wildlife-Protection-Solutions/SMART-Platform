@@ -21,58 +21,37 @@
  */
 package org.wcs.smart.export.config.impl;
 
-import org.wcs.smart.export.AgencyCsvImporter;
-import org.wcs.smart.export.config.ICsvDataImporter;
-import org.wcs.smart.export.dialog.CsvImportDialog;
+import org.eclipse.swt.SWT;
+import org.wcs.smart.export.config.ICsvImportDialogConfig;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 /**
- * Configuration for current {@link CsvImportDialog} to import
- * agencies and ranks into csv file
+ * Basic import configuration for {@link CsvExportDialog}
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public class AgencyCsvImportConfig extends AbstractCsvImportConfig {
+public abstract class AbstractCsvImportConfig implements ICsvImportDialogConfig {
 
-	AgencyCsvImporter importer = new AgencyCsvImporter();
+	@Override
+	public boolean includeHasHeader() {
+		return false;
+	}
+
+	@Override
+	public String getHasHeaderText() {
+		return ""; //$NON-NLS-1$
+	}
+
+	@Override
+	public String getActionButtonText() {
+		return Messages.CsvConfig_Action_Import;
+	}
+
+	@Override
+	public int getFileDialogStyle() {
+		return SWT.OPEN;
+	}
 	
-	@Override
-	public ICsvDataImporter getImporter() {
-		return importer;
-	}
-
-	@Override
-	public String getInfo() {
-		return Messages.CsvConfig_Agency_Import_Info + SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Import_Info_Content +
-				SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_Label +
-				SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_HeaderRow +
-				SmartUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_ContentRow;
-	}
-
-	@Override
-	public String getTitle() {
-		return Messages.CsvConfig_Agency_Import_Title;
-	}
-
-	@Override
-	public String getMessage() {
-		return Messages.CsvConfig_Agency_Import_Message;
-	}
-
-	@Override
-	public String getSuccessMessage() {
-		return Messages.CsvConfig_Agency_Import_Success;
-	}
-
-	@Override
-	public String getFailMessage() {
-		return Messages.CsvConfig_Agency_Import_Fail;
-	}
-
 }

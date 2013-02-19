@@ -22,7 +22,6 @@
 package org.wcs.smart.export.config;
 
 import org.wcs.smart.export.dialog.AbstractCsvDialog;
-import org.wcs.smart.internal.Messages;
 
 /**
  * Gui configuration for {@link AbstractCsvDialog}
@@ -32,9 +31,6 @@ import org.wcs.smart.internal.Messages;
  */
 public interface ICsvDialogConfig {
 
-	public static final String EXPORT_ACTION_TEXT = Messages.CsvConfig_Action_Export;
-	public static final String IMPORT_ACTION_TEXT = Messages.CsvConfig_Action_Import;
-	
 	public boolean includeHasHeader();
 	
 	public String getHasHeaderText();
