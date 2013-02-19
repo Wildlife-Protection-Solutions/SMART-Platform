@@ -1,10 +1,7 @@
 package org.wcs.smart.export.config.impl;
 
-import org.eclipse.swt.SWT;
 import org.wcs.smart.export.AgencyCsvExporter;
 import org.wcs.smart.export.config.ICsvDataExporter;
-import org.wcs.smart.export.config.ICsvDialogConfig;
-import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -16,7 +13,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class AgencyCsvExportConfig implements ICsvExportDialogConfig {
+public class AgencyCsvExportConfig extends AbstractCsvExportConfig {
 
 	private AgencyCsvExporter exporter = new AgencyCsvExporter();
 
@@ -25,16 +22,6 @@ public class AgencyCsvExportConfig implements ICsvExportDialogConfig {
 		return exporter;
 	}
 	
-	@Override
-	public boolean includeHasHeader() {
-		return false;
-	}
-
-	@Override
-	public String getHasHeaderText() {
-		return ""; //$NON-NLS-1$
-	}
-
 	@Override
 	public String getInfo() {
 		return Messages.CsvConfig_Agency_Export_Info +
@@ -66,16 +53,6 @@ public class AgencyCsvExportConfig implements ICsvExportDialogConfig {
 	@Override
 	public String getFailMessage() {
 		return Messages.CsvConfig_Agency_Export_Fail;
-	}
-
-	@Override
-	public String getActionButtonText() {
-		return ICsvDialogConfig.EXPORT_ACTION_TEXT;
-	}
-
-	@Override
-	public int getFileDialogStyle() {
-		return SWT.SAVE;
 	}
 
 }

@@ -23,12 +23,9 @@ package org.wcs.smart.export.config.impl;
 
 import java.text.MessageFormat;
 
-import org.eclipse.swt.SWT;
 import org.wcs.smart.export.EmployeeCsvExporter;
 import org.wcs.smart.export.EmployeeCsvImporter;
 import org.wcs.smart.export.config.ICsvDataExporter;
-import org.wcs.smart.export.config.ICsvDialogConfig;
-import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -40,7 +37,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class EmployeeCsvExportConfig implements ICsvExportDialogConfig {
+public class EmployeeCsvExportConfig extends AbstractCsvExportConfig {
 
 	private EmployeeCsvExporter exporter = new EmployeeCsvExporter();
 
@@ -89,14 +86,4 @@ public class EmployeeCsvExportConfig implements ICsvExportDialogConfig {
 		return Messages.ExportEmployeeDialog_FailureMessage;
 	}
 
-	@Override
-	public String getActionButtonText() {
-		return ICsvDialogConfig.EXPORT_ACTION_TEXT;
-	}
-
-	@Override
-	public int getFileDialogStyle() {
-		return SWT.SAVE;
-	}
-	
 }
