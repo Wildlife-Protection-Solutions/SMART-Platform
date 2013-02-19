@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -66,6 +67,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	private Text targetName;
 	private ComboViewer targetType = null;
 	private ComboViewer targetOp = null;
+	private Text targetDesc;
 	
 	private ControlDecoration cdTargetValue;
 	private ControlDecoration cdTargetName;
@@ -170,6 +172,16 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		cdTargetValue = createDecoration(targetValue);
 		cdTargetName = createDecoration(targetName);
 
+		Label descLabel = new Label(center, SWT.NONE);
+		descLabel.setText("Target Description:");
+		descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+
+		targetDesc = new Text(center, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
+		targetDesc.setTextLimit(AdministrativePlanTarget.MAX_DESC_LENGTH);
+		targetDesc.setLayoutData(createGridDataWithIndent());
+		((GridData)targetDesc.getLayoutData()).widthHint = 100;
+		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
+		
 		validate();
 		return center;
 	}
@@ -282,6 +294,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		target.setName(getTargetName());
 		target.setType(getTargetType());
 		target.setOp(getTargetOp());
+		target.setDescription(targetDesc.getText());
 	}
 	
 	/**
@@ -296,6 +309,9 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		this.targetValue.setText(pt.getValue().toString());
 		this.planTarget = p;
 		this.targetName.setText(pt.getName());
+		String descr = pt.getDescription();
+		this.targetDesc.setText(descr != null ? descr : ""); //$NON-NLS-1$
+		
 		validate();
 	}
 	
