@@ -27,8 +27,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,8 +88,8 @@ public class PlanHibernateManager{
 			@SuppressWarnings("unchecked")
 			List<Object[]> results = filterQuery.list();
 			
-			Map<String, PlanEditorInput> inputs = new HashMap<String, PlanEditorInput>();
-			Map<String, String>parents = new HashMap<String,String>();
+			Map<String, PlanEditorInput> inputs = new LinkedHashMap<String, PlanEditorInput>();
+			Map<String, String>parents = new LinkedHashMap<String,String>();
 			
 			for (Object[] data : results){
 				String uuid = SmartUtils.encodeHex((byte[]) data[0]);

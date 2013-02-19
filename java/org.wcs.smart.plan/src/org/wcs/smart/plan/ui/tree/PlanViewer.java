@@ -82,31 +82,6 @@ public class PlanViewer {
 			}
 			
 		});
-		
-		//TODO: review this code as I am not sure what this will sort
-		//also needs to be setup to work with planeditorinput
-		planViewer.setComparator(new ViewerComparator() {					
-		    @Override
-		    public int compare(Viewer viewer, Object e1, Object e2) {
-		    	if (e1 instanceof Plan && e2 instanceof Plan){	  
-		    		String a = ((Plan)e1).getName();
-		    		String b = ((Plan)e2).getName();
-		    		if (a == null){
-		    			a = ""; //$NON-NLS-1$
-		    		}
-		    		if (b == null){
-		    			b = ""; //$NON-NLS-1$
-		    		}
-		            return Collator.getInstance().compare(a,b);
-		    	}else if (e1 instanceof Plan ){
-		    		return 1;
-		    	}else if (e2 instanceof Plan){
-		    		return -1;
-		    	}else{
-		    		return Collator.getInstance().compare(e1.toString(), e2.toString()); 
-		        }
-		    }
-		});
 	}
 	
 	/**
