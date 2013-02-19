@@ -70,6 +70,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceEditor_Edit_LinkLabel;
 
+	public static String IntelligenceEditor_FailOpenPatrol_Error;
+
 	public static String IntelligenceEditor_NoValue;
 
 	public static String IntelligenceFilterDialog_Message;

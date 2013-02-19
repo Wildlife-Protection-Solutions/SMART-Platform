@@ -40,7 +40,10 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -57,10 +60,16 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.patrol.ui.PatrolPerspective;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * The Intelligence Editor
@@ -81,7 +90,7 @@ public class IntelligenceEditor extends EditorPart {
 
 	private Text txtDateReceived;
 	private Text txtSource;
-	private Text txtPatrolID;
+	private Hyperlink lnkPatrolID;
 	private Text txtShortName;
 	private Text txtDescription;
 	private Text txtFromDate;
@@ -184,9 +193,14 @@ public class IntelligenceEditor extends EditorPart {
 		createEditLink(toolkit, content, PanelType.SOURCE); 
 
 		toolkit.createLabel(content, Messages.IntelligenceSource_PatrolId_Label);
-		txtPatrolID = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtPatrolID.setEditable(false);
-		txtPatrolID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		lnkPatrolID = toolkit.createHyperlink(content, "", SWT.WRAP); //$NON-NLS-1$
+		lnkPatrolID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		lnkPatrolID.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				openPatrol(getIntelligence().getPatrol());
+			}
+		});
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
 		toolkit.createLabel(content, Messages.IntelligenceDesc_Name_Label);
@@ -259,7 +273,8 @@ public class IntelligenceEditor extends EditorPart {
 		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
 		txtSource.setText(intel.getSource().getName());
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
-		txtPatrolID.setText(value);
+		lnkPatrolID.setText(value);
+		lnkPatrolID.setEnabled(intel.getPatrol() != null);
 		txtShortName.setText(intel.getShortName());
 		txtDescription.setText(intel.getDescription());
 		txtFromDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getFromDate()));
@@ -338,6 +353,21 @@ public class IntelligenceEditor extends EditorPart {
 			return true;
 		}
 		return false;
+	}
+
+	private void openPatrol(Patrol p){
+		try {
+			if (p == null) {
+				return;
+			}
+			PatrolEditorInput input = new PatrolEditorInput(p.getUuid(), p.getId(), null, null, null);
+			IWorkbench workbench = PlatformUI.getWorkbench();
+			IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+			workbench.showPerspective(PatrolPerspective.ID, window);
+			window.getActivePage().openEditor(input, PatrolEditor.ID);
+		} catch (Exception e1) {
+			IntelligencePlugIn.displayLog(Messages.IntelligenceEditor_FailOpenPatrol_Error +SmartUtils.LINE_SEPARATOR + e1.getLocalizedMessage(), e1);
+		}
 	}
 	
 	@Override
