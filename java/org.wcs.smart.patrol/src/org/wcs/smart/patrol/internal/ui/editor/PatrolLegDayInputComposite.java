@@ -688,10 +688,7 @@ public class PatrolLegDayInputComposite {
 		observationTable.getTable().setHeaderVisible(true);
 		observationTable.setContentProvider(new ObservableListContentProvider());
 		
-
 		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(observationTable, new FocusCellHighlighter(observationTable){});
-		
-		
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(observationTable) {
 			protected boolean isEditorActivationEvent(
 					ColumnViewerEditorActivationEvent event) {
@@ -718,8 +715,6 @@ public class PatrolLegDayInputComposite {
 		observationTable.setComparator(waypointSorter);
 		for (int i = 0; i < OtColumn.values().length; i++) {
 			final OtColumn columntype = OtColumn.values()[i];
-			
-
 			if (!editor.getPatrolEditor().getOptions().getTrackDistanceDirection() && 
 					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE)){
 				continue;

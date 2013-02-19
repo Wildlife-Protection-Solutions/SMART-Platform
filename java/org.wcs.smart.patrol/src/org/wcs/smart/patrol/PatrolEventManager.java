@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.Waypoint;
 
 /**
  * Event manager for managing patrol events.
@@ -29,7 +30,9 @@ public class PatrolEventManager {
 		PATROL_ADDED,
 		PATROL_DELETED,
 		PATROL_MODIFIED, 
-		PATROL_SAVED
+		PATROL_SAVED,
+		WAYPOINT_MODIFIED,
+		WAYPOINT_DELETED
 	}
 	
 	/**
@@ -82,6 +85,11 @@ public class PatrolEventManager {
 	public static int PATROL_ID = 9;
 	
 	/**
+	 * Waypoint ID - applicable for only
+	 * EventType.WAYPOINT_DELETED and WAYPOINT_MODIFIED
+	 */
+	public static int WAYPOINT = 10;
+	/**
 	 * 
 	 * @return the patrol event manager instance
 	 */
@@ -116,6 +124,23 @@ public class PatrolEventManager {
 	public void patrolChanged(int attributeChanged, Object source){
 		fireListeners(EventType.PATROL_MODIFIED, attributeChanged, source);
 	}
+	
+	
+	/**
+	 * Fires a waypoint modified event.
+	 * @param waypoint
+	 */
+	public void waypointModified(Waypoint waypoint){
+		fireListeners(EventType.WAYPOINT_MODIFIED, WAYPOINT, waypoint);
+	}
+	/**
+	 * Fires a waypoint deleted event.
+	 * @param waypoint
+	 */
+	public void waypointDeleted(Waypoint waypoint){
+		fireListeners(EventType.WAYPOINT_DELETED, WAYPOINT, waypoint);
+	}
+	
 	
 	private void fireListeners(EventType type, int attributeChange, Object source){
 		if (listeners.get(type) != null){
