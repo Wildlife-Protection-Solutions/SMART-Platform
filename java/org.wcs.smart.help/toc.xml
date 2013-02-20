@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?NLS TYPE="org.eclipse.help.toc"?>
 
-<toc label="SMART Help" topic="html/toc.html">
+<toc label="SMART Help">
    <topic label="Introduction">
       <topic label="Getting Started">
       </topic>
@@ -25,7 +25,7 @@
       </topic>
       <topic href="html/AdministrativeTasks.html#ExportImportPatrol" label="Exporting and Importing Patrols">
       </topic>
-      <topic href="html/AdministrativeTasks.html#ImportDataModel" label="Importing The Data Model">
+      <topic href="html/AdministrativeTasks.html#ImportDataModel" label="Creating or Importing The Data Model">
       </topic>
       <topic href="html/AdministrativeTasks.html#ImportCa" label="Importing a Conservation Area">
       </topic>
