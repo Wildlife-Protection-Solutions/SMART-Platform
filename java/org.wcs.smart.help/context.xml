@@ -1,6 +1,0 @@
-<contexts>
-   <context id="createnewca">
-      <description>This is the sample context-sensitive help. There is a link to the help content below.</description>
-      <topic href="html/SettingUpANewConservationArea.html" label="Subtopic" />
-   </context>
-</contexts> 
