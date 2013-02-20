@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
+import org.eclipse.jface.viewers.ICellEditorListener;
+import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -355,6 +357,39 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		return ""; //$NON-NLS-1$
 	}
 
+	private String validate(Column column, Station station, String newName){
+		setErrorMessage(null);
+		if (column == Column.NAME){
+			if (!findLangValue(column, station).equals(newName.trim())){
+
+				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_NAME_LENGTH)){
+					Integer matches = 0;
+					for (Iterator<Station> itr = stations.iterator(); itr.hasNext();) {
+						Station a = itr.next();
+						if( !a.equals(station) && a.findName(cmbLanguage.getCurrentSelection()).equals(newName.trim())){
+							matches++;
+						}
+					} 
+					if(matches > 0){
+						return Messages.StationListPropertyPage_Error_CannotDuplicate;
+					}
+				}else{
+					return	MessageFormat.format(
+								Messages.StationListPropertyPage_Error_InvalidName,
+								new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, Station.MAX_STATION_NAME_LENGTH});
+				}
+			}
+		}else if (column == Column.DESCIPTION){
+			if (!findLangValue(column, station).equals(newName.trim())){
+				if (newName.trim().length() > Station.MAX_STATION_DESC_LENGTH){
+					return MessageFormat.format(Messages.StationListPropertyPage_Error_InvalidDescription,
+								new Object[]{Station.MAX_STATION_DESC_LENGTH});
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Updates the given station object with the new value.
 	 * @param type
@@ -364,42 +399,14 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private void updateLangValue(Column type, Station stn, String newValue) {
 		Language lang = cmbLanguage.getCurrentSelection();
 		if (type == Column.NAME) {
-			if (!findLangValue(type, stn).equals(newValue.trim())){
-
-				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_NAME_LENGTH)){
-					Integer matches = 0;
-					for (Iterator<Station> itr = stations.iterator(); itr.hasNext();) {
-						Station a = itr.next();
-						if( a != stn && a.findName(cmbLanguage.getCurrentSelection()).equals(newValue.trim())){
-							matches++;
-						}
-					} 
-					if(matches > 0){
-						//invalid station name, don't update it.
-						MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.StationListPropertyPage_InvalidName_DialogTitle, Messages.StationListPropertyPage_Error_CannotDuplicate);
-					}else{
-						stn.updateName(lang, newValue.trim());
-						setChangesMade(true);
-					}
-				}else{
-					//invalid value, show error 
-					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.StationListPropertyPage_InvalidName_DialogTitle, 
-							MessageFormat.format(
-									Messages.StationListPropertyPage_Error_InvalidName,
-									new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
-				}
+			if (validate(type, stn, newValue) == null){
+				stn.updateName(lang, newValue.trim());
+				setChangesMade(true);
 			}
 		} else if (type == Column.DESCIPTION) {
-			if (!findLangValue(type, stn).equals(newValue.trim())){
-				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Station.MAX_STATION_DESC_LENGTH, 0)){
-					stn.updateDescription(lang, newValue.trim());
-					setChangesMade(true);
-				}else{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.StationListPropertyPage_InvalidDescription_DialogTitle, 
-							MessageFormat.format(Messages.StationListPropertyPage_Error_InvalidDescription,
-									new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
-					setChangesMade(false);
-				}
+			if (validate(type, stn, newValue) == null){
+				stn.updateDescription(lang, newValue.trim());
+				setChangesMade(true);
 			}
 		}
 	}
@@ -414,8 +421,27 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			final TableViewerColumn col = createTableViewerColumn(viewer, colum.name,
 					colum.bounds, i);
 			col.setLabelProvider(new StationLabelProvider(colum));
-			col.setEditingSupport(new TextTableEditor(viewer, colum));
-			
+			final TextTableEditor ed = new TextTableEditor(viewer, colum);
+			ed.editor.addListener(new ICellEditorListener() {
+				
+				@Override
+				public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+					setErrorMessage(ed.editor.getErrorMessage());
+				}
+				
+				@Override
+				public void cancelEditor() {
+					setErrorMessage(null);
+				}
+				
+				@Override
+				public void applyEditorValue() {
+					setErrorMessage(null);
+					
+				}
+			});
+			col.setEditingSupport(ed);
+					
 			col.getColumn().addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e){
@@ -493,11 +519,13 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private class TextTableEditor extends EditingSupport {
 		private Column column;
 		private TableViewer viewer;
+		private TextCellEditor editor;
 
 		TextTableEditor(TableViewer viewer, Column column) {
 			super(viewer);
 			this.column = column;
 			this.viewer = viewer;
+			this.editor = new TextCellEditor(viewer.getTable());
 		}
 
 		@Override
@@ -512,8 +540,16 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 
 		@Override
-		protected CellEditor getCellEditor(Object element) {
-			return new TextCellEditor(viewer.getTable());
+		protected CellEditor getCellEditor(final Object element) {
+			editor.setValidator(new ICellEditorValidator() {
+				
+				@Override
+				public String isValid(Object value) {
+					return validate(column, (Station)element, (String)value);
+				}
+			});
+			return editor;
+			
 		}
 
 		@Override

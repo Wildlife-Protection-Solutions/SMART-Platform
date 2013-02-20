@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
+import org.eclipse.jface.viewers.ICellEditorListener;
+import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -80,6 +82,7 @@ import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Property page for managing patrol teams.
@@ -408,6 +411,37 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		return ""; //$NON-NLS-1$
 	}
 
+	private String validate(Column type, Team team, Object newValue){
+		if (type == Column.NAME){
+			if (!findValue(type, team).equals((String)newValue)){
+				String newName = (String)newValue;
+				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Team.MAX_NAME_LENGTH)){
+					Integer matches = 0;
+					for (Iterator<Team> itr = teams.iterator(); itr.hasNext();) {
+						Team a = itr.next();
+						if( !a.equals(team) && a.findName(languageViewer.getCurrentSelection()).equals(newName.trim())){
+							matches++;
+						}
+					} 
+					if(matches > 0){
+						//invalid name, don't update it.
+						return Messages.TeamPropertyPage_DuplicateTeamNameError;					
+					}
+				}else{
+					//invalid value, show error
+					return 	MessageFormat.format(Messages.TeamPropertyPage_TeamNameError, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, Team.MAX_NAME_LENGTH});
+				}
+			}
+		}else if (type == Column.MANDATE){
+			return null;
+		}else if (type == Column.DESCRIPTION){
+			String newDesc = (String) newValue;
+			if (newDesc.length() > org.wcs.smart.ca.Label.MAX_LENGTH){
+				return MessageFormat.format(Messages.TeamPropertyPage_DescriptionError, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH});
+			}
+		}
+		return null;
+	}
 	/**
 	 * Updates the given station object with the new value.
 	 * @param type
@@ -443,8 +477,28 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			
 			
 			col.setLabelProvider(new TeamLabelProvider(colum));
+			
 			if (colum == Column.NAME || colum == Column.DESCRIPTION){
-				col.setEditingSupport(new TextTableEditor(viewer, colum));
+				final TextTableEditor ed = new TextTableEditor(viewer, colum);
+				ed.editor.addListener(new ICellEditorListener() {
+					
+					@Override
+					public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+						setErrorMessage(ed.editor.getErrorMessage());
+					}
+					
+					@Override
+					public void cancelEditor() {
+						setErrorMessage(null);
+					}
+					
+					@Override
+					public void applyEditorValue() {
+						setErrorMessage(null);
+						
+					}
+				});
+				col.setEditingSupport(ed);
 			}else if (colum == Column.MANDATE){
 				col.setEditingSupport(new ComboTableEditor(viewer, colum));
 			}	
@@ -474,12 +528,13 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private class ComboTableEditor extends EditingSupport {
 		private Column column;
 		private TableViewer viewer;
-		
+		private CellEditor editor;
 
 		ComboTableEditor(TableViewer viewer, Column column) {
 			super(viewer);
 			this.column = column;
 			this.viewer = viewer;
+			this.editor = new MandateComboBoxCellEditor(viewer.getTable().getParent(),mandates, SWT.DROP_DOWN, languageViewer);
 		}
 
 		@Override
@@ -502,7 +557,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 
 		@Override
 		protected CellEditor getCellEditor(Object element) {
-			return  new MandateComboBoxCellEditor(viewer.getTable().getParent(),mandates, SWT.DROP_DOWN, languageViewer);
+			return editor;
 		}
 
 		@Override
@@ -517,11 +572,13 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private class TextTableEditor extends EditingSupport {
 		private Column column;
 		private TableViewer viewer;
+		private CellEditor editor;
 
 		TextTableEditor(TableViewer viewer, Column column) {
 			super(viewer);
 			this.column = column;
 			this.viewer = viewer;
+			this.editor = new TextCellEditor(viewer.getTable());	
 		}
 
 		@Override
@@ -536,8 +593,15 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 
 		@Override
-		protected CellEditor getCellEditor(Object element) {
-			return new TextCellEditor(viewer.getTable());
+		protected CellEditor getCellEditor(final Object element) {
+			this.editor.setValidator(new ICellEditorValidator() {
+				@Override
+				public String isValid(Object value) {
+					setErrorMessage(null);
+					return validate(column, ((Team)element), (String)value);
+				}
+			});
+			return this.editor;
 		}
 
 		@Override

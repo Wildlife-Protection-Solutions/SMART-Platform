@@ -46,6 +46,8 @@ public class Team extends SimpleListItemWithDescription{
 	public static final String DESCRIPTION = Messages.Team_DescriptionFieldName;
 	public static final String MANDATE = Messages.Team_MandateFieldName;
 	
+	public static final int MAX_NAME_LENGTH = 64;
+	
 	private PatrolMandate mandate;
 	private boolean isActive;
 	

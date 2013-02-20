@@ -39,6 +39,8 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
+import org.eclipse.jface.viewers.ICellEditorListener;
+import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -106,6 +108,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		Column(String name) {
 			this.name = name;
 		}
+		
+		
 	};
 	
 	/**
@@ -293,8 +297,6 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.PatrolMandatePropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.PatrolMandatePropertyPage_ConfirmDeleteMessage, new Object[]{mandate.getName()}))){
 			return;
 		}
-			
-
 		try{
 			if (mandate.getUuid() != null){
 				if (DeleteManager.canDelete(mandate, getSession())){
@@ -323,7 +325,6 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		PatrolMandate md = (PatrolMandate)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 		md.setIsActive(enable);
 		setChangesMade(true);
-		
 		tableViewer.refresh();
 	}
 	
@@ -345,6 +346,31 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		return ""; //$NON-NLS-1$
 	}
 
+	private String validate(Column column, PatrolMandate mandate, String newName){
+		if (column == Column.NAME){
+			if (!findLangValue(column, mandate).equals(newName)){
+				if(SmartUtils.isSimpleString(newName.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolMandate.MAX_NAME_LENGTH)){
+					Integer matches = 0;
+					for (Iterator<PatrolMandate> itr = mandates.iterator(); itr.hasNext();) {
+						PatrolMandate a = itr.next();
+						if( a != mandate && a.findName(cmbLanguage.getCurrentSelection()).equals(newName.trim())){
+							matches++;
+						}
+					} 
+					if(matches > 0){
+						//invalid name, don't update it.
+						return Messages.PatrolMandatePropertyPage_Error_DuplicateMandate;					
+					}
+				}else{
+					//invalid value, show error
+					return 	MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_InvalidMandateName, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolMandate.MAX_NAME_LENGTH});
+				}
+				
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Updates the given station object with the new value.
 	 * @param type
@@ -354,29 +380,13 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	private void updateLangValue(Column type, PatrolMandate mnd, String newValue) {
 		if (type == Column.NAME) {
 			if (!findLangValue(type, mnd).equals(newValue)){
-				if(SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, PatrolMandate.MAX_NAME_LENGTH)){
-					Integer matches = 0;
-					for (Iterator<PatrolMandate> itr = mandates.iterator(); itr.hasNext();) {
-						PatrolMandate a = itr.next();
-						if( a != mnd && a.findName(cmbLanguage.getCurrentSelection()).equals(newValue.trim())){
-							matches++;
-						}
-					} 
-					if(matches > 0){
-						//invalid name, don't update it.
-						MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, Messages.PatrolMandatePropertyPage_Error_DuplicateMandate);
-						setChangesMade(false);
-					}else{					
-						mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
-						setChangesMade(true);
-					}
+				String error = validate(type, mnd, newValue);
+				if (error != null){
+					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, error);
 				}else{
-					//invalid value, show error 
-					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, 
-							MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_InvalidMandateName, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolMandate.MAX_NAME_LENGTH}));
-					setChangesMade(false);
+					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
+					setChangesMade(true);
 				}
-				
 			}
 		}
 	}
@@ -392,7 +402,29 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					1, i);
 			
 			col.setLabelProvider(new MandateLabelProvider(colum));
-			col.setEditingSupport(new TextTableEditor(viewer, colum));
+			final TextTableEditor editor = new TextTableEditor(viewer, colum);
+			editor.editor.addListener(new ICellEditorListener() {
+				
+				@Override
+				public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+					setErrorMessage(editor.editor.getErrorMessage());
+				}
+				
+				@Override
+				public void cancelEditor() {
+					setErrorMessage(null);
+					
+				}
+				
+				@Override
+				public void applyEditorValue() {
+					setErrorMessage(null);
+					
+				}
+			});
+			col.setEditingSupport(editor);
+			
+			
 			
 			col.getColumn().addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -422,16 +454,24 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		private Column column;
 		private TableViewer viewer;
 
+		private CellEditor editor;
+		
 		TextTableEditor(TableViewer viewer, Column column) {
 			super(viewer);
 			this.column = column;
 			this.viewer = viewer;
+			this.editor = new TextCellEditor(viewer.getTable());	
 		}
 
 		@Override
 		protected void setValue(Object element, Object value) {
-			updateLangValue(column, (PatrolMandate) element, (String) value);
-			viewer.refresh();
+			String error = validate(column, ((PatrolMandate)element), (String)value);
+			if (error == null){
+				updateLangValue(column, (PatrolMandate) element, (String) value);
+				viewer.refresh();
+			}else{
+				MessageDialog.openError(getShell(), INVALID_NAME_DIALOG_TITLE, error);
+			}
 		}
 
 		@Override
@@ -440,8 +480,15 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		}
 
 		@Override
-		protected CellEditor getCellEditor(Object element) {
-			return new TextCellEditor(viewer.getTable());
+		protected CellEditor getCellEditor(final Object element) {
+			this.editor.setValidator(new ICellEditorValidator() {
+				@Override
+				public String isValid(Object value) {
+					setErrorMessage(null);
+					return validate(column, ((PatrolMandate)element), (String)value);
+				}
+			});
+			return editor;
 		}
 
 		@Override
