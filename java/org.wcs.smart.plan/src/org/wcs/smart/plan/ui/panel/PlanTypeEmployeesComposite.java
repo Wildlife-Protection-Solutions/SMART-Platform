@@ -58,7 +58,9 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 	private Text unavailableEmployees;
 	private Label activeEmployees;
 	
-	private ControlDecoration UeDecoration;
+	private int iActiveEmployees;
+	
+	private ControlDecoration cdUnavailEmployee;
 	
 	/**
 	 * @param parent
@@ -126,13 +128,12 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		unavailableEmployees.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (!isIdValid()) {
-					UeDecoration.show();
+				if (!validatedEmployees()) {
+					cdUnavailEmployee.show();
 				} else {
-					UeDecoration.hide();
+					cdUnavailEmployee.hide();
 				}
 				fireDataValidStateListeners();
-
 				fireInputChangeListeners();
 			}
 		});
@@ -142,11 +143,11 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		gd5.horizontalIndent = 8;
 		lbl5.setLayoutData(gd5);
 
-        UeDecoration = new ControlDecoration(unavailableEmployees, SWT.LEFT);
-        UeDecoration.setImage(FieldDecorationRegistry.getDefault()
+        cdUnavailEmployee = new ControlDecoration(unavailableEmployees, SWT.LEFT);
+        cdUnavailEmployee.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-        UeDecoration.setShowHover(true);
-        UeDecoration.setDescriptionText(Messages.PlanTypeEmployeesComposite_InvalidName_Error);
+        cdUnavailEmployee.setShowHover(true);
+        cdUnavailEmployee.setDescriptionText(Messages.PlanTypeEmployeesComposite_InvalidName_Error);
 
 		
 	}
@@ -172,25 +173,29 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 				planType.setSelection(new StructuredSelection(plan.getType()));
 		}
 		if(plan.getActiveEmployees() != null){
+			iActiveEmployees = plan.getActiveEmployees();
 			activeEmployees.setText(plan.getActiveEmployees().toString());
 		}else{
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
-			Integer act = HibernateManager.getActiveEmployees(plan.getConservationArea(), session).size();
+			iActiveEmployees = HibernateManager.getActiveEmployees(plan.getConservationArea(), session).size();
 			session.getTransaction().rollback();
 			
-			activeEmployees.setText(act.toString());
+			activeEmployees.setText(String.valueOf(iActiveEmployees));
 		}
 	}
 
 	@Override
 	public boolean isDataValid() {
-		return isIdValid();
+		return validatedEmployees();
 	}
 	
-	private boolean isIdValid() {
+	private boolean validatedEmployees() {
 		try{
-			Integer.parseInt(unavailableEmployees.getText());
+			Integer x = Integer.parseInt(unavailableEmployees.getText());
+			if (x < 0 || x> iActiveEmployees){
+				return false;
+			}
 		}catch (Exception e){
 			return false;
 		}
