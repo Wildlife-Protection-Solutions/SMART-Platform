@@ -75,8 +75,8 @@ public class TypeEmployeePlanWizardPage extends PlanWizardPage {
 					((CreatePlanWizard) getWizard()).validate();
 					setPageComplete(true);
 				}
+				TypeEmployeePlanWizardPage.this.setErrorMessage(panel.getErrorMessage());
 			}
-		
 		});
 		
 		setControl(center);
