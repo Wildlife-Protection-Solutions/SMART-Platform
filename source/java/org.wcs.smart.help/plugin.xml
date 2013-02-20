@@ -11,13 +11,6 @@
       
    </extension>
    <extension
-         point="org.eclipse.help.contexts">
-    <contexts
-            file="context.xml"
-            plugin="org.wcs.smart.help">
-    </contexts>
-</extension>
-   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"

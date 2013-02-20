@@ -83,8 +83,22 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 				loadedSession.close();
 				return null;
 			}
-			dataModel = dd.getDataModel();
+			
+			//re-load datamodel
+			try {
+				ppd.run();
+			} catch (Exception ex) {
+				if (loadedSession.getTransaction().isActive()){
+					loadedSession.getTransaction().rollback();
+				}
+				loadedSession.close();
+				SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
+				return null;
+			}
+			
+			dataModel = ppd.dm;
 		}
+		
 		dialog.setDataModel(dataModel);
 		dialog.open();
 		return null;
