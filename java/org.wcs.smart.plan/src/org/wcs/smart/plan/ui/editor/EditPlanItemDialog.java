@@ -52,7 +52,7 @@ public class EditPlanItemDialog extends AbstractPropertyJHeaderDialog {
 		@Override
 		public void inputChanged() {
 			setChangesMade(true);
-//			EditPlanItemDialog.this.setErrorMessage(item.getErrorMessage());
+			EditPlanItemDialog.this.setErrorMessage(content.getErrorMessage());
 			if (getButton(IDialogConstants.OK_ID) != null){
 				getButton(IDialogConstants.OK_ID).setEnabled(content.isDataValid());
 			}

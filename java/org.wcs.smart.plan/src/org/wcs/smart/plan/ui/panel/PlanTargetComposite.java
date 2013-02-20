@@ -183,7 +183,7 @@ public class PlanTargetComposite extends PlanComposite {
 	}
 	
 	@Override
-	public boolean updateModel(Plan plan) {
+	protected boolean updateModelInternal(Plan plan) {
 		List<PlanTarget> list = plan.getTargets();
 		if(list != null){
 			for (PlanTarget pt : plan.getTargets()){
@@ -191,7 +191,7 @@ public class PlanTargetComposite extends PlanComposite {
 			}
 		}
    		targetTable.updateModel(plan.getTargets());
-		return true;
+   		return true;
 	}
 
 	@Override
@@ -203,11 +203,6 @@ public class PlanTargetComposite extends PlanComposite {
 		targetTable.initValues(targets);
 	}
 
-	@Override
-	public boolean isDataValid() {
-		return true;
-	}
-	
 	public List<PlanTarget> getTargets(){
 		return this.targets;
 	}

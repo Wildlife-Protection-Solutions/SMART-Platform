@@ -84,7 +84,6 @@ public class PlanIdNameDescComposite extends PlanComposite {
 				} else {
 					idDecoration.hide();
 				}
-				fireDataValidStateListeners();
 				fireInputChangeListeners();
 			}
 		});
@@ -139,7 +138,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 	}
 	
 	@Override
-	public boolean updateModel(Plan plan) {
+	protected boolean updateModelInternal(Plan plan) {
 		plan.setId(id.getText());
 		if (name.getText().trim().length() == 0){
 			plan.setName(null);
@@ -151,7 +150,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 		}else{
 			plan.setDescription(description.getText());
 		}
-        return true;
+		return true;
 	}
 
 	@Override
@@ -168,23 +167,24 @@ public class PlanIdNameDescComposite extends PlanComposite {
 		}
 	}
 
-	@Override
-	public boolean isDataValid() {
-		return isIdValid();
+	protected void validate() {
+		setErrorMessage(null);
+		isIdValid();
 	}
 	
 	private boolean isIdValid() {
 		boolean idIsSimple = SmartUtils.isSimpleString(id.getText(),
-				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
-				32, 2);
+				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, 32, 2);
 
 		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), currentPlan.getUuid())){
 			idDecoration.show();
 			idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_IdExists_Error);
+			setErrorMessage(Messages.PlanIdNameDescComposite_IdExists_Error);
 			return false;
 		}else if(id.getText() == null || !idIsSimple){
 			idDecoration.show();
 			idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_InvalidId_Error);
+			setErrorMessage(Messages.PlanIdNameDescComposite_InvalidId_Error);
 			return false;
 		}else{
 		}

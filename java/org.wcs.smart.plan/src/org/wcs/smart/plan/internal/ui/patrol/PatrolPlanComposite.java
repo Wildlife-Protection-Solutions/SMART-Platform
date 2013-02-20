@@ -101,8 +101,9 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 		}
 		return null;
 	}
+	
 	@Override
-	public boolean updateModel(Plan plan) {
+	protected boolean updateModelInternal(Plan plan) {
 		//nothing to do
 		return true;
 	}
