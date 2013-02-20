@@ -111,9 +111,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	public DataModel getDataModel(){
-		return this.dm;
-	}
+
 	@Override
 	public Control createDialogArea(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
