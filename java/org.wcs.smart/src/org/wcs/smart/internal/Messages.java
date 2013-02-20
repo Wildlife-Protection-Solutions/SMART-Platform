@@ -167,7 +167,10 @@ public class Messages extends NLS {
 	public static String BackupDialog_BrowseButton;
 	public static String BackupDialog_Confirm_DialogTitle;
 	public static String BackupDialog_Confirm_Message;
+	public static String BackupDialog_CouldNotCreateOutputDir;
+	public static String BackupDialog_ErrorDialogTitle;
 	public static String BackupDialog_FileLabel;
+	public static String BackupDialog_InvalidFile;
 	public static String BackupHandler_Backup_DialogButton;
 	public static String BackupHandler_Backup_DialogTitle;
 	public static String BackupHandler_Backup_DialotMessage;
