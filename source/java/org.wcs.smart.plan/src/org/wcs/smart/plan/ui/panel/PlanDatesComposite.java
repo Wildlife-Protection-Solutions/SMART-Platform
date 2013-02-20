@@ -111,11 +111,11 @@ public class PlanDatesComposite extends PlanComposite {
 
     }
 
-    	@Override
-	public boolean updateModel(Plan plan) {
-    		plan.setEndDate(SmartUtils.getDate(dtEndDate));
-    		plan.setStartDate(SmartUtils.getDate(dtStartDate));
-        return true;
+	@Override
+	protected boolean updateModelInternal(Plan plan) {
+		plan.setEndDate(SmartUtils.getDate(dtEndDate));
+		plan.setStartDate(SmartUtils.getDate(dtStartDate));
+		return true;
 	}
 
 	@Override
@@ -159,42 +159,37 @@ public class PlanDatesComposite extends PlanComposite {
 
 		}
 
-		isDataValid();
-
+		validate();
 	}
     
-	@Override
-	public boolean isDataValid() {
-		return isValidDates();
-	}
-	
-	private boolean isValidDates() {
-		boolean isValid = true;
+	protected void validate() {
+		setErrorMessage(null);
 		cdEndDate.hide();
 		cdStartDate.hide();
 		if(dtStartDate == null || dtEndDate == null){
-			isValid = false;
 			cdEndDate.show();
 			cdEndDate.setDescriptionText(Messages.PlanDatesComposite_EndDate_Invalid_Error);
+			setErrorMessage(Messages.PlanDatesComposite_EndDate_Invalid_Error);
 		}
 
 		if( (SmartUtils.getDate(dtEndDate)).before(SmartUtils.getDate(dtStartDate)) ){
-			isValid = false;
 			cdEndDate.show();
 			cdEndDate.setDescriptionText(Messages.PlanDatesComposite_EndDate_Range_Error);
+			setErrorMessage(Messages.PlanDatesComposite_EndDate_Range_Error);
 		}
 		
 		if(parentEndDate != null && (SmartUtils.getDate(dtEndDate)).after(parentEndDate) ){
-			isValid = false;
 			cdEndDate.show();
-			cdEndDate.setDescriptionText(Messages.PlanDatesComposite_EndDate_Range_Parent_Error + " (" + parentEndDate + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			String errorText = Messages.PlanDatesComposite_EndDate_Range_Parent_Error + " (" + parentEndDate + ")";  //$NON-NLS-1$ //$NON-NLS-2$
+			cdEndDate.setDescriptionText(errorText);
+			setErrorMessage(errorText);
 		}
 		if(parentEndDate != null && (SmartUtils.getDate(dtStartDate)).before(parentStartDate) ){
-			isValid = false;
 			cdStartDate.show();
-			cdStartDate.setDescriptionText(Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + parentStartDate + ")---"); //$NON-NLS-1$ //$NON-NLS-2$
+			String errText = Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + parentStartDate + ")---"; //$NON-NLS-1$ //$NON-NLS-2$
+			cdStartDate.setDescriptionText(errText);
+			setErrorMessage(errText);
 		}
-		return isValid;
 	}
 
 	@Override

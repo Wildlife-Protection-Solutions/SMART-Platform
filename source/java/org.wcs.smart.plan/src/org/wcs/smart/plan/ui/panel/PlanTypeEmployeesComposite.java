@@ -133,7 +133,6 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 				} else {
 					cdUnavailEmployee.hide();
 				}
-				fireDataValidStateListeners();
 				fireInputChangeListeners();
 			}
 		});
@@ -148,18 +147,16 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
         cdUnavailEmployee.setShowHover(true);
         cdUnavailEmployee.setDescriptionText(Messages.PlanTypeEmployeesComposite_InvalidName_Error);
-
-		
 	}
 	
 	@Override
-	public boolean updateModel(Plan plan) {
+	protected boolean updateModelInternal(Plan plan) {
 		plan.setType((PlanType) ((IStructuredSelection)planType.getSelection()).getFirstElement());
 		Integer act = Integer.valueOf(activeEmployees.getText());
 		Integer un = Integer.valueOf(this.unavailableEmployees.getText());
 		plan.setUnavailableEmployees(un);
 		plan.setActiveEmployees(act);
-        return true;
+		return true;
 	}
 
 	@Override
@@ -192,8 +189,12 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 	}
 
 	@Override
-	public boolean isDataValid() {
-		return validatedEmployees();
+	protected void validate() {
+		if (!validatedEmployees()) {
+			setErrorMessage(Messages.PlanTypeEmployeesComposite_InvalidName_Error);
+			return;
+		}
+		setErrorMessage(null);
 	}
 	
 	private boolean validatedEmployees() {

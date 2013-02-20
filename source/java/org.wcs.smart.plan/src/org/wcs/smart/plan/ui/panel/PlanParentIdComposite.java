@@ -109,7 +109,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				fireChangeListeners();
+				fireInputChangeListeners();
 			}
 		});
 		
@@ -117,7 +117,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateVisibility();
-				fireChangeListeners();
+				fireInputChangeListeners();
 			}
 			
 		});
@@ -126,7 +126,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateVisibility();
-				fireChangeListeners();
+				fireInputChangeListeners();
 			}
 			
 		});
@@ -135,27 +135,17 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		updateVisibility();
 	}
 	
-	private void fireChangeListeners(){
-		fireDataValidStateListeners();
-		fireInputChangeListeners();
-	}
-	
 	private void updateVisibility(){
 		boolean areVisible = !btnNoParent.getSelection();
 		planTreeViewer.getViewer().getControl().setEnabled(areVisible);
 		filterLink.setEnabled(areVisible);
 	}
 
-	
 	@Override
-	public boolean updateModel(Plan plan) {
+	protected boolean updateModelInternal(Plan plan) {
 		if(!btnNoParent.getSelection()){
-			if (planTreeViewer.getSelectedPlan() == null){
-				MessageDialog.openInformation(getShell(), Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanRequired_Message);
-				return false;
-			}
-			
 			PlanEditorInput tmp = (PlanEditorInput) planTreeViewer.getSelectedPlan();
+			//tmp is supposed not to be null as in was checked in validate() method
 			if (Arrays.equals(tmp.getUuid(), plan.getUuid())){
 				MessageDialog.openError(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_ReferItself_Message);
 				return false;
@@ -179,7 +169,18 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		}
 		return true;
 	}
-
+	
+	@Override
+	protected void validate() {
+		if(!btnNoParent.getSelection()){
+			if (planTreeViewer.getSelectedPlan() == null){
+				setErrorMessage(Messages.PlanParentIdComposite_InfoDialog_PlanRequired_Message);
+				return;
+			}
+		}
+		setErrorMessage(null);
+	}
+	
 	@Override
 	public void initFromModel(Plan plan) {
 		
@@ -193,11 +194,6 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			btnUseSelected.setSelection(false);
 		}
 		updateVisibility();
-	}
-
-	@Override
-	public boolean isDataValid() {
-		return true;
 	}
 
 	@Override

@@ -87,10 +87,10 @@ public class PlanStationTeamComposite extends PlanComposite {
 	}
 	
 	@Override
-	public boolean updateModel(Plan plan) {
+	protected boolean updateModelInternal(Plan plan) {
 		plan.setStation(stationList.getSelectedStation());
 		plan.setTeam(teamList.getSelectedTeam());
-        return true;
+		return true;
 	}
 
 	@Override
@@ -123,11 +123,6 @@ public class PlanStationTeamComposite extends PlanComposite {
 			}
 	}
 
-	@Override
-	public boolean isDataValid() {
-		return true; //nothing to validate on this page
-	}
-	
 	@Override
 	public String getTitle() {
 		return Messages.PlanStationTeamComposite_Title;

@@ -25,17 +25,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.model.Plan;
 
 /**
  * Composite used to create controls that work with {@link Plan} object
  * 
  * @author jeffloun
+ * @author elitvin
  * @since 1.0.0
  */
+//same pattern as in IntelligenceComposite
 public abstract class PlanComposite extends Composite implements PlanModifier {
 
 	private String message;
-	private List<IDataValidStateListener> stateListeners = new ArrayList<IDataValidStateListener>();
+	private String errorMessage;
+	
 	private List<IInputChangeListener> inputListeners = new ArrayList<IInputChangeListener>();
 
 	/**
@@ -51,23 +56,35 @@ public abstract class PlanComposite extends Composite implements PlanModifier {
 	 * <code>true</code> by default
 	 */
 	@Override
-	public boolean isDataValid() {
-		return true; //default value
+	public final boolean isDataValid() {
+		return getErrorMessage() == null;
 	}
 
-	public void addDataValidStateListener(IDataValidStateListener listener) {
-		stateListeners.add(listener);
+	/**
+	 * Subclasses must implement this method and properly set error message
+	 * if validation is required for the component. <br/>
+	 * Example: <br/><code>
+	 * if (isValid()) { <br/>
+	 * 	  setErrorMessage(null); <br/>
+	 * } else { <br/>
+	 *    setErrorMessage("Data is not valid"); <br/>
+	 * } </code>
+	 */
+	protected void validate() {
+		//nothing by default
 	}
 
-	public void removeDataValidStateListener(IDataValidStateListener listener) {
-		stateListeners.remove(listener);
+	@Override
+	public final boolean updateModel(Plan plan) {
+		validate();
+		if (isDataValid()) {
+			return updateModelInternal(plan);
+		}
+		SmartPlanPlugIn.displayLog(getErrorMessage(), null);
+        return false;
 	}
 	
-	protected void fireDataValidStateListeners() {
-		for (IDataValidStateListener listener : stateListeners) {
-			listener.stateChanged(isDataValid());
-		}
-	}
+	protected abstract boolean updateModelInternal(Plan plan);
 
 	public void addInputChangeListener(IInputChangeListener listener) {
 		inputListeners.add(listener);
@@ -78,6 +95,7 @@ public abstract class PlanComposite extends Composite implements PlanModifier {
 	}
 	
 	protected void fireInputChangeListeners() {
+		validate();
 		for (IInputChangeListener listener : inputListeners) {
 			listener.inputChanged();
 		}
@@ -89,6 +107,14 @@ public abstract class PlanComposite extends Composite implements PlanModifier {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	protected void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 	
 	public abstract String getTitle();
