@@ -178,6 +178,8 @@ public class Messages extends NLS {
 	public static String TargetProgressViewer_Computing_Label;
 	public static String TargetProgressViewer_TargetsComplete_Label;
 	public static String TargetPropertyPage_Create_Title;
+	public static String TargetPropertyPage_CreateMessage;
+	public static String TargetPropertyPage_DialogTitle;
 	public static String TargetPropertyPage_Update_Title;
 	public static String TargetsPlanWizardPage_Message;
 	public static String TargetsPlanWizardPage_PageName;

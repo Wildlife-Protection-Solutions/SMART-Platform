@@ -289,12 +289,19 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	 */
 	@Override
 	public void updateTarget(PlanTarget pt){
+		if (!(pt instanceof NumericPlanTarget)){
+			return;
+		}
 		NumericPlanTarget target = (NumericPlanTarget)pt;
 		target.setValue(getTargetValue());
 		target.setName(getTargetName());
 		target.setType(getTargetType());
 		target.setOp(getTargetOp());
-		target.setDescription(targetDesc.getText());
+		if (targetDesc.getText().trim().length() > 0){
+			target.setDescription(targetDesc.getText());
+		}else{
+			target.setDescription(null);
+		}
 	}
 	
 	/**
@@ -302,6 +309,9 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	 */
 	@Override
 	public void initPage(PlanTarget p) {
+		if (!(p instanceof NumericPlanTarget)){
+			return;
+		}
 		NumericPlanTarget pt = (NumericPlanTarget) p;
 
 		this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
