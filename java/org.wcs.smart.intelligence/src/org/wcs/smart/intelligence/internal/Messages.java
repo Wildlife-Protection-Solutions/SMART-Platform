@@ -174,6 +174,8 @@ public class Messages extends NLS {
 
 	public static String ReportedIntelligenceContribution_Create_Button;
 
+	public static String ReportedIntelligenceContribution_Create_Button_Tooltip;
+
 	public static String ReportedIntelligenceContribution_IntelligenceReported_Label;
 
 	public static String ReportedIntelligenceContribution_Name;
