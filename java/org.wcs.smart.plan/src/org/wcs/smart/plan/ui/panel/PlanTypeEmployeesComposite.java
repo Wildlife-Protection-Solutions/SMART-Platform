@@ -183,6 +183,12 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 			
 			activeEmployees.setText(String.valueOf(iActiveEmployees));
 		}
+		
+		if (!validatedEmployees()) {
+			cdUnavailEmployee.show();
+		} else {
+			cdUnavailEmployee.hide();
+		}
 	}
 
 	@Override
