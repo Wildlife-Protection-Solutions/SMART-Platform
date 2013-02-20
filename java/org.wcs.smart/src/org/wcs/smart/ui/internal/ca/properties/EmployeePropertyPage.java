@@ -585,10 +585,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		}
 				
 		public void resize(GC gc){
-			if (ecolumn == EmployeeColumn.IS_ACTIVE){
-				column.getColumn().setWidth(20);
-				return;
-			}
 			int width = usageDataColumnProvider.getMaximumWidth(gc);
 			width = Math.max(column.getColumn().getWidth(), width);
 			column.getColumn().setWidth(width);

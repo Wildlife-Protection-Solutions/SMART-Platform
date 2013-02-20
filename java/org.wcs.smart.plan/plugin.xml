@@ -8,15 +8,15 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.report">
          <menu
                id="org.wcs.smart.plan.menu"
-               label="Planning"
-               mnemonic="P">
+               label="%plan.menu.label"
+               mnemonic="%plan.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.plan.NewPlan"
                   icon="images/icons/view16/plan_add.png"
-                  label="Create New Plan"
-                  mnemonic="c"
+                  label="%plan.menu.command.label.newplan"
+                  mnemonic="%plan.menu.command.mnemonic.newplan"
                   style="push"
-                  tooltip="Exports all data associated with the current conservation area">
+                  tooltip="%plan.menu.command.tooltip.newplan">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -42,9 +42,9 @@
             <command
                   commandId="org.wcs.smart.plan.ShowPlanPerspective"
                   icon="images/icons/view16/plan.png"
-                  label="View Planning Records"
+                  label="%plan.menu.command.label.viewplans"
                   style="push"
-                  tooltip="View Plans">
+                  tooltip="%plan.menu.command.tooltip.viewplans">
             </command>
          </menu>
       </menuContribution>
@@ -54,9 +54,9 @@
          <command
                commandId="org.wcs.smart.plan.ShowPlanPerspective"
                icon="images/icons/view16/plan.png"
-               label="Show Planning Perspective"
+               label="%smart.toolbar.command.label.viewplans"
                style="push"
-               tooltip="Show Planning Perspective">
+               tooltip="%smart.toolbar.command.tooltip.viewplans">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -87,9 +87,9 @@
          <command
                commandId="org.wcs.smart.plan.DeletePlan"
                icon="images/icons/etool16/delete.png"
-               label="Delete Plan"
+               label="%planlistview.toolbar.command.label.deleteplan"
                style="push"
-               tooltip="Delete the Selected Plan">
+               tooltip="%planlistview.toolbar.command.tooltip.deleteplan">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -111,9 +111,9 @@
          <command
                commandId="org.wcs.smart.plan.NewPlan"
                icon="images/icons/view16/plan_add.png"
-               label="Create Plan"
+               label="%planlistview.toolbar.command.label.newplan"
                style="push"
-               tooltip="Add a New Plan">
+               tooltip="%planlistview.toolbar.command.tooltip.newplan">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -143,9 +143,9 @@
          <command
                commandId="org.wcs.smart.plan.DeletePlan"
                icon="images/icons/etool16/delete.png"
-               label="Delete Plan"
+               label="%planlistview.popup.command.label.deleteplan2"
                style="push"
-               tooltip="Delete the Selected Plan">
+               tooltip="%planlistview.popup.command.tooltip.deleteplan2">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -189,19 +189,19 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.plan.NewPlan"
-            name="Create New Plan">
+            name="%command.label.newplan2">
       </command>
       <command
             id="org.wcs.smart.plan.ShowPlanPerspective"
-            name="Show Planning Perspective">
+            name="%command.name.showplans">
       </command>
       <command
             id="org.wcs.smart.plan.ShowPlanFilter"
-            name="Show Plan Filter">
+            name="%command.name.showfilter">
       </command>
       <command
             id="org.wcs.smart.plan.DeletePlan"
-            name="Delete Plan">
+            name="%command.name.deleteplan">
       </command>
    </extension>
 
@@ -251,7 +251,7 @@
       <perspective
             class="org.wcs.smart.plan.ui.perspective.PlanPerspective"
             id="org.wcs.smart.plan.planPerspective"
-            name="Planning Perspective">
+            name="%plan.perspective.name">
       </perspective>
    </extension>
    <extension
@@ -260,7 +260,7 @@
             class="org.wcs.smart.plan.ui.perspective.PlanListView"
             icon="images/icons/view16/plan.png"
             id="org.wcs.smart.plan.PlanListView"
-            name="Plan List View"
+            name="%planlistview.view.name"
             restorable="true">
       </view>
    </extension>
@@ -271,7 +271,7 @@
             default="false"
             icon="images/icons/view16/plan.png"
             id="org.wcs.smart.plan.ui.editor.PlanEditor"
-            name="PlanEditor">
+            name="%planlistview.editor.name">
       </editor>
    </extension>
    <extension
