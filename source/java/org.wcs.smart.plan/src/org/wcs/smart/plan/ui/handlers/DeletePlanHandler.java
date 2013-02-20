@@ -22,7 +22,10 @@
 package org.wcs.smart.plan.ui.handlers;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -62,37 +65,31 @@ public class DeletePlanHandler extends AbstractHandler {
 		if (lastSelection == null) {
 			return null;
 		}
+		List<byte[]> toDelete = new ArrayList<byte[]>();
 		
 		for (Iterator<?> iterator = lastSelection.iterator(); iterator.hasNext();) {
 			Object selected = iterator.next();
 			byte[] planUuid = null;
-			String name = null;
 			if (selected instanceof Plan) {
 				planUuid = ((Plan) selected).getUuid();
-				name = ((Plan)selected).getLabel();
 			}else if (selected instanceof PlanEditorInput){
 				planUuid = ((PlanEditorInput)selected).getUuid();
-				name = ((PlanEditorInput) selected).getName();
 			}
 			if (planUuid != null){
-				final byte[] uuid = planUuid;
-				final String thisname = name;
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
-								Messages.DeletePlanHandler_Confirmation_Message,
-								null,
-								MessageFormat.format(Messages.DeletePlanHandler_Confirmation_Warning, new Object[]{thisname}),
-								MessageDialog.CONFIRM, 
-								new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
-						
-						if (dialog.open() == MessageDialog.OK) {
-							DeletePlanJob deleteJob = new DeletePlanJob(uuid);
-							deleteJob.schedule();
-						}
-					}});
+				toDelete.add(planUuid);
 			}
+		}
+		
+		MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+				Messages.DeletePlanHandler_Confirmation_Message,
+				null,
+				MessageFormat.format(Messages.DeletePlanHandler_Confirmation_Warning, new Object[]{toDelete.size()}),
+				MessageDialog.CONFIRM, 
+				new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
+						
+		if (dialog.open() == MessageDialog.OK) {
+			DeletePlanJob deleteJob = new DeletePlanJob(toDelete);
+			deleteJob.schedule();
 		}
 		return null;
 	}
@@ -106,23 +103,25 @@ public class DeletePlanHandler extends AbstractHandler {
      */
     private class DeletePlanJob extends Job {
     	
-    	private byte[] uuid;
+    	private List<byte[]> uuids;
   
-        public DeletePlanJob(byte[] uuid) {
+        public DeletePlanJob(List<byte[]> uuids) {
             super(Messages.DeletePlanHandler_DeleteJob_Title);
-            this.uuid = uuid;
+            this.uuids = uuids;
         }
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-            Plan deletedPlan = PlanHibernateManager.deletePlan(uuid);
-			if (deletedPlan != null) {
-            	//NOTE: you have to be careful with this call
-            	PlanEventManager.getInstance().PlanDeleted(deletedPlan);
-            	return Status.OK_STATUS;
-            }
-            //no need to use other status as hibernate manager will report error in case something is wrong
-            return Status.CANCEL_STATUS;
+        	while(uuids.size() > 0){
+        		byte[] uuid = uuids.remove(0);
+        		Set<Plan> deletedPlans = PlanHibernateManager.deletePlan(uuid);
+        		if (deletedPlans != null) {
+        			for (Plan deletedPlan : deletedPlans){
+        				PlanEventManager.getInstance().planDeleted(deletedPlan);
+        			}
+        		}	
+        	}
+            return Status.OK_STATUS;
         }
     }
 	

@@ -27,10 +27,12 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -219,17 +221,19 @@ public class PlanHibernateManager{
 	/**
 	 * Deletes the plan with the given uuid
 	 * @param uuid
-	 * @return the deleted plan
+	 * @return the deleted plans - all children are automatically deleted
 	 */
-	public static Plan deletePlan(byte[] uuid) {
+	public static Set<Plan> deletePlan(byte[] uuid) {
+		Set<Plan> deletedItems = new HashSet<Plan>();
 		Session session = HibernateManager.openSession();
 		Plan plan = null;
 		try {
 			session.beginTransaction();
 			try {
-				plan = (Plan) session.load(Plan.class, uuid);
-				
-				deleteChildrenPlans(plan, session);
+				plan = (Plan) session.get(Plan.class, uuid);
+				if (plan != null){	//if null then already removed from the database
+					deleteChildrenPlans(plan, session, deletedItems);
+				}
 				
 				session.getTransaction().commit();
 			} catch (Exception ex) {
@@ -240,16 +244,16 @@ public class PlanHibernateManager{
 		} finally {
 			session.close();
 		}
-		return plan;
+		return deletedItems;
 	}
 	
-	private static void deleteChildrenPlans(Plan parent, Session session){
+	private static void deleteChildrenPlans(Plan parent, Session session, Set<Plan> deletedItems){
 		//delete all children
 		for (Iterator<Plan> iterator = parent.getChildren().iterator(); iterator.hasNext();) {
 			Plan child = iterator.next();
 			child.setParent(null);
 			iterator.remove();
-			deleteChildrenPlans(child, session);	
+			deleteChildrenPlans(child, session, deletedItems);	
 		}
 		parent.getChildren().clear();
 		//then delete me
@@ -258,6 +262,7 @@ public class PlanHibernateManager{
 		q.executeUpdate();
 		
 		session.delete(parent);
+		deletedItems.add(parent);
 		session.flush();
 	}
 
