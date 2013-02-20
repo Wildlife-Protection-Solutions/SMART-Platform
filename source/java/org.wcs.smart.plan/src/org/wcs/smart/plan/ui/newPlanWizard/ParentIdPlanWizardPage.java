@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.panel.IInputChangeListener;
 import org.wcs.smart.plan.ui.panel.PlanParentIdComposite;
 
 /**
@@ -54,6 +55,13 @@ public class ParentIdPlanWizardPage extends PlanWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		panel =  new PlanParentIdComposite(parent, SWT.NONE);
+		panel.addInputChangeListener(new IInputChangeListener(){
+			@Override
+			public void inputChanged() {
+				ParentIdPlanWizardPage.this.setPageComplete(panel.isDataValid());
+				ParentIdPlanWizardPage.this.setErrorMessage(panel.getErrorMessage());
+			}
+		});
 		
 		setControl(panel);
 		setTitle(panel.getTitle());		

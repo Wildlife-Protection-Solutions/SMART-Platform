@@ -66,6 +66,7 @@ public class IdNameDescPlanWizardPage extends PlanWizardPage {
 					((CreatePlanWizard) getWizard()).validate();
 					setPageComplete(true);
 				}
+				IdNameDescPlanWizardPage.this.setErrorMessage(panel.getErrorMessage());
 			}
 		
 		});

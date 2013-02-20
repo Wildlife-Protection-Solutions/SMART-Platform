@@ -71,6 +71,7 @@ public class DatesPlanWizardPage extends PlanWizardPage {
 					((CreatePlanWizard) getWizard()).validate();
 					setPageComplete(true);
 				}
+				DatesPlanWizardPage.this.setErrorMessage(panel.getErrorMessage());
 			}
 		
 		});
