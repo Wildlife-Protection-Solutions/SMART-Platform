@@ -39,18 +39,20 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.internal.Messages;
 
 /**
- * Customized Smart preference page for modifying the
- * gps babel install location.
+ * Customized Smart preference page for modifying the gps babel install
+ * location.
  * 
  * @author egouge
- *
+ * 
  */
 public class GpsBabelPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
 	public static final String ID = "org.wcs.smart.preference.GpsBabel"; //$NON-NLS-1$
+	public static final String DEFAULT_VALUE = "./GPSBabel/gpsbabel.exe"; //$NON-NLS-1$
+
 	private FileFieldEditor gpsLoc;
-	
+
 	public GpsBabelPreferencePage() {
 		super();
 	}
@@ -66,50 +68,68 @@ public class GpsBabelPreferencePage extends PreferencePage implements
 	@Override
 	public void init(IWorkbench workbench) {
 	}
-	
+
 	@Override
-    public boolean performOk() {
-    	String propValue = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
-    	if (propValue.equals(gpsLoc.getStringValue())){
-    		return true;
-    	}
-    	
-    	File f = new File(gpsLoc.getStringValue());
-    	if (!f.exists()){
-    		if (!MessageDialog.openConfirm(getShell(), Messages.GpsBabelPreferencePage_WarningDialogTitle, 
-    				MessageFormat.format(
-    						Messages.GpsBabelPreferencePage_FileNotFound,
-    						new Object[]{f.toString()}))){
-    			return false;
-    		}
-    	}
-    	//try to keep relative location of gps babel
-    	String newLocation = f.toString();
-    	try{
-    		newLocation = f.getCanonicalPath();
-    		String appLoc = new File(".").getCanonicalPath(); //$NON-NLS-1$
-    		if (newLocation.startsWith(appLoc)){
-    			newLocation = "." + newLocation.substring(appLoc.length()); //$NON-NLS-1$
-    		}
-    		gpsLoc.setStringValue(newLocation);
-    	}catch (Exception ex){}
-    	
-    	try{
-    		SmartProperties.getInstance().setKey(SmartProperties.PROP_GPS_BABEL, newLocation);
-    	}catch(Exception ex){
-    		SmartPlugIn.displayLog(getShell(), Messages.GpsBabelPreferencePage_CouldNotUpdate + ex.getMessage(), ex);
-    		return false;
-    	}
-        return true;
-    }
-    
+	public boolean performOk() {
+		String propValue = SmartProperties.getInstance().getProperty(
+				SmartProperties.PROP_GPS_BABEL);
+		if (propValue.equals(gpsLoc.getStringValue())) {
+			return true;
+		}
+
+		File f = new File(gpsLoc.getStringValue());
+		if (!f.exists()) {
+			if (!MessageDialog.openConfirm(getShell(),
+					Messages.GpsBabelPreferencePage_WarningDialogTitle,
+					MessageFormat.format(
+							Messages.GpsBabelPreferencePage_FileNotFound,
+							new Object[] { f.toString() }))) {
+				return false;
+			}
+		}
+		// try to keep relative location of gps babel
+		String newLocation = f.toString();
+		try {
+			newLocation = f.getCanonicalPath();
+			String appLoc = new File(".").getCanonicalPath(); //$NON-NLS-1$
+			if (newLocation.startsWith(appLoc)) {
+				newLocation = "." + newLocation.substring(appLoc.length()); //$NON-NLS-1$
+			}
+			gpsLoc.setStringValue(newLocation);
+		} catch (Exception ex) {
+		}
+
+		try {
+			SmartProperties.getInstance().setKey(
+					SmartProperties.PROP_GPS_BABEL, newLocation);
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(
+					getShell(),
+					Messages.GpsBabelPreferencePage_CouldNotUpdate
+							+ ex.getMessage(), ex);
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	protected void performDefaults() {
+		super.performDefaults();
+		gpsLoc.setStringValue(DEFAULT_VALUE);
+		performApply();
+		
+	
+	}
+
 	@Override
 	protected Control createContents(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(3, false));
-		gpsLoc = new FileFieldEditor("", Messages.GpsBabelPreferencePage_ProgramLocLabel, main); //$NON-NLS-1$
-		
-		gpsLoc.setStringValue( SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL)) ;
+		gpsLoc = new FileFieldEditor(
+				"", Messages.GpsBabelPreferencePage_ProgramLocLabel, main); //$NON-NLS-1$
+
+		gpsLoc.setStringValue(SmartProperties.getInstance().getProperty(
+				SmartProperties.PROP_GPS_BABEL));
 
 		return main;
 	}
