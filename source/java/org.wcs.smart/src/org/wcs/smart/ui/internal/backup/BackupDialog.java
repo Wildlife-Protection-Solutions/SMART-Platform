@@ -22,7 +22,9 @@
 package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -155,11 +157,25 @@ public class BackupDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			File file = new File(txtBackupFile.getText());
+			
 			if (file.exists()){
+				if (!file.isFile()){
+					MessageDialog.openError(getShell(), Messages.BackupDialog_ErrorDialogTitle, MessageFormat.format(Messages.BackupDialog_InvalidFile, file.toString()));
+					return;
+				}
 				if (!MessageDialog.openConfirm(getShell(), Messages.BackupDialog_Confirm_DialogTitle, MessageFormat.format(Messages.BackupDialog_Confirm_Message, new Object[]{ file.getAbsolutePath()}) )){
 					return;
 				}
 			}
+			if (!file.getParentFile().exists()){
+				try{
+					FileUtils.forceMkdir(file.getParentFile());
+				}catch (IOException ex){
+					MessageDialog.openError(getShell(), Messages.BackupDialog_ErrorDialogTitle, Messages.BackupDialog_CouldNotCreateOutputDir);
+					return;	
+				}
+			}
+			
 			selectedFile = file;
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}
