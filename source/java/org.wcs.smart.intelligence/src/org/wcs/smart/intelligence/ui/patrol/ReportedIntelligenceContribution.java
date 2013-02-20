@@ -48,7 +48,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
@@ -105,12 +108,13 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		main.setLayout(new GridLayout(2, false));
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
-		Button btnCreate = new Button(main, SWT.PUSH);
-		btnCreate.setText(Messages.ReportedIntelligenceContribution_Create_Button);
+		
+		Hyperlink btnCreate = toolkit.createHyperlink(main, Messages.ReportedIntelligenceContribution_Create_Button, SWT.NONE);
+		btnCreate.setToolTipText(Messages.ReportedIntelligenceContribution_Create_Button_Tooltip);
 		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnCreate.addSelectionListener(new SelectionAdapter() {
+		btnCreate.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void linkActivated(HyperlinkEvent e) {
 				createIntelligence();
 			}
 		});
@@ -133,8 +137,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			}
 		});
 
-		btnOpen = new Button(main, SWT.PUSH);
-		btnOpen.setText(Messages.ReportedIntelligenceContribution_Open_Button);
+		btnOpen = toolkit.createButton(main, Messages.ReportedIntelligenceContribution_Open_Button, SWT.PUSH);
 		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
