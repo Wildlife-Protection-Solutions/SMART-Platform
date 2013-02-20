@@ -797,8 +797,10 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
 			if(attTree != null){
 				List<AttributeTreeNode> root = attTree.getAttribute().getTree();
-				for (AttributeTreeNode n : root){
-					setAttribute(att, n);
+				if (root != null){
+					for (AttributeTreeNode n : root){
+						setAttribute(att, n);
+					}
 				}
 				att.setTree(root);
 			}

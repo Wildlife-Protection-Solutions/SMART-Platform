@@ -208,7 +208,6 @@ public class AttributeTree {
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				///TODO: fix this up
 				ImportAttributeProcessor processor = new ImportAttributeProcessor((Attribute)viewer.getInput());
 				processor.importAttribute();
 				refreshTree();
@@ -367,13 +366,16 @@ public class AttributeTree {
 						delete = DataModelManager.getInstance().validateDelete(node, new NullProgressMonitor(), AttributeTree.this.currentSession);
 						if (delete){
 							if (node.getParent() != null){
-								node.getParent().getActiveChildren().remove(node);
+								if (node.getParent().getActiveChildren() != null){
+									node.getParent().getActiveChildren().remove(node);
+								}
 								node.getParent().getChildren().remove(node);
 								node.setParent(null);
 								node.setAttribute(null);
 							}else{
-								a.getTree().remove(node);
-								node.getAttribute().getActiveTreeNodes().remove(node);
+								if (node.getAttribute().getActiveTreeNodes() != null){
+									node.getAttribute().getActiveTreeNodes().remove(node);
+								}
 								node.getAttribute().getTree().remove(node);
 								node.setAttribute(null);
 							}
@@ -382,7 +384,7 @@ public class AttributeTree {
 						shell.syncExec(new Runnable(){
 							@Override
 							public void run() {
-								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, ex.getMessage());
+								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DeleteManager_DeleteError_Dialog_Title, ex.getLocalizedMessage());
 							}
 						});
 						
