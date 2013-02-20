@@ -156,17 +156,27 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 
 	@Override
 	public void initPage(PlanTarget pt) {
+		if (!(pt instanceof SpatialPlanTarget)){
+			return;
+		}
 		SpatialPlanTarget ptSpatial = (SpatialPlanTarget) pt;
 		targetName.setText(ptSpatial.getName());
-		targetDesc.setText(ptSpatial.getDescription());
+		targetDesc.setText(ptSpatial.getDescription()==null ? "" : ptSpatial.getDescription()); //$NON-NLS-1$
 		locationSelect.setPoints(ptSpatial.getPoints());
 	}
 	
 	@Override
 	public void updateTarget(PlanTarget pt) {
+		if (!(pt instanceof SpatialPlanTarget)){
+			return;
+		}
 		SpatialPlanTarget ptSpatial = (SpatialPlanTarget) pt;
 		ptSpatial.setName(targetName.getText());
-		ptSpatial.setDescription(targetDesc.getText());
+		if (targetDesc.getText().trim().length() == 0){
+			ptSpatial.setDescription(null);
+		}else{
+			ptSpatial.setDescription(targetDesc.getText());
+		}
 
 		//create a copy of points array (we aren't allowed to modify original list as this will effect gui)
 		List<SpatialPlanTargetPoint> points = new ArrayList<SpatialPlanTargetPoint>(locationSelect.getPoints());

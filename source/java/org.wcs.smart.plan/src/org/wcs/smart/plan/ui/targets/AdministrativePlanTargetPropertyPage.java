@@ -166,6 +166,9 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 	 * return target description
 	 */
 	private String getTargetDesc() {
+		if (targetDesc.getText().trim().length() == 0){
+			return null;
+		}
 		return targetDesc.getText();
 	}
 	
@@ -181,9 +184,16 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 	 */
 	@Override
 	public void initPage(PlanTarget p) {
+		if (!(p instanceof AdministrativePlanTarget)){
+			return;
+		}
 		AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
 		this.targetName.setText(pt.getName());
-		this.targetDesc.setText(pt.getTargetDesc());
+		if (pt.getTargetDesc() != null){
+			this.targetDesc.setText(pt.getTargetDesc());
+		}else{
+			this.targetDesc.setText(""); //$NON-NLS-1$
+		}
 		this.targetIsComplete.setSelection(pt.getStatus());
 		validate();
 	}
@@ -201,6 +211,9 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 	 */
 	@Override
 	public void updateTarget(PlanTarget pt){
+		if (!(pt instanceof AdministrativePlanTarget)){
+			return;
+		}
 		AdministrativePlanTarget target = (AdministrativePlanTarget)pt;
 		target.setName(getTargetName());
 		target.setTargetDesc(getTargetDesc());
