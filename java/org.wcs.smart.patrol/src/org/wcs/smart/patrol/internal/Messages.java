@@ -623,14 +623,17 @@ public class Messages extends NLS {
 	public static String TeamPropertyPage_ConfirmDeleteTitle;
 	public static String TeamPropertyPage_DefaultNewTeamDescription;
 	public static String TeamPropertyPage_DefaultNewTeamName;
+	public static String TeamPropertyPage_DescriptionError;
 	public static String TeamPropertyPage_Dialog_Message;
 	public static String TeamPropertyPage_Dialog_Title;
+	public static String TeamPropertyPage_DuplicateTeamNameError;
 	public static String TeamPropertyPage_Error_DeletingTeam;
 	public static String TeamPropertyPage_Error_LoadingMandates;
 	public static String TeamPropertyPage_Error_LoadingTeams;
 	public static String TeamPropertyPage_Error_SavingUpdates;
 	public static String TeamPropertyPage_Language_Label;
 	public static String TeamPropertyPage_PageName;
+	public static String TeamPropertyPage_TeamNameError;
 	public static String TrackPointDialog_DialogMessage;
 	public static String TrackPointDialog_DialogTitle;
 	public static String TrackPointDialog_XColumnName;
