@@ -86,7 +86,7 @@ public class MapInfoAreaComposite extends Composite {
         gd.heightHint = lblCoordinates.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
         lblSeparator.setLayoutData(gd);
         
-        ScaleRatioComposite scale = new ScaleRatioComposite(this, getMap());
+        ScaleRatioComposite scale = new ScaleRatioComposite(this, getMap(), true);
         scale.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
         
         
