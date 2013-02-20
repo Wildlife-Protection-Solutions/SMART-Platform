@@ -31,24 +31,66 @@ import org.wcs.smart.export.dialog.AbstractCsvDialog;
  */
 public interface ICsvDialogConfig {
 
+	/**
+	 * Indicates weather checkbox responsible for csv headers in present in gui
+	 * @return boolean
+	 */
 	public boolean includeHasHeader();
-	
+
+	/**
+	 * Defines text message for headers checkbox.
+	 * Will appear only if includeHasHeader() returns <code>true</code>
+	 * @return text message for headers checkbox
+	 */
 	public String getHasHeaderText();
 
+	/**
+	 * Defines text info message. Usually its a description of output or input format.
+	 * @return text info message
+	 */
 	public String getInfo();
 
+	/**
+	 * Defines dialog title.
+	 * @return dialog title
+	 */
 	public String getTitle();
 
+	/**
+	 * Defines dialog message.
+	 * @return dialog message
+	 */
 	public String getMessage();
 
+	/**
+	 * Defines the message displayed after import/export successfully finished.
+	 * @return text for success message
+	 */
 	public String getSuccessMessage();
 
+	/**
+	 * Defines the message displayed after import/export failed.
+	 * @return text for fail message
+	 */
 	public String getFailMessage();
 
+	/**
+	 * Label for action button. Usually "Export" or "Import".
+	 * @return text for action button
+	 */
 	public String getActionButtonText();
 
+	/**
+	 * Defines file dialog style. Usually SWT.SAVE (for export) or SWT.OPEN (for import).
+	 * @return file dialog style
+	 */
 	public int getFileDialogStyle();
 	
+	/**
+	 * Specifies if dialog should try to append file extension if it is not present.
+	 * If <code>true</code> - extension will be appended
+	 * @return boolean
+	 */
 	public boolean appendFileExtension();
 	
 }
