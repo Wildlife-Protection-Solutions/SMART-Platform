@@ -77,7 +77,7 @@ public class PlanEventManager {
 	/**
 	 * Fires a Plan deleted event
 	 */
-	public void PlanDeleted(Plan source){
+	public void planDeleted(Plan source){
 		fireListeners(EventType.PLAN_DELETED, -1, source);
 	}
 	

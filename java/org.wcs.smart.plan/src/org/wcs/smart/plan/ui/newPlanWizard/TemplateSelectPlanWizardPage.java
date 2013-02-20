@@ -142,7 +142,7 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 		
 		p.setTemplatePlan(source);
 		p.setName(source.getName());
-		p.setId(source.getId());
+		//p.setId(source.getId());  //DO NOT CLONE ID
 		p.setDescription(source.getDescription());
 		p.setStartDate(source.getStartDate());
 		p.setEndDate(source.getEndDate());
