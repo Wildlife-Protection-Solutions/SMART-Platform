@@ -94,8 +94,7 @@ public class RasterService extends AbstractRasterService {
 	 */
 	public RasterService(final GriddedQuery query){
 		super(buildUrl(query.getUuid()),"geotiff", getFactory()); //$NON-NLS-1$
-		this.query = query;		
-		
+		this.query = query;
 		rasterFileName = query.getRasterFileName().getAbsolutePath();
 	}
 	

@@ -90,6 +90,7 @@ public class GriddedQuery extends Query {
 	private Collection<GridResultItem> lastResults;
 	@Transient
 	private GridQueryResultMetadata resultMetadata;
+	private File lastRasterFile = null;
 
 	/**
 	 * Creates a new gridded query with the default
@@ -242,7 +243,7 @@ public class GriddedQuery extends Query {
 	public Collection<GridResultItem> getLastResults(){
 		return this.lastResults;
 	}
-	
+
 	/**
 	 * Executes the query and returns the results
 	 * @param monitor
@@ -523,7 +524,6 @@ public class GriddedQuery extends Query {
 		return this.caFilter;
 	}
 	
-	private File lastRasterFile = null;
 	@Transient
 	public File getLastRasterFile(){
 		return this.lastRasterFile;
