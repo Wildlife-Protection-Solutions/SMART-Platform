@@ -207,6 +207,7 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 					if (performSave()){
 						setReturnCode(OK);
 						close();
+						return;
 					}else{
 						return;
 					}
@@ -214,13 +215,15 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 					//no
 					setReturnCode(CANCEL);
 					close();
+					return;
 				}else if (ret == 2){
 					//cancel
 					return;
 				}
+			}else{
+				setReturnCode(CANCEL);
+				close();
 			}
-			setReturnCode(CANCEL);
-			close();
 		}
 	}
 	
