@@ -112,25 +112,5 @@
          </dataTypeMapping>
       </dataSet>
    </extension>
-   <extension
-         point="org.eclipse.datatools.connectivity.connectionProfile">
-      <category
-            name="%smartcategory.connectionprofile.name"
-            parentCategory="org.eclipse.datatools.connectivity.oda.profileCategory"
-            id="org.wcs.smart.data.oda.smart">
-      </category>
-      <connectionProfile
-            pingFactory="org.eclipse.datatools.connectivity.oda.profile.OdaConnectionFactory"
-            name="%datasource.connectionprofile.name"
-            category="org.wcs.smart.data.oda.smart"
-            id="org.wcs.smart.data.oda.smart">
-      </connectionProfile>
-      <connectionFactory
-            class="org.eclipse.datatools.connectivity.oda.profile.OdaConnectionFactory"
-            id="org.eclipse.datatools.connectivity.oda.IConnection"
-            name="%connectionfactory.name"
-            profile="org.wcs.smart.data.oda.smart">
-      </connectionFactory>
-   </extension>
 
 </plugin>

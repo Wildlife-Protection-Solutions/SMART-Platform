@@ -76,7 +76,7 @@ import org.wcs.smart.util.SmartUtils;
  * query tree.
  * 
  */
-public class CustomDataSetWizardPage extends DataSetWizardPage {
+public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 
 	public static final String DEFAULT_MESSAGE = Messages.CustomDataSetWizardPage_PickQuery_Message;
 
@@ -128,7 +128,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 	 * 
 	 * @param pageName
 	 */
-	public CustomDataSetWizardPage(String pageName) {
+	public SmartQueryDatasetWizardPage(String pageName) {
 		super(pageName);
 		setTitle(pageName);
 		setMessage(DEFAULT_MESSAGE);
@@ -143,7 +143,7 @@ public class CustomDataSetWizardPage extends DataSetWizardPage {
 	 * @param title
 	 * @param titleImage
 	 */
-	public CustomDataSetWizardPage(String pageName, String title,
+	public SmartQueryDatasetWizardPage(String pageName, String title,
 			ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 		setMessage(DEFAULT_MESSAGE);
