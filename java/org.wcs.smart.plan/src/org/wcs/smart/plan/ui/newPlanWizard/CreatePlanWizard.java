@@ -206,7 +206,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		if (!PlanUtil.isDatesInParentRange(plan, plan.getParent())) {
 			//this validation might fail at this point as we allow to complete parent page
 			//having invalid date range
-			MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, "Current plan dates do not fit into parent plan date range. Please go to \"Dates\" step and correct the dates.");
+			MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.CreatePlanWizard_InvalidDateRange_Message);
 			return false;
 		}
 		

@@ -186,9 +186,9 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 	
 	private boolean updatePlanDates(Plan plan, Plan parent) {
 		MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
-				"Update Plan Dates",
+				Messages.PlanParentIdComposite_DateWarnDialog_Title,
 				null,
-				"Current plan dates do not fit into parent plan date range. Do you want to update current plan dates to fit into parent date range?",
+				Messages.PlanParentIdComposite_DateWarnDialog_Message,
 				MessageDialog.CONFIRM, 
 				new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 		
