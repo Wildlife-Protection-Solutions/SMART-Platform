@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -36,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
@@ -113,8 +118,16 @@ public class PlanDatesComposite extends PlanComposite {
 
 	@Override
 	protected boolean updateModelInternal(Plan plan) {
-		plan.setEndDate(SmartUtils.getDate(dtEndDate));
-		plan.setStartDate(SmartUtils.getDate(dtStartDate));
+		Date start = SmartUtils.getDate(dtStartDate);
+		Date end = SmartUtils.getDate(dtEndDate);
+		List<String> kids = PlanHibernateManager.getPlanChildrenOutOfDateRange(plan.getUuid(), start, end);
+		if (!kids.isEmpty()) {
+			MessageDialog.openError(getShell(), Messages.PlanDatesComposite_Title,
+					MessageFormat.format(Messages.PlanDatesComposite_ClidRangeViolation_Message, Arrays.toString(kids.toArray())));
+			return false;
+		}
+		plan.setStartDate(start);
+		plan.setEndDate(end);
 		return true;
 	}
 
