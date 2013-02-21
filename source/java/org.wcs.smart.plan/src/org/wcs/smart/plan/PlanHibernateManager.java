@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -439,4 +440,28 @@ public class PlanHibernateManager{
 		return tracks;		
 
 	}
+	
+	public static List<String> getPlanChildrenOutOfDateRange(byte[] planUuid, Date start, Date end) {
+		if (planUuid == null) {
+			return Collections.emptyList();
+		}
+		Session session = HibernateManager.openSession();
+		try {
+			String sql = "SELECT p.id FROM Plan p WHERE p.parent.uuid = :uuid AND (p.startDate < :start OR coalesce(p.endDate, p.startDate) > :end)"; //$NON-NLS-1$
+			List<String> plans = new ArrayList<String>();
+			Query q = session.createQuery(sql);
+			q.setParameter("uuid", planUuid); //$NON-NLS-1$
+			q.setParameter("start", start); //$NON-NLS-1$
+			q.setParameter("end", end); //$NON-NLS-1$
+
+			List<?> list = q.list();
+			for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
+				plans.add((String) iterator.next());
+			}
+			return plans;		
+		} finally {
+			session.close();
+		}
+	}
+	
 }
