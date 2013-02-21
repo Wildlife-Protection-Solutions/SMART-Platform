@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.render.IViewportModelListener;
 import net.refractions.udig.project.render.ViewportModelEvent;
 import net.refractions.udig.project.render.ViewportModelEvent.EventType;
@@ -109,6 +110,14 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		super(parent, SWT.HORIZONTAL | style);
 		createControls();
 		setWeights(new int[] {1, 2});
+	}
+	
+	/**
+	 * 
+	 * @return map associated with composite
+	 */
+	public Map getMap(){
+		return mapComposite.getMap();
 	}
 
 	private void createControls(){
