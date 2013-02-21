@@ -48,6 +48,7 @@ import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.GridQueryResultMetadata;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
@@ -357,9 +358,11 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}
 		
 		this.query = (GriddedQuery) savedQuery;
+		
 		setInput(new QueryInput(savedQuery));
 		updatePartName();
 		resultPage.setQuery();
+		mapPage.setQuery();
 		
 		setDirty(false);
 	}
