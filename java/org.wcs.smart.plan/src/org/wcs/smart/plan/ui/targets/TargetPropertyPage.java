@@ -219,24 +219,22 @@ public class TargetPropertyPage extends TitleAreaDialog {
 		ITargetPage target; 
 		
 		//create new target if necessary
-		if (toUpdate == null){
+		if (tabFolder != null){
 			target = tabs.get(tabFolder.getSelectionIndex());
-			pt = target.createTarget();
-			//pt.setPlan(parentPlan);
-			parentTargets.add(pt);
-			target.updateTarget(pt);
+		}else if (tabs.size() == 1){
+			target = tabs.get(0);
 		}else{
-			//some hacked code here because we drop the other tabs from target types we are not editing, so the tabFolder.getSelectionIndex()
-			// will always return 0 even though we need to know if it's a numeric, admin , or map target type... 
-			if(toUpdate instanceof NumericPlanTarget){
-				target = tabs.get(0);
-			}else if(toUpdate instanceof AdministrativePlanTarget){
-				target = tabs.get(1);
-			}else{
-				target = tabs.get(2);
-			}
-			target.updateTarget(toUpdate);
+			throw new IllegalStateException("Too many target options");
 		}
+		
+		if (toUpdate == null){
+			pt = target.createTarget();
+			parentTargets.add(pt);
+		}else{
+			pt = toUpdate;
+		}
+		target.updateTarget(pt);
+		
 		return true;
 	}
 
