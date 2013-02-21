@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.panel;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -177,13 +178,56 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 				setErrorMessage(Messages.PlanParentIdComposite_InfoDialog_PlanRequired_Message);
 				return;
 			}
+			PlanEditorInput in = (PlanEditorInput) planTreeViewer.getSelectedPlan();
+			if (currentPlan.getUuid() != null){
+				if (Arrays.equals(in.getUuid(), currentPlan.getUuid())){
+					setErrorMessage(Messages.PlanParentIdComposite_SameParentError);
+					return;
+				}
+				//ensure the new parent is not a child of the current plan
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try{
+					s.update(currentPlan);
+					//new parent cannot be a child of the current plan
+					if (findPlan(currentPlan.getChildren(), in.getUuid())){
+						setErrorMessage(Messages.PlanParentIdComposite_ChildParentError);
+						return;
+					}
+				}finally{
+					try{
+						s.getTransaction().rollback();
+					}catch (Exception ex){}
+					s.close();
+				}
+			}
 		}
 		setErrorMessage(null);
 	}
 	
+	private boolean findPlan(List<Plan> plans, byte[] uuid){
+		if (plans == null){
+			return false;
+		}
+		for (Plan p : plans){
+			if(Arrays.equals(p.getUuid(), uuid)){
+				return true;
+			}
+		}
+		for (Plan p : plans){
+			
+			if (findPlan(p.getChildren(), uuid)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private Plan currentPlan;
 	@Override
 	public void initFromModel(Plan plan) {
 		
+		this.currentPlan = plan;
 		Plan parent = plan.getParent();
 		if (parent != null){
 			updateJob.setDefaultSelection(new PlanEditorInput(parent.getUuid(), null, null));

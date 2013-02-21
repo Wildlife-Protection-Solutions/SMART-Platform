@@ -122,6 +122,7 @@ public class Messages extends NLS {
 	public static String PlanIdNameDescComposite_Name;
 	public static String PlanIdNameDescComposite_PlanId;
 	public static String PlanIdNameDescComposite_Title;
+	public static String PlanParentIdComposite_ChildParentError;
 	public static String PlanParentIdComposite_Filter_Link_Text;
 	public static String PlanParentIdComposite_InfoDialog_PlanNotFound_Message;
 	public static String PlanParentIdComposite_InfoDialog_PlanRequired_Message;
@@ -129,6 +130,7 @@ public class Messages extends NLS {
 	public static String PlanParentIdComposite_InfoDialog_Title;
 	public static String PlanParentIdComposite_Message;
 	public static String PlanParentIdComposite_NoParentPlan_Label;
+	public static String PlanParentIdComposite_SameParentError;
 	public static String PlanParentIdComposite_Title;
 	public static String PlanParentIdComposite_UseParent_Label;
 	public static String PlanStationTeamComposite_Message;

@@ -128,11 +128,6 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		unavailableEmployees.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (!validatedEmployees()) {
-					cdUnavailEmployee.show();
-				} else {
-					cdUnavailEmployee.hide();
-				}
 				fireInputChangeListeners();
 			}
 		});
@@ -180,21 +175,18 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 			
 			activeEmployees.setText(String.valueOf(iActiveEmployees));
 		}
-		
-		if (!validatedEmployees()) {
-			cdUnavailEmployee.show();
-		} else {
-			cdUnavailEmployee.hide();
-		}
+		fireInputChangeListeners();
 	}
 
 	@Override
 	protected void validate() {
+		setErrorMessage(null);
 		if (!validatedEmployees()) {
 			setErrorMessage(Messages.PlanTypeEmployeesComposite_InvalidName_Error);
-			return;
+			cdUnavailEmployee.show();
+		}else{
+			cdUnavailEmployee.hide();
 		}
-		setErrorMessage(null);
 	}
 	
 	private boolean validatedEmployees() {
