@@ -35,7 +35,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -520,14 +522,20 @@ public class PlanEditor extends EditorPart {
 		targetButtons.setLayout(new GridLayout(1, false));
 		targetButtons.setLayoutData(new GridData(SWT.TOP, SWT.BOTTOM, false, false));
 
-		Hyperlink editTargetLink = createEditLink(toolkit, targetButtons, null); //null is on purpose (not to add listener)
+		final Hyperlink editTargetLink = createEditLink(toolkit, targetButtons, null); //null is on purpose (not to add listener)
 		editTargetLink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				editCurrentPlanTarget();
 			}
 		});
-		
+		editTargetLink.setEnabled(false);
+		targetList.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				editTargetLink.setEnabled(!targetList.getSelection().isEmpty());				
+			}
+		});
 		Hyperlink manageLink = createEditLink(toolkit, targetButtons, PanelType.TARGETS);
 		manageLink.setText(Messages.PlanEditor_Manage_Link_Label);
 		

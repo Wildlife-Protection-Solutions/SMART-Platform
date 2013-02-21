@@ -25,12 +25,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -82,9 +86,10 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 
 	@Override
 	public Composite createComponent(Composite parent, int style) {
+		
 		ScrolledComposite scrollCmp = new ScrolledComposite(parent, SWT.V_SCROLL);
 		
-		Composite main = new Composite(scrollCmp, SWT.NONE);
+		final Composite main = new Composite(scrollCmp, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         main.setLayoutData(layoutData);
@@ -149,6 +154,18 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 				changeListener.handleEvent(null);
 			}
 		});
+        
+        
+        //the first time this composite is displayed it needs to refresh the map bounds
+        PaintListener firstPaint = new PaintListener() {
+			@Override
+			public void paintControl(PaintEvent e) {
+				locationSelect.getMap().sendCommandASync(new ZoomExtentCommand());
+				main.removePaintListener(this);
+			}
+		};
+        main.addPaintListener(firstPaint);
+        
         scrollCmp.setContent(main);
 		scrollCmp.setExpandVertical(true);
 		scrollCmp.setExpandHorizontal(true);
