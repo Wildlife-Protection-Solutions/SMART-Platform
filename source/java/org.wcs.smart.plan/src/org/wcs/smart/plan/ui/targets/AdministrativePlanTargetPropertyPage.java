@@ -26,15 +26,14 @@ package org.wcs.smart.plan.ui.targets;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.plan.internal.Messages;
@@ -50,19 +49,27 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 
-	private TargetPropertyPage parentWindow;
+	private TargetPropertyDialog parentWindow;
 	
 	private Text targetDesc;
 	private Text targetName;
 	private Button targetIsComplete;
-	
 	private ControlDecoration cdTargetName;
 	
+	private boolean isInit = false;	
+	private Listener changeListener = new Listener() {
+		@Override
+		public void handleEvent(Event event) {
+			if (!isInit){
+				parentWindow.setDirty();
+			}
+		}
+	};
 	/**
 	 * Creates new editor page
 	 * @param parent
 	 */
-	public AdministrativePlanTargetPropertyPage(TargetPropertyPage parentWindow) {
+	public AdministrativePlanTargetPropertyPage(TargetPropertyDialog parentWindow) {
 		this.parentWindow = parentWindow;
 	}
 	
@@ -92,6 +99,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		targetName = new Text(center, SWT.BORDER );
 		targetName.setTextLimit(PlanTarget.MAX_NAME_LENGTH);
 		targetName.setLayoutData( createGridDataWithIndent());
+		targetName.addListener(SWT.Modify, changeListener);
 		
 		
 		Label lbl4 = new Label(center, SWT.NONE);
@@ -103,28 +111,17 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		targetDesc.setLayoutData(createGridDataWithIndent());
 		((GridData)targetDesc.getLayoutData()).widthHint = 100;
 		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
-
+		targetDesc.addListener(SWT.Modify, changeListener);
 		
 		Label lblt = new Label(center, SWT.NONE);
 		lblt.setText(Messages.AdministrativePlanTargetPropertyPage_Achieved_Label);
 		lblt.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetIsComplete = new Button(center, SWT.CHECK);
-	//	targetIsComplete.setText("Target achieved");
+		targetIsComplete.addListener(SWT.Selection, changeListener);
 
-
-		KeyListener validate = new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				validate();
-			}
-		};
-		targetName.addKeyListener(validate);
-		
 		cdTargetName = createDecoration(targetName);
 
-		validate();
-		
 		return center;
 	}
 	
@@ -152,12 +149,6 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		}else{
 			cdTargetName.hide();
 		}
-		
-		if(isComplete){
-			parentWindow.enableOK(true);
-		}else{
-			parentWindow.enableOK(false);
-		}
 		return isComplete;
 	}
 
@@ -184,18 +175,23 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 	 */
 	@Override
 	public void initPage(PlanTarget p) {
-		if (!(p instanceof AdministrativePlanTarget)){
-			return;
+		this.isInit = true;
+		try{
+			if (!(p instanceof AdministrativePlanTarget)){
+				return;
+			}
+			AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
+			this.targetName.setText(pt.getName());
+			if (pt.getTargetDesc() != null){
+				this.targetDesc.setText(pt.getTargetDesc());
+			}else{
+				this.targetDesc.setText(""); //$NON-NLS-1$
+			}
+			this.targetIsComplete.setSelection(pt.getStatus());
+			validate();
+		}finally{
+			this.isInit = false;
 		}
-		AdministrativePlanTarget pt = (AdministrativePlanTarget) p;
-		this.targetName.setText(pt.getName());
-		if (pt.getTargetDesc() != null){
-			this.targetDesc.setText(pt.getTargetDesc());
-		}else{
-			this.targetDesc.setText(""); //$NON-NLS-1$
-		}
-		this.targetIsComplete.setSelection(pt.getStatus());
-		validate();
 	}
 	
 	/**

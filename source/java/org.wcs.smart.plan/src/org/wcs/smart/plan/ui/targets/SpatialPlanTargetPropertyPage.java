@@ -35,7 +35,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
@@ -57,14 +59,24 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 
 	private static final int CONTENT_MIN_HEIGHT = 325;
 
-	private TargetPropertyPage parentWindow;
+	private TargetPropertyDialog parentWindow;
 
 	private Text targetName;
     private ControlDecoration nameDecoration;
 	private Text targetDesc;
 	private LocationSelectComposite<SpatialPlanTargetPoint> locationSelect;
 	
-	public SpatialPlanTargetPropertyPage(TargetPropertyPage targetPropertyPage) {
+	private boolean isInit = false;	
+	private Listener changeListener = new Listener() {
+		@Override
+		public void handleEvent(Event event) {
+			if (!isInit){
+				parentWindow.setDirty();
+			}
+		}
+	};
+	
+	public SpatialPlanTargetPropertyPage(TargetPropertyDialog targetPropertyPage) {
 		this.parentWindow = targetPropertyPage;
 	}
 
@@ -99,9 +111,9 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 				} else {
 					nameDecoration.show();
 				}
-				applyCurrentState();
 			}
 		});
+		targetName.addListener(SWT.Modify, changeListener);
 
 		nameDecoration = new ControlDecoration(targetName, SWT.LEFT);
 		nameDecoration.setImage(FieldDecorationRegistry.getDefault()
@@ -118,7 +130,8 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		targetDesc.setLayoutData(createGridDataWithIndent());
 		((GridData)targetDesc.getLayoutData()).widthHint = 100;
 		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
-
+		targetDesc.addListener(SWT.Modify, changeListener);
+		
         //location selection
         locationSelect = new LocationSelectComposite<SpatialPlanTargetPoint>(main, SWT.NONE) {
 			@Override
@@ -130,7 +143,12 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
         locationSelect.addLocationPointsChangeListener(this);
         locationSelect.getDecoration().setDescriptionText(Messages.SpatialPlanTargetPropertyPage_Description_Required_Error);
         locationSelect.getDecoration().show();
-
+        locationSelect.addLocationPointsChangeListener(new ILocationPointsChangeListener() {
+			@Override
+			public void locationPointsChanged() {
+				changeListener.handleEvent(null);
+			}
+		});
         scrollCmp.setContent(main);
 		scrollCmp.setExpandVertical(true);
 		scrollCmp.setExpandHorizontal(true);
@@ -156,13 +174,18 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 
 	@Override
 	public void initPage(PlanTarget pt) {
-		if (!(pt instanceof SpatialPlanTarget)){
-			return;
+		this.isInit = true;
+		try{
+			if (!(pt instanceof SpatialPlanTarget)){
+				return;
+			}
+			SpatialPlanTarget ptSpatial = (SpatialPlanTarget) pt;
+			targetName.setText(ptSpatial.getName());
+			targetDesc.setText(ptSpatial.getDescription()==null ? "" : ptSpatial.getDescription()); //$NON-NLS-1$
+			locationSelect.setPoints(ptSpatial.getPoints());
+		}finally{
+			this.isInit=false;
 		}
-		SpatialPlanTarget ptSpatial = (SpatialPlanTarget) pt;
-		targetName.setText(ptSpatial.getName());
-		targetDesc.setText(ptSpatial.getDescription()==null ? "" : ptSpatial.getDescription()); //$NON-NLS-1$
-		locationSelect.setPoints(ptSpatial.getPoints());
 	}
 	
 	@Override
@@ -196,10 +219,6 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		}
 	}
 
-	private void applyCurrentState() {
-		boolean isValid = validate();
-		parentWindow.enableOK(isValid);
-	}
 
 	private boolean isTargetNameValid() {
     	return targetName != null && targetName.getText() != null && !targetName.getText().isEmpty();
@@ -221,7 +240,6 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		} else {
 			locationSelect.getDecoration().show();
 		}
-		applyCurrentState();
 	}
 
 }

@@ -33,14 +33,13 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.plan.internal.Messages;
@@ -48,6 +47,7 @@ import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
 import org.wcs.smart.util.SmartUtils;
 
@@ -61,7 +61,7 @@ import org.wcs.smart.util.SmartUtils;
 public class NumericPlanTargetPropertyPage implements ITargetPage {
 
 	
-	private TargetPropertyPage parentWindow;
+	private TargetPropertyDialog parentWindow;
 	
 	private Text targetValue;
 	private Text targetName;
@@ -73,11 +73,20 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	private ControlDecoration cdTargetName;
 	private PlanTarget planTarget;
 	
+	private boolean isInit = false;	
+	private Listener changeListener = new Listener() {
+		@Override
+		public void handleEvent(Event event) {
+			if (!isInit){
+				parentWindow.setDirty();
+			}
+		}
+	};
 	/**
 	 * Creates new editor page
 	 * @param parent
 	 */
-	public NumericPlanTargetPropertyPage(TargetPropertyPage parentWindow) {
+	public NumericPlanTargetPropertyPage(TargetPropertyDialog parentWindow) {
 		this.parentWindow = parentWindow;
 	}
 	
@@ -112,7 +121,6 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		});
 		targetType.setInput(NumericPlanTarget.TargetType.values());
 		targetType.setSelection(new StructuredSelection(NumericPlanTarget.TargetType.DISTANCE));
-
 		targetType.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -123,6 +131,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 				
 			}
 		});
+		targetType.getControl().addListener(SWT.Selection, changeListener);
 		
 		Label lbl3 = new Label(center, SWT.NONE);
 		lbl3.setText(Messages.NumericPlanTargetPropertyPage_Operator_Label);
@@ -138,6 +147,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		});
 		targetOp.setInput(NumericPlanTarget.Operator.values());
 		targetOp.setSelection(new StructuredSelection(NumericPlanTarget.Operator.GREATER));
+		targetOp.getControl().addListener(SWT.Selection, changeListener);
 		
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText(Messages.NumericPlanTargetPropertyPage_TargetValue_Label);
@@ -146,29 +156,20 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetValue = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetValue.setTextLimit(32);
 		targetValue.setLayoutData(createGridDataWithIndent());
-		
+		targetValue.addListener(SWT.Modify, changeListener);
 
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.NumericPlanTargetPropertyPage_TargetName_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
-		targetName.setTextLimit(32);
-
+		targetName.setTextLimit(SpatialPlanTarget.MAX_NAME_LENGTH);
 		targetName.setLayoutData(createGridDataWithIndent());
 		if(planTarget == null){
 			targetName.setText( getTargetType().getName() );
 		}
-		
-		KeyListener validate = new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				validate();
-			}
-		};
-		targetValue.addKeyListener(validate);
-		targetName.addKeyListener(validate);
-		
+		targetName.addListener(SWT.Modify, changeListener);
+
 		cdTargetValue = createDecoration(targetValue);
 		cdTargetName = createDecoration(targetName);
 
@@ -181,8 +182,8 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetDesc.setLayoutData(createGridDataWithIndent());
 		((GridData)targetDesc.getLayoutData()).widthHint = 100;
 		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
+		targetDesc.addListener(SWT.Modify, changeListener);
 		
-		validate();
 		return center;
 	}
 	
@@ -228,12 +229,6 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		}
 		if (getTargetType() == null){
 			isComplete = false;
-		}
-		
-		if(isComplete){
-			parentWindow.enableOK(true);
-		}else{
-			parentWindow.enableOK(false);
 		}
 		return isComplete;
 	}
@@ -309,20 +304,25 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	 */
 	@Override
 	public void initPage(PlanTarget p) {
-		if (!(p instanceof NumericPlanTarget)){
-			return;
-		}
-		NumericPlanTarget pt = (NumericPlanTarget) p;
+		this.isInit = true;
+		try{
+			if (!(p instanceof NumericPlanTarget)){
+				return;
+			}
+			NumericPlanTarget pt = (NumericPlanTarget) p;
 
-		this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
-		this.targetType.setSelection(new StructuredSelection(pt.getType()));
-		this.targetValue.setText(pt.getValue().toString());
-		this.planTarget = p;
-		this.targetName.setText(pt.getName());
-		String descr = pt.getDescription();
-		this.targetDesc.setText(descr != null ? descr : ""); //$NON-NLS-1$
+			this.targetOp.setSelection(new StructuredSelection(pt.getOp()));
+			this.targetType.setSelection(new StructuredSelection(pt.getType()));
+			this.targetValue.setText(pt.getValue().toString());
+			this.planTarget = p;
+			this.targetName.setText(pt.getName());
+			String descr = pt.getDescription();
+			this.targetDesc.setText(descr != null ? descr : ""); //$NON-NLS-1$
 		
-		validate();
+			validate();
+		}finally{
+			this.isInit = false;
+		}
 	}
 	
 }

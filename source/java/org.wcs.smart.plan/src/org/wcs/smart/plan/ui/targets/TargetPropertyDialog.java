@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -43,7 +44,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -64,7 +64,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class TargetPropertyPage extends TitleAreaDialog {
+public class TargetPropertyDialog extends TitleAreaDialog {
 
 	private static final int TAB_FOLDER_HEIGHT_HINT = 480;
 	private static final int TAB_FOLDER_WIDTH_HINT = 600;
@@ -77,6 +77,9 @@ public class TargetPropertyPage extends TitleAreaDialog {
 	private TabFolder tabFolder; 
 	private List<ITargetPage> tabs;
 	
+	private boolean isDirty = false;
+	
+	
 	/**
 	 * Create the dialog.
 	 * 
@@ -85,7 +88,7 @@ public class TargetPropertyPage extends TitleAreaDialog {
 	 * @param parent
 	 * @param style
 	 */
-	public TargetPropertyPage(Shell parent,  
+	public TargetPropertyDialog(Shell parent,  
 		List<PlanTarget> parentTargets, PlanTarget toUpdate) {
 		super(parent);
 
@@ -151,16 +154,13 @@ public class TargetPropertyPage extends TitleAreaDialog {
 				item.setText(page.getPageName());
 				item.setControl(page.createComponent(tabFolder, SWT.NONE));
 			}
-
-			tabFolder.pack();
 			tabFolder.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
-					int index = tabFolder.getSelectionIndex();
-					if (index >= 0 && index < tabs.size()) {
-						enableOK(tabs.get(index).validate());
-					}
+					setDirty();
 				}
 			});
+			tabFolder.pack();
 			setMessage(Messages.TargetPropertyPage_CreateMessage);
 			
 		} else if (tabs.size() == 1) {
@@ -174,18 +174,10 @@ public class TargetPropertyPage extends TitleAreaDialog {
 			}
 		}
 		setTitle(Messages.TargetPropertyPage_DialogTitle);
+		
 		return parent;
 	}
-	
-	/**
-	 * Enable/disable the ok button
-	 * @param val
-	 */
-	public void enableOK(boolean val){
-		if(getButton(IDialogConstants.OK_ID) != null){
-			getButton(IDialogConstants.OK_ID).setEnabled(val);
-		}
-	}
+
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -194,8 +186,8 @@ public class TargetPropertyPage extends TitleAreaDialog {
 		if(toUpdate == null){
 			btnOk.setEnabled(false);
 		}
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-		
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
+		setDirty(false);
 	}
 	
 	@Override
@@ -206,6 +198,27 @@ public class TargetPropertyPage extends TitleAreaDialog {
 				close();
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
+			if (isDirty){
+				//prompt to save changes
+				MessageDialog dialog = new MessageDialog(getShell(), Messages.TargetPropertyDialog_CloseDialogTitle,null, Messages.TargetPropertyDialog_ConfirmClose,MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL,IDialogConstants.NO_LABEL,IDialogConstants.CANCEL_LABEL}, 0); 
+				int ret = dialog.open();
+				if (ret == 0){
+					//yes
+					if (performSave()){
+						setReturnCode(OK);
+						close();
+					}else{
+						return;
+					}
+				}else if (ret == 1){
+					//no
+					setReturnCode(CANCEL);
+					close();
+				}else if (ret == 2){
+					//cancel
+					return;
+				}
+			}
 			setReturnCode(CANCEL);
 			close();
 		}
@@ -216,16 +229,7 @@ public class TargetPropertyPage extends TitleAreaDialog {
 	 */
 	private boolean performSave(){
 		PlanTarget pt;
-		ITargetPage target; 
-		
-		//create new target if necessary
-		if (tabFolder != null){
-			target = tabs.get(tabFolder.getSelectionIndex());
-		}else if (tabs.size() == 1){
-			target = tabs.get(0);
-		}else{
-			throw new IllegalStateException("Too many target options");
-		}
+		ITargetPage target = getCurrentPage();
 		
 		if (toUpdate == null){
 			pt = target.createTarget();
@@ -234,13 +238,31 @@ public class TargetPropertyPage extends TitleAreaDialog {
 			pt = toUpdate;
 		}
 		target.updateTarget(pt);
-		
+		setDirty(false);
+		isDirty = false;
 		return true;
 	}
 
-	public void addListener(int code, Listener listener) {
-		this.getShell().addListener(code, listener);
+	public void setDirty(){
+		setDirty(true);
 	}
 	
+	private ITargetPage getCurrentPage(){
+		if (tabFolder != null){
+			return tabs.get(tabFolder.getSelectionIndex());
+		}else if (tabs.size() == 1){
+			return  tabs.get(0);
+		}else{
+			throw new IllegalStateException("Too many target options"); //$NON-NLS-1$
+		}
+	}
 	
+	private void setDirty(boolean isDirty){
+		this.isDirty = isDirty;
+		if (getCurrentPage().validate()){
+			getButton(IDialogConstants.OK_ID).setEnabled(isDirty);
+		}else{
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
+		}
+	}
 }
