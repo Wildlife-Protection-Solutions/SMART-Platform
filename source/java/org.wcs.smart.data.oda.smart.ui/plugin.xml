@@ -3,29 +3,12 @@
 <plugin>
 
    <extension
-         point="org.eclipse.datatools.connectivity.connectionProfile">
-      <newWizard
-            name="%newwizard.name"
-            icon="icons/new_oda_dswiz.ico"
-            profile="org.wcs.smart.data.oda.smart"
-            description="%newwizard.description"
-            class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.NewDataSourceWizard"
-            id="org.wcs.smart.data.oda.smart">
-      </newWizard>
-   </extension>
-   <extension
-         point="org.eclipse.datatools.connectivity.ui.connectionProfileImage">
-      <profileImage
-            icon="icons/profile.gif"
-            profileID="org.wcs.smart.data.oda.smart">
-      </profileImage>
-   </extension>
-   <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            name="%profile.propertypage.name"
-            class="org.eclipse.datatools.connectivity.oda.design.ui.pages.impl.DefaultDataSourcePropertyPage"
-            id="org.wcs.smart.data.oda.smart">
+            category="org.wcs.smart.data.oda.smart"
+            class="org.wcs.smart.data.oda.smart.ui.impl.SmartDataSourcePropertyPage"
+            id="org.wcs.smart.data.oda.smart"
+            name="%profile.propertypage.name">
          <enabledWhen>
             <instanceof
                   value="org.eclipse.datatools.connectivity.IConnectionProfile">
@@ -42,7 +25,7 @@
       <dataSourceUI
             id="org.wcs.smart.data.oda.smart">
          <newDataSourceWizard
-               pageClass="org.eclipse.datatools.connectivity.oda.design.ui.pages.impl.DefaultDataSourceWizardPage"
+               pageClass="org.wcs.smart.data.oda.smart.ui.impl.SmartDataSourceWizardPage"
                includesProgressMonitor="false"
                pageTitle="%wizard.data.source.page.title"
                windowTitle="%wizard.window.title">
@@ -78,7 +61,7 @@
                icon="icons/datasetpage.ico"
                id="org.wcs.smart.data.ods.smart.smartQuery.page1"
                path="/"
-               wizardPageClass="org.wcs.smart.data.oda.smart.ui.impl.CustomDataSetWizardPage">
+               wizardPageClass="org.wcs.smart.data.oda.smart.ui.impl.SmartQueryDatasetWizardPage">
          </dataSetPage>
       </dataSetUI>
    </extension>
