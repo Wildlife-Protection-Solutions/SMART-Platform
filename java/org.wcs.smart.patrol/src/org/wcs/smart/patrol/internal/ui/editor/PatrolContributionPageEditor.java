@@ -122,16 +122,16 @@ public class PatrolContributionPageEditor extends EditorPart{
 		List<IPatrolEditorContribution> parts = findContributions();
 		for (IPatrolEditorContribution part : parts){
 			final Section sec = toolkit.createSection(main.getBody(), Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
-			sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			sec.addExpansionListener(new ExpansionAdapter() {
 				@Override
 				public void expansionStateChanged(ExpansionEvent e) {
-//					if (sec.isExpanded()){
-//						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
-//					}else{
-//						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-//					}
-					sec.getParent().layout();
+					if (sec.isExpanded()){
+						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
+					}else{
+						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					}
+					sec.getParent().layout(true, true);
 				}
 			});
 			sec.setText(part.getName());
