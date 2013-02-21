@@ -440,7 +440,16 @@ public class PlanHibernateManager{
 		return tracks;		
 
 	}
-	
+
+	/**
+	 * Returns all plan IDs of given parent that do not fit in specify start/end date range.
+	 * Used for validation purposes when changing date of a plan that has child plans.
+	 * 
+	 * @param planUuid - uuid of a parent Plan
+	 * @param start - start date
+	 * @param end - end date
+	 * @return a list of Plan IDs
+	 */
 	public static List<String> getPlanChildrenOutOfDateRange(byte[] planUuid, Date start, Date end) {
 		if (planUuid == null) {
 			return Collections.emptyList();
