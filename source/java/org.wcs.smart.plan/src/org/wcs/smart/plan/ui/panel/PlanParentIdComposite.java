@@ -24,6 +24,7 @@ package org.wcs.smart.plan.ui.panel;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -34,6 +35,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -156,21 +158,47 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			try{
 				session.beginTransaction();
 				parent = (Plan) session.load(Plan.class, tmp.getUuid());
-				session.getTransaction().rollback();
+				if (parent == null){
+					MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanNotFound_Message);
+					return false;
+				}
+				parent.getName(); //to actually load data
 			}finally{
+				session.getTransaction().rollback();
 				session.close();
 			}
-			if (parent == null){
-				MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanNotFound_Message);
-				return false;
-			}
-			plan.setParent(parent);
+			updatePlan(plan, parent);
 		}else{
 			plan.setParent(null);
 		}
 		return true;
 	}
+
+	protected boolean updatePlan(Plan plan, Plan parent) {
+		if (!PlanUtil.isDatesInParentRange(plan, parent)) {
+			if (!updatePlanDates(plan, parent)) {
+				return false;
+			}
+		}
+		plan.setParent(parent);
+		return true;
+	}
 	
+	private boolean updatePlanDates(Plan plan, Plan parent) {
+		MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+				"Update Plan Dates",
+				null,
+				"Current plan dates do not fit into parent plan date range. Do you want to update current plan dates to fit into parent date range?",
+				MessageDialog.CONFIRM, 
+				new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
+		
+		if (dialog.open() == MessageDialog.OK) {
+			PlanUtil.fitDatesInParentRange(plan, parent);
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	protected void validate() {
 		if(!btnNoParent.getSelection()){
@@ -204,7 +232,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		}
 		setErrorMessage(null);
 	}
-	
+
 	private boolean findPlan(List<Plan> plans, byte[] uuid){
 		if (plans == null){
 			return false;

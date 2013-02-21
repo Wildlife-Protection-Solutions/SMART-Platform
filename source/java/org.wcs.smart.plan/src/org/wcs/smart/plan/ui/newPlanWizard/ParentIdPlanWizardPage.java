@@ -54,11 +54,25 @@ public class ParentIdPlanWizardPage extends PlanWizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		panel =  new PlanParentIdComposite(parent, SWT.NONE);
+		panel =  new PlanParentIdComposite(parent, SWT.NONE) {
+			@Override
+			protected boolean updatePlan(Plan plan, Plan parent) {
+				//still set the plan but allow to specify dates later if they are not valid
+				plan.setParent(parent);
+				((CreatePlanWizard) getWizard()).validate();
+				return true;
+			}
+		};
 		panel.addInputChangeListener(new IInputChangeListener(){
 			@Override
 			public void inputChanged() {
-				ParentIdPlanWizardPage.this.setPageComplete(panel.isDataValid());
+				if(!panel.isDataValid()) {
+					((CreatePlanWizard) getWizard()).setCanFinish(false);
+					setPageComplete(false);
+				} else {
+					((CreatePlanWizard) getWizard()).validate();
+					setPageComplete(true);
+				}
 				ParentIdPlanWizardPage.this.setErrorMessage(panel.getErrorMessage());
 			}
 		});
