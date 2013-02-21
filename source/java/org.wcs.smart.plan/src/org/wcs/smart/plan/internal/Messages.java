@@ -10,6 +10,7 @@ public class Messages extends NLS {
 	public static String AdministrativePlanTargetPropertyPage_Description_Label;
 	public static String AdministrativePlanTargetPropertyPage_EmptyName_Error;
 	public static String AdministrativePlanTargetPropertyPage_Name_Label;
+	public static String CreatePlanWizard_InvalidDateRange_Message;
 	public static String CreatePlanWizard_LoadPerspective_Error;
 	public static String CreatePlanWizard_Title;
 	public static String DatesPlanWizardPage_Message;
@@ -123,6 +124,8 @@ public class Messages extends NLS {
 	public static String PlanIdNameDescComposite_PlanId;
 	public static String PlanIdNameDescComposite_Title;
 	public static String PlanParentIdComposite_ChildParentError;
+	public static String PlanParentIdComposite_DateWarnDialog_Message;
+	public static String PlanParentIdComposite_DateWarnDialog_Title;
 	public static String PlanParentIdComposite_Filter_Link_Text;
 	public static String PlanParentIdComposite_InfoDialog_PlanNotFound_Message;
 	public static String PlanParentIdComposite_InfoDialog_PlanRequired_Message;
