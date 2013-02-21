@@ -87,7 +87,7 @@ import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
-import org.wcs.smart.plan.ui.targets.TargetPropertyPage;
+import org.wcs.smart.plan.ui.targets.TargetPropertyDialog;
 
 
 /**
@@ -767,7 +767,7 @@ public class PlanEditor extends EditorPart {
 	            return;
 	        }
 	        PlanTarget selected = (PlanTarget)selection.getFirstElement(); 
-			TargetPropertyPage dialog = new TargetPropertyPage(getEditorSite().getShell(), plan.getTargets(), selected); 
+			TargetPropertyDialog dialog = new TargetPropertyDialog(getEditorSite().getShell(), plan.getTargets(), selected); 
 		    if (dialog.open() != Window.CANCEL) {
 				if (PlanHibernateManager.savePlan(plan, HibernateManager.openSession())) {
 					PlanEventManager.getInstance().planChanged(0, plan);

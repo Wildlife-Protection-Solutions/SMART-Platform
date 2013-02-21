@@ -43,7 +43,7 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.targets.TargetListViewer;
-import org.wcs.smart.plan.ui.targets.TargetPropertyPage;
+import org.wcs.smart.plan.ui.targets.TargetPropertyDialog;
 
 /**
  * Composite for editing plan targets
@@ -97,7 +97,7 @@ public class PlanTargetComposite extends PlanComposite {
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				TargetPropertyPage dia = new TargetPropertyPage(getShell(), targets, null); 
+				TargetPropertyDialog dia = new TargetPropertyDialog(getShell(), targets, null); 
 			    if (dia.open() == Window.CANCEL){
 			    	//do nothing
 				}else{
@@ -172,7 +172,7 @@ public class PlanTargetComposite extends PlanComposite {
         }
         
         PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
-		TargetPropertyPage dia = new TargetPropertyPage(getShell(), targets, selected); 
+		TargetPropertyDialog dia = new TargetPropertyDialog(getShell(), targets, selected); 
 	    if (dia.open() == Window.CANCEL) {
 	    	//do nothing
 		} else {
