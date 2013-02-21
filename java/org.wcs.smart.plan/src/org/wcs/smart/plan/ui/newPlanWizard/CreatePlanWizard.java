@@ -24,6 +24,7 @@ package org.wcs.smart.plan.ui.newPlanWizard;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -42,6 +43,7 @@ import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.plan.ui.panel.PlanUtil;
 import org.wcs.smart.plan.ui.perspective.PlanPerspective;
 import org.wcs.smart.util.SmartUtils;
 
@@ -98,19 +100,16 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 	 * just checks for valid data that won't crash the insert
 	 */
 	public boolean validData(){
-		boolean isValid = true;
 		boolean idIsSimple = SmartUtils.isSimpleString(plan.getId(),
-				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX,
-				32, 2);
-				
+				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, 32, 2);
+
 		if(plan.getId() == null || !idIsSimple || plan.getType() == null || plan.getStartDate() == null){
-			isValid = false;
+			return false;
 		}
 		
-		return isValid;
+		return PlanUtil.isDatesInParentRange(plan, plan.getParent());
 	}
-	
-	
+
 	/**
 	 * Sets if the wizard can finish
 	 * 
@@ -203,6 +202,14 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 			((PlanWizardPage) lastPage).updateModel(this.plan);
 		}
 
+		
+		if (!PlanUtil.isDatesInParentRange(plan, plan.getParent())) {
+			//this validation might fail at this point as we allow to complete parent page
+			//having invalid date range
+			MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, "Current plan dates do not fit into parent plan date range. Please go to \"Dates\" step and correct the dates.");
+			return false;
+		}
+		
 		Plan p = getPlan();
 		if(p.getTargets() != null){
 			List<PlanTarget> tars = p.getTargets();
