@@ -112,7 +112,10 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				fireInputChangeListeners();
+				//no need to fire events when selection is changed by updateJob (e.g. loading data)
+				if (updateJob != null && !updateJob.isUpdatingViewerSelection()) {
+					fireInputChangeListeners();
+				}
 			}
 		});
 		
