@@ -185,6 +185,8 @@ public class Messages extends NLS {
 	public static String TargetProgressViewer_TargetsComplete_Label;
 	public static String TargetPropertyDialog_CloseDialogTitle;
 	public static String TargetPropertyDialog_ConfirmClose;
+	public static String TargetPropertyDialog_ErrorDialogTitle;
+	public static String TargetPropertyDialog_InvalidTarget;
 	public static String TargetPropertyDialog_TargetTypeLabel;
 	public static String TargetPropertyPage_Create_Title;
 	public static String TargetPropertyPage_CreateMessage;

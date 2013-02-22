@@ -274,6 +274,10 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 		PlanTarget pt;
 		ITargetPage target =currentPage;
 		
+		if (!target.validate()){
+			MessageDialog.openError(getShell(), Messages.TargetPropertyDialog_ErrorDialogTitle, Messages.TargetPropertyDialog_InvalidTarget);
+			return false;
+		}
 		if (toUpdate == null){
 			pt = target.createTarget();
 			parentTargets.add(pt);

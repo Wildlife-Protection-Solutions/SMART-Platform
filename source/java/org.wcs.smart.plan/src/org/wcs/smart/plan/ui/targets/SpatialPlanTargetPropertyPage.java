@@ -238,7 +238,10 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 
 
 	private boolean isTargetNameValid() {
-    	return targetName != null && targetName.getText() != null && !targetName.getText().isEmpty();
+    	return targetName != null && 
+    			targetName.getText() != null && 
+    			!targetName.getText().isEmpty() && 
+    			targetName.getText().length() <= PlanTarget.MAX_NAME_LENGTH;
 	}
 
 	private boolean isLocationPointsValid() {
