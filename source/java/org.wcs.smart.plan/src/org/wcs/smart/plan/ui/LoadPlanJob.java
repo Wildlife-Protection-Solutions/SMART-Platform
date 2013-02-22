@@ -49,6 +49,8 @@ public class LoadPlanJob extends Job {
 	
 	private Object currentSelection;
 	private boolean addNone;
+
+	private boolean updatingViewerSelection = false;
 	
 	/**
 	 * Creates a new job that updates the given viewer
@@ -75,7 +77,9 @@ public class LoadPlanJob extends Job {
 	
 	public void setDefaultSelection(Object defaultSelection){
 		this.currentSelection = defaultSelection;
+		setUpdatingViewerSelection(true);
 		planViewer.setSelection(currentSelection);
+		setUpdatingViewerSelection(false);
 	}
 	
 	@Override
@@ -98,11 +102,13 @@ public class LoadPlanJob extends Job {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					planViewer.setRootPlans(roots.toArray(new Object[roots.size()]));
+					planViewer.setRootPlans(roots.toArray());
 					planViewer.refresh();
 					planViewer.getViewer().expandAll();
 					if (currentSelection != null){
+						setUpdatingViewerSelection(true);
 						planViewer.setSelection(currentSelection);
+						setUpdatingViewerSelection(false);
 					}
 				}
 			});
@@ -112,4 +118,13 @@ public class LoadPlanJob extends Job {
 		return Status.OK_STATUS;
 	}
 
+	public boolean isUpdatingViewerSelection() {
+		return updatingViewerSelection;
+	}
+
+	private void setUpdatingViewerSelection(boolean updatingViewerSelection) {
+		this.updatingViewerSelection = updatingViewerSelection;
+	}
+
+	
 }
