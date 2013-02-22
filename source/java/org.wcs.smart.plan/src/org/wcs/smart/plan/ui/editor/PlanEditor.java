@@ -75,6 +75,8 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -188,6 +190,7 @@ public class PlanEditor extends EditorPart {
 				myPatrols = PlanHibernateManager.getPatrols(plan, s);
 				Plan thisPlan = (Plan) s.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
 				getChildPlanPatrols(thisPlan, childPatrols, s);
+				s.getTransaction().rollback();
 			}finally{
 				s.close();
 			}
@@ -242,14 +245,15 @@ public class PlanEditor extends EditorPart {
 		@Override
 		public void eventFired(int type, Plan source) {
 			if (Arrays.equals(source.getUuid(), getPlan().getUuid())){
-				if (type == PlanEventManager.PATROL_PLAN_ATTRIBUTE){
-					loadPatrolsLinksJob.schedule();
-				}else{
+				if (type != PlanEventManager.PATROL_PLAN_ATTRIBUTE){
 					//if this is our plan we want to update our object
 					//with the new one.
 					plan = source;
 					initValues();
 				}
+			}
+			if (type == PlanEventManager.PATROL_PLAN_ATTRIBUTE){
+				loadPatrolsLinksJob.schedule();
 			}
 		}
 	};
@@ -272,6 +276,13 @@ public class PlanEditor extends EditorPart {
 		}
 	};
 	
+	private IPatrolEventListener patrolListener = new IPatrolEventListener() {
+		
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			loadPatrolsLinksJob.schedule();
+		}
+	};
 	/**
 	 * Default constructor
 	 */
@@ -279,12 +290,22 @@ public class PlanEditor extends EditorPart {
 		super();
 		PlanEventManager.getInstance().addListener(EventType.PLAN_MODIFIED, planListener);
 		PlanEventManager.getInstance().addListener(EventType.PLAN_DELETED, deleteListener);
+		
+		PatrolEventManager.getInstance().addListener(
+				org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_ADDED, patrolListener);
+		PatrolEventManager.getInstance().addListener(
+				org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_DELETED, patrolListener);
 	}
 
 	@Override
 	public void dispose() {
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_MODIFIED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_DELETED, deleteListener);
+		
+		PatrolEventManager.getInstance().removeListener(
+				org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_ADDED, patrolListener);
+		PatrolEventManager.getInstance().removeListener(
+				org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_DELETED, patrolListener);
 		super.dispose();
 	}
 	
@@ -666,6 +687,7 @@ public class PlanEditor extends EditorPart {
 		}
 		for (Plan p : plan.getChildren()){
 			kids.addAll(PlanHibernateManager.getPatrols(p, session));
+			getChildPlanPatrols(p, kids, session);
 		}
 	}
 
