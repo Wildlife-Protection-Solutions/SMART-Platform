@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -143,7 +142,8 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 
 		boolean isComplete = true;
 		if (targetName.getText().trim().isEmpty()
-				|| ! SmartUtils.isSimpleString(targetName.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Employee.MAX_NAME_LENGTH) ) {
+				||
+				targetName.getText().length() > PlanTarget.MAX_NAME_LENGTH){
 			cdTargetName.show();
 			cdTargetName.setDescriptionText(Messages.AdministrativePlanTargetPropertyPage_EmptyName_Error + SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 			isComplete = false;
