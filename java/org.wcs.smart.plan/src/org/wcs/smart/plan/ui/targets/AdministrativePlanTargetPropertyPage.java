@@ -110,6 +110,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 		targetDesc.setTextLimit(AdministrativePlanTarget.MAX_DESC_LENGTH);
 		targetDesc.setLayoutData(createGridDataWithIndent());
 		((GridData)targetDesc.getLayoutData()).widthHint = 100;
+		((GridData)targetDesc.getLayoutData()).heightHint = 50;
 		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
 		targetDesc.addListener(SWT.Modify, changeListener);
 		

@@ -31,22 +31,24 @@
 package org.wcs.smart.plan.ui.targets;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
@@ -66,16 +68,14 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class TargetPropertyDialog extends TitleAreaDialog {
 
-	private static final int TAB_FOLDER_HEIGHT_HINT = 480;
-	private static final int TAB_FOLDER_WIDTH_HINT = 600;
-	
 	private List<PlanTarget> parentTargets;
 	private PlanTarget toUpdate;
 	
 	private String title = null;
 	
-	private TabFolder tabFolder; 
-	private List<ITargetPage> tabs;
+	private List<ITargetPage> pages;
+	private Composite stackPanel;
+	private ITargetPage currentPage;
 	
 	private boolean isDirty = false;
 	
@@ -101,19 +101,19 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 			title = Messages.TargetPropertyPage_Update_Title + " " + toUpdate.getName(); //$NON-NLS-1$
 		}
 		
-		tabs = new ArrayList<ITargetPage>();
+		pages = new ArrayList<ITargetPage>();
 		if (toUpdate == null){
 			//new target
-			tabs.add(new NumericPlanTargetPropertyPage(this));
-			tabs.add(new AdministrativePlanTargetPropertyPage(this));
-			tabs.add(new SpatialPlanTargetPropertyPage(this));
+			pages.add(new NumericPlanTargetPropertyPage(this));
+			pages.add(new AdministrativePlanTargetPropertyPage(this));
+			pages.add(new SpatialPlanTargetPropertyPage(this));
 		}else{
 			if (toUpdate instanceof NumericPlanTarget){
-				tabs.add(new NumericPlanTargetPropertyPage(this));
+				pages.add(new NumericPlanTargetPropertyPage(this));
 			}else if (toUpdate instanceof AdministrativePlanTarget){
-				tabs.add(new AdministrativePlanTargetPropertyPage(this));	
+				pages.add(new AdministrativePlanTargetPropertyPage(this));	
 			}else if (toUpdate instanceof SpatialPlanTarget){
-				tabs.add(new SpatialPlanTargetPropertyPage(this));	
+				pages.add(new SpatialPlanTargetPropertyPage(this));	
 			}
 		}
 		
@@ -144,32 +144,72 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite main =(Composite) super.createDialogArea(parent) ;
-		if (tabs.size() > 1) {
-			tabFolder = new TabFolder(main, SWT.BORDER);
-			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			((GridData) tabFolder.getLayoutData()).widthHint = TAB_FOLDER_WIDTH_HINT;
-			((GridData) tabFolder.getLayoutData()).heightHint = TAB_FOLDER_HEIGHT_HINT;
-			for (ITargetPage page : tabs) {
-				TabItem item = new TabItem(tabFolder, SWT.NONE);
-				item.setText(page.getPageName());
-				item.setControl(page.createComponent(tabFolder, SWT.NONE));
+		if (pages.size() > 1) {
+			
+			Composite inner = new Composite(main, SWT.NONE);
+			GridLayout gl = new GridLayout(2, false);
+			gl.marginWidth = 10;
+			inner.setLayout(gl);
+			inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Label lbl = new Label(inner, SWT.NONE);
+			lbl.setText(Messages.TargetPropertyDialog_TargetTypeLabel);
+			
+			Composite ops = new Composite(inner, SWT.NONE);
+			gl = new GridLayout(pages.size(), false);
+			gl.marginHeight = 12;
+			ops.setLayout(gl);
+			ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			final HashMap<ITargetPage, Control> controls = new HashMap<ITargetPage, Control>();
+			
+			/* create radio button options */
+			for (final ITargetPage page : pages){
+				Button radio = new Button(ops, SWT.RADIO);
+				radio.setText(page.getPageName());
+				radio.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						currentPage = page;
+						((StackLayout)stackPanel.getLayout()).topControl = controls.get(page); 
+						stackPanel.layout();
+						setDirty();
+					}
+					
+				});
+			};
+			Label lbl2 = new Label(inner, SWT.HORIZONTAL | SWT.SEPARATOR);
+			lbl2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			stackPanel = new Composite(inner, SWT.NONE);
+			stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+			stackPanel.setLayout(new StackLayout());
+			
+			/* create page controls */
+			for (ITargetPage page : pages) {
+				controls.put(page, page.createComponent(stackPanel, SWT.NONE));
 			}
-			tabFolder.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					setDirty();
-				}
-			});
-			tabFolder.pack();
+			
+			currentPage = pages.get(0);
+			((StackLayout)stackPanel.getLayout()).topControl = controls.get(currentPage);
+		
 			setMessage(Messages.TargetPropertyPage_CreateMessage);
 			
-		} else if (tabs.size() == 1) {
-			Composite kid = tabs.get(0).createComponent(main, SWT.NONE);
+		} else if (pages.size() == 1) {
+			Composite inner = new Composite(main, SWT.NONE);
+			GridLayout gl = new GridLayout(1, false);
+			gl.marginWidth = 10;
+			gl.marginHeight = 10;
+			inner.setLayout(gl);
+			inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Composite kid = pages.get(0).createComponent(inner, SWT.NONE);
 			kid.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			setMessage(tabs.get(0).getPageName());
+			setMessage(pages.get(0).getPageName());
+			currentPage = pages.get(0);
 		}
 		if (toUpdate != null){
-			for (ITargetPage page : tabs){
+			for (ITargetPage page : pages){
 				page.initPage(toUpdate);
 			}
 		}
@@ -232,7 +272,7 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 	 */
 	private boolean performSave(){
 		PlanTarget pt;
-		ITargetPage target = getCurrentPage();
+		ITargetPage target =currentPage;
 		
 		if (toUpdate == null){
 			pt = target.createTarget();
@@ -249,20 +289,11 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 	public void setDirty(){
 		setDirty(true);
 	}
-	
-	private ITargetPage getCurrentPage(){
-		if (tabFolder != null){
-			return tabs.get(tabFolder.getSelectionIndex());
-		}else if (tabs.size() == 1){
-			return  tabs.get(0);
-		}else{
-			throw new IllegalStateException("Too many target options"); //$NON-NLS-1$
-		}
-	}
+
 	
 	private void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
-		if (getCurrentPage().validate()){
+		if (currentPage.validate()){
 			getButton(IDialogConstants.OK_ID).setEnabled(isDirty);
 		}else{
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
