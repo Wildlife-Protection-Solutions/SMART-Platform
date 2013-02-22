@@ -50,7 +50,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
+            locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.intelligence.ShowIntelligencePersepctive">
          <command
                commandId="org.wcs.smart.plan.ShowPlanPerspective"
                icon="images/icons/view16/plan.png"
