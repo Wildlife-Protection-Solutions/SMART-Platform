@@ -25,6 +25,7 @@ import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 
 /**
  * Class that is able to perform export to csv file operation.
@@ -34,6 +35,6 @@ import org.hibernate.Session;
  */
 public interface ICsvDataExporter {
 
-	public boolean exportCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
+	public boolean exportCsvFile(File file, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
 	
 }
