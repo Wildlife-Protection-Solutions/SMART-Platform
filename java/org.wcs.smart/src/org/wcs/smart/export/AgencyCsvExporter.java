@@ -37,7 +37,6 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -61,10 +60,10 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 	}
 
 	@Override
-	public boolean exportCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) {
+	public boolean exportCsvFile(File file, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
 		CSVWriter writer = null;
 		try {
-			ca = SmartDB.getCurrentConservationArea();
+			this.ca = ca;
 			languages = new ArrayList<Language>(ca.getLanguages());
 			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
 			List<Agency> agencies = getAgencies(session);

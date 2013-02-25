@@ -30,11 +30,11 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -50,7 +50,7 @@ import com.ibm.icu.text.SimpleDateFormat;
 public class EmployeeCsvExporter implements ICsvDataExporter {
 
 	@Override
-	public boolean exportCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean exportCsvFile(File file, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		CSVWriter writer = null;
 		try {
 			writer = new CSVWriter(new FileWriter(file), ',', '"',SmartUtils.LINE_SEPARATOR);
@@ -61,7 +61,7 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 				writer.writeNext(headerCols);
 			}
 
-			List<Employee> employeeList = getEmployees(session);
+			List<Employee> employeeList = getEmployees(ca, session);
 			SimpleDateFormat dateFormat = new SimpleDateFormat(EmployeeCsvImporter.DATE_FORMAT);
 			for (Employee employee : employeeList) {
 				if (monitor.isCanceled()) return false;
@@ -98,9 +98,9 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 	}
 
 	
-	private List<Employee> getEmployees(Session session) {
+	private List<Employee> getEmployees(ConservationArea ca, Session session) {
 		session.beginTransaction();
-		return HibernateManager.getAllEmployees(SmartDB.getCurrentConservationArea(), session);
+		return HibernateManager.getAllEmployees(ca, session);
 	}
 	
 }

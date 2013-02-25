@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Dialog for exporting into csv file
@@ -49,7 +50,7 @@ public class CsvExportDialog extends AbstractCsvDialog {
 
 	@Override
 	protected boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
-		return config.getExporter().exportCsvFile(file, headers, monitor, session);
+		return config.getExporter().exportCsvFile(file, SmartDB.getCurrentConservationArea(), headers, monitor, session);
 	}
 
 }
