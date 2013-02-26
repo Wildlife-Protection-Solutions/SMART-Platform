@@ -648,6 +648,7 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_Key_Label;
 	public static String NameKeyComposite_LanguageLabel;
 	public static String NameKeyComposite_Name_Label;
+	public static String PlanConfigurationPreferencePage_CannotUpdate_Error;
 	public static String PlanConfigurationPreferencePage_DistanceToComplete_Decoration_Message;
 	public static String PlanConfigurationPreferencePage_DistanceToComplete_Label;
 	public static String PlanConfigurationPreferencePage_ErrorDialog_Message;
