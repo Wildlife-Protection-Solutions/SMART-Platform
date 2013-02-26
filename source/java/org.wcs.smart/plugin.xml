@@ -868,6 +868,11 @@
             id="org.wcs.smart.preference.GpsBabel"
             name="%gpsbabel.preferencepage.name">
       </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.PlanConfigurationPreferencePage"
+            id="org.wcs.smart.preference.PlanConfiguration"
+            name="%planconfig.preferencepage.name">
+      </page>
    </extension>
 
 </plugin>
