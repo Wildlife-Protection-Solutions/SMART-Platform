@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.internal.Messages;
 
@@ -105,6 +106,13 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 		distancDecoration.setShowHover(true);
 		distancDecoration.setDescriptionText(Messages.PlanConfigurationPreferencePage_DistanceToComplete_Decoration_Message);
 		distancDecoration.hide();
+
+		//init with values
+		String propValue = SmartProperties.getInstance().getProperty(SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE);
+		if (propValue == null) {
+			propValue = ""; //$NON-NLS-1$
+		}
+		txtDistanceToComplete.setText(propValue);
 		
 		return main;
 	}
@@ -127,12 +135,22 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 			MessageDialog.openError(getShell(), Messages.PlanConfigurationPreferencePage_ErrorDialog_Title, Messages.PlanConfigurationPreferencePage_ErrorDialog_Message);
 			return false;
 		}
-		String propValue = SmartProperties.getInstance().getProperty(
-				SmartProperties.PROP_GPS_BABEL);
-		if (propValue.equals(txtDistanceToComplete.getText())) {
+
+		String value = txtDistanceToComplete.getText();
+		String propValue = SmartProperties.getInstance().getProperty(SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE);
+		if (propValue != null && propValue.equals(value)) {
 			return true;
 		}
 
+		try {
+			SmartProperties.getInstance().setKey(
+					SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE, value);
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(getShell(),
+					Messages.PlanConfigurationPreferencePage_CannotUpdate_Error + ex.getMessage(), ex);
+			return false;
+		}
+		
 		return true;
 	}
 
