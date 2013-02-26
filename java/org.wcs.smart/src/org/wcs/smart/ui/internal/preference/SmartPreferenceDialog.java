@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui.internal.preference;
 
-import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.widgets.Shell;
@@ -47,8 +46,9 @@ public class SmartPreferenceDialog extends PreferenceDialog {
 	 */
 	private static PreferenceManager createPreferenceManager(){
 		PreferenceManager manager = new PreferenceManager();
-		IPreferenceNode node = PlatformUI.getWorkbench().getPreferenceManager().find(GpsBabelPreferencePage.ID);
-		manager.addToRoot(node);
+		PreferenceManager platformPrefManager = PlatformUI.getWorkbench().getPreferenceManager();
+		manager.addToRoot(platformPrefManager.find(GpsBabelPreferencePage.ID));
+		manager.addToRoot(platformPrefManager.find(PlanConfigurationPreferencePage.ID));
 		return manager;
 	}
 	
