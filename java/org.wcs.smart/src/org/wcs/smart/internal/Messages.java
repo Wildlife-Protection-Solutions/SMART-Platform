@@ -276,6 +276,8 @@ public class Messages extends NLS {
 	public static String ConservationAreaManager_Progress_Restarting;
 	public static String CreateCaWizard_Error_CreateCaError;
 	public static String CreateCaWizard_WziardName;
+	public static String CsvCaImportDialog_FromCa_Label;
+	public static String CsvCaImportDialog_FromCsv_Label;
 	public static String CsvConfig_Action_Export;
 	public static String CsvConfig_Action_Import;
 	public static String CsvConfig_Agency_Example_ContentRow;

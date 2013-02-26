@@ -63,8 +63,8 @@ import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.export.config.impl.AgencyCsvExportConfig;
 import org.wcs.smart.export.config.impl.AgencyCsvImportConfig;
+import org.wcs.smart.export.dialog.CsvCaImportDialog;
 import org.wcs.smart.export.dialog.CsvExportDialog;
-import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -258,7 +258,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				CsvImportDialog dialog = new CsvImportDialog(getShell(), new AgencyCsvImportConfig());
+				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), new AgencyCsvImportConfig());
 				int ret = dialog.open();
 				if (ret == IDialogConstants.CANCEL_ID) {
 					return;

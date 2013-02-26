@@ -23,7 +23,9 @@ package org.wcs.smart.export.config.impl;
 
 import java.text.MessageFormat;
 
+import org.wcs.smart.export.EmployeeCsvExporter;
 import org.wcs.smart.export.EmployeeCsvImporter;
+import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.internal.Messages;
@@ -38,6 +40,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class EmployeeCsvImportConfig extends AbstractCsvImportConfig {
 
+	private EmployeeCsvExporter exporter = new EmployeeCsvExporter();
 	private EmployeeCsvImporter importer = new EmployeeCsvImporter();
 	
 	@Override
@@ -45,6 +48,11 @@ public class EmployeeCsvImportConfig extends AbstractCsvImportConfig {
 		return importer;
 	}
 
+	@Override
+	public ICsvDataExporter getExporter() {
+		return exporter;
+	}
+	
 	@Override
 	public boolean includeHasHeader() {
 		return true;

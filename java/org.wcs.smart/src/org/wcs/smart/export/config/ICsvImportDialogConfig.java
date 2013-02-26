@@ -27,7 +27,7 @@ package org.wcs.smart.export.config;
  * @author elitvin
  * @since 1.0.0
  */
-public interface ICsvImportDialogConfig extends ICsvDialogConfig {
+public interface ICsvImportDialogConfig extends ICsvExportDialogConfig {
 
 	ICsvDataImporter getImporter();
 	

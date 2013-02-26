@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.export.config.impl;
 
+import org.wcs.smart.export.AgencyCsvExporter;
 import org.wcs.smart.export.AgencyCsvImporter;
+import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.internal.Messages;
@@ -36,6 +38,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AgencyCsvImportConfig extends AbstractCsvImportConfig {
 
+	AgencyCsvExporter exporter = new AgencyCsvExporter();
 	AgencyCsvImporter importer = new AgencyCsvImporter();
 	
 	@Override
@@ -43,6 +46,11 @@ public class AgencyCsvImportConfig extends AbstractCsvImportConfig {
 		return importer;
 	}
 
+	@Override
+	public ICsvDataExporter getExporter() {
+		return exporter;
+	}
+	
 	@Override
 	public String getInfo() {
 		return Messages.CsvConfig_Agency_Import_Info + SmartUtils.LINE_SEPARATOR +
