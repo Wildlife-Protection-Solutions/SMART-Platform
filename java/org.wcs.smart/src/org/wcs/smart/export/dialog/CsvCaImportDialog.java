@@ -22,10 +22,14 @@
 package org.wcs.smart.export.dialog;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -45,6 +49,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.export.config.ICsvImportDialogConfig;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -102,6 +107,11 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 	 */
 	@Override
 	public Control createDialogArea(Composite parent) {
+		List<ConservationArea> areas = loadCaList();
+		if (areas.isEmpty()) {
+			//no need to display ca dropdown, so display parent control with all its functionality
+			return super.createDialogArea(parent);
+		}
 		btnFromCsv = new Button(parent, SWT.RADIO);
 		btnFromCsv.setSelection(true);
 		btnFromCsv.setText(Messages.CsvCaImportDialog_FromCsv_Label);
@@ -120,11 +130,24 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 			}
 		});
 
-		createImportFromCa(parent);
+		createImportFromCa(parent, areas);
 		updateControlsState();
 		
 		initDialogLabels();
 		return parent;
+	}
+
+	private List<ConservationArea> loadCaList() {
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+		LoadCaRunnable loadCaRunnable = new LoadCaRunnable();
+		try {
+			dialog.run(true, true, loadCaRunnable);
+		} catch (InvocationTargetException e) {
+			SmartPlugIn.displayLog(getShell(), Messages.CsvCaImportDialog_LoadCa_Fail_Error, e);
+		} catch (InterruptedException e) {
+			SmartPlugIn.displayLog(getShell(), Messages.CsvCaImportDialog_LoadCa_Interrupted_Error, e);
+		}
+		return loadCaRunnable.getAreas();
 	}
 
 	protected CsvFileComposite getCsvComposite() {
@@ -148,48 +171,72 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 		}
 	}
 	
-	private void createImportFromCa(Composite comp) {
-		Session session = HibernateManager.openSession();
-		List<ConservationArea> areas = HibernateManager.getConservationAreas(session);
-		areas.remove(SmartDB.getCurrentConservationArea());
-		if (areas.size() > 0) {
-			btnFromCa = new Button(comp, SWT.RADIO);
-			btnFromCa.setText(Messages.CsvCaImportDialog_FromCa_Label);
-			btnFromCa.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					updateControlsState();
-				}
-			});
+	private void createImportFromCa(Composite comp, List<ConservationArea> areas) {
+		btnFromCa = new Button(comp, SWT.RADIO);
+		btnFromCa.setText(Messages.CsvCaImportDialog_FromCa_Label);
+		btnFromCa.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				updateControlsState();
+			}
+		});
 
-			Composite imp = new Composite(comp, SWT.NONE);
-			imp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			GridLayout layout = new GridLayout(1, true);
-			layout.marginLeft = CONTENT_MARGIN;
-			imp.setLayout(layout);
+		Composite imp = new Composite(comp, SWT.NONE);
+		imp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout(1, true);
+		layout.marginLeft = CONTENT_MARGIN;
+		imp.setLayout(layout);
 
-			caViewer = new ComboViewer(imp, SWT.DROP_DOWN | SWT.READ_ONLY);
-			caViewer.setContentProvider(ArrayContentProvider.getInstance());
-			caViewer.setLabelProvider(new LabelProvider() {
-				public String getText(Object element) {
-					if (element instanceof ConservationArea) {
-						ConservationArea ca = (ConservationArea) element;
-						return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
-					}
-					return super.getText(element);
+		caViewer = new ComboViewer(imp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		caViewer.setContentProvider(ArrayContentProvider.getInstance());
+		caViewer.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof ConservationArea) {
+					ConservationArea ca = (ConservationArea) element;
+					return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
 				}
-			});
-			caViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					caToExportFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
-					updateControlsState();
-				}
-			});
+				return super.getText(element);
+			}
+		});
+		caViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				caToExportFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
+				updateControlsState();
+			}
+		});
 
-			caViewer.setInput(areas.toArray());
-			caViewer.setSelection(new StructuredSelection(areas.get(0)));
+		caViewer.setInput(areas.toArray());
+		caViewer.setSelection(new StructuredSelection(areas.get(0)));
+	}
+
+	/**
+	 * Inner class responsible for wrapping load conservation area activities
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	private class LoadCaRunnable implements IRunnableWithProgress {
+		List<ConservationArea> areas = new ArrayList<ConservationArea>();
+
+		private LoadCaRunnable() {}
+
+		@Override
+		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			Session session = HibernateManager.openSession();
+			try {
+				synchronized (this) {
+					areas = HibernateManager.getConservationAreas(session);
+					areas.remove(SmartDB.getCurrentConservationArea());
+				}
+			} finally {
+				session.close();
+			}
 		}
-		session.close();
+
+		public List<ConservationArea> getAreas() {
+			return areas;
+		}
+		
 	}
 	
 }

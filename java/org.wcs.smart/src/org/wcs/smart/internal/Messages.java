@@ -278,6 +278,8 @@ public class Messages extends NLS {
 	public static String CreateCaWizard_WziardName;
 	public static String CsvCaImportDialog_FromCa_Label;
 	public static String CsvCaImportDialog_FromCsv_Label;
+	public static String CsvCaImportDialog_LoadCa_Fail_Error;
+	public static String CsvCaImportDialog_LoadCa_Interrupted_Error;
 	public static String CsvConfig_Action_Export;
 	public static String CsvConfig_Action_Import;
 	public static String CsvConfig_Agency_Example_ContentRow;
