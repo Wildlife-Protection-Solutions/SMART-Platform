@@ -53,7 +53,7 @@ import org.wcs.smart.util.SmartUtils;
 public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
 	private ICsvDialogConfig config;
-	private CsvFileComposite csvComposite;
+	protected CsvFileComposite csvComposite;
 	
 	/**
 	 * @param parentShell

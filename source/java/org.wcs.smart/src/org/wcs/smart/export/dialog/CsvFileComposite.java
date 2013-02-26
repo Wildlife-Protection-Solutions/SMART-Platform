@@ -43,10 +43,12 @@ import org.wcs.smart.internal.Messages;
 public class CsvFileComposite extends Composite {
 
 	private ICsvDialogConfig config;
-	
+
+	private Label lblFile;
 	private Text txtFile;
 	private Button btnHasHeader;
-	private Text txtinfo;
+	private Text txtInfo;
+	private Button btnBrowse;
 	
 	public CsvFileComposite(Composite parent, int style, ICsvDialogConfig config) {
 		super(parent, style);
@@ -62,14 +64,14 @@ public class CsvFileComposite extends Composite {
 		fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setFilterNames(new String[]{Messages.AbstractCsvDialog_FileFilter_Csv, Messages.AbstractCsvDialog_FileFilter_All});
 		
-		Label lbl = new Label(this, SWT.NONE);
-		lbl.setText(Messages.AbstractCsvDialog_File_Label);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		lblFile = new Label(this, SWT.NONE);
+		lblFile.setText(Messages.AbstractCsvDialog_File_Label);
+		lblFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtFile = new Text(this, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		Button btnBrowse = new Button(this, SWT.NONE);
+		btnBrowse = new Button(this, SWT.NONE);
 		btnBrowse.setText(Messages.AbstractCsvDialog_Browse_Button);
 		btnBrowse.addListener(SWT.Selection, new Listener() {
 			@Override
@@ -95,10 +97,10 @@ public class CsvFileComposite extends Composite {
 		btnHasHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		btnHasHeader.setVisible(config.includeHasHeader());
 		
-		txtinfo = new Text(this, SWT.WRAP | SWT.READ_ONLY);
-		txtinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
-		((GridData)txtinfo.getLayoutData()).widthHint = 250;
-		txtinfo.setText(config.getInfo());
+		txtInfo = new Text(this, SWT.WRAP | SWT.READ_ONLY);
+		txtInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		((GridData)txtInfo.getLayoutData()).widthHint = 250;
+		txtInfo.setText(config.getInfo());
 	}
 
 	public void addFileModifyListener(Listener listener) {
@@ -111,5 +113,15 @@ public class CsvFileComposite extends Composite {
 	
 	public boolean getHeadersSelection() {
 		return btnHasHeader != null && btnHasHeader.getSelection();
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		lblFile.setEnabled(enabled);
+		txtFile.setEnabled(enabled);
+		btnHasHeader.setEnabled(enabled);
+		txtInfo.setEnabled(enabled);
+		btnBrowse.setEnabled(enabled);
 	}
 }

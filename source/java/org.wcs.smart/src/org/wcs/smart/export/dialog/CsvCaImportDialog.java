@@ -1,0 +1,195 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.export.dialog;
+
+import java.io.File;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.export.config.ICsvImportDialogConfig;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
+
+/**
+ * Dialog for importing from csv file or another conservation area
+ * 
+ * @author elitvin
+ * @since 1.0.0
+ */
+public class CsvCaImportDialog extends AbstractCsvDialog {
+
+	private static final int CONTENT_MARGIN = 15;
+
+	private ICsvImportDialogConfig config;
+
+	private Button btnFromCsv;
+	
+	private Button btnFromCa;
+	private ComboViewer caViewer;
+
+	private boolean isImportFromCa = false;
+	private ConservationArea caToExportFrom;
+	
+	/**
+	 * @param parentShell
+	 * @param config
+	 */
+	public CsvCaImportDialog(Shell parentShell, ICsvImportDialogConfig config) {
+		super(parentShell, config);
+		this.config = config;
+	}
+
+	@Override
+	protected boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+		if (isImportFromCa) {
+			File tmpFile = File.createTempFile("tempImport", ".csv"); //$NON-NLS-1$ //$NON-NLS-2$
+			try {
+				boolean result = config.getExporter().exportCsvFile(tmpFile, caToExportFrom, false, monitor, session);
+				if (result) {
+					result = config.getImporter().importCsvFile(tmpFile, false, monitor, session);
+				}
+				return result;
+			} finally {
+				tmpFile.deleteOnExit();
+			}
+		}
+		return config.getImporter().importCsvFile(file, headers, monitor, session);
+	}
+
+	/**
+	 * Create contents of the dialog.
+	 */
+	@Override
+	public Control createDialogArea(Composite parent) {
+		btnFromCsv = new Button(parent, SWT.RADIO);
+		btnFromCsv.setSelection(true);
+		btnFromCsv.setText(Messages.CsvCaImportDialog_FromCsv_Label);
+		btnFromCsv.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				updateControlsState();
+			}
+		});
+
+		csvComposite = new CsvFileComposite(parent, SWT.NONE, config);
+		((GridLayout)csvComposite.getLayout()).marginLeft = CONTENT_MARGIN;
+		csvComposite.addFileModifyListener(new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				updateControlsState();
+			}
+		});
+
+		createImportFromCa(parent);
+		updateControlsState();
+		
+		initDialogLabels();
+		return parent;
+	}
+
+	protected CsvFileComposite getCsvComposite() {
+		return csvComposite;
+	}
+
+	private void updateControlsState() {
+		csvComposite.setEnabled(btnFromCsv.getSelection());
+		isImportFromCa = btnFromCa.getSelection();
+		caViewer.getControl().setEnabled(isImportFromCa);
+		if (btnFromCsv.getSelection()) {
+			Button button = getButton(IDialogConstants.OK_ID);
+			if (button != null) {
+				button.setEnabled(csvComposite.getFileText().length() > 0);
+			}
+		} else if (btnFromCa.getSelection()) {
+			Button button = getButton(IDialogConstants.OK_ID);
+			if (button != null) {
+				button.setEnabled(!caViewer.getSelection().isEmpty());
+			}
+		}
+	}
+	
+	private void createImportFromCa(Composite comp) {
+		Session session = HibernateManager.openSession();
+		List<ConservationArea> areas = HibernateManager.getConservationAreas(session);
+		areas.remove(SmartDB.getCurrentConservationArea());
+		if (areas.size() > 0) {
+			btnFromCa = new Button(comp, SWT.RADIO);
+			btnFromCa.setText(Messages.CsvCaImportDialog_FromCa_Label);
+			btnFromCa.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					updateControlsState();
+				}
+			});
+
+			Composite imp = new Composite(comp, SWT.NONE);
+			imp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			GridLayout layout = new GridLayout(1, true);
+			layout.marginLeft = CONTENT_MARGIN;
+			imp.setLayout(layout);
+
+			caViewer = new ComboViewer(imp, SWT.DROP_DOWN | SWT.READ_ONLY);
+			caViewer.setContentProvider(ArrayContentProvider.getInstance());
+			caViewer.setLabelProvider(new LabelProvider() {
+				public String getText(Object element) {
+					if (element instanceof ConservationArea) {
+						ConservationArea ca = (ConservationArea) element;
+						return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
+					}
+					return super.getText(element);
+				}
+			});
+			caViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					caToExportFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
+					updateControlsState();
+				}
+			});
+
+			caViewer.setInput(areas.toArray());
+			caViewer.setSelection(new StructuredSelection(areas.get(0)));
+		}
+		session.close();
+	}
+	
+}
