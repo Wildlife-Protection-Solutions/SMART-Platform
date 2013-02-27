@@ -169,6 +169,8 @@ public class Messages extends NLS {
 	public static String SpatialPlanTarget_Points_Label;
 	public static String SpatialPlanTargetPropertyPage_Description_Label;
 	public static String SpatialPlanTargetPropertyPage_Description_Required_Error;
+	public static String SpatialPlanTargetPropertyPage_DistanceForCompletion_Label;
+	public static String SpatialPlanTargetPropertyPage_InvalidDistanceForCompletion_Error;
 	public static String SpatialPlanTargetPropertyPage_Name_Label;
 	public static String SpatialPlanTargetPropertyPage_Name_Required_Error;
 	public static String SpatialPlanTargetPropertyPage_PageName;

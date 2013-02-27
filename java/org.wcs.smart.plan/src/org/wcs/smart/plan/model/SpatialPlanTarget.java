@@ -46,6 +46,7 @@ public class SpatialPlanTarget extends PlanTarget {
 
 	private String description;
 	private List<SpatialPlanTargetPoint> points;
+	private Integer distanceForCompletion;
 	
 	
 	@Column(name = "description")
@@ -70,6 +71,19 @@ public class SpatialPlanTarget extends PlanTarget {
 		this.points = points;
 	}
 
+	/** 
+	 * 
+	 * @return the distance in meters a patrol must come within to consider this target achieved.
+	 */
+	@Column(name = "success_distance")
+	public int getDistanceForCompletion() {
+		return distanceForCompletion;
+	}
+
+	public void setDistanceForCompletion(Integer distanceForCompletion) {
+		this.distanceForCompletion = distanceForCompletion;
+	}
+	
 	@Transient
 	@Override
 	public String getSummary() {
@@ -85,16 +99,6 @@ public class SpatialPlanTarget extends PlanTarget {
 		spt.setPoints(new ArrayList<SpatialPlanTargetPoint>(getPoints()));
 		spt.setDescription(getDescription());
 		return spt;
-	}
-
-	/** 
-	 * 
-	 * @return the distance in meters a patrol must come within to consider this target achieved.
-	 */
-	@Transient
-	public int getDistanceForCompletion() {
-		//TODO make this a property value, or possible a configuration for each spatial target created, or both...
-		return 250;
 	}
 
 }

@@ -38,11 +38,13 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartProperties;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -61,13 +63,16 @@ import org.wcs.smart.ui.map.location.LocationSelectComposite;
  */
 public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPointsChangeListener {
 
+	private static final int UPPER_PART_HEIGHT_HINT = 100;
 	private static final int CONTENT_MIN_HEIGHT = 325;
 
 	private TargetPropertyDialog parentWindow;
 
 	private Text targetName;
     private ControlDecoration nameDecoration;
-	private Text targetDesc;
+	private Text txtDistanceToComplete;
+    private ControlDecoration distancDecoration;
+ 	private Text targetDesc;
 	private LocationSelectComposite<SpatialPlanTargetPoint> locationSelect;
 	
 	private boolean isInit = false;	
@@ -98,7 +103,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		center.setLayout(new GridLayout(2, false));
 		GridData centerLayout = new GridData(SWT.FILL, SWT.FILL, true, true);
 		centerLayout.grabExcessVerticalSpace = false;
-		centerLayout.heightHint = 90;
+		centerLayout.heightHint = UPPER_PART_HEIGHT_HINT;
 		center.setLayoutData(centerLayout);
 	
 		Label nameLabel = new Label(center, SWT.NONE);
@@ -120,11 +125,33 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		});
 		targetName.addListener(SWT.Modify, changeListener);
 
-		nameDecoration = new ControlDecoration(targetName, SWT.LEFT);
-		nameDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		nameDecoration.setShowHover(true);
+		nameDecoration = createDecoration(targetName);
 		nameDecoration.setDescriptionText(Messages.SpatialPlanTargetPropertyPage_Name_Required_Error);
+
+		Label distanceLabel = new Label(center, SWT.NONE);
+		distanceLabel.setText(Messages.SpatialPlanTargetPropertyPage_DistanceForCompletion_Label);
+		distanceLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+
+		txtDistanceToComplete = new Text(center, SWT.BORDER);
+		//init with default value BEFORE adding any listeners
+		txtDistanceToComplete.setText(getDefaultDistanceToComplete());
+		txtDistanceToComplete.setTextLimit(32);
+		txtDistanceToComplete.setLayoutData(createGridDataWithIndent());
+		txtDistanceToComplete.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isDistanceToCompleteValid()) {
+					distancDecoration.hide();
+				} else {
+					distancDecoration.show();
+				}
+			}
+		});
+		txtDistanceToComplete.addListener(SWT.Modify, changeListener);
+		
+		distancDecoration = createDecoration(txtDistanceToComplete);
+		distancDecoration.setDescriptionText(Messages.SpatialPlanTargetPropertyPage_InvalidDistanceForCompletion_Error);
+		distancDecoration.hide();
 		
 		Label descrLabel = new Label(center, SWT.NONE);
 		descrLabel.setText(Messages.SpatialPlanTargetPropertyPage_Description_Label);
@@ -173,6 +200,14 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		return scrollCmp;
 	}
 
+	private ControlDecoration createDecoration(Control control) {
+		ControlDecoration decoration = new ControlDecoration(control, SWT.LEFT);
+		decoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		decoration.setShowHover(true);
+		return decoration;
+	}
+	
 	private GridData createGridDataWithIndent(){
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalIndent = 8;
@@ -198,6 +233,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 			}
 			SpatialPlanTarget ptSpatial = (SpatialPlanTarget) pt;
 			targetName.setText(ptSpatial.getName());
+			txtDistanceToComplete.setText(String.valueOf(ptSpatial.getDistanceForCompletion()));
 			targetDesc.setText(ptSpatial.getDescription()==null ? "" : ptSpatial.getDescription()); //$NON-NLS-1$
 			locationSelect.setPoints(ptSpatial.getPoints());
 		}finally{
@@ -217,6 +253,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		}else{
 			ptSpatial.setDescription(targetDesc.getText());
 		}
+		ptSpatial.setDistanceForCompletion(Integer.valueOf(txtDistanceToComplete.getText()));
 
 		//create a copy of points array (we aren't allowed to modify original list as this will effect gui)
 		List<SpatialPlanTargetPoint> points = new ArrayList<SpatialPlanTargetPoint>(locationSelect.getPoints());
@@ -244,15 +281,29 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
     			targetName.getText().length() <= PlanTarget.MAX_NAME_LENGTH;
 	}
 
+	private boolean isDistanceToCompleteValid() {
+		try {
+			Integer.parseInt(txtDistanceToComplete.getText());
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+	
 	private boolean isLocationPointsValid() {
     	return !locationSelect.getPoints().isEmpty();
 	}
 	
 	@Override
 	public boolean validate() {
-		return isTargetNameValid() && isLocationPointsValid();
+		return isTargetNameValid() && isDistanceToCompleteValid() && isLocationPointsValid();
 	}
 
+	private String getDefaultDistanceToComplete() {
+		String propValue = SmartProperties.getInstance().getProperty(SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE);
+		return propValue != null ? propValue : ""; //$NON-NLS-1$
+	}
+	
 	@Override
 	public void locationPointsChanged() {
 		if (isLocationPointsValid()) {
