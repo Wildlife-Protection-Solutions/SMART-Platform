@@ -3,6 +3,7 @@
 <plugin>
    <extension-point id="org.wcs.smart.query.export.format" name="Query Export Format" schema="schema/org.wcs.smart.query.export.format.exsd"/>
    <extension-point id="org.wcs.smart.query.property" name="Query Property" schema="schema/org.wcs.smart.query.property.exsd"/>
+   <extension-point id="org.wcs.smart.query.filter.patrol" name="Patrol Filter" schema="schema/org.wcs.smart.query.filter.patrol.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view

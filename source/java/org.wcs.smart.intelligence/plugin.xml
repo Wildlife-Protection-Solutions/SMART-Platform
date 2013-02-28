@@ -291,5 +291,11 @@
             icon="images/etool16/intelligence.png">
       </image>
    </extension>
+   <extension
+         point="org.wcs.smart.query.filter.patrol">
+      <contribution
+            class="org.wcs.smart.intelligence.query.IntelligenceQueryFilterPatrolContribution">
+      </contribution>
+   </extension>
 
 </plugin>

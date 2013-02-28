@@ -76,7 +76,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	
 	private Object[] roots = new Object[]{patrolFiltersRoot, dataModelFiltersRoot, areaFilterRoot, otherItemRoot};
 	
-	private PatrolQueryOption[] patrolOptions = null;
+	private Object[] patrolOptions = null;
 	
 	private HashMap<Area.AreaType, Area[]> areas = new HashMap<Area.AreaType, Area[]>();
 	
@@ -178,7 +178,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			}
 			
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
-			patrolOptions = (PatrolQueryOption[]) in.get(RootNodeType.PATROL_FILTERS);	
+			patrolOptions = (Object[]) in.get(RootNodeType.PATROL_FILTERS);	
 			
 			provider.inputChanged(viewer, oldInput, this.dataModel);
 			clearAreas();
