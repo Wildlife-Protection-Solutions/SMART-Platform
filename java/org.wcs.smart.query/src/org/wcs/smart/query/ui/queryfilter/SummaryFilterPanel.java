@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui.queryfilter;
 
 import java.util.HashMap;
@@ -24,17 +45,29 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
-
+/**
+ * Panel for displaying summary value
+ * and group by options.
+ * 
+ * @author Emily
+ *
+ */
 public class SummaryFilterPanel extends AbstractQueryItemPanel{
 	
 	private TreeViewer filterTreeViewer;
 	
 	public  SummaryFilterPanel(){
 	}
+	
+	/**
+	 * Valid for summary items (either value
+	 * or group by)
+	 */
 	@Override
 	public QueryPartPanelType getValidType(){
 		return QueryPartPanelType.SUMMARY_ITEM;
@@ -79,7 +112,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			}
 		});
 		filterTreeViewer.setAutoExpandLevel(2);
-		filterTreeViewer.setInput("Loading");
+		filterTreeViewer.setInput(LOADING_TEXT);
 		Button btnAdd = new Button(main, SWT.PUSH);
 		btnAdd.setText(Messages.QueryFilterView_AddToQueryButton);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -95,7 +128,16 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		addQueryItem((IStructuredSelection) filterTreeViewer.getSelection());
 	}
 	
-	private Job refreshJob = new Job("RefreshSummaryTree"){
+	
+	
+	@Override
+	public void refreshPanel(){
+		filterTreeViewer.setInput(LOADING_TEXT);
+		filterTreeViewer.refresh();
+		refreshJob.schedule();
+	}
+	
+	private Job refreshJob = new Job("Refresh Summary Tree"){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -124,11 +166,4 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		}
 		
 	};
-	
-	@Override
-	public void refreshPanel(){
-		filterTreeViewer.setInput(LOADING_TEXT);
-		filterTreeViewer.refresh();
-		refreshJob.schedule();
-	}
 }

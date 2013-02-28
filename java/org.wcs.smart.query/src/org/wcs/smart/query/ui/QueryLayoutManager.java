@@ -21,13 +21,10 @@
  */
 package org.wcs.smart.query.ui;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.definition.GriddedQueryDefinitionComposite;
@@ -37,7 +34,6 @@ import org.wcs.smart.query.ui.definition.QueryDefinitionComposite;
 import org.wcs.smart.query.ui.definition.SummaryQueryDefinitionComposite;
 import org.wcs.smart.query.ui.queryfilter.AbstractQueryItemPanel;
 import org.wcs.smart.query.ui.queryfilter.GriddedFilterPanel;
-import org.wcs.smart.query.ui.queryfilter.QueryDataModelManager;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterPanel;
 import org.wcs.smart.query.ui.queryfilter.SummaryFilterPanel;
 
@@ -104,7 +100,14 @@ public class QueryLayoutManager {
 		return null;
 	}
 	
-
+	/**
+	 * Creates the query definition composite for a given query type.
+	 * 
+	 * @param queryType the query type
+	 * @param parent the query definition
+	 * @param view parent querydefview
+	 * @return
+	 */
 	public QueryDefinitionComposite createComposite(QueryType queryType, Composite parent, QueryDefView view){
 		if (queryType == QueryType.OBSERVATION || queryType == QueryType.PATROL){
 			return new ObservationQueryDefinitionComposite(parent, view);
@@ -116,11 +119,4 @@ public class QueryLayoutManager {
 		return null;
 	}
 	
-	
-	
-	
-	
-
-	
-
 }
