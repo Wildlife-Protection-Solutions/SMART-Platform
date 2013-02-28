@@ -26,8 +26,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.parser.PatrolQueryOptions;
-import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.DataModelItem;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
@@ -53,8 +52,8 @@ public class QueryFilterLabelProvider extends LabelProvider {
 	 */
 	@Override 
 	public Image getImage(Object element) {
-		if (element instanceof PatrolQueryOption){
-			return PatrolQueryOptions.getImage((PatrolQueryOption) element);
+		if (element instanceof IPatrolQueryOption){
+			return ((IPatrolQueryOption) element).getImage();
 		}else if (element instanceof PatrolValueOption){
 			//TODO: insert patrol image here
 		}else if (element instanceof QueryFilterContentProvider.RootNode){
@@ -80,8 +79,8 @@ public class QueryFilterLabelProvider extends LabelProvider {
 	 */
 	@Override
 	public String getText(Object element) {
-		if (element instanceof PatrolQueryOption){
-			return ((PatrolQueryOption)element).getGuiName();
+		if (element instanceof IPatrolQueryOption){
+			return ((IPatrolQueryOption)element).getGuiName();
 		}else if (element instanceof QueryFilterContentProvider.RootNode){
 			return ((QueryFilterContentProvider.RootNode)element).getName();
 //			return getStyledText(element).getString();

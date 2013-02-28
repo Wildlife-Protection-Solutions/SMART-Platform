@@ -382,6 +382,8 @@ public class Messages extends NLS {
 	public static String QueryFilterContentProvider_NotLabel;
 	public static String QueryFilterContentProvider_OperatoresLabel;
 	public static String QueryFilterContentProvider_PatrolFiltersLabel;
+	public static String QueryFilterPanel_ParseContribution_Error;
+	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryFilterView_InitTreeJobName;
 	public static String QueryFilterView_LoadingLabel;

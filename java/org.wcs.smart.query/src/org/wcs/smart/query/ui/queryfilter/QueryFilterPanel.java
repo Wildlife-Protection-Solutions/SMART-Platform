@@ -21,10 +21,16 @@
  */
 package org.wcs.smart.query.ui.queryfilter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -51,8 +57,11 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.RootNodeType;
 
@@ -170,8 +179,24 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		filterTreeViewer.refresh();
 		refreshJob.schedule();
 	}
+
+	private List<IPatrolQueryOption> findContributedPatrolQueryOptions() {
+		List<IPatrolQueryOption> items = new ArrayList<IPatrolQueryOption>();
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IQueryFilterPatrolContribution.EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				IQueryFilterPatrolContribution contribution = (IQueryFilterPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+				items.addAll(contribution.getOptions());
+			}
+		}catch (Exception ex){
+			QueryPlugIn.displayLog(Messages.QueryFilterPanel_ParseContribution_Error, ex);
+			return null;
+		}
+		return items;
+	}
 	
-	private Job refreshJob = new Job("Refres hQuery Filter Tree"){
+	private Job refreshJob = new Job(Messages.QueryFilterPanel_RefreshTree_JobTitle) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -181,8 +206,11 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				input.put(QueryFilterContentProvider.ROOT_NODES,new QueryFilterContentProvider.RootNodeType[]{RootNodeType.PATROL_FILTERS, RootNodeType.DATA_MODEL_FILTERS, RootNodeType.OTHER_ITEMS}); 
 				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, PatrolQueryOptions.SHARED_PATROL_FILTER_OPTIONS);
 			}else{
-				input.put(QueryFilterContentProvider.ROOT_NODES,QueryFilterContentProvider.RootNodeType.values()); 
-				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, PatrolQueryOptions.PATROL_FILTER_OPTIONS);
+				input.put(QueryFilterContentProvider.ROOT_NODES,QueryFilterContentProvider.RootNodeType.values());
+				List<IPatrolQueryOption> options = new ArrayList<IPatrolQueryOption>();
+				options.addAll(Arrays.asList(PatrolQueryOptions.PATROL_FILTER_OPTIONS));
+				options.addAll(findContributedPatrolQueryOptions());
+				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, options.toArray());
 			}
 			input.put(QueryFilterContentProvider.RootNodeType.DATA_MODEL_FILTERS, QueryDataModelManager.getInstance().getDataModel());
 
@@ -197,6 +225,6 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			});
 			return Status.OK_STATUS;
 		}
-		
+
 	};
 }

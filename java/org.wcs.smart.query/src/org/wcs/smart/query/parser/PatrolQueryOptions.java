@@ -215,7 +215,7 @@ public class PatrolQueryOptions {
 	/**
 	 * Patrol filter options for summary and observation queries
 	 */
-	public final static PatrolQueryOption[] PATROL_FILTER_OPTIONS = {
+	public final static IPatrolQueryOption[] PATROL_FILTER_OPTIONS = {
 			PatrolQueryOption.ID,
 			PatrolQueryOption.ARMED, 
 			PatrolQueryOption.STATION, 
@@ -366,36 +366,6 @@ public class PatrolQueryOptions {
 		return null;
 	}
 	
-	
-	/**
-	 * @param option
-	 * @return the image that represents a particular 
-	 * patrol filter option
-	 */
-	public static Image getImage(PatrolQueryOption option){
-		if (option == PatrolQueryOption.ARMED){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON);
-		}else if (option == PatrolQueryOption.TEAM){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
-		}else if (option == PatrolQueryOption.STATION){
-			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON);
-		}else if (option == PatrolQueryOption.MANDATE){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
-		}else if (option == PatrolQueryOption.LEADER){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON);
-		}else if (option == PatrolQueryOption.PILOT){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON);
-		}else if (option == PatrolQueryOption.EMPLOYEE){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON);
-		}else if (option == PatrolQueryOption.PATROL_TYPE){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
-		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
-		}else {
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
-		}
-	}
-	
 	/**
 	 * Possible patrol filter option typs.
 	 * @author egouge
@@ -408,7 +378,7 @@ public class PatrolQueryOptions {
 	/**
 	 * Valid patrol filter options.
 	 */
-	public enum PatrolQueryOption{
+	public enum PatrolQueryOption implements IPatrolQueryOption {
 		
 		ID(Messages.PatrolQueryOptions_QueryOpId, "id", "id", Patrol.class, Patrol.class, PatrolQueryOptionType.STRING), //$NON-NLS-2$ //$NON-NLS-1$
 		
@@ -498,6 +468,33 @@ public class PatrolQueryOptions {
 		 */
 		public Class<?> getSourceClass(){
 			return this.sourceClazz;
+		}
+
+		/**
+		 * @return the image that represents a particular patrol filter option
+		 */
+		public Image getImage() {
+			if (this == PatrolQueryOption.ARMED){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON);
+			}else if (this == PatrolQueryOption.TEAM){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
+			}else if (this == PatrolQueryOption.STATION){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON);
+			}else if (this == PatrolQueryOption.MANDATE){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
+			}else if (this == PatrolQueryOption.LEADER){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON);
+			}else if (this == PatrolQueryOption.PILOT){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON);
+			}else if (this == PatrolQueryOption.EMPLOYEE){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON);
+			}else if (this == PatrolQueryOption.PATROL_TYPE){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+			}else if (this == PatrolQueryOption.PATROL_TRANSPORT_TYPE){
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+			}else {
+				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+			}
 		}
 		
 		/**

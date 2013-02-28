@@ -47,6 +47,10 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	 * Image descriptor key for intelligence filter icon
 	 */
 	public static final String INTELLIGENCE_FILTER_ICON = "org.wsc.smart.intelligence.INTELLIGENCE_FILTER"; //$NON-NLS-1$
+	/**
+	 * Image descriptor key for intelligence icon
+	 */
+	public static final String INTELLIGENCE_ICON = "org.wsc.smart.intelligence.INTELLIGENCE"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor
@@ -58,6 +62,7 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 		reg.put(INTELLIGENCE_FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/filter.png")); //$NON-NLS-1$			
+		reg.put(INTELLIGENCE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/intelligence.png")); //$NON-NLS-1$			
 	}
 	
 	/*
