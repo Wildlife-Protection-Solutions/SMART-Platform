@@ -27,7 +27,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -44,6 +47,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISourceProviderListener;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -64,8 +68,9 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.query.ui.QueryLayoutManager;
 import org.wcs.smart.query.ui.SourceProvider;
-import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
+import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 
 /**
  * A view that display the query filter options.
@@ -80,129 +85,18 @@ import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
  */
 public class QueryFilterView extends ViewPart {
 
-	private static final String LOADING_TEXT = Messages.QueryFilterView_LoadingLabel;
+	
 
 	public static final String ID ="org.wcs.smart.query.ui.QueryFilter"; //$NON-NLS-1$
-	
-	private TreeViewer filterTreeViewer;
-	private TreeViewer summaryTreeViewer;
-	private TreeViewer griddedTreeViewer;
-
-	private Composite filterComp;
-	private Composite summaryComp;
-	private Composite griddedComp;
 
 	private Composite main;
 	
-	/**
-	 * Change listenered that updates the filter tree
-	 * when the data model is modified.
-	 */
-	private IDataModelListener dataModelChangeListener = new IDataModelListener() {
-		@Override
-		public void modified() {
-			filterTreeViewer.setInput(LOADING_TEXT);
-			summaryTreeViewer.setInput(LOADING_TEXT);
-			griddedTreeViewer.setInput(LOADING_TEXT);
-			initialize();
-		}
-	};
-	
-	/*
-	 * listener for refreshing areas
-	 */
-	private IAreaModifiedListener areaListener = new IAreaModifiedListener() {
-		@Override
-		public void areasUpdated(AreaType type) {
-			//clear areas from content provider & refresh tree
-			((QueryFilterContentProvider)filterTreeViewer.getContentProvider()).clearAreas();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					filterTreeViewer.refresh();
-				}});
-		}
-	};
+	private Label defaultFilter;
 	
 	public QueryFilterView() {
+
 	}
 
-
-	/**
-	 * A job that initializes the query 
-	 * filter options
-	 */
-	private void initialize(){
-		Job j = new Job(Messages.QueryFilterView_InitTreeJobName){
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				final HashMap<QueryFilterContentProvider.RootNodeType, Object> input = new HashMap<QueryFilterContentProvider.RootNodeType, Object>();
-				DataModel dm = null;
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try{
-					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-					//load into memory; no-lazy loading here.
-					for (Category cat: dm.getCategories()){
-						visitCategory(cat);
-					}
-					for (Attribute att: dm.getAttributes()){
-						att.getAggregations().size();
-					}
-				}finally{
-					session.getTransaction().rollback();
-					session.close();
-				}
-				
-				input.put(QueryFilterContentProvider.RootNodeType.DATA_MODEL_FILTERS, dm);
-				input.put(QueryFilterContentProvider.RootNodeType.PATROL_FILTERS, PatrolQueryOptions.PATROL_FILTER_OPTIONS);
-//				input.put(QueryFilterContentProvider.RootNodeType.AREA_FILTERS,"");
-				
-				
-				final HashMap<SummaryQueryContentProvider.NodeType, Object> summaryInput = new HashMap<SummaryQueryContentProvider.NodeType, Object> ();
-				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_VALUES, PatrolValueOption.values());
-				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_GROUPBYS, PatrolQueryOptions.PATROL_GROUBY_OPTIONS);
-				summaryInput.put(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS, PatrolQueryOptions.DateGroupByOption.values());
-				summaryInput.put(SummaryQueryContentProvider.NodeType.GROUP_BY_NODE, dm);
-				
-				final HashMap<GriddedQueryContentProvider.NodeType, Object> griddedInput = new HashMap<GriddedQueryContentProvider.NodeType, Object> ();
-				griddedInput.put(GriddedQueryContentProvider.NodeType.PATROL_VALUES, PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
-				griddedInput.put(GriddedQueryContentProvider.NodeType.DATAMODEL_VALUES, dm);
-				
-				Display.getDefault().asyncExec(new Runnable(){
-					@Override
-					public void run() {
-						filterTreeViewer.setInput(input);
-						summaryTreeViewer.setInput(summaryInput);
-						griddedTreeViewer.setInput(griddedInput);
-					}});
-					
-
-				return Status.OK_STATUS;
-			}};
-		j.schedule();
-		
-	}
-	
-	/**
-	 * visits a child and gets all attributes.
-	 * <p>This is to ensure all data model elements
-	 * are loaded in the hibernate session.  Circumvents
-	 * the hibernate lazy-loading.</p>
-	 * @param cat
-	 */
-	private void visitCategory(Category cat){
-		for (Category child : cat.getActiveChildren()){
-			visitCategory(child);
-			child.getName();
-		}
-		for (CategoryAttribute ca: cat.getAttributes()){
-			ca.getAttribute().getName();
-		}
-	
-	}
-	
-	
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -224,102 +118,9 @@ public class QueryFilterView extends ViewPart {
 		stack.marginHeight = stack.marginWidth = 0;
 		main.setLayout(stack);
 		
+		defaultFilter = new Label(main, SWT.NONE);
+		defaultFilter.setText("No filter options for current query type.");
 
-		//search tree
-		final PatternFilter patternFilter = new PatternFilter(){			
-			protected boolean isChildMatch(Viewer viewer, Object element) {
-				Object parent = ((ITreeContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
-				if (parent != null) {
-					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
-				}
-				return false;
-			}
-			@Override
-			protected boolean isLeafMatch(Viewer viewer, Object element) {
-				String labelText = ((LabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
-				if (labelText == null) {
-					return false;
-				}
-				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
-			}
-		};
-		
-		filterComp = new Composite(main, SWT.NONE);
-		((StackLayout)main.getLayout()).topControl = filterComp;
-		GridLayout gl = new GridLayout(1, false);
-		gl.marginHeight = gl.marginWidth = 0;
-		filterComp.setLayout(gl);
-		
-		summaryComp = new Composite(main, SWT.NONE);
-		gl = new GridLayout(1, false);
-		gl.marginHeight = gl.marginWidth = 0;
-		summaryComp.setLayout(gl);
-		
-		griddedComp = new Composite(main, SWT.NONE);
-		gl = new GridLayout(1, false);
-		gl.marginHeight = gl.marginWidth = 0;
-		griddedComp.setLayout(gl);
-
-		
-		FilteredTree fTree = new FilteredTree(filterComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
-		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		filterTreeViewer = fTree.getViewer();
-		filterTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		filterTreeViewer.setLabelProvider(new QueryFilterLabelProvider());
-		filterTreeViewer.setContentProvider(new QueryFilterContentProvider(filterTreeViewer));
-		filterTreeViewer.addDoubleClickListener(new IDoubleClickListener() {			
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				addItem();
-			}
-		});
-		filterTreeViewer.setAutoExpandLevel(2);
-		filterTreeViewer.setInput(LOADING_TEXT);
-		
-		fTree = new FilteredTree(summaryComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
-		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		summaryTreeViewer = fTree.getViewer();
-		summaryTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
-		summaryTreeViewer.setLabelProvider(new SummaryQueryLabelProvider());
-		summaryTreeViewer.setContentProvider(new SummaryQueryContentProvider());
-		summaryTreeViewer.addDoubleClickListener(new IDoubleClickListener() {			
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				addItem();
-			}
-		});
-		summaryTreeViewer.setAutoExpandLevel(2);
-		summaryTreeViewer.setInput(LOADING_TEXT);
-		
-		fTree = new FilteredTree(griddedComp,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
-		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-		griddedTreeViewer = fTree.getViewer();
-		griddedTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
-		griddedTreeViewer.setLabelProvider(new GriddedQueryLabelProvider());
-		griddedTreeViewer.setContentProvider(new GriddedQueryContentProvider());
-		griddedTreeViewer.addDoubleClickListener(new IDoubleClickListener() {			
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				addItem();
-			}
-		});
-		griddedTreeViewer.setAutoExpandLevel(2);
-		griddedTreeViewer.setInput(LOADING_TEXT);
-		
-
-		
-		Button btnAdd = new Button(outer, SWT.PUSH);
-		btnAdd.setText(Messages.QueryFilterView_AddToQueryButton);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addItem();
-			}
-		});
-	
-		initialize();
-		
-		
 		ISourceProviderService service = (ISourceProviderService)getSite().getService(ISourceProviderService.class);
 		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
 		provider.addSourceProviderListener(new ISourceProviderListener() {
@@ -328,18 +129,13 @@ public class QueryFilterView extends ViewPart {
 			public void sourceChanged(int sourcePriority, String sourceName,
 					Object sourceValue) {
 				if (sourceName.equals(SourceProvider.QUERY_DROP_TYPE)){
-					if (sourceValue == QueryDropType.FILTER_ITEM){
-						((StackLayout)main.getLayout()).topControl = filterComp;
-					}else if (sourceValue == QueryDropType.SUMMARY_ITEM){
-						((StackLayout)main.getLayout()).topControl = summaryComp;
-					}else if (sourceValue == QueryDropType.GRIDDED_ITEM){
-						((StackLayout)main.getLayout()).topControl = griddedComp;
+					AbstractQueryItemPanel panel = QueryLayoutManager.getInstance().getFilterPanel((QueryPartPanelType)sourceValue);
+					if (panel != null){
+						((StackLayout)main.getLayout()).topControl = panel.getPanel(main);
 					}else{
-						//default filter
-						((StackLayout)main.getLayout()).topControl = filterComp;
+						((StackLayout)main.getLayout()).topControl = defaultFilter;
 					}
 					main.layout();
-					patternFilter.setPattern(null);
 				}
 			}
 			
@@ -348,16 +144,11 @@ public class QueryFilterView extends ViewPart {
 			public void sourceChanged(int sourcePriority, Map sourceValuesByName) {				
 			}
 		});
-		
-		DataModelManager.getInstance().addChangeListener(dataModelChangeListener);
-		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 	}
 
 	@Override
 	public void dispose(){
 		super.dispose();
-		DataModelManager.getInstance().removeChangeListener(dataModelChangeListener);
-		ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
 	}
 	
 	@Override
@@ -365,20 +156,5 @@ public class QueryFilterView extends ViewPart {
 		main.setFocus();
 	}
 
-	/**
-	 * Updates the source provider with the 
-	 * selection from the data tree.
-	 */
-	private void addItem(){
-		SourceProvider provider = (SourceProvider) ((ISourceProviderService)getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.SELECTED_FILTERS);
-		IStructuredSelection selection =  null;
-		if (filterTreeViewer.getTree().isVisible()){
-			selection = (IStructuredSelection) filterTreeViewer.getSelection();
-		}else if(summaryTreeViewer.getTree().isVisible()){
-			selection = (IStructuredSelection) summaryTreeViewer.getSelection();
-		}else{
-			selection = (IStructuredSelection) griddedTreeViewer.getSelection();
-		}
-		provider.setFilterSelection(selection);
-	}
+
 }

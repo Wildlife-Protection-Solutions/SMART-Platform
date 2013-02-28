@@ -180,10 +180,19 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param session hibernate session
 	 * @return a list of conservation areas in the database
 	 */
-	
+	@SuppressWarnings("unchecked")
 	public static List<ConservationArea> getConservationAreas(Session session) {
-		@SuppressWarnings("unchecked")
-		List<ConservationArea> areas = session.createQuery("from ConservationArea order by id").list();	 //$NON-NLS-1$
+		Query query = session.createQuery("from ConservationArea WHERE uuid != :uuid Order by id");	 //$NON-NLS-1$
+		query.setParameter("uuid", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
+		
+		List<ConservationArea> areas = query.list();
+		
+		if (areas.size() > 1){
+			List<?> tmp = session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", ConservationArea.MULTIPLE_CA)).list(); //$NON-NLS-1$
+			if (tmp.size() > 0){
+				areas.add((ConservationArea)tmp.get(0));
+			}
+		}
 		return areas;
 	}
 	
@@ -241,6 +250,42 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 		return false;
 	}
+	/**
+	 * Determines all conservation areas accessible by
+	 * the user with the given username and password.
+	 * <p>
+	 * The username/password must exist as a manager, admin, or analyst account
+	 * in the conservation area.
+	 * </p>
+	 * 
+	 * 
+	 * @param userName user name
+	 * @param password password
+	 * @return list of conservation areas 
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<ConservationArea> findConservationAreas(String userName, String password) throws Exception{
+		Session x = HibernateManager.openSession();
+		Transaction tx = x.beginTransaction();
+		try{
+			String hql = "SELECT e.conservationArea from Employee e where smartUserId = :userid and smartPassword = :password and smartUserLevel IN (:users) ORDER BY e.conservationArea.name"; //$NON-NLS-1$
+			Query q = x.createQuery(hql);
+			q.setParameter("userid", userName); //$NON-NLS-1$
+			q.setParameter("password", password); //$NON-NLS-1$
+			q.setParameterList("users", new Integer[]{Employee.SmartUserLevel.ADMIN.ordinal(), Employee.SmartUserLevel.ANALYST.ordinal(), Employee.SmartUserLevel.MANAGER.ordinal()}); //$NON-NLS-1$
+			List<ConservationArea> areas = q.list(); 
+			
+			return areas;
+			
+		}catch (Exception ex){
+			tx.rollback();
+			throw ex;
+		}finally{
+			x.close();
+		}
+	}
+	
 	
 	/**
 	 * Validates the username and password for a given conservation area.

@@ -43,11 +43,11 @@ import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryInput;
 import org.wcs.smart.query.ui.IQueryEditor;
+import org.wcs.smart.query.ui.QueryLayoutManager;
 import org.wcs.smart.query.ui.SourceProvider;
-import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
+import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 
@@ -207,15 +207,6 @@ public class QueryDefView extends ViewPart {
 		emptyComp = new Composite(stackComp, SWT.NONE);
 		emptyComp.setLayout(new GridLayout(1, false));
 		
-		ObservationQueryDefinitionComposite wp = new ObservationQueryDefinitionComposite(stackComp, this);
-		definitionComposites.put(QueryType.OBSERVATION, wp);
-		definitionComposites.put(QueryType.PATROL, wp);	//patrols are the same
-		SummaryQueryDefinitionComposite sum = new SummaryQueryDefinitionComposite(stackComp, this);
-		definitionComposites.put(QueryType.SUMMARY, sum);
-		GriddedQueryDefinitionComposite grid = new GriddedQueryDefinitionComposite(stackComp, this);
-		definitionComposites.put(QueryType.GRIDDED, grid);
-		
-		
 		((StackLayout)stackComp.getLayout()).topControl = emptyComp;
 	
 		addSourceListener();
@@ -240,7 +231,7 @@ public class QueryDefView extends ViewPart {
 				
 				
 				if (sourceName.equals(SourceProvider.SELECTED_FILTERS)) {
-					QueryDropType dropType = (QueryDropType)provider.getCurrentState().get(SourceProvider.QUERY_DROP_TYPE);
+					QueryPartPanelType dropType = (QueryPartPanelType)provider.getCurrentState().get(SourceProvider.QUERY_DROP_TYPE);
 					IStructuredSelection selection = (IStructuredSelection) sourceValue;
 					boolean fireEvent = false;
 					
@@ -295,7 +286,13 @@ public class QueryDefView extends ViewPart {
 		current = query;
 		if (query != null){
 			currentPanel = definitionComposites.get(current.getType());
-			currentPanel.init();
+			if (currentPanel == null){
+				currentPanel = QueryLayoutManager.getInstance().createComposite(current.getType(), stackComp, this);
+				definitionComposites.put(current.getType(), currentPanel);
+			}
+			if (currentPanel != null){
+				currentPanel.init();
+			}
 		}else{
 			currentPanel = null;
 		}

@@ -41,6 +41,13 @@
                   style="push"
                   tooltip="%command.perspective.tooltip">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
@@ -51,6 +58,13 @@
                label="%command.perspective.label"
                style="push"
                tooltip="%command.perspective.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -163,18 +177,42 @@
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.NewIntelligenceHandler"
             commandId="org.wcs.smart.intelligence.NewIntelligence">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.ShowIntelligencePersepctiveHandler"
             commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.DeleteIntelligenceHandler"
             commandId="org.wcs.smart.intelligence.DeleteIntelligence">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.ShowIntelligenceFilterHandler"
             commandId="org.wcs.smart.intelligence.ShowIntelligenceFilter">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
    </extension>
    <extension

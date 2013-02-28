@@ -97,9 +97,7 @@ public class GriddedQueryDefinitionImporter implements IQueryImporter{
 		griddedQuery.setConservationArea(SmartDB.getCurrentConservationArea());
 		griddedQuery.setOwner(SmartDB.getCurrentEmployee());
 		
-		ConservationAreaFilter caFilter = new ConservationAreaFilter();
-		caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		griddedQuery.setConservationAreaFilter(caFilter);
+		griddedQuery.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
 		return griddedQuery;
 	}

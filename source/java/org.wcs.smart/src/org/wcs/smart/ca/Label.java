@@ -85,7 +85,7 @@ public class Label  {
 		String description = ""; //$NON-NLS-1$
 		Session s = HibernateManager.openSession();
 		Label lbl = (Label) s.get(Label.class, id);
-		if (lbl == null) {
+		if (lbl == null && SmartDB.getCurrentConservationArea().getDefaultLanguage() != null) {
 			// try for the default language
 			id.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			lbl = (Label) s.get(Label.class, id);

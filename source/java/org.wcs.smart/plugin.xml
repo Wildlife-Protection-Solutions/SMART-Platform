@@ -152,6 +152,82 @@
                   style="push"
                   tooltip="%exit.command.tooltip">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </menu>
+         <menu
+               id="org.wcs.smart.menu.file.multipleCa"
+               label="%file.menu.label"
+               mnemonic="%file.menu.mnemonic">
+            <command
+                  commandId="org.wcs.smart.systemPref"
+                  label="%systempref.command.label"
+                  mnemonic="%systempref.command.mnemonic"
+                  style="push"
+                  tooltip="%systempref.command.tooltip">
+            </command>
+            <separator
+                  name="org.wcs.smart.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.file.export"
+                  id="x"
+                  label="%exportmap.command.label"
+                  style="push"
+                  tooltip="%exportmap.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.DefaultPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+            <separator
+                  name="org.wcs.smart.file.separator1">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.logout"
+                  id="org.wcs.menu.file.logout"
+                  label="%logout.command.label"
+                  mnemonic="%logoutcommand.mnemonic"
+                  style="push"
+                  tooltip="%logout.command.tooltip">
+            </command>
+            <command
+                  commandId="org.wcs.smart.exit"
+                  id="org.wcs.menu.file.exit"
+                  label="%exit.command.label"
+                  mnemonic="%exit.command.mnemonic"
+                  style="push"
+                  tooltip="%exit.command.tooltip">
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <not>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
+               </and>
+            </visibleWhen>
          </menu>
          <menu
                id="org.wcs.smart.menu.ca"
@@ -229,11 +305,17 @@
             </command>
             <visibleWhen
                   checkEnabled="true">
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
-               </test>
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
             </visibleWhen>
          </menu>
          <menu
@@ -264,6 +346,13 @@
                   label="%showmapperspective.command.label"
                   style="push"
                   tooltip="%showmapperspective.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.resetSeparator"
@@ -525,6 +614,12 @@
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowCaPropertyHandler"
             commandId="org.wcs.smart.ca.showProperties">
+         <enabledWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.LogoutHandler"
@@ -537,34 +632,82 @@
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowStationPropertyPageHandler"
             commandId="org.wcs.smart.ca.showStations">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowEmployeePropertyHandler"
             commandId="org.wcs.smart.ca.showEmployees">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowAgencyPropertyPageHandler"
             commandId="org.wcs.smart.ca.showAgencyPropertyPage">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowDataModelPropertyPageHandler"
             commandId="org.wcs.smart.ca.showDataModel">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowAreaPropertyPageHandler"
             commandId="org.wcs.smart.ca.showArea">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ShowDefaultMapPerspective"
             commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.DeleteConservationArea"
             commandId="org.wcs.smart.ca.delete">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ChangeUserNameHandler"
             commandId="org.wcs.smart.changeUserPassword">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.backup.BackupHandler"
@@ -573,50 +716,122 @@
       <handler
             class="org.wcs.smart.ui.internal.backup.ExportCaHandler"
             commandId="org.wcs.smart.exportCa">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.backup.AutoBackupConfigHandler"
             commandId="org.wcs.smart.auto_backup">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowBasemapHandler"
             commandId="org.wcs.smart.showBasemaps">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.SaveMapHandler"
             commandId="org.wcs.smart.map.saveMap">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.PanMapHandler"
             commandId="org.wcs.smart.map.pan">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomHandler"
             commandId="org.wcs.smart.map.zoom">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.AddLayerHandler"
             commandId="org.wcs.smart.map.addLayer">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomExtentsHandler"
             commandId="org.wcs.smart.map.zoomExtents">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.LoadBasemapHandler"
             commandId="org.wcs.smart.map.loadBasemap">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomInHandler"
             commandId="org.wcs.smart.map.zoomIn">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ZoomOutHandler"
             commandId="org.wcs.smart.map.zoomOut">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowProjectionsPageHandler"
             commandId="org.wcs.smart.ca.showProjection">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ShowSystemPreferencesHandler"
@@ -634,6 +849,13 @@
             id="org.wcs.smart.userAdmin"
             namespace="org.wcs.smart"
             properties="smartAdminUser"
+            type="java.lang.Object">
+      </propertyTester>
+      <propertyTester
+            class="org.wcs.smart.CaPropertyTester"
+            id="org.wcs.smart.caSingle"
+            namespace="org.wcs.smart"
+            properties="caSingle"
             type="java.lang.Object">
       </propertyTester>
    </extension>

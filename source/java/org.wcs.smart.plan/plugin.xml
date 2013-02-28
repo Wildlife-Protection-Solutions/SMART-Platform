@@ -46,6 +46,13 @@
                   style="push"
                   tooltip="%plan.menu.command.tooltip.viewplans">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
@@ -59,24 +66,10 @@
                tooltip="%smart.toolbar.command.tooltip.viewplans">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="analyst">
-                  </test>
-               </or>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -171,18 +164,42 @@
       <handler
             class="org.wcs.smart.plan.ui.handlers.NewPlanHandler"
             commandId="org.wcs.smart.plan.NewPlan">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.plan.ui.handlers.ShowPlanPersepctiveHandler"
             commandId="org.wcs.smart.plan.ShowPlanPerspective">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.plan.ui.handlers.ShowPlanFilter"
             commandId="org.wcs.smart.plan.ShowPlanFilter">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.plan.ui.handlers.DeletePlanHandler"
             commandId="org.wcs.smart.plan.DeletePlan">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
    </extension>
    <extension

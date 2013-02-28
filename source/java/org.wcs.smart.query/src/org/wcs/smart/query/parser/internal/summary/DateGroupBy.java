@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
@@ -129,9 +130,14 @@ public class DateGroupBy implements IGroupBy {
 			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		}else{
 			if (df.getDateFilterOption() == PatrolQueryOptions.DATE_FILTER_OP.ALL){
-				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
+				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
 				Query q = session.createQuery(hql);
-				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+				if (SmartDB.isMultipleAnalysis()){
+					q.setParameterList("ca", SmartDB.getSelectedConservationAreas());
+				}else{
+					q.setParameterList("ca", new ConservationArea[]{SmartDB.getCurrentConservationArea()}); //$NON-NLS-1$
+				}
+				
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null){
 					startdate = (java.sql.Timestamp)data.get(0);

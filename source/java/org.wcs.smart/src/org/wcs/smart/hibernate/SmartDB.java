@@ -22,6 +22,8 @@
 package org.wcs.smart.hibernate;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
@@ -83,6 +85,8 @@ public class SmartDB {
 	private static DbUser current = DbUser.LOGIN;
 	private static Employee currentEmployee = null;
 	private static ConservationArea currentCa = null;
+	private static List<ConservationArea> selectedCa = null;
+	
 	private static Language currentLanguage = null;;
 	
 	/**
@@ -114,6 +118,8 @@ public class SmartDB {
 	}
 	
 	
+	
+	
 	/**
 	 * Determines if the smart database file exists.  This does not
 	 * mean it is a valid file.
@@ -137,6 +143,27 @@ public class SmartDB {
 	 */
 	public static ConservationArea getCurrentConservationArea(){
 		return currentCa;
+	}
+	
+	public static boolean isMultipleAnalysis(){
+		return Arrays.equals(getCurrentConservationArea().getUuid(), ConservationArea.MULTIPLE_CA);
+	}
+	/**
+	 * 
+	 * @return list of conservation areas selected
+	 * for cross-ca analysis; will be <code>null</code> if 
+	 * logged into a single conservation area
+	 */
+	public static List<ConservationArea> getSelectedConservationAreas(){
+		return selectedCa;
+	}
+	/**
+	 * Sets the conservation areas selected
+	 * for cross-ca analysis
+	 * @param selectedCa
+	 */
+	public static void setSelectedCas(List<ConservationArea> selectedCas){
+		selectedCa = selectedCas;
 	}
 	
 	/**
@@ -180,6 +207,10 @@ public class SmartDB {
 				//eatme
 			}
 			currentLanguage = HibernateManager.findLanguage(l, getCurrentConservationArea());
+			if (currentLanguage == null){
+				currentLanguage = new Language();
+				currentLanguage.setUuid(new byte[]{-1});
+			}
 		}
 		return currentLanguage;
 		

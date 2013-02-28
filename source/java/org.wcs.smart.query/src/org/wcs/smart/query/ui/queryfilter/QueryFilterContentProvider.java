@@ -68,10 +68,12 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	private DataModelContentProvider provider;
 	
 	//root nodes
+	public static final String ROOT_NODES = "RootNodes"; //$NON-NLS-1$
 	private RootNode patrolFiltersRoot = new RootNode(RootNodeType.PATROL_FILTERS);
 	private RootNode dataModelFiltersRoot =new RootNode(RootNodeType.DATA_MODEL_FILTERS);
 	private RootNode areaFilterRoot = new RootNode(RootNodeType.AREA_FILTERS);
 	private RootNode otherItemRoot = new RootNode(RootNodeType.OTHER_ITEMS);
+	
 	private Object[] roots = new Object[]{patrolFiltersRoot, dataModelFiltersRoot, areaFilterRoot, otherItemRoot};
 	
 	private PatrolQueryOption[] patrolOptions = null;
@@ -107,7 +109,7 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	/**
 	 * Root node children
 	 */
-	enum RootNodeType  {
+	public enum RootNodeType  {
 		PATROL_FILTERS(Messages.QueryFilterContentProvider_PatrolFiltersLabel),
 		DATA_MODEL_FILTERS(Messages.QueryFilterContentProvider_DataModelFiltersLabel),
 		AREA_FILTERS(Messages.QueryFilterContentProvider_AreaFiltersLabel),
@@ -146,6 +148,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 	/**
 	 * 
 	 * @param newInput must be a map that contains the keys
+	 * QueryFilterContentProvider.ROOT_NODES - array of RootNodeType which should appear as 
+	 * the root nodes in the tree
 	 * RootNodeType.DATA_MODEL_FILTERS whose value is the current data model
 	 * and 
 	 * RootNodeType.PATROL_FILTERS whose value is the patrol filter options
@@ -163,9 +167,19 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			if (newInput != null && !(newInput instanceof Map)){
 				throw new IllegalArgumentException("new input must be map"); //$NON-NLS-1$
 			}
+			
 			Map<?, ?> in = (Map<?, ?>)newInput;
+			
+			//create root nodes
+			RootNodeType[] rootnodes = (RootNodeType[])in.get(QueryFilterContentProvider.ROOT_NODES);
+			roots = new Object[rootnodes.length];
+			for (int i = 0; i < roots.length; i ++){
+				roots[i] = new RootNode(rootnodes[i]);
+			}
+			
 			this.dataModel = (DataModel)in.get(RootNodeType.DATA_MODEL_FILTERS); 
-			patrolOptions = (PatrolQueryOption[]) in.get(RootNodeType.PATROL_FILTERS);		
+			patrolOptions = (PatrolQueryOption[]) in.get(RootNodeType.PATROL_FILTERS);	
+			
 			provider.inputChanged(viewer, oldInput, this.dataModel);
 			clearAreas();
 		}

@@ -38,7 +38,8 @@ public class SmartUserTester extends PropertyTester {
 	 * Tests the current logged in user level against the level
 	 * provided by the expectedValue.  
 	 * 
-	 * @param expectedValue one of "admin" or "readonly" otherwise false is returned.
+	 * @param expectedValue one of "admin",
+	 * "manager", "analyst", "dataentry" otherwise false is returned.
 	 */
 	@Override
 	public boolean test(Object receiver, String property, Object[] args,
