@@ -33,7 +33,7 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
-import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
+import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.formulaDnd.BracketDropItem.BracketType;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider;
 import org.wcs.smart.query.ui.queryfilter.SummaryDmObject;
@@ -340,7 +340,7 @@ public class DropItemFactory {
 	 * 
 	 * @return null or a array of drop items created
 	 */
-	public DropItem[] createDropItem(Object object, QueryType queryType, QueryDropType dropType){
+	public DropItem[] createDropItem(Object object, QueryType queryType, QueryPartPanelType dropType){
 		DropItem[] items = null; 
 		if (object instanceof Category) {
 			items = new DropItem[]{ createCategoryDropItem((Category) object) };
@@ -361,7 +361,7 @@ public class DropItemFactory {
 
 		} else if (object instanceof PatrolQueryOption) {
 			
-			if (dropType == QueryDropType.SUMMARY_ITEM){
+			if (dropType == QueryPartPanelType.SUMMARY_ITEM){
 				items = new DropItem[]{createPatrolGroupByDropItem(
 						(PatrolQueryOption) object)};
 			}else{

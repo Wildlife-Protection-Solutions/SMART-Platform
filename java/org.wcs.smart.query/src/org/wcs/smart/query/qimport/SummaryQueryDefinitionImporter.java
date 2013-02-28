@@ -117,9 +117,7 @@ public class SummaryQueryDefinitionImporter implements IQueryImporter{
 		summaryQuery.setConservationArea(SmartDB.getCurrentConservationArea());
 		summaryQuery.setOwner(SmartDB.getCurrentEmployee());
 		
-		ConservationAreaFilter caFilter = new ConservationAreaFilter();
-		caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		summaryQuery.setConservationAreaFilter(caFilter);
+		summaryQuery.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
 		return summaryQuery;
 	}

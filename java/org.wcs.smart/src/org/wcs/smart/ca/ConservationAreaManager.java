@@ -59,7 +59,7 @@ public class ConservationAreaManager {
 	/*
 	 * List of area listeners
 	 */
-	public List<IAreaModifiedListener> areaListeners = new ArrayList<IAreaModifiedListener>();
+	private List<IAreaModifiedListener> areaListeners = new ArrayList<IAreaModifiedListener>();
 	
 	private static ConservationAreaManager instance = null;
 	

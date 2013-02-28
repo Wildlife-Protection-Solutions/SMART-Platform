@@ -150,6 +150,13 @@
                   style="push"
                   tooltip="%showpatrolperspectivecommand.tooltip">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
@@ -162,6 +169,13 @@
                mnemonic="%showpatrolperspectivecommand.mnemonic"
                style="push"
                tooltip="%showpatrolperspectivecommand.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -186,20 +200,26 @@
                   tooltip="%patroltoolbar.newpatrol.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
+                  <and>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
                      </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
+                  </and>
                </visibleWhen>
             </command>
          </toolbar>
@@ -284,12 +304,18 @@
                tooltip="%file.exportmap.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <equals
-                        value="org.wcs.smart.patrol.PatrolPerspective">
-                  </equals>
-               </with>
+               <and>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.patrol.PatrolPerspective">
+                     </equals>
+                  </with>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
             </visibleWhen>
          </command>
          <separator
@@ -347,128 +373,188 @@
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTypeHandler"
             commandId="org.wcs.smart.patrol.patrolTypes">
          <activeWhen>
-            <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="admin">
-            </test>
+            <and>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolMandateHandler"
             commandId="org.wcs.smart.patrol.patrolMandate">
          <activeWhen>
-            <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="admin">
-            </test>
+            <and>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolOptionsHandler"
             commandId="org.wcs.smart.patrol.patrolOptions">
          <activeWhen>
-            <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="admin">
-            </test>
+            <and>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTeamsHandler"
             commandId="org.wcs.smart.patrol.teamList">
          <activeWhen>
-            <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="admin">
-            </test>
+            <and>
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.NewPatrolHandler"
             commandId="org.wcs.smart.patrol.newPatrol">
          <activeWhen>
-            <or>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
                <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
                </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="dataentry">
-               </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="manager">
-               </test>
-            </or>
+            </and>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.ShowPatrolPersepctiveHandler"
             commandId="org.wcs.smart.patrol.PatrolPerspective">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.xml.export.ExportPatrolHandler"
             commandId="org.wcs.smart.patrol.exportPatrol">
          <activeWhen>
-            <or>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
                <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
                </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="dataentry">
-               </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="manager">
-               </test>
-            </or>
+            </and>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.xml.in.ImportPatrolHandler"
             commandId="org.wcs.smart.patrol.importPatrol">
          <activeWhen>
-            <or>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
                <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
                </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="dataentry">
-               </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="manager">
-               </test>
-            </or>
+            </and>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.views.ShowPatrolFilterHandler"
             commandId="org.wcs.smart.patrol.view.ShowPatrolFilter">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.internal.ui.views.DeletePatrolHandler"
             commandId="org.wcs.smart.patrol.view.DeletePatrol">
          <activeWhen>
-            <or>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
                <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="admin">
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
                </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="dataentry">
-               </test>
-               <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="manager">
-               </test>
-            </or>
+            </and>
          </activeWhen>
          <enabledWhen>
             <with

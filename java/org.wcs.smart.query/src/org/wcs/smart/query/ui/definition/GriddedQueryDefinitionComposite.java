@@ -40,7 +40,7 @@ import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
-import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
+import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 
@@ -119,9 +119,9 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 				ISourceProviderService service = (ISourceProviderService)parentView.getSite().getService(ISourceProviderService.class);
 				SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
 				if (tabs.getSelectionIndex() == 0){
-					provider.setQueryDefinitionType(QueryDropType.GRIDDED_ITEM);
+					provider.setQueryDefinitionType(QueryPartPanelType.GRIDDED_ITEM);
 				}else{
-					provider.setQueryDefinitionType(QueryDropType.FILTER_ITEM);
+					provider.setQueryDefinitionType(QueryPartPanelType.FILTER_ITEM);
 				}
 			}
 		});
@@ -255,7 +255,7 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 		tabs.setSelection(0);
 		ISourceProviderService service = (ISourceProviderService)parentView.getSite().getService(ISourceProviderService.class);
 		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
-		provider.setQueryDefinitionType(QueryDropType.GRIDDED_ITEM);
+		provider.setQueryDefinitionType(QueryPartPanelType.GRIDDED_ITEM);
 	}
 	
 }

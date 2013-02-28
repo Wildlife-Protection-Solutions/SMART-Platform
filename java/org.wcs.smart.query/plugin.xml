@@ -28,6 +28,12 @@
             name="%querylist.view.name"
             restorable="true">
       </view>
+      <view
+            class="org.wcs.smart.query.ui.multi.ConservationAreaListView"
+            id="org.wcs.smart.query.conservationAreaList"
+            name="Conservation Areas"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -67,6 +73,12 @@
             icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.SmartQueryPerspective"
             name="%query.perspective.name">
+      </perspective>
+      <perspective
+            class="org.wcs.smart.query.internal.ui.MultiCaQueryPerspective"
+            icon="images/icons/view16/querypatrol.gif"
+            id="org.wcs.smart.query.SmartMultiCaQueryPerspective"
+            name="Multiple Conservation Area Query Perspective">
       </perspective>
    </extension>
    <extension
@@ -116,9 +128,14 @@
                      checkEnabled="false">
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.SmartQueryPerspective">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        </equals>
+                     </or>
                   </with>
                </visibleWhen>
             </command>
@@ -131,9 +148,14 @@
                      checkEnabled="false">
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.SmartQueryPerspective">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        </equals>
+                     </or>
                   </with>
                </visibleWhen>
             </command>
@@ -149,9 +171,14 @@
                      checkEnabled="false">
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.SmartQueryPerspective">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        </equals>
+                     </or>
                   </with>
                </visibleWhen>
             </command>
@@ -163,9 +190,14 @@
                      checkEnabled="false">
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.SmartQueryPerspective">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        </equals>
+                     </or>
                   </with>
                </visibleWhen>
             </command>
@@ -182,9 +214,14 @@
                   checkEnabled="false">
                <with
                      variable="activeWorkbenchWindow.activePerspective">
-                  <equals
-                        value="org.wcs.smart.query.SmartQueryPerspective">
-                  </equals>
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                     </equals>
+                  </or>
                </with>
             </visibleWhen>
          </command>
@@ -672,6 +709,9 @@
                   <equals
                         value="org.wcs.smart.query.SmartQueryPerspective">
                   </equals>
+                  <equals
+                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                  </equals>
                </with>
                <with
                      variable="activeEditorId">
@@ -723,9 +763,14 @@
                </with>
                <with
                      variable="activeWorkbenchWindow.activePerspective">
-                  <equals
-                        value="org.wcs.smart.query.SmartQueryPerspective">
-                  </equals>
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                     </equals>
+                  </or>
                </with>
             </and>
          </enabledWhen>

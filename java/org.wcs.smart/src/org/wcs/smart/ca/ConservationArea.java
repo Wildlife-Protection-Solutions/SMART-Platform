@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -53,6 +52,11 @@ import org.wcs.smart.util.SmartUtils;
 @Table(name="smart.conservation_area")
 public class ConservationArea {
 
+	public static final byte[] MULTIPLE_CA = new byte[]{0,0,0,0,
+		0,0,0,0,
+		0,0,0,0,
+		0,0,0,0};
+	
 	/**
 	 * Maximum conservation area id length
 	 */
@@ -76,7 +80,6 @@ public class ConservationArea {
 	private String designation;
 	private String description;
 	
-	private String srs;
 	private List<Employee> employees;
 	private List<Agency> agencies;
 	private Set<Language> languages;
@@ -120,14 +123,6 @@ public class ConservationArea {
 	}
 	public void setDescription(String description) {
 		this.description = description;
-	}
-	
-	@Column(name="default_srs")
-	public String getSrs() {
-		return srs;
-	}
-	public void setSrs(String srs) {
-		this.srs = srs;
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY)

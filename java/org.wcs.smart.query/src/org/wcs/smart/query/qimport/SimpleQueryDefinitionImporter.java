@@ -124,9 +124,7 @@ public class SimpleQueryDefinitionImporter implements IQueryImporter {
 		wq.setConservationArea(SmartDB.getCurrentConservationArea());
 		wq.setOwner(SmartDB.getCurrentEmployee());
 		
-		ConservationAreaFilter caFilter = new ConservationAreaFilter();
-		caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		wq.setConservationAreaFilter(caFilter);
+		wq.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
 		
 		return wq;

@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
@@ -67,12 +68,32 @@ public class ConservationAreaFilter implements IFilter {
 	
 	private ArrayList<byte[]> filters = new ArrayList<byte[]>();
 
-	
 	/**
-	 * Creates an empty conservation area filter
+	 * Creates a new empty conservation area filter
 	 */
 	public ConservationAreaFilter(){
 		
+	}
+	
+	/**
+	 * Creates a new default conservation area filter.
+	 * <p>By default this filter includes the logged in conservation
+	 * area for single analysis, or all selected conservation areas
+	 * for multiple ca analysis</p>
+	 * 
+	 * 
+	 */
+	public ConservationAreaFilter(boolean init){
+		this();
+		if (init){
+			if (!SmartDB.isMultipleAnalysis()){
+				addConservationArea(SmartDB.getCurrentConservationArea());
+			}else{
+				for (ConservationArea ca : SmartDB.getSelectedConservationAreas()){
+					addConservationArea(ca);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -133,6 +154,9 @@ public class ConservationAreaFilter implements IFilter {
 		sb.append(caClassPrefix);
 		sb.append(".ca_uuid IN ("); //$NON-NLS-1$
 		for (int i = 0; i < filters.size(); i++) {
+			if (i != 0){
+				sb.append(",");
+			}
 			String uuid = SmartUtils.encodeHex(filters.get(i));
 			sb.append("x'" + uuid + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}

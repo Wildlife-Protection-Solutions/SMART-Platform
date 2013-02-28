@@ -44,7 +44,7 @@ import org.eclipse.ui.ISources;
  */
 public class SourceProvider extends AbstractSourceProvider {
 
-	public static enum QueryDropType{
+	public static enum QueryPartPanelType{
 		FILTER_ITEM, SUMMARY_ITEM, GRIDDED_ITEM
 	}
 	
@@ -77,7 +77,7 @@ public class SourceProvider extends AbstractSourceProvider {
 		fireSourceChanged(ISources.ACTIVE_PART_ID, SELECTED_FILTERS, selection);
 	}
 	
-	public void setQueryDefinitionType(QueryDropType type){
+	public void setQueryDefinitionType(QueryPartPanelType type){
 		data.put(QUERY_DROP_TYPE, type);
 		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_DROP_TYPE, type);
 	}

@@ -22,6 +22,7 @@
 package org.wcs.smart.startup;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.derby.impl.jdbc.EmbedSQLException;
@@ -115,20 +116,64 @@ public class SmartStartUp {
 	 * @return true if successfully logged in, false otherwise
 	 */
 	public static boolean login(ConservationArea ca, String userName, String password ){
-		try{
-			Employee e = HibernateManager.validateUser(userName, password, ca);
-			if (e == null){
-				MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.SmartStartUp_ErrorDialog_Title, Messages.SmartStartUp_Error_LoginFail);
+		
+		if (Arrays.equals(ca.getUuid(), ConservationArea.MULTIPLE_CA)) {
+			// we are performing cross-ca analysis and need to do something
+			// differen
+			List<ConservationArea> areas;
+			try {
+				areas = HibernateManager.findConservationAreas(userName,
+						password);
+
+				if (areas == null || areas.size() == 0) {
+					MessageDialog
+							.openInformation(
+									Display.getCurrent().getActiveShell(),
+									"Error",
+									"The provided username/password does not have permissions to access any of the conservation areas.");
+					return false;
+				} else if (areas.size() == 1) {
+					MessageDialog
+							.openInformation(
+									Display.getCurrent().getActiveShell(),
+									"Error",
+									"The current username/password only has access to a single conservation area.  To perform cross-conservation analaysis you must have the same user account with manager, analyst or admin permissions in each conservation area you with to query");
+					return false;
+				} else {
+					
+					//set the employee to the employee for the first CA
+					Employee e = HibernateManager.validateUser(userName, password, areas.get(0));
+					if (e == null){
+						MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.SmartStartUp_ErrorDialog_Title, Messages.SmartStartUp_Error_LoginFail);
+						return false;
+					}
+					//	disconnect from the database & setup correct user level
+					HibernateManager.endSessionFactory(true);
+					SmartDB.setCurrentUser(e, ca);
+					SmartDB.setSelectedCas(areas);
+					return true;
+				}
+			} catch (Exception ex) {
+				SmartPlugIn.displayLog(null,
+						Messages.SmartStartUp_Error_LoginError, ex);
 				return false;
 			}
-			//disconnect from the database & setup correct user level
-			HibernateManager.endSessionFactory(true);
-			SmartDB.setCurrentUser(e, ca);
+		}else{
+			try{
+				Employee e = HibernateManager.validateUser(userName, password, ca);
+				if (e == null){
+					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.SmartStartUp_ErrorDialog_Title, Messages.SmartStartUp_Error_LoginFail);
+					return false;
+				}
+				//	disconnect from the database & setup correct user level
+				HibernateManager.endSessionFactory(true);
+				SmartDB.setCurrentUser(e, ca);
 			
-			HibernateManager.openSession();
-			return true;
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(null, Messages.SmartStartUp_Error_LoginError, ex);
+				HibernateManager.openSession();
+				return true;
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(null, Messages.SmartStartUp_Error_LoginError, ex);
+			}
 		}
 		return false;
 	}

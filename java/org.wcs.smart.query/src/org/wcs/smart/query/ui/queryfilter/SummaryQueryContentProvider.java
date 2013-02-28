@@ -95,7 +95,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	/**
 	 * Root node children
 	 */
-	enum NodeType  {
+	public enum NodeType  {
 		VALUE_NODE(Messages.SummaryQueryContentProvider_ValueOpsLabel),
 		GROUP_BY_NODE(Messages.SummaryQueryContentProvider_GroupByOpLabel),
 		PATROL_VALUES(Messages.SummaryQueryContentProvider_PatrolValuesLabel),

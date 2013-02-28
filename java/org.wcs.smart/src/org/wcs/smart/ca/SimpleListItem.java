@@ -142,6 +142,7 @@ public class SimpleListItem extends HasLabel {
 	 * @param newName
 	 */
 	public void updateName(Language lang, String newName){
+		if (lang == null) return;
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
 			if (type.getLanguage().equals(lang)){

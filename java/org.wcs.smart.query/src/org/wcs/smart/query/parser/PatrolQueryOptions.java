@@ -205,6 +205,14 @@ public class PatrolQueryOptions {
 	};
 	
 	/**
+	 * Patrol group by options for summary queries that can
+	 * be shared across conservation areas
+	 */
+	public final static PatrolQueryOption[] SHARED_PATROL_GROUBY_OPTIONS = {
+			PatrolQueryOption.PATROL_TYPE
+	};
+	
+	/**
 	 * Patrol filter options for summary and observation queries
 	 */
 	public final static PatrolQueryOption[] PATROL_FILTER_OPTIONS = {
@@ -220,6 +228,14 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.EMPLOYEE
 	};
 	
+	/**
+	 * Patrol filter options for summary and observation queries 
+	 * that can be shared across conservation areas 
+	 */
+	public final static PatrolQueryOption[] SHARED_PATROL_FILTER_OPTIONS = {
+			PatrolQueryOption.ARMED, 
+			PatrolQueryOption.PATROL_TYPE, 
+	};
 	
 	/**
 	 * Options for computing encounter rates

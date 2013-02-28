@@ -33,7 +33,7 @@ import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.SourceProvider;
-import org.wcs.smart.query.ui.SourceProvider.QueryDropType;
+import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
 
@@ -168,7 +168,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	public void visible(){
 		ISourceProviderService service = (ISourceProviderService)view.getSite().getService(ISourceProviderService.class);
 		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);
-		provider.setQueryDefinitionType(QueryDropType.FILTER_ITEM);
+		provider.setQueryDefinitionType(QueryPartPanelType.FILTER_ITEM);
 	}
 
 }

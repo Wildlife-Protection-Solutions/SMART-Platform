@@ -44,17 +44,20 @@ public class QueryFactory {
 		q.updateName(SmartDB.getCurrentLanguage(), defaultName);
 		q.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), defaultName);
 		q.setName(defaultName);
+		
 	}
 	
 	public static ObservationQuery createObservationQuery(){
 		ObservationQuery query = new ObservationQuery();
 		initQuery(query, null);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		return query;
 	}
 	
 	public static PatrolQuery createPatrolQuery(){
 		PatrolQuery query = new PatrolQuery();
 		initQuery(query, null);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		return query;
 	}
 	
@@ -62,11 +65,7 @@ public class QueryFactory {
 	public static GriddedQuery createGriddedQuery(){
 		GriddedQuery query = new GriddedQuery();
 		initQuery(query, Messages.GriddedQuery_DefaultQueryName);
-		ConservationAreaFilter caFilter = new ConservationAreaFilter();
-		if (SmartDB.getCurrentConservationArea() != null){
-			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		}
-		query.setConservationAreaFilter(caFilter);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		query.setDateFilter(null);
 		return query;
 	}
@@ -75,11 +74,7 @@ public class QueryFactory {
 		SummaryQuery query = new SummaryQuery();
 		initQuery(query, Messages.SummaryQuery_DefaultQueryName);
 		
-		ConservationAreaFilter caFilter = new ConservationAreaFilter();
-		if (SmartDB.getCurrentConservationArea() != null){
-			caFilter.addConservationArea(SmartDB.getCurrentConservationArea());
-		}
-		query.setConservationAreaFilter(caFilter);
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		query.setDateFilter(null);
 		return query;
 	}
