@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui.queryfilter;
 
 import java.util.HashMap;
@@ -25,17 +46,23 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
-import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
-import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
-import org.wcs.smart.query.ui.QueryLayoutManager;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.RootNodeType;
 
+/**
+ * Panel displaying default filter items for filtering
+ * query results.
+ * 
+ * @author Emily
+ *
+ */
 public class QueryFilterPanel extends AbstractQueryItemPanel {
 	
 	private TreeViewer filterTreeViewer;
@@ -121,7 +148,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			}
 		});
 		filterTreeViewer.setAutoExpandLevel(2);
-		filterTreeViewer.setInput("Loading");
+		filterTreeViewer.setInput(LOADING_TEXT);
 		Button btnAdd = new Button(main, SWT.PUSH);
 		btnAdd.setText(Messages.QueryFilterView_AddToQueryButton);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -137,8 +164,14 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		addQueryItem((IStructuredSelection) filterTreeViewer.getSelection());
 	}
 	
+	@Override
+	public void refreshPanel(){
+		filterTreeViewer.setInput(LOADING_TEXT);
+		filterTreeViewer.refresh();
+		refreshJob.schedule();
+	}
 	
-	private Job refreshJob = new Job("RefreshQueryFilterTree"){
+	private Job refreshJob = new Job("Refres hQuery Filter Tree"){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -166,11 +199,4 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		}
 		
 	};
-	
-	@Override
-	public void refreshPanel(){
-		filterTreeViewer.setInput(LOADING_TEXT);
-		filterTreeViewer.refresh();
-		refreshJob.schedule();
-	}
 }

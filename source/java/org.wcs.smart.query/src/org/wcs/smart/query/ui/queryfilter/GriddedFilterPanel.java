@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.ui.queryfilter;
 
 import java.util.HashMap;
@@ -24,10 +45,19 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 
+/**
+ * Gridded value items panel.  Contains
+ * a tree of items that can be used for
+ * computing values for gridded queries.
+ * 
+ * @author Emily
+ *
+ */
 public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 	
 	//filter panel
@@ -36,6 +66,9 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 	public GriddedFilterPanel(){
 	}
 	
+	/**
+	 * Valid for gridded items
+	 */
 	public QueryPartPanelType getValidType(){
 		return QueryPartPanelType.GRIDDED_ITEM;
 	}
@@ -79,7 +112,7 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 			}
 		});
 		filterTreeViewer.setAutoExpandLevel(2);
-		filterTreeViewer.setInput("Loading");
+		filterTreeViewer.setInput(LOADING_TEXT);
 		
 		Button btnAdd = new Button(main, SWT.PUSH);
 		btnAdd.setText(Messages.QueryFilterView_AddToQueryButton);
@@ -96,7 +129,21 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 		addQueryItem((IStructuredSelection) filterTreeViewer.getSelection());
 	}
 	
-	private Job refreshJob = new Job("RefreshGriddedTree"){
+	
+	@Override
+	public void refreshPanel(){
+		if (SmartDB.isMultipleAnalysis()){
+			filterTreeViewer.setInput("Gridded Analysis Not Available for Cross-Conservation Area Analysis");
+			filterTreeViewer.refresh();
+		}else{
+			filterTreeViewer.setInput(LOADING_TEXT);
+			filterTreeViewer.refresh();
+			refreshJob.schedule();
+		}
+	}
+	
+	// job for refreshing the tree
+	private Job refreshJob = new Job("Refresh Gridded Tree"){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -117,16 +164,4 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 		}
 		
 	};
-	
-	@Override
-	public void refreshPanel(){
-		if (SmartDB.isMultipleAnalysis()){
-			filterTreeViewer.setInput("Gridded Analysis Not Available for Cross-Conservation Area Analysis");
-			filterTreeViewer.refresh();
-		}else{
-			filterTreeViewer.setInput(LOADING_TEXT);
-			filterTreeViewer.refresh();
-			refreshJob.schedule();
-		}
-	}
 }

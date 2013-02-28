@@ -39,6 +39,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolOptions;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IResultItem;
 
@@ -213,63 +214,60 @@ public abstract class QueryColumn implements Cloneable{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
-				DataModel dataModel = null;
 				PatrolOptions patrolOps = null;
 				Session session = HibernateManager.openSession();
 				
 				try {
 					patrolOps = PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-					session.beginTransaction();
-					dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-					
-					ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+				} finally {
+					session.close();
+				}	
+				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				
-					for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
-						FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
-						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
 						
-							if (patrolOps.getTrackDistanceDirection()){
-								cols.add(new FixedQueryColumn(item));
-							}
-						}else if(item == FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE||
-									item == FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE){
-							//do nothing, don't want these columns in a waypoint query
-						}else{
+						if (patrolOps.getTrackDistanceDirection()){
 							cols.add(new FixedQueryColumn(item));
 						}
+					}else if(item == FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE||
+								item == FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE){
+							//do nothing, don't want these columns in a waypoint query
+					}else{
+						cols.add(new FixedQueryColumn(item));
 					}
-
-					// add data model category columns
-					int numCategory = 0;
-					for (Category cat : dataModel.getActiveCategories()) {
-						numCategory = Math.max(numCategory, getDepth(cat));
-					}
-
-					for (int i = 0; i < numCategory; i++) {
-						cols.add(new CategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader + i, i));
-					}
-					
-					//sort attributes alphabetically
-					List<Attribute> atts = new ArrayList<Attribute>();
-					atts.addAll( dataModel.getAttributes() );
-					Collections.sort(atts, new Comparator<Attribute>(){
-						@Override
-						public int compare(Attribute o1, Attribute o2) {
-							return Collator.getInstance().compare(o1.getName(),o2.getName());
-						}});
-					
-					for (Attribute att : atts) {
-						String name = att.getName();
-						cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
-					}
-
-					queryColumns = cols.toArray(new QueryColumn[cols.size()]);
-				
-				} finally {
-					session.getTransaction().commit();
-					session.close();
 				}
+
+				DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
+				// add data model category columns
+				int numCategory = 0;
+				for (Category cat : dataModel.getActiveCategories()) {
+					numCategory = Math.max(numCategory, getDepth(cat));
+				}
+
+				for (int i = 0; i < numCategory; i++) {
+					cols.add(new CategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader + i, i));
+				}
+					
+				//sort attributes alphabetically
+				List<Attribute> atts = new ArrayList<Attribute>();
+				atts.addAll( dataModel.getAttributes() );
+				Collections.sort(atts, new Comparator<Attribute>(){
+					@Override
+					public int compare(Attribute o1, Attribute o2) {
+						return Collator.getInstance().compare(o1.getName(),o2.getName());
+					}});
+					
+				for (Attribute att : atts) {
+					String name = att.getName();
+					cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
+				}
+
+				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
+				
+				
 				return Status.OK_STATUS;
 			}
 			};
@@ -363,10 +361,8 @@ public abstract class QueryColumn implements Cloneable{
 	 */
 	private static int getDepth(Category cat) {
 		int maxDepth = 0;
-		for (Category child : cat.getChildren()) {
-			if (child.getIsActive()) {
-				maxDepth = Math.max(maxDepth, getDepth(child));
-			}
+		for (Category child : cat.getActiveChildren()) {
+			maxDepth = Math.max(maxDepth, getDepth(child));
 		}
 		return maxDepth + 1;
 	}

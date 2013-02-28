@@ -133,7 +133,7 @@ public class DateGroupBy implements IGroupBy {
 				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
 				Query q = session.createQuery(hql);
 				if (SmartDB.isMultipleAnalysis()){
-					q.setParameterList("ca", SmartDB.getSelectedConservationAreas());
+					q.setParameterList("ca", SmartDB.getSelectedConservationAreas()); //$NON-NLS-1$
 				}else{
 					q.setParameterList("ca", new ConservationArea[]{SmartDB.getCurrentConservationArea()}); //$NON-NLS-1$
 				}
