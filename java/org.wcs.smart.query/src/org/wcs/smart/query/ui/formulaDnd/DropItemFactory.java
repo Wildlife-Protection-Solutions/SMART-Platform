@@ -28,6 +28,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.model.Query.QueryType;
+import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
@@ -120,10 +121,10 @@ public class DropItemFactory {
 	 * @param option
 	 * @return
 	 */
-	public DropItem createPatrolFilterDropItem(PatrolQueryOption option){
+	public DropItem createPatrolFilterDropItem(IPatrolQueryOption option){
 		DropItem item = null;
 		if (option == PatrolQueryOption.ARMED){
-			item = new BooleanPatrolDropItem( option);
+			item = new BooleanPatrolDropItem(option);
 		}else if (option == PatrolQueryOption.ID){
 			item = new PatrolIdDropItem(option);
 		}else if (option == PatrolQueryOption.MANDATE || 
@@ -134,7 +135,21 @@ public class DropItemFactory {
 				option == PatrolQueryOption.LEADER ||
 				option == PatrolQueryOption.TEAM||
 				option == PatrolQueryOption.PILOT){
-			item = new PatrolListDropItem( option);
+			item = new PatrolListDropItem(option);
+		} else {
+			switch (option.getType()) {
+			case BOOLEAN:
+				item = new BooleanPatrolDropItem(option);
+				break;
+			case STRING:
+				item = new PatrolIdDropItem(option);
+				break;
+			case UUID:
+				item = new PatrolListDropItem(option);
+				break;
+			default:
+				break;
+			}
 		}
 		return item;
 			
@@ -179,7 +194,7 @@ public class DropItemFactory {
 	 * @param item
 	 * @return
 	 */
-	public DropItem createPatrolGroupByDropItem(PatrolQueryOption item){
+	public DropItem createPatrolGroupByDropItem(IPatrolQueryOption item){
 		return new PatrolGroupByDropItem(item);
 	}
 	
@@ -359,14 +374,14 @@ public class DropItemFactory {
 			items = new DropItem[]{createPatrolValueDropItem(
 							(PatrolValueOption) object)};
 
-		} else if (object instanceof PatrolQueryOption) {
+		} else if (object instanceof IPatrolQueryOption) {
 			
 			if (dropType == QueryPartPanelType.SUMMARY_ITEM){
 				items = new DropItem[]{createPatrolGroupByDropItem(
-						(PatrolQueryOption) object)};
+						(IPatrolQueryOption) object)};
 			}else{
 				items = new DropItem[]{createPatrolFilterDropItem(
-						(PatrolQueryOption) object)};
+						(IPatrolQueryOption) object)};
 			}
 		} else if (object instanceof DateGroupByOption) {
 			items = new DropItem[]{createDateGroupByDropItem(
