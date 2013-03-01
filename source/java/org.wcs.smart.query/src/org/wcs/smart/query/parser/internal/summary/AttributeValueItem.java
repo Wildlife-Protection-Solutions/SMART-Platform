@@ -30,6 +30,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.FilterValidator;
@@ -128,7 +129,7 @@ public class AttributeValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
 	 */
 	public String getName(Session session){
-		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
 		
 		if (att == null){
 			return ""; //$NON-NLS-1$
@@ -153,7 +154,7 @@ public class AttributeValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
 	 */
 	public String getFullName(Session session){
-		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
 		if (att == null){
 			return ""; //$NON-NLS-1$
 		}
@@ -195,7 +196,7 @@ public class AttributeValueItem implements IValueItem {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
-		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
 		DropItem di = null;
 		if (categoryKey == null){
 			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);

@@ -28,15 +28,15 @@ public class DataModelMerger {
 	 * @param session hibernate session
 	 * @return a merged data model
 	 */
-	public DataModel mergeDataModels(ConservationArea[] cas, Session session){
+	public DataModel mergeDataModels(ConservationArea[] cas, ConservationArea defaultCa, Session session){
 		if (cas == null || cas.length < 2){
 			throw new IllegalStateException("more than 1 conservation area must be provided");//$NON-NLS-1$
 		}
-		/* load data model for first ca found */
-		DataModel dm = HibernateManager.loadDataModel(cas[0], session);
+		// load data model for default Ca
+		DataModel dm = HibernateManager.loadDataModel(defaultCa, session);
 		
 		/* root categories */
-		DataModel newDataModel = new DataModel(cas[0], new ArrayList<Category>(), new ArrayList<Attribute>());
+		DataModel newDataModel = new DataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
 		for (Category c : dm.getCategories()){
 			if (canKeep(c, cas, session)){
 				newDataModel.addRootCategories(c);
@@ -47,7 +47,7 @@ public class DataModelMerger {
 		/* attributes */
 		for (Attribute a : dm.getAttributes()){
 			if (canKeep(a, cas, session)){
-				a.setName(a.findName(cas[0].getDefaultLanguage()));
+//				a.setName(a.findName(cas[0].getDefaultLanguage()));
 				newDataModel.getAttributes().add(a);
 			}
 		}
@@ -65,7 +65,7 @@ public class DataModelMerger {
 	private void processChildren(Category parent, ConservationArea[] ca, Session session){
 		
 		//TODO: I need to deal with the name/language issue here
-		parent.setName(parent.findName(ca[0].getDefaultLanguage()));
+//		parent.setName(parent.findName(ca[0].getDefaultLanguage()));
 		if(parent.getChildren() != null){
 			List<Category> kids = new ArrayList<Category>();
 			for (Category kid : parent.getChildren()){

@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
@@ -202,27 +203,28 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
+				Session session = HibernateManager.openSession();
+				session.beginTransaction();
 				try{
 					
 					List<AttributeTreeNode> nodes = null;
+					
 					if (parent.getObject() instanceof Attribute){
-						s.update(parent.getObject());
-						nodes = ((Attribute)parent.getObject()).getActiveTreeNodes() ;
+						Attribute attribute = (Attribute)parent.getObject();
+						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof CategoryAttribute ){
-						s.update(((CategoryAttribute)parent.getObject()).getAttribute() );
-						nodes = ((CategoryAttribute)parent.getObject()).getAttribute().getActiveTreeNodes() ;
+						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
+						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof AttributeTreeNode){
-						s.update(parent.getObject());
-						nodes =  ((AttributeTreeNode)parent.getObject()).getActiveChildren() ;
+						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
+						nodes = node.getActiveChildren();
 					}
 					kids.addAll(nodes);					
-					s.getTransaction().rollback();
+					session.getTransaction().rollback();
 				}catch (Exception ex){
 					QueryPlugIn.log(Messages.SummaryQueryContentProvider_ErrorLoadingTreeItemsA + ex.getLocalizedMessage(), ex);
 				}finally{
-					s.close();
+					session.close();
 				}
 				return Status.OK_STATUS;
 			}

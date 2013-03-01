@@ -85,7 +85,7 @@ public class SmartDB {
 	private static DbUser current = DbUser.LOGIN;
 	private static Employee currentEmployee = null;
 	private static ConservationArea currentCa = null;
-	private static List<ConservationArea> selectedCa = null;
+	private static MultipleCaAnalysisConfiguration caConfig = null;
 	
 	private static Language currentLanguage = null;;
 	
@@ -150,20 +150,19 @@ public class SmartDB {
 	}
 	/**
 	 * 
-	 * @return list of conservation areas selected
-	 * for cross-ca analysis; will be <code>null</code> if 
-	 * logged into a single conservation area
+	 * @return the configuration used if the current login
+	 * is performing cross conservation area analysis.  Otherwise
+	 * it will return <code>null</code>.
 	 */
-	public static List<ConservationArea> getSelectedConservationAreas(){
-		return selectedCa;
+	public static MultipleCaAnalysisConfiguration getConservationAreaConfiguration(){
+		return caConfig;
 	}
 	/**
-	 * Sets the conservation areas selected
-	 * for cross-ca analysis
+	 * Sets the configuration for cross conservation area analysis
 	 * @param selectedCa
 	 */
-	public static void setSelectedCas(List<ConservationArea> selectedCas){
-		selectedCa = selectedCas;
+	public static void setSelectedCas(MultipleCaAnalysisConfiguration configuration){
+		caConfig = configuration;
 	}
 	
 	/**

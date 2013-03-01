@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -45,6 +47,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 
@@ -65,7 +68,7 @@ public class AttributeTreeDropItem extends DropItem{
 	private Button btnEdit = null;
 	
 	private Attribute attribute = null;
-	
+	private List<AttributeTreeNode> roots = null;
 	private AttributeTreeNode currentSelection = null;
 	
 	/*
@@ -80,11 +83,7 @@ public class AttributeTreeDropItem extends DropItem{
 			s.beginTransaction();
 			try{
 				attribute = (Attribute) s.load(Attribute.class, attribute.getUuid());
-				if (attribute.getActiveTreeNodes() != null){
-					for (AttributeTreeNode node : attribute.getActiveTreeNodes()){
-						visitTreeNode(node);
-					}
-				}
+				roots = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
 			}catch(Exception ex){
 				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
 			}finally{
@@ -92,15 +91,6 @@ public class AttributeTreeDropItem extends DropItem{
 				s.close();
 			}
 			return Status.OK_STATUS;
-		}
-		private void visitTreeNode(AttributeTreeNode parent){
-			if (parent.getActiveChildren() != null){
-				for (AttributeTreeNode child: parent.getActiveChildren()){
-					child.getHkey();
-					child.getName();
-					visitTreeNode(child);
-				}
-			}
 		}
 	};
 		
@@ -233,7 +223,7 @@ public class AttributeTreeDropItem extends DropItem{
 				 if (treeviewer == null){
 					 return;
 				 }
-				treeviewer.setAttribute(attribute);
+				treeviewer.setAttribute(roots);
 				treeviewer.positionAndShow(AttributeTreeDropItem.this.getWidget(), new ISelectionListener(){
 
 					@Override
