@@ -22,12 +22,10 @@
 package org.wcs.smart.query.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
@@ -138,20 +136,8 @@ public class QueryResultItem implements IResultItem{
 	/**
 	 * @param cat sets the category
 	 */
-	public void setCategory(Category cat){
-		if (cat == null){
-			return;
-		}
-		ArrayList<String> values = new ArrayList<String>();
-		values.add(cat.getName());
-		Category parent = cat.getParent();
-		while(parent != null){
-			values.add(parent.getName());
-			parent = parent.getParent();
-		}
-		Collections.reverse(values);
-		
-		observationCategory = values.toArray(new String[values.size()]);
+	public void setCategory(String[] categoryLabels){
+		this.observationCategory = categoryLabels;
 	}
 	
 	/**

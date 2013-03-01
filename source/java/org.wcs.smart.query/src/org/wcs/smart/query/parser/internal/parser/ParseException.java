@@ -86,8 +86,7 @@ public class ParseException extends Exception {
    * from the parser) the correct error message
    * gets displayed.
    */
-  
-private static String initialise(Token currentToken,
+  private static String initialise(Token currentToken,
                            int[][] expectedTokenSequences,
                            String[] tokenImage) {
     String eol = System.getProperty("line.separator", "\n");

@@ -26,11 +26,18 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
@@ -47,7 +54,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 
 	
 	private FilterDropTargetPanel dropTarget;
-	
+	private ConservationAreaFilterPanel caFilter;
 	private QueryDefView view;
 	/**
 	 * 
@@ -69,8 +76,34 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 		setLayout(layout);
 		setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
-		// create drop area
-		createDragAndDropArea(this);
+		dropTarget = new FilterDropTargetPanel(view);
+		
+		if (SmartDB.isMultipleAnalysis()){
+			//need tabs with both a ca filter and a query filter
+			TabFolder tabs = new TabFolder(this, SWT.TOP);
+			tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			TabItem item2 = new TabItem(tabs, SWT.NONE);
+			Composite control = dropTarget.createComposite(tabs);
+			item2.setControl(control);
+			item2.setText(FilterDropTargetPanel.PANEL_TITLE);	
+			dropTarget.getComposite().setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
+			
+			TabItem item1 = new TabItem(tabs, SWT.NONE);
+			caFilter = new ConservationAreaFilterPanel(tabs);
+			item1.setControl(caFilter);
+			item1.setText(ConservationAreaFilterPanel.PANEL_TITLE);	
+			caFilter.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
+			caFilter.setSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					validate();
+				}
+			});
+		}else{
+			// create drop area
+			dropTarget.createComposite(this);
+		}
 	}
 	
 	/**
@@ -82,16 +115,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 		}
 	}
 	
-	/**
-	 * Creates the drag and drop are panel
-	 * @param parent
-	 * 
-	 * @return
-	 */
-	private void createDragAndDropArea(Composite parent){		
-		dropTarget = new FilterDropTargetPanel(view);
-		dropTarget.createComposite(parent);
-	}
+
 
 	/**
 	 * @see org.wcs.smart.query.ui.QueryDefinitionComposite#clear()
@@ -117,11 +141,9 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	 */
 	public String validate(){
 		String error =null;
+		
 		String query = dropTarget.getQueryString().trim();
-		boolean isvalid = true;
-		if (query.length() == 0) {
-			isvalid = true;
-		} else {
+		if (query.length() != 0) {
 			try {
 				InputStream is = new ByteArrayInputStream(query.getBytes());
 				Parser parser = new Parser(is);
@@ -129,15 +151,25 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 				is.close();
 			} catch (Throwable ex) {
 				// failed to parse query
-				isvalid = false;
 				error = ex.getLocalizedMessage();
 			}
 		}
+		
+		if (error == null && caFilter != null){
+			error = caFilter.isValid();
+		}
+
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)view.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_VALID);
-		provider.setQueryValue(isvalid, error);
+		provider.setQueryValue(error == null, error);
 		if(view.getQuery() != null){
-			view.getQuery().setIsValid(isvalid);
+			view.getQuery().setIsValid(error == null);
 			((SimpleQuery)view.getQuery()).setQueryFilter(query);
+			if (caFilter != null){
+				ConservationAreaFilter newFilter = caFilter.getCaFilter();
+				if (newFilter != null){
+					view.getQuery().setConservationAreaFilter(newFilter);
+				}
+			}
 		}
 		return error;
 	}
@@ -148,6 +180,9 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	@Override
 	public void init() {
 		dropTarget.addElements(((SimpleQuery)view.getQuery()).getDropItems());
+		if (caFilter != null){
+			caFilter.initQuery(view.getQuery());
+		}
 	}
 
 	/**

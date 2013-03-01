@@ -23,7 +23,6 @@ package org.wcs.smart.hibernate;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
@@ -163,6 +162,7 @@ public class SmartDB {
 	 */
 	public static void setSelectedCas(MultipleCaAnalysisConfiguration configuration){
 		caConfig = configuration;
+		currentLanguage = caConfig.getLanguage();
 	}
 	
 	/**

@@ -192,7 +192,7 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 			public String getText(Object element) {
 				if (element instanceof ConservationArea) {
 					ConservationArea ca = (ConservationArea) element;
-					return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
+					return ca.getNameLabel();
 				}
 				return super.getText(element);
 			}

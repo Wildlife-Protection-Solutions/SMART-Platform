@@ -40,7 +40,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
@@ -90,7 +90,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			for(Category child : QueryHibernateManager.getCategories(s, level)){
+			for(Category child : QueryDataModelManager.getInstance().getCategories(s, level)){
 				items.add(new ListItem(null, child.getFullCategoryName(), child.getHkey()));
 			}
 			s.getTransaction().rollback();
@@ -188,6 +188,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeData(Object data) {
 		if (data == null){

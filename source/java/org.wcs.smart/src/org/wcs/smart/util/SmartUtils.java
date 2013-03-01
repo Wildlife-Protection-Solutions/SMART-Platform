@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -40,6 +41,9 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.DateTime;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -547,5 +551,64 @@ public class SmartUtils {
 	    	key += "_" + l.getCountry(); //$NON-NLS-1$
 	    }
 	    return key.trim();
+	}
+	
+	
+	/**
+	 * Finds the language that best matches the current
+	 * logged in language.
+	 * <p>
+	 * Looks first for codes that fully match,
+	 * then codes whose first (language) part matches.  If
+	 * not found returns null.
+	 * 
+	 * @param languages
+	 * @return
+	 */
+	public static Language findLanguageMatch(Collection<Language> languages){
+		String currentCode = SmartDB.getCurrentLanguage().getCode();
+		for (Language l : languages){
+			if (l.getCode().equals(currentCode)){
+				return l;
+			}
+		}
+		String[] bits = currentCode.split("_"); //$NON-NLS-1$
+		String lang = bits[0];
+		
+		for (Language l : languages){
+			if (l.getCode().split("_")[0].equals(lang)){ //$NON-NLS-1$
+				return l;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Finds the label whose value best matches the current
+	 * logged in language.
+	 * <p>
+	 * Looks first for codes that fully match,
+	 * then codes whose first (language) part matches.  If
+	 * not found returns null.
+	 * 
+	 * @param languages
+	 * @return
+	 */
+	public static Label findLanguageMatch(Collection<Label> labels){
+		String currentCode = SmartDB.getCurrentLanguage().getCode();
+		for (Label l : labels){
+			if (l.getLanguage().getCode().equals(currentCode)){
+				return l;
+			}
+		}
+		String[] bits = currentCode.split("_"); //$NON-NLS-1$
+		String lang = bits[0];
+		
+		for (Label l : labels){
+			if (l.getLanguage().getCode().split("_")[0].equals(lang)){ //$NON-NLS-1$
+				return l;
+			}
+		}
+		return null;
 	}
 }

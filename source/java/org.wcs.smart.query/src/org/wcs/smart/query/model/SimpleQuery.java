@@ -39,7 +39,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
-import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
@@ -67,7 +66,6 @@ public abstract class SimpleQuery extends Query {
 	public String strQueryFilter;
 	public IFilter queryFilter;	//cached copy of the parsed query
 	
-	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
 		
 	private Collection<QueryResultItem> lastResults  = null;
@@ -150,23 +148,6 @@ public abstract class SimpleQuery extends Query {
 		}
 		return queryFilter;	
 	}
-	
-	
-	/**
-	 * @return the conservation area filter
-	 */
-	@Transient
-	public ConservationAreaFilter getConservationAreaFilter(){
-		return this.caFilter;
-	}
-	
-	/**
-	 * @param filter a conservation area filter
-	 */
-	public void setConservationAreaFilter(ConservationAreaFilter filter){
-		this.caFilter = filter;
-	}
-	
 	
 	/**
 	 * @return the date filter; or null if date filter not set

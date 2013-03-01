@@ -27,6 +27,7 @@ public class Messages extends NLS {
 	public static String AttributeTreeGroupByDropItem_TreeLevelLabel;
 	public static String AttributeValueItem_AggNoSupported;
 	public static String AttributeValueItem_InvalidKey;
+	public static String CaDataModelManagerImpl_LoadDataModelJobName;
 	public static String CategoryFilter_CategoryNotFound;
 	public static String CategoryFilter_InvalidPrefix;
 	public static String CategoryGroupByDropItem_AllLabel;
@@ -39,6 +40,8 @@ public class Messages extends NLS {
 	public static String CategoryValueItem_CountObservationLabel;
 	public static String CombinedValueItem_PER_LABEL;
 	public static String ConservationAreaFilter_InvalidCaFilter;
+	public static String ConservationAreaFilterPanel_CaFilterPanelTitle;
+	public static String ConservationAreaFilterPanel_Error_NoCas;
 	public static String CreateHandler_QueryEditorError;
 	public static String CreateHandler_QueryPerspectiveError;
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
@@ -104,6 +107,7 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_OverwriteDialogMessage;
 	public static String ExportQueryWizard_OverwriteDialogTitle;
 	public static String ExportQueryWizard_WindowTitle;
+	public static String FilterDropTargetPanel_QueryFilterPanelTitle;
 	public static String FilterValidator_AttributeListItemNotFound;
 	public static String FilterValidator_AttributeNotFound;
 	public static String FilterValidator_AttributeTreeNodeNotFound;
@@ -158,8 +162,10 @@ public class Messages extends NLS {
 	public static String GriddedFilterPanel_ClearLabel;
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_CopyLabel;
+	public static String GriddedFilterPanel_GriddedAnalysisError;
 	public static String GriddedFilterPanel_RateFilterLabel;
 	public static String GriddedFilterPanel_RateFilterTooltip;
+	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedFilterPanel_ValueFilterLabel;
 	public static String GriddedFilterPanel_ValueFilterTooltip;
 	public static String GriddedQuery_DefaultQueryName;
@@ -239,6 +245,7 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_CouldNotImportError;
 	public static String ImportQueryWizard_ImportFailed;
 	public static String ImportQueryWizard_Title;
+	public static String MultiCaDataModelManagerImpl_LoadMergeJobName;
 	public static String NameCellEditor_CouldNotSaveFolderNameChange;
 	public static String NameCellEditor_CouldNotSaveQueryName;
 	public static String NameCellEditor_UpdateFolderNameJob;
@@ -281,6 +288,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryMapPage_ErrorRefreshing;
 	public static String PatrolQueryMapPage_RefreshJobName;
 	public static String PatrolQueryMapPage_UnknownStatus;
+	public static String PatrolQueryOptions_CaGroupByOptionName;
 	public static String PatrolQueryOptions_DateGroupByOpDay;
 	public static String PatrolQueryOptions_DateGroupByOpMonth;
 	public static String PatrolQueryOptions_DateGroupByOpYear;
@@ -385,7 +393,7 @@ public class Messages extends NLS {
 	public static String QueryFilterPanel_ParseContribution_Error;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterView_AddToQueryButton;
-	public static String QueryFilterView_InitTreeJobName;
+	public static String QueryFilterView_ErrorNoFilterOptions;
 	public static String QueryFilterView_LoadingLabel;
 	public static String QueryFolderTreeComposite_AddFolderButton;
 	public static String QueryGeoResource_Error_NoDatasource;
@@ -482,6 +490,7 @@ public class Messages extends NLS {
 	public static String SummaryEditor_QueryError;
 	public static String SummaryEditor_RunQueryJobName;
 	public static String SummaryEditor_SummaryQueryLabel;
+	public static String SummaryFilterPanel_RefreshTreeJobName;
 	public static String SummaryQuery_CannotGroupByAttribute;
 	public static String SummaryQuery_CannotGroupByCategory;
 	public static String SummaryQuery_DefaultQueryName;
@@ -503,8 +512,7 @@ public class Messages extends NLS {
 	public static String SummaryQueryContentProvider_PatrolValuesLabel;
 	public static String SummaryQueryContentProvider_ValueCategoriesAttributesLabel;
 	public static String SummaryQueryContentProvider_ValueOpsLabel;
-	public static String SummaryQueryDefinitionComposite_FilterSectionHeader;
-	public static String SummaryQueryDefinitionComposite_GroupByValuesSectionHeader;
+	public static String SummaryQueryDefinitionComposite_Error_EmptyQuery;
 	public static String SummaryQueryDefinitionComposite_NoValueError;
 	public static String SummaryQueryLabelProvider_CountCatLabel;
 	public static String SummaryResultsArea_RunSummaryLink;
@@ -513,6 +521,7 @@ public class Messages extends NLS {
 	public static String SummaryValueGroupByPanel_ColumnHeadersTooltip;
 	public static String SummaryValueGroupByPanel_GroupBySectionHeader;
 	public static String SummaryValueGroupByPanel_GroupBySectionTooltip;
+	public static String SummaryValueGroupByPanel_GroupByValuePanelTitle;
 	public static String SummaryValueGroupByPanel_RowHeadersHeader;
 	public static String SummaryValueGroupByPanel_RowHeadersTooltip;
 	public static String SummaryValueGroupByPanel_ValuesSectionHeader;

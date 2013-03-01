@@ -38,12 +38,15 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.HasLabel;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -53,6 +56,7 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
@@ -184,7 +188,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 						return;
 					}
 					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter());
+						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter());
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()){
@@ -199,7 +203,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 					}
 					
 					monitor.subTask(Messages.DerbyQueryEngine2_Progress_PopulatingResults);
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), true, c, true);
+					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), true, c, true);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;
@@ -378,6 +382,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + queryTempTable + "("); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_id varchar(23),"); //$NON-NLS-1$
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -448,6 +453,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append("INSERT INTO " + queryTempTable ); //$NON-NLS-1$
 		// ---- SELECT CLAUSE -----
 		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(tablePrefix.get(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(Patrol.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(Patrol.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
@@ -651,45 +657,48 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		try {
 			
 			/*Field order:
-			 * 1 - "p_uuid"
-			 * 2 - "p_id"
-			 * 3 - "p_start_date"
-			 * 4 - "p_end_date"
-			 * 5 - "p_station_uuid"
-			 * 6 - "p_team_uuid"
-			 * 7 - "p_objective"
-			 * 8 - "p_mandate_uuid"
-			 * 9 - "p_type"
-			 * 10 - "p_is_armed"
-			 * 11 - "pl_transport_uuid"
-			 * 12 - "pl_id"
-			 * 13 - "pld_patrol_day"
-			 * 14 - "plm_leader"
-			 * 15 - "plm_pilot"
-			 * 16 - "uuid"
-			 * 17 - "id"
-			 * 18 - "x"
-			 * 19 - "y"
-			 * 20 - "time"
-			 * 21 - "direction"
-			 * 22 - "distance"
-			 * 23 - "wp_comment"
-			 * 24 - "uuid"
-			 * 25 - "category_uuid"
-			 * 26 - "attribute_uuid"
-			 * 27 - "number_value"
-			 * 28 - "string_value"
-			 * 29 - "list_element_uuid"
-			 * 30 - "tree_node_uuid"
+			 * 1 - "ca_uuid"
+			 * 2 - "p_uuid"
+			 * 3 - "p_id"
+			 * 4 - "p_start_date"
+			 * 5 - "p_end_date"
+			 * 6 - "p_station_uuid"
+			 * 7 - "p_team_uuid"
+			 * 8 - "p_objective"
+			 * 9 - "p_mandate_uuid"
+			 * 10 - "p_type"
+			 * 11 - "p_is_armed"
+			 * 12 - "pl_transport_uuid"
+			 * 13 - "pl_id"
+			 * 14 - "pld_patrol_day"
+			 * 15 - "plm_leader"
+			 * 16 - "plm_pilot"
+			 * 17 - "uuid"
+			 * 18 - "id"
+			 * 19 - "x"
+			 * 20 - "y"
+			 * 21 - "time"
+			 * 22 - "direction"
+			 * 23 - "distance"
+			 * 24 - "wp_comment"
+			 * 25 - "uuid"
+			 * 26 - "category_uuid"
+			 * 27 - "attribute_uuid"
+			 * 28 - "number_value"
+			 * 29 - "string_value"
+			 * 30 - "list_element_uuid"
+			 * 31 - "tree_node_uuid"
+			 * 
+			 * 
 			 */
 
 			while (rs.next()) {
-				byte[] wpouuid = rs.getBytes(24);
+				byte[] wpouuid = rs.getBytes(25);
 				if (wpouuid != null && last != null
 						&& last.getObservationUuid() != null
 						&& Arrays.equals(wpouuid, last.getObservationUuid())) {
 					//same observation new attribute
-					Attribute att = getAttribute(rs.getBytes(26), session);
+					Attribute att = getAttribute(rs.getBytes(27), session);
 					if (att != null){
 						Object value = getAttributeValue(att, rs, session);
 						last.addAttribute(att.getKeyId(), value);
@@ -698,35 +707,35 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				}
 
 				QueryResultItem it = new QueryResultItem();
-				it.setPatrolUuid(rs.getBytes(1));
-				it.setPatrolId(rs.getString(2));
-				it.setPatrolStartDate(rs.getDate(3));
-				it.setPatrolEndDate(rs.getDate(4));
-				it.setStation(getName(rs.getBytes(5), session));				
-				it.setTeam(getName(rs.getBytes(6), session));				
-//				it.setObjectiveRating(rs.getInt(7));
-				it.setObjective(rs.getString(7));
-				it.setMandate(getName(rs.getBytes(8), session));
-				//it.setMandate(getMandateName(rs.getBytes(8), session));
-				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(9)));
-				it.setArmed(rs.getBoolean(10));
-				it.setTransportType(getName(rs.getBytes(11), session));
-				it.setPatrolLegId(rs.getString(12));
-				it.setWpDateTime(rs.getDate(13));
+				byte[] cauuid = rs.getBytes(1);
+//				it.setCaUuid(rs.getBytes(1));
+				it.setPatrolUuid(rs.getBytes(2));
+				it.setPatrolId(rs.getString(3));
+				it.setPatrolStartDate(rs.getDate(4));
+				it.setPatrolEndDate(rs.getDate(5));
+				it.setStation(getName(rs.getBytes(6), cauuid, session));				
+				it.setTeam(getName(rs.getBytes(7), cauuid, session));	
+				it.setObjective(rs.getString(8));
+				it.setMandate(getName(rs.getBytes(9), cauuid, session));
+				it.setPatrolType(PatrolType.Type.valueOf(rs.getString(10)));
+				it.setArmed(rs.getBoolean(11));
+				it.setTransportType(getName(rs.getBytes(12), cauuid, session));
+				it.setPatrolLegId(rs.getString(13));
+				it.setWpDateTime(rs.getDate(14));
 				
-				it.setLeader(getEmployeeName(rs.getBytes(14), session));
-				it.setPilot(getEmployeeName(rs.getBytes(15), session));
-				it.setWaypointUuid(rs.getBytes(16));
-				it.setWaypointId(rs.getInt(17));
-				it.setWaypointX(rs.getDouble(18));
-				it.setWaypointY(rs.getDouble(19));
-				it.setWaypointTime(rs.getTime(20));
-				it.setWaypointDirection(rs.getFloat(21));
-				it.setWaypointDistance(rs.getFloat(22));
-				it.setWaypointComment(rs.getString(23));
+				it.setLeader(getEmployeeName(rs.getBytes(15), session));
+				it.setPilot(getEmployeeName(rs.getBytes(16), session));
+				it.setWaypointUuid(rs.getBytes(17));
+				it.setWaypointId(rs.getInt(18));
+				it.setWaypointX(rs.getDouble(19));
+				it.setWaypointY(rs.getDouble(20));
+				it.setWaypointTime(rs.getTime(21));
+				it.setWaypointDirection(rs.getFloat(22));
+				it.setWaypointDistance(rs.getFloat(23));
+				it.setWaypointComment(rs.getString(24));
 				it.setObservationUuid(wpouuid);
-				it.setCategory(getCategory(rs.getBytes(25), session));
-				Attribute att = getAttribute(rs.getBytes(26), session);
+				it.setCategory(getCategoryLabels(rs.getBytes(26), session));
+				Attribute att = getAttribute(rs.getBytes(27), session);
 				if (att != null){
 					Object value = getAttributeValue(att, rs, session);
 					it.addAttribute(att.getKeyId(), value);
@@ -755,30 +764,24 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		Object value = null;
 		switch (att.getType()) {
 		case NUMERIC:
-			value = rs.getDouble(27);
+			value = rs.getDouble(28);
 			break;
 		case BOOLEAN:
-			value = (rs.getDouble(27) >= 0.5);
+			value = (rs.getDouble(28) >= 0.5);
 			break;
 		case TEXT:
-			value = rs.getString(28);
+			value = rs.getString(29);
 			break;
 		case TREE:
-			byte[] nodeuuid = rs.getBytes(30);
+			byte[] nodeuuid = rs.getBytes(31);
 			if (nodeuuid != null) {
-				value = getName(nodeuuid, session);
-//				AttributeTreeNode i = (AttributeTreeNode) session.load(
-//						AttributeTreeNode.class, nodeuuid);
-//				value = i.getName();
+				value = QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, att, nodeuuid);
 			}
 			break;
 		case LIST:
-			byte[] listuuid = rs.getBytes(29);
+			byte[] listuuid = rs.getBytes(30);
 			if (listuuid != null) {
-				value = getName(listuuid, session);
-//				AttributeListItem i = (AttributeListItem) session.load(
-//						AttributeListItem.class, listuuid);
-//				value = i.getName();
+				value = QueryDataModelManager.getInstance().getAttributeListItemLabel(session, att, listuuid);
 			}
 			break;
 		}
@@ -796,6 +799,9 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	protected Attribute getAttribute(byte[] uuid, Session session){
 		if (uuid != null){
 			Attribute att = (Attribute) session.load(Attribute.class, uuid);
+			if (SmartDB.isMultipleAnalysis()){
+				return QueryDataModelManager.getInstance().getAttribute(session,att.getKeyId());
+			}
 			return att;
 		}
 		return null;
@@ -808,10 +814,9 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @param session
 	 * @return
 	 */
-	protected Category getCategory(byte[] uuid, Session session){
+	protected String[] getCategoryLabels(byte[] uuid, Session session){
 		if (uuid != null){
-			Category x = (Category) session.load(Category.class, uuid);
-			return x;
+			return QueryDataModelManager.getInstance().getFullCategoryLabel(session, uuid);
 		}
 		return null;
 	}
@@ -834,8 +839,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		return null;
 	}
 	
-	protected String getName(byte[] uuid, Session session){
-		return Label.getDescription(uuid);
+	protected String getName(byte[] uuid, byte[] cauuid, Session session){
+		if (SmartDB.isMultipleAnalysis()){
+			//need find label for the given conservation area
+			return Label.getDescription(uuid, cauuid);	
+		}else{
+			return Label.getDescription(uuid);
+		}
 	}
 	
 	/**
@@ -845,7 +855,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @return select clause
 	 */
 	protected String SelectClause(boolean includeObservations) {
-		String[] results = { "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		String[] results = { "p_ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
 				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", "pld_patrol_day", "plm_leader", "plm_pilot" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$

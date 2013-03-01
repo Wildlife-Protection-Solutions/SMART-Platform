@@ -33,7 +33,6 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -281,11 +280,11 @@ public class AttributeFilter implements IFilter {
 			it.initializeData(new String[]{op.getGuiValue(), String.valueOf(value1)});
 			
 		}else if (attributeType == AttributeType.LIST){
-			AttributeListItem ali = QueryHibernateManager.getAttributeListItem(session, attributeKey, (String)value1);
+			AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, (String)value1);
 			ListItem li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
 			it.initializeData(li);
 		}else if (attributeType == AttributeType.TREE){
-			AttributeTreeNode ali = QueryHibernateManager.getAttributeTreeNode(session, attributeKey, (String)value1);
+			AttributeTreeNode ali = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, (String)value1);
 			it.initializeData(ali);
 		}
 		
@@ -297,7 +296,7 @@ public class AttributeFilter implements IFilter {
 	 * @throws Exception
 	 */
 	public Attribute getAttribute(Session session) throws Exception{
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(session, attributeKey);
 		if (att == null){
 			throw new Exception(MessageFormat.format(Messages.AttributeFilter_AttributeNotFound, new Object[]{attributeKey}));
 		}

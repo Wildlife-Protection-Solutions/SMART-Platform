@@ -736,7 +736,10 @@ public class Messages extends NLS {
 	public static String SmartStartUp_Error_LoginFail;
 	public static String SmartStartUp_Error_NoSmartDb;
 	public static String SmartStartUp_ErrorDialog_Title;
+	public static String SmartStartUp_ErrorDialogTitle;
 	public static String SmartStartUp_MultiConnectError;
+	public static String SmartStartUp_NoCaAccess;
+	public static String SmartStartUp_SingleCaAccess;
 	public static String SmartUtils_Error_CouldNotCopy;
 	public static String SmartUtils_Error_CouldNotCreateDir;
 	public static String SmartUtils_Error_CouldNotCreateTempDir;
@@ -764,8 +767,6 @@ public class Messages extends NLS {
 	public static String StationListPropertyPage_Error_InvalidDescription;
 	public static String StationListPropertyPage_Error_InvalidName;
 	public static String StationListPropertyPage_Error_Saving;
-	public static String StationListPropertyPage_InvalidDescription_DialogTitle;
-	public static String StationListPropertyPage_InvalidName_DialogTitle;
 	public static String StationListPropertyPage_LanguageLabel;
 	public static String StationListPropertyPage_PageName;
 	public static String StringComparison_Contains;

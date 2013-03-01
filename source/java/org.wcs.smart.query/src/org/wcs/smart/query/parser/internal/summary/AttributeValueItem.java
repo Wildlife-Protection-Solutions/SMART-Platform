@@ -31,7 +31,6 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -129,7 +128,7 @@ public class AttributeValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
 	 */
 	public String getName(Session session){
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
 		
 		if (att == null){
 			return ""; //$NON-NLS-1$
@@ -140,7 +139,7 @@ public class AttributeValueItem implements IValueItem {
 		name.append(att.getName());
 		
 		if (categoryKey != null){
-			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
+			Category cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
 			if (cat != null){
 				name.append( " (" + cat.getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
@@ -154,7 +153,7 @@ public class AttributeValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
 	 */
 	public String getFullName(Session session){
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
 		if (att == null){
 			return ""; //$NON-NLS-1$
 		}
@@ -164,7 +163,7 @@ public class AttributeValueItem implements IValueItem {
 		name.append(att.getName());
 		
 		if (categoryKey != null){
-			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
+			Category cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
 			if (cat != null){
 				name.append( " (" + cat.getFullCategoryName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
@@ -196,12 +195,12 @@ public class AttributeValueItem implements IValueItem {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
 		DropItem di = null;
 		if (categoryKey == null){
 			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
 		}else{
-			Category cat = QueryHibernateManager.getCategory(session, categoryKey);
+			Category cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
 			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
 		}
 		di.initializeData(new Object[]{getDropItemInitializeData(), null});

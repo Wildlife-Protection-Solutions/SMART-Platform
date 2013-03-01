@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 
 /**
@@ -51,6 +52,8 @@ import org.wcs.smart.query.ui.definition.QueryDefView;
  */
 public class FilterDropTargetPanel implements IDropPanel {
 
+	public static final String PANEL_TITLE = Messages.FilterDropTargetPanel_QueryFilterPanelTitle;
+	
 	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };
 	
 	private ScrolledComposite dropTarget = null;

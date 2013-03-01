@@ -17,7 +17,7 @@ import org.wcs.smart.hibernate.SmartDB;
 
 public class ConservationAreaListView extends ViewPart {
 
-	public static final String ID = "org.wcs.smart.query.conservationAreaList";
+	public static final String ID = "org.wcs.smart.query.conservationAreaList"; //$NON-NLS-1$
 	
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	private Label lblDefault = null;
@@ -51,7 +51,7 @@ public class ConservationAreaListView extends ViewPart {
 		});
 		if (SmartDB.getConservationAreaConfiguration() != null){
 			for(ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-				Label l = toolkit.createLabel(main, ca.getName() + " (" + ca.getId() + ")");
+				Label l = toolkit.createLabel(main, ca.getNameLabel());
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				((GridData)l.getLayoutData()).horizontalIndent = 10;
 			}

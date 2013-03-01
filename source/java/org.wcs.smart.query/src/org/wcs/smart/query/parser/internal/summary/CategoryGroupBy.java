@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -133,11 +133,11 @@ public class CategoryGroupBy implements IGroupBy {
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (filterHkeys != null && filterHkeys.length > 0){
 			for (int i = 0; i < filterHkeys.length; i++){
-				Category cat = QueryHibernateManager.getCategory(session, filterHkeys[i]);
+				Category cat = QueryDataModelManager.getInstance().getCategory(session, filterHkeys[i]);
 				items.add( new ListItem(null, cat.getFullCategoryName(), cat.getHkey()) );		
 			}
 		}else{
-			for(Category child : QueryHibernateManager.getCategories(session, treeLevel)){
+			for(Category child : QueryDataModelManager.getInstance().getCategories(session, treeLevel)){
 				items.add(new ListItem(null, child.getFullCategoryName(), child.getHkey()));
 			}
 		}
@@ -154,7 +154,7 @@ public class CategoryGroupBy implements IGroupBy {
 		if (filterHkeys != null){
 			ArrayList<ListItem> inits = new ArrayList<ListItem>();
 			for (int i = 0; i < filterHkeys.length; i ++){
-				Category child = QueryHibernateManager.getCategory(session, filterHkeys[i]);
+				Category child = QueryDataModelManager.getInstance().getCategory(session, filterHkeys[i]);
 				inits.add(new ListItem(null, child.getName(), filterHkeys[i]));
 			}
 			it.initializeData(inits);
