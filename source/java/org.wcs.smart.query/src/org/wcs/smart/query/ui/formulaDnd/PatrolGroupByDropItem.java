@@ -43,7 +43,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
-import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.util.SmartUtils;
 
@@ -55,7 +55,7 @@ import org.wcs.smart.util.SmartUtils;
 public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 
 	
-	private PatrolQueryOption groupBy;
+	private IPatrolQueryOption groupBy;
 	private List<ListItem> filteredValues = new ArrayList<ListItem>();
 	private ToolTip toolTip;
 	
@@ -65,7 +65,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	 * Creates a new drop item
 	 * @param type
 	 */
-	public PatrolGroupByDropItem(PatrolQueryOption type){
+	public PatrolGroupByDropItem(IPatrolQueryOption type){
 		this.groupBy = type;
 	}
 	

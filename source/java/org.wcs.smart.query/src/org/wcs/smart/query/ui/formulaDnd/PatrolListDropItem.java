@@ -47,6 +47,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.util.SmartUtils;
 
@@ -62,7 +63,7 @@ public class PatrolListDropItem extends DropItem{
 
 	private String keyPart;
 	private String text;
-	private PatrolQueryOption option;
+	private IPatrolQueryOption option;
 	
 	private ComboViewer listViewer;
 	private Font smallerFont = null;
@@ -110,7 +111,7 @@ public class PatrolListDropItem extends DropItem{
 	 * @param target target item
 	 * @param option patrol filter option
 	 */
-	public PatrolListDropItem(PatrolQueryOption option) {
+	public PatrolListDropItem(IPatrolQueryOption option) {
 		this.keyPart = "patrol:" + option.getKey(); //$NON-NLS-1$
 		this.text = option.getGuiName();
 		this.option = option;

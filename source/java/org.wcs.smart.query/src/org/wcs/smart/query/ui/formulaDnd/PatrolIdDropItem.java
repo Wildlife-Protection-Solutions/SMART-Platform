@@ -42,6 +42,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.filter.Operator;
 
@@ -102,7 +103,7 @@ public class PatrolIdDropItem  extends DropItem{
 	 * @param target drop panel target
 	 * @param PatrolFilterOption id patrol filter option
 	 */
-	public PatrolIdDropItem(PatrolQueryOption option) {
+	public PatrolIdDropItem(IPatrolQueryOption option) {
 		//super(parent, target);
 		assert option == PatrolQueryOption.ID;
 		this.text = option.getGuiName();

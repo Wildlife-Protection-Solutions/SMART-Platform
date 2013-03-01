@@ -25,7 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.query.parser.IPatrolQueryOption;
 
 /**
  * Patrol drop item that is represented as a boolean expression..
@@ -44,7 +44,7 @@ public class BooleanPatrolDropItem extends DropItem {
 	 * @param target drop target
 	 * @param filter patrol filter
 	 */
-	public BooleanPatrolDropItem(PatrolQueryOption filter) {
+	public BooleanPatrolDropItem(IPatrolQueryOption filter) {
 		//super(parent, target);
 		this.text = filter.getGuiName();
 		this.key = "patrol:" + filter.getKey(); //$NON-NLS-1$
