@@ -32,6 +32,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
@@ -296,7 +297,7 @@ public class AttributeFilter implements IFilter {
 	 * @throws Exception
 	 */
 	public Attribute getAttribute(Session session) throws Exception{
-		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
 		if (att == null){
 			throw new Exception(MessageFormat.format(Messages.AttributeFilter_AttributeNotFound, new Object[]{attributeKey}));
 		}

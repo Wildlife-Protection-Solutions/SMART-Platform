@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
@@ -96,11 +97,9 @@ public class AttributeListGroupByDropItem extends DropItem implements
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
-			session.update(attribute);
-			for (AttributeListItem it : attribute.getAttributeList()){
-				if (it.getIsActive()){
-					items.add(new ListItem(null, it.getName(), it.getKeyId()));
-				}
+			List<AttributeListItem> listitems = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+			for (AttributeListItem it : listitems){
+				items.add(new ListItem(null, it.getName(), it.getKeyId()));
 			}
 			session.getTransaction().rollback();
 			session.close();

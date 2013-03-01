@@ -37,8 +37,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 public class AttributeTreeContentProvider implements ITreeContentProvider {
 
 	private RootNode root ;
-	private Attribute attribute;
-
+	private List<AttributeTreeNode> rootNodes;
 	private boolean active;
 	private boolean showRoot;
 
@@ -77,7 +76,15 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.attribute = (Attribute)newInput;
+		if (newInput instanceof Attribute){
+			if (active){
+				rootNodes = ((Attribute) newInput).getActiveTreeNodes();
+			}else{
+				rootNodes = ((Attribute) newInput).getTree();
+			}
+		}else if (newInput instanceof List){
+			this.rootNodes = (List<AttributeTreeNode>) newInput;
+		}
 	}
 
 	/*
@@ -99,11 +106,7 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	public Object[] getChildren(Object parentElement) {
 		List<AttributeTreeNode> kids = null;
 		if (parentElement instanceof RootNode){
-			if (!active){
-				kids = attribute.getTree();
-			}else{
-				kids = attribute.getActiveTreeNodes();
-			}
+			kids = rootNodes;
 		}
 		if (parentElement instanceof AttributeTreeNode){
 			if (!active){

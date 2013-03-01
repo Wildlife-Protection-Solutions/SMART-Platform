@@ -241,29 +241,6 @@ public class QueryHibernateManager {
 	}
 	
 	/**
-	 * Loads an attribute from the given attribute key and the
-	 * current conservation area 
-	 * 
-	 * @param session
-	 * @param attributeKey attribute key
-	 * @return attribute loaded from the database or <code>null</code> if attribute not found
-	 */
-	public static Attribute getAttribute(Session session, String attributeKey){
-		Query q = session.createQuery("From Attribute where conservationArea = :ca and keyid = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("key", attributeKey); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Attribute> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
-			return results.get(0);
-		}
-		
-	}
-	
-	
-	/**
 	 * Loads an attribute list item for the given key and the
 	 * current conservation area 
 	 * 
@@ -437,24 +414,7 @@ public class QueryHibernateManager {
 		return cats;
 	}
 	
-	/**
-	 * 
-	 * Gets all the categories at a given level in the data tree.  Throws and exception if not found.
-	 * @param session
-	 * @param level
-	 * @param active if only active tree nodes should be loaded
-	 * @return
-	 */
-	public static List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level, boolean active){
-		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level and isActive = :active"; //$NON-NLS-1$
-		Query q = session.createQuery(query);
-		q.setParameter("uuid", uuid); //$NON-NLS-1$
-		q.setParameter("level", level); //$NON-NLS-1$
-		q.setParameter("active", active); //$NON-NLS-1$
-		
-		List<AttributeTreeNode> nodes = q.list();
-		return nodes;
-	}
+
 	
 	
 	/**

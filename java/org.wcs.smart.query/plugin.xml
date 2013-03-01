@@ -707,12 +707,14 @@
             <and>
                <with
                      variable="activeWorkbenchWindow.activePerspective">
-                  <equals
-                        value="org.wcs.smart.query.SmartQueryPerspective">
-                  </equals>
-                  <equals
-                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
-                  </equals>
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.SmartQueryPerspective">
+                     </equals>
+                  </or>
                </with>
                <with
                      variable="activeEditorId">

@@ -33,6 +33,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
@@ -203,7 +204,7 @@ public class AttributeGroupBy implements IGroupBy {
 	public List<ListItem> getItems(Session session) {
 		//get children categories
 		
-		Attribute att = QueryHibernateManager.getAttribute(session, attributeKey);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
 		
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (att.getType() == AttributeType.LIST){
@@ -217,17 +218,15 @@ public class AttributeGroupBy implements IGroupBy {
 						}
 					}
 				}
-			}else{
-				for (AttributeListItem it : att.getAttributeList()) {
-					if (it.getIsActive()){
-						items.add(new ListItem(null, it.getName(), it.getKeyId()));
-					}
+			}else{				
+				for (AttributeListItem it : QueryDataModelManager.getInstance().getActiveAttributeListItems(att, session)) {
+					items.add(new ListItem(null, it.getName(), it.getKeyId()));
 				}
 			}
 		}else if (att.getType() == AttributeType.TREE){
 			if (filterHkeys == null){
 				//get all attribute nodes with given hkey length
-				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
+				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
 					//TODO: full name
 					items.add(new ListItem(null, child.getName(), child.getHkey()));
 				}
@@ -236,7 +235,7 @@ public class AttributeGroupBy implements IGroupBy {
 				for (int i = 0; i < filterHkeys.length; i ++){
 					keys.add(filterHkeys[i]);
 				}
-				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
+				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att.getUuid(), treeLevel, true)){
 					//TODO: full name
 					if (keys.contains(child.getHkey())){
 						items.add(new ListItem(null, child.getName(), child.getHkey()));	
@@ -253,7 +252,7 @@ public class AttributeGroupBy implements IGroupBy {
 	@Override
 	public DropItem asDropItem(Session session) {
 		
-		Attribute attribute = QueryHibernateManager.getAttribute(session, attributeKey);
+		Attribute attribute = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
 		
 		DropItem it = null;
 		if (categoryHkey != null){
@@ -293,7 +292,7 @@ public class AttributeGroupBy implements IGroupBy {
 					keys.add(filterHkeys[i]);
 				}
 				ArrayList<ListItem> items = new ArrayList<ListItem>();
-				for(AttributeTreeNode child : QueryHibernateManager.getAttributeTreeNodes(session, attribute.getUuid(), treeLevel, true)){
+				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute.getUuid(), treeLevel, true)){
 					//TODO: full name
 					if (keys.contains(child.getHkey())){
 						items.add(new ListItem(null, child.getName(), child.getHkey()));	

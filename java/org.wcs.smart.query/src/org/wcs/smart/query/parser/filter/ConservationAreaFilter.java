@@ -89,7 +89,7 @@ public class ConservationAreaFilter implements IFilter {
 			if (!SmartDB.isMultipleAnalysis()){
 				addConservationArea(SmartDB.getCurrentConservationArea());
 			}else{
-				for (ConservationArea ca : SmartDB.getSelectedConservationAreas()){
+				for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
 					addConservationArea(ca);
 				}
 			}

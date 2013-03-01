@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -144,7 +145,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			List<AttributeTreeNode> nodes = QueryHibernateManager.getAttributeTreeNodes(session, attribute.getUuid(), level, true);
+			List<AttributeTreeNode> nodes = QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute.getUuid(), level, true);
 			for (AttributeTreeNode it : nodes) {
 				items.add(new ListItem(null, it.getName(), it.getHkey()));
 			}

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -40,7 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
@@ -91,8 +93,8 @@ public class TreeDropDownViewer {
 	 * 
 	 * @param att
 	 */
-	public void setAttribute(Attribute att){
-		attributeTreeViewer.setInput(att);
+	public void setAttribute(List<AttributeTreeNode> rootNodes){
+		attributeTreeViewer.setInput(rootNodes);
 		attributeTreeViewer.expandToLevel(1);
 		attributeTreeViewer.refresh();
 	}

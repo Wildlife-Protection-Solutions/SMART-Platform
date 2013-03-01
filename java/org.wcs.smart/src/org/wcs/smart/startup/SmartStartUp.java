@@ -36,6 +36,7 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.MultipleCaAnalysisConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
@@ -150,7 +151,9 @@ public class SmartStartUp {
 					//	disconnect from the database & setup correct user level
 					HibernateManager.endSessionFactory(true);
 					SmartDB.setCurrentUser(e, ca);
-					SmartDB.setSelectedCas(areas);
+					
+					MultipleCaAnalysisConfiguration config = new MultipleCaAnalysisConfiguration(areas);
+					SmartDB.setSelectedCas(config);
 					return true;
 				}
 			} catch (Exception ex) {

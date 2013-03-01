@@ -49,8 +49,8 @@ public class ConservationAreaListView extends ViewPart {
 				}
 			}
 		});
-		if (SmartDB.getSelectedConservationAreas() != null){
-			for(ConservationArea ca : SmartDB.getSelectedConservationAreas()){
+		if (SmartDB.getConservationAreaConfiguration() != null){
+			for(ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
 				Label l = toolkit.createLabel(main, ca.getName() + " (" + ca.getId() + ")");
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				((GridData)l.getLayoutData()).horizontalIndent = 10;
