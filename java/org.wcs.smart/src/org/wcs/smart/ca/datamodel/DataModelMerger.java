@@ -1,6 +1,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -47,8 +48,8 @@ public class DataModelMerger {
 		/* attributes */
 		for (Attribute a : dm.getAttributes()){
 			if (canKeep(a, cas, session)){
-//				a.setName(a.findName(cas[0].getDefaultLanguage()));
 				newDataModel.getAttributes().add(a);
+				mergeAttributeAggregations(a,cas, session);
 			}
 		}
 		
@@ -63,9 +64,6 @@ public class DataModelMerger {
 	 * processes all children of a given category
 	 */
 	private void processChildren(Category parent, ConservationArea[] ca, Session session){
-		
-		//TODO: I need to deal with the name/language issue here
-//		parent.setName(parent.findName(ca[0].getDefaultLanguage()));
 		if(parent.getChildren() != null){
 			List<Category> kids = new ArrayList<Category>();
 			for (Category kid : parent.getChildren()){
@@ -95,7 +93,29 @@ public class DataModelMerger {
 			}
 		}
 	}
-	
+	@SuppressWarnings("unchecked")
+	private void mergeAttributeAggregations(Attribute a, ConservationArea[] ca, Session session){
+		List<Aggregation> aggs = a.getAggregations();
+		if (aggs.size() == 0){
+			return;
+		}
+		
+		String hql = "FROM Attribute a where a.keyId = :key and a.conservationArea in (:ca)"; //$NON-NLS-1$
+		Query q = session.createQuery(hql);
+		q.setParameter("key", a.getKeyId()); //$NON-NLS-1$
+		q.setParameterList("ca", ca); //$NON-NLS-1$
+		List<Attribute> results = q.list();
+		for (Attribute tmp : results){
+			for (Iterator<Aggregation> iterator = aggs.iterator(); iterator.hasNext();) {
+				Aggregation agg = (Aggregation) iterator.next();
+				if (!tmp.getAggregations().contains(agg)){
+					iterator.remove();
+				}
+			}
+		}
+		a.setAggregations(aggs);
+		return;
+	}
 	/**
 	 * Determines if an attribute is shared across all conservation areas.
 	 * The attribute key must exist in each conservation area.
