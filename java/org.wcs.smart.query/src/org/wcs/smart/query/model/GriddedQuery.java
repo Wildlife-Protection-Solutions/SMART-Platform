@@ -46,7 +46,6 @@ import org.wcs.smart.query.engine.DerbyGridEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
-import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
@@ -69,7 +68,7 @@ public class GriddedQuery extends Query {
 	private GridQueryDefinition query;
 	
 	private String strQuery;	
-	private ConservationAreaFilter caFilter;
+	
 	private DateFilter dateFilter;
 	
 	private List<QueryColumn> queryColumns = null;
@@ -119,23 +118,6 @@ public class GriddedQuery extends Query {
 		return myQuery;
 	}
 	
-	/**
-	 * @return the conservation area filter
-	 */
-	
-	@Column(name="ca_filter")
-	public String getConservationAreaFilterAsFilter(){
-		return this.caFilter.asString();
-	}
-	/**
-	 * @param filter a conservation area filter
-	 */
-	public void setConservationAreaFilterAsFilter(String filter){
-		this.caFilter = ConservationAreaFilter.parseFilter(filter);
-	}
-
-
-
 	/**
 	 * @return the date filter; or null if date filter not set
 	 */
@@ -288,13 +270,14 @@ public class GriddedQuery extends Query {
 	 * @see java.lang.Object#clone()
 	 */
 	@Transient
+	@Override
 	public GriddedQuery clone(){
 		GriddedQuery q = new GriddedQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());
 		q.setConservationArea(getConservationArea());
-		q.setConservationAreaFilter(caFilter);
+		q.setConservationAreaFilter(getConservationAreaFilter());
 		q.setDateFilter(getDateFilter());
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQuery(getQuery());
@@ -505,24 +488,10 @@ public class GriddedQuery extends Query {
 		if (copy instanceof GriddedQuery){
 			setQuery(((GriddedQuery) copy).getQuery());
 			setCrsDefinition(((GriddedQuery) copy).getCrsDefinition());
-			setConservationAreaFilter(((GriddedQuery) copy).getConservationAreaFilter());
+			setConservationAreaFilter(copy.getConservationAreaFilter());
 		}
 	}
-	
-	/**
-	 * @param filter a conservation area filter
-	 */
-	public void setConservationAreaFilter(ConservationAreaFilter filter){
-		this.caFilter = filter;
-	}
-	
-	/**
-	 * @return the conservation area filter
-	 */
-	@Transient
-	public ConservationAreaFilter getConservationAreaFilter(){
-		return this.caFilter;
-	}
+
 	
 	@Transient
 	public File getLastRasterFile(){

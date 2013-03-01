@@ -213,7 +213,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			}
 			if (filter != IFilter.EMPTY_FILTER && filter.hasAttributeFilter()) {
 				createObservationTable(c, filter, query.getDateFilter(),
-						query.getConservationAreaFilter());
+						query.getConservationAreaFilterAsFilter());
 			}
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
@@ -237,7 +237,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 
 			monitor.subTask(Messages.DerbyGridEngine_Progress_PopulatingResults);
 			populateTemporaryTable(filter, query.getDateFilter(),
-					query.getConservationAreaFilter(), false, c,
+					query.getConservationAreaFilterAsFilter(), false, c,
 					needsObservation);
 			monitor.worked(1);
 
@@ -524,7 +524,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			}
 		}
 		sql.append( " and "); //$NON-NLS-1$
-		sql.append(query.getConservationAreaFilter().asSql(tablePrefix));
+		sql.append(query.getConservationAreaFilterAsFilter().asSql(tablePrefix));
 		
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());

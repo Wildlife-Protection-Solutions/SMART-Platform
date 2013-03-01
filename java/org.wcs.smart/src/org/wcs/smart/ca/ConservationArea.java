@@ -162,6 +162,15 @@ public class ConservationArea {
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @return conservation area label
+	 * to use on gui
+	 */
+	@Transient
+	public String getNameLabel(){
+		 return getId() + " - " + getName(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 	
 
 	/**

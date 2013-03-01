@@ -95,7 +95,7 @@ public class GriddedTableContent {
 		
 		//clear results
 		resultsTable.setInput(null);
-		lblNumResults.setText("");
+		lblNumResults.setText(""); //$NON-NLS-1$
 	}
 	
 	public void setQueryName(GriddedQuery query){

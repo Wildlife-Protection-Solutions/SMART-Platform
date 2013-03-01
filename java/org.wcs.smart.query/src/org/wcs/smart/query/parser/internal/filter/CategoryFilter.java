@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
@@ -136,7 +136,7 @@ public class CategoryFilter implements IFilter {
 	 */
 	public Category getCategory(Session session) throws Exception{
 		String keyPart = categoryIdentifier.split(":")[1]; //$NON-NLS-1$
-		Category cat = QueryHibernateManager.getCategory(session, keyPart);
+		Category cat = QueryDataModelManager.getInstance().getCategory(session, keyPart);
 		if (cat == null){
 			throw new Exception(MessageFormat.format(Messages.CategoryFilter_CategoryNotFound, new Object[]{keyPart}));
 		}

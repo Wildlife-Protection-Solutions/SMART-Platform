@@ -34,7 +34,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -204,7 +203,7 @@ public class AttributeGroupBy implements IGroupBy {
 	public List<ListItem> getItems(Session session) {
 		//get children categories
 		
-		Attribute att = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
+		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
 		
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (att.getType() == AttributeType.LIST){
@@ -252,11 +251,11 @@ public class AttributeGroupBy implements IGroupBy {
 	@Override
 	public DropItem asDropItem(Session session) {
 		
-		Attribute attribute = QueryDataModelManager.getInstance().getAttribute(attributeKey, session);
+		Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
 		
 		DropItem it = null;
 		if (categoryHkey != null){
-			Category category = QueryHibernateManager.getCategory(session, categoryHkey);
+			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 			if (attributeType == AttributeType.LIST){
 				it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
 			}else{

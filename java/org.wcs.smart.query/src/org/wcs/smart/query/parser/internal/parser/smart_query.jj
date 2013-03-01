@@ -55,6 +55,7 @@ TOKEN :
  | < PATROL_TEAM_KEY : "patrol:team" >
  | < PATROL_MANDATE_KEY : "patrol:mandate" >
  | < PATROL_TYPE_KEY : "patrol:patroltype" >
+ | < PATROL_CA_KEY : "patrol:ca" >
  | < PATROLLEG_TRANSPORT_KEY : "patrol:transport" >
  | < PATROLLEG_LEADER_KEY : "patrol:leader" >
  | < PATROLLEG_PILOT_KEY : "patrol:pilot" >
@@ -73,11 +74,12 @@ TOKEN :
 |    < QUERY_SPLITTER : "|" >
 |    < PATROL_UUID_GROUPBY_OPTION :(
   			< PATROL_STATION_KEY > |
-			< PATROL_TEAM_KEY> |
-			< PATROL_MANDATE_KEY> |
-			< PATROL_TYPE_KEY> |
+			< PATROL_TEAM_KEY > |
+			< PATROL_MANDATE_KEY > |
+			< PATROL_TYPE_KEY > |
 			< PATROLLEG_TRANSPORT_KEY > |
-			< PATROLLEG_LEADER_KEY> |
+			< PATROLLEG_LEADER_KEY > |
+			< PATROL_CA_KEY > |
 			< PATROLLEG_MEMBER_KEY > ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 |    < PATROL_STRING_GROUPBY_OPTION :
   			< PATROL_ID_KEY >  ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >

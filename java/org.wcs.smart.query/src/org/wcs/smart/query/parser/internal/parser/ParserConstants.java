@@ -128,43 +128,45 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int PATROL_TYPE_KEY = 62;
   /** RegularExpression Id. */
-  int PATROLLEG_TRANSPORT_KEY = 63;
+  int PATROL_CA_KEY = 63;
   /** RegularExpression Id. */
-  int PATROLLEG_LEADER_KEY = 64;
+  int PATROLLEG_TRANSPORT_KEY = 64;
   /** RegularExpression Id. */
-  int PATROLLEG_PILOT_KEY = 65;
+  int PATROLLEG_LEADER_KEY = 65;
   /** RegularExpression Id. */
-  int PATROLLEG_MEMBER_KEY = 66;
+  int PATROLLEG_PILOT_KEY = 66;
   /** RegularExpression Id. */
-  int AREA_KEY = 67;
+  int PATROLLEG_MEMBER_KEY = 67;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 68;
+  int AREA_KEY = 68;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 69;
+  int PATROL_VALUE_ITEM = 69;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 70;
+  int PATROL_VALUE_KEY = 70;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 71;
+  int SUM_CAT_VALUE_KEY = 71;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 72;
+  int SUM_ATTRIBUTE_VALUE_KEY = 72;
   /** RegularExpression Id. */
-  int AGG = 73;
+  int SUM_CAT_ATT_VALUE_KEY = 73;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 74;
+  int AGG = 74;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 75;
+  int DATE_GROUPBY_ITEM = 75;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 76;
+  int QUERY_SPLITTER = 76;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 77;
+  int PATROL_UUID_GROUPBY_OPTION = 77;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 78;
+  int PATROL_STRING_GROUPBY_OPTION = 78;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 79;
+  int CATEGORY_GROUPBY_ITEM = 79;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 80;
+  int ATTRIBUTE_GROUPBY_ITEM = 80;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 81;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 81;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 82;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -234,6 +236,7 @@ public interface ParserConstants {
     "\"patrol:team\"",
     "\"patrol:mandate\"",
     "\"patrol:patroltype\"",
+    "\"patrol:ca\"",
     "\"patrol:transport\"",
     "\"patrol:leader\"",
     "\"patrol:pilot\"",

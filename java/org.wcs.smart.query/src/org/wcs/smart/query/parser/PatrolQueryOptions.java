@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Station;
@@ -209,7 +210,8 @@ public class PatrolQueryOptions {
 	 * be shared across conservation areas
 	 */
 	public final static PatrolQueryOption[] SHARED_PATROL_GROUBY_OPTIONS = {
-			PatrolQueryOption.PATROL_TYPE
+			PatrolQueryOption.PATROL_TYPE,
+			PatrolQueryOption.CONSERVATION_AREA
 	};
 	
 	/**
@@ -234,7 +236,7 @@ public class PatrolQueryOptions {
 	 */
 	public final static PatrolQueryOption[] SHARED_PATROL_FILTER_OPTIONS = {
 			PatrolQueryOption.ARMED, 
-			PatrolQueryOption.PATROL_TYPE, 
+			PatrolQueryOption.PATROL_TYPE
 	};
 	
 	/**
@@ -398,8 +400,9 @@ public class PatrolQueryOptions {
 		
 		PATROL_TYPE(Messages.PatrolQueryOptions_QueryOpType, "patroltype", "patrol_type", Patrol.class, null, PatrolQueryOptionType.STRING), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		PATROL_TRANSPORT_TYPE(Messages.PatrolQueryOptions_QueryOpTransportType, "transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID); //$NON-NLS-2$ //$NON-NLS-1$
+		PATROL_TRANSPORT_TYPE(Messages.PatrolQueryOptions_QueryOpTransportType, "transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
+		CONSERVATION_AREA(Messages.PatrolQueryOptions_CaGroupByOptionName, "ca", "ca_uuid", Patrol.class, ConservationArea.class, PatrolQueryOptionType.UUID); //$NON-NLS-2$ //$NON-NLS-3$
 		
 		private String key;			//unique identifier key
 		private String columnName;	//column name in database table
@@ -591,7 +594,10 @@ public class PatrolQueryOptions {
 					}else if (object instanceof Employee){
 						Employee e = (Employee)object;
 						results.add(new ListItem(e.getUuid(), e.getLabel()));
-					}	
+					}else if (object instanceof ConservationArea){
+						ConservationArea ca = (ConservationArea)object;
+						results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+					}
 				}
 				
 			}else if (type == PatrolQueryOptionType.STRING){
@@ -625,7 +631,10 @@ public class PatrolQueryOptions {
 				for (String pid : pids){
 					items.add(new ListItem(null, pid, pid));
 				}
-				
+			}else if (this == CONSERVATION_AREA){
+				for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+					items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+				}
 			}else if (this == STATION){
 				List<Station> stations = PatrolHibernateManager.getActiveStations(SmartDB.getCurrentConservationArea(), session);
 				for (Station s : stations){
@@ -642,9 +651,15 @@ public class PatrolQueryOptions {
 					items.add(new ListItem(t.getUuid(), t.getName()));
 				}
 			}else if (this == PATROL_TYPE){
-				List<PatrolType> types= PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
-				for (PatrolType t : types){
-					items.add(new ListItem(null, t.getType().getGuiName(), t.getType().name() ));
+				if (SmartDB.isMultipleAnalysis()){
+					for (PatrolType.Type t : PatrolType.Type.values()){
+						items.add(new ListItem(null, t.getGuiName(), t.name()));
+					}
+				}else{
+					List<PatrolType> types= PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
+					for (PatrolType t : types){
+						items.add(new ListItem(null, t.getType().getGuiName(), t.getType().name() ));
+					}
 				}
 			}else if (this == PATROL_TRANSPORT_TYPE){
 				List<PatrolTransportType> types= PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session);

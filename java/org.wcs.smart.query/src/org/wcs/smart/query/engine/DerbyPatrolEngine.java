@@ -95,7 +95,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 						return;
 					}
 					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter());
+						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter());
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()){
@@ -110,7 +110,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 					}
 					
 					monitor.subTask(Messages.DerbyPatrolEngine_Progress_PopulatingResults);
-					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilter(), false, c, false);
+					populateTemporaryTable(query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter(), false, c, false);
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;
@@ -160,28 +160,29 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 			QueryResultItem lastItem = null;
 			while (rs.next()) {
 				
-				byte[] pluuid = rs.getBytes(18);
+				byte[] pluuid = rs.getBytes(19);
 				if (Arrays.equals(pluuid, lastPlUuid)){
-					lastItem.addTrack(rs.getBytes(17));
+					lastItem.addTrack(rs.getBytes(18));
 				}else{
 					QueryResultItem it = new QueryResultItem();
-					it.setPatrolUuid(rs.getBytes(1));
-					it.setPatrolId(rs.getString(2));
-					it.setPatrolStartDate(rs.getDate(3));
-					it.setPatrolEndDate(rs.getDate(4));
-					it.setStation(getName(rs.getBytes(5), session));				
-					it.setTeam(getName(rs.getBytes(6), session));				
-					it.setObjective(rs.getString(7));
-					it.setMandate(getName(rs.getBytes(8), session));
-					it.setPatrolType(PatrolType.Type.valueOf(rs.getString(9)));
-					it.setArmed(rs.getBoolean(10));
-					it.setTransportType(getName(rs.getBytes(11), session));
-					it.setPatrolLegId(rs.getString(12));
-					it.setPatrolLegStartDate(rs.getDate(13));
-					it.setPatrolLegEndDate(rs.getDate(14));
-					it.setLeader(getEmployeeName(rs.getBytes(15), session));
-					it.setPilot(getEmployeeName(rs.getBytes(16), session));
-					it.addTrack(rs.getBytes(17));
+					byte[] cauuid = rs.getBytes(1);
+					it.setPatrolUuid(rs.getBytes(2));
+					it.setPatrolId(rs.getString(3));
+					it.setPatrolStartDate(rs.getDate(4));
+					it.setPatrolEndDate(rs.getDate(5));
+					it.setStation(getName(rs.getBytes(6), cauuid, session));				
+					it.setTeam(getName(rs.getBytes(7), cauuid, session));				
+					it.setObjective(rs.getString(8));
+					it.setMandate(getName(rs.getBytes(9), cauuid, session));
+					it.setPatrolType(PatrolType.Type.valueOf(rs.getString(10)));
+					it.setArmed(rs.getBoolean(11));
+					it.setTransportType(getName(rs.getBytes(12), cauuid, session));
+					it.setPatrolLegId(rs.getString(13));
+					it.setPatrolLegStartDate(rs.getDate(14));
+					it.setPatrolLegEndDate(rs.getDate(15));
+					it.setLeader(getEmployeeName(rs.getBytes(16), session));
+					it.setPilot(getEmployeeName(rs.getBytes(17), session));
+					it.addTrack(rs.getBytes(18));
 					items.add(it);
 					lastItem = it;
 				}
@@ -203,7 +204,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 	 * @return select clause
 	 */
 	private String buildSelectClause() {
-		String[] results = { "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		String[] results = {"p_ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
 				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$
@@ -246,6 +247,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + queryTempTable + "("); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_id varchar(23),"); //$NON-NLS-1$
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -307,6 +309,7 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		sql.append("INSERT INTO " + queryTempTable ); //$NON-NLS-1$
 		// ---- SELECT CLAUSE -----
 		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(tablePrefix.get(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(Patrol.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(Patrol.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$

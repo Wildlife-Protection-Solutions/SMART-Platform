@@ -288,7 +288,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		cmvConservationArea.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				ConservationArea ca = ((ConservationArea)element);
-				return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
+				return ca.getNameLabel();
 			}
 		});		
 		

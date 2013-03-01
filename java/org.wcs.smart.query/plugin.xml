@@ -390,6 +390,15 @@
                      mnemonic="%menu.query.menu.newquery.newgridquery.command.mnemonic"
                      style="push"
                      tooltip="%menu.query.menu.newquery.newgridquery.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.query.SmartQueryPerspective">
+                        </equals>
+                     </with>
+                  </visibleWhen>
                </command>
             </menu>
             <separator
@@ -559,9 +568,14 @@
                      checkEnabled="false">
                   <with
                         variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
-                     </equals>
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.SmartQueryPerspective">
+                        </equals>
+                     </or>
                   </with>
                </visibleWhen>
             </control>
@@ -593,6 +607,13 @@
                label="%querytoolbar.createquery.menu.newgridsummary.command.label"
                style="push"
                tooltip="%querytoolbar.createquery.menu.newgridsummary.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="false"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -875,6 +896,11 @@
       <handler
             class="org.wcs.smart.query.internal.ui.CreateGriddedSummaryHandler"
             commandId="org.wcs.smart.query.createGriddedSummary">
+         <activeWhen>
+            <test
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.query.internal.ui.CreateUnknownQueryHandler"

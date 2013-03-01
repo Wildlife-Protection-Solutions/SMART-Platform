@@ -946,6 +946,8 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			return "plm_leader"; //$NON-NLS-1$
 		case EMPLOYEE:
 			return "employee_uuid"; //$NON-NLS-1$
+		case CONSERVATION_AREA:
+			return "p_ca_uuid"; //$NON-NLS-1$
 		}
 		assert false;
 		return ""; //$NON-NLS-1$

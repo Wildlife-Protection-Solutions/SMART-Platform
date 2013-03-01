@@ -119,7 +119,7 @@ public class QueryFilterView extends ViewPart {
 		main.setLayout(stack);
 		
 		defaultFilter = new Label(main, SWT.NONE);
-		defaultFilter.setText("No filter options for current query type.");
+		defaultFilter.setText(Messages.QueryFilterView_ErrorNoFilterOptions);
 
 		ISourceProviderService service = (ISourceProviderService)getSite().getService(ISourceProviderService.class);
 		SourceProvider provider = (SourceProvider) service.getSourceProvider(SourceProvider.QUERY_DROP_TYPE);

@@ -241,52 +241,6 @@ public class QueryHibernateManager {
 	}
 	
 	/**
-	 * Loads an attribute list item for the given key and the
-	 * current conservation area 
-	 * 
-	 * @param session
-	 * @param attributeKey attribute key
-	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
-	 */
-	public static AttributeListItem getAttributeListItem(Session session, String attributeKey, String attributeListItem){
-		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("key", attributeListItem); //$NON-NLS-1$
-		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<AttributeListItem> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
-			return results.get(0);
-		}	
-	}
-	
-	/**
-	 * Loads an attribute tree not item item for the given hkey and the
-	 * current conservation area 
-	 * 
-	 * @param session
-	 * @param attributeHKey attribute tree node hkey
-	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
-	 */
-	public static AttributeTreeNode getAttributeTreeNode(Session session, String attributeKey, String attributeTreeHKey){
-		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("key", attributeTreeHKey); //$NON-NLS-1$
-		q.setParameter("attribute", attributeKey); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<AttributeTreeNode> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
-			return results.get(0);
-		}
-		
-	}
-	
-	
-	/**
 	 * Get the patrol mandate object.
 	 * 
 	 * @param session
@@ -376,45 +330,7 @@ public class QueryHibernateManager {
 	}
 	
 	
-	/**
-	 * Loads the category for the given category key 
-	 * @param session
-	 * @param categoryKey
-	 * @return cateogyr object or <code>null</code> if not loaded
-	 */
-	public static Category getCategory(Session session, String categoryKey){
-		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("key", categoryKey); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Category> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
-			return results.get(0);
-		}
-		
-	}
 	
-	
-	/**
-	 * 
-	 * Gets all the categories at a given level in the data tree.
-	 * @param session
-	 * @param level
-	 * @return
-	 */
-	public static List<Category> getCategories(Session session, int level){
-		String query = "FROM Category WHERE conservationArea = :ca AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
-		Query q = session.createQuery(query);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("level", level); //$NON-NLS-1$
-		
-		List<Category> cats = q.list();
-		return cats;
-	}
-	
-
 	
 	
 	/**

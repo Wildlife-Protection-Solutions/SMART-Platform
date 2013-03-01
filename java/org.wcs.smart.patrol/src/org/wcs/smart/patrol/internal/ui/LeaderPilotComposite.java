@@ -193,7 +193,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		patrolLeaderViewer.setInput(list);		
 		if (patrol.getFirstLeg().getLeader() != null){
 			patrolLeaderViewer.setSelection(new StructuredSelection(patrol.getFirstLeg().getLeader().getMember()));
-		}else{
+		}else if (list.size() > 0){
 			patrolLeaderViewer.setSelection(new StructuredSelection(list.get(0)));
 		}
 
@@ -204,7 +204,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			patrolPilotViewer.setInput(list);
 			if ( patrol.getFirstLeg().getPilot() != null){
 				patrolPilotViewer.setSelection(new StructuredSelection(patrol.getFirstLeg().getPilot().getMember()));
-			}else{
+			}else if (list.size() > 0){
 				patrolPilotViewer.setSelection(new StructuredSelection(list.get(0)));	
 			}
 		}

@@ -247,7 +247,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 				public String getText(Object element) {
 					if (element instanceof ConservationArea) {
 						ConservationArea ca = (ConservationArea) element;
-						return ca.getId() + " - " + ca.getName(); //$NON-NLS-1$
+						return ca.getNameLabel();
 					}
 					return super.getText(element);
 				}
@@ -310,7 +310,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						
 						if (dmToClone.getCategories().size() == 0) {
 							dm = null;
-							String error = MessageFormat.format(Messages.InitCaDataModelDialog_Error_Cloning, new Object[]{ caToCloneFrom.getId() + " - " + caToCloneFrom.getName()});  //$NON-NLS-1$
+							String error = MessageFormat.format(Messages.InitCaDataModelDialog_Error_Cloning, new Object[]{ ca.getNameLabel()}); 
 							throw new InvocationTargetException(new IllegalStateException(error),error);
 						}
 						//TODO: this needs to be tested when we support multiple languages

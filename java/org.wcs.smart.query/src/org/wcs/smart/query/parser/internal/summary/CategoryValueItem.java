@@ -23,7 +23,7 @@ package org.wcs.smart.query.parser.internal.summary;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -113,7 +113,7 @@ public class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
 	 */
 	public String getName(Session session){
-		Category c = QueryHibernateManager.getCategory(session, categoryHkey);
+		Category c = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 		if (c == null){
 			return this.key;
 		}
@@ -124,7 +124,7 @@ public class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getFullName(org.hibernate.Session)
 	 */
 	public String getFullName(Session session){
-		Category c = QueryHibernateManager.getCategory(session, categoryHkey);
+		Category c = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 		if (c == null){
 			return this.key;
 		}
@@ -136,7 +136,7 @@ public class CategoryValueItem implements IValueItem {
 	 */
 	@Override
 	public DropItem asDropItem(Session session) {
-		Category category = QueryHibernateManager.getCategory(session, categoryHkey);
+		Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
 		if (category != null){
 			category.getFullCategoryName();		//cache this
 			DropItem di = DropItemFactory.INSTANCE.createCategoryValueDropItem(category);

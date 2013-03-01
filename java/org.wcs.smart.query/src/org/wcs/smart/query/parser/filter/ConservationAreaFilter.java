@@ -75,6 +75,15 @@ public class ConservationAreaFilter implements IFilter {
 		
 	}
 	
+	
+	/**
+	 * 
+	 * @return the ids of the conservation areas in the filter
+	 */
+	public ArrayList<byte[]> getConservationAreaFilterIds(){
+		return filters;
+	}
+	
 	/**
 	 * Creates a new default conservation area filter.
 	 * <p>By default this filter includes the logged in conservation
@@ -155,7 +164,7 @@ public class ConservationAreaFilter implements IFilter {
 		sb.append(".ca_uuid IN ("); //$NON-NLS-1$
 		for (int i = 0; i < filters.size(); i++) {
 			if (i != 0){
-				sb.append(",");
+				sb.append(","); //$NON-NLS-1$
 			}
 			String uuid = SmartUtils.encodeHex(filters.get(i));
 			sb.append("x'" + uuid + "'"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -210,5 +219,5 @@ public class ConservationAreaFilter implements IFilter {
 	@Override
 	public List<IFilter> getChildren() {
 		return null;
-	}
+	}	
 }

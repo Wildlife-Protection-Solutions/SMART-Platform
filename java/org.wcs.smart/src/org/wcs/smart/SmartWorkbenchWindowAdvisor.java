@@ -120,7 +120,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     public void postWindowOpen() {
     	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().addWorkbenchListener(shutdownListener);
         //assign title to window
-        getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getId() + " - " + SmartDB.getCurrentConservationArea().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+        getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getNameLabel()); //$NON-NLS-1$
         
         /* -- setup part listener for layer view legend */
     	partListener = new IPartListener2() {

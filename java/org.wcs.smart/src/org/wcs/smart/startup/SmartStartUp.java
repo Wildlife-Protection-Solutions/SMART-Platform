@@ -130,15 +130,15 @@ public class SmartStartUp {
 					MessageDialog
 							.openInformation(
 									Display.getCurrent().getActiveShell(),
-									"Error",
-									"The provided username/password does not have permissions to access any of the conservation areas.");
+									Messages.SmartStartUp_ErrorDialogTitle,
+									Messages.SmartStartUp_NoCaAccess);
 					return false;
 				} else if (areas.size() == 1) {
 					MessageDialog
 							.openInformation(
 									Display.getCurrent().getActiveShell(),
-									"Error",
-									"The current username/password only has access to a single conservation area.  To perform cross-conservation analaysis you must have the same user account with manager, analyst or admin permissions in each conservation area you with to query");
+									Messages.SmartStartUp_ErrorDialogTitle,
+									Messages.SmartStartUp_SingleCaAccess);
 					return false;
 				} else {
 					

@@ -44,6 +44,8 @@ import org.wcs.smart.query.ui.formulaDnd.ListDropTargetPanel;
  */
 public class SummaryValueGroupByPanel {
 
+	public static final String PANEL_TITLE = Messages.SummaryValueGroupByPanel_GroupByValuePanelTitle;
+	
 	private ListDropTargetPanel lstRowGroupBy;
 	private ListDropTargetPanel lstColumnGroupBy;
 	private ListDropTargetPanel lstValues;

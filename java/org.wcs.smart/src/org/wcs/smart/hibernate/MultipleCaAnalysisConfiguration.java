@@ -42,7 +42,8 @@ public class MultipleCaAnalysisConfiguration {
 
 	private List<ConservationArea> conservationAreas;
 	private ConservationArea mainConservationArea;
-
+	private Language language;
+	
 	/**
 	 * The set of conservation areas logged into
 	 * @param conservationAreas
@@ -77,6 +78,14 @@ public class MultipleCaAnalysisConfiguration {
 		return this.conservationAreas.size();
 	}
 	
+	/**
+	 * The language associated with the main conservation area
+	 * that is the best match to the locale
+	 * @return
+	 */
+	public Language getLanguage(){
+		return this.language;
+	}
 	
 	/**
 	 * determines the main conservation area
@@ -93,11 +102,13 @@ public class MultipleCaAnalysisConfiguration {
 			Language language = HibernateManager.findLanguage(l, ca);
 			if (language != null){
 				mainConservationArea = ca;
+				this.language = language;
 				break;
 			}
 		}
 		if (mainConservationArea == null){
 			mainConservationArea = conservationAreas.get(0);
+			this.language = mainConservationArea.getDefaultLanguage();
 		}
 		SmartDB.getCurrentConservationArea().setLanguages(mainConservationArea.getLanguages());
 		

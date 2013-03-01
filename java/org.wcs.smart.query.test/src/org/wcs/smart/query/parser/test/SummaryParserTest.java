@@ -305,6 +305,21 @@ public class SummaryParserTest {
 		Assert.assertNull(test.getQueryFilter());
 	}
 	
+	@Test
+	public void testConservationAreaGroupBy() throws Exception{
+		
+		String valuePart = "";
+		String rowGroupByPart = "patrol:ca:";
+		String colGroupByPart = "";
+		String queryPart = "";
+		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+	}
 	
 	@Test
 	public void testCategoryGroupBy() throws Exception{

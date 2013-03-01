@@ -137,7 +137,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		refreshJob.schedule();
 	}
 	
-	private Job refreshJob = new Job("Refresh Summary Tree"){
+	private Job refreshJob = new Job(Messages.SummaryFilterPanel_RefreshTreeJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

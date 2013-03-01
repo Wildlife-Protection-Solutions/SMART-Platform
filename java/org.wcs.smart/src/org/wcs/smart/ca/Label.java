@@ -41,6 +41,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * 
@@ -70,6 +71,14 @@ public class Label  {
 		id = new LabelItemPK();
 	}
 
+	/**
+	 * Loads the label for the given element from the database.
+	 * Looks first for the current language, then the default language
+	 * of the current conservation area.
+	 * 
+	 * @param elementuuid
+	 * @return
+	 */
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
 		if (elementuuid == null){
@@ -85,11 +94,56 @@ public class Label  {
 		String description = ""; //$NON-NLS-1$
 		Session s = HibernateManager.openSession();
 		Label lbl = (Label) s.get(Label.class, id);
-		if (lbl == null && SmartDB.getCurrentConservationArea().getDefaultLanguage() != null) {
+		if (lbl == null ) {
 			// try for the default language
 			id.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			lbl = (Label) s.get(Label.class, id);
 		}
+		if (lbl != null) {
+			description = lbl.getValue();
+		}
+		return description;
+	}
+	
+	/**
+	 * Loads the label for the given element from the database.  Looks
+	 * for the language in the conservation area than matches the code
+	 * of the current language.  If not found uses the default
+	 * language of the provided ca.
+	 * 
+	 * @param elementuuid the element uuid
+	 * @param cauuid the uuid the element is associated with
+	 * @return
+	 */
+	@Transient
+	public static synchronized String getDescription(byte[] elementuuid, byte[] cauuid) {
+		String description = ""; //$NON-NLS-1$
+		if (elementuuid == null || cauuid == null){
+			return description;
+		}
+		
+		Label.LabelItemPK id = new Label.LabelItemPK();
+		HasLabel h = new HasLabel();
+		h.setUuid(elementuuid);
+		id.setElement(h);
+		
+		for (ConservationArea c : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+			if (Arrays.equals(c.getUuid(), cauuid)){
+				Language l = SmartUtils.findLanguageMatch(c.getLanguages());
+				if (l != null){
+					id.setLanguage(l);
+				}else{
+					id.setLanguage(c.getDefaultLanguage());
+				}
+				break;
+			}
+		}
+		if (id.getLanguage() == null){
+			return description;
+		}
+		
+		Session s = HibernateManager.openSession();
+		Label lbl = (Label) s.get(Label.class, id);
 		if (lbl != null) {
 			description = lbl.getValue();
 		}

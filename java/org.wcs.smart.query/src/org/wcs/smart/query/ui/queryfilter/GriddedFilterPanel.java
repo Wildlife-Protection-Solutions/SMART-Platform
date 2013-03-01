@@ -133,7 +133,7 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 	@Override
 	public void refreshPanel(){
 		if (SmartDB.isMultipleAnalysis()){
-			filterTreeViewer.setInput("Gridded Analysis Not Available for Cross-Conservation Area Analysis");
+			filterTreeViewer.setInput(Messages.GriddedFilterPanel_GriddedAnalysisError);
 			filterTreeViewer.refresh();
 		}else{
 			filterTreeViewer.setInput(LOADING_TEXT);
@@ -143,7 +143,7 @@ public class GriddedFilterPanel  extends AbstractQueryItemPanel{
 	}
 	
 	// job for refreshing the tree
-	private Job refreshJob = new Job("Refresh Gridded Tree"){
+	private Job refreshJob = new Job(Messages.GriddedFilterPanel_RefreshJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

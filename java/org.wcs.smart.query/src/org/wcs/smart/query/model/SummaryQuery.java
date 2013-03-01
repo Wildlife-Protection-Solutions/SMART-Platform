@@ -42,7 +42,6 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
-import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
@@ -72,7 +71,6 @@ public class SummaryQuery extends Query {
 	@Transient
 	private SumQueryDefinition query;	//cached copy of the parsed query
 
-	private ConservationAreaFilter caFilter;
 	private DateFilter dateFilter;
 	
 	/* transient fields for tracking ui items */
@@ -127,28 +125,6 @@ public class SummaryQuery extends Query {
 		return myQuery;
 	}
 	
-	/**
-	 * @return the conservation area filter
-	 */
-	@Transient
-	public ConservationAreaFilter getConservationAreaFilterAsFilter(){
-		return this.caFilter;
-	}
-	/**
-	 * @param filter a conservation area filter
-	 */
-	public void setConservationAreaFilter(ConservationAreaFilter filter){
-		this.caFilter = filter;
-	}
-	@Column(name="ca_filter")
-	public String getConservationAreaFilter(){
-		return this.caFilter.asString();
-	}
-	public void setConservationAreaFilter(String caFilterString){
-		this.caFilter = ConservationAreaFilter.parseFilter(caFilterString);
-	}
-
-
 	/**
 	 * @return the date filter; or null if date filter not set
 	 */
@@ -456,9 +432,8 @@ public class SummaryQuery extends Query {
 	 */
 	public void copyFrom(Query copy){
 		assert copy instanceof SummaryQuery;
-		
 		SummaryQuery q = (SummaryQuery)copy;
 		setQuery(q.getQuery());
-		setConservationAreaFilter(q.getConservationAreaFilter());
+		setConservationAreaFilter(getConservationAreaFilter());
 	}
 }

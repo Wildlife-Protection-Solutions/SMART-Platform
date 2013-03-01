@@ -33,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.gridded.GriddedEditor;
 import org.wcs.smart.query.ui.observation.QueryResultsEditor;
@@ -112,6 +113,7 @@ public abstract class Query extends SimpleListItem {
 	private QueryFolder ownerFolder = null;
 	private boolean isValid = false;
 	
+	private ConservationAreaFilter caFilter;
 	
 	protected Query(){
 		
@@ -210,6 +212,36 @@ public abstract class Query extends SimpleListItem {
 	 */
 	public void setIsValid(boolean isValid){
 		this.isValid = isValid;
+	}
+	
+	/**
+	 * @return the conservation area filter
+	 */
+	@Column(name="ca_filter")
+	public String getConservationAreaFilter(){
+		return this.caFilter.asString();
+	}
+	/**
+	 * @param filter a conservation area filter
+	 */
+	public void setConservationAreaFilter(String filter){
+		this.caFilter = ConservationAreaFilter.parseFilter(filter);
+	}
+	
+	
+	/**
+	 * @param filter a conservation area filter
+	 */
+	public void setConservationAreaFilter(ConservationAreaFilter filter){
+		this.caFilter = filter;
+	}
+	
+	/**
+	 * @return the conservation area filter
+	 */
+	@Transient
+	public ConservationAreaFilter getConservationAreaFilterAsFilter(){
+		return this.caFilter;
 	}
 	
 	/**
