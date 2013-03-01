@@ -50,7 +50,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
  */
 public class AttributeValueDropItem extends AbstractValueDropItem {
 
-	private Attribute attribute = null;;
+	private Attribute attribute = null;
 	private Category category = null; 
 	
 	private Aggregation selectedAggregation;

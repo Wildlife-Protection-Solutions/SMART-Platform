@@ -248,23 +248,21 @@ public class QueryDataModelManager {
 	 * @param active if only active tree nodes should be loaded
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, byte[] uuid, int level, boolean active){
 		if (SmartDB.isMultipleAnalysis()){
 			Attribute a = (Attribute) session.get(Attribute.class, uuid);
-			String query = "SELECT a.hkey FROM AttributeTreeNode a join a.attribute b WHERE b.keyId = :key and smart.hkeyLength(a.hkey) = :level group by a.hkey having count(*) = :cnt";
+			String query = "SELECT a.hkey FROM AttributeTreeNode a join a.attribute b WHERE b.keyId = :key and smart.hkeyLength(a.hkey) = :level group by a.hkey having count(*) = :cnt";//$NON-NLS-1$
 			Query q = session.createQuery(query);
-			q.setParameter("key", a.getKeyId());
-			q.setParameter("level", level);
-			q.setInteger("cnt", SmartDB.getConservationAreaConfiguration().getCaCount());
+			q.setParameter("key", a.getKeyId());//$NON-NLS-1$
+			q.setParameter("level", level);//$NON-NLS-1$
+			q.setInteger("cnt", SmartDB.getConservationAreaConfiguration().getCaCount());//$NON-NLS-1$
 			List<String> hkeys = q.list();
 			
-			q = session.createQuery("FROM AttributeTreeNode a WHERE a.attribute.uuid = :uuid and hkey in (:hkeys)");
-			q.setParameter("uuid" ,uuid);
-			q.setParameterList("hkeys", hkeys);
+			q = session.createQuery("FROM AttributeTreeNode a WHERE a.attribute.uuid = :uuid and hkey in (:hkeys)");//$NON-NLS-1$
+			q.setParameter("uuid" ,uuid);//$NON-NLS-1$
+			q.setParameterList("hkeys", hkeys);//$NON-NLS-1$
 			List<AttributeTreeNode> nodes = q.list();
-//			for (AttributeTreeNode n : nodes){
-//				n.setName(n.findName(SmartDB.getSelectedConservationAreas().get(0).getDefaultLanguage()));
-//			}
 			return nodes;
 				
 		}else{
