@@ -22,6 +22,7 @@
 package org.wcs.smart.startup;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
@@ -65,7 +67,7 @@ public class SmartStartUp {
 	 * 
 	 * @return list of conservation areas in the database
 	 */
-	public static List<ConservationArea> getConservationAreas(){
+	public static List<Object> getConservationAreas(){
 		//check that the database exists
 		if (!SmartDB.dbExists()){
 			//log error message and exit
@@ -76,7 +78,17 @@ public class SmartStartUp {
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				return HibernateManager.getConservationAreas(session);
+				List<Object> results = new ArrayList<Object>();
+				results.addAll(HibernateManager.getConservationAreas(session));
+				
+				if (results.size() > 1){
+					List<?> tmp = session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", ConservationArea.MULTIPLE_CA)).list(); //$NON-NLS-1$
+					if (tmp.size() > 0){
+						results.add(Messages.SmartStartUp_AnalysisLoginSepeartor);
+						results.add((ConservationArea)tmp.get(0));
+					}
+				}
+				return results;
 			}finally{
 				session.getTransaction().rollback();
 				session.close();

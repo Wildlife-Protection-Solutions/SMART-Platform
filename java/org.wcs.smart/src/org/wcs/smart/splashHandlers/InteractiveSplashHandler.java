@@ -25,9 +25,12 @@ package org.wcs.smart.splashHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -178,7 +181,14 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				handleButtonAdvancedSelected();
 			}
 		});
+
 		
+		cmvConservationArea.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validateUi();
+			}
+		});
 		ModifyListener validator = new ModifyListener() {	
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -194,7 +204,16 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 * validates the ui components, enabling and disabling required components.
 	 */
 	private void validateUi(){
-		btnOk.setEnabled(txtUserName.isEnabled() && (txtUserName.getText().length() > 0 && txtPassword.getText().length() > 0));
+		boolean ok = !cmvConservationArea.getSelection().isEmpty();
+		if (ok){
+			if (!(((IStructuredSelection)cmvConservationArea.getSelection()).getFirstElement() instanceof ConservationArea)){
+				ok = false;
+			}
+		}
+		if (ok){
+			ok = txtUserName.isEnabled() && (txtUserName.getText().length() > 0 && txtPassword.getText().length() > 0);
+		}
+		btnOk.setEnabled(ok);
 	}
 
 
@@ -274,30 +293,26 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		lblLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblLabel.setText(Messages.InteractiveSplashHandler_Ca_Label);
 		
-//		FontData[] fd = lblLabel.getFont().getFontData();
-//		fd[0].setStyle(SWT.BOLD);
-//		newFont = new Font(getSplash().getDisplay(), fd[0]);
-//		lblLabel.setFont(newFont);
-//		lblLabel.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		
 		Combo cmbConservationArea = new Combo(fCompositeLogin, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbConservationArea.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		widgets.add(cmbConservationArea);
 		
 		cmvConservationArea = new ComboViewer(cmbConservationArea);
+		cmvConservationArea.setContentProvider(ArrayContentProvider.getInstance());
 		cmvConservationArea.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
-				ConservationArea ca = ((ConservationArea)element);
-				return ca.getNameLabel();
+				if (element instanceof ConservationArea){
+					ConservationArea ca = ((ConservationArea)element);
+					return ca.getNameLabel();
+				}
+				return super.getText(element);
 			}
 		});		
 		
 		Label lblUserName = new Label(fCompositeLogin, SWT.NONE);
 		lblUserName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblUserName.setText(Messages.InteractiveSplashHandler_Username_Label);
-//		lblUserName.setFont(newFont);
-//		lblUserName.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		
+
 		txtUserName = new Text(fCompositeLogin, SWT.BORDER);
 		txtUserName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		widgets.add(txtUserName);
@@ -306,9 +321,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		Label lblPassword = new Label(fCompositeLogin, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblPassword.setText(Messages.InteractiveSplashHandler_Password_Label);
-//		lblPassword.setFont(newFont);
-//		lblPassword.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		
+
 		txtPassword = new Text(fCompositeLogin, SWT.PASSWORD | SWT.BORDER);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		txtPassword.addKeyListener(new KeyAdapter() {
@@ -329,7 +342,6 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		data = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
 		lblAdvanced.setLayoutData(data);
 		lblAdvanced.setVisible(true);// false
-//		lblAdvanced.setForeground(getSplash().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		lblAdvanced.setCursor( new Cursor(getSplash().getDisplay(),  SWT.CURSOR_HAND));
 		widgets.add(lblAdvanced);
 		
@@ -388,7 +400,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				@Override
 				public void run() {
 					DisplayAccess.accessDisplayDuringStartup();
-					final List<ConservationArea> cas = new ArrayList<ConservationArea>();
+					final List<Object> cas = new ArrayList<Object>();
 					try{
 						cas.addAll(SmartStartUp.getConservationAreas());
 					}catch (final Exception ex){
@@ -402,12 +414,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							cmvConservationArea.getCombo().removeAll();
-
-							if (cas != null && cas.size() > 0) {
-								for (ConservationArea ca : cas) {
-									cmvConservationArea.add(ca);
-								}
+							if (cas != null && cas.size() > 0){
+								cmvConservationArea.setInput(cas);
 								cmvConservationArea.getCombo().select(0);
 								enableControls(true);
 								progressLabel.setText(""); //$NON-NLS-1$
