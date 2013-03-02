@@ -23,14 +23,11 @@ package org.wcs.smart.query.ui.queryfilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -57,10 +54,10 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
+import org.wcs.smart.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.RootNodeType;
@@ -182,16 +179,8 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 
 	private List<IPatrolQueryOption> findContributedPatrolQueryOptions() {
 		List<IPatrolQueryOption> items = new ArrayList<IPatrolQueryOption>();
-		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IQueryFilterPatrolContribution.EXTENSION_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				IQueryFilterPatrolContribution contribution = (IQueryFilterPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
-				items.addAll(contribution.getOptions());
-			}
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.QueryFilterPanel_ParseContribution_Error, ex);
-			return null;
+		for (IQueryFilterPatrolContribution contribution : PatrolContributionFactory.getContributions()) {
+			items.addAll(contribution.getOptions());
 		}
 		return items;
 	}

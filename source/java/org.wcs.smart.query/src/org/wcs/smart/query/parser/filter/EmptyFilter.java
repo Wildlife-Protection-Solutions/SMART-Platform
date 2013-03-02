@@ -19,45 +19,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui;
+package org.wcs.smart.query.parser.filter;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
-import org.wcs.smart.query.parser.IPatrolQueryOption;
+import org.hibernate.Session;
+import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.parser.internal.filter.IFilter;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
- * Contribution for the Patrol section of a "Query Filter" view.
- *
+ * A class to represent and empty filter.
+ * 
  * @author elitvin
  * @since 1.0.0
  */
-public interface IQueryFilterPatrolContribution {
+public class EmptyFilter implements IFilter {
 
-	/**
-	 * Extension id
-	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.query.filter.patrol"; //$NON-NLS-1$
+	@Override
+	public String asString() {
+		return ""; //$NON-NLS-1$
+	}
+
+	@Override
+	public String asSql(HashMap<Class<?>, String> tableMapping) {
+		return ""; //$NON-NLS-1$
+	}
+
+	@Override
+	public boolean hasCategoryFilter() {
+		return false;
+	}
+
+	@Override
+	public boolean hasAttributeFilter() {
+		return false;
+	}
+
+	@Override
+	public boolean hasEmployeeFilter() {
+		return false;
+	}
+
+	@Override
+	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
+	}
 	
-	public List<IPatrolQueryOption> getOptions();
+	@Override
+	public DropItem[] getDropItems(Session session) throws Exception {
+		return new DropItem[]{};
+	}
 
-	/**
-	 * Creates a patrol filter for a boolean patrol filter option
-	 * 
-	 * @param key the patrol key 
-	 * @return
-	 */
-	public IFilter createBooleanFilter(String key);
+	@Override
+	public List<IFilter> getChildren() {
+		return null;
+	}
 
-	/**
-	 * Creates a patrol filter
-	 * 
-	 * @param key patrol filter key
-	 * @param op patrol filter operator 
-	 * @param value patrol filter value
-	 * @return
-	 */
-	public IFilter createStringFilter(String key, Operator op, Object value);
-	
 }

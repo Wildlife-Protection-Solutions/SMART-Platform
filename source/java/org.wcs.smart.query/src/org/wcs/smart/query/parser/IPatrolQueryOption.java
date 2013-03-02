@@ -38,6 +38,16 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 public interface IPatrolQueryOption {
 
 	/**
+	 * MANDATORY prefix for the key for all boolean contribution options
+	 */
+	public static final String BOOLEAN_CONTRIBUTION_KEY_PREFIX = "contribution:boolean:"; //$NON-NLS-1$
+
+	/**
+	 * MANDATORY prefix for the key for all string contribution options
+	 */
+	public static final String STRING_CONTRIBUTION_KEY_PREFIX = "contribution:string:";  //$NON-NLS-1$
+	
+	/**
 	 * @return <code>true</code> if this option involved employees
 	 */
 	public boolean isEmployeeItem();

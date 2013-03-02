@@ -3,7 +3,6 @@
 package org.wcs.smart.query.parser.internal.parser;
 
 /** Token Manager Error. */
-@SuppressWarnings({"nls"})
 public class TokenMgrError extends Error
 {
 

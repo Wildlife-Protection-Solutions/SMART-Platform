@@ -19,45 +19,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui;
+package org.wcs.smart.query.parser;
 
 import java.util.List;
 
-import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.eclipse.swt.graphics.Image;
+import org.hibernate.Session;
+import org.wcs.smart.query.model.ListItem;
 
 /**
- * Contribution for the Patrol section of a "Query Filter" view.
- *
+ * Blank implementation for some of {@link IPatrolQueryOption} methods 
+ * which is suitable for most contribution items
+ * 
  * @author elitvin
  * @since 1.0.0
  */
-public interface IQueryFilterPatrolContribution {
+public abstract class AbstractEmptyPatrolQueryOption implements IPatrolQueryOption {
 
-	/**
-	 * Extension id
-	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.query.filter.patrol"; //$NON-NLS-1$
+	@Override
+	public Image getImage() {
+		return null;
+	}
 	
-	public List<IPatrolQueryOption> getOptions();
+	@Override
+	public Class<?> getSourceClass() {
+		return this.getClass();
+	}
 
-	/**
-	 * Creates a patrol filter for a boolean patrol filter option
-	 * 
-	 * @param key the patrol key 
-	 * @return
-	 */
-	public IFilter createBooleanFilter(String key);
-
-	/**
-	 * Creates a patrol filter
-	 * 
-	 * @param key patrol filter key
-	 * @param op patrol filter operator 
-	 * @param value patrol filter value
-	 * @return
-	 */
-	public IFilter createStringFilter(String key, Operator op, Object value);
+	@Override
+	public boolean isEmployeeItem() {
+		return false;
+	}
 	
+	@Override
+	public String getName(Session session, byte[] uuid) {
+		return ""; //$NON-NLS-1$
+	}
+
+	@Override
+	public String[] getNames(Session session, byte[] uuid) {
+		return new String[0];
+	}
+
+	@Override
+	public Object getObject(Session session, byte[] uuid) {
+		return null;
+	}
+
+	@Override
+	public List<ListItem> getValues(Session session, String[] keys) {
+		return null;
+	}
+
+	@Override
+	public List<ListItem> getAllActiveValues(Session session) {
+		return null;
+	}
+
 }

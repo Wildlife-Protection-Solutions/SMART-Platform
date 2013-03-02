@@ -4,7 +4,7 @@ import java.util.*;
 import org.wcs.smart.query.parser.internal.filter.*;
 import org.wcs.smart.query.parser.internal.summary.*;
 
-@SuppressWarnings({"unused", "nls"})
+
 public class Parser implements ParserConstants {
 
 /* ------------ Expressions ----------------------*/
@@ -43,6 +43,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROL_CONTRIBUTION_BOOL_KEY:
+    case PATROL_CONTRIBUTION_STRING_KEY:
     case AREA_KEY:
       filter = ExpressionPart();
       break;
@@ -89,6 +91,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROL_CONTRIBUTION_BOOL_KEY:
+    case PATROL_CONTRIBUTION_STRING_KEY:
     case AREA_KEY:
       valueFilter = ExpressionPart();
       break;
@@ -121,6 +125,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROL_CONTRIBUTION_BOOL_KEY:
+    case PATROL_CONTRIBUTION_STRING_KEY:
     case AREA_KEY:
       rateFilter = ExpressionPart();
       break;
@@ -302,7 +308,7 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-final public IFilter ExpressionPart() throws ParseException {
+  final public IFilter ExpressionPart() throws ParseException {
   IFilter expr = null;
   Operator op = null;
   IFilter expr2 = null;
@@ -363,6 +369,8 @@ final public IFilter ExpressionPart() throws ParseException {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROL_CONTRIBUTION_BOOL_KEY:
+    case PATROL_CONTRIBUTION_STRING_KEY:
       filter = AttributeExpression();
       break;
     case AREA_KEY:
@@ -400,6 +408,10 @@ final public IFilter ExpressionPart() throws ParseException {
     case PATROL_BOOL_KEY:
       jj_consume_token(PATROL_BOOL_KEY);
                 filter = PatrolFilter.createBooleanFilter(token.image);
+      break;
+    case PATROL_CONTRIBUTION_BOOL_KEY:
+      jj_consume_token(PATROL_CONTRIBUTION_BOOL_KEY);
+                filter = PatrolContributionFactory.createBooleanFilter(token.image);
       break;
     default:
       jj_la1[14] = jj_gen;
@@ -458,6 +470,7 @@ final public IFilter ExpressionPart() throws ParseException {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROL_CONTRIBUTION_STRING_KEY:
       /* String comparison */
               filter = StringExpression();
       break;
@@ -469,6 +482,7 @@ final public IFilter ExpressionPart() throws ParseException {
     case ATT_BOOL_KEY:
     case CAT_ATT_BOOL_KEY:
     case PATROL_BOOL_KEY:
+    case PATROL_CONTRIBUTION_BOOL_KEY:
       /* boolean */
               filter = BooleanItemExpression();
       break;
@@ -587,6 +601,14 @@ final public IFilter ExpressionPart() throws ParseException {
                          value = token.image;
                         filter = PatrolFilter.createStringFilter(key, op, value);
       break;
+    case PATROL_CONTRIBUTION_STRING_KEY:
+      jj_consume_token(PATROL_CONTRIBUTION_STRING_KEY);
+                         key = token.image;
+      op = StringOp();
+      jj_consume_token(QUOTED_STRING);
+                         value = token.image;
+                        filter = PatrolContributionFactory.createStringFilter(key, op, value);
+      break;
     default:
       jj_la1[18] = jj_gen;
       jj_consume_token(-1);
@@ -702,7 +724,7 @@ final public IFilter ExpressionPart() throws ParseException {
       jj_la1_1 = new int[] {0x7c7ff800,0x7c7ff800,0x7c7ff800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7c7ff800,0x484000,0x42000,0x7c7ff000,0x7c000000,0x7c021000,0x0,0x1c,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x1f,0x1f,0x1f,0x3a0,0x0,0x0,0x3a0,0x3e800,0x0,0x6000,0x3e800,0x0,0x0,0x1f,0x0,0x0,0xf,0xf,0xf,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x7f,0x7f,0x7f,0xe80,0x0,0x0,0xe80,0xfa000,0x0,0x18000,0xfa000,0x0,0x0,0x7f,0x10,0x0,0x3f,0xf,0x2f,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -819,7 +841,7 @@ final public IFilter ExpressionPart() throws ParseException {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[83];
+    boolean[] la1tokens = new boolean[85];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -839,7 +861,7 @@ final public IFilter ExpressionPart() throws ParseException {
         }
       }
     }
-    for (int i = 0; i < 83; i++) {
+    for (int i = 0; i < 85; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

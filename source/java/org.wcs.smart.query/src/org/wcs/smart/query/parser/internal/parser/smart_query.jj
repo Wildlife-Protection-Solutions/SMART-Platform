@@ -60,6 +60,8 @@ TOKEN :
  | < PATROLLEG_LEADER_KEY : "patrol:leader" >
  | < PATROLLEG_PILOT_KEY : "patrol:pilot" >
  | < PATROLLEG_MEMBER_KEY : "patrol:member" >
+ | < PATROL_CONTRIBUTION_BOOL_KEY : "patrol:contribution:boolean:"(< LETTER >)* >
+ | < PATROL_CONTRIBUTION_STRING_KEY : "patrol:contribution:string:"(< LETTER >)* >
  | < AREA_KEY : "area:" ("wp" | "t") ":" ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) ":" < DM_KEY > >}
 /* Summary Query */
 TOKEN :
@@ -352,6 +354,11 @@ IFilter BooleanItemExpression():
    |
     	< PATROL_BOOL_KEY >    	{
       		filter = PatrolFilter.createBooleanFilter(token.image);    	}
+   |
+    	< PATROL_CONTRIBUTION_BOOL_KEY >
+    	{
+      		filter = PatrolContributionFactory.createBooleanFilter(token.image);
+    	}
 	)	
  {   return filter;
  } 
@@ -509,6 +516,20 @@ IFilter StringExpression():
 		)
 		{
   			filter = PatrolFilter.createStringFilter(key, op, value);
+		}
+
+	|
+ 		(
+			(
+  				< PATROL_CONTRIBUTION_STRING_KEY >
+ 			) 
+ 			{key = token.image;}
+	     	op = StringOp()
+			< QUOTED_STRING >
+			{value = token.image;}
+		)
+		{
+  			filter = PatrolContributionFactory.createStringFilter(key, op, value);
 		}
 
 	)

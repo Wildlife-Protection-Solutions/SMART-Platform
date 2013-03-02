@@ -19,45 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui;
+package org.wcs.smart.intelligence.query;
 
-import java.util.List;
-
-import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.query.parser.AbstractEmptyPatrolQueryOption;
+import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 
 /**
- * Contribution for the Patrol section of a "Query Filter" view.
- *
+ * Intelligence option to contribute to Patrol Query Filter
+ * 
  * @author elitvin
  * @since 1.0.0
  */
-public interface IQueryFilterPatrolContribution {
-
-	/**
-	 * Extension id
-	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.query.filter.patrol"; //$NON-NLS-1$
+public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 	
-	public List<IPatrolQueryOption> getOptions();
+	public static final String KEY = BOOLEAN_CONTRIBUTION_KEY_PREFIX + "intelligence"; //$NON-NLS-1$
 
-	/**
-	 * Creates a patrol filter for a boolean patrol filter option
-	 * 
-	 * @param key the patrol key 
-	 * @return
-	 */
-	public IFilter createBooleanFilter(String key);
+	@Override
+	public String getGuiName() {
+		return "Intelligence";
+	}
 
-	/**
-	 * Creates a patrol filter
-	 * 
-	 * @param key patrol filter key
-	 * @param op patrol filter operator 
-	 * @param value patrol filter value
-	 * @return
-	 */
-	public IFilter createStringFilter(String key, Operator op, Object value);
+	@Override
+	public String getKey() {
+		return KEY;
+	}
+
+	@Override
+	public String getColumnName() {
+		return "intelligence";
+	}
+
+	@Override
+	public PatrolQueryOptionType getType() {
+		return PatrolQueryOptionType.BOOLEAN;
+	}
+
+	@Override
+	public Class<?> getPatrolAttributeClass() {
+		return Patrol.class;
+	}
+
+	@Override
+	public Image getImage() {
+		return IntelligencePlugIn.getDefault().getImageRegistry().get(IntelligencePlugIn.INTELLIGENCE_ICON);
+	}
 	
 }

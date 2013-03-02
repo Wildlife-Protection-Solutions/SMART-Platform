@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.intelligence.query;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Image;
-import org.hibernate.Session;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.internal.filter.Operator;
 import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
 
 /**
@@ -41,78 +37,26 @@ import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
  */
 public class IntelligenceQueryFilterPatrolContribution implements IQueryFilterPatrolContribution {
 
+	private IPatrolQueryOption intelligenceOption = new IntelligencePatrolQueryOption();
+	
 	@Override
 	public List<IPatrolQueryOption> getOptions() {
-		//TODO: implement real object!!!
-		IPatrolQueryOption testOption = new IPatrolQueryOption() {
+		List<IPatrolQueryOption> options = new ArrayList<IPatrolQueryOption>();
+		options.add(intelligenceOption);
+		return options;
+	}
 
-			@Override
-			public boolean isEmployeeItem() {
-				return false;
-			}
+	@Override
+	public IFilter createBooleanFilter(String key) {
+		if (intelligenceOption.getKey().equals(key)) {
+			return new PatrolIntelligenceQueryFilter(intelligenceOption);
+		}
+		return null;
+	}
 
-			@Override
-			public String getGuiName() {
-				return "Intelligence";
-			}
-
-			@Override
-			public String getKey() {
-				return "intelligence";
-			}
-
-			@Override
-			public String getColumnName() {
-				return "intelligence";
-			}
-
-			@Override
-			public PatrolQueryOptionType getType() {
-				return PatrolQueryOptionType.BOOLEAN;
-			}
-
-			@Override
-			public Class<?> getPatrolAttributeClass() {
-				return Patrol.class;
-			}
-
-			@Override
-			public Class<?> getSourceClass() {
-				return IntelligenceQueryFilterPatrolContribution.class;
-			}
-
-			@Override
-			public Image getImage() {
-				return IntelligencePlugIn.getDefault().getImageRegistry().get(IntelligencePlugIn.INTELLIGENCE_ICON);
-			}
-			
-			@Override
-			public String getName(Session session, byte[] uuid) {
-				return "fake";
-			}
-
-			@Override
-			public String[] getNames(Session session, byte[] uuid) {
-				return new String[] {"fake"};
-			}
-
-			@Override
-			public Object getObject(Session session, byte[] uuid) {
-				return null;
-			}
-
-			@Override
-			public List<ListItem> getValues(Session session, String[] keys) {
-				return null;
-			}
-
-			@Override
-			public List<ListItem> getAllActiveValues(Session session) {
-				return null;
-			}
-			
-		};
-		return Arrays.asList(testOption);
+	@Override
+	public IFilter createStringFilter(String key, Operator op, Object value) {
+		return null;
 	}
 
 }
