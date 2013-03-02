@@ -262,6 +262,7 @@ public class Messages extends NLS {
 	public static String Operator_StrContains;
 	public static String Operator_StrEquals;
 	public static String Operator_StrNotContains;
+	public static String PatrolContributionFactory_ParseContribution_Error;
 	public static String PatrolFilter_InvalidPrefix;
 	public static String PatrolGroupBy_CouldNotParse;
 	public static String PatrolGroupBy_CouldNotResolveFilter;
@@ -390,7 +391,6 @@ public class Messages extends NLS {
 	public static String QueryFilterContentProvider_NotLabel;
 	public static String QueryFilterContentProvider_OperatoresLabel;
 	public static String QueryFilterContentProvider_PatrolFiltersLabel;
-	public static String QueryFilterPanel_ParseContribution_Error;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryFilterView_ErrorNoFilterOptions;

@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.query.parser.filter.EmptyFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**
@@ -38,48 +39,7 @@ public interface IFilter {
 	/**
 	 * A class to represent and empty filter.
 	 */
-	public IFilter EMPTY_FILTER = new IFilter(){
-
-		@Override
-		public String asString() {
-			return ""; //$NON-NLS-1$
-		}
-
-		@Override
-		public String asSql(HashMap<Class<?>, String> tableMapping) {
-			return ""; //$NON-NLS-1$
-		}
-
-
-		@Override
-		public boolean hasCategoryFilter() {
-			return false;
-		}
-
-		@Override
-		public boolean hasAttributeFilter() {
-			return false;
-		}
-
-		@Override
-		public boolean hasEmployeeFilter() {
-			return false;
-		}
-
-		@Override
-		public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
-		}
-		
-		@Override
-		public DropItem[] getDropItems(Session session){
-			return new DropItem[]{};
-		}
-
-		@Override
-		public List<IFilter> getChildren() {
-			return null;
-		}
-	};
+	public IFilter EMPTY_FILTER = new EmptyFilter();
 	
 	/**
 	 * @return the string representation of the filter
