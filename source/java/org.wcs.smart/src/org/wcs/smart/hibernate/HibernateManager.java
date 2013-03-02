@@ -175,8 +175,10 @@ public class HibernateManager extends SmartHibernateManager{
 	
 	
 	/**
-	 * Opens a session, loads all conservation areas and
-	 * closes the session.
+	 * Loads all public conservation areas in the database.
+	 * <p>This will not return the default CA used for cross-ca
+	 * analysis</p>
+	 * 
 	 * @param session hibernate session
 	 * @return a list of conservation areas in the database
 	 */
@@ -184,15 +186,7 @@ public class HibernateManager extends SmartHibernateManager{
 	public static List<ConservationArea> getConservationAreas(Session session) {
 		Query query = session.createQuery("from ConservationArea WHERE uuid != :uuid Order by id");	 //$NON-NLS-1$
 		query.setParameter("uuid", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-		
 		List<ConservationArea> areas = query.list();
-		
-		if (areas.size() > 1){
-			List<?> tmp = session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", ConservationArea.MULTIPLE_CA)).list(); //$NON-NLS-1$
-			if (tmp.size() > 0){
-				areas.add((ConservationArea)tmp.get(0));
-			}
-		}
 		return areas;
 	}
 	

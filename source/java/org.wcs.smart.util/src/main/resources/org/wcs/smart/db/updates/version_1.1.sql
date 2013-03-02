@@ -12,6 +12,6 @@ alter table smart.conservation_area drop column plan_point_buffer;
 -- Add a default ca for cross-ca analysis.
 insert into smart.conservation_area
   (uuid,id,name,description,designation)
-  values (x'00000000000000000000000000000000', 'SMART', 'Cross Conservation Analysis','Internal CA for Cross Conservation Analysis', 'Internal');=======
+  values (x'00000000000000000000000000000000', 'XXX', 'Cross Conservation Analysis','Internal CA for Cross Conservation Analysis', 'Internal');=======
 
 

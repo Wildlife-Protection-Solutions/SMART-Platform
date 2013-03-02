@@ -731,6 +731,7 @@ public class Messages extends NLS {
 	public static String SmartServiceInfo_Keyword1;
 	public static String SmartServiceInfo_Keyword2;
 	public static String SmartServiceInfo_Title;
+	public static String SmartStartUp_AnalysisLoginSepeartor;
 	public static String SmartStartUp_ConnectError;
 	public static String SmartStartUp_Error_LoginError;
 	public static String SmartStartUp_Error_LoginFail;
