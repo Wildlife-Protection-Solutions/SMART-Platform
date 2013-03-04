@@ -28,6 +28,11 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	private static SmartPlanPlugIn plugin;
 	
 	/**
+	 * General Image descriptor key for plan 
+	 */
+	public static final String PLAN_ICON = "org.wsc.smart.patrol.PLAN"; //$NON-NLS-1$
+
+	/**
 	 * Image descriptor key for conservation area plan 
 	 */
 	public static final String CA_PLAN_ICON = "org.wsc.smart.patrol.CA_PLAN"; //$NON-NLS-1$
@@ -155,6 +160,8 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	
 	@Override
     protected void initializeImageRegistry(ImageRegistry reg) {
+		reg.put(PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/view16/plan.png")); //$NON-NLS-1$
+
 		reg.put(CA_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/ca_plan.png")); //$NON-NLS-1$
 		reg.put(STATION_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station_plan.png")); //$NON-NLS-1$
 		reg.put(TEAM_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/team_plan.png")); //$NON-NLS-1$

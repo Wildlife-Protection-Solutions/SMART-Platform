@@ -40,6 +40,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
@@ -471,6 +472,19 @@ public class PlanHibernateManager{
 		} finally {
 			session.close();
 		}
+	}
+
+	/**
+	 * Returns a a list of all plans in given Conservation area
+	 * 
+	 * @return a list of Plans
+	 */
+	public static List<Plan> getPlans(ConservationArea ca, Session session) {
+		Criteria criteria = session.createCriteria(Plan.class);
+		criteria.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Plan> plans = criteria.list();
+		return plans;
 	}
 	
 }
