@@ -302,5 +302,11 @@
             icon="images/icons/etool16/delete.png">
       </image>
    </extension>
+   <extension
+         point="org.wcs.smart.query.filter.patrol">
+      <contribution
+            class="org.wcs.smart.plan.query.PlanQueryFilterPatrolContribution">
+      </contribution>
+   </extension>
 
 </plugin>
