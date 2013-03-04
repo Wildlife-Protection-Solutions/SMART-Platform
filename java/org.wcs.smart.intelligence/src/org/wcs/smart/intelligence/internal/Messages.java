@@ -112,6 +112,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceLocation_PageTitle;
 
+	public static String IntelligencePatrolQueryOption_Name;
+
 	public static String IntelligencePatrolWizardPage_Message;
 
 	public static String IntelligencePatrolWizardPage_PageName;
