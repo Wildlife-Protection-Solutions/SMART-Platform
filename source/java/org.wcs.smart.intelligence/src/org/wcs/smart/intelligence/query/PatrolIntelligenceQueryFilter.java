@@ -50,10 +50,9 @@ public class PatrolIntelligenceQueryFilter extends EmptyFilter {
 
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		// TODO: Implement real sql
 		String prefix = tableMapping.get(option.getPatrolAttributeClass());
-		String x = prefix + ".is_armed" ; //+ " = 'true'" ; //$NON-NLS-1$
-		return x;
+		String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = "+prefix+".uuid)"; //$NON-NLS-1$ //$NON-NLS-2$
+		return sql;
 	}
 
 	@Override

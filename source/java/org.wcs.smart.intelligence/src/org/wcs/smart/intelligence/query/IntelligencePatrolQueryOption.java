@@ -23,6 +23,7 @@ package org.wcs.smart.intelligence.query;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.parser.AbstractEmptyPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
@@ -39,7 +40,7 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 
 	@Override
 	public String getGuiName() {
-		return "Intelligence";
+		return Messages.IntelligencePatrolQueryOption_Name;
 	}
 
 	@Override
@@ -49,7 +50,9 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 
 	@Override
 	public String getColumnName() {
-		return "intelligence";
+		//This value is not user for this particular contribution 
+		//as there is no corresponding column in patrol table
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override
