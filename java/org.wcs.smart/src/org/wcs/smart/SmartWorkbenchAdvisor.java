@@ -25,6 +25,7 @@ import org.eclipse.ui.application.IWorkbenchConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchAdvisor;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * This workbench advisor creates the window advisor, and specifies the
@@ -46,7 +47,11 @@ public class SmartWorkbenchAdvisor extends WorkbenchAdvisor {
 	}
 
 	public String getInitialWindowPerspectiveId() {
-		return DefaultPerspective.ID;
+		if (SmartDB.isMultipleAnalysis()){
+			return DefaultCrossCaPerspective.ID;
+		}else{
+			return DefaultPerspective.ID;
+		}
 	}
 
 }

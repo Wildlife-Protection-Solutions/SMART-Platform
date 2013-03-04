@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -100,7 +99,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @param session
 	 * @return
 	 */
-	@SuppressWarnings({ "nls", "unchecked" })
+	@SuppressWarnings({"unchecked" })
 	public List<AttributeListItem> getActiveAttributeListItems(Attribute attribute, Session session){
 		//we need to only include items that are shared across all conservation areas
 		String query = "SELECT a.keyId FROM AttributeListItem a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea IN (:cas) group by a.keyId having count(*) = :cnt"; //$NON-NLS-1$
@@ -128,7 +127,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @param session
 	 * @return list of root attribute tree nodes
 	 */
-	@SuppressWarnings({ "nls", "unchecked" })
+	@SuppressWarnings({"unchecked" })
 	public List<AttributeTreeNode> getActiveAttributeTreeNodes(Attribute attribute, Session session){
 		//we need to only include items that are shared across all conservation areas
 		String query = "SELECT a.hkey FROM AttributeTreeNode a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea in (:cas) group by a.hkey having count(*) = :cnt"; //$NON-NLS-1$
@@ -173,10 +172,15 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @param session
 	 * @return
 	 */
+	/* see http://darren.oldag.net/2008/11/hibernate-query-cache-dirty-little_04.html for information
+	 * on why we are using uuid in the cachable query
+	 */
 	public Attribute getAttribute(Session session, String attributeKey){
-		Query q = session.createQuery("From Attribute where conservationArea = :ca and keyid = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
+		Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()); //$NON-NLS-1$
 		q.setParameter("key", attributeKey); //$NON-NLS-1$
+		q.setCacheable(true);
+		
 		@SuppressWarnings("unchecked")
 		List<Attribute> results = q.list();
 		if (results.size() != 1 ){
@@ -184,6 +188,19 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		}else{
 			return results.get(0);
 		}
+	}
+	
+	/**
+	 * Returns the attribute associated with the main conservation area with the attribute of the given key.
+	 * @param attributeKey
+	 * @param session
+	 * @return
+	 */
+	public Attribute getAttribute(Session session, Attribute attribute){
+		if (attribute.getConservationArea().equals(SmartDB.getConservationAreaConfiguration().getMainConservationArea())){
+			return attribute;
+		}
+		return getAttribute(session, attribute.getKeyId());
 	}
 	
 	
@@ -226,9 +243,10 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 */
 	@Override
 	public Category getCategory(Session session, String categoryKey){
-		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea());	 //$NON-NLS-1$
+		Query q = session.createQuery("From Category where conservationArea.uuid = :ca and hkey = :key"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid());	 //$NON-NLS-1$
 		q.setParameter("key", categoryKey); //$NON-NLS-1$
+		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
 		List<Category> results = q.list();
 		if (results.size() != 1 ){
@@ -276,10 +294,11 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 */
 	@Override
 	public AttributeListItem getAttributeListItem(Session session, String attributeKey, String attributeListItem){
-		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
+		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea.uuid = :ca and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()); //$NON-NLS-1$
 		q.setParameter("key", attributeListItem); //$NON-NLS-1$
 		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
+		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
 		List<AttributeListItem> results = q.list();
 		if (results.size() != 1 ){
@@ -299,10 +318,11 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 */
 	@Override
 	public AttributeTreeNode getAttributeTreeNode(Session session, String attributeKey, String attributeTreeHKey){
-		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
+		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea.uuid = :ca and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()); //$NON-NLS-1$
 		q.setParameter("key", attributeTreeHKey); //$NON-NLS-1$
 		q.setParameter("attribute", attributeKey); //$NON-NLS-1$
+		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
 		List<AttributeTreeNode> results = q.list();
 		if (results.size() != 1 ){
@@ -429,19 +449,6 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	public String getAttributeTreeNodeLabel(Session session, Attribute attribute, byte[] keyuuid){
 		AttributeTreeNode item = (AttributeTreeNode) session.load(AttributeTreeNode.class, keyuuid);
 		
-		//does this key exist in the merged data model?  if so
-		//we need to return that names
-		DataModel dm = getDataModel();
-		for (Attribute a : dm.getAttributes()){
-			if (a.getKeyId().equals(attribute.getKeyId())){
-				a = (Attribute) session.load(Attribute.class, a.getUuid());
-				AttributeTreeNode found = findTreeNode(item.getHkey(), a.getTree());
-				if (found != null){
-					return found.getName();
-				}
-			}
-		}
-		
 		//otherwise return the name provided with ca
 		Label l = SmartUtils.findLanguageMatch(item.getNames());
 		if (l != null){
@@ -450,23 +457,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		return item.findName(attribute.getConservationArea().getDefaultLanguage());
 	}
 	
-	private AttributeTreeNode findTreeNode(String hkey, List<AttributeTreeNode> parents){
-		if (parents == null){
-			return null;
-		}
-		for (AttributeTreeNode node : parents){
-			if (node.getHkey().equals(hkey)){
-				return node;
-			}
-		}
-		for (AttributeTreeNode node : parents){
-			AttributeTreeNode found = findTreeNode(hkey, node.getChildren());
-			if (found != null){
-				return found;
-			}
-		}
-		return null;
-	}
+	
+	
 	private Job loadAndMergeDataModelJob = new Job(Messages.MultiCaDataModelManagerImpl_LoadMergeJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

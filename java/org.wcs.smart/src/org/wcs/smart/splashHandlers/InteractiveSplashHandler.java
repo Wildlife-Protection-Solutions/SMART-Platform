@@ -189,6 +189,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				validateUi();
 			}
 		});
+		
 		ModifyListener validator = new ModifyListener() {	
 			@Override
 			public void modifyText(ModifyEvent e) {

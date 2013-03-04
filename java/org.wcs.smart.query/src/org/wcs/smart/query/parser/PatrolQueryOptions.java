@@ -402,7 +402,7 @@ public class PatrolQueryOptions {
 		
 		PATROL_TRANSPORT_TYPE(Messages.PatrolQueryOptions_QueryOpTransportType, "transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 		
-		CONSERVATION_AREA(Messages.PatrolQueryOptions_CaGroupByOptionName, "ca", "ca_uuid", Patrol.class, ConservationArea.class, PatrolQueryOptionType.UUID); //$NON-NLS-2$ //$NON-NLS-3$
+		CONSERVATION_AREA(Messages.PatrolQueryOptions_CaGroupByOptionName, "ca", "ca_uuid", Patrol.class, ConservationArea.class, PatrolQueryOptionType.UUID);  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		
 		private String key;			//unique identifier key
 		private String columnName;	//column name in database table

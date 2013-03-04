@@ -29,12 +29,6 @@
             name="%querylist.view.name"
             restorable="true">
       </view>
-      <view
-            class="org.wcs.smart.query.ui.multi.ConservationAreaListView"
-            id="org.wcs.smart.query.conservationAreaList"
-            name="Conservation Areas"
-            restorable="true">
-      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

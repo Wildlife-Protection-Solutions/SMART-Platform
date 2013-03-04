@@ -21,9 +21,25 @@
       <view
             allowMultiple="true"
             class="org.wcs.smart.ui.map.MapView"
-            icon="images/icons/etool16/map.png"
+            icon="images/icons/eview16/map.png"
             id="org.wcs.smart.ui.map.MapView"
             name="%mapview.name"
+            restorable="false">
+      </view>
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.ui.CrossCaView"
+            icon="images/icons/eview16/crossca.png"
+            id="org.wcs.smart.crossCaView"
+            name="Cross Conservation Analysis"
+            restorable="false">
+      </view>
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.ui.ConservationAreaListView"
+            icon="images/icons/eview16/crossca.png"
+            id="org.wcs.smart.query.conservationAreaList"
+            name="Conservation Area List"
             restorable="false">
       </view>
    </extension>
@@ -31,8 +47,15 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.DefaultPerspective"
+            icon="images/icons/eview16/map.png"
             id="org.wcs.smart.DefaultPerspective"
             name="%defaultperspective.name">
+      </perspective>
+      <perspective
+            class="org.wcs.smart.DefaultCrossCaPerspective"
+            icon="images/icons/eview16/crossca.png"
+            id="org.wcs.smart.DefaultCrossCaPerspective"
+            name="%crossca.default.perspective.name">
       </perspective>
    </extension>
    <extension
@@ -606,7 +629,7 @@
       </command>
       <command
             id="org.wcs.smart.translateItem"
-            name="Translate...">
+            name="%tranlsate.command.name">
       </command>
    </extension>
    <extension
@@ -1014,20 +1037,20 @@
             class="org.wcs.smart.ui.map.tool.ZoomTool"
             icon="images/icons/elcl16/zoom_tool.png"
             id="org.wcs.smart.ui.map.tool.ZoomTool"
-            name="Zoom Tool"
+            name="%zoomtool.name"
             onToolbar="false"
             toolCursorId="zoomCursor"
-            tooltip="Zoom the map">
+            tooltip="%zoomtool.tooltip">
       </modalTool>
       <modalTool
             categoryId="org.wcs.smart.ui.map.tool"
             class="org.wcs.smart.ui.map.tool.PanTool"
             icon="images/icons/elcl16/pan_tool.png"
             id="org.wcs.smart.ui.map.tool.PanTool"
-            name="Pan Tool"
+            name="%pantool.name"
             onToolbar="false"
             toolCursorId="move"
-            tooltip="Pans the map">
+            tooltip="%pantool.tooltip">
       </modalTool>
       <toolCursor
             hotspotX="10"
@@ -1095,6 +1118,24 @@
             id="org.wcs.smart.preference.PlanConfiguration"
             name="%planconfig.preferencepage.name">
       </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.DefaultCrossCaPerspective">
+         <view
+               closeable="false"
+               id="org.wcs.smart.crossCaView"
+               minimized="false"
+               moveable="true"
+               ratio=".5"
+               relationship="left"
+               relative="org.eclipse.ui.editorss"
+               showTitle="false"
+               standalone="true"
+               visible="true">
+         </view>
+      </perspectiveExtension>
    </extension>
 
 </plugin>

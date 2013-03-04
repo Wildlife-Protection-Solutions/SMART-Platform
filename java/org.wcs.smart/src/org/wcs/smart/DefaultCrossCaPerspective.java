@@ -19,24 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.internal.ui;
+package org.wcs.smart;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.wcs.smart.query.model.Query.QueryType;
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.IPerspectiveFactory;
+import org.wcs.smart.ui.ConservationAreaListView;
+import org.wcs.smart.ui.CrossCaView;
 /**
- * Handler for creating new patrol query
+ * Default perspective for cross-ca analysis.  
  * 
  * @author Emily
  *
  */
-public class CreatePatrolQueryHandler extends CreateHandler {
+public class DefaultCrossCaPerspective implements IPerspectiveFactory {
 
+	public final static String ID = "org.wcs.smart.DefaultCrossCaPerspective"; //$NON-NLS-1$
+	
+	
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		super.execute(event);
-		super.createQuery(QueryType.PATROL);
-		return null;
+	public void createInitialLayout(IPageLayout layout) {
+		layout.setEditorAreaVisible(false);
+
+		layout.addView( ConservationAreaListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA); 
+		layout.getViewLayout(CrossCaView.ID).setCloseable(false);
 	}
 
 }
