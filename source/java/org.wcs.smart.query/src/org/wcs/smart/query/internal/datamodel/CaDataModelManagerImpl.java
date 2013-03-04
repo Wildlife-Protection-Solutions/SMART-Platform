@@ -141,9 +141,10 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 */
 	@Override
 	public Attribute getAttribute(Session session, String attributeKey){
-		Query q = session.createQuery("From Attribute where conservationArea = :ca and keyid = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 		q.setParameter("key", attributeKey); //$NON-NLS-1$
+		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
 		List<Attribute> results = q.list();
 		if (results.size() != 1 ){
@@ -153,6 +154,16 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		}
 	}
 	
+	/**
+	 * Returns the attribute with the given key
+	 * @param attributeKey
+	 * @param session
+	 * @return
+	 */
+	@Override
+	public Attribute getAttribute(Session session, Attribute attribute){
+		return attribute;
+	}
 	
 	/**
 	 * 
@@ -184,9 +195,10 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 */
 	@Override
 	public Category getCategory(Session session, String categoryKey){
-		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query q = session.createQuery("From Category where conservationArea.uuid = :ca and hkey = :key"); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 		q.setParameter("key", categoryKey); //$NON-NLS-1$
+		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
 		List<Category> results = q.list();
 		if (results.size() != 1 ){

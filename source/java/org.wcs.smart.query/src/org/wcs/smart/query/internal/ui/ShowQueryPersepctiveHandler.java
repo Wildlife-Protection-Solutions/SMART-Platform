@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.query.internal.ui;
 
-import java.util.Arrays;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryInput;
@@ -48,11 +44,7 @@ public class ShowQueryPersepctiveHandler extends AbstractHandler {
 	 */
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		try {
-			String perspectiveId = QueryPerspective.ID;
-			
-			if (SmartDB.isMultipleAnalysis()){
-				perspectiveId = MultiCaQueryPerspective.ID;
-			}
+			String perspectiveId = QueryPlugIn.getActivePerspectiveId();
 			HandlerUtil
 					.getActiveWorkbenchWindow(event)
 					.getWorkbench()

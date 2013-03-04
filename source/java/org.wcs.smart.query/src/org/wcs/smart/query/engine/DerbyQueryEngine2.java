@@ -38,14 +38,12 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.HasLabel;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -800,7 +798,8 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		if (uuid != null){
 			Attribute att = (Attribute) session.load(Attribute.class, uuid);
 			if (SmartDB.isMultipleAnalysis()){
-				return QueryDataModelManager.getInstance().getAttribute(session,att.getKeyId());
+				Attribute att2 = QueryDataModelManager.getInstance().getAttribute(session,att);
+				return att2;
 			}
 			return att;
 		}

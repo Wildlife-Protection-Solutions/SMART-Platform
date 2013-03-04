@@ -88,6 +88,15 @@ public interface IDataModelManager {
 	 */
 	public Attribute getAttribute(Session session, String attributeKey);
 
+	
+	/**
+	 * Returns the attribute with a key provided by the attribute.
+	 * @param attributeKey
+	 * @param session
+	 * @return
+	 */
+	public Attribute getAttribute(Session session, Attribute attribute);
+
 	/**
 	 * 
 	 * Gets all the attribute tree nodes at a given level in the data tree.

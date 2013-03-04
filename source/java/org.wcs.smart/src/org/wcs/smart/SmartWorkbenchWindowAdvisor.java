@@ -176,8 +176,10 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	
         /* --- Add initial layers to map --- */
     	final MapView view = (MapView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(MapView.ID);
-    	LoadDefaultLayersJob job = new LoadDefaultLayersJob(view.getMap(), true);
-    	job.schedule();
+    	if (view != null){
+    		LoadDefaultLayersJob job = new LoadDefaultLayersJob(view.getMap(), true);
+    		job.schedule();
+    	}
     	
     	
     }

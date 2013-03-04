@@ -236,17 +236,39 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		super.setPartName(input.getName());
 		showBusy(true);
 		try {
+			
+			
 			page1 = new QueryResultsTablePage(this);
 			addPage(0, page1, input);
 			setPageText(0, Messages.QueryResultsEditor_TableResultsTabName);
-			if (this.query != null && this.query.getUuid() == null){
-				page1.setQuery();
-			}
+			
 			
 			page2 = new QueryMapPageEditor(this);
 			addPage(1, page2, input);
 			setPageText(1, Messages.QueryResultsEditor_MappedResultsTabName);
 			
+			//run this in a job as it needs
+			//to load the data model to get the query
+			//columns and this may take a while
+			Job j = new Job(Messages.QueryResultsEditor_initquerylobname){
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					ObservationQuery q = getQueryInternal();
+					q.getQueryColumns();
+					
+					Display.getDefault().syncExec(new Runnable(){
+
+						@Override
+						public void run() {
+							if (query != null && query.getUuid() == null){
+								page1.setQuery();
+							}
+							
+						}});
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
 		} catch (final Throwable t) {
 			QueryPlugIn.log("Could not open query editor", t); //$NON-NLS-1$
 		}finally{

@@ -434,6 +434,7 @@ public class Messages extends NLS {
 	public static String QueryResultsEditor_Error_CouldNotParse;
 	public static String QueryResultsEditor_Error_DialogTitle;
 	public static String QueryResultsEditor_ErrorRunningQuery;
+	public static String QueryResultsEditor_initquerylobname;
 	public static String QueryResultsEditor_InvalidQueryError;
 	public static String QueryResultsEditor_LoadQueryJobName;
 	public static String QueryResultsEditor_MappedResultsTabName;

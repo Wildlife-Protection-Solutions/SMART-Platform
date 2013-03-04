@@ -38,7 +38,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.internal.ui.MultiCaQueryPerspective;
+import org.wcs.smart.query.internal.ui.QueryPerspective;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -355,5 +358,17 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		}
 		return propertyProviders;
 		
+	}
+	
+	/**
+	 * 
+	 * @return the id of the query perspective to use
+	 */
+	public static String getActivePerspectiveId(){
+		if (SmartDB.isMultipleAnalysis()){
+			return MultiCaQueryPerspective.ID;
+		}else{
+			return QueryPerspective.ID;
+		}
 	}
 }
