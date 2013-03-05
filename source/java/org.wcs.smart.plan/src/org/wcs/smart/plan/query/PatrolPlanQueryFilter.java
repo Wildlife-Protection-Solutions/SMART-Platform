@@ -24,8 +24,11 @@ package org.wcs.smart.plan.query;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.filter.EmptyFilter;
+import org.wcs.smart.query.parser.internal.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.util.SmartUtils;
@@ -39,16 +42,18 @@ import org.wcs.smart.util.SmartUtils;
 public class PatrolPlanQueryFilter extends EmptyFilter {
 
 	private IPatrolQueryOption option;
+	private Operator op;	
 	private Object value;
 
-	public PatrolPlanQueryFilter(IPatrolQueryOption option, Object value) {
+	public PatrolPlanQueryFilter(IPatrolQueryOption option, Operator op, Object value) {
 		this.option = option;
+		this.op = op;
 		this.value = value;
 	}
 
 	@Override
 	public String asString() {
-		return option.getKey();
+		return option.getKey() + " " + op.asSmartValue() + " " + value;  //$NON-NLS-1$  //$NON-NLS-2$
 	}
 
 	@Override
@@ -62,6 +67,11 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
 		DropItem it = DropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
+		String id = SmartUtils.stripQuotes((String)value);
+		ListItem listItem = PlanHibernateManager.getPlan(session, id);
+		if (listItem != null) {
+			it.initializeData(listItem);
+		}
 		return new DropItem[]{it};
 	}
 
