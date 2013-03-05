@@ -115,6 +115,7 @@ public class Messages extends NLS {
 	public static String PlanFilterDialog_PlanTypeFilter_Label;
 	public static String PlanFilterDialog_Title;
 	public static String PlanHibernateManager_DeletePlan_Error;
+	public static String PlanHibernateManager_Plan_NotFound_Error;
 	public static String PlanHibernateManager_SavePlan_Error;
 	public static String PlanIdNameDescComposite_Description;
 	public static String PlanIdNameDescComposite_IdExists_Error;

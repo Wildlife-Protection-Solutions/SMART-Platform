@@ -24,6 +24,7 @@ package org.wcs.smart.plan;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +51,7 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -475,7 +477,7 @@ public class PlanHibernateManager{
 	}
 
 	/**
-	 * Returns a a list of all plans in given Conservation area
+	 * Returns a list of all plans in given Conservation area
 	 * 
 	 * @return a list of Plans
 	 */
@@ -485,6 +487,26 @@ public class PlanHibernateManager{
 		@SuppressWarnings("unchecked")
 		List<Plan> plans = criteria.list();
 		return plans;
+	}
+
+	/**
+	 * Loads the list item for the given plan uuid
+	 * 
+	 * @return a list item for the given plan
+	 * @throws Exception 
+	 * @throws  
+	 */
+	public static ListItem getPlan(Session session, String id) throws Exception {
+		Query q = session.createQuery("SELECT uuid, name FROM Plan WHERE uuid =:uuid"); //$NON-NLS-1$
+		q.setParameter("uuid", SmartUtils.decodeHex(id)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Object[]> results = q.list();
+		if (results.size() == 1) {
+			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
+		} else {
+			SmartPlanPlugIn.displayLog(MessageFormat.format(Messages.PlanHibernateManager_Plan_NotFound_Error, id), null);
+			return null;
+		}
 	}
 	
 }
