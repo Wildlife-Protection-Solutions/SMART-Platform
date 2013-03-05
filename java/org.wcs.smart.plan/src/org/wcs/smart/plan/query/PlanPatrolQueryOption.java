@@ -30,6 +30,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.AbstractEmptyPatrolQueryOption;
@@ -47,7 +48,7 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 
 	@Override
 	public String getGuiName() {
-		return "Part of Plan";
+		return Messages.PlanPatrolQueryOption_Name;
 	}
 
 	@Override
