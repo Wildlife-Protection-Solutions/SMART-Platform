@@ -53,10 +53,9 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
-		//TODO: need to check for all sub-plans as well
 		String prefix = tableMapping.get(option.getPatrolAttributeClass());
 		String v = SmartUtils.stripQuotes((String)value);
-		String sql = "EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid AND pa2pl.plan_uuid = x'"+v+"')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String sql = "smart.patrolInPlan("+prefix+".uuid, '"+v+"')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return sql;
 	}
 
