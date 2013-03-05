@@ -103,7 +103,7 @@ public class StyleCellEditor extends DialogCellEditor {
 						session.beginTransaction();
 						Query q = null;
 						try {
-							q = QueryHibernateManager.findQuery(session,
+							q = QueryHibernateManager.getInstance().findQuery(session,
 									SmartUtils.decodeHex(ds.getQueryText().split(":")[1]), //$NON-NLS-1$
 									QueryType.valueOf(ds.getQueryText().split(":")[0])); //$NON-NLS-1$
 						} finally {

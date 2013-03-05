@@ -33,6 +33,7 @@ import org.eclipse.ui.IEditorPart;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.hibernate.IQueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
@@ -66,7 +67,7 @@ public class QueryEditorUtils {
 		Shell shell = editor.getSite().getShell();
 		
 		//validate if user can save the current query
-		if (query.getIsShared() && !QueryHibernateManager.canModifyCaQueries()){			
+		if (query.getIsShared() && !QueryHibernateManager.getInstance().canModifyCaQueries()){			
 			boolean ret = MessageDialog.openQuestion(shell, SAVE_DIALOGTITLE, Messages.QueryEditorUtils_PermissionError);
 			if (ret){
 				return doSaveAs(editor,true);
@@ -122,14 +123,14 @@ public class QueryEditorUtils {
 					query.setFolder(qf);
 					query.setIsShared(qf.getEmployee() == null);
 				
-				}else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)){
+				}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 					query.setIsShared(true);
 				}
 				query.setOwner(SmartDB.getCurrentEmployee());
 				query.setConservationArea(SmartDB.getCurrentConservationArea());			
 		}
 				
-		if (!QueryHibernateManager.saveQuery(query, false)){
+		if (!QueryHibernateManager.getInstance().saveQuery(query, false)){
 			monitor.setCanceled(true);
 			return null;
 		}
@@ -202,7 +203,7 @@ public class QueryEditorUtils {
 						newQuery.setFolder(qf);
 						newQuery.setIsShared(qf.getEmployee() == null);
 					
-					}else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)){
+					}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 						newQuery.setIsShared(true);
 					}
 					newQuery.setOwner(SmartDB.getCurrentEmployee());
@@ -213,7 +214,7 @@ public class QueryEditorUtils {
 					
 					monitor.subTask(Messages.QueryEditorUtils_Progress_SavingQuery);
 					
-					if (!QueryHibernateManager.saveQuery(newQuery, true)){
+					if (!QueryHibernateManager.getInstance().saveQuery(newQuery, true)){
 						//not saved
 						return;
 					}

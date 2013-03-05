@@ -46,6 +46,7 @@ import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.hibernate.IQueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
@@ -132,7 +133,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						if (!qf.isRootFolder()){
 							query.setFolder(qf);
 							query.setIsShared(qf.getEmployee() == null);
-						}else if (qf.getUuid().equals(QueryHibernateManager.CA_QUERY_KEY)){
+						}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 							query.setIsShared(true);
 						}
 						
@@ -140,7 +141,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						session.beginTransaction();
 						try{
 							//generate id
-							query.setId(QueryHibernateManager.generateQueryId(session));
+							query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
 							session.save(query);
 							session.getTransaction().commit();
 						}catch (Exception ex){

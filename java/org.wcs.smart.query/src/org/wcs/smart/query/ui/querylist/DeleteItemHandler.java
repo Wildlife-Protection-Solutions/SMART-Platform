@@ -93,7 +93,7 @@ public class DeleteItemHandler extends AbstractHandler {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			Query query = QueryHibernateManager.findQuery(s, o.getUuid(), o.getType());
+			Query query = QueryHibernateManager.getInstance().findQuery(s, o.getUuid(), o.getType());
 			if (query == null) throw new Exception(Messages.DeleteItemHandler_ErrorQueryNotFound);
 			
 			if (!QueryEventManager.getInstance().fireBeforeDeleteListeners(query, s)){

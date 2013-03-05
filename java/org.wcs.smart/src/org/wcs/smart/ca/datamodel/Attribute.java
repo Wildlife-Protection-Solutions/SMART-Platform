@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -55,8 +54,6 @@ import org.wcs.smart.internal.Messages;
  */
 @Entity
 @Table(name = "smart.dm_attribute")
-
-@Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Attribute extends DmObject{
 

@@ -155,16 +155,20 @@ public class SmartStartUp {
 				} else {
 					
 					//set the employee to the employee for the first CA
-					Employee e = HibernateManager.validateUser(userName, password, areas.get(0));
-					if (e == null){
-						MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.SmartStartUp_ErrorDialog_Title, Messages.SmartStartUp_Error_LoginFail);
-						return false;
+					List<Employee> users = new ArrayList<Employee>();
+					for (ConservationArea thisCa : areas){
+						Employee e = HibernateManager.validateUser(userName, password, thisCa);
+						if (e == null){
+							MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.SmartStartUp_ErrorDialog_Title, Messages.SmartStartUp_Error_LoginFail);
+							return false;
+						}
+						users.add(e);
 					}
 					//	disconnect from the database & setup correct user level
-					HibernateManager.endSessionFactory(true);
-					SmartDB.setCurrentUser(e, ca);
+					HibernateManager.endSessionFactory(true);					
+					SmartDB.setCurrentUser(users.get(0), ca);
 					
-					MultipleCaAnalysisConfiguration config = new MultipleCaAnalysisConfiguration(areas);
+					MultipleCaAnalysisConfiguration config = new MultipleCaAnalysisConfiguration(areas, users);
 					SmartDB.setSelectedCas(config);
 					return true;
 				}

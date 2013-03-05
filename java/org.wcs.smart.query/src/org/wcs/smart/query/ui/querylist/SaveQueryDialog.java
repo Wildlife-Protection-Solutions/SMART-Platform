@@ -107,6 +107,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 	@Override
 	protected Composite createDialogArea(Composite parent) {
 		getShell().setText(Messages.SaveQueryDialog_DialogTitle);
+		setTitle(Messages.SaveQueryDialog_PageTitle);
 		if (this.includeName){
 			setMessage(Messages.SaveQueryDialog_NewDialogMessage);
 		}else{
@@ -138,7 +139,7 @@ public class SaveQueryDialog  extends TitleAreaDialog {
 			 lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
 		
-		treeComp = new QueryFolderTreeComposite(main,QueryHibernateManager.canModifyCaQueries());
+		treeComp = new QueryFolderTreeComposite(main,QueryHibernateManager.getInstance().canModifyCaQueries());
 		treeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		treeComp.addSelectionListener(new ISelectionChangedListener() {
 			@Override

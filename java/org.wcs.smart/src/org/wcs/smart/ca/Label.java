@@ -26,7 +26,6 @@ import java.util.Arrays;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
-import javax.persistence.Cacheable;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -58,7 +57,7 @@ import org.wcs.smart.util.SmartUtils;
 		joinColumns = @JoinColumn(name = "language_uuid")),
 	@AssociationOverride(name = "id.element", 
 		joinColumns = @JoinColumn(name = "element_uuid")) })
-@Cacheable
+
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Label  {
 
@@ -138,6 +137,7 @@ public class Label  {
 				break;
 			}
 		}
+
 		if (id.getLanguage() == null){
 			return description;
 		}
