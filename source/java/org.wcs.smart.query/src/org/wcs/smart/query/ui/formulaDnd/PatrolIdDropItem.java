@@ -78,7 +78,7 @@ public class PatrolIdDropItem  extends DropItem{
 			}
 			Session s = HibernateManager.openSession();
 			try{
-				final List<String> data = QueryHibernateManager.getPatrolIds(s);
+				final List<String> data = QueryHibernateManager.getInstance().getPatrolIds(s);
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {

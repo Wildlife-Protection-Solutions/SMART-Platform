@@ -56,7 +56,7 @@ public class ConservationAreaFilter implements IFilter {
 		try {
 			String[] bits = caFilterAsString.split(","); //$NON-NLS-1$
 			for (int i = 0; i < bits.length; i++) {
-				filter.addConservationArea(SmartUtils.decodeHex(bits[i]));
+				filter.addConservationArea(SmartUtils.decodeHex(bits[i].trim()));
 
 			}
 		} catch (Exception ex) {
@@ -127,14 +127,12 @@ public class ConservationAreaFilter implements IFilter {
 	@Override
 	public String asString() {
 		StringBuilder sb = new StringBuilder();
-//		sb.append("(");
 		for (int i = 0; i < filters.size(); i ++){
 			if (i != 0){
-				sb.append(" , "); //$NON-NLS-1$
+				sb.append(","); //$NON-NLS-1$
 			}
 			sb.append( SmartUtils.encodeHex( filters.get(i) ) );
-		}			
-//		sb.append(")");
+		}
 		return sb.toString();
 	}
 

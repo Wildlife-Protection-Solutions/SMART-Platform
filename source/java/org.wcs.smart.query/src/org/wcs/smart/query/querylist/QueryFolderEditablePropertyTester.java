@@ -75,7 +75,7 @@ public class QueryFolderEditablePropertyTester extends PropertyTester {
 				return true;
 			}else if (input.isShared()){
 				//only rename or deletable if admin or manager
-				if (QueryHibernateManager.canModifyCaQueries()){
+				if (QueryHibernateManager.getInstance().canModifyCaQueries()){
 					return true;
 				}
 				return false;
@@ -94,7 +94,7 @@ public class QueryFolderEditablePropertyTester extends PropertyTester {
 				return true;
 			}else if (folder.getEmployee() == null ){
 				//conservation area level folder; only rename or deletable if admin or manager
-				if (QueryHibernateManager.canModifyCaQueries()){
+				if (QueryHibernateManager.getInstance().canModifyCaQueries()){
 					return true;
 				}
 			}
@@ -104,7 +104,7 @@ public class QueryFolderEditablePropertyTester extends PropertyTester {
 				return true;
 			}else if (folder.getEmployee() == null ){
 				//conservation area level folder; only rename or deletable if admin or manager
-				if (QueryHibernateManager.canModifyCaQueries()){
+				if (QueryHibernateManager.getInstance().canModifyCaQueries()){
 					return true;
 				}
 			}

@@ -28,7 +28,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -63,15 +62,16 @@ public class Language {
 	public void setUuid(byte[] uuid) {
 		this.uuid = uuid;
 	}
+	
+	
 	public String getCode() {
-		return code.trim();
+		return code;
 	}
 	public void setCode(String code) {
 		this.code = code;
 	}
 	
 	@ManyToOne
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getCa() {
 		return ca;
 	}

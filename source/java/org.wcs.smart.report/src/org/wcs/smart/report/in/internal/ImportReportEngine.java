@@ -76,6 +76,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.hibernate.IQueryHibernateManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.qimport.QueryImporter;
 import org.wcs.smart.report.ReportEventManager;
@@ -564,7 +565,7 @@ public class ImportReportEngine {
 		
 		if (smartQuery.getUuid() == null){
 			//new query 
-			smartQuery.setId(QueryHibernateManager.generateQueryId(session));
+			smartQuery.setId(QueryHibernateManager.getInstance().generateQueryId(session));
 						
 			//smartQuery not found so we need to insert new query
 			//display warning created during import process
@@ -650,12 +651,12 @@ public class ImportReportEngine {
 		final List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
 
 		//search by uuid
-		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.findQuery(session, SmartUtils.decodeHex(queryUuid), importedQuery.getType());
+		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.getInstance().findQuery(session, SmartUtils.decodeHex(queryUuid), importedQuery.getType());
 		if (uuidQuery != null){
 			queries.add(uuidQuery);
 		}else{
 			//search by name
-			queries.addAll( QueryHibernateManager.findQuery(session, 
+			queries.addAll( QueryHibernateManager.getInstance().findQuery(session, 
 						importedQuery.getName(), 
 						importedQuery.getType()) );
 		}
@@ -965,9 +966,9 @@ public class ImportReportEngine {
 							
 						}
 						if (query.getIsShared()){
-							sb.append(QueryHibernateManager.CONSERVATION_AREA_QUERIES_NAME);
+							sb.append(IQueryHibernateManager.CONSERVATION_AREA_QUERIES_NAME);
 						}else{
-							sb.append(QueryHibernateManager.MY_QUERIES_NAME);
+							sb.append(IQueryHibernateManager.MY_QUERIES_NAME);
 						}
 						
 						return ((org.wcs.smart.query.model.Query) element).getName() + " [" + ((org.wcs.smart.query.model.Query)element).getId() + "] - " + sb.toString(); //$NON-NLS-1$ //$NON-NLS-2$

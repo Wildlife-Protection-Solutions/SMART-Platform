@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.util.SmartUtils;
 
@@ -41,6 +42,8 @@ import org.wcs.smart.util.SmartUtils;
 public class MultipleCaAnalysisConfiguration {
 
 	private List<ConservationArea> conservationAreas;
+	private List<Employee> employees;
+	
 	private ConservationArea mainConservationArea;
 	private Language language;
 	
@@ -48,11 +51,21 @@ public class MultipleCaAnalysisConfiguration {
 	 * The set of conservation areas logged into
 	 * @param conservationAreas
 	 */
-	public MultipleCaAnalysisConfiguration(List<ConservationArea> conservationAreas){
+	public MultipleCaAnalysisConfiguration(List<ConservationArea> conservationAreas,
+			List<Employee> employees){
 		this.conservationAreas = conservationAreas;
+		this.employees = employees;
 		computeMainConservationArea();
 	}
 
+	/**
+	 * 
+	 * @return List of employee objects that represent the
+	 * same logged-in user in the different conservation areas.
+	 */
+	public List<Employee> getEmployees(){
+		return this.employees;
+	}
 	/**
 	 * 
 	 * @return the main conservation area to be used for
@@ -61,6 +74,7 @@ public class MultipleCaAnalysisConfiguration {
 	public ConservationArea getMainConservationArea(){
 		return this.mainConservationArea;
 	}
+	
 	
 	/**
 	 * 
@@ -110,7 +124,7 @@ public class MultipleCaAnalysisConfiguration {
 			mainConservationArea = conservationAreas.get(0);
 			this.language = mainConservationArea.getDefaultLanguage();
 		}
-		SmartDB.getCurrentConservationArea().setLanguages(mainConservationArea.getLanguages());
+		//SmartDB.getCurrentConservationArea().setLanguages(mainConservationArea.getLanguages());
 		
 	}
 }

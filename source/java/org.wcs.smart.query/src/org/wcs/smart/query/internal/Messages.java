@@ -470,6 +470,7 @@ public class Messages extends NLS {
 	public static String SaveQueryDialog_LocationLabel;
 	public static String SaveQueryDialog_NameLabel;
 	public static String SaveQueryDialog_NewDialogMessage;
+	public static String SaveQueryDialog_PageTitle;
 	public static String ShapePatrolQueryExporter_ExporterName;
 	public static String ShapeQueryExporter_ExporterName;
 	public static String ShowQueryPersepctiveHandler_QueryPerspectiveError;

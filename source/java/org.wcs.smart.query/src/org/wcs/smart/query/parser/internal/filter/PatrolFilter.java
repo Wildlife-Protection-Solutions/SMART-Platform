@@ -257,16 +257,16 @@ public class PatrolFilter implements IFilter {
 		if (option == PatrolQueryOption.ID){
 			it.initializeData(new String[]{op.getGuiValue(), value1});
 		}else if (option == PatrolQueryOption.MANDATE){
-			ListItem m = QueryHibernateManager.getPatrolMandate(session, value1);
+			ListItem m = QueryHibernateManager.getInstance().getPatrolMandate(session, value1);
 			it.initializeData(m);
 		}else if (option == PatrolQueryOption.STATION){
-			ListItem m = QueryHibernateManager.getStation(session, value1);
+			ListItem m = QueryHibernateManager.getInstance().getStation(session, value1);
 			it.initializeData(m);
 		}else if (option == PatrolQueryOption.TEAM){
-			ListItem m = QueryHibernateManager.getTeam(session, value1);
+			ListItem m = QueryHibernateManager.getInstance().getTeam(session, value1);
 			it.initializeData(m);
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE){
-			ListItem m = QueryHibernateManager.getTransportType(session, value1);
+			ListItem m = QueryHibernateManager.getInstance().getTransportType(session, value1);
 			it.initializeData(m);
 			
 		}else if (option == PatrolQueryOption.PATROL_TYPE){
@@ -277,7 +277,7 @@ public class PatrolFilter implements IFilter {
 				option == PatrolQueryOption.LEADER ||
 						option == PatrolQueryOption.PILOT
 				){
-			ListItem m = QueryHibernateManager.getEmployee(session, value1);
+			ListItem m = QueryHibernateManager.getInstance().getEmployee(session, value1);
 			it.initializeData(m);
 			
 		}

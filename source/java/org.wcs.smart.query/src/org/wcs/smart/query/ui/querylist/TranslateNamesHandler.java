@@ -63,7 +63,7 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 			Session s = HibernateManager.openSession();
 			try{
 				s.getTransaction().begin();
-				toUpdate = QueryHibernateManager.findQuery(s, input.getUuid(), input.getType());
+				toUpdate = QueryHibernateManager.getInstance().findQuery(s, input.getUuid(), input.getType());
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(Messages.TranslateNamesHandler_LoadQueryError + ex.getMessage(), ex);

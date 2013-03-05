@@ -165,7 +165,7 @@ public class ReportDefintionExporter implements IReportExporter {
 					Query smartQuery = null;
 					try{
 						hsession.beginTransaction();
-						smartQuery = QueryHibernateManager.findQuery(hsession, uuid, qType);
+						smartQuery = QueryHibernateManager.getInstance().findQuery(hsession, uuid, qType);
 					}finally{
 						hsession.getTransaction().commit();
 						hsession.close();

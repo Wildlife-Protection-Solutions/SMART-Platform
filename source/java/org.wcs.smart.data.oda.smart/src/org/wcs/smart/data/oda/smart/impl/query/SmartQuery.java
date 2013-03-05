@@ -91,7 +91,7 @@ public class SmartQuery implements IQuery {
 			Session session = HibernateManager.openSession();
 			try {
 				session.beginTransaction();
-				smartQuery = QueryHibernateManager.findQuery(session,  uuid, queryType);
+				smartQuery = QueryHibernateManager.getInstance().findQuery(session,  uuid, queryType);
 				session.getTransaction().commit();
 			} finally {
 				if (session.getTransaction().isActive()){

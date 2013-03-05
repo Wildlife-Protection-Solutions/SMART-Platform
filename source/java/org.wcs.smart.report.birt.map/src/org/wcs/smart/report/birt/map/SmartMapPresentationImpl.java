@@ -149,7 +149,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 						byte[] quuid = SmartUtils.decodeHex(mapqueries.get(i).split(":")[1]); //$NON-NLS-1$
 						QueryType qtype = QueryType.valueOf(mapqueries.get(i).split(":")[0]); //$NON-NLS-1$
 						
-						Query q = QueryHibernateManager.findQuery(session,quuid, qtype);
+						Query q = QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
 						GeoSmart layer = new GeoSmart();
 						layer.name = mapnames.get(i);
 						layer.dbQuery = q;

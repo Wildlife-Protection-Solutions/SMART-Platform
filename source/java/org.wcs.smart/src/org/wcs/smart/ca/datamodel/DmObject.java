@@ -78,9 +78,6 @@ public class DmObject extends HasLabel{
 	 */
 	@OneToMany(targetEntity = Label.class, fetch = FetchType.LAZY, mappedBy="id.element", cascade={CascadeType.ALL}, orphanRemoval=true)
 	public Set<Label> getNames() {
-		if (names == null){
-			names = new HashSet<Label>();
-		}
 		return names;
 	}
 

@@ -171,15 +171,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 4);
 
-				try {
-					
-//					String myquery = "SELECT p.uuid, p.id, p.station_uuid, p.team_uuid, p.objective, p.mandate_uuid, p.patrol_type, p.is_armed, p.start_date, p.end_date, pl.uuid, pl.id, pl.transport_uuid, pld.uuid, pld.patrol_day, wp.uuid, wpo.uuid, plm_leader.employee_uuid, plm_pilot.employee_uuid  FROM smart.patrol p inner join smart.patrol_leg pl on p.uuid = pl.patrol_uuid  inner join smart.patrol_leg_day pld on pl.uuid = pld.patrol_leg_uuid  inner join smart.waypoint wp on pld.uuid = wp.leg_day_uuid  left join smart.wp_observation wpo on wp.uuid = wpo.wp_uuid  left join smart.patrol_leg_members plm_leader  on pl.uuid = plm_leader.patrol_leg_uuid and  plm_leader.is_leader  left join smart.patrol_leg_members plm_pilot  on pl.uuid = plm_pilot.patrol_leg_uuid and  plm_pilot.is_pilot , (select geom from smart.area_geometries where keyid = 'conservationarea' and area_type = 'CA' and ca_uuid = x'd5f41e3ab1e04108aacd4920e85bad94') as CA_conservationarea WHERE  ( pld.patrol_day >= '2012-06-05' )  AND (p.ca_uuid IN (x'd5f41e3ab1e04108aacd4920e85bad94')) AND  ( smart.pointinpolygon(wp.x, wp.y, CA_conservationarea.geom) ) ";
-//					ResultSet rs = c.createStatement().executeQuery(myquery);
-//					while(rs.next()){
-//						System.out.println(rs.getString(1));
-//					}
-//					rs.close();
-					
+				try {			
 					monitor.subTask(Messages.DerbyQueryEngine2_Progress_CreatingObservationTable);
 					IFilter qFilter = query.getFilter();
 					if (qFilter == null){
@@ -652,6 +644,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 
 		QueryResultItem last = null;
+		session.flush();
 		try {
 			
 			/*Field order:
@@ -733,6 +726,7 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				it.setWaypointComment(rs.getString(24));
 				it.setObservationUuid(wpouuid);
 				it.setCategory(getCategoryLabels(rs.getBytes(26), session));
+				
 				Attribute att = getAttribute(rs.getBytes(27), session);
 				if (att != null){
 					Object value = getAttributeValue(att, rs, session);

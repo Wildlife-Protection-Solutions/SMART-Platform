@@ -24,7 +24,6 @@ package org.wcs.smart.ca.datamodel;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,7 +48,6 @@ import org.wcs.smart.ca.ConservationArea;
  */
 @Entity
 @Table(name = "smart.dm_attribute_tree")
-@Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AttributeTreeNode extends DmObject implements HkeyObject{
 

@@ -36,6 +36,7 @@ import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.hibernate.IQueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
@@ -64,8 +65,8 @@ public class SavedQueryTree {
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				folders = QueryHibernateManager.getQueryFolders(s, true);
-				queries = QueryHibernateManager.getQueryProxies(s);
+				folders = QueryHibernateManager.getInstance().getQueryFolders(s, true);
+				queries = QueryHibernateManager.getInstance().getQueryProxies(s);
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(Messages.SavedQueryTree_ErrorLoadingQueries + ex.getLocalizedMessage(), ex);
 			}finally{
@@ -115,9 +116,9 @@ public class SavedQueryTree {
 				if (query.getFolder() != null){
 					key = query.getFolder().getUuid();
 				}else if (query.getIsShared()){
-					key = QueryHibernateManager.CA_QUERY_KEY;
+					key = IQueryHibernateManager.CA_QUERY_KEY;
 				}else{
-					key = QueryHibernateManager.USER_QUERY_KEY;
+					key = IQueryHibernateManager.USER_QUERY_KEY;
 				}
 				List<QueryInput> ins = queries.get(Arrays.hashCode(key));
 				if (ins == null){

@@ -594,7 +594,7 @@ public class SmartUtils {
 	 * @param languages
 	 * @return
 	 */
-	public static Label findLanguageMatch(Collection<Label> labels){
+	public static Label findLanguageMatchLabels(Collection<Label> labels){
 		String currentCode = SmartDB.getCurrentLanguage().getCode();
 		for (Label l : labels){
 			if (l.getLanguage().getCode().equals(currentCode)){

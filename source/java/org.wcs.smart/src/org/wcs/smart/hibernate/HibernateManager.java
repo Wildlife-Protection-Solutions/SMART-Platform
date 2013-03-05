@@ -269,7 +269,6 @@ public class HibernateManager extends SmartHibernateManager{
 			q.setParameter("password", password); //$NON-NLS-1$
 			q.setParameterList("users", new Integer[]{Employee.SmartUserLevel.ADMIN.ordinal(), Employee.SmartUserLevel.ANALYST.ordinal(), Employee.SmartUserLevel.MANAGER.ordinal()}); //$NON-NLS-1$
 			List<ConservationArea> areas = q.list(); 
-			
 			return areas;
 			
 		}catch (Exception ex){

@@ -627,7 +627,7 @@ public class PatrolQueryOptions {
 		public List<ListItem> getAllActiveValues(Session session){
 			ArrayList<ListItem> items = new ArrayList<ListItem>();
 			if (this == ID){
-				List<String> pids = QueryHibernateManager.getPatrolIds(session);
+				List<String> pids = QueryHibernateManager.getInstance().getPatrolIds(session);
 				for (String pid : pids){
 					items.add(new ListItem(null, pid, pid));
 				}

@@ -169,7 +169,7 @@ public class ConservationArea {
 	 */
 	@Transient
 	public String getNameLabel(){
-		 return getId() + " - " + getName(); //$NON-NLS-1$ //$NON-NLS-2$
+		 return getId() + " - " + getName(); //$NON-NLS-1$
 	}
 	
 

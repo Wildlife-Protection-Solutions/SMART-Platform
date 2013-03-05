@@ -72,7 +72,7 @@ public class ImportQueryFolderPage extends WizardPage {
 		lbl.setText(Messages.ImportQueryFolderPage_FolderLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		folderTree= new QueryFolderTreeComposite(main,QueryHibernateManager.canModifyCaQueries());
+		folderTree= new QueryFolderTreeComposite(main,QueryHibernateManager.getInstance().canModifyCaQueries());
 		folderTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		folderTree.addSelectionListener(new ISelectionChangedListener() {
 			@Override

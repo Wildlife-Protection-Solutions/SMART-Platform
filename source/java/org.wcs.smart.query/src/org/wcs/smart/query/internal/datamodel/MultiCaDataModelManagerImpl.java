@@ -344,6 +344,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 */
 	@Override
 	public String[] getFullCategoryLabel(Session session, byte[] categoryUuid){
+		//if (true) return new String[]{"abc"};
+		
 		DataModel dm = getDataModel();
 		
 		Category category = (Category) session.load(Category.class, categoryUuid);
@@ -361,8 +363,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 				parent = parent.getParent();
 			}	
 		}else{
-			
-			Language l = SmartUtils.findLanguageMatch(category.getNames()).getLanguage();
+			Language l = SmartUtils.findLanguageMatchLabels(category.getNames()).getLanguage();
 			if (l == null){
 				//default language of conservation area
 				l = category.getConservationArea().getDefaultLanguage();
@@ -372,7 +373,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 			while(parent != null){
 				values.add(parent.findName(l));
 				parent = parent.getParent();
-			}	
+			}
+			
 		}
 
 		Collections.reverse(values);
@@ -427,7 +429,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		
 		
 		//attribute not found in database
-		Label l = SmartUtils.findLanguageMatch(item.getNames());
+		Label l = SmartUtils.findLanguageMatchLabels(item.getNames());
 		if (l != null){
 			return l.getValue();
 		}else{
@@ -450,7 +452,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		AttributeTreeNode item = (AttributeTreeNode) session.load(AttributeTreeNode.class, keyuuid);
 		
 		//otherwise return the name provided with ca
-		Label l = SmartUtils.findLanguageMatch(item.getNames());
+		Label l = SmartUtils.findLanguageMatchLabels(item.getNames());
 		if (l != null){
 			return l.getValue();
 		}

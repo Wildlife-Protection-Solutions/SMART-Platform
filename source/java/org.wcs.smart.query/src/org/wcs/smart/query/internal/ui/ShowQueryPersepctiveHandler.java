@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.internal.ui;
 
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -44,6 +45,7 @@ public class ShowQueryPersepctiveHandler extends AbstractHandler {
 	 */
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		try {
+			
 			String perspectiveId = QueryPlugIn.getActivePerspectiveId();
 			HandlerUtil
 					.getActiveWorkbenchWindow(event)
