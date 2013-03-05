@@ -12,6 +12,15 @@ alter table smart.conservation_area drop column plan_point_buffer;
 -- Add a default ca for cross-ca analysis.
 insert into smart.conservation_area
   (uuid,id,name,description,designation)
-  values (x'00000000000000000000000000000000', 'XXX', 'Cross Conservation Analysis','Internal CA for Cross Conservation Analysis', 'Internal');=======
+  values (x'00000000000000000000000000000000', 'XXX', 'Cross Conservation Analysis','Internal CA for Cross Conservation Analysis', 'Internal');
+  
+-- DB Function that check if patrol in within a certain plan including sub-plans (used in platrol query filter) --
+create function smart.patrolInPlan(patrol_uuid CHAR(16) FOR BIT DATA, uuidStr long varchar)
+    returns boolean
+    language java
+    parameter style java
+    reads sql data
+    external name 'org.wcs.smart.plan.SmartPlanDbStored.patrolInPlan';
+  
 
 
