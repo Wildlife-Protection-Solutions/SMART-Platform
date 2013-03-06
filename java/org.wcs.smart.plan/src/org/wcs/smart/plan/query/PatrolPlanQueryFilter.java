@@ -60,7 +60,9 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
 		String prefix = tableMapping.get(option.getPatrolAttributeClass());
 		String v = SmartUtils.stripQuotes((String)value);
-		String sql = "smart.patrolInPlan("+prefix+".uuid, '"+v+"')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		//if v is empty this means that this is "Any Plan" case
+		String sql = !isAnyPlan(v) ? "smart.patrolInPlan("+prefix+".uuid, '"+v+"')" : //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid)";  //$NON-NLS-1$ //$NON-NLS-2$
 		return sql;
 	}
 
@@ -68,11 +70,14 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 	public DropItem[] getDropItems(Session session) throws Exception {
 		DropItem it = DropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
 		String id = SmartUtils.stripQuotes((String)value);
-		ListItem listItem = PlanHibernateManager.getPlan(session, id);
+		ListItem listItem = isAnyPlan(id)? PlanPatrolQueryOption.ANY_PATROL_ITEM : PlanHibernateManager.getPlan(session, id);
 		if (listItem != null) {
 			it.initializeData(listItem);
 		}
 		return new DropItem[]{it};
 	}
 
+	private boolean isAnyPlan(String v) {
+		return v == null || v.isEmpty();
+	}
 }

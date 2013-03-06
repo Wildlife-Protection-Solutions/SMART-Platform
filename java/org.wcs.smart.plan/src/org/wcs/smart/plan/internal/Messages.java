@@ -138,6 +138,7 @@ public class Messages extends NLS {
 	public static String PlanParentIdComposite_SameParentError;
 	public static String PlanParentIdComposite_Title;
 	public static String PlanParentIdComposite_UseParent_Label;
+	public static String PlanPatrolQueryOption_AnyPlan;
 	public static String PlanPatrolQueryOption_Name;
 	public static String PlanStationTeamComposite_Message;
 	public static String PlanStationTeamComposite_TeamStation_NotFound_Error;
