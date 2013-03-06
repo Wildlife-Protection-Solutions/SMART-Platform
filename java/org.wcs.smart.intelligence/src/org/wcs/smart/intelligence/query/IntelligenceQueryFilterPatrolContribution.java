@@ -48,14 +48,14 @@ public class IntelligenceQueryFilterPatrolContribution implements IQueryFilterPa
 
 	@Override
 	public IFilter createBooleanFilter(String key) {
-		if (intelligenceOption.getKey().equals(key)) {
-			return new PatrolIntelligenceQueryFilter(intelligenceOption);
-		}
 		return null;
 	}
 
 	@Override
 	public IFilter createStringFilter(String key, Operator op, Object value) {
+		if (intelligenceOption.getKey().equals(key)) {
+			return new PatrolIntelligenceQueryFilter(intelligenceOption, op, value);
+		}
 		return null;
 	}
 
