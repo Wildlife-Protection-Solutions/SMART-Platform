@@ -46,6 +46,8 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 
 	public static final String KEY = STRING_CONTRIBUTION_KEY_PREFIX + "planPart"; //$NON-NLS-1$
 
+	public static final ListItem ANY_PATROL_ITEM = new ListItem(new byte[0], Messages.PlanPatrolQueryOption_AnyPlan);
+	
 	@Override
 	public String getGuiName() {
 		return Messages.PlanPatrolQueryOption_Name;
@@ -81,6 +83,7 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 	@Override
 	public List<ListItem> getAllActiveValues(Session session) {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.add(ANY_PATROL_ITEM);
 		List<Plan> plans = PlanHibernateManager.getPlans(SmartDB.getCurrentConservationArea(), session);
 		for (Plan plan : plans) {
 			items.add(new ListItem(plan.getUuid(), plan.getName()));
