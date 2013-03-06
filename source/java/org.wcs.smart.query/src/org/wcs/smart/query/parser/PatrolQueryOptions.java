@@ -676,6 +676,11 @@ public class PatrolQueryOptions {
 			}
 			return items;
 		}
+		
+		@Override
+		public ListItem getDefaultListItem() {
+			return null;
+		}
 	}
 	
 	

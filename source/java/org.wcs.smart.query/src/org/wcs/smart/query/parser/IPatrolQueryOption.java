@@ -139,5 +139,11 @@ public interface IPatrolQueryOption {
 	 */
 	public List<ListItem> getAllActiveValues(Session session);
 	
-
+	/**
+	 * Specifies default list item that will be selected by default if option
+	 * was added to the query.
+	 * 
+	 * @return list item selected by default
+	 */
+	public ListItem getDefaultListItem();
 }

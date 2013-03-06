@@ -73,9 +73,7 @@ public class PatrolIntelligenceQueryFilter extends EmptyFilter {
 		ListItem listItem = isAnyIntelligence(id) ? 
 				IntelligencePatrolQueryOption.ANY_INTELLIGENCE_ITEM :
 				IntelligenceHibernateManager.getIntelligence(session, id);
-		if (listItem != null) {
-			it.initializeData(listItem);
-		}
+		it.initializeData(listItem);
 		return new DropItem[]{it};
 	}
 

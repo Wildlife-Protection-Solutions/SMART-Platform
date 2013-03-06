@@ -90,4 +90,8 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 		return items;
 	}
 	
+	@Override
+	public ListItem getDefaultListItem() {
+		return ANY_INTELLIGENCE_ITEM;
+	}
 }

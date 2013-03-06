@@ -75,5 +75,10 @@ public abstract class AbstractEmptyPatrolQueryOption implements IPatrolQueryOpti
 	public List<ListItem> getAllActiveValues(Session session) {
 		return null;
 	}
+	
+	@Override
+	public ListItem getDefaultListItem() {
+		return null;
+	}
 
 }

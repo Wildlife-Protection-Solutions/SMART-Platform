@@ -90,4 +90,9 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 		}
 		return items;
 	}
+	
+	@Override
+	public ListItem getDefaultListItem() {
+		return ANY_PATROL_ITEM;
+	}
 }

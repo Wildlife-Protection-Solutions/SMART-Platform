@@ -70,10 +70,8 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 	public DropItem[] getDropItems(Session session) throws Exception {
 		DropItem it = DropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
 		String id = SmartUtils.stripQuotes((String)value);
-		ListItem listItem = isAnyPlan(id)? PlanPatrolQueryOption.ANY_PATROL_ITEM : PlanHibernateManager.getPlan(session, id);
-		if (listItem != null) {
-			it.initializeData(listItem);
-		}
+		ListItem listItem = isAnyPlan(id) ? PlanPatrolQueryOption.ANY_PATROL_ITEM : PlanHibernateManager.getPlan(session, id);
+		it.initializeData(listItem);
 		return new DropItem[]{it};
 	}
 
