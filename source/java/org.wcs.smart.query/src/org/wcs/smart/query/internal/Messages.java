@@ -13,6 +13,8 @@ public class Messages extends NLS {
 	public static String AttributeFilter_AttributeNotFound;
 	public static String AttributeFilter_InvalidAttributePrefix;
 	public static String AttributeFilter_InvalidWaypointObservationPrefix;
+	public static String AttributeFilter_ListItemNotFound;
+	public static String AttributeFilter_TreeNodeNotFound;
 	public static String AttributeListDropItem_LoadingJobName;
 	public static String AttributeListDropItem_LoadingLabel;
 	public static String AttributeListGroupByDropItem_AllLabel;

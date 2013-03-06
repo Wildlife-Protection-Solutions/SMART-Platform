@@ -283,10 +283,16 @@ public class AttributeFilter implements IFilter {
 			
 		}else if (attributeType == AttributeType.LIST){
 			AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, (String)value1);
+			if (ali == null){
+				throw new IllegalStateException(Messages.AttributeFilter_ListItemNotFound);
+			}
 			ListItem li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
 			it.initializeData(li);
 		}else if (attributeType == AttributeType.TREE){
 			AttributeTreeNode ali = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, (String)value1);
+			if (ali == null){
+				throw new IllegalStateException(Messages.AttributeFilter_TreeNodeNotFound);
+			}
 			it.initializeData(ali);
 		}
 		

@@ -94,6 +94,9 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	
 	/**
 	 * Returns only items shared across all conservation areas.
+	 * <p>The objects returned are associated with the same conservation
+	 * areas as the attribute passed in</p> 
+	 * 
 	 * 
 	 * @param attribute
 	 * @param session
@@ -167,27 +170,21 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	
 
 	/**
-	 * Returns the attribute associated with the main conservation area with the given key.
+	 * Returns the attribute with the given key from 
+	 * the shared data model.
+	 * 
 	 * @param attributeKey
 	 * @param session
 	 * @return
 	 */
-	/* see http://darren.oldag.net/2008/11/hibernate-query-cache-dirty-little_04.html for information
-	 * on why we are using uuid in the cachable query
-	 */
 	public Attribute getAttribute(Session session, String attributeKey){
-		Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()); //$NON-NLS-1$
-		q.setParameter("key", attributeKey); //$NON-NLS-1$
-		q.setCacheable(true);
-		
-		@SuppressWarnings("unchecked")
-		List<Attribute> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
-			return results.get(0);
+		DataModel dm = getDataModel();
+		for (Attribute a : dm.getAttributes()){
+			if (a.getKeyId().equals(attributeKey)){
+				return a;
+			}
 		}
+		return null;
 	}
 	
 	/**
@@ -212,7 +209,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * <p>returns only items shared across all conservation areas</p>
 	 * 
 	 * @param session
-	 * @param level
+	 * @param uuid attribute uuid
+	 * @param level tree node level
 	 * @param active if only active tree nodes should be loaded
 	 * @return
 	 */
@@ -236,32 +234,25 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	
 	
 	/**
-	 * Loads the category for the given category key from the main conservation area 
+	 * Loads the category for the given category key from the shared data model  
 	 * @param session
 	 * @param categoryKey
 	 * @return category object or <code>null</code> if not loaded
 	 */
 	@Override
 	public Category getCategory(Session session, String categoryKey){
-		Query q = session.createQuery("From Category where conservationArea.uuid = :ca and hkey = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid());	 //$NON-NLS-1$
-		q.setParameter("key", categoryKey); //$NON-NLS-1$
-		q.setCacheable(true);
-		@SuppressWarnings("unchecked")
-		List<Category> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
-			return results.get(0);
-		}
+		DataModel dm = getDataModel();
+		Category category = findCategory(categoryKey, dm.getCategories());
+		return category;
 		
 	}
 	
 	
 	/**
 	 * 
-	 * Gets all the categories at a given level in the data tree associated with the
-	 * main conservation area
+	 * Gets all the categories at a given level that are shared across all conservation areas.
+	 * The objects returned are associated with the main conservation area. 
+	 * 
 	 * @param session
 	 * @param level
 	 * @return
@@ -290,27 +281,35 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * 
 	 * @param session
 	 * @param attributeKey attribute key
-	 * @return attributelistitem loaded from the database or <code>null</code> if attribute not found
+	 * @return attributelistitem the list item key
+	 * @return the attribute list item associated with the main conservation area or <code>null</code> if
+	 * attribute list item is not shared across all conservation areas.
 	 */
 	@Override
 	public AttributeListItem getAttributeListItem(Session session, String attributeKey, String attributeListItem){
-		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea.uuid = :ca and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()); //$NON-NLS-1$
+		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea in (:cas) and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
+		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("key", attributeListItem); //$NON-NLS-1$
 		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
 		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
 		List<AttributeListItem> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
+		if (results.size() == SmartDB.getConservationAreaConfiguration().getCaCount()){
+			for(AttributeListItem i : results){
+				if (i.getAttribute().getConservationArea().equals(SmartDB.getConservationAreaConfiguration().getConservationAreas())){
+					return i;
+				}
+			}
 			return results.get(0);
-		}	
+		}
+		return null;
+			
 	}
 	
 	/**
-	 * Loads an attribute tree not item item for the given hkey and the main 
-	 * current conservation area 
+	 * Loads an attribute tree node for the given key.
+	 * Returns the attributetreenode associated with the main conservation area if 
+	 * found otherwise will return null
 	 * 
 	 * @param session
 	 * @param attributeHKey attribute tree node hkey
@@ -318,24 +317,30 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 */
 	@Override
 	public AttributeTreeNode getAttributeTreeNode(Session session, String attributeKey, String attributeTreeHKey){
-		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea.uuid = :ca and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()); //$NON-NLS-1$
+		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea IN (:cas) and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
+		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("key", attributeTreeHKey); //$NON-NLS-1$
 		q.setParameter("attribute", attributeKey); //$NON-NLS-1$
 		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
 		List<AttributeTreeNode> results = q.list();
-		if (results.size() != 1 ){
-			return null;
-		}else{
+		if (results.size() == SmartDB.getConservationAreaConfiguration().getCaCount() ){
+			for (AttributeTreeNode i : results){
+				if (i.getAttribute().getConservationArea().equals(SmartDB.getConservationAreaConfiguration().getMainConservationArea())){
+					return i;
+				}
+			}
 			return results.get(0);
+		}else{
+			return null;
+			
 		}
 	}
 	
 	/**
 	 * Returns the full category label for a category with the
 	 * given uuid.  This attempts to find the label
-	 * in the same langauge as the current system language.
+	 * in the same language as the current system language.
 	 * If not it uses the default language of the conservation area.
 	 * 
 	 * @param session
