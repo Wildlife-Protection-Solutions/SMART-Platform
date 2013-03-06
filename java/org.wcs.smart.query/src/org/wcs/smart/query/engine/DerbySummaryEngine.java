@@ -55,7 +55,7 @@ import org.wcs.smart.query.model.SummaryResultKey;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryGroupBy;

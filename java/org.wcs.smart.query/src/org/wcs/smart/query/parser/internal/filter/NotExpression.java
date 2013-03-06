@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.query.ui.queryfilter.QueryFilterContentProvider.OtherItems;
@@ -63,7 +64,7 @@ public class NotExpression implements IFilter {
 
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asString()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
@@ -71,7 +72,7 @@ public class NotExpression implements IFilter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asSql(java.util.HashMap)
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping){
@@ -79,7 +80,7 @@ public class NotExpression implements IFilter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -87,7 +88,7 @@ public class NotExpression implements IFilter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -95,7 +96,7 @@ public class NotExpression implements IFilter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -103,7 +104,7 @@ public class NotExpression implements IFilter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
@@ -125,7 +126,7 @@ public class NotExpression implements IFilter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getChildren()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getChildren()
 	 */
 	@Override
 	public List<IFilter> getChildren() {

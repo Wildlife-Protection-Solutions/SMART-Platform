@@ -61,9 +61,9 @@ import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
 
 /**
  * Query engine for executing 

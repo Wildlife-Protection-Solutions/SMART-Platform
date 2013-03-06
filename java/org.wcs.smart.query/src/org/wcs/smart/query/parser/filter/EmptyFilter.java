@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**

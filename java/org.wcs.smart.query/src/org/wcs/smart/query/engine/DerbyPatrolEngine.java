@@ -50,8 +50,8 @@ import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.filter.DateFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.AreaFilter;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
 
 /**
  * Query engine for patrol queries.

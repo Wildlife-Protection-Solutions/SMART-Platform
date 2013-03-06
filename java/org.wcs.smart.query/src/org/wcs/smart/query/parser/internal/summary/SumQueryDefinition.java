@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
-import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 
 /**
  * A representation of a summary query parsed into the various

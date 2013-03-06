@@ -38,7 +38,6 @@ import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.internal.filter.AttributeFilter;
 import org.wcs.smart.query.parser.internal.filter.CategoryFilter;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.SmartUtils;

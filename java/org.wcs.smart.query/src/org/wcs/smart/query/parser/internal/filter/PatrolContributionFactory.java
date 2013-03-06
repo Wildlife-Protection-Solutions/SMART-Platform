@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
 
 /**

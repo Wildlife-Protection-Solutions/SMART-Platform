@@ -30,6 +30,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.util.SmartUtils;
@@ -143,7 +145,7 @@ public class CategoryAttributeFilter implements IFilter{
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asString()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
@@ -152,7 +154,7 @@ public class CategoryAttributeFilter implements IFilter{
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asSql(java.util.HashMap)
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
 	 */
 	@Override
 	public String asSql(HashMap<Class<?>, String> tableMapping) {
@@ -161,7 +163,7 @@ public class CategoryAttributeFilter implements IFilter{
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -170,7 +172,7 @@ public class CategoryAttributeFilter implements IFilter{
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -179,7 +181,7 @@ public class CategoryAttributeFilter implements IFilter{
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -188,7 +190,7 @@ public class CategoryAttributeFilter implements IFilter{
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
@@ -198,7 +200,7 @@ public class CategoryAttributeFilter implements IFilter{
 
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getDropItems(org.hibernate.Session)
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
 	 */
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
@@ -213,7 +215,7 @@ public class CategoryAttributeFilter implements IFilter{
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getChildren()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getChildren()
 	 */
 	@Override
 	public List<IFilter> getChildren() {
