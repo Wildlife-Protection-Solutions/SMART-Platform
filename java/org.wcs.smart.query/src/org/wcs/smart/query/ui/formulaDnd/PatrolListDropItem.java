@@ -115,6 +115,7 @@ public class PatrolListDropItem extends DropItem{
 		this.keyPart = "patrol:" + option.getKey(); //$NON-NLS-1$
 		this.text = option.getGuiName();
 		this.option = option;
+		this.currentSelection = option.getDefaultListItem();
 	}
 
 	
