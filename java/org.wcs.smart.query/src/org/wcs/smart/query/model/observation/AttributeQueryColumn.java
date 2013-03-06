@@ -48,6 +48,7 @@ public class AttributeQueryColumn extends QueryColumn {
 	public AttributeQueryColumn(String name, String attributeId, AttributeType type){
 		super(name, "attribute:" + attributeId, null); //$NON-NLS-1$
 		this.attributeKey = attributeId;
+		
 		ColumnType ctype = ColumnType.STRING;
 		if (type == AttributeType.NUMERIC ){
 			ctype = ColumnType.NUMBER;
@@ -78,7 +79,13 @@ public class AttributeQueryColumn extends QueryColumn {
 	public Object getValue(IResultItem queryResultItem) {
 		if (queryResultItem instanceof QueryResultItem) {
 			QueryResultItem item = (QueryResultItem) queryResultItem;
-			return item.getAttributeValue(attributeKey);
+			Object x = item.getAttributeValue(attributeKey);
+			if (x != null){
+				if (getType()  == QueryColumn.ColumnType.BOOLEAN){
+					return Boolean.valueOf((Double)x >= 0.5);
+				}	
+				return x;
+			}
 		}
 		return ""; //$NON-NLS-1$
 	}

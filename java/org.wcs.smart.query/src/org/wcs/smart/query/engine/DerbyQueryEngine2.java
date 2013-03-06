@@ -751,38 +751,22 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getAttributeValue(Attribute att, ResultSet rs,
-			Session session) throws SQLException {
-		Object value = null;
-		switch (att.getType()) {
-		case NUMERIC:
-			value = rs.getDouble(28);
-			break;
-		case BOOLEAN:
-			value = (rs.getDouble(28) >= 0.5);
-			break;
-		case TEXT:
-			value = rs.getString(29);
-			break;
-		case TREE:
-			byte[] nodeuuid = rs.getBytes(31);
-			if (nodeuuid != null) {
-				value = QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, att, nodeuuid);
-			}
-			break;
-		case LIST:
-			byte[] listuuid = rs.getBytes(30);
-			if (listuuid != null) {
-				value = QueryDataModelManager.getInstance().getAttributeListItemLabel(session, att, listuuid);
-			}
-			break;
+	protected Object getAttributeValue(Attribute att, ResultSet rs, Session session) throws SQLException {
+		if (rs.getObject(28) != null){
+			return rs.getDouble(28);
+		}else if (rs.getString(29) != null){
+			return rs.getString(29);
+		}else if (rs.getBytes(31) != null){
+			return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, att, rs.getBytes(31));
+		}else if (rs.getBytes(30) != null){
+			return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, att, rs.getBytes(30));
 		}
-		return value;
+		return null;
 	}
 	
-	
 	/**
-	 * Loads the attribute object from the session
+	 * Loads the attribute object from the session.
+	 * 
 	 * 
 	 * @param uuid
 	 * @param session
@@ -791,14 +775,11 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	protected Attribute getAttribute(byte[] uuid, Session session){
 		if (uuid != null){
 			Attribute att = (Attribute) session.load(Attribute.class, uuid);
-			if (SmartDB.isMultipleAnalysis()){
-				Attribute att2 = QueryDataModelManager.getInstance().getAttribute(session,att);
-				return att2;
-			}
 			return att;
 		}
 		return null;
 	}
+	
 	/**
 	 * Loads the category object from the session
 	 * 
