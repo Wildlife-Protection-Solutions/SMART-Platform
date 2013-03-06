@@ -98,6 +98,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceHibernateManager_Error_CouldNotDeleteFilestore;
 
+	public static String IntelligenceHibernateManager_Intelligence_NotFound_Error;
+
 	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
 
 	public static String IntelligenceListView_Loading_Label;
@@ -111,6 +113,8 @@ public class Messages extends NLS {
 	public static String IntelligenceLocation_Message;
 
 	public static String IntelligenceLocation_PageTitle;
+
+	public static String IntelligencePatrolQueryOption_AnyIntelligence;
 
 	public static String IntelligencePatrolQueryOption_Name;
 

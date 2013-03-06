@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -39,6 +40,8 @@ import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.PatrolIntelligence;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Intelligence related database functions.
@@ -249,5 +252,27 @@ public class IntelligenceHibernateManager extends HibernateManager {
 			session.close();
 		}
 	}
-	
+
+	/**
+	 * @throws Exception 
+	 * @throws  
+	 * Loads the list item for the given intelligence uuid
+	 * 
+	 * @return a list item for the given intelligence
+	 * @throws Exception 
+	 * @throws  
+	 */
+	public static ListItem getIntelligence(Session session, String id) throws Exception {
+		Query q = session.createQuery("SELECT uuid, shortName FROM Intelligence WHERE uuid =:uuid"); //$NON-NLS-1$
+		q.setParameter("uuid", SmartUtils.decodeHex(id)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Object[]> results = q.list();
+		if (results.size() == 1) {
+			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
+		} else {
+			IntelligencePlugIn.displayLog(MessageFormat.format(Messages.IntelligenceHibernateManager_Intelligence_NotFound_Error, id), null);
+			return null;
+		}
+	}
+
 }

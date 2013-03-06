@@ -21,10 +21,17 @@
  */
 package org.wcs.smart.intelligence.query;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.graphics.Image;
+import org.hibernate.Session;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.AbstractEmptyPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 
@@ -36,8 +43,10 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
  */
 public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 	
-	public static final String KEY = BOOLEAN_CONTRIBUTION_KEY_PREFIX + "intelligence"; //$NON-NLS-1$
+	public static final String KEY = STRING_CONTRIBUTION_KEY_PREFIX + "intelligence"; //$NON-NLS-1$
 
+	public static final ListItem ANY_INTELLIGENCE_ITEM = new ListItem(new byte[0], Messages.IntelligencePatrolQueryOption_AnyIntelligence);
+	
 	@Override
 	public String getGuiName() {
 		return Messages.IntelligencePatrolQueryOption_Name;
@@ -57,7 +66,7 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 
 	@Override
 	public PatrolQueryOptionType getType() {
-		return PatrolQueryOptionType.BOOLEAN;
+		return PatrolQueryOptionType.UUID;
 	}
 
 	@Override
@@ -68,6 +77,17 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 	@Override
 	public Image getImage() {
 		return IntelligencePlugIn.getDefault().getImageRegistry().get(IntelligencePlugIn.INTELLIGENCE_ICON);
+	}
+
+	@Override
+	public List<ListItem> getAllActiveValues(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.add(ANY_INTELLIGENCE_ITEM);
+		List<Intelligence> inteligenceList = IntelligenceHibernateManager.getIntelligences(session);
+		for (Intelligence i : inteligenceList) {
+			items.add(new ListItem(i.getUuid(), i.getShortName()));
+		}
+		return items;
 	}
 	
 }
