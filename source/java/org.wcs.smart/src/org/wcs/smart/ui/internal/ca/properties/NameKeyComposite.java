@@ -117,8 +117,10 @@ public abstract class NameKeyComposite extends Composite {
 	protected void initFields(DmObject dmObject, Language defaultLang){
 		currentSelection = null;
 		values = new HashMap<Language, String>();
-		for (org.wcs.smart.ca.Label lbl : dmObject.getNames()){
-			values.put(lbl.getLanguage(), lbl.getValue());
+		if (dmObject.getNames() != null){
+			for (org.wcs.smart.ca.Label lbl : dmObject.getNames()){
+				values.put(lbl.getLanguage(), lbl.getValue());
+			}
 		}
 		
 		if (txtKey != null && dmObject.getKeyId() != null){

@@ -175,15 +175,20 @@ public class DataModelSmartToXmlConverter {
 	}
 	
 	
-	private static void setNames(List<NameType> list, Set<Label> names,HashMap<String, Language> llookup){
+	private static void setNames(List<NameType> list, Set<Label> names,
+			HashMap<String, Language> llookup){
+		
+		if (names == null){
+			return;
+		}
 		for (Label lbl: names){
 			NameType nt = new NameType();
 			nt.setValue(lbl.getValue());
 			nt.setLanguageCode(llookup.get(new String(lbl.getLanguage().getUuid())).getCode());
 			list.add(nt);
 		}
-		
 	}
+	
 	private static HashMap<String, Language> processLanguages(DataModel dm, org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml){
 		HashMap<String, Language> lookup = new HashMap<String, Language>();
 		LanguageListType llt = new LanguageListType();

@@ -596,17 +596,20 @@ public class SmartUtils {
 	 */
 	public static Label findLanguageMatchLabels(Collection<Label> labels){
 		String currentCode = SmartDB.getCurrentLanguage().getCode();
-		for (Label l : labels){
-			if (l.getLanguage().getCode().equals(currentCode)){
-				return l;
+		if (labels != null){
+			for (Label l : labels){
+				if (l.getLanguage().getCode().equals(currentCode)){
+					return l;
+				}
 			}
 		}
 		String[] bits = currentCode.split("_"); //$NON-NLS-1$
 		String lang = bits[0];
-		
-		for (Label l : labels){
-			if (l.getLanguage().getCode().split("_")[0].equals(lang)){ //$NON-NLS-1$
-				return l;
+		if (labels != null){
+			for (Label l : labels){
+				if (l.getLanguage().getCode().split("_")[0].equals(lang)){ //$NON-NLS-1$
+					return l;
+				}
 			}
 		}
 		return null;

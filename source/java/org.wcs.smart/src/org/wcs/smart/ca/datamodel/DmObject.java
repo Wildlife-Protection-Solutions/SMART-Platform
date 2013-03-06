@@ -139,6 +139,7 @@ public class DmObject extends HasLabel{
 	 */
 	@Transient
 	public String findNameNull(Language lang){
+		if (getNames() == null) return null;
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
 			if ( type.getLanguage().equals(lang) ){
@@ -156,6 +157,10 @@ public class DmObject extends HasLabel{
 	 * @param newName
 	 */
 	public void updateName(Language lang, String newName){
+		if (getNames() == null){
+			names = new HashSet<Label>();
+		}
+		
 		for (Iterator<Label> iterator = getNames().iterator(); iterator.hasNext();) {
 			Label type = iterator.next();
 			if ( type.getLanguage().equals(lang) ){
@@ -211,22 +216,23 @@ public class DmObject extends HasLabel{
 		this.name = oldObject.name;
 		
 		this.setNames(new HashSet<Label>());
-		
-		for (Label l : oldObject.getNames()){
-			if (l.getLanguage().getCode().equals(defaultLang)){
-				Label lblClone = new Label();
-				lblClone.setValue(l.getValue());
-				lblClone.setLanguage(newCa.getDefaultLanguage());
-				lblClone.setElement(this);
-				this.getNames().add(lblClone);
-			}
-			for (Language lang : newCa.getLanguages()){
-				if (l.getLanguage().isSame(lang) ){
+		if (oldObject.getNames() != null){
+			for (Label l : oldObject.getNames()){
+				if (l.getLanguage().getCode().equals(defaultLang)){
 					Label lblClone = new Label();
 					lblClone.setValue(l.getValue());
-					lblClone.setLanguage(lang);
+					lblClone.setLanguage(newCa.getDefaultLanguage());
 					lblClone.setElement(this);
 					this.getNames().add(lblClone);
+				}
+				for (Language lang : newCa.getLanguages()){
+					if (l.getLanguage().isSame(lang) ){
+						Label lblClone = new Label();
+						lblClone.setValue(l.getValue());
+						lblClone.setLanguage(lang);
+						lblClone.setElement(this);
+						this.getNames().add(lblClone);
+					}
 				}
 			}
 		}
