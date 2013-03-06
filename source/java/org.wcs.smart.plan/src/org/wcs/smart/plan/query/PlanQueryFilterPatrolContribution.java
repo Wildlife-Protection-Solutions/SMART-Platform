@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.IQueryFilterPatrolContribution;
 
 

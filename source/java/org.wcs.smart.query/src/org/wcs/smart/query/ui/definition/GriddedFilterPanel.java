@@ -45,7 +45,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;

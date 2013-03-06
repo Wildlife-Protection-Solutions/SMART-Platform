@@ -30,7 +30,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.parser.internal.summary.DateGroupBy;
 import org.wcs.smart.query.parser.internal.summary.GroupByPart;

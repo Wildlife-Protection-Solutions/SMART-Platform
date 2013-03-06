@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.wcs.smart.query.parser.filter.Operator;
 
 /**
  * Attribute drop item for numeric, text, and boolean attributes in observation

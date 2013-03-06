@@ -29,7 +29,7 @@ import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.PatrolQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.SimpleQuery;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;

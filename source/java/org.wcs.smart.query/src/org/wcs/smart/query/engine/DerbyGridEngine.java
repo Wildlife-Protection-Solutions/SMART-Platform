@@ -70,7 +70,7 @@ import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryValueItem.ValueType;

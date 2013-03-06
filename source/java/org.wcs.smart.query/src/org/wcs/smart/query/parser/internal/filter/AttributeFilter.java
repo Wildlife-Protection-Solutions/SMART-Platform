@@ -35,6 +35,8 @@ import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.util.SmartUtils;
@@ -170,7 +172,7 @@ public class AttributeFilter implements IFilter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#asString()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
@@ -225,7 +227,7 @@ public class AttributeFilter implements IFilter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasEmployeeFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()
 	 */
 	@Override
 	public boolean hasEmployeeFilter() {
@@ -233,7 +235,7 @@ public class AttributeFilter implements IFilter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasCategoryFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasCategoryFilter()
 	 */
 	@Override
 	public boolean hasCategoryFilter() {
@@ -241,7 +243,7 @@ public class AttributeFilter implements IFilter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#hasAttributeFilter()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#hasAttributeFilter()
 	 */
 	@Override
 	public boolean hasAttributeFilter() {
@@ -249,7 +251,7 @@ public class AttributeFilter implements IFilter {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getAttributeFilters(java.util.HashSet)
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getAttributeFilters(java.util.HashSet)
 	 */
 	@Override
 	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
@@ -258,7 +260,7 @@ public class AttributeFilter implements IFilter {
 
 	
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getDropItems(org.hibernate.Session)
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
 	 */
 	public DropItem[] getDropItems(Session session) throws Exception{
 		Attribute att = getAttribute(session);
@@ -304,7 +306,7 @@ public class AttributeFilter implements IFilter {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.parser.internal.filter.IFilter#getChildren()
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getChildren()
 	 */
 	@Override
 	public List<IFilter> getChildren() {

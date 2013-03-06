@@ -19,14 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.parser.internal.filter;
+package org.wcs.smart.query.parser.filter;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.query.parser.filter.EmptyFilter;
+import org.wcs.smart.query.parser.internal.filter.AttributeInfo;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 
 /**

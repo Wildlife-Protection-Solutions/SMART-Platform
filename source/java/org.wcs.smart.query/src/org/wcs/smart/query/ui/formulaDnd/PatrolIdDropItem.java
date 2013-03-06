@@ -44,7 +44,7 @@ import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.wcs.smart.query.parser.filter.Operator;
 
 /**
  * Patrol id drop item. This consists of a list of 

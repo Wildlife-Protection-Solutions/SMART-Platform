@@ -24,8 +24,8 @@ package org.wcs.smart.query.ui;
 import java.util.List;
 
 import org.wcs.smart.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.filter.Operator;
 
 /**
  * Contribution for the Patrol section of a "Query Filter" view.

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.parser.internal.filter;
+package org.wcs.smart.query.parser.filter;
 
 import org.wcs.smart.query.internal.Messages;
 

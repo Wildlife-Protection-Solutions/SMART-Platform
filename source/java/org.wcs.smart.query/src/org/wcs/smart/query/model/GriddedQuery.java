@@ -47,7 +47,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.parser.internal.filter.IFilter;
+import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;

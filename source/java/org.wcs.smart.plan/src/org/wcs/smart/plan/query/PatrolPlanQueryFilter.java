@@ -28,7 +28,7 @@ import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.filter.EmptyFilter;
-import org.wcs.smart.query.parser.internal.filter.Operator;
+import org.wcs.smart.query.parser.filter.Operator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItemFactory;
 import org.wcs.smart.util.SmartUtils;
