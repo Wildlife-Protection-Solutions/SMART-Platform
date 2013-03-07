@@ -23,6 +23,7 @@ package org.wcs.smart.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +44,7 @@ import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.filter.IFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 
 /**
  * 
@@ -229,9 +231,18 @@ public abstract class SimpleQuery extends Query {
 		}else{
 			items = new ArrayList<DropItem>();
 		}
-		DropItem[] filterItems = query.getDropItems(session);
-		for (int i = 0; i < filterItems.length; i ++){
-			items.add(filterItems[i]);
+		try{
+			DropItem[] filterItems = query.getDropItems(session);
+			for (int i = 0; i < filterItems.length; i ++){
+				items.add(filterItems[i]);
+			}
+		}catch (Exception ex){
+			for (DropItem it : items){
+				it.dispose();
+			}
+			items.clear();
+			items.add(new ErrorDropItem(MessageFormat.format(Messages.SimpleQuery_DropItemParseError, new Object[]{ex.getMessage()})));
+			throw ex;
 		}
 	}
 	

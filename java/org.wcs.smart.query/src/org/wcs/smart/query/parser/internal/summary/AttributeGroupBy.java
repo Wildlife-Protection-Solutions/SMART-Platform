@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +35,8 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -204,7 +207,6 @@ public class AttributeGroupBy implements IGroupBy {
 		//get children categories
 		
 		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
-		
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (att.getType() == AttributeType.LIST){
 			if (filterHkeys != null) {
@@ -249,13 +251,18 @@ public class AttributeGroupBy implements IGroupBy {
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem asDropItem(Session session) {
+	public DropItem asDropItem(Session session) throws Exception{
 		
 		Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
-		
+		if (attribute == null){
+			throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_AttributeNotFoundError, new Object[]{attributeKey}));
+		}
 		DropItem it = null;
 		if (categoryHkey != null){
 			Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
+			if (category == null){
+				throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_CategoryNotFoundError, new Object[]{categoryHkey}));
+			}
 			if (attributeType == AttributeType.LIST){
 				it = DropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
 			}else{
@@ -274,7 +281,7 @@ public class AttributeGroupBy implements IGroupBy {
 			if (filterHkeys != null){
 				ArrayList<ListItem> items = new ArrayList<ListItem>();
 				for (int i = 0; i < filterHkeys.length ; i++){
-					for (AttributeListItem ali : attribute.getAttributeList()){
+					for (AttributeListItem ali : QueryDataModelManager.getInstance().getAttributeListItems(attribute, session)){
 						if (ali.getKeyId().equals(filterHkeys[i])){
 							items.add(new ListItem(null, ali.getName(), ali.getKeyId()));
 							break;

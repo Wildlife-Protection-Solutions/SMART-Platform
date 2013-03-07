@@ -25,6 +25,7 @@ import java.awt.Point;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,6 +54,7 @@ import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.IValueItem;
 import org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -349,32 +351,51 @@ public class GriddedQuery extends Query {
 			valueFilterDropItems = new ArrayList<DropItem>();
 		}
 
-		
-		//---- generate drop items for value filter 		
-		IFilter valueFilter = getQueryDefinition().getValueFilter();
-		if (valueFilter != null){
-			DropItem[] filterItems = valueFilter.getDropItems(session);
-			for (int i = 0; i < filterItems.length; i ++){
-				valueFilterDropItems.add(filterItems[i]);
+		Exception lastException = null;
+		try{
+			//---- generate drop items for value filter
+			IFilter valueFilter = getQueryDefinition().getValueFilter();
+			if (valueFilter != null){
+				DropItem[] filterItems = valueFilter.getDropItems(session);
+				for (int i = 0; i < filterItems.length; i ++){
+					valueFilterDropItems.add(filterItems[i]);
+				}
 			}
+		}catch (Exception ex){
+			clearDropItemList(valueFilterDropItems);
+			valueFilterDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.GriddedQuery_ValueParseError, new Object[]{ex.getLocalizedMessage()})));
+			lastException = ex;
 		}
 		//---- generate drop items for rate filter 		
-		IFilter rateFilter = getQueryDefinition().getRateFilter();
-		if (rateFilter != null){
-			DropItem[] filterItems = rateFilter.getDropItems(session);
-			for (int i = 0; i < filterItems.length; i ++){
-				rateFilterDropItems.add(filterItems[i]);
+		try{
+			IFilter rateFilter = getQueryDefinition().getRateFilter();
+			if (rateFilter != null){
+				DropItem[] filterItems = rateFilter.getDropItems(session);
+				for (int i = 0; i < filterItems.length; i ++){
+					rateFilterDropItems.add(filterItems[i]);
+				}
 			}
+		}catch (Exception ex){
+			clearDropItemList(rateFilterDropItems);
+			rateFilterDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.GriddedQuery_RateFilterParseError, new Object[]{ex.getLocalizedMessage()})));
+			lastException = ex;
 		}
-		//---- generate drop items for value items ----
-		List<DropItem> valueItems = new ArrayList<DropItem>();
-		IValueItem part = getQueryDefinition().getValuePart();
-		DropItem di = part.asDropItem(session);
-		if (di instanceof AbstractValueDropItem){
-			((AbstractValueDropItem) di).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
+		try{
+			//---- generate drop items for value items ----
+			IValueItem part = getQueryDefinition().getValuePart();
+			DropItem di = part.asDropItem(session);
+			if (di instanceof AbstractValueDropItem){
+				((AbstractValueDropItem) di).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_OPTIONS);
+			}
+			valueDropItems.addAll(Collections.singleton(di));
+		}catch (Exception ex){
+			clearDropItemList(valueDropItems);
+			valueDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.GriddedQuery_ValueFilterParseError, new Object[]{ex.getLocalizedMessage()})));
+			lastException = ex;
 		}
-		valueItems.add(di);
-		valueDropItems.addAll(valueItems);
+		if (lastException != null){
+			throw lastException;
+		}
 	}
 	
 	

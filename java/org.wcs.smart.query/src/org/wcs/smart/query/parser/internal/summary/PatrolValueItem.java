@@ -96,7 +96,7 @@ public class PatrolValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem asDropItem(Session session) {
+	public DropItem asDropItem(Session session) throws Exception{
 		DropItem item = DropItemFactory.INSTANCE.createPatrolValueDropItem(patrolOp);
 		return item;
 	}

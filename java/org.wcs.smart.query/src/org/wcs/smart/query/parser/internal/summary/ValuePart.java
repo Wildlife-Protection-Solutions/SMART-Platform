@@ -82,7 +82,7 @@ public class ValuePart {
 	 * @param session
 	 * @return
 	 */
-	public List<DropItem> getDropItems(Session session) {
+	public List<DropItem> getDropItems(Session session) throws Exception {
 		ArrayList<DropItem> item = new ArrayList<DropItem>();
 		for (IValueItem valueItem : items){
 			item.add(valueItem.asDropItem(session));

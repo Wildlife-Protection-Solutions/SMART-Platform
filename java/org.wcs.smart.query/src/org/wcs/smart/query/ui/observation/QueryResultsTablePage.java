@@ -88,7 +88,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 		
 	}
 
-	public void setQuery(){
+	public void initPage(){
 		content.initValues(parentEditor.getQueryInternal());
 	}
 	

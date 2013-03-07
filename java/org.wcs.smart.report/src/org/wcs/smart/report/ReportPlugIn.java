@@ -74,7 +74,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 
 	@Override
     protected void initializeImageRegistry(ImageRegistry reg) {
-		reg.put(REPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/report.png"));
+		reg.put(REPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/report.png")); //$NON-NLS-1$
 	}
 	
 	/**

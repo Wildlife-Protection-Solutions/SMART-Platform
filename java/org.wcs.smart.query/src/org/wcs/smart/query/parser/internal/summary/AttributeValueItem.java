@@ -194,13 +194,19 @@ public class AttributeValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem asDropItem(Session session) {
+	public DropItem asDropItem(Session session) throws Exception{
 		Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
+		if (att == null){
+			throw new Exception(MessageFormat.format(Messages.AttributeValueItem_AttributeNotFoundError, new Object[]{attributeKey}));
+		}
 		DropItem di = null;
 		if (categoryKey == null){
 			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(att);
 		}else{
 			Category cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
+			if (cat == null){
+				throw new Exception(MessageFormat.format(Messages.AttributeValueItem_CategoryNotFoundError, new Object[]{categoryKey}));
+			}
 			di = DropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
 		}
 		di.initializeData(new Object[]{getDropItemInitializeData(), null});

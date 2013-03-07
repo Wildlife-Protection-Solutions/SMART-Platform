@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Smart Query
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
@@ -43,4 +43,4 @@ Export-Package: .,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
 Bundle-ClassPath: .
-Bundle-Vendor: org.wcs.smart
+Bundle-Vendor: %Bundle-Vendor

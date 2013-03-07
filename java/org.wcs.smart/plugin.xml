@@ -31,7 +31,7 @@
             class="org.wcs.smart.ui.CrossCaAnalysisIntroView"
             icon="images/icons/eview16/crossca.png"
             id="org.wcs.smart.crossCaView"
-            name="Cross Conservation Analysis"
+            name="%crossca.view.name"
             restorable="false">
       </view>
       <view
@@ -39,7 +39,7 @@
             class="org.wcs.smart.ui.ConservationAreaListView"
             icon="images/icons/eview16/crossca.png"
             id="org.wcs.smart.query.conservationAreaList"
-            name="Conservation Area List"
+            name="%calist.view.name"
             restorable="false">
       </view>
    </extension>
@@ -177,17 +177,10 @@
             </command>
             <visibleWhen
                   checkEnabled="false">
-               <and>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
             </visibleWhen>
          </menu>
          <menu
@@ -242,14 +235,12 @@
             </command>
             <visibleWhen
                   checkEnabled="false">
-               <and>
-                  <not>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                  </not>
-               </and>
+               <not>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </not>
             </visibleWhen>
          </menu>
          <menu

@@ -160,4 +160,19 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 		return queries;
 	}
 
+	/**
+	 * All query types are supported for single
+	 * ca analysis
+	 * @see org.wcs.smart.query.hibernate.IQueryHibernateManager#getSupportedQueryTypes()
+	 */
+	@Override
+	public QueryType[] getSupportedQueryTypes() {
+		return new QueryType[]{
+				QueryType.OBSERVATION,
+				QueryType.PATROL,
+				QueryType.SUMMARY,
+				QueryType.GRIDDED
+		};
+	}
+
 }

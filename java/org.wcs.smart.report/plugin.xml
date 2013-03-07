@@ -58,7 +58,7 @@
       </command>
       <command
             id="org.wcs.smart.report.translateItem"
-            name="Translate...">
+            name="%translate.command.name">
       </command>
    </extension>
    <extension
@@ -388,10 +388,10 @@
          </command>
          <command
                commandId="org.wcs.smart.report.translateItem"
-               label="Translate..."
-               mnemonic="t"
+               label="%translate.command.label"
+               mnemonic="%translate.command.mnemonic"
                style="push"
-               tooltip="Provide translations for name">
+               tooltip="%translate.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with

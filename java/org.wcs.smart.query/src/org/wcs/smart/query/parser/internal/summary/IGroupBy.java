@@ -85,7 +85,7 @@ public interface IGroupBy {
 	 * @param session
 	 * @return
 	 */
-	public DropItem asDropItem(Session session);
+	public DropItem asDropItem(Session session) throws Exception;
 	
 	/**
 	 * @return <code>true</code> if group by part includes category

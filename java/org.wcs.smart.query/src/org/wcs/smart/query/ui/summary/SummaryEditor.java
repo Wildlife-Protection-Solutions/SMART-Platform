@@ -119,10 +119,10 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			 try{
 				 query = (SummaryQuery) session.load(SummaryQuery.class, input.getUuid());
 			
-				 query.getFilterDropItems();
-				 query.getValueDropItems();
-				 query.getRowGroupByDropItems();
-				 query.getColumnGroupByDropItems();
+//				 query.getFilterDropItems();
+//				 query.getValueDropItems();
+//				 query.getRowGroupByDropItems();
+//				 query.getColumnGroupByDropItems();
 				 query.generateDropItems(session);
 				 
 				getSite().getShell().getDisplay().asyncExec(new Runnable() {
@@ -134,7 +134,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 				});
 				 
 			 }catch (Exception ex){
-				 QueryPlugIn.log(MessageFormat.format(Messages.SummaryEditor_ErrorLoadingQuery, new Object[]{input.getName()}), ex);
+				 QueryPlugIn.displayLog(MessageFormat.format(Messages.SummaryEditor_ErrorLoadingQuery, new Object[]{input.getName(), ex.getMessage()}), ex);
 			 }finally{
 				 session.getTransaction().rollback();
 				 session.close();

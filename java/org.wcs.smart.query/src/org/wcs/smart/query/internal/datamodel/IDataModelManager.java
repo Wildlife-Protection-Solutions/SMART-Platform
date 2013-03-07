@@ -71,6 +71,15 @@ public interface IDataModelManager {
 			Attribute attribute, Session session);
 
 	/**
+	 * Determines the all attribute list items for the given attribute.
+	 * 
+	 * @param attribute
+	 * @param session
+	 * @return
+	 */
+	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session);
+	
+	/**
 	 * Determines the active attribute tree items for the given attribute
 	 * 
 	 * @param attribute
@@ -80,6 +89,7 @@ public interface IDataModelManager {
 	public List<AttributeTreeNode> getActiveAttributeTreeNodes(
 			Attribute attribute, Session session);
 
+	
 	/**
 	 * Returns the attribute with a given key
 	 * @param attributeKey
@@ -110,6 +120,7 @@ public interface IDataModelManager {
 	public List<AttributeTreeNode> getAttributeTreeNodes(Session session,
 			byte[] uuid, int level, boolean active);
 
+	
 	/**
 	 * Loads the category for the given category key
 	 * 

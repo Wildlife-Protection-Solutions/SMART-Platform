@@ -106,6 +106,20 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 			return items;
 		
 	}
+	
+	/**
+	 * Determines all active attribute list items for the given
+	 * attribute. 
+	 * 
+	 * @param attribute
+	 * @param session
+	 * @return
+	 */
+	@Override
+	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session){
+		return attribute.getActiveListItems();		
+	}
+	
 	/**
 	 * Determines the active attribute tree items for the given
 	 * attribute. 

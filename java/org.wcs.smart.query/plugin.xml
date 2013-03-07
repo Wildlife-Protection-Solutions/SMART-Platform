@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.query.export.format" name="Query Export Format" schema="schema/org.wcs.smart.query.export.format.exsd"/>
-   <extension-point id="org.wcs.smart.query.property" name="Query Property" schema="schema/org.wcs.smart.query.property.exsd"/>
-   <extension-point id="org.wcs.smart.query.filter.patrol" name="Patrol Filter" schema="schema/org.wcs.smart.query.filter.patrol.exsd"/>
+   <extension-point id="org.wcs.smart.query.export.format" name="%extension-point.name" schema="schema/org.wcs.smart.query.export.format.exsd"/>
+   <extension-point id="org.wcs.smart.query.property" name="%extension-point.name.0" schema="schema/org.wcs.smart.query.property.exsd"/>
+   <extension-point id="org.wcs.smart.query.filter.patrol" name="%extension-point.name.1" schema="schema/org.wcs.smart.query.filter.patrol.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view
@@ -73,7 +73,7 @@
             class="org.wcs.smart.query.internal.ui.MultiCaQueryPerspective"
             icon="images/icons/view16/querypatrol.gif"
             id="org.wcs.smart.query.SmartMultiCaQueryPerspective"
-            name="Multiple Conservation Area Query Perspective">
+            name="%multieca.perspective.name">
       </perspective>
    </extension>
    <extension
@@ -301,10 +301,10 @@
          </command>
          <command
                commandId="org.wcs.smart.query.translate"
-               label="Translate..."
-               mnemonic="t"
+               label="%translate.command.label"
+               mnemonic="%translate.command.mnemonic"
                style="push"
-               tooltip="Provide translations for name">
+               tooltip="%translate.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -702,7 +702,7 @@
       </command>
       <command
             id="org.wcs.smart.query.translate"
-            name="Translate...">
+            name="%translate.command.name">
       </command>
    </extension>
    <extension
