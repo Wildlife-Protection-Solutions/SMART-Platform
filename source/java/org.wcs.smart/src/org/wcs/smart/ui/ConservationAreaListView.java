@@ -35,6 +35,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 /**
  * View that displays a list of current active conservation 
  * areas.
@@ -59,7 +60,7 @@ public class ConservationAreaListView extends ViewPart {
 		Composite main = toolkit.createComposite(parent);
 		
 		main.setLayout(new GridLayout(1, false));
-		lblDefault = toolkit.createLabel(main, "Conservation Areas:", SWT.NONE);
+		lblDefault = toolkit.createLabel(main, Messages.ConservationAreaListView_CaLabel, SWT.NONE);
 		
 		FontData fd = lblDefault.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -85,8 +86,8 @@ public class ConservationAreaListView extends ViewPart {
 			}
 		}
 		
-		toolkit.createLabel(main, "", SWT.NONE);
-		Label ll = toolkit.createLabel(main, "The above is a list of conservation areas you can access in your analysis.", SWT.WRAP);
+		toolkit.createLabel(main, "", SWT.NONE); //$NON-NLS-1$
+		Label ll = toolkit.createLabel(main, Messages.ConservationAreaListView_CaInfo, SWT.WRAP);
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)ll.getLayoutData()).widthHint = 100;
 	}

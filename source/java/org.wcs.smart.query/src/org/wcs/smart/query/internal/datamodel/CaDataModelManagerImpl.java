@@ -303,7 +303,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * attribute like item 
 	 */
 	@Override
-	public String getAttributeListItemLabel(Session session, Attribute attribute, byte[] keyuuid){
+	public String getAttributeListItemLabel(Session session, byte[] cauuid, byte[] keyuuid){
 		return getName(keyuuid, session);
 	}
 	
@@ -311,7 +311,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * @return the label to use for the given attribute tree node
 	 */
 	@Override
-	public String getAttributeTreeNodeLabel(Session session, Attribute attribute, byte[] keyuuid){
+	public String getAttributeTreeNodeLabel(Session session, byte[] cauuid, byte[] keyuuid){
 		return getName(keyuuid, session);
 	}
 	

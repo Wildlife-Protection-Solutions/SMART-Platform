@@ -52,21 +52,27 @@ public class ConservationAreaFilter implements IFilter {
 	 */
 	public static ConservationAreaFilter parseFilter(String caFilterAsString) {
 		ConservationAreaFilter filter = new ConservationAreaFilter();
-		try {
-			String[] bits = caFilterAsString.split(","); //$NON-NLS-1$
-			for (int i = 0; i < bits.length; i++) {
-				filter.addConservationArea(SmartUtils.decodeHex(bits[i].trim()));
+		if (caFilterAsString == null){
+			filter.setIncludeAll(true);
+		}else{
+			filter.setIncludeAll(false);		
+			try {
+				String[] bits = caFilterAsString.split(","); //$NON-NLS-1$
+				for (int i = 0; i < bits.length; i++) {
+					filter.addConservationArea(SmartUtils.decodeHex(bits[i].trim()));
 
-			}
-		} catch (Exception ex) {
-			throw new IllegalStateException(
+				}
+			
+			} catch (Exception ex) {
+				throw new IllegalStateException(
 					Messages.ConservationAreaFilter_InvalidCaFilter, ex);
+			}
 		}
 		return filter;
 	}
 	
 	private ArrayList<byte[]> filters = new ArrayList<byte[]>();
-
+	private boolean includeAll = false;
 	/**
 	 * Creates a new empty conservation area filter
 	 */
@@ -97,9 +103,7 @@ public class ConservationAreaFilter implements IFilter {
 			if (!SmartDB.isMultipleAnalysis()){
 				addConservationArea(SmartDB.getCurrentConservationArea());
 			}else{
-				for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-					addConservationArea(ca);
-				}
+				setIncludeAll(true);
 			}
 		}
 	}
@@ -109,6 +113,7 @@ public class ConservationAreaFilter implements IFilter {
 	 * @param newCa conservation area
 	 */
 	public void addConservationArea(ConservationArea newCa){
+		this.includeAll = false;
 		filters.add(newCa.getUuid());
 	}
 	
@@ -117,7 +122,16 @@ public class ConservationAreaFilter implements IFilter {
 	 * @param uuid the conservation area uuid
 	 */
 	public void addConservationArea(byte[] uuid){
+		this.includeAll = false;
 		filters.add(uuid);
+	}
+	
+	public boolean includeAll(){
+		return this.includeAll;
+	}
+	
+	public void setIncludeAll(boolean includeAll){
+		this.includeAll = includeAll;
 	}
 	
 	/**
@@ -125,6 +139,11 @@ public class ConservationAreaFilter implements IFilter {
 	 */
 	@Override
 	public String asString() {
+		if (includeAll){
+			//if we are include all conservation areas then
+			//filter is null
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < filters.size(); i ++){
 			if (i != 0){
@@ -153,17 +172,33 @@ public class ConservationAreaFilter implements IFilter {
 	 * @return
 	 */
 	public String asSql(String caClassPrefix) {
-		if (filters.size() == 0){
+		ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
+		if (includeAll){
+			//include all current conservation areas
+			if (SmartDB.getConservationAreaConfiguration() != null){
+				for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+					localFilters.add(ca.getUuid());
+				}
+			}else{
+				localFilters.add(SmartDB.getCurrentConservationArea().getUuid());
+			}
+		}else{
+			//include only selected conservation areas
+			localFilters.addAll(filters);
+		}
+		
+		if (localFilters.size() == 0){
 			return ""; //$NON-NLS-1$
 		}
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append(caClassPrefix);
 		sb.append(".ca_uuid IN ("); //$NON-NLS-1$
-		for (int i = 0; i < filters.size(); i++) {
+		for (int i = 0; i < localFilters.size(); i++) {
 			if (i != 0){
 				sb.append(","); //$NON-NLS-1$
 			}
-			String uuid = SmartUtils.encodeHex(filters.get(i));
+			String uuid = SmartUtils.encodeHex(localFilters.get(i));
 			sb.append("x'" + uuid + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		sb.append(")"); //$NON-NLS-1$

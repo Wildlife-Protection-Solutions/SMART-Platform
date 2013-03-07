@@ -35,7 +35,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SimpleQuery;
 import org.wcs.smart.query.parser.filter.ConservationAreaFilter;
 import org.wcs.smart.query.parser.internal.parser.Parser;
@@ -55,7 +57,10 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	
 	private FilterDropTargetPanel dropTarget;
 	private ConservationAreaFilterPanel caFilter;
+	private TabItem caTabItem;
+	
 	private QueryDefView view;
+	private boolean isInitializing = false;
 	/**
 	 * 
 	 */
@@ -89,11 +94,11 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 			item2.setText(FilterDropTargetPanel.PANEL_TITLE);	
 			dropTarget.getComposite().setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 			
-			TabItem item1 = new TabItem(tabs, SWT.NONE);
+			caTabItem = new TabItem(tabs, SWT.NONE);
 			caFilter = new ConservationAreaFilterPanel(tabs);
-			item1.setControl(caFilter);
-			item1.setText(ConservationAreaFilterPanel.PANEL_TITLE);	
-			caFilter.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
+			caTabItem.setControl(caFilter);
+			caTabItem.setText(ConservationAreaFilterPanel.PANEL_TITLE);
+
 			caFilter.setSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -140,6 +145,8 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	 * @see org.wcs.smart.query.ui.definition.QueryDefinitionComposite#validate()
 	 */
 	public String validate(){
+		if (isInitializing) return null; //still initializing ; do not validate
+		
 		String error =null;
 		
 		String query = dropTarget.getQueryString().trim();
@@ -169,6 +176,15 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 				if (newFilter != null){
 					view.getQuery().setConservationAreaFilter(newFilter);
 				}
+				
+				if (caFilter.hasMissingFilter()){
+					caTabItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+//					caTabItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
+					caTabItem.setToolTipText(Messages.ObservationQueryDefinitionComposite_FilterWarningTooltip);
+				}else{
+					caTabItem.setImage(null);
+					caTabItem.setToolTipText(Messages.ObservationQueryDefinitionComposite_CaTooltip);
+				}
 			}
 		}
 		return error;
@@ -179,10 +195,12 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	 */
 	@Override
 	public void init() {
+		isInitializing = true;
 		dropTarget.addElements(((SimpleQuery)view.getQuery()).getDropItems());
 		if (caFilter != null){
 			caFilter.initQuery(view.getQuery());
 		}
+		isInitializing = false;
 	}
 
 	/**

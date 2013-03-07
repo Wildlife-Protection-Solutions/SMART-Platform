@@ -82,7 +82,6 @@ public class AttributeTreeDropItem extends DropItem{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				attribute = (Attribute) s.load(Attribute.class, attribute.getUuid());
 				roots = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
 			}catch(Exception ex){
 				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$

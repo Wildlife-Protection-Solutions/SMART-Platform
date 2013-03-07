@@ -92,6 +92,7 @@ public class QueryEditorTableContent {
 	 * @param query the observation query to initialize data with
 	 */
 	public void initValues(ObservationQuery query) {
+		if (stackComposite.isDisposed()) return;
 		setQueryName(query);
 		resultsTable.initQuery(query);
 		resultsTable.updateVisible(query.getQueryColumns());

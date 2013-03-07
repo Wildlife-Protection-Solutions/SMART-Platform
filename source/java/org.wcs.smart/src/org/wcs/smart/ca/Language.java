@@ -107,7 +107,7 @@ public class Language {
 	 * @return
 	 */
 	public boolean isSame(Language l){
-		return getCode().equals(l.getCode());
+		return getCode().trim().equals(l.getCode().trim());
 	}
 	
 	public int hashCode(){
@@ -129,7 +129,7 @@ public class Language {
 	public String getLabel(){
 		Locale l = getLocale();
 		if (l != null){
-			return l.getDisplayName() + " [" + getCode() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			return l.getDisplayName() + " [" + getCode().trim() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return getCode();
 	}

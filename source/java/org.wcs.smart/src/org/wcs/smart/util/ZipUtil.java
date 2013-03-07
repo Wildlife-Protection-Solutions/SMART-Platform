@@ -179,7 +179,7 @@ public class ZipUtil {
 				// name = name.substring(i + 1);
 
 				File destinationFile = new File(destinationLocation, name);
-				if (name.endsWith(File.separator)) {
+				if (name.endsWith("/")) { //$NON-NLS-1$
 					if (!destinationFile.isDirectory()
 							&& !destinationFile.mkdirs()) {
 						throw new Exception(

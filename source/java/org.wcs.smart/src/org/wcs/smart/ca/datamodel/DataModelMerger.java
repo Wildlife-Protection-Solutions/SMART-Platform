@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
@@ -8,6 +29,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Class to merge datamodels. 
@@ -30,72 +52,88 @@ public class DataModelMerger {
 	 * @return a merged data model
 	 */
 	public DataModel mergeDataModels(ConservationArea[] cas, ConservationArea defaultCa, Session session){
+		
 		if (cas == null || cas.length < 2){
 			throw new IllegalStateException("more than 1 conservation area must be provided");//$NON-NLS-1$
 		}
 		// load data model for default Ca
 		DataModel dm = HibernateManager.loadDataModel(defaultCa, session);
-		
-		/* root categories */
 		DataModel newDataModel = new DataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
-		for (Category c : dm.getCategories()){
-			if (canKeep(c, cas, session)){
-				newDataModel.addRootCategories(c);
-			}
-		}
-		newDataModel.getActiveCategories().addAll(newDataModel.getCategories());
 		
-		/* attributes */
+		// ATTRIBUTES
 		for (Attribute a : dm.getAttributes()){
 			if (canKeep(a, cas, session)){
-				newDataModel.getAttributes().add(a);
-				mergeAttributeAggregations(a,cas, session);
+				Attribute copy = a.clone(SmartDB.getCurrentConservationArea(), SmartDB.getCurrentLanguage().getCode());
+				newDataModel.getAttributes().add(copy);
+				mergeAttributeAggregations(copy,cas, session);
 			}
 		}
 		
-		/* child categories and attributes */
+		/* root categories */
 		for (Category c : dm.getCategories()){
-			processChildren(c, cas, session);
+			if (canKeep(c, cas, session)){
+				Category newRoot = cloneCategory(c, null, newDataModel.getAttributes(), cas,session);
+				newDataModel.addRootCategories(newRoot);
+			}
 		}
+		
 		return newDataModel;
 	}
 	
-	/*
-	 * processes all children of a given category
-	 */
-	private void processChildren(Category parent, ConservationArea[] ca, Session session){
-		if(parent.getChildren() != null){
-			List<Category> kids = new ArrayList<Category>();
-			for (Category kid : parent.getChildren()){
-				if (canKeep(kid, ca, session)){
-					kids.add(kid);
+
+	private Category cloneCategory(Category toClone, Category parent, List<Attribute> clonedAttributes, ConservationArea[] cas, Session session){
+		
+		Category clone = new Category();
+		clone.setHkey(toClone.getHkey());
+		clone.setKeyId(toClone.getKeyId());
+		clone.setCategoryOrder(toClone.getCategoryOrder());
+		clone.setParent(parent);
+		clone.setIsActive(true);
+		
+		//clone the labels
+		clone.setName(toClone.getName());
+			
+		if (toClone.getAttributes() != null){
+			clone.setAttributes(new ArrayList<CategoryAttribute>());
+			for (CategoryAttribute attribute : toClone.getAttributes()){
+				if (canKeep(attribute, cas, session)){
+					//	find attribute
+					Attribute newAttribute = null;
+					for (Attribute clonedAttribute: clonedAttributes){
+						if (clonedAttribute.getKeyId().equals(attribute.getAttribute().getKeyId())){
+							newAttribute = clonedAttribute;
+							break;
+						}
+					}
+					if (newAttribute !=  null){
+						CategoryAttribute link = new CategoryAttribute(clone, newAttribute);
+						link.setIsActive(true);
+						clone.getAttributes().add(link);
+					}
+				}
+				
+			}
+		}
+		if (toClone.getChildren() != null){
+			clone.setChildren(new ArrayList<Category>());
+			
+			for (Category child : toClone.getChildren()){
+				if (canKeep(child,cas, session)){
+					Category kid = cloneCategory(child,clone,clonedAttributes, cas, session);
+					clone.getChildren().add(kid);
 				}
 			}
-			
-			parent.getChildren().clear();
-			parent.getChildren().addAll(kids);
-			parent.setActiveChildren(kids);
+			clone.setActiveChildren(clone.getChildren());
 		}
 		
-		if (parent.getAttributes() != null){
-			List<CategoryAttribute> attributes = new ArrayList<CategoryAttribute>();
-			for (CategoryAttribute categoryAttribute : parent.getAttributes()){
-				if (canKeep(categoryAttribute, ca, session)){
-					attributes.add(categoryAttribute);
-				}
-			}
-			parent.setAttributes(attributes);
-		}
-
-		if (parent.getChildren() != null){
-			for (Category kid : parent.getChildren()){
-				processChildren(kid, ca, session);
-			}
-		}
+		
+		return clone;
 	}
+
+	
 	@SuppressWarnings("unchecked")
 	private void mergeAttributeAggregations(Attribute a, ConservationArea[] ca, Session session){
-		List<Aggregation> aggs = a.getAggregations();
+		List<Aggregation> aggs = new ArrayList<Aggregation>(a.getAggregations());
 		if (aggs.size() == 0){
 			return;
 		}
@@ -181,8 +219,5 @@ public class DataModelMerger {
 			return true;
 		}
 		return false;
-	
-		
-		
 	}
 }

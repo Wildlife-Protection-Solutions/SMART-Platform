@@ -122,7 +122,7 @@ public class SummaryQueryDefinitionComposite extends QueryDefinitionComposite {
 			caFilterPanel = new ConservationAreaFilterPanel(tabs);
 			item3.setControl(caFilterPanel);
 			item3.setText(ConservationAreaFilterPanel.PANEL_TITLE);	
-			caFilterPanel.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
+			caFilterPanel.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, false));
 			caFilterPanel.setSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

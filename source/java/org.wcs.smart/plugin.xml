@@ -28,7 +28,7 @@
       </view>
       <view
             allowMultiple="false"
-            class="org.wcs.smart.ui.CrossCaView"
+            class="org.wcs.smart.ui.CrossCaAnalysisIntroView"
             icon="images/icons/eview16/crossca.png"
             id="org.wcs.smart.crossCaView"
             name="Cross Conservation Analysis"
@@ -875,7 +875,7 @@
             type="java.lang.Object">
       </propertyTester>
       <propertyTester
-            class="org.wcs.smart.CaPropertyTester"
+            class="org.wcs.smart.SingleCaPropertyTester"
             id="org.wcs.smart.caSingle"
             namespace="org.wcs.smart"
             properties="caSingle"

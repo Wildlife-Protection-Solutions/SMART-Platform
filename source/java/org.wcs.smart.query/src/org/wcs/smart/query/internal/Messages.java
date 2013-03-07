@@ -42,8 +42,13 @@ public class Messages extends NLS {
 	public static String CategoryValueItem_CountObservationLabel;
 	public static String CombinedValueItem_PER_LABEL;
 	public static String ConservationAreaFilter_InvalidCaFilter;
+	public static String ConservationAreaFilterPanel_CaFilterError;
 	public static String ConservationAreaFilterPanel_CaFilterPanelTitle;
 	public static String ConservationAreaFilterPanel_Error_NoCas;
+	public static String ConservationAreaFilterPanel_FilterCaOp;
+	public static String ConservationAreaFilterPanel_IncludeAllCaOp;
+	public static String ConservationAreaListView_CaInfoLabel;
+	public static String ConservationAreaListView_CaLabel;
 	public static String CreateHandler_QueryEditorError;
 	public static String CreateHandler_QueryPerspectiveError;
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
@@ -252,6 +257,8 @@ public class Messages extends NLS {
 	public static String NameCellEditor_CouldNotSaveQueryName;
 	public static String NameCellEditor_UpdateFolderNameJob;
 	public static String NameCellEditor_UpdateQueryNameJob;
+	public static String ObservationQueryDefinitionComposite_CaTooltip;
+	public static String ObservationQueryDefinitionComposite_FilterWarningTooltip;
 	public static String Operator_AND;
 	public static String Operator_Equals;
 	public static String Operator_GreaterThan;

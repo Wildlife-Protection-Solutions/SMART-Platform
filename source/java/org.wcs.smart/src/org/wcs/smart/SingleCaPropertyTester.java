@@ -21,27 +21,29 @@
  */
 package org.wcs.smart;
 
-import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.IPerspectiveFactory;
-import org.wcs.smart.ui.ConservationAreaListView;
-import org.wcs.smart.ui.CrossCaAnalysisIntroView;
+import org.eclipse.core.expressions.PropertyTester;
+import org.wcs.smart.hibernate.SmartDB;
+
 /**
- * Default perspective for cross-ca analysis.  
+ * Property tester that returns true if logged into
+ * a single ca, false if logged into multiple ca
  * 
  * @author Emily
  *
  */
-public class DefaultCrossCaPerspective implements IPerspectiveFactory {
+public class SingleCaPropertyTester extends PropertyTester {
 
-	public final static String ID = "org.wcs.smart.DefaultCrossCaPerspective"; //$NON-NLS-1$
-	
-	
+	/**
+	 * Tests the current conservation area to determine if
+	 * it is a single CA or the default CrossCa identifiers
+	 * 
+	 * @return <code>true</code> if ca references a single ca, 
+	 * <code>false</code> if references "general" ca
+	 */
 	@Override
-	public void createInitialLayout(IPageLayout layout) {
-		layout.setEditorAreaVisible(false);
-
-		layout.addView( ConservationAreaListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA); 
-		layout.getViewLayout(CrossCaAnalysisIntroView.ID).setCloseable(false);
+	public boolean test(Object receiver, String property, Object[] args,
+			Object expectedValue) {
+		return !SmartDB.isMultipleAnalysis();
 	}
 
 }
