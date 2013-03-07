@@ -94,6 +94,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	
 	/**
 	 * Returns only items shared across all conservation areas.
+	 * 
 	 * <p>The objects returned are associated with the same conservation
 	 * areas as the attribute passed in</p> 
 	 * 
@@ -113,9 +114,9 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		
 		List<String> keys = q.list();
 			
-		query = "FROM AttributeListItem a WHERE a.attribute = :attribute and a.keyId IN (:keys)"; //$NON-NLS-1$
+		query = "FROM AttributeListItem a WHERE a.attribute.conservationArea = :ca and a.keyId IN (:keys)"; //$NON-NLS-1$
 		q = session.createQuery(query);
-		q.setParameter("attribute", attribute); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
 		q.setParameterList("keys", keys); //$NON-NLS-1$
 			
 		List<AttributeListItem> items = q.list();
@@ -141,9 +142,9 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		
 		List<String> hkeys = q.list();
 			
-		query = "FROM AttributeTreeNode a WHERE a.attribute = :attribute and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
+		query = "FROM AttributeTreeNode a WHERE a.attribute.conservationArea = :ca and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
 		q = session.createQuery(query);
-		q.setParameter("attribute", attribute); //$NON-NLS-1$
+		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
 		q.setParameterList("keys", hkeys); //$NON-NLS-1$
 			
 		List<AttributeTreeNode> roots = q.list();
@@ -368,7 +369,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 				parent = parent.getParent();
 			}	
 		}else{
-			Language l = SmartUtils.findLanguageMatchLabels(category.getNames()).getLanguage();
+			Language l = SmartUtils.findLanguageMatch(category.getConservationArea().getLanguages());
 			if (l == null){
 				//default language of conservation area
 				l = category.getConservationArea().getDefaultLanguage();
@@ -417,29 +418,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * 
 	 */
 	@Override
-	public String getAttributeListItemLabel(Session session, Attribute attribute, byte[] keyuuid){
-		AttributeListItem item = (AttributeListItem) session.load(AttributeListItem.class, keyuuid);
-		
-		DataModel dm = getDataModel();
-		for (Attribute a: dm.getAttributes()){
-			if (a.getKeyId().equals(attribute.getKeyId())){
-				a = (Attribute) session.load(Attribute.class, a.getUuid());
-				for (AttributeListItem i : a.getAttributeList()){
-					if (item.getKeyId().equals(i.getKeyId())){
-						return i.getName();
-					}
-				}		
-			}
-		}
-		
-		
-		//attribute not found in database
-		Label l = SmartUtils.findLanguageMatchLabels(item.getNames());
-		if (l != null){
-			return l.getValue();
-		}else{
-			return item.findName(attribute.getConservationArea().getDefaultLanguage()); 
-		}
+	public String getAttributeListItemLabel(Session session, byte[] cauuid, byte[] keyuuid ){
+		return Label.getDescription(keyuuid, cauuid);
 	}
 
 	
@@ -453,15 +433,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @return the label to use for the given attribute tree node
 	 */
 	@Override
-	public String getAttributeTreeNodeLabel(Session session, Attribute attribute, byte[] keyuuid){
-		AttributeTreeNode item = (AttributeTreeNode) session.load(AttributeTreeNode.class, keyuuid);
-		
-		//otherwise return the name provided with ca
-		Label l = SmartUtils.findLanguageMatchLabels(item.getNames());
-		if (l != null){
-			return l.getValue();
-		}
-		return item.findName(attribute.getConservationArea().getDefaultLanguage());
+	public String getAttributeTreeNodeLabel(Session session, byte[] cauuid, byte[] keyuuid){
+		return Label.getDescription(keyuuid, cauuid);
 	}
 	
 	

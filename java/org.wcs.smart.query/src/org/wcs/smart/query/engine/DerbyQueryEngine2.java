@@ -679,26 +679,27 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			 * 29 - "string_value"
 			 * 30 - "list_element_uuid"
 			 * 31 - "tree_node_uuid"
-			 * 
+			 * 32 - "attribute key"
 			 * 
 			 */
 
 			while (rs.next()) {
+				byte[] cauuid = rs.getBytes(1);
 				byte[] wpouuid = rs.getBytes(25);
 				if (wpouuid != null && last != null
 						&& last.getObservationUuid() != null
 						&& Arrays.equals(wpouuid, last.getObservationUuid())) {
 					//same observation new attribute
-					Attribute att = getAttribute(rs.getBytes(27), session);
-					if (att != null){
-						Object value = getAttributeValue(att, rs, session);
-						last.addAttribute(att.getKeyId(), value);
+					String key = rs.getString(32);
+					if (key != null){
+						Object value = getAttributeValue(rs, cauuid, session);
+						last.addAttribute(key, value);
 					}
+
 					continue;
 				}
 
 				QueryResultItem it = new QueryResultItem();
-				byte[] cauuid = rs.getBytes(1);
 //				it.setCaUuid(rs.getBytes(1));
 				it.setPatrolUuid(rs.getBytes(2));
 				it.setPatrolId(rs.getString(3));
@@ -727,10 +728,11 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				it.setObservationUuid(wpouuid);
 				it.setCategory(getCategoryLabels(rs.getBytes(26), session));
 				
-				Attribute att = getAttribute(rs.getBytes(27), session);
-				if (att != null){
-					Object value = getAttributeValue(att, rs, session);
-					it.addAttribute(att.getKeyId(), value);
+//				Attribute att = getAttribute(rs.getBytes(27), session);
+				String key = rs.getString(32);
+				if (key != null){
+					Object value = getAttributeValue(rs, cauuid, session);
+					it.addAttribute(key, value);
 				}
 
 				items.add(it);
@@ -751,34 +753,19 @@ public class DerbyQueryEngine2 implements QueryEngine {
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getAttributeValue(Attribute att, ResultSet rs, Session session) throws SQLException {
+	protected Object getAttributeValue(ResultSet rs, byte[] cauuid, Session session) throws SQLException {
 		if (rs.getObject(28) != null){
 			return rs.getDouble(28);
 		}else if (rs.getString(29) != null){
 			return rs.getString(29);
 		}else if (rs.getBytes(31) != null){
-			return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, att, rs.getBytes(31));
+			return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, rs.getBytes(31));
 		}else if (rs.getBytes(30) != null){
-			return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, att, rs.getBytes(30));
+			return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, rs.getBytes(30));
 		}
 		return null;
 	}
 	
-	/**
-	 * Loads the attribute object from the session.
-	 * 
-	 * 
-	 * @param uuid
-	 * @param session
-	 * @return
-	 */
-	protected Attribute getAttribute(byte[] uuid, Session session){
-		if (uuid != null){
-			Attribute att = (Attribute) session.load(Attribute.class, uuid);
-			return att;
-		}
-		return null;
-	}
 	
 	/**
 	 * Loads the category object from the session
@@ -839,9 +826,10 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		
 		String[] observations = { "uuid", "category_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		String[] attributes = { "attribute_uuid", "number_value", //$NON-NLS-1$ //$NON-NLS-2$
+		String[] obAttributes = { "attribute_uuid", "number_value", //$NON-NLS-1$ //$NON-NLS-2$
 				"string_value", "list_element_uuid", "tree_node_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
+		String[] attributes = {"keyid"}; //$NON-NLS-1$
+		
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < results.length; i++) {
 			if (i != 0) {
@@ -862,17 +850,22 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				sb.append(tablePrefix.get(WaypointObservation.class) + "." //$NON-NLS-1$
 						+ observations[i] + " as o_" + observations[i]); //$NON-NLS-1$
 			}
-			for (int i = 0; i < attributes.length; i++) {
+			for (int i = 0; i < obAttributes.length; i++) {
 				sb.append(","); //$NON-NLS-1$
 				sb.append(tablePrefix.get(WaypointObservationAttribute.class)
-						+ "." + attributes[i] + " as a_" + attributes[i]); //$NON-NLS-1$ //$NON-NLS-2$
+						+ "." + obAttributes[i] + " as a_" + obAttributes[i]); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			for (int i = 0; i < attributes.length; i++) {
+				sb.append(","); //$NON-NLS-1$
+				sb.append(tablePrefix.get(Attribute.class)
+						+ "." + attributes[i] + " as att_" + attributes[i]); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} else {
 			for (int i = 0; i < observations.length; i++) {
 				sb.append(","); //$NON-NLS-1$
 				sb.append(" cast(null as char(16) for bit data)"); //$NON-NLS-1$
 			}
-			for (int i = 0; i < attributes.length; i++) {
+			for (int i = 0; i < obAttributes.length; i++) {
 				sb.append(","); //$NON-NLS-1$
 				if (i == 1) {
 					sb.append(" cast(null as double)"); //$NON-NLS-1$
@@ -881,6 +874,10 @@ public class DerbyQueryEngine2 implements QueryEngine {
 				} else {
 					sb.append(" cast(null as char(16) for bit data)"); //$NON-NLS-1$
 				}
+			}
+			for (int i = 0; i < attributes.length; i++) {
+				sb.append(","); //$NON-NLS-1$
+				sb.append(" cast(null as varchar(128))"); //$NON-NLS-1$
 			}
 		}
 
@@ -943,6 +940,15 @@ public class DerbyQueryEngine2 implements QueryEngine {
 					+ ".uuid = " //$NON-NLS-1$
 					+ tablePrefix.get(WaypointObservationAttribute.class)
 					+ ".observation_uuid"); //$NON-NLS-1$
+			
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(tableNames.get(Attribute.class));
+			sql.append(" "); //$NON-NLS-1$
+			sql.append(tablePrefix.get(Attribute.class));
+			sql.append(" on " + tablePrefix.get(Attribute.class) //$NON-NLS-1$
+					+ ".uuid = " //$NON-NLS-1$
+					+ tablePrefix.get(WaypointObservationAttribute.class)
+					+ ".attribute_uuid"); //$NON-NLS-1$
 		}
 		return sql.toString();
 	}

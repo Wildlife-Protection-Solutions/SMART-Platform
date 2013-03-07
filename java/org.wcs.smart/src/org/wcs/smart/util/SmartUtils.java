@@ -41,7 +41,6 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.DateTime;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -528,7 +527,7 @@ public class SmartUtils {
 	{
 	    String l = ""; //$NON-NLS-1$
 	    String c = ""; //$NON-NLS-1$
-		StringTokenizer tempStringTokenizer = new StringTokenizer(s,"_"); //$NON-NLS-1$
+		StringTokenizer tempStringTokenizer = new StringTokenizer(s.trim(),"_"); //$NON-NLS-1$
 	    if(tempStringTokenizer.hasMoreTokens())
 	    	l = (String) tempStringTokenizer.nextElement();
 	    
@@ -558,7 +557,7 @@ public class SmartUtils {
 	 * Finds the language that best matches the current
 	 * logged in language.
 	 * <p>
-	 * Looks first for codes that fully match,
+	 * Looks first for codes (language & locale) that fully match,
 	 * then codes whose first (language) part matches.  If
 	 * not found returns null.
 	 * 
@@ -582,36 +581,6 @@ public class SmartUtils {
 		}
 		return null;
 	}
-	
-	/**
-	 * Finds the label whose value best matches the current
-	 * logged in language.
-	 * <p>
-	 * Looks first for codes that fully match,
-	 * then codes whose first (language) part matches.  If
-	 * not found returns null.
-	 * 
-	 * @param languages
-	 * @return
-	 */
-	public static Label findLanguageMatchLabels(Collection<Label> labels){
-		String currentCode = SmartDB.getCurrentLanguage().getCode();
-		if (labels != null){
-			for (Label l : labels){
-				if (l.getLanguage().getCode().equals(currentCode)){
-					return l;
-				}
-			}
-		}
-		String[] bits = currentCode.split("_"); //$NON-NLS-1$
-		String lang = bits[0];
-		if (labels != null){
-			for (Label l : labels){
-				if (l.getLanguage().getCode().split("_")[0].equals(lang)){ //$NON-NLS-1$
-					return l;
-				}
-			}
-		}
-		return null;
-	}
+
+
 }

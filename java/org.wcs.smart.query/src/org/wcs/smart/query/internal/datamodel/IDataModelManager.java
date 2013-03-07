@@ -162,11 +162,11 @@ public interface IDataModelManager {
 	 * Returns the label for the attribute list item with the given uuid.
 	 * 
 	 * @param session
-	 * @param attribute parent attribute
+	 * @param attributeKey parent attribute
 	 * @param keyuuid attribute list item uuid
 	 * @return
 	 */
-	public String getAttributeListItemLabel(Session session, Attribute attribute, byte[] keyuuid);
+	public String getAttributeListItemLabel(Session session, byte[] cauuid, byte[] keyuuid);
 	
 	/**
 	 * Returns the label for the attribute tree node with the given uuid
@@ -175,5 +175,5 @@ public interface IDataModelManager {
 	 * @param keyuuid attribute tree node uuid
 	 * @return
 	 */
-	public String getAttributeTreeNodeLabel(Session session, Attribute attribute, byte[] keyuuid);
+	public String getAttributeTreeNodeLabel(Session session, byte[] cauuid, byte[] keyuuid);
 }

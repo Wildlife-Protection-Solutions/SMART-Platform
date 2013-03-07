@@ -270,12 +270,17 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_Updated_DialogMessage;
 	public static String ChangeUserPasswordDialog_Updated_DialogTitle;
 	public static String ChangeUserPasswordDialog_Username_Label;
+	public static String ConservationAreaListView_CaInfo;
+	public static String ConservationAreaListView_CaLabel;
 	public static String ConservationAreaManager_Error_DeletingFilestore;
 	public static String ConservationAreaManager_Progress_DeleteCa;
 	public static String ConservationAreaManager_Progress_RemoveFileStore;
 	public static String ConservationAreaManager_Progress_Restarting;
 	public static String CreateCaWizard_Error_CreateCaError;
 	public static String CreateCaWizard_WziardName;
+	public static String CrossCaView_Header;
+	public static String CrossCaView_Message1;
+	public static String CrossCaView_Message2;
 	public static String CsvCaImportDialog_FromCa_Label;
 	public static String CsvCaImportDialog_FromCsv_Label;
 	public static String CsvCaImportDialog_LoadCa_Fail_Error;

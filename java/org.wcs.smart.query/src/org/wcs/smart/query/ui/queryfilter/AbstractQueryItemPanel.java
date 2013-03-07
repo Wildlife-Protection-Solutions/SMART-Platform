@@ -88,7 +88,7 @@ public abstract class AbstractQueryItemPanel{
 	 * to pass the item to the query definition panel.
 	 */
 	public void addQueryItem(IStructuredSelection currentSelection){
-		IWorkbenchPartSite site = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite();
+		IWorkbenchPartSite site = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite();
 		SourceProvider provider = (SourceProvider) ((ISourceProviderService)site.getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.SELECTED_FILTERS);
 		provider.setFilterSelection(currentSelection);
 	}
