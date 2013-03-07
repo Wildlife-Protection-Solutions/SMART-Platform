@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -53,6 +54,11 @@ public class DataModel {
 
 	public static final String HKEY_SEPERATOR = "."; //$NON-NLS-1$
 
+	private static final String INVALID_START_CHARS_KEY_PATTERN = "[^a-z]+"; //$NON-NLS-1$
+
+	private static final String VALID_DM_KEY_PATTERN = "[a-z]{1}[a-z0-9_]*"; //$NON-NLS-1$
+	
+	
 	private ConservationArea ca;	//the conservation area of the data model
 	private List<Category> categories;	//the root categories for the data model
 	private List<Attribute> attributes; // all attributes associated with datamodel	
@@ -383,6 +389,10 @@ public class DataModel {
 	 */
 	public static String generateKey (String value, Collection<? extends DmObject> otherValues){
 		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		//DM keys should not start with number or '_' character or queries will be invalid see ticket #354
+		if (!raw.isEmpty() && Pattern.matches(INVALID_START_CHARS_KEY_PATTERN, raw.subSequence(0, 1))) {
+			raw = raw.replaceFirst(INVALID_START_CHARS_KEY_PATTERN, ""); //$NON-NLS-1$
+		}
 		if (raw.isEmpty()){
 			raw = "object"; //$NON-NLS-1$
 		}
@@ -437,7 +447,7 @@ public class DataModel {
 		if (key.length() > DmObject.MAX_KEY_LENGTH ){
 			return MessageFormat.format(Messages.DataModel_Error_Key_ToLong, new Object[]{DmObject.MAX_KEY_LENGTH});
 		}
-		if (key.matches(".*[^a-z0-9_].*")){ //$NON-NLS-1$
+		if (!key.matches(VALID_DM_KEY_PATTERN)){
 			return Messages.DataModel_Error_Key_InvalidCharacters;
 		}
 		if (checkKeyExists(key, otherValues)){
