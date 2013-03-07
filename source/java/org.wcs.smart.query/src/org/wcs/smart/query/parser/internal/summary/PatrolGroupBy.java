@@ -159,7 +159,7 @@ public class PatrolGroupBy implements IGroupBy {
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem asDropItem(Session session) {
+	public DropItem asDropItem(Session session) throws Exception{
 		DropItem it = DropItemFactory.INSTANCE.createPatrolGroupByDropItem(option);
 		try {
 			if (items != null){
@@ -167,6 +167,10 @@ public class PatrolGroupBy implements IGroupBy {
 				for (int i = 0; i < initItems.length; i++) {
 					if (option.getType() == PatrolQueryOptionType.UUID){
 						byte[] uuid = SmartUtils.decodeHex(items[i]);
+						String name = option.getName(session, uuid);
+						if (name == null){
+							throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_PatrolOptionParseError, new Object[]{option.getGuiName()}));
+						}
 						initItems[i] = new ListItem(uuid, option.getName(session, uuid));
 					}else{
 						initItems[i] = new ListItem(null, items[i], items[i]);

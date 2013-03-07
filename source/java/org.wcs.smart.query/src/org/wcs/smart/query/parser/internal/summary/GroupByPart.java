@@ -87,7 +87,7 @@ public class GroupByPart {
 	 * @param session
 	 * @return
 	 */
-	public List<DropItem> getDropItems(Session session){
+	public List<DropItem> getDropItems(Session session) throws Exception{
 		ArrayList<DropItem> item = new ArrayList<DropItem>();
 		for (IGroupBy groupByItem : groupBy){
 			item.add(groupByItem.asDropItem(session));

@@ -135,7 +135,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * 
 	 * @param session
 	 * @param value patrol mandate uuid as hex encoded string
-	 * @return
+	 * @return the patrol mandate or null if not found
 	 * @throws Exception
 	 */
 	@Override
@@ -147,7 +147,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * Gets the station object
 	 * @param session
 	 * @param value station uuid as hex encoded string
-	 * @return
+	 * @return the station or null if not found
 	 * @throws Exception
 	 */
 	@Override
@@ -159,7 +159,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * Gets team object
 	 * @param session
 	 * @param value team uuid as hex encoded string
-	 * @return
+	 * @return the team or null if not found
 	 * @throws Exception
 	 */
 	@Override
@@ -171,7 +171,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * Gets the transportation types listitem object 
 	 * @param session
 	 * @param value transportation type uuid as hex encoded string
-	 * @return
+	 * @return the transport type or null if not found
 	 * @throws Exception
 	 */
 	public ListItem getTransportType(Session session, String value) throws Exception{
@@ -196,7 +196,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
 		}else{
 			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadError, new Object[]{clazz, value}), null);
-			return new ListItem(""); //$NON-NLS-1$
+			return null;
 		}
 	}
 	
@@ -218,7 +218,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 			return new ListItem( (byte[])d[0], (String) d[1] + " " + (String)d[2] + " [" + (String)d[3] + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else{
 			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadEmployeeError, new Object[]{value}), null);
-			return new ListItem(""); //$NON-NLS-1$
+			return null;
 		}
 	}
 	

@@ -112,12 +112,11 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			QueryInput input = (QueryInput) QueryResultsEditor.this.getEditorInput();
-			
+
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
 				query = (ObservationQuery) session.load(ObservationQuery.class, input.getUuid());
-				
 				query.getDropItems();
 				query.generateDropItems(session);
 			}catch (Exception ex){
@@ -133,7 +132,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						page1.setQuery();
+						page1.initPage();
 						setDirty(false);
 					}
 				});
@@ -261,7 +260,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 						@Override
 						public void run() {
 							if (query != null && query.getUuid() == null){
-								page1.setQuery();
+								page1.initPage();
 							}
 							
 						}});
@@ -350,7 +349,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		}
 		
 		if (newQuery){
-			page1.setQuery();			
+			page1.initPage();			
 		}
 		updatePartName();
 		setDirty(false);
@@ -367,7 +366,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		this.query = (ObservationQuery) savedQuery;
 		setInput(new QueryInput(savedQuery));
 		updatePartName();
-		page1.setQuery();
+		page1.initPage();
 		
 		setDirty(false);
 		

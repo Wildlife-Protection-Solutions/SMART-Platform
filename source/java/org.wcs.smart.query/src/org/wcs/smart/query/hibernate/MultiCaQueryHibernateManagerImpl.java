@@ -167,4 +167,19 @@ public class MultiCaQueryHibernateManagerImpl extends
 		return queries;
 	}
 
+	/**
+	 * Gridded queries not supported for multi ca analysis
+	 * 
+	 * @see org.wcs.smart.query.hibernate.IQueryHibernateManager#getSupportedQueryTypes()
+	 */
+	@Override
+	public QueryType[] getSupportedQueryTypes() {
+		return new QueryType[]{
+				QueryType.OBSERVATION,
+				QueryType.PATROL,
+				QueryType.SUMMARY
+		};
+	}
+
+	
 }

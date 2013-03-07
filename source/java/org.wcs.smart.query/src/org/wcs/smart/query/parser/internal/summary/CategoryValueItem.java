@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -135,15 +137,16 @@ public class CategoryValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem asDropItem(Session session) {
+	public DropItem asDropItem(Session session) throws Exception{
 		Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
-		if (category != null){
-			category.getFullCategoryName();		//cache this
-			DropItem di = DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
-			di.initializeData(new Object[]{getDropItemInitializeData(), null});
-			return di;
+		if (category == null){
+			throw new Exception(MessageFormat.format(Messages.CategoryValueItem_CategoryNotFoundError, new Object[]{categoryHkey}));
 		}
-		return null;
+		category.getFullCategoryName();		//cache this
+		DropItem di = DropItemFactory.INSTANCE.createCategoryValueDropItem(category);
+		di.initializeData(new Object[]{getDropItemInitializeData(), null});
+		return di;
+		
 	}
 	
 	/**

@@ -56,6 +56,7 @@ import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.ValuePart;
 import org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.ErrorDropItem;
 
 /**
  * A class to represent a summary query.
@@ -310,6 +311,7 @@ public class SummaryQuery extends Query {
 		clearDropItemList(colGroupByDropItems);
 		clearDropItemList(valueDropItems);
 		clearDropItemList(filterDropItems);
+		
 		if (rowGroupByDropItems == null){
 			rowGroupByDropItems = new ArrayList<DropItem>();
 		}
@@ -323,34 +325,63 @@ public class SummaryQuery extends Query {
 			filterDropItems = new ArrayList<DropItem>();
 		}
 		
-		//---- generate drop items for filter items ----		
-		IFilter query = getQueryDefinition().getQueryFilter();
-		if (query != null){
-			DropItem[] filterItems = query.getDropItems(session);
-			for (int i = 0; i < filterItems.length; i ++){
-				filterDropItems.add(filterItems[i]);
+		//---- generate drop items for filter items ----
+		Exception lastException = null;
+		try{
+			IFilter query = getQueryDefinition().getQueryFilter();
+			if (query != null){
+				DropItem[] filterItems = query.getDropItems(session);
+				for (int i = 0; i < filterItems.length; i ++){
+					filterDropItems.add(filterItems[i]);
+				}
 			}
+		}catch (Exception ex){
+			clearDropItemList(filterDropItems);
+			filterDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.SummaryQuery_FilterParseError, new Object[]{ex.getLocalizedMessage()} )));
+			lastException = ex;
 		}
 		
 		//---- generate drop items for value items ----
-		ValuePart part = getQueryDefinition().getValuePart();
-		List<DropItem> valueItems = part.getDropItems(session);
-		for (DropItem di : valueItems){
-			if (di instanceof AbstractValueDropItem){
-				((AbstractValueDropItem) di).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
+		try{
+			ValuePart part = getQueryDefinition().getValuePart();
+			List<DropItem> valueItems = part.getDropItems(session);
+			for (DropItem di : valueItems){
+				if (di instanceof AbstractValueDropItem){
+					((AbstractValueDropItem) di).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS);
+				}
 			}
+			valueDropItems.addAll(valueItems);
+		}catch (Exception ex){
+			clearDropItemList(valueDropItems);
+			valueDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.SummaryQuery_ValueParseError, new Object[]{ex.getLocalizedMessage()} )));
+			lastException = ex;
 		}
-		valueDropItems.addAll(valueItems);
 		
 		//---- generate drop items for group by items ----
-		GroupByPart groupByPart = getQueryDefinition().getRowGroupByPart();
-		List<DropItem> groupbyItems = groupByPart.getDropItems(session);
-		rowGroupByDropItems.addAll(groupbyItems);
+		try{
+			GroupByPart groupByPart = getQueryDefinition().getRowGroupByPart();
+			List<DropItem> groupbyItems = groupByPart.getDropItems(session);
+			rowGroupByDropItems.addAll(groupbyItems);
+		}catch (Exception ex){
+			clearDropItemList(rowGroupByDropItems);
+			rowGroupByDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.SummaryQuery_RowGroupByParseError, new Object[]{ex.getLocalizedMessage()} )));
+			lastException = ex;
+		}
 		
 		//---- generate drop items for group by items ----
-		groupByPart = getQueryDefinition().getColumnGroupByPart();
-		groupbyItems = groupByPart.getDropItems(session);
-		colGroupByDropItems.addAll(groupbyItems);
+		try{
+			GroupByPart groupByPart = getQueryDefinition().getColumnGroupByPart();
+			List<DropItem> groupbyItems = groupByPart.getDropItems(session);
+			colGroupByDropItems.addAll(groupbyItems);
+		}catch (Exception ex){
+			clearDropItemList(colGroupByDropItems);
+			colGroupByDropItems.add(new ErrorDropItem(MessageFormat.format(Messages.SummaryQuery_ColumnGroupByParseError, new Object[]{ex.getLocalizedMessage()} )));
+			lastException = ex;
+		}
+		
+		if (lastException != null){
+			throw lastException;
+		}
 	
 	}
 	

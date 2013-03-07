@@ -1,11 +1,3 @@
-package org.wcs.smart.query;
-
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.internal.datamodel.CaDataModelManagerImpl;
-import org.wcs.smart.query.internal.datamodel.IDataModelManager;
-import org.wcs.smart.query.internal.datamodel.MultiCaDataModelManagerImpl;
-
 /*
  * Copyright (C) 2012 Wildlife Conservation Society
  *
@@ -27,6 +19,14 @@ import org.wcs.smart.query.internal.datamodel.MultiCaDataModelManagerImpl;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package org.wcs.smart.query;
+
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.internal.datamodel.CaDataModelManagerImpl;
+import org.wcs.smart.query.internal.datamodel.IDataModelManager;
+import org.wcs.smart.query.internal.datamodel.MultiCaDataModelManagerImpl;
+
+
 /**
  * Class responsible for loading the SMART data model
  * to support querying.
@@ -38,6 +38,10 @@ public class QueryDataModelManager {
 
 	private static IDataModelManager instance = null;
 	
+	/**
+	 * 
+	 * @return the active data model manager
+	 */
 	public static IDataModelManager getInstance(){
 		if (instance == null){
 			if (SmartDB.isMultipleAnalysis()){

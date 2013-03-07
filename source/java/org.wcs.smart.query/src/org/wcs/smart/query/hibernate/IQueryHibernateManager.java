@@ -184,4 +184,10 @@ public interface IQueryHibernateManager {
 	 */
 	public List<org.wcs.smart.query.model.Query> findQuery(Session session, 
 			String queryName, QueryType queryType);
+	
+	/**
+	 * 
+	 * @return a list of supported query types 
+	 */
+	public QueryType[] getSupportedQueryTypes();
 }

@@ -132,9 +132,11 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 	
 	@Override
 	public void refreshPanel(){
-		filterTreeViewer.setInput(LOADING_TEXT);
-		filterTreeViewer.refresh();
-		refreshJob.schedule();
+		if (filterTreeViewer != null){
+			filterTreeViewer.setInput(LOADING_TEXT);
+			filterTreeViewer.refresh();
+			refreshJob.schedule();
+		}
 	}
 	
 	private Job refreshJob = new Job(Messages.SummaryFilterPanel_RefreshTreeJobName){

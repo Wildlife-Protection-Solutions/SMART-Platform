@@ -66,7 +66,7 @@ public interface IValueItem {
 	 * @param session
 	 * @return
 	 */
-	public DropItem asDropItem(Session session);
+	public DropItem asDropItem(Session session) throws Exception;
 	
 	/**
 	 * @return <code>true</code> if value item includes category

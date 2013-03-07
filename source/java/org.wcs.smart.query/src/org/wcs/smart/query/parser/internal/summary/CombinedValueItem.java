@@ -113,7 +113,7 @@ public class CombinedValueItem implements IValueItem {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem asDropItem(Session session) {
+	public DropItem asDropItem(Session session) throws Exception {
 		DropItem di = part1.asDropItem(session);
 		di.initializeData(getDropItemInitializeData());
 		return di;

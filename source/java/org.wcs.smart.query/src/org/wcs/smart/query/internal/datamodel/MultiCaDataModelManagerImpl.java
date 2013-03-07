@@ -123,6 +123,18 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		return items;
 	}
 	
+	/**
+	 * Determines all list items for the given
+	 * attribute. 
+	 * 
+	 * @param attribute
+	 * @param session
+	 * @return
+	 */
+	@Override
+	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session){
+		return getActiveAttributeListItems(attribute, session);	
+	}
 	
 	/**
 	 * Returns only items shared across all conservation areas.

@@ -172,9 +172,11 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 	
 	@Override
 	public void refreshPanel(){
-		filterTreeViewer.setInput(LOADING_TEXT);
-		filterTreeViewer.refresh();
-		refreshJob.schedule();
+		if (filterTreeViewer != null){
+			filterTreeViewer.setInput(LOADING_TEXT);
+			filterTreeViewer.refresh();
+			refreshJob.schedule();
+		}
 	}
 
 	private List<IPatrolQueryOption> findContributedPatrolQueryOptions() {

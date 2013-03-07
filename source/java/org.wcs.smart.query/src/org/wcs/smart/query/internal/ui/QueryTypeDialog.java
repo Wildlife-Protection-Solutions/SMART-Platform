@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 
@@ -43,14 +44,8 @@ import org.wcs.smart.query.model.Query.QueryType;
  */
 public class QueryTypeDialog extends TitleAreaDialog {
 
-	private QueryType selectedQueryType = QueryType.OBSERVATION;
-	
-	private QueryType[] queryTypes = new QueryType[]{
-			QueryType.OBSERVATION,
-			QueryType.PATROL,
-			QueryType.SUMMARY,
-			QueryType.GRIDDED
-	};
+	private QueryType selectedQueryType = null;
+
 	private Button[] btns;
 	
 	/**
@@ -86,12 +81,15 @@ public class QueryTypeDialog extends TitleAreaDialog {
 		gl.marginLeft = 15;
 		option.setLayout(gl);
 		
+		QueryType[] queryTypes = QueryHibernateManager.getInstance().getSupportedQueryTypes();
 		btns = new Button[queryTypes.length];
 		for (int i = 0; i < queryTypes.length; i ++){
 			btns[i] = new Button(option, SWT.RADIO);
+			btns[i].setData(queryTypes[i]);
 			btns[i].setText(queryTypes[i].getUiName());
 			if (i == 0){
 				btns[i].setSelection(true);
+				selectedQueryType = queryTypes[i];
 			}
 		}
 		
@@ -122,7 +120,7 @@ public class QueryTypeDialog extends TitleAreaDialog {
 		if (IDialogConstants.OK_ID == buttonId) {
 			for (int i = 0; i < btns.length; i ++){
 				if (btns[i].getSelection()){
-					selectedQueryType = queryTypes[i];
+					selectedQueryType = (QueryType) btns[i].getData();
 					break;
 				}
 			}

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.parser.internal.summary;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
@@ -149,12 +151,15 @@ public class CategoryGroupBy implements IGroupBy {
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#asDropItem(org.hibernate.Session)
 	 */
 	@Override
-	public DropItem asDropItem(Session session) {
+	public DropItem asDropItem(Session session) throws Exception {
 		DropItem it = DropItemFactory.INSTANCE.createCategoryGroupByDropItem(treeLevel);
 		if (filterHkeys != null){
 			ArrayList<ListItem> inits = new ArrayList<ListItem>();
 			for (int i = 0; i < filterHkeys.length; i ++){
 				Category child = QueryDataModelManager.getInstance().getCategory(session, filterHkeys[i]);
+				if (child == null){
+					throw new Exception(MessageFormat.format(Messages.CategoryGroupBy_CategoryNotFoundError, new Object[]{filterHkeys[i]}));
+				}
 				inits.add(new ListItem(null, child.getName(), filterHkeys[i]));
 			}
 			it.initializeData(inits);
