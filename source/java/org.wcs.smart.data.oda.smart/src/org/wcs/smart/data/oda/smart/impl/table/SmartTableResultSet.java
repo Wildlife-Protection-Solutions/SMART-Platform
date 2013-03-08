@@ -62,7 +62,7 @@ public class SmartTableResultSet  implements IResultSet {
 
 		this.metadata = metadata;
 		table.openQuery();
-		this.data = table.getValues(SmartDB.getCurrentConservationArea());
+		this.data = table.getValues(SmartDB.getConservationAreaConfiguration().getConservationAreas());
 		this.table = table;
 		m_maxRows = data.size();
 		

@@ -272,6 +272,7 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_Username_Label;
 	public static String ConservationAreaListView_CaInfo;
 	public static String ConservationAreaListView_CaLabel;
+	public static String ConservationAreaListView_ModifyLink;
 	public static String ConservationAreaManager_Error_DeletingFilestore;
 	public static String ConservationAreaManager_Progress_DeleteCa;
 	public static String ConservationAreaManager_Progress_RemoveFileStore;
@@ -707,6 +708,12 @@ public class Messages extends NLS {
 	public static String SaveBasemapDialog_SaveButton;
 	public static String SaveBasemapDialog_Title;
 	public static String SaveMapHandler_JobName;
+	public static String SelectCaDialog_CaError;
+	public static String SelectCaDialog_CaLabel;
+	public static String SelectCaDialog_DialogTitle;
+	public static String SelectCaDialog_ErrorDialogtitle;
+	public static String SelectCaDialog_SelectLabel;
+	public static String SelectCaDialog_ShellTitle;
 	public static String SetBasemapTool_RestoreBasemap_JobName;
 	public static String ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel;
 	public static String ShowDataModelPropertyPageHandler_Progress_LoadingDataModel;

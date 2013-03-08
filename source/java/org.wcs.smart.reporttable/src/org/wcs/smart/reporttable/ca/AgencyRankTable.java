@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.reporttable.ca;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -29,6 +30,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.reporttable.internal.Messages;
 
 /**
@@ -41,6 +43,7 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class AgencyRankTable  extends SmartBirtTable {
 
 	private enum Column{
+		CA(Messages.AgencyRankTable_Ca_FieldName, java.sql.Types.VARCHAR),
 		AGENCY(Messages.AgencyRankTable_AgencyName_FieldName, java.sql.Types.VARCHAR),
 		RANK(Messages.AgencyRankTable_RankName_FieldName, java.sql.Types.VARCHAR);
 		
@@ -64,18 +67,26 @@ public class AgencyRankTable  extends SmartBirtTable {
 				return rank.getAgency().getName();
 			case RANK:
 				return rank.getName();
+			case CA:
+				return rank.getAgency().getConservationArea().getNameLabel();
 			}
 			return null;
 		}
 	}
 	
 	private Session session = null;
+	private Column[] activeColumns;
 	
 	/**
 	 * Creates a new agency/rank birt table source
 	 */
 	public AgencyRankTable() {
 		super(Messages.AgencyRankTable_TableName);
+		if (SmartDB.isMultipleAnalysis()){
+			this.activeColumns = Column.values();
+		}else{
+			this.activeColumns = new Column[]{Column.AGENCY, Column.RANK};
+		}
 	}
 
 	/**
@@ -83,9 +94,9 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] name = new String[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getName();
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getName();
 		}
 		return name;
 	}
@@ -95,9 +106,9 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@Override
 	public int[] getColumnTypes() {
-		int[] name = new int[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getType();
+		int[] name = new int[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getType();
 		}
 		return name;
 	}
@@ -107,10 +118,10 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues(ConservationArea ca) {
-		String sql = "FROM Rank r WHERE r.agency.conservationArea = :ca"; //$NON-NLS-1$
+	public List<Object> getValues (Collection<ConservationArea> cas) {
+		String sql = "FROM Rank r WHERE r.agency.conservationArea in (:ca)"; //$NON-NLS-1$
 		Query q  = session.createQuery(sql);
-		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.setParameterList("ca", cas); //$NON-NLS-1$
 		
 		return q.list();
 	}
@@ -120,7 +131,7 @@ public class AgencyRankTable  extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((Rank)object);
+		return activeColumns[index].getValue((Rank)object);
 	}
 
 	/**

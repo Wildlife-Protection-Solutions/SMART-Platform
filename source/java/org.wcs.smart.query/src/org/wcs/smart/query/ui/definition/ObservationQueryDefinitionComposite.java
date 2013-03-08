@@ -177,9 +177,8 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 					view.getQuery().setConservationAreaFilter(newFilter);
 				}
 				
-				if (caFilter.hasMissingFilter()){
+				if (newFilter == null || (newFilter.getMissingCas() != null && newFilter.getMissingCas().size() > 0)){
 					caTabItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
-//					caTabItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
 					caTabItem.setToolTipText(Messages.ObservationQueryDefinitionComposite_FilterWarningTooltip);
 				}else{
 					caTabItem.setImage(null);

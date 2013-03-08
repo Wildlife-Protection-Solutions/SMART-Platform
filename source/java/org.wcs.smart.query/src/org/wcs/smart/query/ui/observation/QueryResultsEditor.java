@@ -44,6 +44,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.IConservationAreaConfigurationListener;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -140,11 +142,31 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			
 			return Status.OK_STATUS;
 		}};
+		
+		private IConservationAreaConfigurationListener configListener = new IConservationAreaConfigurationListener() {
+			@Override
+			public void configurationChanged() {
+				Session session = HibernateManager.openSession();
+				session.beginTransaction();
+				try{
+					query.generateDropItems(session);
+				}catch (Exception ex){
+					QueryPlugIn.displayLog(MessageFormat.format(
+							Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ query.getName()})+ ex.getLocalizedMessage(), ex);
+				}finally{
+					session.getTransaction().rollback();
+					session.close();
+				}
+				QueryEventManager.getInstance().fireQueryChangedListeners(query);
+			}
+		};
 	/**
+	 * 
 	 * Creates a new editor
 	 */
 	public QueryResultsEditor() {
 		super();		
+		SmartDB.addConfigurationChangeListener(configListener);
 	}
 
 	
@@ -155,6 +177,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	public void dispose() {
 		super.dispose();
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
+		SmartDB.removeConfigurationChangeListener(configListener);
 	}
 	
 	/**

@@ -233,6 +233,8 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	public boolean saveQuery(org.wcs.smart.query.model.Query query,  boolean generateDropItems){
 
 		boolean newQuery = query.getId() == null;
+		
+		//fire before save listeners in a separate transaction
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
@@ -240,6 +242,17 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 			if (!QueryEventManager.getInstance().fireBeforeSaveListeners(query, s)){
 				return false;
 			}
+		}catch (Exception ex){
+			QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getLocalizedMessage(), ex);
+			return false;
+		}finally{
+			s.getTransaction().rollback();
+		}
+		s.close();
+		
+		s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
 			if (newQuery){
 				query.setId(generateQueryId(s));
 				//page1.setQuery();
@@ -247,12 +260,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 			if (generateDropItems){
 				query.generateDropItems(s);
 			}
-			//ensure query is NOT in current session
-			if (!newQuery){
-				s.evict(query);
-			}
 			s.saveOrUpdate(query);
-			
 			query.updateName(SmartDB.getCurrentLanguage(), query.getName());
 			s.getTransaction().commit();
 

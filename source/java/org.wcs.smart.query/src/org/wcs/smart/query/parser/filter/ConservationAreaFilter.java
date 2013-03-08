@@ -22,8 +22,10 @@
 package org.wcs.smart.query.parser.filter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -59,7 +61,11 @@ public class ConservationAreaFilter implements IFilter {
 			try {
 				String[] bits = caFilterAsString.split(","); //$NON-NLS-1$
 				for (int i = 0; i < bits.length; i++) {
-					filter.addConservationArea(SmartUtils.decodeHex(bits[i].trim()));
+					try{
+						filter.addConservationArea(SmartUtils.decodeHex(bits[i].trim()));
+					}catch (Exception ex){
+						//eatme
+					}
 
 				}
 			
@@ -68,11 +74,35 @@ public class ConservationAreaFilter implements IFilter {
 					Messages.ConservationAreaFilter_InvalidCaFilter, ex);
 			}
 		}
+		ArrayList<byte[]> missing = new ArrayList<byte[]>();
+		for (Iterator<byte[]> iterator = filter.caFilters.iterator(); iterator.hasNext();) {
+			byte[] type = (byte[]) iterator.next();
+			boolean found = false;
+			for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+				if (Arrays.equals(type, ca.getUuid())){
+					found = true;
+					break;
+				}
+			}
+			if (!found){
+				missing.add(type);
+				iterator.remove();
+			}
+			
+		}
+		if (missing.size() > 0){
+			filter.setMissingConservationAreas(missing);
+		}else{
+			filter.setMissingConservationAreas(null);
+		}
 		return filter;
 	}
 	
-	private ArrayList<byte[]> filters = new ArrayList<byte[]>();
+	private ArrayList<byte[]> caFilters = new ArrayList<byte[]>();
+	private List<byte[]> missingCas = null;
+	
 	private boolean includeAll = false;
+	
 	/**
 	 * Creates a new empty conservation area filter
 	 */
@@ -80,13 +110,38 @@ public class ConservationAreaFilter implements IFilter {
 		
 	}
 	
-	
+	public void refreshMissingList(){
+		if (missingCas != null){
+			caFilters.addAll(missingCas);
+		}
+		ArrayList<byte[]> missing = new ArrayList<byte[]>();
+		for (Iterator<byte[]> iterator = caFilters.iterator(); iterator.hasNext();) {
+			byte[] type = (byte[]) iterator.next();
+			boolean found = false;
+			for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+				if (Arrays.equals(type, ca.getUuid())){
+					found = true;
+					break;
+				}
+			}
+			if (!found){
+				missing.add(type);
+				iterator.remove();
+			}
+			
+		}
+		if (missing.size() > 0){
+			setMissingConservationAreas(missing);
+		}else{
+			setMissingConservationAreas(null);
+		}
+	}
 	/**
 	 * 
 	 * @return the ids of the conservation areas in the filter
 	 */
 	public ArrayList<byte[]> getConservationAreaFilterIds(){
-		return filters;
+		return caFilters;
 	}
 	
 	/**
@@ -114,7 +169,7 @@ public class ConservationAreaFilter implements IFilter {
 	 */
 	public void addConservationArea(ConservationArea newCa){
 		this.includeAll = false;
-		filters.add(newCa.getUuid());
+		caFilters.add(newCa.getUuid());
 	}
 	
 	/**
@@ -123,15 +178,42 @@ public class ConservationAreaFilter implements IFilter {
 	 */
 	public void addConservationArea(byte[] uuid){
 		this.includeAll = false;
-		filters.add(uuid);
+		caFilters.add(uuid);
 	}
 	
+	/**
+	 * 
+	 * @return true if all current conservation areas should be included
+	 */
 	public boolean includeAll(){
 		return this.includeAll;
 	}
 	
+	/**
+	 * Sets if all current conservation areas should be included
+	 * @param includeAll
+	 */
 	public void setIncludeAll(boolean includeAll){
 		this.includeAll = includeAll;
+	}
+	
+	/**
+	 * 
+	 * @return CA uuids that are in the current filter but 
+	 * not the current list of CA's being analysed.  May return null
+	 * if not Cas missing
+	 */
+	public List<byte[]> getMissingCas(){
+		return missingCas;
+	}
+	
+	/**
+	 * Sets the CAs that are in the current filter but no in the 
+	 * list of CA's being analysed.
+	 * @param missing
+	 */
+	public void setMissingConservationAreas(List<byte[]> missing){
+		this.missingCas = missing;
 	}
 	
 	/**
@@ -144,12 +226,13 @@ public class ConservationAreaFilter implements IFilter {
 			//filter is null
 			return null;
 		}
+
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < filters.size(); i ++){
+		for (int i = 0; i < caFilters.size(); i ++){
 			if (i != 0){
 				sb.append(","); //$NON-NLS-1$
 			}
-			sb.append( SmartUtils.encodeHex( filters.get(i) ) );
+			sb.append( SmartUtils.encodeHex( caFilters.get(i) ) );
 		}
 		return sb.toString();
 	}
@@ -184,11 +267,11 @@ public class ConservationAreaFilter implements IFilter {
 			}
 		}else{
 			//include only selected conservation areas
-			localFilters.addAll(filters);
+			localFilters.addAll(caFilters);
 		}
 		
 		if (localFilters.size() == 0){
-			return ""; //$NON-NLS-1$
+			return "false"; //$NON-NLS-1$
 		}
 		
 		StringBuilder sb = new StringBuilder();

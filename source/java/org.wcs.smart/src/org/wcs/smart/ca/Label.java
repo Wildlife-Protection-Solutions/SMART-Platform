@@ -23,6 +23,7 @@ package org.wcs.smart.ca;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -35,6 +36,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -78,6 +80,7 @@ public class Label  {
 	 * @param elementuuid
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	@Transient
 	public static synchronized String getDescription(byte[] elementuuid) {
 		if (elementuuid == null){
@@ -98,12 +101,41 @@ public class Label  {
 			id.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			lbl = (Label) s.get(Label.class, id);
 			
-			//if still null search each language
+			//search for any label in one of the current ca languages
 			for(Language l : SmartDB.getCurrentConservationArea().getLanguages()){
 				id.setLanguage(l);
 				lbl = (Label)s.get(Label.class, id);
 				if (lbl != null){
 					break;
+				}
+			}
+			
+			if(SmartDB.isMultipleAnalysis()){
+				//if still null search some something with the same code
+				//this will happen for things such as station name when
+				//the current ca is the "cross conservation area ca"
+				Query q = s.createQuery("SELECT l.value from Label l where l.id.element.uuid = :uuid and l.id.language.code = :code"); //$NON-NLS-1$
+				q.setCacheable(true);
+				q.setParameter("uuid", elementuuid); //$NON-NLS-1$
+				q.setParameter("code", SmartDB.getCurrentLanguage().getCode()); //$NON-NLS-1$
+				List<String> x = q.list();
+				if (x.size() > 0){
+					description = x.get(0);
+				}else{
+					//same language code
+					q.setParameter("code", SmartDB.getCurrentLanguage().getCode().split("_")[0]); //$NON-NLS-1$ //$NON-NLS-2$
+					x = q.list();
+					if (x.size() > 0){
+						description = x.get(0);
+					}else{
+						q = s.createQuery("SELECT l.value FROM Label l where l.id.element.uuid = :uuid"); //$NON-NLS-1$
+						q.setCacheable(true);
+						q.setParameter("uuid", elementuuid); //$NON-NLS-1$
+						x = q.list();
+						if (x.size() > 0){
+							description = x.get(0);
+						}
+					}
 				}
 			}
 		}

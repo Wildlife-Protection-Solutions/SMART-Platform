@@ -18,6 +18,10 @@ public class Messages extends NLS {
 	public static String SmartTableDataSetWizardPage_Error_MustSelectTable;
 	public static String SmartTableDataSetWizardPage_PickSmartTable_Message;
 	public static String SmartTableDataSetWizardPage_SelectTableName_Label;
+	public static String SmartDataSourcePropertyPage_Label;
+	public static String SmartDataSourcePropertyPage_Title;
+	public static String SmartDataSourceWizardPage_Label;
+	public static String SmartDataSourceWizardPage_Title;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

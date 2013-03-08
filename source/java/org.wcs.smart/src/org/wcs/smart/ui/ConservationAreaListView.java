@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -93,17 +94,23 @@ public class ConservationAreaListView extends ViewPart {
 		
 		initCas();
 		
-		Hyperlink link = toolkit.createHyperlink(main, "Modify...", SWT.NONE);
+		Hyperlink link = toolkit.createHyperlink(main, Messages.ConservationAreaListView_ModifyLink, SWT.NONE);
 		link.addHyperlinkListener(new HyperlinkAdapter() {
 			
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
+				
 				SelectCaDialog dialog = new SelectCaDialog(getSite().getShell());
 				if (dialog.open() == SelectCaDialog.OK){
-					ConservationAreaConfiguration newConfig = dialog.getNewConfiguration();
-//					SmartDB.setCurrentUser(newConfig.getEmployees()., SmartDB.getCurrentConservationArea());
-					SmartDB.setConservationAreaConfiguration(newConfig);
 					
+					//close all active editors 
+					if (!PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeAllEditors(true)){
+						return;
+					}
+					
+					ConservationAreaConfiguration newConfig = dialog.getNewConfiguration();
+
+					SmartDB.setConservationAreaConfiguration(newConfig);
 					//the data model has changed
 					DataModelManager.getInstance().fireChangeListeners();
 					initCas();

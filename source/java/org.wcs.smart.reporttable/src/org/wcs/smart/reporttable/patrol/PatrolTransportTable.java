@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.reporttable.patrol;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -28,6 +29,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.reporttable.internal.Messages;
 
@@ -41,7 +43,7 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class PatrolTransportTable extends SmartBirtTable {
 
 	private enum Column{
-		
+		CA(Messages.PatrolTransportTable_Ca_FieldName,java.sql.Types.VARCHAR),
 		NAME(Messages.PatrolTransportTable_TransportType_FieldName,java.sql.Types.VARCHAR),
 		ACTIVE(Messages.PatrolTransportTable_IsActive_FieldName, java.sql.Types.BOOLEAN),
 		PATROL_TYPE(Messages.PatrolTransportTable_PatrolType_FieldName, java.sql.Types.VARCHAR);
@@ -67,18 +69,26 @@ public class PatrolTransportTable extends SmartBirtTable {
 				return e.getIsActive();
 			case PATROL_TYPE:
 				return e.getPatrolType().getGuiName();
+			case CA:
+				return e.getConservationArea().getNameLabel();
 			}
 			return null;
 		}
 	}
 	
 	private Session session = null;
+	private Column[] activeColumns;
 	
 	/**
 	 * Creates a nw patrol transport type table
 	 */
 	public PatrolTransportTable() {
 		super(Messages.PatrolTransportTable_TableName);
+		if (SmartDB.isMultipleAnalysis()){
+			this.activeColumns = Column.values();
+		}else{
+			this.activeColumns = new Column[]{Column.NAME, Column.PATROL_TYPE, Column.ACTIVE};
+		}
 	}
 
 	/**
@@ -86,9 +96,9 @@ public class PatrolTransportTable extends SmartBirtTable {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] name = new String[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getName();
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getName();
 		}
 		return name;
 	}
@@ -98,9 +108,9 @@ public class PatrolTransportTable extends SmartBirtTable {
 	 */
 	@Override
 	public int[] getColumnTypes() {
-		int[] name = new int[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getType();
+		int[] name = new int[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getType();
 		}
 		return name;
 	}
@@ -110,8 +120,8 @@ public class PatrolTransportTable extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+	public List<Object> getValues (Collection<ConservationArea> cas) {
+		return session.createCriteria(PatrolTransportType.class).add(Restrictions.in("conservationArea", cas)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -119,7 +129,7 @@ public class PatrolTransportTable extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((PatrolTransportType)object);
+		return activeColumns[index].getValue((PatrolTransportType)object);
 	}
 
 	/**

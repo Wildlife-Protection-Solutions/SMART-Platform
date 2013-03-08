@@ -121,6 +121,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				
 				query.getDropItems();
 				query.generateDropItems(session);
+				
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(
 						MessageFormat.format(Messages.PatrolQueryResultsEditor_CouldNotParseQueryError, new Object[]{ input.getName() }) + ex.getLocalizedMessage(), ex);
@@ -143,11 +144,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			
 			return Status.OK_STATUS;
 		}};
+		
+		
 	/**
 	 * Creates a new editor
 	 */
 	public PatrolQueryResultsEditor() {
-		super();		
+		super();
 	}
 
 	

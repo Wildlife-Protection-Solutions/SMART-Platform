@@ -40,6 +40,9 @@ import org.wcs.smart.patrol.model.PatrolType;
  */
 public class QueryResultItem implements IResultItem{
 
+	private String caId;
+	private String caName;
+	
 	private String patrolId;
 	private Date patrolStartDate;
 	private Date patrolEndDate;
@@ -449,5 +452,35 @@ public class QueryResultItem implements IResultItem{
 		this.tracks.add(track);
 	}
 	
+	/**
+	 * Sets the ca id
+	 * @param caId
+	 */
+	public void setConservationAreaId(String caId){
+		this.caId = caId;
+	}
+	
+	/**
+	 * Sets the ca name
+	 * @param caName
+	 */
+	public void setConservationAreaName(String caName){
+		this.caName = caName;
+	}
+	
+	/**
+	 * 
+	 * @return this conservation area id
+	 */
+	public String getConservationAreaId(){
+		return this.caId;
+	}
+	/**
+	 * the conservation area name
+	 * @return
+	 */
+	public String getConservationAreaName(){
+		return this.caName;
+	}
 	
 }

@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 
 /**
  * A property page for the SMART Datasource.
@@ -42,14 +43,14 @@ public class SmartDataSourcePropertyPage extends DataSourceEditorPage implements
 	Properties p = new Properties();
 	
 	public SmartDataSourcePropertyPage() {
-		setTitle("SMART Data Source");
+		setTitle(Messages.SmartDataSourcePropertyPage_Title);
 	}
 
 	@Override
 	protected Control createContents(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("SMART Data Source is not configurable");
-		setTitle("SMART Data Source");
+		lbl.setText(Messages.SmartDataSourcePropertyPage_Label);
+		setTitle(Messages.SmartDataSourcePropertyPage_Title);
 		return null;
 	}
 

@@ -21,13 +21,9 @@
  */
 package org.wcs.smart.plan.ui.tree;
 
-import java.text.Collator;
-
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.SmartPlanPlugIn;

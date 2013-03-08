@@ -24,11 +24,10 @@ package org.wcs.smart.data.oda.smart.ui.impl;
 import java.util.Properties;
 
 import org.eclipse.datatools.connectivity.oda.design.ui.pages.impl.DefaultDataSourceWizardPage;
-import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSourceWizardPage;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 
 /**
  * A new wizard page for the smart data source.
@@ -50,8 +49,8 @@ public class SmartDataSourceWizardPage extends DefaultDataSourceWizardPage {
 	@Override
 	public void createPageCustomControl(Composite arg0) {
 		Label lbl = new Label(arg0, SWT.NONE);
-		lbl.setText("The SMART datasource is not configurable.");
-		setTitle("SMART Data Source");
+		lbl.setText(Messages.SmartDataSourceWizardPage_Label);
+		setTitle(Messages.SmartDataSourceWizardPage_Title);
 	}
 
 	@Override
