@@ -23,7 +23,6 @@ package org.wcs.smart.intelligence.model;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -33,16 +32,14 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
 
@@ -52,32 +49,18 @@ import org.wcs.smart.util.SmartUtils;
  */
 @Entity
 @Table(name = "smart.intelligence")
-public class Intelligence {
+public class Intelligence extends SimpleListItem {
 
-	private byte[] uuid;
     private ConservationArea conservationArea;
     private Date receivedDate;
     private IntelligenceSourceType source;
     private Patrol patrol;
     private Date fromDate;
     private Date toDate;
-    private String shortName;
     private String description;
 	private List<IntelligencePoint> points;
 	private List<IntelligenceAttachment> attachments;
    
- 
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-    public byte[] getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -135,13 +118,13 @@ public class Intelligence {
 		this.toDate = toDate;
 	}
 
-	@Column(name="short_name")
+	@Transient
 	public String getShortName() {
-		return shortName;
+		return super.getName();
 	}
 
 	public void setShortName(String shortName) {
-		this.shortName = shortName;
+		setName(shortName);
 	}
 
 	@Column(name="description")
@@ -178,27 +161,6 @@ public class Intelligence {
 		this.attachments = attachments;
 	}
 
-	@Override
-	public int hashCode() {
-		if (uuid != null) {
-			return Arrays.hashCode(uuid);
-		}
-		return super.hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Intelligence) {
-			Intelligence i = (Intelligence)other;
-			if (i.getUuid() == null && this.getUuid() == null) {
-				return super.equals(i);
-			}else if (i.getUuid() != null && this.getUuid() != null) {
-				return Arrays.equals(i.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
-	
 	/**
 	 * 
 	 * <p>
@@ -211,7 +173,7 @@ public class Intelligence {
 	 */
 	@Transient
 	public String getIntelligenceDatastorePath(){
-		return "intelligence" + File.separator + SmartUtils.getDirectoryPath(uuid); //$NON-NLS-1$
+		return "intelligence" + File.separator + SmartUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
 	}
 	
 
