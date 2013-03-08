@@ -118,15 +118,6 @@ public class Intelligence extends SimpleListItem {
 		this.toDate = toDate;
 	}
 
-	@Transient
-	public String getShortName() {
-		return super.getName();
-	}
-
-	public void setShortName(String shortName) {
-		setName(shortName);
-	}
-
 	@Column(name="description")
 	public String getDescription() {
 		return description;

@@ -38,7 +38,7 @@ public class IntelligenceLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof Intelligence) {
 			Intelligence i = (Intelligence)element;
-			return i.getShortName() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( i.getReceivedDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			return i.getName() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( i.getReceivedDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.getText(element);
 	}
