@@ -22,5 +22,7 @@ create function smart.patrolInPlan(patrol_uuid CHAR(16) FOR BIT DATA, uuidStr lo
     reads sql data
     external name 'org.wcs.smart.plan.SmartPlanDbStored.patrolInPlan';
   
-
-
+-- Translation options support for intelligence (copy current names as default language values, remove names column) -- 
+INSERT INTO smart.I18N_LABEL(LANGUAGE_UUID, ELEMENT_UUID, VALUE) SELECT lang.UUID as LANG_UUID, i.UUID as ELEM_UUID, 
+i.SHORT_NAME as VALUE FROM smart.LANGUAGE lang INNER JOIN smart.INTELLIGENCE i ON lang.CA_UUID = i.CA_UUID WHERE lang.isdefault;
+ALTER TABLE smart.INTELLIGENCE DROP COLUMN SHORT_NAME;
