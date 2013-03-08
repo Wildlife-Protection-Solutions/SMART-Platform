@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.reporttable.patrol;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -28,6 +29,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.reporttable.internal.Messages;
 
@@ -41,7 +43,7 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class PatrolMandateTable extends SmartBirtTable {
 
 	private enum Column{
-		
+		CA(Messages.PatrolMandateTable_Ca_FieldName,java.sql.Types.VARCHAR),
 		NAME(Messages.PatrolMandateTable_MandateName_FieldName,java.sql.Types.VARCHAR),
 		ACTIVE(Messages.PatrolMandateTable_IsActive_FieldName, java.sql.Types.BOOLEAN);
 		
@@ -61,6 +63,8 @@ public class PatrolMandateTable extends SmartBirtTable {
 		
 		public Object getValue(PatrolMandate e){
 			switch(this){
+			case CA:
+				return e.getConservationArea().getNameLabel();
 			case NAME:
 				return e.getName();
 			case ACTIVE:
@@ -71,12 +75,19 @@ public class PatrolMandateTable extends SmartBirtTable {
 	}
 	
 	private Session session = null;
+	private Column[] activeColumns;
 	
+
 	/**
 	 * Creates a new patrol mandate table.
 	 */
 	public PatrolMandateTable() {
 		super(Messages.PatrolMandateTable_TableName);
+		if (SmartDB.isMultipleAnalysis()){
+			this.activeColumns = Column.values();
+		}else{
+			this.activeColumns = new Column[]{Column.NAME, Column.ACTIVE};
+		}
 	}
 
 	/**
@@ -84,9 +95,9 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] name = new String[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getName();
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getName();
 		}
 		return name;
 	}
@@ -96,9 +107,9 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 */
 	@Override
 	public int[] getColumnTypes() {
-		int[] name = new int[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getType();
+		int[] name = new int[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getType();
 		}
 		return name;
 	}
@@ -108,8 +119,8 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+	public List<Object> getValues (Collection<ConservationArea> cas) {
+		return session.createCriteria(PatrolMandate.class).add(Restrictions.in("conservationArea", cas)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -117,7 +128,7 @@ public class PatrolMandateTable extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((PatrolMandate)object);
+		return activeColumns[index].getValue((PatrolMandate)object);
 	}
 
 	/**

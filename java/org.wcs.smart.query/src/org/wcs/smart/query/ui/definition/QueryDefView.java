@@ -145,7 +145,6 @@ public class QueryDefView extends ViewPart {
 		}
 	};
 
-	
 	/**
 	 * Creates new query definition view.
 	 */

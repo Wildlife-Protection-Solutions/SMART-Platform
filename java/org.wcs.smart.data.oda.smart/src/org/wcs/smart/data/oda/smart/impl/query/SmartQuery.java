@@ -92,7 +92,6 @@ public class SmartQuery implements IQuery {
 			try {
 				session.beginTransaction();
 				smartQuery = QueryHibernateManager.getInstance().findQuery(session,  uuid, queryType);
-				session.getTransaction().commit();
 			} finally {
 				if (session.getTransaction().isActive()){
 					session.getTransaction().rollback();

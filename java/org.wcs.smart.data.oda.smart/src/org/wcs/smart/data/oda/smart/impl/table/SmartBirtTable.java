@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.data.oda.smart.impl.table;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.wcs.smart.ca.ConservationArea;
@@ -69,7 +70,7 @@ public abstract class SmartBirtTable {
 	 * @param ca the conservation area filter
 	 * @return the values for the given conservation area
 	 */
-	public abstract List<Object> getValues(ConservationArea ca);
+	public abstract List<Object> getValues(Collection<ConservationArea> cas);
 
 	/**
 	 * Given an object returns the value for the given column

@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.IConservationAreaConfigurationListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
@@ -74,20 +73,10 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 	
 	private List<byte[]> missingFilterUuids = new ArrayList<byte[]>();
 	
-	private IConservationAreaConfigurationListener configListener = new IConservationAreaConfigurationListener() {
-		@Override
-		public void configurationChanged() {
-			if (currentQuery != null){
-				initQuery(currentQuery);
-			}
-		}
-	};
-	
-	
+
 	@Override
 	public void dispose(){
 		super.dispose();
-		SmartDB.removeConfigurationChangeListener(configListener);
 	}
 	
 	public ConservationAreaFilterPanel(Composite parent){
@@ -147,8 +136,6 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 		content.pack();
 		scroll.setContent(content);
 		scroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		SmartDB.addConfigurationChangeListener(configListener);
 	}
 	
 	
@@ -180,29 +167,18 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 		this.selectionListener = selectionListener;
 	}
 	
-	/**
-	 * If there are missing conservation areas from the filter
-	 * @return
-	 */
-	public boolean hasMissingFilter(){
-		return this.missingFilterUuids.size() != 0;
-	}
+
 	/**
 	 * Initializes the panel with the information from the query.
 	 * 
 	 * @param query
 	 */
 	public void initQuery(Query query){
+		query.getConservationAreaFilterAsFilter().refreshMissingList();
 		missingFilterUuids.clear();
-		
 		this.currentQuery = query;
 		for (Control c : caList.getChildren()){
 			c.dispose();
-		}
-
-		boolean[] found = new boolean[query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds().size()];
-		for (int i = 0 ; i < found.length; i ++){
-			found[i] = false;
 		}
 		
 		for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
@@ -214,17 +190,15 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 			for (int i = 0; i < query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds().size(); i ++){
 				if (Arrays.equals(query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds().get(i), ca.getUuid())){
 					btnCa.setSelection(true);
-					found[i] = true;
 				}
 			}
 			btnCa.addSelectionListener(this);
 		}
 
-		for (int i = 0; i < found.length; i ++){
-			if (!found[i]){
-				missingFilterUuids.add(query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds().get(i));
-			}
+		if (query.getConservationAreaFilterAsFilter().getMissingCas() != null){
+			missingFilterUuids.addAll(query.getConservationAreaFilterAsFilter().getMissingCas());
 		}
+		
 		if (missingFilterUuids.size() > 0){
 			caWarning.setVisible(true);
 			int w = content.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
@@ -269,9 +243,7 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 				}
 			}
 			/* add back missing uuid */
-			for (byte[] uuid : missingFilterUuids){
-				filter.addConservationArea(uuid);
-			}
+			filter.setMissingConservationAreas(missingFilterUuids);
 		}
 		return filter;
 	}

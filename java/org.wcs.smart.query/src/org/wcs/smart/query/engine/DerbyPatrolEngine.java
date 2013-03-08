@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -160,29 +161,31 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 			QueryResultItem lastItem = null;
 			while (rs.next()) {
 				
-				byte[] pluuid = rs.getBytes(19);
+				byte[] pluuid = rs.getBytes(21);
 				if (Arrays.equals(pluuid, lastPlUuid)){
-					lastItem.addTrack(rs.getBytes(18));
+					lastItem.addTrack(rs.getBytes(20));
 				}else{
 					QueryResultItem it = new QueryResultItem();
-					byte[] cauuid = rs.getBytes(1);
-					it.setPatrolUuid(rs.getBytes(2));
-					it.setPatrolId(rs.getString(3));
-					it.setPatrolStartDate(rs.getDate(4));
-					it.setPatrolEndDate(rs.getDate(5));
-					it.setStation(getName(rs.getBytes(6), cauuid, session));				
-					it.setTeam(getName(rs.getBytes(7), cauuid, session));				
-					it.setObjective(rs.getString(8));
-					it.setMandate(getName(rs.getBytes(9), cauuid, session));
-					it.setPatrolType(PatrolType.Type.valueOf(rs.getString(10)));
-					it.setArmed(rs.getBoolean(11));
-					it.setTransportType(getName(rs.getBytes(12), cauuid, session));
-					it.setPatrolLegId(rs.getString(13));
-					it.setPatrolLegStartDate(rs.getDate(14));
-					it.setPatrolLegEndDate(rs.getDate(15));
-					it.setLeader(getEmployeeName(rs.getBytes(16), session));
-					it.setPilot(getEmployeeName(rs.getBytes(17), session));
-					it.addTrack(rs.getBytes(18));
+					byte[] cauuid = rs.getBytes(3);
+					it.setConservationAreaId(rs.getString(1));
+					it.setConservationAreaName(rs.getString(2));
+					it.setPatrolUuid(rs.getBytes(4));
+					it.setPatrolId(rs.getString(5));
+					it.setPatrolStartDate(rs.getDate(6));
+					it.setPatrolEndDate(rs.getDate(7));
+					it.setStation(getName(rs.getBytes(8), cauuid, session));				
+					it.setTeam(getName(rs.getBytes(9), cauuid, session));				
+					it.setObjective(rs.getString(10));
+					it.setMandate(getName(rs.getBytes(11), cauuid, session));
+					it.setPatrolType(PatrolType.Type.valueOf(rs.getString(12)));
+					it.setArmed(rs.getBoolean(13));
+					it.setTransportType(getName(rs.getBytes(14), cauuid, session));
+					it.setPatrolLegId(rs.getString(15));
+					it.setPatrolLegStartDate(rs.getDate(16));
+					it.setPatrolLegEndDate(rs.getDate(17));
+					it.setLeader(getEmployeeName(rs.getBytes(18), session));
+					it.setPilot(getEmployeeName(rs.getBytes(19), session));
+					it.addTrack(rs.getBytes(20));
 					items.add(it);
 					lastItem = it;
 				}
@@ -204,6 +207,8 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 	 * @return select clause
 	 */
 	private String buildSelectClause() {
+		String[] ca = {"id", "name"}; //$NON-NLS-1$ //$NON-NLS-2$
+		
 		String[] results = {"p_ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
 				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -215,10 +220,15 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 				"plm_pilot", "track", "pl_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < results.length; i++) {
+		for (int i = 0; i < ca.length; i++) {
 			if (i != 0) {
 				sb.append(","); //$NON-NLS-1$
 			}
+			sb.append(tablePrefix.get(ConservationArea.class) + "." + ca[i] + " as ca_" + ca[i]); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		
+		for (int i = 0; i < results.length; i++) {
+			sb.append(","); //$NON-NLS-1$
 			sb.append("r." + results[i] + " as r_" + results[i]); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return sb.toString();
@@ -232,6 +242,13 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 		StringBuilder sql = new StringBuilder();
 		sql.append(queryTempTable);
 		sql.append(" r"); //$NON-NLS-1$
+
+		sql.append(" inner join "); //$NON-NLS-1$
+		sql.append(tableNames.get(ConservationArea.class));
+		sql.append(" "); //$NON-NLS-1$
+		sql.append(tablePrefix.get(ConservationArea.class));
+		sql.append(" on " + tablePrefix.get(ConservationArea.class) //$NON-NLS-1$
+				+ ".uuid = r.p_ca_uuid "); //$NON-NLS-1$
 
 		return sql.toString();
 	}

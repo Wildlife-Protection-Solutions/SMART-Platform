@@ -32,7 +32,6 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;

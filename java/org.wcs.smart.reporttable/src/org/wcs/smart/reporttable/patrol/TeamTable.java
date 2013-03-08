@@ -21,15 +21,15 @@
  */
 package org.wcs.smart.reporttable.patrol;
 
+import java.util.Collection;
 import java.util.List;
-
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.reporttable.internal.Messages;
 
@@ -43,7 +43,7 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class TeamTable  extends SmartBirtTable {
 
 	private enum Column{
-		
+		CA(Messages.TeamTable_Ca_FieldName,java.sql.Types.VARCHAR),
 		NAME(Messages.TeamTable_TeamName_FieldName,java.sql.Types.VARCHAR),
 		DESCRIPTION(Messages.TeamTable_Description_FieldName, java.sql.Types.VARCHAR),
 		MANDATE(Messages.TeamTable_Mandate_FieldName, java.sql.Types.VARCHAR),
@@ -76,18 +76,26 @@ public class TeamTable  extends SmartBirtTable {
 					return e.getMandate().getName();
 				}
 				return null;
+			case CA:
+				return e.getConservationArea().getNameLabel();
 			}
 			return null;
 		}
 	}
 	
 	private Session session = null;
+	private Column[] activeColumns;
 	
 	/**
 	 * Creates a new patrol team table
 	 */
 	public TeamTable() {
 		super(Messages.TeamTable_TableName);
+		if (SmartDB.isMultipleAnalysis()){
+			this.activeColumns = Column.values();
+		}else{
+			this.activeColumns = new Column[]{Column.NAME, Column.DESCRIPTION, Column.MANDATE, Column.ACTIVE};
+		}
 	}
 
 	/**
@@ -95,9 +103,9 @@ public class TeamTable  extends SmartBirtTable {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] name = new String[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getName();
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getName();
 		}
 		return name;
 	}
@@ -107,9 +115,9 @@ public class TeamTable  extends SmartBirtTable {
 	 */
 	@Override
 	public int[] getColumnTypes() {
-		int[] name = new int[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getType();
+		int[] name = new int[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getType();
 		}
 		return name;
 	}
@@ -119,8 +127,8 @@ public class TeamTable  extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+	public List<Object> getValues(Collection<ConservationArea> cas) {
+		return session.createCriteria(Team.class).add(Restrictions.in("conservationArea", cas)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -128,7 +136,7 @@ public class TeamTable  extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((Team)object);
+		return activeColumns[index].getValue((Team)object);
 	}
 
 	/**

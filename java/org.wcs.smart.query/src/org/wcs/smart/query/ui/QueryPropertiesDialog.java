@@ -95,12 +95,18 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			Session s = HibernateManager.openSession();
 			try{
 				s.beginTransaction();
-				query = (Query) s.load(Query.class, this.query.getUuid());
+				s.saveOrUpdate(this.query);
+				this.query.getNames().size();
+				
+				Query tmp = (Query) s.load(Query.class, this.query.getUuid());
 				this.names = new HashMap<Language, String>();
-				for (org.wcs.smart.ca.Label l : query.getNames()){
+				for (org.wcs.smart.ca.Label l : tmp.getNames()){
 					names.put(l.getLanguage(), l.getValue());
 				}
-				this.names.put(SmartDB.getCurrentLanguage(), query.getName());
+				this.names.put(SmartDB.getCurrentLanguage(), tmp.getName());
+				
+				
+				
 				s.getTransaction().rollback();
 			}finally{
 				s.close();

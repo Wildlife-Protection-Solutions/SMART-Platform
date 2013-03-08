@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -343,7 +342,7 @@ public class AttributeTree {
 		}else{
 			itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
 			itemsToDelete.deleteCharAt(itemsToDelete.length() - 1);
-			deleteQuestion= MessageFormat.format(Messages.AttributeTree_ConfirmDelete_DialogMessage, new String[]{ itemsToDelete.toString() });
+			deleteQuestion= MessageFormat.format(Messages.AttributeTree_ConfirmDelete_DialogMessage, new Object[]{ itemsToDelete.toString() });
 		}
 				
 				
@@ -356,7 +355,6 @@ public class AttributeTree {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 				InterruptedException {
-				Attribute a = (Attribute)viewer.getInput();
 				monitor.beginTask(Messages.AttributeTree_DeleteProgress, toDelete.size());
 				final Display shell = Display.getDefault();
 				for (AttributeTreeNode node : toDelete){

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.reporttable.ca;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -29,6 +30,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.reporttable.internal.Messages;
 
 /**
@@ -41,7 +43,7 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class EmployeeTable extends SmartBirtTable {
 
 	private enum EmployeeColumn{
-		
+		CA(Messages.EmployeeTable_Ca_FieldName, java.sql.Types.VARCHAR),	
 		ID(Messages.EmployeeTable_Id_FieldName,java.sql.Types.VARCHAR),
 		GIVENNAME(Messages.EmployeeTable_GiveName_FieldName, java.sql.Types.VARCHAR),
 		FAMILYNAME(Messages.EmployeeTable_FamilyName_FieldName, java.sql.Types.VARCHAR),
@@ -70,6 +72,8 @@ public class EmployeeTable extends SmartBirtTable {
 		
 		public Object getValue(Employee e){
 			switch(this){
+			case CA:
+				return e.getConservationArea().getNameLabel();
 			case ID:
 				return e.getId();
 			case GIVENNAME:
@@ -107,12 +111,28 @@ public class EmployeeTable extends SmartBirtTable {
 	}
 	
 	private Session session = null;
+	private EmployeeColumn[] activeColumns;
 	
 	/**
 	 * Create a new employee table
 	 */
 	public EmployeeTable() {
 		super(Messages.EmployeeTable_TableName);
+		if (SmartDB.isMultipleAnalysis()){
+			this.activeColumns = EmployeeColumn.values();
+		}else{
+			this.activeColumns = new EmployeeColumn[]{EmployeeColumn.ID,
+					EmployeeColumn.GIVENNAME,
+					EmployeeColumn.FAMILYNAME,
+					EmployeeColumn.START_DATE,
+					EmployeeColumn.END_DATE,
+					EmployeeColumn.BIRTH_DATE,
+					EmployeeColumn.GENDER,
+					EmployeeColumn.SMARTUSERID,
+					EmployeeColumn.SMARTUSERLEVEL,
+					EmployeeColumn.AGENCY,
+					EmployeeColumn.RANK};
+		}
 	}
 
 	/**
@@ -120,9 +140,9 @@ public class EmployeeTable extends SmartBirtTable {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] name = new String[EmployeeColumn.values().length];
-		for (int i = 0; i < EmployeeColumn.values().length; i ++){
-			name[i] = EmployeeColumn.values()[i].getName();
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getName();
 		}
 		return name;
 	}
@@ -132,9 +152,9 @@ public class EmployeeTable extends SmartBirtTable {
 	 */
 	@Override
 	public int[] getColumnTypes() {
-		int[] name = new int[EmployeeColumn.values().length];
-		for (int i = 0; i < EmployeeColumn.values().length; i ++){
-			name[i] = EmployeeColumn.values()[i].getType();
+		int[] name = new int[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getType();
 		}
 		return name;
 	}
@@ -144,8 +164,8 @@ public class EmployeeTable extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+	public List<Object> getValues (Collection<ConservationArea> cas) {
+		return session.createCriteria(Employee.class).add(Restrictions.in("conservationArea", cas)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -153,7 +173,7 @@ public class EmployeeTable extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return EmployeeColumn.values()[index].getValue((Employee)object);
+		return activeColumns[index].getValue((Employee)object);
 	}
 
 	/**

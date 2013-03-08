@@ -41,6 +41,8 @@ public class FixedQueryColumn extends QueryColumn {
 	 * The defined fixed columns.
 	 */
 	public enum FixedColumns{
+		CA_ID("Conservation Area ID", ColumnType.STRING,"ca:id"),
+		CA_NAME("Conservation Area Name", ColumnType.STRING,"ca:name"),
 		PATROL_ID(Messages.FixedQueryColumn_PatrolIdColumnName, ColumnType.STRING, "patrol:id"), //$NON-NLS-1$
 		PATROL_TYPE(Messages.FixedQueryColumn_TypeColumnName, ColumnType.STRING, "patrol:type"), //$NON-NLS-1$
 		PATROL_START_DATE(Messages.FixedQueryColumn_PatrolStartDateColumnName, ColumnType.DATE, "patrol:startdate"), //$NON-NLS-1$
@@ -149,6 +151,10 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getWaypointX();
 			case WAYPOINT_Y:
 				return item.getWaypointY();
+			case CA_ID:
+				return item.getConservationAreaId();
+			case CA_NAME:
+				return item.getConservationAreaName();
 			}
 		}
 		return ""; //$NON-NLS-1$

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.reporttable.ca;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -29,6 +30,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.reporttable.internal.Messages;
 /**
  * Wrapper to convert station objects
@@ -40,6 +42,7 @@ import org.wcs.smart.reporttable.internal.Messages;
 public class StationTable  extends SmartBirtTable {
 
 	private enum Column{
+		CA(Messages.StationTable_Ca_FieldName, java.sql.Types.VARCHAR),
 		NAME(Messages.StationTable_Name_FieldName,java.sql.Types.VARCHAR),
 		DESCRIPTION(Messages.StationTable_Description_FieldName, java.sql.Types.VARCHAR),
 		ACTIVE(Messages.StationTable_ISActive_FieldName, java.sql.Types.BOOLEAN);
@@ -66,18 +69,27 @@ public class StationTable  extends SmartBirtTable {
 				return e.getDescription();
 			case ACTIVE:
 				return e.getIsActive();
+			case CA:
+				return e.getConservationArea().getNameLabel();
 			}
 			return null;
 		}
 	}
 	
 	private Session session = null;
+	private Column[] activeColumns;
+	
 	
 	/**
 	 * Creates a new station table
 	 */
 	public StationTable() {
 		super(Messages.StationTable_TableName);
+		if (SmartDB.isMultipleAnalysis()){
+			this.activeColumns = Column.values();
+		}else{
+			this.activeColumns = new Column[]{Column.NAME, Column.DESCRIPTION, Column.ACTIVE};
+		}
 	}
 
 	/**
@@ -85,9 +97,9 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] name = new String[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getName();
+		String[] name = new String[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getName();
 		}
 		return name;
 	}
@@ -97,9 +109,9 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@Override
 	public int[] getColumnTypes() {
-		int[] name = new int[Column.values().length];
-		for (int i = 0; i < Column.values().length; i ++){
-			name[i] = Column.values()[i].getType();
+		int[] name = new int[activeColumns.length];
+		for (int i = 0; i < activeColumns.length; i ++){
+			name[i] = activeColumns[i].getType();
 		}
 		return name;
 	}
@@ -109,8 +121,8 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues(ConservationArea ca) {
-		return session.createCriteria(Station.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+	public List<Object> getValues (Collection<ConservationArea> cas) {
+		return session.createCriteria(Station.class).add(Restrictions.in("conservationArea", cas)).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -118,7 +130,7 @@ public class StationTable  extends SmartBirtTable {
 	 */
 	@Override
 	public Object getValue(Object object, int index) {
-		return Column.values()[index].getValue((Station)object);
+		return activeColumns[index].getValue((Station)object);
 	}
 
 	/**

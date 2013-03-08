@@ -22,6 +22,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.observation.FixedQueryColumn.FixedColumns;
 
 /**
  * Query column cache.
@@ -100,16 +101,19 @@ public class QueryColumnCache {
 				
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
 						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						add = patrolOps.getTrackDistanceDirection();
 						
-						if (patrolOps.getTrackDistanceDirection()){
-							cols.add(new FixedQueryColumn(item));
-						}
 					}else if(item == FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE||
 								item == FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE){
 							//do nothing, don't want these columns in a waypoint query
-					}else{
+						add = false;
+					}else if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
+						add = SmartDB.isMultipleAnalysis();
+					}
+					if (add){
 						cols.add(new FixedQueryColumn(item));
 					}
 				}
@@ -185,6 +189,7 @@ public class QueryColumnCache {
 					
 						for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 							FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+							boolean add = true;
 							if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
 										item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
 										item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
@@ -194,9 +199,16 @@ public class QueryColumnCache {
 										item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
 										item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME){
 								// do nothing, don't want these columns for patrol queries
+								add = false;
 							}else{
+								if (item == FixedColumns.CA_ID || item == FixedColumns.CA_NAME){
+									add = SmartDB.isMultipleAnalysis();
+								}
+							}
+							if (add){
 								cols.add(new FixedQueryColumn(item));
 							}
+								
 						}
 
 						patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);

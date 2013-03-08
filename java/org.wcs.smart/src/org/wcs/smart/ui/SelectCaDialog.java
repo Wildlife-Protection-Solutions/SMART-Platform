@@ -41,9 +41,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Dialog for changing the current conservation areas used
@@ -53,9 +54,9 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class SelectCaDialog extends TitleAreaDialog {
 
-	private static final String ERROR_DIALOG_TITLE = "Error";
+	private static final String ERROR_DIALOG_TITLE = Messages.SelectCaDialog_ErrorDialogtitle;
 
-	private static final String CA_SELECT_MULTI_ERROR = "You must select at least two Conservation Areas";
+	private static final String CA_SELECT_MULTI_ERROR = Messages.SelectCaDialog_CaError;
 
 	private CheckboxTableViewer caList; 
 	
@@ -97,7 +98,7 @@ public class SelectCaDialog extends TitleAreaDialog {
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(comp, SWT.NONE);
-		l.setText("Conservation Areas:");
+		l.setText(Messages.SelectCaDialog_CaLabel);
 		
 		caList = CheckboxTableViewer.newCheckList(comp, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		caList.setLabelProvider(new LabelProvider(){
@@ -112,6 +113,7 @@ public class SelectCaDialog extends TitleAreaDialog {
 		});
 		caList.setContentProvider(ArrayContentProvider.getInstance());
 		caList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)caList.getControl().getLayoutData()).heightHint = 100;
 		caList.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -127,9 +129,9 @@ public class SelectCaDialog extends TitleAreaDialog {
 		});
 		
 		
-		setMessage("Select the Conservation Areas you wish to analyze.\nOnly Conservation Areas that you have access to appear in this list.");
-		setTitle("Conservation Areas");
-		getShell().setText("Cross Conservation Area Anlysis");
+		setMessage(Messages.SelectCaDialog_SelectLabel);
+		setTitle(Messages.SelectCaDialog_DialogTitle);
+		getShell().setText(Messages.SelectCaDialog_ShellTitle);
 		
 		
 		try {

@@ -81,7 +81,6 @@ public class ReportQueryListener implements IQueryEventListener {
 				}else if (savedQuery instanceof GriddedQuery){
 					confirmSave = false;
 				}
-				
 				if (confirmSave){
 					//	if the column definition 
 					StringBuilder sb = new StringBuilder();
@@ -101,6 +100,7 @@ public class ReportQueryListener implements IQueryEventListener {
 						return false;
 					}
 				}
+				
 				return true;
 			}
 		

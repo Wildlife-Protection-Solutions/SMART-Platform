@@ -35,7 +35,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.filter.FilterValidator;
