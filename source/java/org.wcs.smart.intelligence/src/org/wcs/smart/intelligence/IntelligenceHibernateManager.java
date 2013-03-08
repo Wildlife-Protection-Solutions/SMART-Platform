@@ -97,6 +97,8 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		try {
 			session.beginTransaction();
 			try {
+				//save a name
+				intelligence.updateName(SmartDB.getCurrentLanguage(), intelligence.getName());
 				session.saveOrUpdate(intelligence);
 				session.getTransaction().commit();
 			} catch (Exception ex) {
@@ -243,7 +245,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
 		Session session = SmartHibernateManager.openSession();
 		try {
-			Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol ORDER BY pi.id.intelligence.shortName asc"); //$NON-NLS-1$
+			Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol"); //$NON-NLS-1$
 			query.setParameter("patrol", patrol); //$NON-NLS-1$
 			@SuppressWarnings("unchecked")
 			List<Intelligence> list = query.list();
@@ -263,7 +265,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @throws  
 	 */
 	public static ListItem getIntelligence(Session session, String id) throws Exception {
-		Query q = session.createQuery("SELECT uuid, shortName FROM Intelligence WHERE uuid =:uuid"); //$NON-NLS-1$
+		Query q = session.createQuery("SELECT uuid, name FROM Intelligence WHERE uuid =:uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", SmartUtils.decodeHex(id)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();

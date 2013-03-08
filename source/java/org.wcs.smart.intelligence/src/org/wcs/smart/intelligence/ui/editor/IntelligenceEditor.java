@@ -294,6 +294,7 @@ public class IntelligenceEditor extends EditorPart {
 			if (intelligence.getPatrol() != null) {
 				intelligence.getPatrol().getId();
 			}
+			intelligence.getNames().size();
 			intelligence.getPoints().size();
 			intelligence.getAttachments().size();
 			session.getTransaction().commit();

@@ -21,9 +21,17 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.intelligence.IntelligenceEventManager;
+import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
+import org.wcs.smart.ui.TranslateNamesHandler;
 
 /**
  * Handler that brings up the intelligence translate dialog.
@@ -31,10 +39,34 @@ import org.eclipse.core.commands.ExecutionException;
  * @author elitvin
  * @since 1.0.0
  */
-public class TranslateIntelligenceHandler extends AbstractHandler {
+public class TranslateIntelligenceHandler extends TranslateNamesHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
+		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection)) {
+			return null;
+		}
+		
+		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
+
+		Intelligence intelligence = null;
+		if (obj instanceof IntelligenceEditorInput) {
+			byte[] uuid = ((IntelligenceEditorInput) obj).getUuid();
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			intelligence = (Intelligence) session.load(Intelligence.class, uuid);
+			session.getTransaction().rollback();
+			session.close();
+		} else if (obj instanceof Intelligence) {
+			intelligence = (Intelligence) obj;
+		}
+		
+		if (intelligence != null) {
+			translateItem(intelligence, event);
+			IntelligenceEventManager.getInstance().intelligenceChanged(0, intelligence);
+		}
+		
 		return null;
 	}
 

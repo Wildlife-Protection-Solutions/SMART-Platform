@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.intelligence.ui.patrol;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -143,6 +144,7 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 
 	protected void updateControls() {
 		intelligenceList = IntelligenceHibernateManager.getMotivatedIntelligences(patrol);
+		Collections.sort(intelligenceList, new IntelligenceNameComparator());
 		if (intelligenceList.isEmpty()) {
 			label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
 			tableViewer.getControl().setVisible(false);

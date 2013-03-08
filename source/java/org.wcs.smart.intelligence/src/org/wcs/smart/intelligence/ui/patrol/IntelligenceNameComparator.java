@@ -35,7 +35,9 @@ public class IntelligenceNameComparator implements Comparator<Intelligence> {
 
 	@Override
 	public int compare(Intelligence i1, Intelligence i2) {
-		return Collator.getInstance().compare(i1.getShortName(), i2.getShortName());
+		String v1 = (i1.getName() != null) ? i1.getName() : ""; //$NON-NLS-1$
+		String v2 = (i2.getName() != null) ? i2.getName() : ""; //$NON-NLS-1$
+		return Collator.getInstance().compare(v1, v2);
 	}
 
 }

@@ -55,7 +55,7 @@ public class IntelligenceViewFilter {
 	public Query buildQuery(Session s) { 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT i.uuid, i.shortName, i.receivedDate "); //$NON-NLS-1$
+		str.append("SELECT i.uuid, i.name, i.receivedDate "); //$NON-NLS-1$
 		str.append("FROM Intelligence i "); //$NON-NLS-1$
 		str.append("WHERE i.conservationArea = :ca " ); //$NON-NLS-1$
 
@@ -69,13 +69,10 @@ public class IntelligenceViewFilter {
 			str.append("AND coalesce(i.toDate, i.fromDate) >= :relevantStart AND i.fromDate <= :relevantEnd "); //$NON-NLS-1$
 		}
 		
-		
 		//name
 		if (nameComparison != null && name != null) {
-			str.append("AND lower(i.shortName) like :name "); //$NON-NLS-1$
+			str.append("AND lower(i.name.value) like :name "); //$NON-NLS-1$
 		}
-		
-		str.append("ORDER BY i.shortName asc"); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
