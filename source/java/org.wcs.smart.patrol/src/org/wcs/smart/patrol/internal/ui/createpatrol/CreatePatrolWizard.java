@@ -126,7 +126,6 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	public Session getSession() {
 		if (session == null || !session.isOpen()) {
 			session = PatrolHibernateManager.openSession();
-			session.update(patrol.getConservationArea());
 		}
 		return session;
 	}
@@ -204,7 +203,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 				}
 			}catch (Exception ex){
 				//eat this error
-				ex.printStackTrace();
+				//ex.printStackTrace();
 			}
 		}
 		return thisitems;
