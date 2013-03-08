@@ -85,7 +85,7 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 		items.add(ANY_INTELLIGENCE_ITEM);
 		List<Intelligence> inteligenceList = IntelligenceHibernateManager.getIntelligences(session);
 		for (Intelligence i : inteligenceList) {
-			items.add(new ListItem(i.getUuid(), i.getShortName()));
+			items.add(new ListItem(i.getUuid(), i.getName()));
 		}
 		return items;
 	}

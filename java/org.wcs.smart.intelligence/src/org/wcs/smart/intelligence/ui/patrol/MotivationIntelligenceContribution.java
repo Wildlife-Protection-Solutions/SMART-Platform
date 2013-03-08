@@ -197,7 +197,7 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	
 	private void openEditor(Intelligence intelligence) {
 		Assert.isNotNull(intelligence);
-		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getShortName(), intelligence.getReceivedDate());
+		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getName(), intelligence.getReceivedDate());
 		try {
 			IWorkbench wb = PlatformUI.getWorkbench();
 			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();

@@ -266,8 +266,8 @@ public class IntelligenceEditor extends EditorPart {
 	 */
 	private void initValues() {
 		Intelligence intel = getIntelligence();
-		setPartName(intel.getShortName());		
-		form.setText(intel.getShortName());
+		setPartName(intel.getName());		
+		form.setText(intel.getName());
 		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
 		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
@@ -275,7 +275,7 @@ public class IntelligenceEditor extends EditorPart {
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		lnkPatrolID.setText(value);
 		lnkPatrolID.setEnabled(intel.getPatrol() != null);
-		txtShortName.setText(intel.getShortName());
+		txtShortName.setText(intel.getName());
 		txtDescription.setText(intel.getDescription());
 		txtFromDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getFromDate()));
 		value = intel.getToDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(intel.getToDate()) : txtFromDate.getText();

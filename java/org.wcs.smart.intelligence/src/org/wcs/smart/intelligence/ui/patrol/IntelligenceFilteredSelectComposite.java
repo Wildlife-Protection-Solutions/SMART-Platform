@@ -135,7 +135,7 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
     			Object[] data = (Object[]) iterator.next();
     			Intelligence i = new Intelligence();
     			i.setUuid((byte[])data[0]);
-    			i.setShortName((String)data[1]);
+    			i.setName((String)data[1]);
     			i.setReceivedDate((Date)data[2]);
     			intelligences.add(i);
     		}
