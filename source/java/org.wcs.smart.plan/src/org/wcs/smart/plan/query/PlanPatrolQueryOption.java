@@ -86,7 +86,7 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 		items.add(ANY_PATROL_ITEM);
 		List<Plan> plans = PlanHibernateManager.getPlans(SmartDB.getCurrentConservationArea(), session);
 		for (Plan plan : plans) {
-			items.add(new ListItem(plan.getUuid(), plan.getName()));
+			items.add(new ListItem(plan.getUuid(), Plan.generateLabel(plan.getId(), plan.getName())));
 		}
 		return items;
 	}
