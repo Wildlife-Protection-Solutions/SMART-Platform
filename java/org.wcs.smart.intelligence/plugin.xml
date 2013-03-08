@@ -128,6 +128,16 @@
             allPopups="true"
             locationURI="popup:org.wcs.smart.intelligence.IntelligenceListView">
          <command
+               commandId="org.wcs.smart.intelligence.translate"
+               label="%translate.command.label"
+               style="push"
+               tooltip="%translate.command.tooltip">
+         </command>
+         <separator
+               name="org.wcs.smart.intelligence.separator1"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.intelligence.DeleteIntelligence"
                icon="images/etool16/delete.png"
                label="%delete.command.label"
@@ -171,6 +181,10 @@
             id="org.wcs.smart.intelligence.ShowIntelligenceFilter"
             name="%command.filter.name">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.translate"
+            name="%translate.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -213,6 +227,10 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.TranslateIntelligenceHandler"
+            commandId="org.wcs.smart.intelligence.translate">
       </handler>
    </extension>
    <extension
