@@ -26,13 +26,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
@@ -238,12 +240,8 @@ public class FilterValidator {
 	 * @throws Exception
 	 */
 	public static void validateCategory(String hkey, Session session) throws Exception{
-		String hql = " FROM Category Where conservationArea = :ca and hkey = :key"; //$NON-NLS-1$
-		org.hibernate.Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("key", hkey); //$NON-NLS-1$
-		
-		if (q.list().size() != 1){
+		Category c = QueryDataModelManager.getInstance().getCategory(session, hkey);
+		if (c == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_CategoryNotFound, new Object[]{hkey}));
 		}
 	}
@@ -254,12 +252,8 @@ public class FilterValidator {
 	 * @throws Exception
 	 */
 	public static void validateAttribute(String key, Session session) throws Exception{
-		String hql = " FROM Attribute Where conservationArea = :ca and keyId = :key"; //$NON-NLS-1$
-		org.hibernate.Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("key", key); //$NON-NLS-1$
-		
-		if (q.list().size() != 1){
+		Attribute a = QueryDataModelManager.getInstance().getAttribute(session, key);
+		if (a == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeNotFound, new Object[]{key}));
 		}
 	}
@@ -272,17 +266,8 @@ public class FilterValidator {
 	 * @throws Exception
 	 */
 	public static void validateAttributeListItem(String key, String attributeKey, Session session) throws Exception{
-		
-		Query q = session
-				.createQuery(" From AttributeListItem ali join ali.attribute as a "+ //$NON-NLS-1$
-						"where a.conservationArea = :ca and ali.keyId = :key and "+ //$NON-NLS-1$
-						"a.keyId = :attributeKey"); //$NON-NLS-1$
-		
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("key", key); //$NON-NLS-1$
-		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
-			
-		if (q.list().size() != 1){
+		Object x = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, key);
+		if (x == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeListItemNotFound, new Object[]{key}));
 		}
 	}
@@ -296,14 +281,8 @@ public class FilterValidator {
 	 * @throws Exception
 	 */
 	public static void validateAttributeTreeNode(String key, String attributeKey, Session session) throws Exception{
-		String hql = " FROM AttributeTreeNode ai join ai.attribute a " +  //$NON-NLS-1$
-				"Where a.conservationArea = :ca and ai.hkey = :hkey and a.keyId = :attributeKey";  //$NON-NLS-1$
-		org.hibernate.Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		q.setParameter("hkey", key); //$NON-NLS-1$
-		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
-		
-		if (q.list().size() != 1){
+		Object x = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, key);
+		if (x == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeTreeNodeNotFound, new Object[]{key}));
 		}
 	}

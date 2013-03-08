@@ -21,15 +21,16 @@
  */
 package org.wcs.smart.query.internal.datamodel;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -73,19 +74,24 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @return the data model for querying
 	 */
 	public DataModel getDataModel(){
-		if (dm == null){
-			Job job = loadAndMergeDataModelJob;
+		if (dm == null){			
 			synchronized (this) {
-				if (job.getState() == Job.NONE || job.getState() == Job.SLEEPING){
-					job.schedule();
+				if (dm != null){
+					return dm;
 				}
-			}
-			
-			try{
-				//wait for the current job to finish
-				job.join();
-			}catch (Exception ex){
-				QueryPlugIn.log(ex.getMessage(), ex);
+				Display.getDefault().syncExec(new Runnable(){
+
+					@Override
+					public void run() {
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						try {
+							dialog.run(true, false, loadAndMergeDataModelJob);
+						} catch (Exception e) {
+							QueryPlugIn.displayLog(Messages.MultiCaDataModelManagerImpl_MergeError + e.getLocalizedMessage(), e);
+							e.printStackTrace();
+						}
+						
+					}});
 			}
 		}
 		return this.dm;
@@ -309,7 +315,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		List<AttributeListItem> results = q.list();
 		if (results.size() == SmartDB.getConservationAreaConfiguration().getCaCount()){
 			for(AttributeListItem i : results){
-				if (i.getAttribute().getConservationArea().equals(SmartDB.getConservationAreaConfiguration().getConservationAreas())){
+				if (i.getAttribute().getConservationArea().equals(SmartDB.getConservationAreaConfiguration().getMainConservationArea())){
 					return i;
 				}
 			}
@@ -451,9 +457,11 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	
 	
 	
-	private Job loadAndMergeDataModelJob = new Job(Messages.MultiCaDataModelManagerImpl_LoadMergeJobName){
+	private IRunnableWithProgress loadAndMergeDataModelJob = new IRunnableWithProgress() {
+		
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
+		public void run(IProgressMonitor monitor) throws InvocationTargetException,
+				InterruptedException {
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
@@ -462,14 +470,14 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 				dm = merger.mergeDataModels(
 						config.getConservationAreas().toArray(new ConservationArea[config.getCaCount()]),
 						config.getMainConservationArea(),
-						session);
+						session, monitor);
 						
 			}finally{
 				session.getTransaction().rollback();
 				session.close();
 			}
-			return Status.OK_STATUS;
+
+			
 		}
-	};
-	
+	};	
 }
