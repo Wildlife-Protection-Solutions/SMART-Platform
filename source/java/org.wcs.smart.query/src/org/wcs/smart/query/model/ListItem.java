@@ -146,8 +146,10 @@ public class ListItem implements Comparable<ListItem>{
 	@Override
 	public int compareTo(ListItem o) {
 		if (o == null){
-			return -1;
+			return 1;
 		}
-		return Collator.getInstance().compare(name,o.getName());
+		String src = (name == null) ? "" : name; //$NON-NLS-1$
+		String dst = (o.getName() == null) ? "" : o.getName(); //$NON-NLS-1$
+		return Collator.getInstance().compare(src, dst);
 	}
 }
