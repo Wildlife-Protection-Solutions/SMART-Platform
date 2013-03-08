@@ -22,10 +22,14 @@
 package org.wcs.smart.ui;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,6 +42,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.ViewPart;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
@@ -61,6 +66,8 @@ public class ConservationAreaListView extends ViewPart {
 	
 	private Composite caComp = null;
 	private Composite parent = null;
+	private Composite main = null;
+	private ScrolledComposite scroll = null;
 	
 	public ConservationAreaListView() {
 	}
@@ -68,7 +75,14 @@ public class ConservationAreaListView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		this.parent = parent;
-		Composite main = toolkit.createComposite(parent);
+		
+		scroll = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+		toolkit.adapt(scroll);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		
+		main = toolkit.createComposite(scroll,SWT.BORDER);
+		scroll.setContent(main);
 		
 		main.setLayout(new GridLayout(1, false));
 		lblDefault = toolkit.createLabel(main, Messages.ConservationAreaListView_CaLabel, SWT.NONE);
@@ -91,6 +105,7 @@ public class ConservationAreaListView extends ViewPart {
 		});
 		caComp = toolkit.createComposite(main, SWT.NONE);
 		caComp.setLayout(new GridLayout());
+		caComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		initCas();
 		
@@ -122,6 +137,14 @@ public class ConservationAreaListView extends ViewPart {
 		Label ll = toolkit.createLabel(main, Messages.ConservationAreaListView_CaInfo, SWT.WRAP);
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)ll.getLayoutData()).widthHint = 100;
+		
+		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		scroll.addControlListener(new ControlAdapter() {
+			public void controlResized(ControlEvent e) {
+				Rectangle r = scroll.getClientArea();
+				scroll.setMinSize(main.computeSize(r.width-10, SWT.DEFAULT));
+			}
+		});
 	}
 
 	@Override
@@ -137,13 +160,29 @@ public class ConservationAreaListView extends ViewPart {
 		if (SmartDB.getConservationAreaConfiguration() != null){
 			
 			for(ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-				Label l = toolkit.createLabel(caComp, ca.getNameLabel());
+				Composite c = toolkit.createComposite(caComp);
+				c.setLayout(new GridLayout(2, false));
+				((GridLayout)c.getLayout()).marginHeight = 0;
+				((GridLayout)c.getLayout()).marginWidth = 0;
+				((GridLayout)c.getLayout()).horizontalSpacing = 0;
+				((GridLayout)c.getLayout()).verticalSpacing = 0;
+				
+				c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)c.getLayoutData()).horizontalIndent = 0;
+				
+				Label l = toolkit.createLabel(c,""); //$NON-NLS-1$
+				l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BULLET_BLACK));
+				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+				
+				l = toolkit.createLabel(c, ca.getNameLabel(), SWT.WRAP);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				((GridData)l.getLayoutData()).horizontalIndent = 10;
+				((GridData)l.getLayoutData()).widthHint = 90;
+				
 			}
 		}
 		caComp.layout();
-		
+		main.layout();
+		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		parent.layout(true, true);
 	}
 }

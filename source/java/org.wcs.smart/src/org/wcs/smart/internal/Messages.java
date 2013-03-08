@@ -325,6 +325,10 @@ public class Messages extends NLS {
 	public static String DataModelManager_Progress_DeleteListItem;
 	public static String DataModelManager_Progress_DeleteTreeNode;
 	public static String DataModelManager_Progress_ValidatingDelete;
+	public static String DataModelMerger_SubTask1;
+	public static String DataModelMerger_SubTask2;
+	public static String DataModelMerger_SubTask3;
+	public static String DataModelMerger_TaskName;
 	public static String DataModelPropertyPage_AddAttribute_Button;
 	public static String DataModelPropertyPage_AddAttribute_DialogMessage;
 	public static String DataModelPropertyPage_AddAttribute_DialogTitle;

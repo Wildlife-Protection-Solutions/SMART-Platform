@@ -25,12 +25,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -55,21 +57,28 @@ public class DataModelMerger {
 	 * @param session hibernate session
 	 * @return a merged data model
 	 */
-	public DataModel mergeDataModels(ConservationArea[] cas, ConservationArea defaultCa, Session session){
+	public DataModel mergeDataModels(ConservationArea[] cas, 
+			ConservationArea defaultCa, 
+			Session session, IProgressMonitor monitor){
 		
 		if (cas == null || cas.length < 2){
 			throw new IllegalStateException("more than 1 conservation area must be provided");//$NON-NLS-1$
 		}
 		// load data model for default Ca
-		DataModel dm = HibernateManager.loadDataModel(defaultCa, session);
-		DataModel newDataModel = new DataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
+		monitor.beginTask(Messages.DataModelMerger_TaskName, 4);
 		
+		monitor.subTask(Messages.DataModelMerger_SubTask1);
+		DataModel dm = HibernateManager.loadDataModel(defaultCa, session);
+		monitor.worked(1);
+		
+		DataModel newDataModel = new DataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
 		defaultLanguage = SmartUtils.findLanguageMatch(defaultCa.getLanguages());
 		if (defaultLanguage == null){
 			defaultLanguage = defaultCa.getDefaultLanguage();
 		}
 				
 		// ATTRIBUTES
+		monitor.subTask(Messages.DataModelMerger_SubTask2);
 		for (Attribute a : dm.getAttributes()){
 			if (canKeep(a, cas, session)){
 				Attribute copy = new Attribute();
@@ -87,14 +96,17 @@ public class DataModelMerger {
 				mergeAttributeAggregations(copy,cas, session);
 			}
 		}
+		monitor.worked(1);
 		
 		/* root categories */
+		monitor.subTask(Messages.DataModelMerger_SubTask3);
 		for (Category c : dm.getCategories()){
 			if (canKeep(c, cas, session)){
 				Category newRoot = cloneCategory(c, null, newDataModel.getAttributes(), cas,session);
 				newDataModel.addRootCategories(newRoot);
 			}
 		}
+		monitor.worked(1);
 		
 		return newDataModel;
 	}
