@@ -262,6 +262,7 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_ImportFailed;
 	public static String ImportQueryWizard_Title;
 	public static String MultiCaDataModelManagerImpl_LoadMergeJobName;
+	public static String MultiCaDataModelManagerImpl_MergeError;
 	public static String NameCellEditor_CouldNotSaveFolderNameChange;
 	public static String NameCellEditor_CouldNotSaveQueryName;
 	public static String NameCellEditor_UpdateFolderNameJob;

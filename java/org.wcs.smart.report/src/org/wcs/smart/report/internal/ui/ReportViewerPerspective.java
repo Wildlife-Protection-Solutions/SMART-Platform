@@ -24,7 +24,9 @@ package org.wcs.smart.report.internal.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
+import org.wcs.smart.ui.ConservationAreaListView;
 
 /**
  * View report perspective
@@ -71,9 +73,11 @@ public class ReportViewerPerspective  implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(false);
 		
 		layout.addView(ReportListView.ID, IPageLayout.LEFT, (float)0.26, editorArea);
-		
 		IFolderLayout reportsArea = layout.createFolder("reportsArea", IPageLayout.RIGHT, 0.26f, ReportListView.ID); //$NON-NLS-1$
 		reportsArea.addPlaceholder(ReportView.ID + ":*"); //$NON-NLS-1$
 		
+		if (SmartDB.isMultipleAnalysis()){
+			layout.addView(ConservationAreaListView.ID, IPageLayout.TOP, 0.3f, ReportListView.ID);
+		}
 	}
 }
