@@ -22,7 +22,9 @@
 package org.wcs.smart.hibernate;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
@@ -84,10 +86,10 @@ public class SmartDB {
 	private static DbUser current = DbUser.LOGIN;
 	private static Employee currentEmployee = null;
 	private static ConservationArea currentCa = null;
-	private static MultipleCaAnalysisConfiguration caConfig = null;
+	private static ConservationAreaConfiguration caConfig = null;
 	
-	private static Language currentLanguage = null;;
-	
+	private static Language currentLanguage = null;
+	private static List<IConservationAreaConfigurationListener> changeListeners;
 	/**
 	 * 
 	 * @return the current database user
@@ -153,16 +155,20 @@ public class SmartDB {
 	 * is performing cross conservation area analysis.  Otherwise
 	 * it will return <code>null</code>.
 	 */
-	public static MultipleCaAnalysisConfiguration getConservationAreaConfiguration(){
+	public static ConservationAreaConfiguration getConservationAreaConfiguration(){
 		return caConfig;
 	}
 	/**
 	 * Sets the configuration for cross conservation area analysis
 	 * @param selectedCa
 	 */
-	public static void setSelectedCas(MultipleCaAnalysisConfiguration configuration){
+	public static void setConservationAreaConfiguration(ConservationAreaConfiguration configuration){
 		caConfig = configuration;
-		currentLanguage = caConfig.getLanguage();
+		if (changeListeners != null){
+			for (IConservationAreaConfigurationListener listener: changeListeners){
+				listener.configurationChanged();
+			}
+		}
 	}
 	
 	/**
@@ -215,5 +221,25 @@ public class SmartDB {
 		
 	}
 	
-
+	/**
+	 * Adds a configuration change listener.
+	 * @param listener
+	 */
+	public static void addConfigurationChangeListener(IConservationAreaConfigurationListener listener){
+		if (changeListeners == null){
+			changeListeners = new ArrayList<IConservationAreaConfigurationListener>();
+		}
+		changeListeners.add(listener);
+	}
+	
+	/**
+	 * Removes a configuration change listener.
+	 * @param listener
+	 */
+	public static void removeConfigurationChangeListener(IConservationAreaConfigurationListener listener){
+		if (changeListeners != null){
+			changeListeners.remove(listener);
+		}
+		
+	}
 }

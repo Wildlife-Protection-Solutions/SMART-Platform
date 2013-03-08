@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.engine.DerbyQueryEngine2;
 import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumnCache;
 
 /**
  * A class to represent an observation query.
@@ -105,7 +106,7 @@ public class ObservationQuery extends SimpleQuery{
 	 * Loads the query columns
 	 */
 	private void initQueryColumns(){
-		QueryColumn[] cols = QueryColumn.getWaypointQueryColumns();
+		QueryColumn[] cols = QueryColumnCache.getInstance().getWaypointQueryColumns();
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

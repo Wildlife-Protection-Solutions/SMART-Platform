@@ -46,6 +46,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.engine.DerbyGridEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumnCache;
 import org.wcs.smart.query.parser.PatrolQueryOptions;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.parser.filter.IFilter;
@@ -438,7 +439,7 @@ public class GriddedQuery extends Query {
 	 * Loads the query columns
 	 */
 	private void initQueryColumns(){
-		QueryColumn[] cols = QueryColumn.getGridColumns();
+		QueryColumn[] cols = QueryColumnCache.getInstance().getGridColumns();
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		for (int i = 0; i < cols.length; i ++){

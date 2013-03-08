@@ -88,6 +88,17 @@ public class QueryResultsTablePage  extends EditorPart  {
 		
 	}
 
+	/**
+	 * Updates the query title
+	 */
+	public void updateTitle(){
+		content.setQueryName(parentEditor.getQueryInternal());
+	}
+	
+	/**
+	 * Initializes the entire page including the title
+	 * @param all
+	 */
 	public void initPage(){
 		content.initValues(parentEditor.getQueryInternal());
 	}

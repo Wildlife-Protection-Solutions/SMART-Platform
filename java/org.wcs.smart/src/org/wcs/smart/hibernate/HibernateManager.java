@@ -74,7 +74,8 @@ public class HibernateManager extends SmartHibernateManager{
 
 	/**
 	 * 
-	 * @return the language for the given code
+	 * @return the language for the given code associated with the conservation area
+	 * <code>null</code> if not found
 	 */
 	public static Language findLanguage(Locale l, ConservationArea ca){
 		Session x = openSession();

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.hibernate;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
@@ -39,10 +39,10 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class MultipleCaAnalysisConfiguration {
+public class ConservationAreaConfiguration {
 
-	private List<ConservationArea> conservationAreas;
-	private List<Employee> employees;
+	private Collection<ConservationArea> conservationAreas;
+	private Collection<Employee> employees;
 	
 	private ConservationArea mainConservationArea;
 	private Language language;
@@ -51,8 +51,8 @@ public class MultipleCaAnalysisConfiguration {
 	 * The set of conservation areas logged into
 	 * @param conservationAreas
 	 */
-	public MultipleCaAnalysisConfiguration(List<ConservationArea> conservationAreas,
-			List<Employee> employees){
+	public ConservationAreaConfiguration(Collection<ConservationArea> conservationAreas,
+			Collection<Employee> employees){
 		this.conservationAreas = conservationAreas;
 		this.employees = employees;
 		computeMainConservationArea();
@@ -63,7 +63,7 @@ public class MultipleCaAnalysisConfiguration {
 	 * @return List of employee objects that represent the
 	 * same logged-in user in the different conservation areas.
 	 */
-	public List<Employee> getEmployees(){
+	public Collection<Employee> getEmployees(){
 		return this.employees;
 	}
 	/**
@@ -80,7 +80,7 @@ public class MultipleCaAnalysisConfiguration {
 	 * 
 	 * @return the list of conservation areas
 	 */
-	public List<ConservationArea> getConservationAreas(){
+	public Collection<ConservationArea> getConservationAreas(){
 		return this.conservationAreas;
 	}
 	
@@ -121,7 +121,7 @@ public class MultipleCaAnalysisConfiguration {
 			}
 		}
 		if (mainConservationArea == null){
-			mainConservationArea = conservationAreas.get(0);
+			mainConservationArea = conservationAreas.iterator().next();
 			this.language = mainConservationArea.getDefaultLanguage();
 		}
 		//SmartDB.getCurrentConservationArea().setLanguages(mainConservationArea.getLanguages());

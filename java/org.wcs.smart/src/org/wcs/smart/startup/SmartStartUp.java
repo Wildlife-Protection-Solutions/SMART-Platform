@@ -24,7 +24,9 @@ package org.wcs.smart.startup;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -37,12 +39,14 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.MultipleCaAnalysisConfiguration;
+import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * This class contains some of the basic functions required
@@ -132,7 +136,7 @@ public class SmartStartUp {
 		
 		if (Arrays.equals(ca.getUuid(), ConservationArea.MULTIPLE_CA)) {
 			// we are performing cross-ca analysis and need to do something
-			// differen
+			// different
 			List<ConservationArea> areas;
 			try {
 				areas = HibernateManager.findConservationAreas(userName,
@@ -164,12 +168,37 @@ public class SmartStartUp {
 						}
 						users.add(e);
 					}
+					
+					Session session = HibernateManager.openSession();
+					session.beginTransaction();
+					try{
+						List<?> results = session.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", SmartUtils.localeToString(Locale.getDefault()))).list(); //$NON-NLS-1$ //$NON-NLS-2$
+						if (results.size() == 0){
+							Language lang = new Language();
+							lang.setCa(ca);
+							lang.setDefault(false);
+							lang.setCode(SmartUtils.localeToString(Locale.getDefault()));
+							ca.getLanguages().add(lang);
+							session.saveOrUpdate(lang);
+						}
+						session.getTransaction().commit();
+					}catch (Exception ex){
+						session.getTransaction().rollback();
+						SmartPlugIn.log(ex.getMessage(), ex);
+					}finally{
+						session.close();
+					}
+					
+					
 					//	disconnect from the database & setup correct user level
+					
 					HibernateManager.endSessionFactory(true);					
 					SmartDB.setCurrentUser(users.get(0), ca);
+					ConservationAreaConfiguration config = new ConservationAreaConfiguration(areas, users);
+					SmartDB.setConservationAreaConfiguration(config);
 					
-					MultipleCaAnalysisConfiguration config = new MultipleCaAnalysisConfiguration(areas, users);
-					SmartDB.setSelectedCas(config);
+					
+					
 					return true;
 				}
 			} catch (Exception ex) {
@@ -188,6 +217,9 @@ public class SmartStartUp {
 				HibernateManager.endSessionFactory(true);
 				SmartDB.setCurrentUser(e, ca);
 			
+
+				ConservationAreaConfiguration config = new ConservationAreaConfiguration(Collections.singleton(ca), Collections.singleton(e));
+				SmartDB.setConservationAreaConfiguration(config);
 				HibernateManager.openSession();
 				return true;
 			}catch (Exception ex){

@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.engine.DerbyPatrolEngine;
 import org.wcs.smart.query.model.observation.QueryColumn;
+import org.wcs.smart.query.model.observation.QueryColumnCache;
 
 /**
  * A representation of a patrol query.
@@ -98,7 +99,7 @@ public class PatrolQuery extends SimpleQuery {
 	 * Loads the query columns
 	 */
 	private void initQueryColumns(){
-		QueryColumn[] cols = QueryColumn.getPatrolQueryColumns();
+		QueryColumn[] cols = QueryColumnCache.getInstance().getPatrolQueryColumns();
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

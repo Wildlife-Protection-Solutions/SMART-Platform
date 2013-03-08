@@ -253,8 +253,6 @@ public class QueryListView extends ViewPart {
 	public void dispose(){
 		super.dispose();
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(editorListener);
-		//QueryEventManager.getInstance().removeQueryFolderListener(listener);
-		
 		SavedQueryTree.getInstance().removeListener(listener);
 		listener = null;
 	}

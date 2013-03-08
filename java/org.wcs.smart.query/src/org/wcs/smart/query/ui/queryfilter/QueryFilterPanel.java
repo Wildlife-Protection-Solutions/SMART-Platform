@@ -175,6 +175,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		if (filterTreeViewer != null){
 			filterTreeViewer.setInput(LOADING_TEXT);
 			filterTreeViewer.refresh();
+			refreshJob.cancel();
 			refreshJob.schedule();
 		}
 	}

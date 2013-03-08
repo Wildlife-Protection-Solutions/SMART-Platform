@@ -42,7 +42,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.MultipleCaAnalysisConfiguration;
+import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -457,7 +457,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				MultipleCaAnalysisConfiguration config = SmartDB.getConservationAreaConfiguration();
+				ConservationAreaConfiguration config = SmartDB.getConservationAreaConfiguration();
 				DataModelMerger merger = new DataModelMerger();
 				dm = merger.mergeDataModels(
 						config.getConservationAreas().toArray(new ConservationArea[config.getCaCount()]),
