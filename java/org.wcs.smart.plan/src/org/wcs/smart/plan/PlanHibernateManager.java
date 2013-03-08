@@ -497,12 +497,13 @@ public class PlanHibernateManager{
 	 * @throws  
 	 */
 	public static ListItem getPlan(Session session, String id) throws Exception {
-		Query q = session.createQuery("SELECT uuid, name FROM Plan WHERE uuid =:uuid"); //$NON-NLS-1$
+		Query q = session.createQuery("SELECT uuid, id, name FROM Plan WHERE uuid =:uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", SmartUtils.decodeHex(id)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1) {
-			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
+			String displayName = Plan.generateLabel((String)((Object[])results.get(0))[1], (String)((Object[])results.get(0))[2]);
+			return new ListItem( (byte[])((Object[])results.get(0))[0], displayName);
 		} else {
 			SmartPlanPlugIn.displayLog(MessageFormat.format(Messages.PlanHibernateManager_Plan_NotFound_Error, id), null);
 			return null;
