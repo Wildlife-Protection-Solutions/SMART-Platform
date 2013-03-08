@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.IConservationAreaConfigurationListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
@@ -73,8 +74,25 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 	
 	private List<byte[]> missingFilterUuids = new ArrayList<byte[]>();
 	
+	private IConservationAreaConfigurationListener configListener = new IConservationAreaConfigurationListener() {
+		@Override
+		public void configurationChanged() {
+			if (currentQuery != null){
+				initQuery(currentQuery);
+			}
+		}
+	};
+	
+	
+	@Override
+	public void dispose(){
+		super.dispose();
+		SmartDB.removeConfigurationChangeListener(configListener);
+	}
+	
 	public ConservationAreaFilterPanel(Composite parent){
 		super(parent, SWT.NONE);
+		
 		setLayout(new FillLayout());
 		((FillLayout)getLayout()).marginHeight = 0;
 		((FillLayout)getLayout()).marginWidth = 0;
@@ -129,6 +147,8 @@ public class ConservationAreaFilterPanel extends Composite implements SelectionL
 		content.pack();
 		scroll.setContent(content);
 		scroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		SmartDB.addConfigurationChangeListener(configListener);
 	}
 	
 	

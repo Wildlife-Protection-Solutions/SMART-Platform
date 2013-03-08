@@ -97,6 +97,15 @@ public class Label  {
 			// try for the default language
 			id.setLanguage(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			lbl = (Label) s.get(Label.class, id);
+			
+			//if still null search each language
+			for(Language l : SmartDB.getCurrentConservationArea().getLanguages()){
+				id.setLanguage(l);
+				lbl = (Label)s.get(Label.class, id);
+				if (lbl != null){
+					break;
+				}
+			}
 		}
 		if (lbl != null) {
 			description = lbl.getValue();

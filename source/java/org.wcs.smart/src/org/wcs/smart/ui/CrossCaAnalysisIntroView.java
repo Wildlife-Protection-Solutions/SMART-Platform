@@ -29,11 +29,13 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.IConservationAreaConfigurationListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
@@ -49,10 +51,26 @@ public class CrossCaAnalysisIntroView extends ViewPart {
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	private Label lblHeader = null;
 	private Font boldFont = null;
+	
+	private Composite caList = null;
+	
+	private IConservationAreaConfigurationListener changeListener = new IConservationAreaConfigurationListener() {
+		@Override
+		public void configurationChanged() {
+			updateCas();
+			
+		}
+	};
 	public CrossCaAnalysisIntroView() {
-		// TODO Auto-generated constructor stub
+		SmartDB.addConfigurationChangeListener(changeListener);
 	}
 
+	@Override
+	public void dispose(){
+		super.dispose();
+		SmartDB.removeConfigurationChangeListener(changeListener);
+	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		Composite main = toolkit.createComposite(parent);
@@ -77,24 +95,37 @@ public class CrossCaAnalysisIntroView extends ViewPart {
 		});
 		
 		toolkit.createLabel(main, Messages.CrossCaView_Message1, SWT.NONE);
-		
-		if (SmartDB.getConservationAreaConfiguration() != null){
-			for(ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-				Label l = toolkit.createLabel(main, ca.getNameLabel());
-				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				((GridData)l.getLayoutData()).horizontalIndent = 10;
-			}
-		}
-		
-		
+		caList = toolkit.createComposite(main);
+		caList.setLayout(new GridLayout());
+		updateCas();
 		Label ll = toolkit.createLabel(main, Messages.CrossCaView_Message2, SWT.WRAP);
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)ll.getLayoutData()).widthHint = 100;
+		
 	}
 
 	@Override
 	public void setFocus() {
 		lblHeader.setFocus();
+	}
+	
+	private void updateCas(){
+		if (caList != null){
+			for (Control c : caList.getChildren()){
+				c.dispose();
+			}
+			
+			if (SmartDB.getConservationAreaConfiguration() != null){
+				for(ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+					Label l = toolkit.createLabel(caList, ca.getNameLabel());
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridData)l.getLayoutData()).horizontalIndent = 10;
+				}
+			}
+			
+			caList.getParent().layout(true, true);
+		}
+		
 	}
 
 }

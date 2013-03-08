@@ -84,6 +84,9 @@ public class QueryResultsTable {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
+						if (table.getTable().isDisposed()){
+							return;
+						}
 						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
 					}
 				});

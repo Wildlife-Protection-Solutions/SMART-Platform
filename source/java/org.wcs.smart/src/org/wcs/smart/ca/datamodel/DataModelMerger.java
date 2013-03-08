@@ -28,8 +28,10 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class to merge datamodels. 
@@ -38,6 +40,8 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class DataModelMerger {
 
+	private Language defaultLanguage = null;
+	
 	public DataModelMerger(){
 		
 	}
@@ -60,10 +64,25 @@ public class DataModelMerger {
 		DataModel dm = HibernateManager.loadDataModel(defaultCa, session);
 		DataModel newDataModel = new DataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
 		
+		defaultLanguage = SmartUtils.findLanguageMatch(defaultCa.getLanguages());
+		if (defaultLanguage == null){
+			defaultLanguage = defaultCa.getDefaultLanguage();
+		}
+				
 		// ATTRIBUTES
 		for (Attribute a : dm.getAttributes()){
 			if (canKeep(a, cas, session)){
-				Attribute copy = a.clone(SmartDB.getCurrentConservationArea(), SmartDB.getCurrentLanguage().getCode());
+				Attribute copy = new Attribute();
+				copy.setAggregations(a.getAggregations());
+				copy.setConservationArea(SmartDB.getCurrentConservationArea());
+				copy.setIsRequired(a.getIsRequired());
+				copy.setKeyId(a.getKeyId());
+				copy.setMaxValue(a.getMaxValue());
+				copy.setMinValue(a.getMinValue());
+				copy.setName(a.findName(defaultLanguage));
+				copy.setRegex(a.getRegex());
+				copy.setType(a.getType());
+				
 				newDataModel.getAttributes().add(copy);
 				mergeAttributeAggregations(copy,cas, session);
 			}
@@ -81,7 +100,9 @@ public class DataModelMerger {
 	}
 	
 
-	private Category cloneCategory(Category toClone, Category parent, List<Attribute> clonedAttributes, ConservationArea[] cas, Session session){
+	private Category cloneCategory(Category toClone, 
+			Category parent, List<Attribute> clonedAttributes, 
+			ConservationArea[] cas, Session session){
 		
 		Category clone = new Category();
 		clone.setHkey(toClone.getHkey());
@@ -91,7 +112,7 @@ public class DataModelMerger {
 		clone.setIsActive(true);
 		
 		//clone the labels
-		clone.setName(toClone.getName());
+		clone.setName(toClone.findName(defaultLanguage));
 			
 		if (toClone.getAttributes() != null){
 			clone.setAttributes(new ArrayList<CategoryAttribute>());

@@ -29,11 +29,17 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 /**
@@ -52,11 +58,15 @@ public class ConservationAreaListView extends ViewPart {
 	private Label lblDefault = null;
 	private Font boldFont = null;
 	
+	private Composite caComp = null;
+	private Composite parent = null;
+	
 	public ConservationAreaListView() {
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
+		this.parent = parent;
 		Composite main = toolkit.createComposite(parent);
 		
 		main.setLayout(new GridLayout(1, false));
@@ -78,15 +88,30 @@ public class ConservationAreaListView extends ViewPart {
 				}
 			}
 		});
-		if (SmartDB.getConservationAreaConfiguration() != null){
-			for(ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-				Label l = toolkit.createLabel(main, ca.getNameLabel());
-				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				((GridData)l.getLayoutData()).horizontalIndent = 10;
-			}
-		}
+		caComp = toolkit.createComposite(main, SWT.NONE);
+		caComp.setLayout(new GridLayout());
 		
-		toolkit.createLabel(main, "", SWT.NONE); //$NON-NLS-1$
+		initCas();
+		
+		Hyperlink link = toolkit.createHyperlink(main, "Modify...", SWT.NONE);
+		link.addHyperlinkListener(new HyperlinkAdapter() {
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				SelectCaDialog dialog = new SelectCaDialog(getSite().getShell());
+				if (dialog.open() == SelectCaDialog.OK){
+					ConservationAreaConfiguration newConfig = dialog.getNewConfiguration();
+//					SmartDB.setCurrentUser(newConfig.getEmployees()., SmartDB.getCurrentConservationArea());
+					SmartDB.setConservationAreaConfiguration(newConfig);
+					
+					//the data model has changed
+					DataModelManager.getInstance().fireChangeListeners();
+					initCas();
+				}
+				
+			}
+		});
+		
 		Label ll = toolkit.createLabel(main, Messages.ConservationAreaListView_CaInfo, SWT.WRAP);
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)ll.getLayoutData()).widthHint = 100;
@@ -97,4 +122,21 @@ public class ConservationAreaListView extends ViewPart {
 		lblDefault.setFocus();
 	}
 
+	private void initCas(){
+		for (Control kid : caComp.getChildren()){
+			kid.dispose();
+		}
+		
+		if (SmartDB.getConservationAreaConfiguration() != null){
+			
+			for(ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+				Label l = toolkit.createLabel(caComp, ca.getNameLabel());
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)l.getLayoutData()).horizontalIndent = 10;
+			}
+		}
+		caComp.layout();
+		
+		parent.layout(true, true);
+	}
 }

@@ -23,6 +23,8 @@ package org.wcs.smart.query.ui.querylist;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.QueryFolder;
@@ -76,6 +78,5 @@ public class QueryListLabelProvider extends LabelProvider {
 		}
 		return super.getText(element);
 	}
-
 
 }

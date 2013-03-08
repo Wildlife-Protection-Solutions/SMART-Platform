@@ -235,12 +235,10 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		super.setPartName(input.getName());
 		showBusy(true);
 		try {
-			
-			
 			page1 = new QueryResultsTablePage(this);
 			addPage(0, page1, input);
 			setPageText(0, Messages.QueryResultsEditor_TableResultsTabName);
-			
+			page1.updateQueryName();
 			
 			page2 = new QueryMapPageEditor(this);
 			addPage(1, page2, input);

@@ -132,11 +132,7 @@ public class DateGroupBy implements IGroupBy {
 			if (df.getDateFilterOption() == PatrolQueryOptions.DATE_FILTER_OP.ALL){
 				String hql = "SELECT min(startDate) from Patrol WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
 				Query q = session.createQuery(hql);
-				if (SmartDB.isMultipleAnalysis()){
-					q.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-				}else{
-					q.setParameterList("ca", new ConservationArea[]{SmartDB.getCurrentConservationArea()}); //$NON-NLS-1$
-				}
+				q.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 				
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null){
