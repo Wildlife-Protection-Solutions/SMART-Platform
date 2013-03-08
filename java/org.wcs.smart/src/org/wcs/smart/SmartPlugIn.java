@@ -106,7 +106,12 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	/**
 	 * Image descriptor for warning icon
 	 */
-	public static final String WARN_ICON= "org.wsc.smart.datamodel.WARN_ICON"; //$NON-NLS-1$
+	public static final String WARN_ICON= "org.wsc.smart.WARN_ICON"; //$NON-NLS-1$
+		
+	/**
+	 * Image descriptor for warning icon
+	 */
+	public static final String BULLET_BLACK = "org.wsc.smart.BULLET_BLACK"; //$NON-NLS-1$
 		
 	
 	public BasemapDefinition defaultDefinition = null;
@@ -178,6 +183,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(STATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station.png")); //$NON-NLS-1$
 	     
 	     reg.put(WARN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/warn.png")); //$NON-NLS-1$
+	     reg.put(BULLET_BLACK, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/bullet_black.png")); //$NON-NLS-1$
 	}
 	
 	/**
