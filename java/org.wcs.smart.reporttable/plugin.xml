@@ -20,6 +20,9 @@
       <class
             SmartBirtTable="org.wcs.smart.reporttable.patrol.TeamTable">
       </class>
+      <class
+            SmartBirtTable="org.wcs.smart.reporttable.ca.CaTable">
+      </class>
    </extension>
 
 </plugin>
