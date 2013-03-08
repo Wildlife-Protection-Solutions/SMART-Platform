@@ -8,6 +8,11 @@ public class Messages extends NLS {
 	public static String AgencyRankTable_Ca_FieldName;
 	public static String AgencyRankTable_RankName_FieldName;
 	public static String AgencyRankTable_TableName;
+	public static String CaTable_DescriptionColumnName;
+	public static String CaTable_DesignationColumnName;
+	public static String CaTable_IDColumnName;
+	public static String CaTable_NameColumnName;
+	public static String CaTable_TableName;
 	public static String EmployeeTable_Agency_FieldName;
 	public static String EmployeeTable_BirthDate_FieldName;
 	public static String EmployeeTable_Ca_FieldName;
