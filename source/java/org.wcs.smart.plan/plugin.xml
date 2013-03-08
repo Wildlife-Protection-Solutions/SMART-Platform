@@ -134,6 +134,16 @@
             allPopups="false"
             locationURI="popup:org.wcs.smart.plan.PlanListView">
          <command
+               commandId="org.wcs.smart.plan.translate"
+               label="%translate.command.label"
+               style="push"
+               tooltip="%translate.command.tooltip">
+         </command>
+         <separator
+               name="org.wcs.smart.plan.separator2"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.plan.DeletePlan"
                icon="images/icons/etool16/delete.png"
                label="%planlistview.popup.command.label.deleteplan2"
@@ -201,6 +211,10 @@
             </test>
          </activeWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.TranslatePlanHandler"
+            commandId="org.wcs.smart.plan.translate">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -219,6 +233,10 @@
       <command
             id="org.wcs.smart.plan.DeletePlan"
             name="%command.name.deleteplan">
+      </command>
+      <command
+            id="org.wcs.smart.plan.translate"
+            name="%translate.command.name">
       </command>
    </extension>
 
