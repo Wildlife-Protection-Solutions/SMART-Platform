@@ -42,6 +42,9 @@ import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.IFilterDropItem;
+import org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem;
+import org.wcs.smart.query.ui.formulaDnd.IValueDropItem;
 
 
 /**
@@ -241,9 +244,9 @@ public class GriddedQueryDefinitionComposite extends QueryDefinitionComposite {
 	 */
 	@Override
 	public void addItem(DropItem item) {
-		if (item.isGroupByItem() || item.isValueItem()){
+		if (item instanceof IGroupByDropItem || item instanceof IValueDropItem){
 			panel.addItem(item);
-		}else if (item.isFilterItem()){
+		}else if (item instanceof IFilterDropItem){
 			filterPanel.addElement(item);
 		}
 	}

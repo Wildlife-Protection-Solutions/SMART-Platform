@@ -53,7 +53,7 @@ import org.wcs.smart.query.parser.filter.Operator;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolIdDropItem  extends DropItem{
+public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 
 	private String text;
 	private String key;
@@ -227,27 +227,5 @@ public class PatrolIdDropItem  extends DropItem{
 		this.currentValue = ((String[])data)[1];
 		
 	}
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
 	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
-	}
 }

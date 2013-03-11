@@ -45,6 +45,7 @@ import org.wcs.smart.query.ui.SourceProvider;
 import org.wcs.smart.query.ui.SourceProvider.QueryPartPanelType;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
 import org.wcs.smart.query.ui.formulaDnd.FilterDropTargetPanel;
+import org.wcs.smart.query.ui.formulaDnd.IFilterDropItem;
 
 /**
  * Observation query definition panel
@@ -115,7 +116,7 @@ public class ObservationQueryDefinitionComposite extends QueryDefinitionComposit
 	 * @see org.wcs.smart.query.ui.definition.QueryDefinitionComposite#addItem(org.wcs.smart.query.ui.formulaDnd.DropItem)
 	 */
 	public void addItem(DropItem item){
-		if (item.isFilterItem()){
+		if (item instanceof IFilterDropItem){
 			dropTarget.addElement(item);
 		}
 	}

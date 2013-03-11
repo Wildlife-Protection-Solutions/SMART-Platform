@@ -49,6 +49,8 @@ import org.hibernate.persister.entity.Joinable;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
+import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -106,6 +108,48 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 	}
 	
+	/**
+	 * Loads all the areas for the given area type
+	 * @param areaType area type to load area for
+	 * @param session
+	 * @return
+	 */
+	public static List<Area> loadAreas(AreaType areaType, Session session){
+		@SuppressWarnings("unchecked")
+		List<Area> items = session
+			.createCriteria(Area.class)
+			.add(Restrictions.eq(
+					"conservationArea", //$NON-NLS-1$
+				SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("type", areaType)).list(); //$NON-NLS-1$
+	
+		return items;
+	}
+	
+	/**
+	 * Finds the Area of the provided type with the given key for the
+	 * current conservation area.  IF multiple area are found (this should not
+	 * happen if keys are maintained correctly) the first area is returned.
+	 * 
+	 * @param type area type
+	 * @param key area key
+	 * @param session
+	 * @return matching area or <code>null</code> if not found
+	 */
+	@SuppressWarnings("unchecked")
+	public static Area findArea(AreaType type, String key, Session session){
+		List<Area> matching = session
+				.createCriteria(Area.class)
+				.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
+						SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
+				.add(Restrictions.eq("type", type)).list(); //$NON-NLS-1$
+		if (matching.size() == 0){
+			return null;
+		}else{
+			return matching.get(0);
+		}
+	}
 	/**
 	 * For each hibernate mapping which maps 1-1 to a database
 	 * table this function returns the information about that

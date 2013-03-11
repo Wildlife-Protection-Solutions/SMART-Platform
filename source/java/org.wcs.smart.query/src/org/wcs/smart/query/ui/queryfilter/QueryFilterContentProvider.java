@@ -40,13 +40,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -248,26 +246,20 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session session = HibernateManager.openSession();
+				session.beginTransaction();
 				try {
-					session.beginTransaction();
-					@SuppressWarnings("unchecked")
-					List<Area> items = session
-							.createCriteria(Area.class)
-							.add(Restrictions.eq(
-									"conservationArea", //$NON-NLS-1$
-									SmartDB.getCurrentConservationArea()))
-							.add(Restrictions.eq("type", at)).list(); //$NON-NLS-1$
+					List<Area> items = HibernateManager.loadAreas(at, session);
 					areas.put(at, items.toArray(new Area[items.size()]));
-					session.getTransaction().commit();
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							viewer.refresh(at);
-						}
-					});
 				} finally {
+					session.getTransaction().rollback();
 					session.close();
 				}
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						viewer.refresh(at);
+					}
+				});
 				return Status.OK_STATUS;
 			}
 		};

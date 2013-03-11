@@ -33,7 +33,7 @@ import org.wcs.smart.ca.datamodel.Category;
  * @author Emily
  * @since 1.0.0
  */
-public class CategoryDropItem extends DropItem {
+public class CategoryDropItem extends DropItem implements IFilterDropItem{
 
 	private String text;
 	private String key;
@@ -89,29 +89,5 @@ public class CategoryDropItem extends DropItem {
 	@Override
 	public void initializeData(Object data) {
 		
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
 	}
 }

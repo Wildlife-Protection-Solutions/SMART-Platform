@@ -22,10 +22,12 @@
 package org.wcs.smart.query.ui.queryfilter;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,10 +36,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -46,6 +51,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -72,13 +78,17 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	//root nodes
 	private RootNode valueNode = new RootNode(NodeType.VALUE_NODE);
 	private RootNode groupByNode = new RootNode(NodeType.GROUP_BY_NODE);
+	
 	//patrol nodes
 	private RootNode patrolValueNode = new RootNode(NodeType.PATROL_VALUES);
 	private RootNode patrolGroupByNode = new RootNode(NodeType.PATROL_GROUPBYS);
 	
 	//date group by node 
 	private RootNode dateGroupByNode = new RootNode(NodeType.PATROL_DATE_GROUPBYS);
-
+	
+	//area group bys
+	private RootNode areaGroupByNode = new RootNode(NodeType.AREA_GROUPBYS); 
+	
 	//datamodel nodes
 	private RootNode dataModelValueNode = new RootNode(NodeType.DATAMODEL_VALUES);
 	private RootNode dataModelGroupByNode = new RootNode(NodeType.DATAMODEL_GROUPBYS);
@@ -93,6 +103,9 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	private PatrolQueryOption[] patrolGroupByOption = null;
 	private DateGroupByOption[] dateGroupByOptions = null;
 
+	private HashMap<Area.AreaType, Area[]> areas = new HashMap<Area.AreaType, Area[]>();
+	private TreeViewer viewer;
+	
 	/**
 	 * Root node children
 	 */
@@ -102,6 +115,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 		PATROL_VALUES(Messages.SummaryQueryContentProvider_PatrolValuesLabel),
 		PATROL_GROUPBYS(Messages.SummaryQueryContentProvider_PatrolGroupByLabel),
 		PATROL_DATE_GROUPBYS(Messages.SummaryQueryContentProvider_DateLabel),
+		AREA_GROUPBYS(Messages.SummaryQueryContentProvider_AreaGroupByLabel),
 		DATAMODEL_VALUES(Messages.SummaryQueryContentProvider_DataModelValuesLabel),
 		DATAMODEL_GROUPBYS(Messages.SummaryQueryContentProvider_DataModelGroupByLabel),
 		DATAMODEL_VALUE_CATEGORY(Messages.SummaryQueryContentProvider_ValueCategoriesAttributesLabel),
@@ -133,6 +147,14 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	}
 
 	/**
+	 * Clears the areas loaded into the content provider
+	 */
+	public void clearAreas(){
+		this.areas.clear();
+	}
+	
+	
+	/**
 	 * 
 	 * @param newInput must be a map that contains the keys
 	 * RootNodeType.DATA_MODEL_ITEM whose value is the current data model
@@ -143,6 +165,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.viewer = (TreeViewer)viewer;
 		if (newInput == null){
 			patrolValueOptions = null;
 			patrolGroupByOption = null;
@@ -163,6 +186,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			dateGroupByOptions = (DateGroupByOption[]) in.get(SummaryQueryContentProvider.NodeType.PATROL_DATE_GROUPBYS);
 			provider.inputChanged(viewer, oldInput, this.dataModel);	
 		}
+		clearAreas();
 	}
 
 	/**
@@ -187,13 +211,49 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof RootNode){
 			return ((RootNode)parentElement).getChildren();
-		//}else if (parentElement instanceof AREA FITLER){
+		}else if (parentElement instanceof Area.AreaType){
+			final Area.AreaType at = (Area.AreaType) parentElement;
+			if (areas.get(at) != null) {
+				return areas.get(at);
+			} else {
+				loadAreas(at);
+				return new String[] { LOADING_TEXT };
+			}
 		}else if (parentElement instanceof SummaryDmObject){
 			SummaryDmObject parent = ((SummaryDmObject)parentElement);
 			return getChildren(parent);
 			
 		}
 		return new Object[]{};
+	}
+	
+	/**
+	 * Loads the areas for a given area type
+	 * @param at
+	 */
+	private void loadAreas(final Area.AreaType at) {
+		Job j = new Job(MessageFormat.format(Messages.QueryFilterContentProvider_LoadingItemsJobName, new Object[]{at.getGuiName()})) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session session = HibernateManager.openSession();
+				session.beginTransaction();
+				try {
+					List<Area> items = HibernateManager.loadAreas(at, session);
+					areas.put(at, items.toArray(new Area[items.size()]));
+				} finally {
+					session.getTransaction().rollback();
+					session.close();
+				}
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						viewer.refresh(at);
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
 	}
 
 	private Object[] getAttributeTreeChildren(final SummaryDmObject parent){
@@ -340,6 +400,8 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 					return valueNode;
 			}
 			return null;
+		}else if (element instanceof Area.AreaType){
+			return areaGroupByNode;
 		}else if (element instanceof PatrolQueryOption){
 			return patrolGroupByNode;
 		}else if (element instanceof PatrolValueOption){
@@ -365,9 +427,8 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 			return false;
 		}else if (element instanceof PatrolValueOption){
 			return false;
-//		}else if (element instanceof DataModelItem){
-//			return false;
-		//}else if (parentElement instanceof AREA FITLER){
+		}else if (element instanceof Area.AreaType){
+			return true;
 		}else if (element instanceof SummaryDmObject){
 			if (!((SummaryDmObject) element).isValue()){
 				if (((SummaryDmObject) element).getObject() instanceof AttributeTreeNode){
@@ -423,7 +484,14 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				kids[kids.length-1] = dateGroupByNode;
 				return kids;
 			}else if (type == NodeType.GROUP_BY_NODE){				
-				return new Object[]{patrolGroupByNode, dataModelGroupByNode};
+				if (SmartDB.isMultipleAnalysis()){
+					//areas are not applicable for cross-ca analysis
+					return new Object[]{patrolGroupByNode, dataModelGroupByNode};
+				}else{
+					return new Object[]{patrolGroupByNode, areaGroupByNode, dataModelGroupByNode};
+				}
+			}else if (type == NodeType.AREA_GROUPBYS){
+				return Area.AreaType.values();
 			}else if (type == NodeType.PATROL_DATE_GROUPBYS){
 				return dateGroupByOptions;
 			}else if (type == NodeType.DATAMODEL_VALUES){
@@ -516,6 +584,8 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
 			}else if (type == NodeType.DATAMODEL_GROUPBY_CATEGORY){
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
+			}else if (type == NodeType.AREA_GROUPBYS){
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.AREA_FILTER_ICON);
 			}
 			return null;
 		}

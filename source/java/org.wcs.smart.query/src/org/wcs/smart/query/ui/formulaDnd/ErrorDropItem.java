@@ -70,21 +70,6 @@ public class ErrorDropItem extends DropItem {
 	}
 
 	@Override
-	public boolean isValueItem() {
-		return false;
-	}
-
-	@Override
-	public boolean isFilterItem() {
-		return false;
-	}
-
-	@Override
-	public boolean isGroupByItem() {
-		return false;
-	}
-
-	@Override
 	protected void createComposite(Composite parent) {
 		redColor =  new Color(Display.getDefault(),new RGB(255, 210,210) );
 		parent.setBackground(redColor);

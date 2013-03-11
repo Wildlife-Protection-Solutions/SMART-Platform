@@ -21,59 +21,13 @@
  */
 package org.wcs.smart.query.ui.formulaDnd;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.parser.filter.Operator;
-
 /**
- * a NOT drop tiem
+ * Interface that drop items which represent data
+ * filters must implement
+ * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class NotDropItem extends DropItem implements IFilterDropItem{
+public interface IFilterDropItem {
 
-	/**
-	 * @param parent
-	 * @param panel
-	 */
-	public NotDropItem() {
-		//super(parent, panel);
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
-	 */
-	@Override
-	public String getText() {
-		return Operator.NOT.getGuiValue();
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
-	 */
-	@Override
-	public String asQueryPart() {
-		return Operator.NOT.asSmartValue();
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
-	 */
-	@Override
-	protected void createComposite(Composite parent) {
-		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(Operator.NOT.getGuiValue());
-		initDrag(lbl);		
-	}
-
-	/**
-	 * Nothing to initialize
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
-	 */
-	@Override
-	public void initializeData(Object data) {
-		
-	}
-	
 }

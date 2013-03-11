@@ -111,6 +111,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	 * @param dropItem
 	 * @return
 	 */
+	@Override
 	public boolean addItem(DropItem dItem){
 		if (!(dItem instanceof CategoryGroupByDropItem)){
 			return false;
@@ -144,8 +145,6 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	 */
 	@Override
 	public String getText() {
-//		return parentCategory.getFullCategoryName();
-		
 		StringBuilder sb = new StringBuilder();
 		sb.append (Messages.CategoryGroupByDropItem_CategoriesLabel + " - " + Messages.CategoryGroupByDropItem_TreeLevelLabel + " " + this.level + "\n");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		int cnt = 0;
@@ -158,7 +157,6 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 			sb.append("\n"); //$NON-NLS-1$
 			cnt ++;
 		}
-//		return "Categories @ Level " + this.level;
 		return sb.toString();
 	}
 
@@ -169,7 +167,6 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("category:"); //$NON-NLS-1$
-//		sb.append(parentCategory.getHkey());
 		sb.append(level);
 		sb.append(":"); //$NON-NLS-1$
 		if (filters != null){
@@ -196,30 +193,6 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 		}else{
 			this.filters = (List<ListItem>)data;
 		}
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem() {
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem() {
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem() {
-		return true;
 	}
 
 	/**

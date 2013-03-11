@@ -238,6 +238,7 @@ public class Parser implements ParserConstants {
     case PATROL_UUID_GROUPBY_OPTION:
     case PATROL_STRING_GROUPBY_OPTION:
     case CATEGORY_GROUPBY_ITEM:
+    case AREA_GROUPBY_ITEM:
     case ATTRIBUTE_GROUPBY_ITEM:
     case CATEGORY_ATTRIBUTE_GROUPBY_ITEM:
       item = GroupByItem();
@@ -291,6 +292,10 @@ public class Parser implements ParserConstants {
     case CATEGORY_GROUPBY_ITEM:
       jj_consume_token(CATEGORY_GROUPBY_ITEM);
                         item = CategoryGroupBy.createGroupBy(token.image);
+      break;
+    case AREA_GROUPBY_ITEM:
+      jj_consume_token(AREA_GROUPBY_ITEM);
+                        item = AreaGroupBy.createGroupBy(token.image);
       break;
     case ATTRIBUTE_GROUPBY_ITEM:
       jj_consume_token(ATTRIBUTE_GROUPBY_ITEM);
@@ -725,7 +730,7 @@ public class Parser implements ParserConstants {
       jj_la1_1 = new int[] {0x7c7ff800,0x7c7ff800,0x7c7ff800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7c7ff800,0x484000,0x42000,0x7c7ff000,0x7c000000,0x7c021000,0x0,0x1c,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x7f,0x7f,0x7f,0xe80,0x0,0x0,0xe80,0xfa000,0x0,0x18000,0xfa000,0x0,0x0,0x7f,0x10,0x0,0x3f,0xf,0x2f,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0xbf,0xbf,0xbf,0x1d00,0x0,0x0,0x1d00,0x3f4000,0x0,0x30000,0x3f4000,0x0,0x0,0xbf,0x10,0x0,0x3f,0xf,0x2f,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -842,7 +847,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[85];
+    boolean[] la1tokens = new boolean[87];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -862,7 +867,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 85; i++) {
+    for (int i = 0; i < 87; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

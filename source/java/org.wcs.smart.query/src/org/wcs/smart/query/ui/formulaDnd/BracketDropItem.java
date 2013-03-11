@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Label;
  * @author Emily
  * @since 1.0.0
  */
-public class BracketDropItem extends DropItem {
+public class BracketDropItem extends DropItem implements IFilterDropItem{
 
 	
 	/**
@@ -95,29 +95,5 @@ public class BracketDropItem extends DropItem {
 	@Override
 	public void initializeData(Object data) {
 		
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
 	}
 }

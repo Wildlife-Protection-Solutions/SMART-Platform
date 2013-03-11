@@ -73,9 +73,7 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	//patrol nodes
 	private RootNode patrolValueNode = new RootNode(NodeType.PATROL_VALUES);
 
-	
-
-	//datamodel nodes
+	//data model nodes
 	private RootNode dataModelValueNode = new RootNode(NodeType.DATAMODEL_VALUES);
 
 	
@@ -86,23 +84,6 @@ public class GriddedQueryContentProvider  implements ITreeContentProvider {
 	private PatrolValueOption[] gridValueOptions = null;
 	private PatrolValueOption[] patrolRatioOptions = null;
 	private DateGroupByOption[] dateGroupByOptions = null;
-	
-	
-//	/**
-//	 * Data model children items
-//	 */
-//	enum DataModelItem{
-//		CATEGORIES("Categories"),
-//		ATTRIBUTES("Attributes");
-//		
-//		String guiName;
-//		
-//		DataModelItem(String guiName){
-//			this.guiName = guiName;
-//		}
-//	}
-	
-	
 	
 	/**
 	 * Root node children

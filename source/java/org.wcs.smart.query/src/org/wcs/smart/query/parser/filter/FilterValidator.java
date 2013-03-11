@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -245,6 +247,23 @@ public class FilterValidator {
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_CategoryNotFound, new Object[]{hkey}));
 		}
 	}
+	
+	
+	/**
+	 * Validates the area filter ensuring the area with the given key and type exists.
+	 * 
+	 * @param type the area type
+	 * @param areaKey the area key
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void validateArea(AreaType type, String areaKey, Session session) throws Exception{
+		Area a = HibernateManager.findArea(type, areaKey, session);
+		if (a == null){
+			throw new Exception (MessageFormat.format(Messages.FilterValidator_InvalidAreaFilter, new Object[]{type.getGuiName(), areaKey}));
+		}
+	}
+	
 	/**
 	 * Validates that an atttribute with the given key exists
 	 * @param key

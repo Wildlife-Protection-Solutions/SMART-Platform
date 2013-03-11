@@ -37,7 +37,7 @@ import org.wcs.smart.query.parser.filter.Operator;
  * @author Emily
  * @since 1.0.0
  */
-public class BooleanOpDropItem extends DropItem {
+public class BooleanOpDropItem extends DropItem implements IFilterDropItem{
 	
 	private Combo operator;
 	private Font smallerFont;
@@ -134,28 +134,4 @@ public class BooleanOpDropItem extends DropItem {
 		}
 	}
 	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
-	}
-
 }

@@ -32,7 +32,7 @@ import org.wcs.smart.query.parser.IPatrolQueryOption;
  * @author Emily
  * @since 1.0.0
  */
-public class BooleanPatrolDropItem extends DropItem {
+public class BooleanPatrolDropItem extends DropItem implements IFilterDropItem{
 
 	private Label lbl;
 	private String text;
@@ -81,30 +81,6 @@ public class BooleanPatrolDropItem extends DropItem {
 	@Override
 	public void initializeData(Object data) {
 		
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
 	}
 
 }
