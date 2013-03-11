@@ -171,7 +171,9 @@ public class PlanFilter {
 	 */
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
-		
+
+		//NOTE: if select order is changed also change sorting in PlanHibernateManager.getRootPlans
+		//as in assumes that id goes 2nd and name 3rd
 		str.append("SELECT p.uuid, p.id, p.name, p.type, p.parent.uuid "); //$NON-NLS-1$
 		str.append("FROM Plan p "); //$NON-NLS-1$
 		str.append("WHERE p.conservationArea = :ca " ); //$NON-NLS-1$
@@ -212,8 +214,6 @@ public class PlanFilter {
 		if (!and){
 			str.append(")"); //$NON-NLS-1$
 		}
-		
-		str.append(" ORDER BY p.name asc, p.id desc"); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (types != null && types.length > 0){

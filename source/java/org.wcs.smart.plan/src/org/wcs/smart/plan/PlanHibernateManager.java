@@ -23,11 +23,13 @@ package org.wcs.smart.plan;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -94,6 +96,24 @@ public class PlanHibernateManager{
 			
 			@SuppressWarnings("unchecked")
 			List<Object[]> results = filterQuery.list();
+			// ORDER BY p.name asc, p.id desc
+			Collections.sort(results, new Comparator<Object[]>(){
+				@Override
+				public int compare(Object[] arg0, Object[] arg1) {
+					String name0 = (String)arg0[2];
+					String name1 = (String)arg1[2];
+					if (name0 == null) name0 = ""; //$NON-NLS-1$
+					if (name1 == null) name1 = ""; //$NON-NLS-1$
+					int result = Collator.getInstance().compare(name0, name1);
+					if (result != 0)
+						return result;
+					String id0 = (String)arg0[1];
+					String id1 = (String)arg1[1];
+					if (id0 == null) id0 = ""; //$NON-NLS-1$
+					if (id1 == null) id1 = ""; //$NON-NLS-1$
+					return -Collator.getInstance().compare(id0, id1); //minus for desc sort
+				}
+			});
 			
 			Map<String, PlanEditorInput> inputs = new LinkedHashMap<String, PlanEditorInput>();
 			Map<String, String>parents = new LinkedHashMap<String,String>();
