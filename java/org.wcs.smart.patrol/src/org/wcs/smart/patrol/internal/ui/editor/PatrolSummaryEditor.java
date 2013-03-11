@@ -51,7 +51,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -71,7 +73,6 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
@@ -182,6 +183,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		super.dispose();
 	}
 	
+	private Composite outline;
 	/**
 	 * Create contents of the editor part.
 	 * @param parent
@@ -189,17 +191,27 @@ public class PatrolSummaryEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 
-		ScrolledForm container = toolkit.createScrolledForm(parent);
+		//ScrolledForm container = toolkit.createScrolledForm(parent);
+		ScrolledComposite container = new ScrolledComposite(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		container.setLayout(new GridLayout());
+		container.setExpandHorizontal(true);
+		container.setExpandVertical(true);
+		container.setMinHeight(300);
+		container.setMinWidth(300);
 
-		toolkit.paintBordersFor(container);
-		container.getBody().setLayout(new GridLayout(1, false));
-		container.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		toolkit.paintBordersFor(container);
+//		container.getBody().setLayout(new GridLayout(1, false));
+//		container.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		
+//		frmPatrolSummary = toolkit.createForm(container.getBody());
+		outline = toolkit.createComposite(container);
+		outline.setLayout(new GridLayout());
+		outline.setLayoutData(new GridData(SWT.FILL, SWT.FILL ,true, true));
+		container.setContent(outline);
 		
-
-		
-		frmPatrolSummary = toolkit.createForm(container.getBody());
+		frmPatrolSummary = toolkit.createForm(outline);
 		frmPatrolSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-
+		
 		GridLayout layout = new GridLayout(1, true);
 		frmPatrolSummary.getBody().setLayout(layout);
 		
@@ -331,7 +343,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		dataSection.setLayout(new GridLayout(1, false));
 		Composite compData = toolkit.createComposite(dataSection, SWT.NONE );
 		compData.setLayout(new GridLayout(1, false));
-
+		compData.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		Composite comp = toolkit.createComposite(compData, SWT.NONE );
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		comp.setLayout(new GridLayout(5, false));
@@ -388,9 +401,10 @@ public class PatrolSummaryEditor extends EditorPart {
 		tblPatrolData = new TableViewer(compTable, SWT.BORDER| SWT.FULL_SELECTION);
 		toolkit.adapt(tblPatrolData.getTable());
 		
-		tblPatrolData.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		tblPatrolData.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblPatrolData.getTable().setLinesVisible(true);
 		tblPatrolData.getTable().setHeaderVisible(true);
+		((GridData)tblPatrolData.getTable().getLayoutData()).heightHint = 100;
 		
 		for (int i = 0; i < PatrolLegDayColumn.values().length; i++){
 			PatrolLegDayColumn columntype = PatrolLegDayColumn.values()[i];
@@ -425,7 +439,11 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		dataSection.setClient(compData);
 		
+		Point p = outline.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				
+		container.setMinSize(p.x, p.y+100);
 		initValues();
+		
 	}
 
 	/**
