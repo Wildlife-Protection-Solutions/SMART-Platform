@@ -727,6 +727,7 @@ public class PlanEditor extends EditorPart {
 		if(t != null){
 			t.getName();
 		}
+		p.getNames().size();
 		session.getTransaction().rollback();
 		session.close();
 		return p;

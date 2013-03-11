@@ -141,7 +141,7 @@ public class PlanIdNameDescComposite extends PlanComposite {
 	protected boolean updateModelInternal(Plan plan) {
 		plan.setId(id.getText());
 		if (name.getText().trim().length() == 0){
-			plan.setName(null);
+			plan.setName(""); //$NON-NLS-1$
 		}else{
 			plan.setName(name.getText());
 		}
