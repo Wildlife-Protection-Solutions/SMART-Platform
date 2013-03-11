@@ -290,7 +290,6 @@ public class PlanHibernateManager{
 		
 		session.delete(parent);
 		deletedItems.add(parent);
-		session.flush();
 	}
 
 	/**
