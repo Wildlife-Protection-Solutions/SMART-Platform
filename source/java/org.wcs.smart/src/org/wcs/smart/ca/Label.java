@@ -22,6 +22,11 @@
 package org.wcs.smart.ca;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -189,6 +194,35 @@ public class Label  {
 			description = lbl.getValue();
 		}
 		return description;
+	}
+
+	/**
+	 * DB stored function that returns name in current language for given element UUID.
+	 * 
+	 * create function smart.elementName(element_uuid CHAR(16) FOR BIT DATA)
+     * returns varchar(1024)
+     * language java
+     * parameter style java
+     * reads sql data
+     * external name 'org.wcs.smart.ca.Label.getElementName';
+     * 
+	 * @param elementuuid
+	 * @return name in current language for given element UUID.
+	 * @throws SQLException
+	 */
+	@Transient
+	public static String getElementName(byte[] elementuuid) throws SQLException {
+		Connection connection = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
+		String sql = "SELECT value FROM smart.i18n_label lbl WHERE language_uuid = ? AND element_uuid = ?"; //$NON-NLS-1$
+		PreparedStatement statement = connection.prepareStatement(sql);
+		statement.setObject(1, SmartDB.getCurrentLanguage().getUuid());
+		statement.setObject(2, elementuuid);
+		ResultSet resultSet = statement.executeQuery();
+		if (resultSet.next()) {
+			return resultSet.getString(1);
+		}
+		return null;
+		
 	}
 	
 	@Transient
