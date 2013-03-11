@@ -45,7 +45,12 @@ public class PlanFilter {
 	
 	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {
 			new StringFilterComposite.TextField(Messages.PlanFilter_PlanId, "id"), //$NON-NLS-1$
-			new StringFilterComposite.TextField(Messages.PlanFilter_PlanName, "name") //$NON-NLS-1$
+			new StringFilterComposite.TextField(Messages.PlanFilter_PlanName, "uuid") { //$NON-NLS-1$
+				@Override
+				public String getDbFieldQuery(String objPrefix) {
+					return "smart.elementName(" + super.getDbFieldQuery(objPrefix) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				};
+			}
 	};
 	
 	
@@ -190,7 +195,7 @@ public class PlanFilter {
 				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			str.append(" lower(p." + searchField.getDbFieldName() + ") like :pid "); //$NON-NLS-1$ //$NON-NLS-2$
+			str.append(" lower(" + searchField.getDbFieldQuery("p") + ") like :pid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			
 		}
 		if (dateFilter != null){
