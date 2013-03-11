@@ -59,7 +59,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolListDropItem extends DropItem{
+public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 
 	private String keyPart;
 	private String text;
@@ -235,27 +235,4 @@ public class PatrolListDropItem extends DropItem{
 		currentSelection = (ListItem)data;
 	}
 	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
-	}
 }

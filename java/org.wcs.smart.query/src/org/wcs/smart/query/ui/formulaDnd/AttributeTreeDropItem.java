@@ -56,7 +56,7 @@ import org.wcs.smart.query.internal.Messages;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeTreeDropItem extends DropItem{
+public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 	
 	private String text;
 	private String key;
@@ -261,30 +261,6 @@ public class AttributeTreeDropItem extends DropItem{
 			return ((FilterDropTargetPanel)this.targetPanel).getTreeEditor();
 		}
 		return null;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
 	}
 
 }

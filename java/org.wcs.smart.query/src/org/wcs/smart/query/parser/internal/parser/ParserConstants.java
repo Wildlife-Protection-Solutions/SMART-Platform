@@ -141,35 +141,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int PATROL_CONTRIBUTION_STRING_KEY = 69;
   /** RegularExpression Id. */
-  int AREA_KEY = 70;
+  int AREA_TYPE_KEY = 70;
   /** RegularExpression Id. */
-  int PATROL_VALUE_ITEM = 71;
+  int AREA_KEY = 71;
   /** RegularExpression Id. */
-  int PATROL_VALUE_KEY = 72;
+  int PATROL_VALUE_ITEM = 72;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 73;
+  int PATROL_VALUE_KEY = 73;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 74;
+  int SUM_CAT_VALUE_KEY = 74;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 75;
+  int SUM_ATTRIBUTE_VALUE_KEY = 75;
   /** RegularExpression Id. */
-  int AGG = 76;
+  int SUM_CAT_ATT_VALUE_KEY = 76;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 77;
+  int AGG = 77;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 78;
+  int DATE_GROUPBY_ITEM = 78;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 79;
+  int QUERY_SPLITTER = 79;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 80;
+  int PATROL_UUID_GROUPBY_OPTION = 80;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 81;
+  int PATROL_STRING_GROUPBY_OPTION = 81;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 82;
+  int CATEGORY_GROUPBY_ITEM = 82;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 83;
+  int AREA_GROUPBY_ITEM = 83;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 84;
+  int ATTRIBUTE_GROUPBY_ITEM = 84;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 85;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 86;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -246,6 +250,7 @@ public interface ParserConstants {
     "\"patrol:member\"",
     "<PATROL_CONTRIBUTION_BOOL_KEY>",
     "<PATROL_CONTRIBUTION_STRING_KEY>",
+    "<AREA_TYPE_KEY>",
     "<AREA_KEY>",
     "<PATROL_VALUE_ITEM>",
     "<PATROL_VALUE_KEY>",
@@ -258,6 +263,7 @@ public interface ParserConstants {
     "<PATROL_UUID_GROUPBY_OPTION>",
     "<PATROL_STRING_GROUPBY_OPTION>",
     "<CATEGORY_GROUPBY_ITEM>",
+    "<AREA_GROUPBY_ITEM>",
     "<ATTRIBUTE_GROUPBY_ITEM>",
     "<CATEGORY_ATTRIBUTE_GROUPBY_ITEM>",
     "<QUOTED_STRING>",

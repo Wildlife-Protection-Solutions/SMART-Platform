@@ -10,6 +10,9 @@ public class Messages extends NLS {
 	public static String AddFolderHandler_CouldNotAddFolderError;
 	public static String AddFolderHandler_DefaultNewFolderName;
 	public static String AreaFilter_InvalidAreaKey;
+	public static String AreaGroupBy_AreaGroupByNotFound;
+	public static String AreaGroupByItem_LoadError;
+	public static String AreaGroupByItem_LoadingAreaJobName;
 	public static String AttributeFilter_AttributeNotFound;
 	public static String AttributeFilter_InvalidAttributePrefix;
 	public static String AttributeFilter_InvalidWaypointObservationPrefix;
@@ -128,6 +131,7 @@ public class Messages extends NLS {
 	public static String FilterValidator_Employee_DifferentUniqueId;
 	public static String FilterValidator_EmployeeDifferentId;
 	public static String FilterValidator_EmployeeDifferentName;
+	public static String FilterValidator_InvalidAreaFilter;
 	public static String FilterValidator_MultipleImportOptions;
 	public static String FilterValidator_PatrolFilter_EmployeeError;
 	public static String FilterValidator_PatrolFilter_UnqiueIdMatchingError;
@@ -137,6 +141,8 @@ public class Messages extends NLS {
 	public static String FixedColumnLabelProvider_BooleanPatrolAttribute_FalseLabel;
 	public static String FixedColumnLabelProvider_BooleanPatrolAttribute_TrueLabel;
 	public static String FixedQueryColumn_ArmedColumnName;
+	public static String FixedQueryColumn_CaIdColumnName;
+	public static String FixedQueryColumn_CaNameColumnName;
 	public static String FixedQueryColumn_CommentColumnName;
 	public static String FixedQueryColumn_DirectionColumnName;
 	public static String FixedQueryColumn_DistanceColumnName;
@@ -529,6 +535,7 @@ public class Messages extends NLS {
 	public static String SummaryQuery_RowGroupByParseError;
 	public static String SummaryQuery_ValueParseError;
 
+	public static String SummaryQueryContentProvider_AreaGroupByLabel;
 	public static String SummaryQueryContentProvider_DataModelAttributeLabel;
 	public static String SummaryQueryContentProvider_DataModelGroupByAttributesLabel;
 	public static String SummaryQueryContentProvider_DataModelGroupByLabel;

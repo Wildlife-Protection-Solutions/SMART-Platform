@@ -123,20 +123,6 @@ public abstract class DropItem {
 	public abstract void initializeData(Object data);
 	
 	/**
-	 * @return <code>true</code> if a summary value drop item
-	 */
-	public abstract boolean isValueItem();
-	/**
-	 * @return <code>true</code> if drop item is a filter drop
-	 * item that filters query results 
-	 */
-	public abstract boolean isFilterItem();
-	/**
-	 * @return <code>true</code> if group by drop item
-	 */
-	public abstract boolean isGroupByItem();
-	
-	/**
 	 * Called when a drop item modified the queries.
 	 * <p>This function notifies the required components
 	 * that the query has changed.</p>

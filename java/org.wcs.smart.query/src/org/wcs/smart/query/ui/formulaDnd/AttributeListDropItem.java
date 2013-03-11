@@ -58,7 +58,7 @@ import org.wcs.smart.query.model.ListItem;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeListDropItem extends DropItem{
+public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	
 	private String text;
 	private String key;
@@ -232,29 +232,6 @@ public class AttributeListDropItem extends DropItem{
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
 		loadItemsJobs.schedule();
 	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
 
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
-	}
 
 }

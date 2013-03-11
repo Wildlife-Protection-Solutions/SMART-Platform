@@ -235,6 +235,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeData(Object data) {
 		if (data == null) {
@@ -245,30 +246,6 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 
 	}
 
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem() {
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem() {
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem() {
-		return true;
-	}
-	
 	/**
 	 * Updates the text label
 	 */

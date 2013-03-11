@@ -203,31 +203,6 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return true;
-	}
-	
-	
-	/**
 	 * Opens and closes a hibernate session so this should
 	 * be executed in a separate thread.
 	 * 

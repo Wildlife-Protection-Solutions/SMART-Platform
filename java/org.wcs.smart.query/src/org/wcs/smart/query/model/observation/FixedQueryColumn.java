@@ -41,8 +41,8 @@ public class FixedQueryColumn extends QueryColumn {
 	 * The defined fixed columns.
 	 */
 	public enum FixedColumns{
-		CA_ID("Conservation Area ID", ColumnType.STRING,"ca:id"),
-		CA_NAME("Conservation Area Name", ColumnType.STRING,"ca:name"),
+		CA_ID(Messages.FixedQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id"), //$NON-NLS-2$
+		CA_NAME(Messages.FixedQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name"), //$NON-NLS-2$
 		PATROL_ID(Messages.FixedQueryColumn_PatrolIdColumnName, ColumnType.STRING, "patrol:id"), //$NON-NLS-1$
 		PATROL_TYPE(Messages.FixedQueryColumn_TypeColumnName, ColumnType.STRING, "patrol:type"), //$NON-NLS-1$
 		PATROL_START_DATE(Messages.FixedQueryColumn_PatrolStartDateColumnName, ColumnType.DATE, "patrol:startdate"), //$NON-NLS-1$

@@ -44,7 +44,7 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
  * @author egouge
  * @since 1.0.0
  */
-public abstract class AbstractValueDropItem extends DropItem {
+public abstract class AbstractValueDropItem extends DropItem implements IValueDropItem{
 
 	private static final String PER_LABEL = Messages.AbstractValueDropItem_RateofChangePerLabel;
 	
@@ -236,30 +236,5 @@ public abstract class AbstractValueDropItem extends DropItem {
 		main = new Composite(parent, SWT.NONE);
 		initDrag(main);
 		updateUi();
-	}
-	
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return true;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return false;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
 	}
 }

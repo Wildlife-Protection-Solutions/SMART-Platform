@@ -33,6 +33,8 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.SummaryQuery;
 import org.wcs.smart.query.ui.formulaDnd.DropItem;
+import org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem;
+import org.wcs.smart.query.ui.formulaDnd.IValueDropItem;
 import org.wcs.smart.query.ui.formulaDnd.ListDropTargetPanel;
 
 /**
@@ -220,9 +222,9 @@ public class SummaryValueGroupByPanel {
 	 * @param item
 	 */
 	public void addItem(DropItem item){
-		if (item.isValueItem()){
+		if (item instanceof IValueDropItem){
 			lstValues.addElement(item);
-		}else if (item.isGroupByItem()){
+		}else if (item instanceof IGroupByDropItem){
 			lstRowGroupBy.addElement(item);
 		}
 	}

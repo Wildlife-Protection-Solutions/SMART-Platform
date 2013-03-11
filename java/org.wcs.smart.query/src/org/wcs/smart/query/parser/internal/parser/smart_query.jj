@@ -63,7 +63,8 @@ TOKEN :
  | < PATROLLEG_MEMBER_KEY : "patrol:member" >
  | < PATROL_CONTRIBUTION_BOOL_KEY : "patrol:contribution:boolean:"(< LETTER >)* >
  | < PATROL_CONTRIBUTION_STRING_KEY : "patrol:contribution:string:"(< LETTER >)* >
- | < AREA_KEY : "area:" ("wp" | "t") ":" ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) ":" < DM_KEY > >}
+ | < AREA_TYPE_KEY : ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) >
+ | < AREA_KEY : "area:" ("wp" | "t") ":" < AREA_TYPE_KEY > ":" < DM_KEY > >}
 /* Summary Query */
 TOKEN :
 {
@@ -87,6 +88,7 @@ TOKEN :
 |    < PATROL_STRING_GROUPBY_OPTION :
   			< PATROL_ID_KEY >  ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
 | 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
+| 	<  AREA_GROUPBY_ITEM : "area:" < AREA_TYPE_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :
 			( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )*) >
@@ -276,6 +278,11 @@ IGroupBy GroupByItem() :
 		{		  
 		  	item = CategoryGroupBy.createGroupBy(token.image);
 		}
+	|
+		< AREA_GROUPBY_ITEM >
+		{		  
+		  	item = AreaGroupBy.createGroupBy(token.image);
+		} 
 	|
 		< ATTRIBUTE_GROUPBY_ITEM >
 		{

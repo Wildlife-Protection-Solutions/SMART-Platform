@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.formulaDnd;
 
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -344,6 +345,24 @@ public class DropItemFactory {
 		return new AreaDropItem(area, geomType);
 	}
 	
+	/**
+	 * Creates a new area group by drop item 
+	 * 
+	 * @param areaType
+	 * @return
+	 */
+	public DropItem createAreaGroupByDropItem(Area area){
+		return new AreaGroupByItem(area);
+	}
+	/**
+	 * Creates a new area group by drop item 
+	 * 
+	 * @param areaType
+	 * @return
+	 */
+	public DropItem createAreaGroupByDropItem(AreaType areaType){
+		return new AreaGroupByItem(areaType);
+	}
 	
 	/**
 	 * Creates a drop item or collection of drop items for the
@@ -389,9 +408,14 @@ public class DropItemFactory {
 		
 		} else if (object instanceof SummaryDmObject) {
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)object)};
-			
+		}else if (object instanceof AreaType){
+			if (dropType == QueryPartPanelType.SUMMARY_ITEM){
+				items = new DropItem[]{createAreaGroupByDropItem((AreaType)object)};
+			}
 		}else if (object instanceof Area){
-			if (queryType == QueryType.OBSERVATION){
+			if (dropType == QueryPartPanelType.SUMMARY_ITEM){
+				items = new DropItem[]{createAreaGroupByDropItem((Area)object)};
+			}else if (queryType == QueryType.OBSERVATION){
 				items = new DropItem[]{ createAreaDropItem((Area)object, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 			}else if (queryType == QueryType.PATROL ||
 					queryType == QueryType.SUMMARY ||

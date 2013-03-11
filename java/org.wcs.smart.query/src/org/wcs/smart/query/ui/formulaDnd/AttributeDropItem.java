@@ -45,7 +45,7 @@ import org.wcs.smart.query.parser.filter.Operator;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeDropItem extends DropItem{
+public class AttributeDropItem extends DropItem implements IFilterDropItem{
 
 	private String text;
 	private String key;
@@ -233,30 +233,6 @@ public class AttributeDropItem extends DropItem{
 		if (currentValue != null){
 			value.setText(currentValue);
 		}
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isValueItem()
-	 */
-	@Override
-	public boolean isValueItem(){
-		return false;
-	}
-	
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isFilterItem()
-	 */
-	@Override
-	public boolean isFilterItem(){
-		return true;
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#isGroupByItem()
-	 */
-	@Override
-	public boolean isGroupByItem(){
-		return false;
 	}
 
 }
