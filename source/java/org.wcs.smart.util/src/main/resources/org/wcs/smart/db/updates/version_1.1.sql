@@ -34,3 +34,8 @@ create function smart.elementName(element_uuid CHAR(16) FOR BIT DATA)
     parameter style java
     reads sql data
     external name 'org.wcs.smart.ca.Label.getElementName';
+
+-- Translation options support for plans (copy current names as default language values, remove names column) -- 
+INSERT INTO smart.I18N_LABEL(LANGUAGE_UUID, ELEMENT_UUID, VALUE) SELECT lang.UUID as LANG_UUID, p.UUID as ELEM_UUID, 
+coalesce(p.NAME, '') as VALUE FROM smart.LANGUAGE lang INNER JOIN smart.PLAN p ON lang.CA_UUID = p.CA_UUID WHERE lang.isdefault;
+ALTER TABLE smart.PLAN DROP COLUMN NAME;
