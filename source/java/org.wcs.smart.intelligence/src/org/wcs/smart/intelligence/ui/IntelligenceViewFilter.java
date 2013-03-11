@@ -71,7 +71,7 @@ public class IntelligenceViewFilter {
 		
 		//name
 		if (nameComparison != null && name != null) {
-			str.append("AND lower(i.name.value) like :name "); //$NON-NLS-1$
+			str.append("AND lower(smart.elementName(i.uuid)) like :name "); //$NON-NLS-1$
 		}
 		
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
