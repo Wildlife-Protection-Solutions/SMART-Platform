@@ -21,9 +21,17 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.plan.PlanEventManager;
+import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.ui.TranslateNamesHandler;
 
 /**
  * Handler that brings up the plan translate dialog.
@@ -31,10 +39,34 @@ import org.eclipse.core.commands.ExecutionException;
  * @author elitvin
  * @since 1.0.0
  */
-public class TranslatePlanHandler extends AbstractHandler {
+public class TranslatePlanHandler extends TranslateNamesHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
+		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection)) {
+			return null;
+		}
+		
+		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
+
+		Plan plan = null;
+		if (obj instanceof PlanEditorInput) {
+			byte[] uuid = ((PlanEditorInput) obj).getUuid();
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			plan = (Plan) session.load(Plan.class, uuid);
+			session.getTransaction().rollback();
+			session.close();
+		} else if (obj instanceof Plan) {
+			plan = (Plan) obj;
+		}
+		
+		if (plan != null) {
+			translateItem(plan, event);
+			PlanEventManager.getInstance().planChanged(0, plan);
+		}
+		
 		return null;
 	}
 	

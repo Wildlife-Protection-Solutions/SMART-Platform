@@ -43,6 +43,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -185,6 +186,8 @@ public class PlanHibernateManager{
 				String id = PlanHibernateManager.generatePlanId(plan, session);
 				plan.setId(id);
 			}
+			//save a name
+			plan.updateName(SmartDB.getCurrentLanguage(), plan.getName());
 			session.saveOrUpdate(plan);
 			session.getTransaction().commit();
 		}catch (Exception ex){

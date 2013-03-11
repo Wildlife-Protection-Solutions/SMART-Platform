@@ -22,7 +22,6 @@
 package org.wcs.smart.plan.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -32,16 +31,14 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.plan.SmartPlanPlugIn;
@@ -55,7 +52,7 @@ import org.wcs.smart.plan.internal.Messages;
  */
 @Entity
 @Table(name="smart.plan")
-public class Plan {
+public class Plan extends SimpleListItem {
 
 	public static final int MAX_ID_LENGTH = 32;
 	public static final int MAX_DESC_LENGTH = 256;
@@ -85,12 +82,10 @@ public class Plan {
 		}
 	}
 	
-	private byte[] uuid;
 	private ConservationArea ca;
 	private Station station;
 	private Team team;
 	private String id;
-	private String name;
 	private String description;
 	private Date startDate;
 	private Date endDate;
@@ -106,21 +101,6 @@ public class Plan {
 	
 	public Plan(){
 		
-	}
-
-	/**
-	 * 
-	 * @return unique plan identifier
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
 	}
 
 	/**
@@ -231,18 +211,6 @@ public class Plan {
 	
 	/**
 	 * 
-	 * @return plan name
-	 */
-	@Column(name = "name")
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * 
 	 * @return number of unavailable employees
 	 */
 	@Column(name = "unavailable_employees")
@@ -338,28 +306,6 @@ public class Plan {
 	}
 	public void setTemplatePlan(Plan p) {
 		template = p;
-	}
-	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Plan){
-			Plan s = (Plan)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
 	}
 
 	/**
