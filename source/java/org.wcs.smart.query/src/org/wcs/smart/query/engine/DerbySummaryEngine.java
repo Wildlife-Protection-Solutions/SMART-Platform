@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -43,6 +44,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointObservation;
 import org.wcs.smart.patrol.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
@@ -56,6 +58,7 @@ import org.wcs.smart.query.parser.PatrolQueryOptions.DateGroupByOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.query.parser.filter.IFilter;
+import org.wcs.smart.query.parser.internal.summary.AreaGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeGroupBy;
 import org.wcs.smart.query.parser.internal.summary.AttributeValueItem;
 import org.wcs.smart.query.parser.internal.summary.CategoryGroupBy;
@@ -373,7 +376,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		StringBuilder valueAggSql = new StringBuilder();
 
 		
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, patrolItem);
 		
 		
 		valueSql.append(getFieldName(patrolItem));
@@ -455,7 +458,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem);
 		
 		String valueSql = "temp.ob_uuid"; //$NON-NLS-1$
 		if (attributeItem.getCategoryKey() != null){
@@ -652,7 +655,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql);
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, categoryItem);
 		
 		String valueSql = ""; //$NON-NLS-1$
 		StringBuilder valueAggSql = new StringBuilder();
@@ -716,11 +719,44 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	private void createGroupBySql(GroupByPart groupBy,
 			StringBuilder fromSql,
 			StringBuilder groupBySql, 
-			StringBuilder groupByInnerSql) {
+			StringBuilder groupByInnerSql, IValueItem value) {
 		
 		int itemcnt = 1;
+		boolean waypointAdd = false;
 		for (IGroupBy gb : groupBy.getGroupBys()){
-			if (gb instanceof PatrolGroupBy){
+			if (gb instanceof AreaGroupBy){
+				if (value instanceof CategoryValueItem
+						|| value instanceof AttributeValueItem) {
+					AreaGroupBy agb = (AreaGroupBy) gb;
+					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
+					String areaPrefix = tablePrefix.get(Area.class)
+							+ "_" + itemcnt; //$NON-NLS-1$
+					groupByInnerSql
+							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
+
+					if (!waypointAdd) {
+						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(tableNames.get(Waypoint.class));
+						fromSql.append(" "); //$NON-NLS-1$
+						fromSql.append(tablePrefix.get(Waypoint.class));
+						fromSql.append(" on temp.wp_uuid = " + tablePrefix.get(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+						waypointAdd = true;
+					}
+					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(tableNames.get(Area.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(areaPrefix);
+					fromSql.append(" on smart.pointinpolygon("); //$NON-NLS-1$
+					fromSql.append(tablePrefix.get(Waypoint.class) + ".x, "); //$NON-NLS-1$
+					fromSql.append(tablePrefix.get(Waypoint.class) + ".y, "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
+					fromSql.append(")"); //$NON-NLS-1$
+					groupBySql.append(key);
+				} else {
+					// TODO deal with patrol values
+				}
+				
+			}else if (gb instanceof PatrolGroupBy){
 				String prefix = getTablePrefix((PatrolGroupBy) gb);
 				String name = getFieldName((PatrolGroupBy) gb);
 				if (prefix != null){
