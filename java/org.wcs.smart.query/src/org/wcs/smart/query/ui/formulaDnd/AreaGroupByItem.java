@@ -151,8 +151,13 @@ public class AreaGroupByItem extends DropItem implements IGroupByDropItem,ICombi
 		sb.append(":"); //$NON-NLS-1$
 		sb.append(type.name());
 		sb.append(":"); //$NON-NLS-1$
-		for (ListItem it: filters){
-			sb.append(it.getKey());
+		if (filters != null){
+			for (int i =0; i < filters.size(); i ++){
+				sb.append(filters.get(i).getKey());
+				if (i < filters.size()-1){
+					sb.append(":"); //$NON-NLS-1$
+				}
+			}
 		}
 		return sb.toString();
 	}
