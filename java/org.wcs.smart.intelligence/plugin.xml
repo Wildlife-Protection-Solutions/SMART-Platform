@@ -31,6 +31,18 @@
                   </or>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.intelligence.export"
+                  label="%export.command.label"
+                  style="push"
+                  tooltip="%export.command.tooltip">
+            </command>
+            <command
+                  commandId="org.wcs.smart.intelligence.import"
+                  label="%import.command.label"
+                  style="push"
+                  tooltip="%import.command.tooltip">
+            </command>
             <separator
                   name="org.wcs.smart.intelligence.separator1"
                   visible="true">
@@ -185,6 +197,14 @@
             id="org.wcs.smart.intelligence.translate"
             name="%translate.command.name">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.export"
+            name="%export.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.intelligence.import"
+            name="%import.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -231,6 +251,14 @@
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.TranslateIntelligenceHandler"
             commandId="org.wcs.smart.intelligence.translate">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligenceHandler"
+            commandId="org.wcs.smart.intelligence.export">
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ImportIntelligenceHandler"
+            commandId="org.wcs.smart.intelligence.import">
       </handler>
    </extension>
    <extension
