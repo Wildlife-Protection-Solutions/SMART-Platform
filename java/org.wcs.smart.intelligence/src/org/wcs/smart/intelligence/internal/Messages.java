@@ -160,6 +160,16 @@ public class Messages extends NLS {
 
 	public static String MotivationIntelligenceContribution_NotMotivated_Label;
 
+	public static String MultiIntelligenceExportDialog_ChangeFilter;
+
+	public static String MultiIntelligenceExportDialog_LoadJobName;
+
+	public static String MultiIntelligenceExportDialog_Message;
+
+	public static String MultiIntelligenceExportDialog_PageTitle;
+
+	public static String MultiIntelligenceExportDialog_Title;
+
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
 	public static String PatrolDeleteHandler_Task_DeleteFilestore;
