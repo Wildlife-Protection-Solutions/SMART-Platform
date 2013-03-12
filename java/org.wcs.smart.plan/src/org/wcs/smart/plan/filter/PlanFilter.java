@@ -42,17 +42,10 @@ import org.wcs.smart.plan.model.Plan;
 public class PlanFilter {
 	
 	public static DateFilter DEFAULT_DATE_FILTER = DateFilter.RANGE_30_DAYS; 
-	
-	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {
-			new StringFilterComposite.TextField(Messages.PlanFilter_PlanId, "id"), //$NON-NLS-1$
-			new StringFilterComposite.TextField(Messages.PlanFilter_PlanName, "uuid") { //$NON-NLS-1$
-				@Override
-				public String getDbFieldQuery(String objPrefix) {
-					return "smart.elementName(" + super.getDbFieldQuery(objPrefix) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-				};
-			}
-	};
-	
+
+	private static StringFilterComposite.TextField PLAN_ID_FILTER = new StringFilterComposite.TextField(Messages.PlanFilter_PlanId, "id"); //$NON-NLS-1$
+	private static StringFilterComposite.TextField PLAN_NAME_FILTER = new StringFilterComposite.TextField(Messages.PlanFilter_PlanName, "value"); //$NON-NLS-1$
+	public static StringFilterComposite.TextField[] SEARCH_FIELDS = {PLAN_ID_FILTER, PLAN_NAME_FILTER};
 	
 	private Plan.PlanType[] types = null;
 	private DateFilter dateFilter = DEFAULT_DATE_FILTER;
@@ -176,6 +169,9 @@ public class PlanFilter {
 		//as in assumes that id goes 2nd and name 3rd
 		str.append("SELECT p.uuid, p.id, p.name, p.type, p.parent.uuid "); //$NON-NLS-1$
 		str.append("FROM Plan p "); //$NON-NLS-1$
+		if (stringComparator != null && planIdFilter != null && searchField == PLAN_NAME_FILTER) {
+			str.append(", Label lbl "); //$NON-NLS-1$
+		}
 		str.append("WHERE p.conservationArea = :ca " ); //$NON-NLS-1$
 	
 		boolean and = true;
@@ -197,7 +193,11 @@ public class PlanFilter {
 				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			str.append(" lower(" + searchField.getDbFieldQuery("p") + ") like :pid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (searchField == PLAN_NAME_FILTER) {
+			    str.append(" (lbl.id.element.uuid = p.uuid AND lower(lbl.value) like :pid AND lbl.id.language = :language) "); //$NON-NLS-1$
+			} else {
+				str.append(" lower( p." + searchField.getDbFieldName() + ") like :pid "); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			
 		}
 		if (dateFilter != null){
@@ -224,6 +224,9 @@ public class PlanFilter {
 				query.setParameter("pid", "%" + this.planIdFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
 				query.setParameter("pid", this.planIdFilter.toLowerCase()); //$NON-NLS-1$
+			}
+			if (searchField == PLAN_NAME_FILTER) {
+				query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
 			}
 		}
 		if (dateFilter != null) {

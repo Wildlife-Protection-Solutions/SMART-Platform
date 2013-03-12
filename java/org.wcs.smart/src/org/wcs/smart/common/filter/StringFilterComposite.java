@@ -248,8 +248,8 @@ public class StringFilterComposite extends Composite {
 		public String getGuiName(){
 			return this.guiName;
 		}
-		public String getDbFieldQuery(String objPrefix){
-			return objPrefix + "." +this.dbName; //$NON-NLS-1$
+		public String getDbFieldName() {
+			return this.dbName;
 		}
 	}
 }
