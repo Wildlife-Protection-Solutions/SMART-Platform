@@ -45,6 +45,8 @@ package org.wcs.smart.util;
 import java.sql.Blob;
 import java.sql.SQLException;
 
+import javax.sql.rowset.serial.SerialBlob;
+
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.GeodeticCalculator;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -53,12 +55,15 @@ import org.opengis.referencing.operation.TransformException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
+import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
@@ -79,6 +84,11 @@ public class GeometryUtils {
 	private static WKBReader wkbreader(){
 		return new WKBReader(geomFactory);
 	}
+	
+	private static WKBWriter wkbwriter(){
+		return new WKBWriter();
+	}
+	
 	
 	/**
 	 * Determines if the given point is in the polygon.
@@ -130,6 +140,65 @@ public class GeometryUtils {
 			Geometry g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
 			Geometry g2 = gFromWKB(wkb2.getBytes(1, (int)wkb2.length()));
 			return g1.intersects(g2);
+		}catch (SQLException e){
+			throw new RuntimeException ( e );
+		}
+	}
+	
+	/**
+	 * Computes the intersection of two geometries.
+	 * <p>Assumes the wkb geometries are in the same projection.</p>
+	 * @param wkb1
+	 * @param wkb2
+	 * @return
+	 */
+	public static Blob intersection (Blob wkb1, Blob wkb2){
+		if (wkb1 == null || wkb2 == null) return null;
+		try{
+			Geometry g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
+			Geometry g2 = gFromWKB(wkb2.getBytes(1, (int)wkb2.length()));
+			Geometry g3 = g2.intersection(g1);
+			return new SerialBlob(wkbwriter().write(g3));
+		}catch (Throwable e){
+ 			throw new RuntimeException ( e );
+		}
+	}
+	
+	/**
+	 * Computes the distance in meters for the given geometry.
+	 * 
+	 * @param wkb
+	 * @return distance of all linestrings found in the geometry in meters
+	 */
+	public static double distanceInMeter(Blob wkb){
+		if (wkb == null) return 0;
+		try{
+			Geometry g = gFromWKB(wkb.getBytes(1, (int)wkb.length()));
+			if (g instanceof LineString){
+				return distanceInMeters((LineString)g);
+			}else if (g instanceof MultiLineString){
+				double distance = 0;
+				MultiLineString mls = (MultiLineString)g;
+				for (int i = 0; i < mls.getNumGeometries(); i ++){
+					distance += distanceInMeters((LineString)mls.getGeometryN(i));
+				}
+				return distance;
+			}else if (g instanceof GeometryCollection){
+				double distance = 0;
+				GeometryCollection gc = (GeometryCollection)g;
+				for (int i = 0; i < gc.getNumGeometries(); i ++){
+					if (gc.getGeometryN(i) instanceof LineString){
+						distance += distanceInMeters((LineString)gc.getGeometryN(i));
+					}else if (gc.getGeometryN(i) instanceof MultiLineString){
+						MultiLineString mls = (MultiLineString)gc.getGeometryN(i);
+						for (int k = 0; k < mls.getNumGeometries(); k ++){
+							distance += distanceInMeters((LineString)mls.getGeometryN(k));
+						}		
+					}
+				}
+				return distance;
+			}
+			return 0;
 		}catch (SQLException e){
 			throw new RuntimeException ( e );
 		}

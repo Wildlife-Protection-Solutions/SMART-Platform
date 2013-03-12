@@ -378,11 +378,35 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 		
 		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, patrolItem);
 		
+		boolean hasAreaGroupBy = false;
+		for (IGroupBy groupby : groupBy.getGroupBys()){
+			if (groupby instanceof AreaGroupBy){
+				hasAreaGroupBy = true;
+				break;
+			}
+		}
+		if (patrolItem.getOption() ==  PatrolValueOption.DISTANCE && hasAreaGroupBy){
+			valueSql.append("smart.distanceInMeter(");
+			StringBuilder append = new StringBuilder();
+			for(String prefix : areaGroupByPrefix){
+				valueSql.append("smart.intersection(");
+				valueSql.append(prefix);
+				valueSql.append(".geom");
+				valueSql.append(",");
+				append.append(")");
+			}
+			valueSql.append(tablePrefix.get(Track.class));
+			valueSql.append(".geometry");
+			valueSql.append(append);
+			valueSql.append(") / 1000.0");
+			valueSql.append(" as distance ");
+		}else{
+			valueSql.append(getFieldName(patrolItem));
+		}
 		
-		valueSql.append(getFieldName(patrolItem));
 		valueAggSql.append(getAggFieldName(patrolItem));
 		
-		if (patrolItem.getOption().getOptionClass().equals(Track.class)){
+		if (patrolItem.getOption().getOptionClass().equals(Track.class) && !hasAreaGroupBy){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNames.get(Track.class));
 			fromSql.append(" "); //$NON-NLS-1$
@@ -716,13 +740,17 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 	 * @param groupBySql
 	 * @param groupByInnerSql
 	 */
+	private List<String> areaGroupByPrefix = new ArrayList<String>();
+	
 	private void createGroupBySql(GroupByPart groupBy,
 			StringBuilder fromSql,
 			StringBuilder groupBySql, 
 			StringBuilder groupByInnerSql, IValueItem value) {
+		areaGroupByPrefix.clear();
 		
 		int itemcnt = 1;
 		boolean waypointAdd = false;
+		boolean trackAdd = false;
 		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
 				if (value instanceof CategoryValueItem
@@ -754,6 +782,31 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 					groupBySql.append(key);
 				} else {
 					// TODO deal with patrol values
+					AreaGroupBy agb = (AreaGroupBy) gb;
+					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
+					String areaPrefix = tablePrefix.get(Area.class)
+							+ "_" + itemcnt; //$NON-NLS-1$
+					groupByInnerSql
+							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
+					areaGroupByPrefix.add(areaPrefix);
+					
+					if (!trackAdd) {
+						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(tableNames.get(Track.class));
+						fromSql.append(" "); //$NON-NLS-1$
+						fromSql.append(tablePrefix.get(Track.class));
+						fromSql.append(" on temp.pld_uuid = " + tablePrefix.get(Track.class) + ".patrol_leg_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+						trackAdd = true;
+					}
+					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(tableNames.get(Area.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(areaPrefix);
+					fromSql.append(" on smart.intersects("); //$NON-NLS-1$
+					fromSql.append(tablePrefix.get(Track.class) + ".geometry, "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
+					fromSql.append(")"); //$NON-NLS-1$
+					groupBySql.append(key);
 				}
 				
 			}else if (gb instanceof PatrolGroupBy){

@@ -31,3 +31,32 @@ ALTER TABLE smart.INTELLIGENCE DROP COLUMN SHORT_NAME;
 INSERT INTO smart.I18N_LABEL(LANGUAGE_UUID, ELEMENT_UUID, VALUE) SELECT lang.UUID as LANG_UUID, p.UUID as ELEM_UUID, 
 coalesce(p.NAME, '') as VALUE FROM smart.LANGUAGE lang INNER JOIN smart.PLAN p ON lang.CA_UUID = p.CA_UUID WHERE lang.isdefault;
 ALTER TABLE smart.PLAN DROP COLUMN NAME;
+
+
+
+-- Addition spatial functions to support group by areas in queries
+CREATE FUNCTION smart.intersection(wkb1 blob, wkb2 blob) returns blob
+LANGUAGE JAVA
+deterministic
+external name 'org.wcs.smart.util.GeometryUtils.intersection'
+PARAMETER STYLE JAVA
+NO SQL
+RETURNS NULL ON NULL INPUT;
+
+CREATE FUNCTION smart.distanceInMeter(wkb1 blob) returns double
+LANGUAGE JAVA
+deterministic
+external name 'org.wcs.smart.util.GeometryUtils.distanceInMeter'
+PARAMETER STYLE JAVA
+NO SQL
+RETURNS NULL ON NULL INPUT;
+
+-- Convert code from char(5) to varchar(5) to deal
+-- with two character languages without adding extra spacing
+-- to code.
+ALTER TABLE smart.language ADD COLUMN codeA VARCHAR(5);
+UPDATE smart.language SET codeA = trim(code);
+ALTER TABLE smart.language DROP COLUMN code;
+RENAME COLUMN smart.language.codeA TO code;
+
+
