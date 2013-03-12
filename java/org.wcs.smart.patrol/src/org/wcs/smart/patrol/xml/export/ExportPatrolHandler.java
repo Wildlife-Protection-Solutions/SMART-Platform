@@ -70,7 +70,7 @@ public class ExportPatrolHandler extends AbstractHandler {
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return null;
 		}
-		final List<byte[]> patrols = dialog.getPatrolUuids();
+		final List<byte[]> patrols = dialog.getObjectUuids();
 		if (patrols.size() == 0) {
 			MessageDialog.openInformation(shell, EXPORT_DIALOGTITLE, Messages.ExportPatrolHandler_Error_NothingToExport);
 			return null;

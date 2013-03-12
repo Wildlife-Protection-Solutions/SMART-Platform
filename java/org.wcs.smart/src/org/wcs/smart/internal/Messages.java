@@ -800,6 +800,15 @@ public class Messages extends NLS {
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;
 	public static String UserNamePasswordDialog_Username_Label;
+	public static String XmlMultiExportDialog_AttachmentInfoLabel;
+	public static String XmlMultiExportDialog_BrowseButton;
+	public static String XmlMultiExportDialog_DeselectAll_Label;
+	public static String XmlMultiExportDialog_DestinationFolderLabel;
+	public static String XmlMultiExportDialog_ExportButton;
+	public static String XmlMultiExportDialog_IncludeAttachmentsLabel;
+	public static String XmlMultiExportDialog_LoadingText;
+	public static String XmlMultiExportDialog_OverwriteWarningLabel;
+	public static String XmlMultiExportDialog_SelectAllLabel;
 	public static String ZipUtil_Error_CreatingTempDir;
 	public static String ZipUtil_Error_UnzipFailed;
 	public static String ZipUtil_Progress_CreatingZip;
