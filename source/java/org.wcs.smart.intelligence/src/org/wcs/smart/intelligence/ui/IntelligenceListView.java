@@ -22,7 +22,6 @@
 package org.wcs.smart.intelligence.ui;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -195,8 +194,7 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 		public String getText(Object element) {
 			if (element instanceof IntelligenceEditorInput){
 				IntelligenceEditorInput i = (IntelligenceEditorInput)element;
-				return i.getName()+ "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format(i.getReceivedDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-				
+				return Intelligence.generateLabel(i.getName(), i.getReceivedDate());
 			}
 			return super.getText(element);
 		}

@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.model;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -167,5 +168,8 @@ public class Intelligence extends SimpleListItem {
 		return "intelligence" + File.separator + SmartUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
 	}
 	
-
+	@Transient
+	public static String generateLabel(String name, Date receivedDate) {
+		return name + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format(receivedDate) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }
