@@ -27,14 +27,6 @@ INSERT INTO smart.I18N_LABEL(LANGUAGE_UUID, ELEMENT_UUID, VALUE) SELECT lang.UUI
 i.SHORT_NAME as VALUE FROM smart.LANGUAGE lang INNER JOIN smart.INTELLIGENCE i ON lang.CA_UUID = i.CA_UUID WHERE lang.isdefault;
 ALTER TABLE smart.INTELLIGENCE DROP COLUMN SHORT_NAME;
 
--- DB stored function that returns name in current language for given element UUID -- 
-create function smart.elementName(element_uuid CHAR(16) FOR BIT DATA)
-    returns varchar(1024)
-    language java
-    parameter style java
-    reads sql data
-    external name 'org.wcs.smart.ca.Label.getElementName';
-
 -- Translation options support for plans (copy current names as default language values, remove names column) -- 
 INSERT INTO smart.I18N_LABEL(LANGUAGE_UUID, ELEMENT_UUID, VALUE) SELECT lang.UUID as LANG_UUID, p.UUID as ELEM_UUID, 
 coalesce(p.NAME, '') as VALUE FROM smart.LANGUAGE lang INNER JOIN smart.PLAN p ON lang.CA_UUID = p.CA_UUID WHERE lang.isdefault;

@@ -57,6 +57,9 @@ public class IntelligenceViewFilter {
 		
 		str.append("SELECT i.uuid, i.name, i.receivedDate "); //$NON-NLS-1$
 		str.append("FROM Intelligence i "); //$NON-NLS-1$
+		if (nameComparison != null && name != null) {
+			str.append(", Label lbl "); //$NON-NLS-1$
+		}
 		str.append("WHERE i.conservationArea = :ca " ); //$NON-NLS-1$
 
 		//received date
@@ -71,7 +74,7 @@ public class IntelligenceViewFilter {
 		
 		//name
 		if (nameComparison != null && name != null) {
-			str.append("AND lower(smart.elementName(i.uuid)) like :name "); //$NON-NLS-1$
+		    str.append("AND  lbl.id.element.uuid = i.uuid AND lower(lbl.value) like :name AND lbl.id.language = :language"); //$NON-NLS-1$
 		}
 		
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
@@ -114,6 +117,7 @@ public class IntelligenceViewFilter {
 				query.setParameter("name", name.toLowerCase()); //$NON-NLS-1$
 				break;
 			}
+			query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
 		}
 
 		return query;
