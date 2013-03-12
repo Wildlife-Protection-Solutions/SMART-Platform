@@ -2,8 +2,6 @@ package org.wcs.smart.patrol.xml.export;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -11,34 +9,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.common.control.XmlMultiExportDialog;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
@@ -52,9 +29,7 @@ import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
  * @author egouge
  *
  */
-public class MultiPatrolExportDialog extends TitleAreaDialog implements IPatrolFilteringView {
-
-	private static final String LOADING_TEXT = Messages.MultiPatrolExportDialog_LoadingText;
+public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPatrolFilteringView {
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
@@ -63,13 +38,6 @@ public class MultiPatrolExportDialog extends TitleAreaDialog implements IPatrolF
 	static{
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
 	}
-	private Text txtFile;
-	private Button btnIncludeAttachments;
-	private CheckboxTableViewer patrols ;
-	
-	private String dirName;
-	private boolean includeAttachements;
-	private List<byte[]> patrolUuids;
 
 	private PatrolViewFilter currentFilter = new PatrolViewFilter();
 	
@@ -79,217 +47,44 @@ public class MultiPatrolExportDialog extends TitleAreaDialog implements IPatrolF
 	 * @param patrol patrol to export
 	 */
 	public MultiPatrolExportDialog(Shell parentShell) {
-		super(parentShell);
+		super(parentShell, Messages.MultiPatrolExportDialog_ChangeFilter);
 		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
 	}
 
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		setTitle(Messages.MultiPatrolExportDialog_PageTitle);
+		setMessage(Messages.MultiPatrolExportDialog_Message);
+		getShell().setText(Messages.MultiPatrolExportDialog_Title);
+		return super.createDialogArea(parent);
+	}
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
-		dirName = txtFile.getText();
-		includeAttachements = btnIncludeAttachments.getSelection();
-		
-		this.patrolUuids = new ArrayList<byte[]>();
-		Object[] checked = patrols.getCheckedElements();
-		for (int i = 0; i < checked.length; i ++){
-			patrolUuids.add(  (byte[])((Object[])checked[i])[1] );
-		}
-		
-		dialogSettings.put(OUTPUT_DIR, dirName);
-		dialogSettings.put(INCLUDE_ATTACHMENT, includeAttachements);
-		
 		super.buttonPressed(buttonId);
+		dialogSettings.put(OUTPUT_DIR, getDirectory());
+		dialogSettings.put(INCLUDE_ATTACHMENT, getIncludeAttachments());
 	}
 
-	/**
-	 * @return the filename selected by user
-	 */
-	public String getDirectory() {
-		return this.dirName;
-	}
-
-	/**
-	 * @return if attachments should be included
-	 */
-	public boolean getIncludeAttachments() {
-		return this.includeAttachements;
-	}
-
-	/**
-	 * 
-	 * @return list of patrol uuids to export
-	 */
-	public List<byte[]> getPatrolUuids(){
-		return this.patrolUuids;
-	}
-	/**
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
-	 */
-	protected void createButtonsForButtonBar(Composite parent) {
-		// create OK and Cancel buttons by default
-		Button b = createButton(parent, IDialogConstants.OK_ID, Messages.MultiPatrolExportDialog_ExportButton, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
-
-		b.setEnabled(false);
-		if (txtFile.getText() != null && txtFile.getText().length() > 0) {
-			b.setEnabled(true);
-		}
-	}
-
-	/**
-	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
-	protected Control createDialogArea(Composite parent) {
-		Composite composite = (Composite) super.createDialogArea(parent);
-		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(3, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.MultiPatrolExportDialog_DestinationFolderLabel + "*:");  //$NON-NLS-1$
-		txtFile = new Text(main, SWT.BORDER);
-		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-		
-		txtFile.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (txtFile.getText() != null && txtFile.getText().length() > 0) {
-					if (getButton(IDialogConstants.OK_ID) != null){
-						getButton(IDialogConstants.OK_ID).setEnabled(true);
-					}
-				}
-			}
-		});
-		String value = dialogSettings.get(OUTPUT_DIR);
-		if (value != null){
-			txtFile.setText(value);
-		}
-				
-		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText(Messages.MultiPatrolExportDialog_BrowseButton);
-		btnBrowse.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
-			
-				if (txtFile.getText().length() > 0) {
-					dd.setFilterPath(txtFile.getText());
-				}
-				String f = dd.open();
-				if (f != null) {
-					txtFile.setText(f);
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
-				}
-			}
-		});
-
-		lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.MultiPatrolExportDialog_IncludeAttachmentsLabel + "**:");  //$NON-NLS-1$
-		btnIncludeAttachments = new Button(main, SWT.CHECK);
-		btnIncludeAttachments.setSelection(dialogSettings.getBoolean(INCLUDE_ATTACHMENT));
-			
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
-		btnIncludeAttachments.setLayoutData(gd);
-		
-		Link lnk2 = new Link(main, SWT.NONE);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
-		lnk2.setLayoutData(gd);
-		lnk2.setText(Messages.MultiPatrolExportDialog_ChangeFilter);
-		
-		lnk2.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), MultiPatrolExportDialog.this);
-				pfd.open();
-			}
-		});
-		
-		patrols = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.MULTI);
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
-		gd.heightHint = 200;
-		patrols.getControl().setLayoutData(gd);
-		patrols.getTable().addKeyListener(new KeyAdapter() {
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (patrols.getSelection().isEmpty()){
-					return;
-				}
-				if (e.keyCode == SWT.SPACE){
-					IStructuredSelection selection = ((IStructuredSelection)patrols.getSelection());
-					selection.getFirstElement();
-					boolean value = patrols.getChecked(   selection.getFirstElement() );
-					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						patrols.setChecked(tp, !value);
-					}
-					e.doit = false;
-							
-				}
-				
-			}
-		});
-		patrols.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof Object[]){
-					return (String)((Object[])element)[0];
-				}
-				return super.getText(element);
-			}
-		});
-		patrols.setContentProvider(ArrayContentProvider.getInstance());
-		String[][] loadingdata = {{LOADING_TEXT, null}}; 
-		patrols.setInput( loadingdata );
-		loadPatrols();
-		
-		Composite lowerComp = new Composite(main, SWT.NONE);
-		GridLayout gl = new GridLayout(3, false);
-		gl.verticalSpacing = gl.marginLeft = gl.marginRight = gl.marginTop = gl.marginBottom = 0;
-		lowerComp.setLayout(gl);
-		
-		final Link selectAll = new Link(lowerComp, SWT.NONE);
-		selectAll.setText("<a>" + Messages.MultiPatrolExportDialog_SelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		
-		lbl = new Label(lowerComp, SWT.VERTICAL | SWT.SEPARATOR);
-		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
-		gd.heightHint = selectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		lbl.setLayoutData(gd);
-		
-		final Link deselectAll = new Link(lowerComp, SWT.NONE);
-		deselectAll.setText("<a>" + Messages.MultiPatrolExportDialog_DeselectAll_Label + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		
-		Listener listener = new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				patrols.setAllChecked(event.widget == selectAll);
-			}};
-		deselectAll.addListener(SWT.Selection, listener);
-		selectAll.addListener(SWT.Selection, listener);
-			
-		lbl = new Label(main, SWT.WRAP);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
-		gd.widthHint = 250;
-		lbl.setText("*" + Messages.MultiPatrolExportDialog_OverwriteWarningLabel); //$NON-NLS-1$
-		lbl.setLayoutData(gd);
-		
-		
-		lbl = new Label(main, SWT.WRAP);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
-		gd.widthHint = 250;
-		lbl.setText("**" + Messages.MultiPatrolExportDialog_AttachmentInfoLabel); //$NON-NLS-1$
-		lbl.setLayoutData(gd);
-		
-		setTitle(Messages.MultiPatrolExportDialog_PageTitle);
-		setMessage(Messages.MultiPatrolExportDialog_Message);
-		getShell().setText(Messages.MultiPatrolExportDialog_Title);
-		return composite;
-
+	@Override
+	protected boolean getDefaultIncludeAttachments() {
+		return dialogSettings.getBoolean(INCLUDE_ATTACHMENT);
 	}
 	
-	private void loadPatrols(){
+	@Override
+	protected String getDefaultOutputFolder() {
+		return dialogSettings.get(OUTPUT_DIR);
+	}
+	
+	@Override
+	protected void handleFilterLinkClicked() {
+		PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), MultiPatrolExportDialog.this);
+		pfd.open();
+	}
+
+	@Override
+	protected void loadObjectData() {
 		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -311,8 +106,8 @@ public class MultiPatrolExportDialog extends TitleAreaDialog implements IPatrolF
 					getShell().getDisplay().asyncExec(new Runnable(){
 						@Override
 						public void run() {
-							patrols.setInput(data);
-							patrols.refresh();
+							getTableViewer().setInput(data);
+							getTableViewer().refresh();
 						}
 					});
 					
@@ -337,11 +132,12 @@ public class MultiPatrolExportDialog extends TitleAreaDialog implements IPatrolF
 
 	@Override
 	public void updateContent() {
-		loadPatrols();
+		loadObjectData();
 	}
 
 	@Override
 	public PatrolViewFilter getFilter() {
 		return currentFilter;
 	}
+
 }
