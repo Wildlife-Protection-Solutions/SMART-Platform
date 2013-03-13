@@ -647,7 +647,7 @@ public class GPSDataImport {
 				Calendar c2 = GregorianCalendar.getInstance();
 				c2.setTimeZone(Track.ZTIMEZONE);
 				c2.setTimeInMillis(0);
-				c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
+				c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
 				
 				c.z = c2.getTime().getTime();
 				
