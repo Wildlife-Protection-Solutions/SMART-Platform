@@ -234,15 +234,43 @@ public class ImportReportEngine {
 			
 			session.getTransaction().commit();
 			
-			//fire new/update event
-			if (isNew){
-				ReportEventManager.getInstance().fireReportAdded(importReport);
-			}else{
-				ReportEventManager.getInstance().fireReportUpdated(importReport);
-			}
-			return true;
+				try {
+					// fire query events
+					display.syncExec(new Runnable() {
+						@Override
+						public void run() {
+							for (org.wcs.smart.query.model.Query q : queriesAdded) {
+								QueryEventManager
+										.getInstance()
+										.fireFolderChangedListeners(
+												IQueryFolderListener.QUERY_ADDED,
+												q);
+							}
+							for (org.wcs.smart.query.model.Query q : queriesModified) {
+								QueryEventManager.getInstance()
+										.fireQueryChangedListeners(q);
+							}
+						}
+
+					});
+
+					// fire new/update event
+					if (isNew) {
+						ReportEventManager.getInstance().fireReportAdded(
+								importReport);
+					} else {
+						ReportEventManager.getInstance().fireReportUpdated(
+								importReport);
+					}
+				} catch (Throwable t) {
+					throw new Exception(
+							Messages.ImportReportEngine_EventImportError);
+				}
+				return true;
 		}catch (Exception ex){
-			session.getTransaction().rollback();
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
 			throw ex;
 		}finally{
 			if (session.getTransaction().isActive()){
@@ -594,27 +622,29 @@ public class ImportReportEngine {
 
 			//save to db
 			session.saveOrUpdate(smartQuery);
-			
-			final org.wcs.smart.query.model.Query thisQuery = smartQuery;
-			display.syncExec(new Runnable(){
-				@Override
-				public void run() {
-					QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, thisQuery);
-				}
-				
-			});
+			queriesAdded.add(smartQuery);
+//			final org.wcs.smart.query.model.Query thisQuery = smartQuery;
+//			display.syncExec(new Runnable(){
+//				@Override
+//				public void run() {
+//					QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, thisQuery);
+//				}
+//				
+//			});
 			
 
 		}else{
 			//overwrite or use original
 			session.saveOrUpdate(smartQuery);
-			final org.wcs.smart.query.model.Query thisQuery = smartQuery;
-			display.syncExec(new Runnable(){
-				@Override
-				public void run() {
-					QueryEventManager.getInstance().fireQueryChangedListeners(thisQuery);
-				}
-			});
+			queriesModified.add(smartQuery);
+//			final org.wcs.smart.query.model.Query thisQuery = smartQuery;
+//			
+//			display.syncExec(new Runnable(){
+//				@Override
+//				public void run() {
+//					QueryEventManager.getInstance().fireQueryChangedListeners(thisQuery);
+//				}
+//			});
 		}
 		
 		//update report definition to point to correct query
@@ -624,6 +654,9 @@ public class ImportReportEngine {
 		
 		return true;
 	}
+	
+	private List<org.wcs.smart.query.model.Query> queriesAdded = new ArrayList<org.wcs.smart.query.model.Query>();
+	private List<org.wcs.smart.query.model.Query> queriesModified = new ArrayList<org.wcs.smart.query.model.Query>();
 	
 	private HashMap<String, String> oldToNewQueries = new HashMap<String, String>();
 	/**
@@ -849,7 +882,7 @@ public class ImportReportEngine {
 		public QueryImportMessageDialog(Shell parentShell, String queryName, boolean canOverwrite) {
 			
 			super(parentShell, IMPORTOP_DIALOG_TITLE, null, 
-					QUERY_ALREADYEXISTS_MSG,
+					MessageFormat.format(QUERY_ALREADYEXISTS_MSG , new Object[]{queryName}),
 					MessageDialog.QUESTION, new String[]{IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, OK_INDEX );
 			this.canOverwrite = canOverwrite;
 			
