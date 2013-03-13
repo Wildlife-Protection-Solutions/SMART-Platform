@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.xml.in;
+package org.wcs.smart.common.control;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Dialog for selecting file to import
@@ -51,10 +51,10 @@ import org.wcs.smart.patrol.internal.Messages;
  * @author Emily
  * @since 1.0.0
  */
-public class ImportPatrolDialog  extends TitleAreaDialog {
+public class XmlImportDialog  extends TitleAreaDialog {
 
 	private static final String[] FILTER_EXTENSIONS = new String[] { "*.zip;*.xml", "*.zip", "*.xml", "*.*" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	private static final String[] FILTER_NAMES = new String[] { Messages.ImportPatrolDialog_PatrolFilters_FilterName, Messages.ImportPatrolDialog_ZipFilter_FilterName, Messages.ImportPatrolDialog_XmlFilter_FilterName, Messages.ImportPatrolDialog_AllFiles_FilterName };
+	private static final String[] FILTER_NAMES = new String[] { Messages.XmlImportDialog_Filter_Supported, Messages.XmlImportDialog_Filter_Xml, Messages.XmlImportDialog_Filter_Zip, Messages.XmlImportDialog_Filter_All };
 
 	private ListViewer lstFiles;
 	private Button btnAdd;
@@ -62,15 +62,30 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 	
 	private ArrayList<String> files = new ArrayList<String>();
 	
+	private String dialogTitle = ""; //$NON-NLS-1$
+	private String dialogText = ""; //$NON-NLS-1$
+	private String dialogMessage = ""; //$NON-NLS-1$	
+	
 	/**
 	 * Creates a new dialog
 	 * @param parentShell parent shell
 	 */
-	public ImportPatrolDialog(Shell parentShell) {
+	public XmlImportDialog(Shell parentShell) {
 		super(parentShell);
 
 	}
 
+	/**
+	 * Creates a new dialog
+	 * @param parentShell parent shell
+	 */
+	public XmlImportDialog(Shell parentShell, String dialogTitle, String dialogText, String dialogMessage) {
+		super(parentShell);
+		this.dialogTitle = dialogTitle;
+		this.dialogText = dialogText;
+		this.dialogMessage = dialogMessage;
+	}
+	
 
 	/**
 	 * @return the filename selected by user or 
@@ -86,13 +101,11 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button b = createButton(parent, IDialogConstants.OK_ID, Messages.ImportPatrolDialog_Import_Button, true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		Button b = createButton(parent, IDialogConstants.OK_ID, Messages.XmlImportDialog_ImportButton, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 
 		b.setEnabled(false);
 	}
-
 
 	/**
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
@@ -105,7 +118,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.ImportPatrolDialog_FilesLabel);
+		lbl.setText(Messages.XmlImportDialog_Files_Label);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, true, 2, 1));
 		
 		lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -121,7 +134,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
 		
 		btnAdd = new Button(buttons, SWT.PUSH);
-		btnAdd.setText(Messages.ImportPatrolDialog_AddButton);
+		btnAdd.setText(Messages.XmlImportDialog_AddButton);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -146,7 +159,7 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 		});
 		
 		btnRemove = new Button(buttons, SWT.PUSH);
-		btnRemove.setText(Messages.ImportPatrolDialog_RemoveButton);
+		btnRemove.setText(Messages.XmlImportDialog_RemoveButton);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -161,10 +174,9 @@ public class ImportPatrolDialog  extends TitleAreaDialog {
 			}	
 		});
 		
-		
-		setMessage(Messages.ImportPatrolDialog_DialogMessage);
-		setTitle(Messages.ImportPatrolDialog_DialogTitle);
-		getShell().setText(Messages.ImportPatrolDialog_DialogText);
+		setMessage(dialogMessage);
+		setTitle(dialogTitle);
+		getShell().setText(dialogText);
 		return composite;
 	}
 	

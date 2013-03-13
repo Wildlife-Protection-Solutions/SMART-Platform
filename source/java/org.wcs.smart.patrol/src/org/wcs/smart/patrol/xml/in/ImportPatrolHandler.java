@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -69,8 +70,10 @@ public class ImportPatrolHandler extends AbstractHandler {
 		final IWorkbench activeWorkbench = HandlerUtil
 				.getActiveWorkbenchWindow(event).getWorkbench();
 
-		ImportPatrolDialog dialog = new ImportPatrolDialog(Display.getCurrent()
-				.getActiveShell());
+		XmlImportDialog dialog = new XmlImportDialog(Display.getCurrent().getActiveShell(),
+				Messages.ImportPatrolDialog_DialogTitle,
+				Messages.ImportPatrolDialog_DialogText,
+				Messages.ImportPatrolDialog_DialogMessage);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return null;
 		}

@@ -172,17 +172,9 @@ public class Messages extends NLS {
 	public static String ImportGPSWizardPage_OImportOnlyCurrentDayOp;
 	public static String ImportGPSWizardPage_PageName;
 	public static String ImportGPSWizardPage_SelectPointsToImportOp;
-	public static String ImportPatrolDialog_AddButton;
-	public static String ImportPatrolDialog_AllFiles_FilterName;
 	public static String ImportPatrolDialog_DialogMessage;
 	public static String ImportPatrolDialog_DialogText;
 	public static String ImportPatrolDialog_DialogTitle;
-	public static String ImportPatrolDialog_FilesLabel;
-	public static String ImportPatrolDialog_Import_Button;
-	public static String ImportPatrolDialog_PatrolFilters_FilterName;
-	public static String ImportPatrolDialog_RemoveButton;
-	public static String ImportPatrolDialog_XmlFilter_FilterName;
-	public static String ImportPatrolDialog_ZipFilter_FilterName;
 	public static String ImportPatrolHandler_Cancelled_DialogMessage;
 	public static String ImportPatrolHandler_Cancelled_DialogTitle;
 	public static String ImportPatrolHandler_Error_DirectoryNotFound;
