@@ -38,6 +38,24 @@ public class Messages extends NLS {
 
 	public static String EditPatrolMotivationDialog_Title;
 
+	public static String ExportIntelligenceHandler_Completed_Message;
+
+	public static String ExportIntelligenceHandler_DirectoryNotExist;
+
+	public static String ExportIntelligenceHandler_Export_Task;
+
+	public static String ExportIntelligenceHandler_ExportIntelligence_Error;
+
+	public static String ExportIntelligenceHandler_ExportIntelligence_SubTask;
+
+	public static String ExportIntelligenceHandler_Failed_Error_Message;
+
+	public static String ExportIntelligenceHandler_LoadIntelligence_Error;
+
+	public static String ExportIntelligenceHandler_LoadIntelligence_SubTask;
+
+	public static String ExportIntelligenceHandler_NothingSelected;
+
 	public static String IntelligenceAttachments_Attachments_Label;
 
     public static String IntelligenceAttachments_Message;
