@@ -301,19 +301,22 @@ public class DerbyQueryEngine2 implements QueryEngine {
 			inlist.append("'" + key.getKey() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		sql.append("FROM "); //$NON-NLS-1$
-		boolean on = false;
-		if (dateFilter != null && (dateFilter.getDateFieldOption() == DateFilter.DATE_FIELD_OP.PATROL_END || dateFilter.getDateFieldOption() == DateFilter.DATE_FIELD_OP.PATROL_START ) ){
-			sql.append(tableNames.get(Patrol.class) + " as " + tablePrefix.get(Patrol.class)); //$NON-NLS-1$
-			sql.append(" join "); //$NON-NLS-1$
-			sql.append(tableNames.get(PatrolLeg.class) + " as " + tablePrefix.get(PatrolLeg.class)); //$NON-NLS-1$
-	 		sql.append(" ON " +tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	 		sql.append(" join "); //$NON-NLS-1$
-			on = true;
+
+		sql.append(tableNames.get(Patrol.class) + " as " + tablePrefix.get(Patrol.class)); //$NON-NLS-1$
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(tableNames.get(PatrolLeg.class) + " as " + tablePrefix.get(PatrolLeg.class)); //$NON-NLS-1$
+ 		sql.append(" ON " +tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+ 		if (caFilter != null){
+			String cfilter = caFilter.asSql(tablePrefix.get(Patrol.class));
+			if (cfilter.length() > 0){
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(cfilter);
+			}
 		}
+ 		sql.append(" join "); //$NON-NLS-1$
+
 		sql.append(tableNames.get(PatrolLegDay.class) + " as " + tablePrefix.get(PatrolLegDay.class)); //$NON-NLS-1$
-		if (on){
-			sql.append(" ON " + tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid = " + tablePrefix.get(PatrolLeg.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
+		sql.append(" ON " + tablePrefix.get(PatrolLegDay.class) + ".patrol_leg_uuid = " + tablePrefix.get(PatrolLeg.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNames.get(Waypoint.class) + " as " + tablePrefix.get(Waypoint.class)); //$NON-NLS-1$
 		sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = " + tablePrefix.get(Waypoint.class) + ".leg_day_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -336,13 +339,13 @@ public class DerbyQueryEngine2 implements QueryEngine {
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNames.get(Attribute.class) + " as " + tablePrefix.get(Attribute.class)); //$NON-NLS-1$
 		sql.append(" on " + tablePrefix.get(Attribute.class) + ".uuid = " + tablePrefix.get(WaypointObservationAttribute.class) + ".attribute_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if (caFilter != null){
-			String cfilter = caFilter.asSql(tablePrefix.get(Attribute.class));
-			if (cfilter.length() > 0){
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(cfilter);
-			}
-		}
+//		if (caFilter != null){
+//			String cfilter = caFilter.asSql(tablePrefix.get(Attribute.class));
+//			if (cfilter.length() > 0){
+//				sql.append(" and "); //$NON-NLS-1$
+//				sql.append(cfilter);
+//			}
+//		}
 		
 		if (list) {
 			sql.append(" LEFT JOIN "); //$NON-NLS-1$

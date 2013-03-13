@@ -262,6 +262,12 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 			}
 			s.saveOrUpdate(query);
 			query.updateName(SmartDB.getCurrentLanguage(), query.getName());
+			if (SmartDB.getCurrentConservationArea().getDefaultLanguage() != null){
+				if (query.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
+					//if label for default language is null then update the default as well
+					query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), query.getName());
+				}
+			}
 			s.getTransaction().commit();
 
 		}catch (Exception ex){
@@ -319,12 +325,18 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		
 		
 		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
-		String hsql = "FROM " + queryType.getHibernateClass().getSimpleName() + " WHERE conservationArea = :ca and name=:name and (isShared = 'true' or (isShared = 'false' and owner = :employee))"; //$NON-NLS-1$ //$NON-NLS-2$
-		Query query = session.createQuery(hsql);
+		String hsql = "SELECT q FROM " + queryType.getHibernateClass().getSimpleName() + " q, Label l WHERE l.id.element = q.uuid and q.conservationArea = :ca " +  //$NON-NLS-1$//$NON-NLS-2$
+				"and l.value = :name and (q.isShared = 'true' or (q.isShared = 'false' and q.owner = :employee))"; //$NON-NLS-1$ 
+		Query query = session.createQuery(hsql); 
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		query.setParameter("employee", SmartDB.getCurrentEmployee()); //$NON-NLS-1$
 		query.setParameter("name", queryName); //$NON-NLS-1$
-		queries.addAll(query.list());
+		List<org.wcs.smart.query.model.Query> list = query.list();
+		for (org.wcs.smart.query.model.Query q : list){
+			if (!queries.contains(q)){
+				queries.add(q);
+			}
+		}
 				
 		return queries;
 	}

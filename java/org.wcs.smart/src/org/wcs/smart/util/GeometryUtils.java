@@ -60,7 +60,11 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
@@ -79,6 +83,7 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
  * @since 1.0.0
  */
 public class GeometryUtils {
+	private static Double MILLISEC_PER_HOUR = 3600000.0;
 	private static GeometryFactory geomFactory = new GeometryFactory();
 	
 	private static WKBReader wkbreader(){
@@ -162,6 +167,112 @@ public class GeometryUtils {
 		}catch (Throwable e){
  			throw new RuntimeException ( e );
 		}
+	}
+	
+	
+	/**
+	 * Calculates the time in hours that the linestring spent
+	 * inside the given geometry.  The geometry must either
+	 * be a polygon, multipolygon or geometry collection.  The linestring
+	 * must be a 3d linestring with the z value representing
+	 * the time the point was recorded
+	 * 
+	 * @param polygon
+	 * @param linestring
+	 * @return
+	 */
+	public static double computeHours(Blob geom, Blob linestring){
+		if (geom == null || linestring == null){
+			return 0;
+		}
+		try{
+			
+			Geometry ls = wkbreader().read(linestring.getBytes(1, (int)linestring.length()));
+			if (!(ls instanceof LineString)){
+				return 0;
+			}
+			Geometry poly = wkbreader().read(geom.getBytes(1, (int)geom.length()));
+			
+			if (poly instanceof Polygon){
+				double x = computeHours((Polygon)poly, (LineString)ls);
+				System.out.println(x);
+				return x;
+			}else if (poly instanceof MultiPolygon){
+				double x = computeHours((MultiPolygon)poly, (LineString)ls);
+				System.out.println(x);
+				return x;
+			}else if (poly instanceof GeometryCollection){
+				double x = computeHours((GeometryCollection)poly, (LineString)ls);
+				System.out.println(x);
+				return x;
+			}
+		}catch (Throwable e){
+			throw new RuntimeException(e);
+		}
+		return 0;
+		
+	}
+	/*
+	 * support function from computeHours
+	 */
+	private static double computeHours(GeometryCollection geom, LineString ls){
+		double total = 0;
+		for (int i = 0; i < geom.getNumGeometries(); i ++){
+			Geometry g = geom.getGeometryN(i);
+			if (g instanceof Polygon){
+				total += computeHours((Polygon)g, ls);
+			}else if (g instanceof MultiPolygon){
+				total += computeHours((MultiPolygon)g, ls);
+			}else if (g instanceof GeometryCollection){
+				total += computeHours((GeometryCollection)g, ls);
+			}
+		}
+		return total;
+	}
+	/*
+	 * support function from computeHours
+	 */
+	private static double computeHours(MultiPolygon poly, LineString ls){
+		double total = 0;
+		for (int i = 0; i < poly.getNumGeometries(); i ++){
+			total += computeHours((Polygon)poly.getGeometryN(i), (LineString)ls);
+		}
+		return total;
+	}
+	/*
+	 * support function from computeHours
+	 */
+	private static double computeHours(Polygon p, LineString ls){
+		double value = 0;
+		if (p.contains(ls)){
+			value = ls.getCoordinateN(ls.getNumPoints() - 1).z - ls.getCoordinateN(0).z;
+		}else if (!p.intersects(ls)){
+			return 0;	//nothing
+		}else{
+			PreparedGeometry pg = PreparedGeometryFactory.prepare(p);	
+			
+			Coordinate[] c = ls.getCoordinates();
+			for (int i = 0; i < c.length-1; i ++){
+				Coordinate c1 = c[i];
+				Coordinate c2 = c[i+1];
+				
+				if (!p.getEnvelopeInternal().intersects(new Envelope(c1, c2))){
+					//outside envelop
+					continue;
+				}
+				if (pg.containsProperly(geomFactory.createLineString(new Coordinate[]{c1, c2}))){
+					//entirely contained within
+					value += (c2.z - c1.z);
+				}else{
+					//part in and part out so linearly interpolate
+					double l1 = c2.distance(c1);
+					double l2 = pg.getGeometry().intersection(geomFactory.createLineString(new Coordinate[]{c1, c2})).getLength();
+					double time = c2.z - c1.z;
+					value += time * (l2 / l1);
+				}
+			}
+		}
+		return value / MILLISEC_PER_HOUR;
 	}
 	
 	/**

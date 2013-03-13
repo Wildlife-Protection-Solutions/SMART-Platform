@@ -108,6 +108,7 @@ public class TrackPointDialog extends TitleAreaDialog {
 		column.getColumn().setMoveable(false);
 		column.getColumn().setWidth(200);
 		
+		//time
 		column = new TableViewerColumn(trackviewer,SWT.NONE);
 		column.setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element) {
