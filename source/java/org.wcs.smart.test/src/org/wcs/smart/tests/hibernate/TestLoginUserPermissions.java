@@ -50,7 +50,7 @@ public class TestLoginUserPermissions {
 		InputStream stream = TestLoginUserPermissions.class.getClassLoader().getResourceAsStream("smart.properties");
 		prop.load(stream);
 
-		String database = prop.getProperty(SmartProperties.SMART_DB_KEY);
+		String database = prop.getProperty(SmartProperties.PROP_SMART_DB);
 		return database;
 	}
 

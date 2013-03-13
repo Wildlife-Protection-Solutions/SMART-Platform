@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,6 +37,8 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
@@ -55,7 +58,6 @@ public class CreateCaTest {
 		Language lang = new Language();
 		lang.setCa(ca);
 		lang.setCode("en_CA");
-		lang.setName("English Canada");
 		lang.setDefault(true);
 		
 		HashSet<Language> langs = new HashSet<Language>();
@@ -105,7 +107,7 @@ public class CreateCaTest {
 		//try saving data model
 		session = Hibernate.openSession();
 		session.beginTransaction();
-		dm.save(session);
+		dm.save(session, new NullProgressMonitor());
 		session.getTransaction().commit();
 		session.close();
 		

@@ -51,6 +51,14 @@ PARAMETER STYLE JAVA
 NO SQL
 RETURNS NULL ON NULL INPUT;
 
+CREATE FUNCTION smart.computeHours(wkb1 geometry, wkb2 ls) returns double
+LANGUAGE JAVA
+deterministic
+external name 'org.wcs.smart.util.GeometryUtils.computeHours'
+PARAMETER STYLE JAVA
+NO SQL
+RETURNS NULL ON NULL INPUT;
+
 -- Convert code from char(5) to varchar(5) to deal
 -- with two character languages without adding extra spacing
 -- to code.

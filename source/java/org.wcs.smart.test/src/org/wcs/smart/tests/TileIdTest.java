@@ -38,7 +38,7 @@ public class TileIdTest {
 
 	@Test
 	public void testTileId() throws Exception{
-		CoordinateReferenceSystem DATABASE_CRS = CRS.decode("EPSG:4326");
+		CoordinateReferenceSystem DATABASE_CRS = CRS.decode("EPSG:4326", true);
 		String tid = "";
 		
 		tid = ReprojectUtils.computeTileId(0, 0, DATABASE_CRS.toWKT(), 0, 0, 1);
