@@ -92,6 +92,14 @@ public class Messages extends NLS {
 
 	public static String IntelligenceEditor_NoValue;
 
+	public static String IntelligenceExporter_Converting;
+
+	public static String IntelligenceExporter_Exporting;
+
+	public static String IntelligenceExporter_PackAttachments;
+
+	public static String IntelligenceExporter_WritingFile;
+
 	public static String IntelligenceFilterDialog_Message;
 
 	public static String IntelligenceFilterDialog_NameGroup_Label;

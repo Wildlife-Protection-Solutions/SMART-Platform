@@ -21,10 +21,32 @@
  */
 package org.wcs.smart.intelligence.xml.export;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.Deflater;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligenceAttachment;
+import org.wcs.smart.intelligence.xml.IIntelligenceXmlDataConstants;
+import org.wcs.smart.intelligence.xml.IntelligenceToXmlConverter;
+import org.wcs.smart.intelligence.xml.model.IntelligenceType;
+import org.wcs.smart.intelligence.xml.model.ObjectFactory;
 
 /**
  * Class responsible for exporting
@@ -36,8 +58,99 @@ import org.wcs.smart.intelligence.model.Intelligence;
 public class IntelligenceExporter {
 
 	public static File exportIntelligence(Intelligence intelligence, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception {
-		return null;
+		monitor.beginTask(Messages.IntelligenceExporter_Exporting, includeAttachments ? 4 : 2);
+		Session session = HibernateManager.openSession();
+		try {
+			session.refresh(intelligence);
+			
+			monitor.subTask(Messages.IntelligenceExporter_Converting);
+			IntelligenceType xml = IntelligenceToXmlConverter.toXml(intelligence);
+			monitor.worked(1);
+			
+			if (!includeAttachments){
+				return exportIntelligenceWithoutAttachments(xml, file, monitor);
+			}else{
+				return exportIntelligenceWithAttachments(intelligence, xml, file, monitor);
+			}
+		} finally {
+			session.close();
+		}
 	}
+
+	private static File exportIntelligenceWithoutAttachments(IntelligenceType xml, File file, IProgressMonitor monitor) throws JAXBException, IOException {
+		monitor.subTask(Messages.IntelligenceExporter_WritingFile);
+		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+		try {
+			writeDataModel(xml, out);
+		} finally {
+			out.close();
+		}
+		monitor.worked(1);
+		return file;
+	}
+	
+	private static File exportIntelligenceWithAttachments(Intelligence intelligence, IntelligenceType xml, File f, IProgressMonitor monitor) throws IOException, JAXBException {
+		int index = f.getName().lastIndexOf('.');
+		String name = f.getName();
+		if (index >= 0){
+			name= name.substring(0, index);
+		}
+		File xmlFile = File.createTempFile(name, ".xml"); //$NON-NLS-1$
+		exportIntelligenceWithoutAttachments(xml, xmlFile, monitor);
+		
+		monitor.subTask(Messages.IntelligenceExporter_PackAttachments);
+		//create zip file
+		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
+		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
+		try {
+			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
+
+			/* add xml file to zip */
+			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
+			FileInputStream inStream = new FileInputStream(xmlFile);
+
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			try {
+				while ((bytesRead = inStream.read(buffer)) > 0) {
+					zout.write(buffer, 0, bytesRead);
+				}
+			} finally {
+				inStream.close();
+			}
+			monitor.worked(1);
+
+			/* add all attachments */
+			for (IntelligenceAttachment att : intelligence.getAttachments()) {
+				File attFile = att.getFullFile();
+				zout.putNextEntry(new ZipEntry(IIntelligenceXmlDataConstants.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
+
+				inStream = new FileInputStream(attFile);
+				try {
+					while ((bytesRead = inStream.read(buffer)) > 0) {
+						zout.write(buffer, 0, bytesRead);
+					}
+				} finally {
+					inStream.close();
+				}
+			}
+			// close
+		} finally {
+			zout.close();
+		}
+        monitor.worked(1);
+        
+        try{
+        	//delete temp file
+        	xmlFile.delete();
+        }catch(Exception ex){
+        	IntelligencePlugIn.log(null, ex);
+        }
+        
+        return zipFile;
+		
+	}
+
 
 	/**
 	 * Determines the output file name for export
@@ -62,6 +175,27 @@ public class IntelligenceExporter {
 			String zip = in.getParent() + File.separator + name + ".zip"; //$NON-NLS-1$
 			return new File(zip);
 		}
+	}
+
+	/**
+	 * Writes a xml intelligence object to a file.
+	 * <p>
+	 * User is required to close output stream.
+	 * </p>
+	 * @param intelligence xml intelligence to write
+	 * @param file output stream 
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	public static void writeDataModel(IntelligenceType intelligence, OutputStream file) throws JAXBException, IOException {
+		JAXBContext context = JAXBContext.newInstance(IIntelligenceXmlDataConstants.METADATA_CLASSES_PACKAGE);
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+		
+		ObjectFactory objFactor = new ObjectFactory();
+		
+		JAXBElement<IntelligenceType> element = objFactor.createIntelligence(intelligence);
+		marshaller.marshal(element, file);
 	}
 	
 }

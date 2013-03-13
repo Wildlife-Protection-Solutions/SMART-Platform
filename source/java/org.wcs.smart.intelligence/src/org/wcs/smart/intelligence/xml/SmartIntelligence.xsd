@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/intelligence" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/intelligence"
+elementFormDefault="qualified">
+
+    <complexType name="IntelligenceType">
+    	<sequence>
+    		<element name="name" type="tns:LabelType" maxOccurs="unbounded" minOccurs="1"/>
+    		<element name="description" type="string" maxOccurs="1"	minOccurs="0"/>
+    		<element name="points" type="tns:PointType"	maxOccurs="unbounded" minOccurs="0"/>
+    		<element name="attachments" type="string" maxOccurs="unbounded" minOccurs="0"/>
+     	</sequence>
+ 	   	<attribute name="receivedDate" type="date"/>
+ 	   	<attribute name="fromDate" type="date"/>
+ 	   	<attribute name="toDate" type="date" use="optional"/>
+    	<attribute name="source">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="PATROL"></enumeration>
+    				<enumeration value="PUBLIC"></enumeration>
+    				<enumeration value="INFORMANT"></enumeration>
+    				<enumeration value="CET"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    </complexType>
+
+    <complexType name="LabelType">
+    	<attribute name="languageCode" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+    <complexType name="PointType">
+	   	<attribute name="x" type="double"></attribute>
+    	<attribute name="y" type="double"></attribute>
+    </complexType>
+
+    <element name="intelligence" type="tns:IntelligenceType"/>
+    
+</schema>
