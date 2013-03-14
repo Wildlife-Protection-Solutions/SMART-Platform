@@ -25,6 +25,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -41,6 +42,9 @@ import org.wcs.smart.patrol.model.Waypoint;
 import org.wcs.smart.patrol.model.WaypointAttachment;
 import org.wcs.smart.patrol.xml.PatrolToXmlConverter;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
+import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
+import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
+import org.wcs.smart.patrol.xml.model.ExtraDataType;
 import org.wcs.smart.patrol.xml.model.PatrolType;
 
 /**
@@ -84,6 +88,12 @@ public class PatrolExporter {
 			
 			monitor.subTask(Messages.PatrolExporter_Progress_Converting);
 			PatrolType xml = PatrolToXmlConverter.toXml(patrol);
+			for (IXmlExtraDataContribution edc : XmlExtraDataContributionFactory.getContributions()) {
+				List<ExtraDataType> extraData = edc.exportData(patrol);
+				if (extraData != null) {
+					xml.getExtraData().addAll(extraData);
+				}
+			}
 			monitor.worked(1);
 			
 			if (!includeAttachments){
@@ -92,7 +102,9 @@ public class PatrolExporter {
 				return exportPatrolWithAttachments(patrol, xml, file, monitor);
 			}
 		} finally {
-			session.close();
+			if (session.isOpen()) {
+				session.close();
+			}
 		}
 	}
 	
