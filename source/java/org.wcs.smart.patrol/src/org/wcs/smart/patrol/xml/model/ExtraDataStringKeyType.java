@@ -15,15 +15,15 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for LabelType complex type.
+ * <p>Java class for ExtraDataStringKeyType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="LabelType">
+ * &lt;complexType name="ExtraDataStringKeyType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="languageCode" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,36 +33,36 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LabelType")
-public class LabelType {
+@XmlType(name = "ExtraDataStringKeyType")
+public class ExtraDataStringKeyType {
 
     @XmlAttribute
-    protected String languageCode;
+    protected String key;
     @XmlAttribute
     protected String value;
 
     /**
-     * Gets the value of the languageCode property.
+     * Gets the value of the key property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getLanguageCode() {
-        return languageCode;
+    public String getKey() {
+        return key;
     }
 
     /**
-     * Sets the value of the languageCode property.
+     * Sets the value of the key property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setLanguageCode(String value) {
-        this.languageCode = value;
+    public void setKey(String value) {
+        this.key = value;
     }
 
     /**

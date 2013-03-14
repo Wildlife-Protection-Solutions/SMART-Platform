@@ -25,6 +25,7 @@ elementFormDefault="qualified">
     		<element name="comment" type="string" maxOccurs="1"
     			minOccurs="0">
     		</element>
+    		<element name="extraData" type="tns:ExtraDataType" maxOccurs="unbounded" minOccurs="0"/>
     	</sequence>
     	<attribute name="patrolType">
     		<simpleType>
@@ -138,6 +139,23 @@ elementFormDefault="qualified">
     	<attribute name="value" type="string"></attribute>
     </complexType>
 
+    <complexType name="ExtraDataType">
+    	<sequence>
+            <element name="stringKey" type="tns:ExtraDataStringKeyType" maxOccurs="unbounded" minOccurs="0"/>
+            <element name="dateKey" type="tns:ExtraDataDateKeyType" maxOccurs="unbounded" minOccurs="0"/>
+    	</sequence>
+    	<attribute name="type" type="string"/>
+    </complexType>
+
+    <complexType name="ExtraDataStringKeyType">
+    	<attribute name="key" type="string"/>
+    	<attribute name="value" type="string"/>
+    </complexType>
+
+    <complexType name="ExtraDataDateKeyType">
+    	<attribute name="key" type="string"/>
+    	<attribute name="value" type="date"/>
+    </complexType>
 
     <element name="patrol" type="tns:PatrolType"/>
 </schema>
