@@ -21,9 +21,29 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.List;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.common.control.XmlImportDialog;
+import org.wcs.smart.intelligence.IntelligenceEventManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.xml.IntelligenceImporter;
 
 /**
  * Command handler for importing intelligence data from xml file.
@@ -35,8 +55,61 @@ public class ImportIntelligenceHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		final IWorkbench activeWorkbench = HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench();
+
+		XmlImportDialog dialog = new XmlImportDialog(Display.getCurrent().getActiveShell(),
+				Messages.ImportIntelligenceHandler_Dialog_Title,
+				Messages.ImportIntelligenceHandler_Dialog_Text,
+				Messages.ImportIntelligenceHandler_Dialog_Message);
+		if (dialog.open() != IDialogConstants.OK_ID) {
+			return null;
+		}
+
+		List<String> files = dialog.getFileNames();
+		importFiles(activeWorkbench, files);
+		
 		return null;
+	}
+
+	private void importFiles(final IWorkbench activeWorkbench, final List<String> files) {
+		final Display display = Display.getCurrent();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
+		
+		try {
+			pmd.run(true, true, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.ImportIntelligenceHandler_LoadingFile, files.size());
+					IProgressMonitor nullPm = new NullProgressMonitor();
+						
+					for (int i = 0; i < files.size(); i ++){
+						File file = new File(files.get(i));
+						monitor.subTask(MessageFormat.format(Messages.ImportIntelligenceHandler_ProcessingFile, file.toString()));
+						monitor.worked(1);
+						if (file.isDirectory()) continue;
+						try{
+							Intelligence intel = IntelligenceImporter.importIntelligence(file, nullPm);
+							if (intel != null) {
+								IntelligenceEventManager.getInstance().intelligenceAdded(intel);
+							}
+						}catch (Exception ex){
+							IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ImportIntelligenceHandler_CannotImportFile, file.toString()) + ex.getLocalizedMessage(), ex);
+						}
+						if (monitor.isCanceled()){
+							display.syncExec(new Runnable() {
+								@Override
+								public void run() {
+									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIntelligenceHandler_CancelInfoDialog_Title, Messages.ImportIntelligenceHandler_CancelInfoDialog_Message);									
+								}
+							});
+							return;
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			IntelligencePlugIn.displayLog(Messages.ImportIntelligenceHandler_ImportError + e.getLocalizedMessage(), e);
+		}
 	}
 
 }

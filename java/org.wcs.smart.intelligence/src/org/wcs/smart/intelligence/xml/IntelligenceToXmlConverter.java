@@ -61,7 +61,7 @@ public class IntelligenceToXmlConverter {
 		/* source */
 		xml.setSource(i.getSource().name());
 
-		/* source */
+		/* description */
 		xml.setDescription(i.getDescription());
 
 		/* points */

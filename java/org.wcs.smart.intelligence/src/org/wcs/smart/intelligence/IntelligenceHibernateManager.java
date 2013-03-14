@@ -95,23 +95,36 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		Interceptor interceptor = new AttachmentInterceptor();
 		Session session = SmartHibernateManager.openSession(interceptor);
 		try {
-			session.beginTransaction();
-			try {
-				//save a name
-				intelligence.updateName(SmartDB.getCurrentLanguage(), intelligence.getName());
-				session.saveOrUpdate(intelligence);
-				session.getTransaction().commit();
-			} catch (Exception ex) {
-				session.getTransaction().rollback();
-				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_SaveIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-				return false;
-			}
+			return saveIntelligence(intelligence, session);
 		} finally {
 			session.close();
 		}
-		return true;
 	}
 
+	/**
+	 * Saves a given intelligence to the database.
+	 * 
+	 * @param intelligence the intelligence to save
+	 * @param session session
+	 * @return <code>true</code> if saved successfully, <code>false</code> if error
+	 */
+	public static boolean saveIntelligence(Intelligence intelligence, Session session) {
+		session.beginTransaction();
+		try {
+			//save a name
+			if (intelligence.getName() != null) {
+				intelligence.updateName(SmartDB.getCurrentLanguage(), intelligence.getName());
+			}
+			session.saveOrUpdate(intelligence);
+			session.getTransaction().commit();
+			return true;
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_SaveIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			return false;
+		}
+	}
+	
 	/**
 	 * Delete a given intelligence from the database.
 	 * 
