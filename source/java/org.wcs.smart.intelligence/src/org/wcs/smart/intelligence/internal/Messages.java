@@ -56,6 +56,24 @@ public class Messages extends NLS {
 
 	public static String ExportIntelligenceHandler_NothingSelected;
 
+	public static String ImportIntelligenceHandler_CancelInfoDialog_Message;
+
+	public static String ImportIntelligenceHandler_CancelInfoDialog_Title;
+
+	public static String ImportIntelligenceHandler_CannotImportFile;
+
+	public static String ImportIntelligenceHandler_Dialog_Message;
+
+	public static String ImportIntelligenceHandler_Dialog_Text;
+
+	public static String ImportIntelligenceHandler_Dialog_Title;
+
+	public static String ImportIntelligenceHandler_ImportError;
+
+	public static String ImportIntelligenceHandler_LoadingFile;
+
+	public static String ImportIntelligenceHandler_ProcessingFile;
+
 	public static String IntelligenceAttachments_Attachments_Label;
 
     public static String IntelligenceAttachments_Message;
@@ -127,6 +145,32 @@ public class Messages extends NLS {
 	public static String IntelligenceHibernateManager_Intelligence_NotFound_Error;
 
 	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
+
+	public static String IntelligenceImporter_Converting;
+
+	public static String IntelligenceImporter_DuplicateDialog_Message;
+
+	public static String IntelligenceImporter_DuplicateDialog_Title;
+
+	public static String IntelligenceImporter_ExtractingZip;
+
+	public static String IntelligenceImporter_ExtractingZip_Error;
+
+	public static String IntelligenceImporter_Importing;
+
+	public static String IntelligenceImporter_ReadingFile;
+
+	public static String IntelligenceImporter_ReadingFile_Error;
+
+	public static String IntelligenceImporter_RemovingTempFiles;
+
+	public static String IntelligenceImporter_Saving;
+
+	public static String IntelligenceImporter_Validating;
+
+	public static String IntelligenceImporter_WarnDialog_Message;
+
+	public static String IntelligenceImporter_WarnDialog_Title;
 
 	public static String IntelligenceListView_Loading_Label;
 
@@ -227,6 +271,12 @@ public class Messages extends NLS {
 	public static String ReportedIntelligenceContribution_Open_Button;
 
 	public static String ShowIntelligencePersepctiveHandler_Error;
+
+	public static String XmlToIntelligenceConverter_NoAttachmentFound_Warning;
+
+	public static String XmlToIntelligenceConverter_NoLangCodeFound_Warning;
+
+	public static String XmlToIntelligenceConverter_SeveralLangCodeFound_Warning;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
