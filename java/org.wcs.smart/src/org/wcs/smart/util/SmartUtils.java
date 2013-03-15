@@ -597,6 +597,9 @@ public class SmartUtils {
 	 * @throws DatatypeConfigurationException
 	 */
 	public static XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
+		if (d == null) {
+			return null;
+		}
 		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
 		cal.setTime(d);
 		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
