@@ -13,22 +13,23 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for WaypointObservationType complex type.
+ * <p>Java class for ExtraDataLabelKeyType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="WaypointObservationType">
+ * &lt;complexType name="ExtraDataLabelKeyType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}WaypointObservationAttributeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="label" type="{http://www.smartconservationsoftware.org/xml/1.0/patrol}LabelType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
- *       &lt;attribute name="categoryKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -37,66 +38,67 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "WaypointObservationType", propOrder = {
-    "attributes"
+@XmlType(name = "ExtraDataLabelKeyType", propOrder = {
+    "label"
 })
-public class WaypointObservationType {
+public class ExtraDataLabelKeyType {
 
-    protected List<WaypointObservationAttributeType> attributes;
+    @XmlElement(required = true)
+    protected List<LabelType> label;
     @XmlAttribute
-    protected String categoryKey;
+    protected String key;
 
     /**
-     * Gets the value of the attributes property.
+     * Gets the value of the label property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the attributes property.
+     * This is why there is not a <CODE>set</CODE> method for the label property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getAttributes().add(newItem);
+     *    getLabel().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link WaypointObservationAttributeType }
+     * {@link LabelType }
      * 
      * 
      */
-    public List<WaypointObservationAttributeType> getAttributes() {
-        if (attributes == null) {
-            attributes = new ArrayList<WaypointObservationAttributeType>();
+    public List<LabelType> getLabel() {
+        if (label == null) {
+            label = new ArrayList<LabelType>();
         }
-        return this.attributes;
+        return this.label;
     }
 
     /**
-     * Gets the value of the categoryKey property.
+     * Gets the value of the key property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getCategoryKey() {
-        return categoryKey;
+    public String getKey() {
+        return key;
     }
 
     /**
-     * Sets the value of the categoryKey property.
+     * Sets the value of the key property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setCategoryKey(String value) {
-        this.categoryKey = value;
+    public void setKey(String value) {
+        this.key = value;
     }
 
 }
