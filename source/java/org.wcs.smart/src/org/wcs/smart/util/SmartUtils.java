@@ -36,6 +36,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.DateTime;
@@ -582,5 +587,26 @@ public class SmartUtils {
 		return null;
 	}
 
+	/**
+	 * Converts a date to an xml date.  Sets the
+	 * XML timezone field to undefined so timezone information
+	 * is not included in output.
+	 * 
+	 * @param d
+	 * @return
+	 * @throws DatatypeConfigurationException
+	 */
+	public static XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
+		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
+		cal.setTime(d);
+		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setHour(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setMinute(DatatypeConstants.FIELD_UNDEFINED);
+		xgc.setSecond(DatatypeConstants.FIELD_UNDEFINED);
+		
+		return xgc;
+	}
 
 }
