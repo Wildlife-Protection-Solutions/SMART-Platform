@@ -22,7 +22,6 @@
 package org.wcs.smart.plan.internal.ui.patrol;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,13 +44,13 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PatrolPlan;
@@ -234,24 +233,18 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			List<?> plans = session.createCriteria(PatrolPlan.class)
-					.add(Restrictions.eq("id.patrol", patrol)).list(); //$NON-NLS-1$
-
-			if (plans.size() == 1) {
-				this.currentPlan = ((PatrolPlan) plans.get(0)).getPlan();
+			this.currentPlan = PlanHibernateManager.getPlanForPatrol(patrol, session);
+			if (this.currentPlan != null) {
 				Plan parent = currentPlan.getParent();
 				// ensure parents are lazily loaded
 				while (parent != null) {
 					parent = parent.getParent();
 				}
-			} else if (plans.size() > 1) {
-				// TODO: this is an error
 			}
 			session.getTransaction().rollback();
 		} finally {
 			session.close();
 		}
-		
 		initContent();
 
 	}

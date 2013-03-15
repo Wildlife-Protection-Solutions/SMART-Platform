@@ -46,12 +46,14 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
+import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.query.model.ListItem;
@@ -530,6 +532,23 @@ public class PlanHibernateManager{
 			SmartPlanPlugIn.displayLog(MessageFormat.format(Messages.PlanHibernateManager_Plan_NotFound_Error, id), null);
 			return null;
 		}
+	}
+
+	
+	/**
+	 * For given patrol returns a plan to which this patrol belong.
+	 * 
+	 * @return plan to which the patrol belong
+	 */
+	public static Plan getPlanForPatrol(Patrol patrol, Session session) {
+		List<?> plans = session.createCriteria(PatrolPlan.class).add(Restrictions.eq("id.patrol", patrol)).list(); //$NON-NLS-1$
+
+		if (plans.size() == 1) {
+			return ((PatrolPlan) plans.get(0)).getPlan();
+		} else if (plans.size() > 1) {
+			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_ErrorMatchingPatrolToPlan, null);
+		}
+		return null;
 	}
 	
 }
