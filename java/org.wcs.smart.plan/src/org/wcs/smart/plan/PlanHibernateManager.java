@@ -550,5 +550,19 @@ public class PlanHibernateManager{
 		}
 		return null;
 	}
+
+	/**
+	 * Returns a list of all plans in given Conservation area with give id
+	 * 
+	 * @return a list of Plans
+	 */
+	public static List<Plan> getPlansById(Session session, ConservationArea ca, String id) {
+		Criteria criteria = session.createCriteria(Plan.class);
+		criteria.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		criteria.add(Restrictions.eq("id", id)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Plan> plans = criteria.list();
+		return plans;
+	}
 	
 }

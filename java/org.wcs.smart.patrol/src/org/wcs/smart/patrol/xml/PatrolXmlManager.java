@@ -57,6 +57,7 @@ public class PatrolXmlManager {
 	public static PatrolType readDataModel(InputStream file) throws JAXBException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	
+		@SuppressWarnings("unchecked")
 		JAXBElement<PatrolType> o = (JAXBElement<PatrolType>) un.unmarshal(file);
 		PatrolType x = o.getValue();
 		return x;

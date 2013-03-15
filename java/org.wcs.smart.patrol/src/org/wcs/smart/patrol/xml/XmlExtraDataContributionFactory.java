@@ -28,6 +28,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 
 /**
@@ -53,7 +54,7 @@ public class XmlExtraDataContributionFactory {
 				}
 				contributions = items;
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog("Error parsing Extra-Data patrol contribution", ex);
+				SmartPatrolPlugIn.displayLog(Messages.XmlExtraDataContributionFactory_ErrorParsingExtraData, ex);
 				return Collections.emptyList();
 			}
 		}

@@ -28,6 +28,26 @@ public class Messages extends NLS {
 
     public static String CaDeleteHandler_DeletingIntelligences;
 
+	public static String ConvertedIntelligenceExtraData_CannotDetermineName;
+
+	public static String ConvertedIntelligenceExtraData_CannotDetermineReceivedDate;
+
+	public static String ConvertedIntelligenceExtraData_IntelligenceNotFound;
+
+	public static String ConvertedIntelligenceExtraData_IntelligencePatrolIsSet;
+
+	public static String ConvertedIntelligenceExtraData_MotivationIntelligence;
+
+	public static String ConvertedIntelligenceExtraData_MultipleIntelligenceFound;
+
+	public static String ConvertedIntelligenceExtraData_NameKeyMissing;
+
+	public static String ConvertedIntelligenceExtraData_NotPatrolReported;
+
+	public static String ConvertedIntelligenceExtraData_RecievedDateKeyMissing;
+
+	public static String ConvertedIntelligenceExtraData_ReportedIntelligence;
+
 	public static String DeleteIntelligenceHandler_ConfirmationDialog_Message;
 
 	public static String DeleteIntelligenceHandler_ConfirmationDialog_PatrolChanges_Message;

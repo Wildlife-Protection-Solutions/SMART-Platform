@@ -27,6 +27,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.ExtraDataStringKeyType;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
@@ -42,9 +43,9 @@ import org.wcs.smart.plan.model.Plan;
  */
 public class PatrolPlanXmlExtraDataContribution implements IXmlExtraDataContribution {
 
-	private static final String PLAN_TYPE = "plan"; //$NON-NLS-1$
+	static final String PLAN_TYPE = "plan"; //$NON-NLS-1$
 
-	private static final String PLAN_ID_KEY = "id"; //$NON-NLS-1$
+	static final String PLAN_ID_KEY = "id"; //$NON-NLS-1$
 
 	@Override
 	public List<ExtraDataType> exportData(Patrol patrol) throws Exception {
@@ -70,4 +71,8 @@ public class PatrolPlanXmlExtraDataContribution implements IXmlExtraDataContribu
 		}
 	}
 
+	@Override
+	public IConvertedExtraData fromXml(List<ExtraDataType> extraDataList) {
+		return new ConvertedPlanExtraData(extraDataList);
+	}
 }

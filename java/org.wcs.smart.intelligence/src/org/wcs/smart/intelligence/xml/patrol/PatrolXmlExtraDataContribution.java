@@ -30,6 +30,7 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.ExtraDataDateKeyType;
 import org.wcs.smart.patrol.xml.model.ExtraDataLabelKeyType;
@@ -46,12 +47,12 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolXmlExtraDataContribution implements IXmlExtraDataContribution {
 	
-	private static final String MOTIVATION_TYPE = "motivation_intelligence"; //$NON-NLS-1$
+	static final String MOTIVATION_TYPE = "motivation_intelligence"; //$NON-NLS-1$
 
-	private static final String REPORTED_TYPE = "reported_intelligence"; //$NON-NLS-1$
+	static final String REPORTED_TYPE = "reported_intelligence"; //$NON-NLS-1$
 
-	private static final String MOTIVATION_NAME_KEY = "name"; //$NON-NLS-1$
-	private static final String MOTIVATION_RECEIVED_DATE_KEY = "receivedDate"; //$NON-NLS-1$
+	static final String NAME_KEY = "name"; //$NON-NLS-1$
+	static final String RECEIVED_DATE_KEY = "receivedDate"; //$NON-NLS-1$
 	
 	@Override
 	public List<ExtraDataType> exportData(Patrol patrol) throws Exception {
@@ -90,14 +91,19 @@ public class PatrolXmlExtraDataContribution implements IXmlExtraDataContribution
 			labelType.setValue(label.getValue());
 			nameKey.getLabel().add(labelType);
 		}
-		nameKey.setKey(MOTIVATION_NAME_KEY);
+		nameKey.setKey(NAME_KEY);
 		data.getLabelKey().add(nameKey);
 		
 		ExtraDataDateKeyType recDateKey = new ExtraDataDateKeyType();
-		recDateKey.setKey(MOTIVATION_RECEIVED_DATE_KEY);
+		recDateKey.setKey(RECEIVED_DATE_KEY);
 		recDateKey.setValue(SmartUtils.toXmlDate(intelligence.getReceivedDate()));
 		data.getDateKey().add(recDateKey);
 		
 		return data;
+	}
+	
+	@Override
+	public IConvertedExtraData fromXml(List<ExtraDataType> extraDataList) {
+		return new ConvertedIntelligenceExtraData(extraDataList);
 	}
 }

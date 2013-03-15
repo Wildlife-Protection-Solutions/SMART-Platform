@@ -632,6 +632,7 @@ public class Messages extends NLS {
 	public static String WaypointInfoView_DateTimeLabel;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;
+	public static String XmlExtraDataContributionFactory_ErrorParsingExtraData;
 	public static String XmlToPatrolConverter_Error_DuplicateAttributes;
 	public static String XmlToPatrolConverter_Error_InvalidTransportType;
 	public static String XmlToPatrolConverter_Error_MandateNotFound;
