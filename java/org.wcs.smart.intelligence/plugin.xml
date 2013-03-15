@@ -343,5 +343,11 @@
             class="org.wcs.smart.intelligence.query.IntelligenceQueryFilterPatrolContribution">
       </contribution>
    </extension>
+   <extension
+         point="org.wcs.smart.patrol.xml">
+      <contribution
+            class="org.wcs.smart.intelligence.xml.patrol.PatrolXmlExtraDataContribution">
+      </contribution>
+   </extension>
 
 </plugin>
