@@ -195,15 +195,12 @@ public class GeometryUtils {
 			
 			if (poly instanceof Polygon){
 				double x = computeHours((Polygon)poly, (LineString)ls);
-				System.out.println(x);
 				return x;
 			}else if (poly instanceof MultiPolygon){
 				double x = computeHours((MultiPolygon)poly, (LineString)ls);
-				System.out.println(x);
 				return x;
 			}else if (poly instanceof GeometryCollection){
 				double x = computeHours((GeometryCollection)poly, (LineString)ls);
-				System.out.println(x);
 				return x;
 			}
 		}catch (Throwable e){

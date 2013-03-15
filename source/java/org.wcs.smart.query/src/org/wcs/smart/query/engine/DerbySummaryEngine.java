@@ -387,6 +387,7 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				break;
 			}
 		}
+		
 		if (patrolItem.getOption() ==  PatrolValueOption.DISTANCE && hasAreaGroupBy){
 			valueSql.append("smart.distanceInMeter(");
 			StringBuilder append = new StringBuilder();
@@ -422,6 +423,28 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 			valueSql.append(tablePrefix.get(Track.class));
 			valueSql.append(".geometry)");
 			valueSql.append(" as hours ");
+			
+			valueAggSql.append("sum(hours)");
+		}else if (patrolItem.getOption() == PatrolValueOption.MAN_HOURS && hasAreaGroupBy){
+valueSql.append("smart.computeHours(");
+			
+			StringBuilder append = new StringBuilder();
+			for (int i = 0; i < areaGroupByPrefix.size() - 1; i ++){
+				valueSql.append("smart.intersection(");
+				valueSql.append(areaGroupByPrefix.get(i));
+				valueSql.append(".geom");
+				valueSql.append(",");
+				append.append(")");
+			}
+			valueSql.append(areaGroupByPrefix.get(areaGroupByPrefix.size() - 1)+ ".geom");
+			valueSql.append(append);
+				
+			valueSql.append(",");
+			valueSql.append(tablePrefix.get(Track.class));
+			valueSql.append(".geometry)");
+			valueSql.append(" as hours, ");
+			valueSql.append(tablePrefix.get(PatrolLegMember.class));
+			valueSql.append(".employee_uuid as pl_member");
 			
 			valueAggSql.append("sum(hours)");
 			
