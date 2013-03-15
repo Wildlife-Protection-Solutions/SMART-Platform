@@ -25,7 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -53,7 +55,10 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
+import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
 import org.wcs.smart.patrol.xml.XmlToPatrolConverter;
+import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
+import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.PatrolType;
 import org.wcs.smart.util.SmartUtils;
 
@@ -189,10 +194,10 @@ public class PatrolImporter {
 	 * @return created Patrol or null
 	 * @throws Exception
 	 */
-	private static Patrol  convertAndSave(PatrolType xmlPatrol, File attachmentDirectory, IProgressMonitor monitor)
-			throws Exception {
+	private static Patrol  convertAndSave(PatrolType xmlPatrol, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+		XmlToPatrolConverter converter = new XmlToPatrolConverter();
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try{
+		try {
 			monitor.subTask(Messages.PatrolImporter_Progress_Validating);
 			//check if a patrol in the database with the given patorl id already exists
 			if (xmlPatrol.getId() != null){
@@ -216,63 +221,87 @@ public class PatrolImporter {
 								return ;
 							}		
 						}
-						
+
 					});
 					if(!cont[0]){
 						return null;
 					}
-					
-					
 				}
 			}		
 			monitor.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
-			XmlToPatrolConverter converter = new XmlToPatrolConverter();
 			converter.fromXml(xmlPatrol, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
-			monitor.worked(1);
-			
-			if (converter.getWarnings().size() > 0){
-				StringBuilder sb = new StringBuilder();
-				for (String str: converter.getWarnings()){
-					sb.append(str);
-					sb.append(SmartUtils.LINE_SEPARATOR);
-				}
-				final String message = sb.toString();
-				final boolean[] cont = new boolean[]{true}; 
-				Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						ConfirmInputDialog dialog = new ConfirmInputDialog(
-								Display.getDefault().getActiveShell(),
-								Messages.PatrolImporter_PatrolImport_ErrorDialogTitle,
-								Messages.PatrolImporter_PatrolImport_ErrorMessage,
-								message, null);
-						if (dialog.open() != ConfirmInputDialog.OK){
-							cont[0] = false;
-							
-						}	
-					}
-				});
-				if (!cont[0]){
-					return null;
-				}
-							
-			}
-			Patrol imported = converter.getImportedPatrol();
-			
-			monitor.subTask(Messages.PatrolImporter_Progress_Saving);
-			if (!PatrolHibernateManager.savePatrolInTransaction(imported, session, true)){
-				imported = null;
-			}
-			monitor.worked(1);
-			return imported;
-		}finally{
+		} finally {
 			if (session.isOpen()){
 				session.close();
 			}
 		}
+
+		List<String> warnings = new ArrayList<String>();
+		warnings.addAll(converter.getWarnings());
+		//converting extra data
+		List<IConvertedExtraData> convertedExtraData = new ArrayList<IConvertedExtraData>();
+		for (IXmlExtraDataContribution edc : XmlExtraDataContributionFactory.getContributions()) {
+			IConvertedExtraData extraData = edc.fromXml(xmlPatrol.getExtraData());
+			if (extraData != null) {
+				if (extraData.getWarnings() != null) {
+					warnings.addAll(extraData.getWarnings());
+				}
+				convertedExtraData.add(extraData);
+			}
+		}
+		monitor.worked(1);
+
+		//display reported conversion warnings if they present
+		if (!warnings.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			for (String str: warnings){
+				sb.append(str);
+				sb.append(SmartUtils.LINE_SEPARATOR);
+			}
+			final String message = sb.toString();
+			final boolean[] cont = new boolean[]{true}; 
+			Display.getDefault().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					ConfirmInputDialog dialog = new ConfirmInputDialog(
+							Display.getDefault().getActiveShell(),
+							Messages.PatrolImporter_PatrolImport_ErrorDialogTitle,
+							Messages.PatrolImporter_PatrolImport_ErrorMessage,
+							message, null);
+					if (dialog.open() != ConfirmInputDialog.OK){
+						cont[0] = false;
+
+					}	
+				}
+			});
+			if (!cont[0]) {
+				return null;
+			}
+
+		}
+		
+		//performing actual save in database
+		monitor.subTask(Messages.PatrolImporter_Progress_Saving);
+		Patrol imported = converter.getImportedPatrol();
+		if (imported == null)
+			return null;
+		session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		session.beginTransaction();
+		try {
+			PatrolHibernateManager.savePatrol(imported, session, true);
+			for (IConvertedExtraData extraData : convertedExtraData) {
+				extraData.saveInTransaction(session, imported);
+			}
+			session.getTransaction().commit();
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+			return null;
+		}
+		monitor.worked(1);
+		return imported;
 	}
-	
 	
 	/**
 	 * Unzips the content of the zip

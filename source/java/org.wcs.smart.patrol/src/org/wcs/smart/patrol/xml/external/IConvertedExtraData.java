@@ -23,44 +23,29 @@ package org.wcs.smart.patrol.xml.external;
 
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.xml.model.ExtraDataType;
 
 /**
- * Contribution for the Patrol Export/Import functionality to handle
- * "extra-data" section of XML file. Contributions are provided via
- * extension point.
+ * Represents the patrol extra-data converted object.
  * 
  * @author elitvin
  * @since 1.0.0
  */
-public interface IXmlExtraDataContribution {
-
-	/**
-	 * Extension id
-	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.patrol.xml"; //$NON-NLS-1$
-
-	/**
-	 * Returns "extra-data" that current extension points wants to save
-	 * to XML file for give patrol.
-	 * 
-	 * @param patrol
-	 * @return List<ExtraDataType>
-	 * @throws Exception
-	 */
-	public List<ExtraDataType> exportData(Patrol patrol) throws Exception;
-
-	/**
-	 * Converts XML extra-data to some inner structure but do not perform actual save operation.
-	 * Extension point is supposed to convert only items that it contributed.
-	 * Returned object acts like a wrapper on converted extra-data.
-	 * 
-	 * @see IConvertedExtraData
-	 * 
-	 * @param extraDataList
-	 * @return
-	 */
-	public IConvertedExtraData fromXml(List<ExtraDataType> extraDataList);
+public interface IConvertedExtraData {
 	
+	/**
+	 * @return any warnings generated during the import process
+	 */
+	public List<String> getWarnings();
+	
+	/**
+	 * Perform actual save operation of converted extra-data.
+	 * 
+	 * @param session
+	 * @param patrol
+	 * @return <true> if data successfully save in database
+	 */
+	public boolean saveInTransaction(Session session, Patrol patrol);
+
 }

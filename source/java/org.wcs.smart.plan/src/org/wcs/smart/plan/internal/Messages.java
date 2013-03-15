@@ -10,6 +10,11 @@ public class Messages extends NLS {
 	public static String AdministrativePlanTargetPropertyPage_Description_Label;
 	public static String AdministrativePlanTargetPropertyPage_EmptyName_Error;
 	public static String AdministrativePlanTargetPropertyPage_Name_Label;
+	public static String ConvertedPlanExtraData_ExtraKeyFound;
+	public static String ConvertedPlanExtraData_ExtraRecordFound;
+	public static String ConvertedPlanExtraData_MultiplePlansFound;
+	public static String ConvertedPlanExtraData_NoPlanReference;
+	public static String ConvertedPlanExtraData_PlanNotFound;
 	public static String CreatePlanWizard_InvalidDateRange_Message;
 	public static String CreatePlanWizard_LoadPerspective_Error;
 	public static String CreatePlanWizard_Title;
