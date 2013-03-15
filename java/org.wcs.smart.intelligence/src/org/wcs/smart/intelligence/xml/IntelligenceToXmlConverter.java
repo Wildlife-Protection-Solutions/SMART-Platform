@@ -21,13 +21,7 @@
  */
 package org.wcs.smart.intelligence.xml;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -36,6 +30,7 @@ import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.xml.model.IntelligenceType;
 import org.wcs.smart.intelligence.xml.model.LabelType;
 import org.wcs.smart.intelligence.xml.model.PointType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class responsible for converting intelligence object to XML.
@@ -54,9 +49,9 @@ public class IntelligenceToXmlConverter {
 		}
 
 		/* dates */
-		xml.setReceivedDate(toXmlDate(i.getReceivedDate()));
-		xml.setFromDate(toXmlDate(i.getFromDate()));
-		xml.setToDate(toXmlDate(i.getToDate()));
+		xml.setReceivedDate(SmartUtils.toXmlDate(i.getReceivedDate()));
+		xml.setFromDate(SmartUtils.toXmlDate(i.getFromDate()));
+		xml.setToDate(SmartUtils.toXmlDate(i.getToDate()));
 
 		/* source */
 		xml.setSource(i.getSource().name());
@@ -95,31 +90,6 @@ public class IntelligenceToXmlConverter {
 		pt.setX(p.getX());
 		pt.setY(p.getY());
 		return pt;
-	}
-	
-	/**
-	 * Converts a date to an xml date.  Sets the
-	 * XML timezone field to undefined so timezone information
-	 * is not included in output.
-	 * 
-	 * @param d
-	 * @return
-	 * @throws DatatypeConfigurationException
-	 */
-	private static XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
-		if (d == null) {
-			return null;
-		}
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(d);
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setHour(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMinute(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setSecond(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
 	}
 	
 }

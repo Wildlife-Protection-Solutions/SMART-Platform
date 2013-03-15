@@ -49,8 +49,8 @@ public class PatrolToXmlConverter {
 		xml.setId(p.getId());
 		
 		/* start & end dates */
-		xml.setEndDate(toXmlDate(p.getEndDate()));
-		xml.setStartDate(toXmlDate(p.getStartDate()));
+		xml.setEndDate(SmartUtils.toXmlDate(p.getEndDate()));
+		xml.setStartDate(SmartUtils.toXmlDate(p.getStartDate()));
 		
 		/* armed */
 		xml.setIsArmed(p.isArmed());
@@ -98,8 +98,8 @@ public class PatrolToXmlConverter {
 	
 	private static PatrolLegType convertPatrolLeg(PatrolLeg leg) throws DatatypeConfigurationException{
 		PatrolLegType xml = new PatrolLegType();
-		xml.setEndDate(toXmlDate(leg.getEndDate()));
-		xml.setStartDate(toXmlDate(leg.getStartDate()));
+		xml.setEndDate(SmartUtils.toXmlDate(leg.getEndDate()));
+		xml.setStartDate(SmartUtils.toXmlDate(leg.getStartDate()));
 		xml.setId(leg.getId());
 		xml.setTransportType(createLabel(leg.getPatrol(), leg.getType()));
 		
@@ -127,7 +127,7 @@ public class PatrolToXmlConverter {
 	private static PatrolLegDayType convertPatrolLegDay(PatrolLegDay legDay) throws DatatypeConfigurationException{
 		
 		PatrolLegDayType xml = new PatrolLegDayType();
-		xml.setDate(toXmlDate(legDay.getDate()));
+		xml.setDate(SmartUtils.toXmlDate(legDay.getDate()));
 		
 		xml.setEndTime(toXmlTime(legDay.getEndTime()));
 		xml.setStartTime(toXmlTime(legDay.getStartTime()));
@@ -237,27 +237,4 @@ public class PatrolToXmlConverter {
 		return xgc;
 	}
 	
-	/**
-	 * Converts a date to an xml date.  Sets the
-	 * XML timezone field to undefined so timezone information
-	 * is not included in output.
-	 * 
-	 * @param d
-	 * @return
-	 * @throws DatatypeConfigurationException
-	 */
-	private static XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException{
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(d);
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setHour(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMinute(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setSecond(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
-	}
-	
-
 }
