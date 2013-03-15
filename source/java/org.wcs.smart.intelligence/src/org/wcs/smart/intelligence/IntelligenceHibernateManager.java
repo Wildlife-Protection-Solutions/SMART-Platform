@@ -239,15 +239,24 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	public static List<Intelligence> getReportedIntelligences(Patrol patrol) {
 		Session session = SmartHibernateManager.openSession();
 		try {
-			Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("patrol", patrol)); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
-			List<Intelligence> list = query.list();
-			return list;
+			return getReportedIntelligences(patrol, session);
 		} finally {
 			session.close();
 		}
 	}
 
+	/**
+	 * Returns the list of intelligences reported by this patrol
+	 * 
+	 * @param patrol
+	 * @return the list of intelligences reported by this patrol
+	 */
+	public static List<Intelligence> getReportedIntelligences(Patrol patrol, Session session) {
+		Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("patrol", patrol)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Intelligence> list = query.list();
+		return list;
+	}
 
 	/**
 	 * Returns the list of intelligences that motivated patrol
@@ -258,16 +267,26 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
 		Session session = SmartHibernateManager.openSession();
 		try {
-			Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol"); //$NON-NLS-1$
-			query.setParameter("patrol", patrol); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
-			List<Intelligence> list = query.list();
-			return list;
+			return getMotivatedIntelligences(patrol, session);
 		} finally {
 			session.close();
 		}
 	}
 
+	/**
+	 * Returns the list of intelligences that motivated patrol
+	 * 
+	 * @param patrol
+	 * @return the list of intelligences that motivated patrol
+	 */
+	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol, Session session) {
+		Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol"); //$NON-NLS-1$
+		query.setParameter("patrol", patrol); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Intelligence> list = query.list();
+		return list;
+	}
+	
 	/**
 	 * @throws Exception 
 	 * @throws  
