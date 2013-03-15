@@ -143,6 +143,7 @@ elementFormDefault="qualified">
     	<sequence>
             <element name="stringKey" type="tns:ExtraDataStringKeyType" maxOccurs="unbounded" minOccurs="0"/>
             <element name="dateKey" type="tns:ExtraDataDateKeyType" maxOccurs="unbounded" minOccurs="0"/>
+            <element name="labelKey" type="tns:ExtraDataLabelKeyType" maxOccurs="unbounded" minOccurs="0"/>
     	</sequence>
     	<attribute name="type" type="string"/>
     </complexType>
@@ -155,6 +156,13 @@ elementFormDefault="qualified">
     <complexType name="ExtraDataDateKeyType">
     	<attribute name="key" type="string"/>
     	<attribute name="value" type="date"/>
+    </complexType>
+
+    <complexType name="ExtraDataLabelKeyType">
+    	<sequence>
+            <element name="label" type="tns:LabelType" maxOccurs="unbounded" minOccurs="1"/>
+    	</sequence>
+    	<attribute name="key" type="string"/>
     </complexType>
 
     <element name="patrol" type="tns:PatrolType"/>
