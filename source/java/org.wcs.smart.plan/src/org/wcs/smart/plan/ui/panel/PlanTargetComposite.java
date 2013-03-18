@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -98,11 +97,9 @@ public class PlanTargetComposite extends PlanComposite {
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				TargetPropertyDialog dia = new TargetPropertyDialog(getShell(), targets, null); 
-			    if (dia.open() == Window.CANCEL){
-			    	//do nothing
-				}else{
-
+				TargetPropertyDialog dia = new TargetPropertyDialog(getShell(), targets, null);
+				dia.open();
+				if (dia.isSavePerformed()) {
 					targetTable.updateModel(targets);
 					fireInputChangeListeners();
 				}
@@ -175,10 +172,9 @@ public class PlanTargetComposite extends PlanComposite {
         }
         
         PlanTarget selected = (PlanTarget)sec.getFirstElement(); 
-		TargetPropertyDialog dia = new TargetPropertyDialog(getShell(), targets, selected); 
-	    if (dia.open() == Window.CANCEL) {
-	    	//do nothing
-		} else {
+		TargetPropertyDialog dia = new TargetPropertyDialog(getShell(), targets, selected);
+		dia.open();
+		if (dia.isSavePerformed()) {
 			targetTable.updateModel(targets);
 			isDataValid();
 			fireInputChangeListeners();
