@@ -38,7 +38,6 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
@@ -798,8 +797,9 @@ public class PlanEditor extends EditorPart {
 	            return;
 	        }
 	        PlanTarget selected = (PlanTarget)selection.getFirstElement(); 
-			TargetPropertyDialog dialog = new TargetPropertyDialog(getEditorSite().getShell(), plan.getTargets(), selected); 
-		    if (dialog.open() != Window.CANCEL) {
+			TargetPropertyDialog dialog = new TargetPropertyDialog(getEditorSite().getShell(), plan.getTargets(), selected);
+			dialog.open();
+			if (dialog.isSavePerformed()) {
 				if (PlanHibernateManager.savePlan(plan, HibernateManager.openSession())) {
 					PlanEventManager.getInstance().planChanged(0, plan);
 				}

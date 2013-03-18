@@ -78,6 +78,7 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 	private ITargetPage currentPage;
 	
 	private boolean isDirty = false;
+	private boolean savePerformed = false;
 	
 	
 	/**
@@ -235,7 +236,9 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 		if (IDialogConstants.OK_ID == buttonId) {
 			if (performSave()){
 				setReturnCode(OK);
-				close();
+				if (closeOnSave()) {
+					close();
+				}
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			if (isDirty){
@@ -266,6 +269,12 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 			}
 		}
 	}
+
+	private boolean closeOnSave() {
+		//do not close if this is "Edit" operation to be consistent with editors
+		//close if this is "Add" to be consistent with wizards
+		return pages.size() > 1;
+	}
 	
 	/*
 	 * adds the plan target to the plan
@@ -286,7 +295,7 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 		}
 		target.updateTarget(pt);
 		setDirty(false);
-		isDirty = false;
+		savePerformed = true;
 		return true;
 	}
 
@@ -302,5 +311,9 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 		}else{
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 		}
+	}
+	
+	public boolean isSavePerformed() {
+		return savePerformed;
 	}
 }
