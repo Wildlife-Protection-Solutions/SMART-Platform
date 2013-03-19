@@ -40,6 +40,7 @@ import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * A drop item that represents a value-attribute
@@ -215,4 +216,12 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 
 	}
 
+	@Override
+	public boolean isAllowed() {
+		if (attribute.getAggregations() == null || attribute.getAggregations().isEmpty()) {
+			setNotAllowedMessage(Messages.AttributeValueDropItem_NoAggregation_Warning);
+			return false;
+		}
+		return super.isAllowed();
+	}
 }

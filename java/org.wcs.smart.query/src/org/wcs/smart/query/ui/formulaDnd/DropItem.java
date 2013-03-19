@@ -55,6 +55,8 @@ public abstract class DropItem {
 	
 	private Composite widget;
 	
+	private String notAllowedMessage = ""; //$NON-NLS-1$
+	
 	/**
 	 * Creates a new drop item
 	 */
@@ -230,5 +232,24 @@ public abstract class DropItem {
 	 */
 	protected String formatStringForLabel(String text){
 		return SmartUtils.formatStringForLabel(text);
+	}
+	
+	/**
+	 * Determines if this drop item is allowed to be added to definition view.
+	 * Some restrictions may be applied to particular drop items (validation, permissions, etc.)
+	 * that do not allow to add this item to query. Reason will be obtained via getNotAllowedMessage() 
+	 * 
+	 * @return
+	 */
+	public boolean isAllowed() {
+		return true;
+	}
+	
+	public String getNotAllowedMessage() {
+		return notAllowedMessage;
+	}
+	
+	protected void setNotAllowedMessage(String notAllowedMessage) {
+		this.notAllowedMessage = notAllowedMessage;
 	}
 }
