@@ -25,12 +25,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISourceProviderListener;
@@ -240,8 +242,12 @@ public class QueryDefView extends ViewPart {
 						if (items == null ) continue;
 						for (int i = 0; i < items.length; i ++){
 							if (items[i] != null){
-								currentPanel.addItem(items[i]);
-								fireEvent = true;
+								if (items[i].isAllowed()) {
+									currentPanel.addItem(items[i]);
+									fireEvent = true;
+								} else {
+									MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.QueryDefView_Warning_Title, items[i].getNotAllowedMessage());
+								}
 							}
 						}
 					}

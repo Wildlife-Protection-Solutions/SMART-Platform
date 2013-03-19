@@ -32,6 +32,7 @@ public class Messages extends NLS {
 	public static String AttributeTreeGroupByDropItem_FiltersLink;
 	public static String AttributeTreeGroupByDropItem_IncludedLabel;
 	public static String AttributeTreeGroupByDropItem_TreeLevelLabel;
+	public static String AttributeValueDropItem_NoAggregation_Warning;
 	public static String AttributeValueItem_AggNoSupported;
 	public static String AttributeValueItem_AttributeNotFoundError;
 	public static String AttributeValueItem_CategoryNotFoundError;
@@ -389,6 +390,7 @@ public class Messages extends NLS {
 	public static String QueryDateFilterComposite_DateLabel;
 	public static String QueryDateFilterComposite_TodayLabel;
 	public static String QueryDefView_CloseError;
+	public static String QueryDefView_Warning_Title;
 	public static String QueryEditorTableContent_NaLabel;
 	public static String QueryEditorTableContent_NumberOfIncidentLabel;
 	public static String QueryEditorTableContent_NumberOfRecordsLabel;
