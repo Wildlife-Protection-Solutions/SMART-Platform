@@ -16,6 +16,8 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -101,6 +103,14 @@ public class ScaleRatioComposite extends Composite implements FocusListener, Key
             public void widgetDefaultSelected( SelectionEvent e ) {
             }
         });
+        combo.addTraverseListener(new TraverseListener() {
+			@Override
+			public void keyTraversed(TraverseEvent e) {
+				if (e.character == SWT.Selection && e.getSource() == combo) {
+					e.doit = false;
+				}
+			}
+		});
         combo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         updateScale();
 	}
