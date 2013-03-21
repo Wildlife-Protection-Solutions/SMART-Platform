@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.wcs.smart.data.oda.smart French NLS Support
+Bundle-SymbolicName: org.wcs.smart.data.oda.smart.nl_fr
+Bundle-Version: 1.0.0.qualifier
+Fragment-Host: org.wcs.smart.data.oda.smart;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
