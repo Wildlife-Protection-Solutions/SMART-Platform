@@ -178,6 +178,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceImporter_Importing;
 
+	public static String IntelligenceImporter_Name_NoMatch_Error;
+
 	public static String IntelligenceImporter_ReadingFile;
 
 	public static String IntelligenceImporter_ReadingFile_Error;

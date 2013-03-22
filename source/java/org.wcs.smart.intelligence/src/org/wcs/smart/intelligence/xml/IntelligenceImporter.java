@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -204,16 +205,26 @@ public class IntelligenceImporter {
 			monitor.subTask(Messages.IntelligenceImporter_Validating);
 			//check if a intelligence in the database with the given name already exists
 			if (xml.getName() != null) {
-				String code = SmartDB.getCurrentLanguage().getCode();
-				String name = null;
-				for (LabelType labelType : xml.getName()) {
-					if (code.equals(labelType.getLanguageCode())) {
-						name = labelType.getValue();
-						break;
-					}
+				Language language = SmartDB.getCurrentLanguage();
+				String name = findNameInLanguage(language, xml.getName());
+				if (name == null) {
+					//we were unable to find name in current language, try default
+					language = SmartDB.getCurrentConservationArea().getDefaultLanguage();
+					name = findNameInLanguage(language, xml.getName());
 				}
+				if (name == null) {
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.IntelligenceImporter_DuplicateDialog_Title,
+									MessageFormat.format(Messages.IntelligenceImporter_Name_NoMatch_Error, filename));
+						}
+					});
+					return null;
+				}
+				
 				Query query = session.createQuery("SELECT l.value FROM Label l, Intelligence i WHERE l.id.language = :language AND lower(l.value) like :name AND l.id.element.uuid = i.uuid"); //$NON-NLS-1$
-				query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
+				query.setParameter("language", language); //$NON-NLS-1$
 				query.setParameter("name", name.toLowerCase()); //$NON-NLS-1$
 				List<?> result = query.list();
 				if (result != null && result.size() > 0){
@@ -239,8 +250,6 @@ public class IntelligenceImporter {
 					if(!cont[0]){
 						return null;
 					}
-					
-					
 				}
 			}		
 			monitor.subTask(Messages.IntelligenceImporter_Converting);
@@ -291,6 +300,18 @@ public class IntelligenceImporter {
 		}
 	}
 
+	private static String findNameInLanguage(Language language, List<LabelType> names) {
+		String code = language.getCode();
+		String name = null;
+		for (LabelType labelType : names) {
+			if (code.equals(labelType.getLanguageCode())) {
+				name = labelType.getValue();
+				break;
+			}
+		}
+		return name;
+	}
+	
 	/**
 	 * Unzips the content of the zip
 	 * file to a temporary directory.
