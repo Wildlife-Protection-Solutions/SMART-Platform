@@ -492,8 +492,6 @@ public class Messages extends NLS {
 	public static String EmployeeCsvImporter_Error_RankNotFound;
 	public static String EmployeeCsvImporter_Error_StartAfterEmployeeBirthDate;
 	public static String EmployeeCsvImporter_Error_StartDateFormat;
-	public static String EmployeeCsvImporter_Female_Export_Key;
-	public static String EmployeeCsvImporter_Male_Export_Key;
 	public static String EmployeeDeleteAdvisor_Error_NoMoreAdmin;
 	public static String EmployeeDeleteAdvisor_Error_NotEmployee;
 	public static String EmployeeDialog_Create_DialogTitle;

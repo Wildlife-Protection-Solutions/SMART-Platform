@@ -23,6 +23,7 @@ package org.wcs.smart.export.config.impl;
 
 import java.text.MessageFormat;
 
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.export.EmployeeCsvExporter;
 import org.wcs.smart.export.EmployeeCsvImporter;
 import org.wcs.smart.export.config.ICsvDataExporter;
@@ -68,7 +69,7 @@ public class EmployeeCsvImportConfig extends AbstractCsvImportConfig {
 		return Messages.ImportEmployeeDialog_CSVFormat_1
 				+ SmartUtils.LINE_SEPARATOR
 				+ MessageFormat.format(
-						Messages.ImportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.MALE + "/" + EmployeeCsvImporter.FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
+						Messages.ImportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, Employee.DB_MALE + "/" + Employee.DB_FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
 				+ SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR
 				+ Messages.ImportEmployeeDialog_CSVFormat_3;
 	}

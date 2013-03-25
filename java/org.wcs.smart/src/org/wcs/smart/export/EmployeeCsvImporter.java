@@ -66,16 +66,6 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 	 */
 	
 	/**
-	 * FEMALE key for CSV file format 
-	 */
-	public static final String FEMALE = Messages.EmployeeCsvImporter_Female_Export_Key;
-
-	/**
-	 * MALE key for CSV file format
-	 */
-	public static final String MALE = Messages.EmployeeCsvImporter_Male_Export_Key;
-
-	/**
 	 * Current conservation area agencies
 	 */
 	private List<Agency> agencies = null;
@@ -152,10 +142,10 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 			//gender
 			String gender = data[index++];
 			if (gender == null || gender.trim().length() != 1 || 
-					!(gender.trim().toUpperCase().equals(FEMALE) || gender.trim().toUpperCase().equals(MALE))){
-				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_Gender, new Object[]{FEMALE, MALE, line}));
+					!(gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE || gender.trim().toUpperCase().charAt(0) == Employee.DB_MALE)){
+				throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_Gender, Employee.DB_FEMALE, Employee.DB_MALE, line));
 			}
-			if (gender.trim().toUpperCase().equals(FEMALE)){
+			if (gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE){
 				e.setGender(Employee.DB_FEMALE);
 			}else{
 				e.setGender(Employee.DB_MALE);
