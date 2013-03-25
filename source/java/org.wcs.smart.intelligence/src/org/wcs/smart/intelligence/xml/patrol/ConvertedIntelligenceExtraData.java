@@ -31,6 +31,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
@@ -97,19 +98,22 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 			return null;
 		}
 		String name = null;
-		String currentCode = SmartDB.getCurrentLanguage().getCode();
+		Language language = SmartDB.getCurrentConservationArea().getDefaultLanguage();
+		String codeWarnLabel = language.getCode();
 		for (ExtraDataLabelKeyType labelKeyType : dataType.getLabelKey()) {
 			if (PatrolXmlExtraDataContribution.NAME_KEY.equals(labelKeyType.getKey())) {
-				for (LabelType labelType : labelKeyType.getLabel()) {
-					if (currentCode.equals(labelType.getLanguageCode())) {
-						name = labelType.getValue();
-						break;
+				name = findNameInLanguage(language, labelKeyType.getLabel());
+				if (name == null) {
+					language = SmartDB.getCurrentLanguage();
+					if (codeWarnLabel != language.getCode()) {
+						codeWarnLabel += "; " + language.getCode(); //$NON-NLS-1$
 					}
+					name = findNameInLanguage(language, labelKeyType.getLabel());
 				}
 			}
 		}
 		if (name == null) {
-			warnings.add(moduleMsgLabel + MessageFormat.format(Messages.ConvertedIntelligenceExtraData_CannotDetermineName, currentCode));
+			warnings.add(moduleMsgLabel + MessageFormat.format(Messages.ConvertedIntelligenceExtraData_CannotDetermineName, codeWarnLabel));
 			return null;
 		}
 		
@@ -141,7 +145,7 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 			Query query = session.createQuery("SELECT i FROM Intelligence i, Label lbl WHERE i.receivedDate = :receivedDate AND lbl.id.element.uuid = i.uuid AND lbl.value = :name AND lbl.id.language = :language"); //$NON-NLS-1$
 			query.setParameter("receivedDate", receivedDate); //$NON-NLS-1$
 			query.setParameter("name", name); //$NON-NLS-1$
-			query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
+			query.setParameter("language", language); //$NON-NLS-1$
 			@SuppressWarnings("unchecked")
 			List<Intelligence> list = query.list();
 			if (list.isEmpty()) {
@@ -155,6 +159,18 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 		} finally {
 			session.close();
 		}
+	}
+
+	private static String findNameInLanguage(Language language, List<LabelType> names) {
+		String code = language.getCode();
+		String name = null;
+		for (LabelType labelType : names) {
+			if (code.equals(labelType.getLanguageCode())) {
+				name = labelType.getValue();
+				break;
+			}
+		}
+		return name;
 	}
 	
 	private boolean validateReportedIntelligence(Intelligence intelligence) {
