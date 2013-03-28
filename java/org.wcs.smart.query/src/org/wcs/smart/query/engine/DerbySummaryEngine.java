@@ -387,74 +387,10 @@ public class DerbySummaryEngine extends DerbyQueryEngine2{
 				break;
 			}
 		}
-		
-		if (patrolItem.getOption() ==  PatrolValueOption.DISTANCE && hasAreaGroupBy){
-			valueSql.append("smart.distanceInMeter(");
-			StringBuilder append = new StringBuilder();
-			for(String prefix : areaGroupByPrefix){
-				valueSql.append("smart.intersection(");
-				valueSql.append(prefix);
-				valueSql.append(".geom");
-				valueSql.append(",");
-				append.append(")");
-			}
-			valueSql.append(tablePrefix.get(Track.class));
-			valueSql.append(".geometry");
-			valueSql.append(append);
-			valueSql.append(") / 1000.0");
-			valueSql.append(" as distance ");
-			
-			valueAggSql.append(getAggFieldName(patrolItem));
-		}else if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS && hasAreaGroupBy){
-			valueSql.append("smart.computeHours(");
-			
-			StringBuilder append = new StringBuilder();
-			for (int i = 0; i < areaGroupByPrefix.size() - 1; i ++){
-				valueSql.append("smart.intersection(");
-				valueSql.append(areaGroupByPrefix.get(i));
-				valueSql.append(".geom");
-				valueSql.append(",");
-				append.append(")");
-			}
-			valueSql.append(areaGroupByPrefix.get(areaGroupByPrefix.size() - 1)+ ".geom");
-			valueSql.append(append);
-				
-			valueSql.append(",");
-			valueSql.append(tablePrefix.get(Track.class));
-			valueSql.append(".geometry)");
-			valueSql.append(" as hours ");
-			
-			valueAggSql.append("sum(hours)");
-		}else if (patrolItem.getOption() == PatrolValueOption.MAN_HOURS && hasAreaGroupBy){
-valueSql.append("smart.computeHours(");
-			
-			StringBuilder append = new StringBuilder();
-			for (int i = 0; i < areaGroupByPrefix.size() - 1; i ++){
-				valueSql.append("smart.intersection(");
-				valueSql.append(areaGroupByPrefix.get(i));
-				valueSql.append(".geom");
-				valueSql.append(",");
-				append.append(")");
-			}
-			valueSql.append(areaGroupByPrefix.get(areaGroupByPrefix.size() - 1)+ ".geom");
-			valueSql.append(append);
-				
-			valueSql.append(",");
-			valueSql.append(tablePrefix.get(Track.class));
-			valueSql.append(".geometry)");
-			valueSql.append(" as hours, ");
-			valueSql.append(tablePrefix.get(PatrolLegMember.class));
-			valueSql.append(".employee_uuid as pl_member");
-			
-			valueAggSql.append("sum(hours)");
-			
-		}else{
-			valueSql.append(getFieldName(patrolItem));
-			valueAggSql.append(getAggFieldName(patrolItem));
-		}
-		
-		
-		
+
+		valueSql.append(getFieldName(patrolItem, hasAreaGroupBy));
+		valueAggSql.append(getAggFieldName(patrolItem, hasAreaGroupBy));
+
 		if (patrolItem.getOption().getOptionClass().equals(Track.class) && !hasAreaGroupBy){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNames.get(Track.class));
@@ -800,10 +736,12 @@ valueSql.append("smart.computeHours(");
 		int itemcnt = 1;
 		boolean waypointAdd = false;
 		boolean trackAdd = false;
+		
 		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
 				if (value instanceof CategoryValueItem
 						|| value instanceof AttributeValueItem) {
+					//category and attribute value area group bys use the waypoint location
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
 					String areaPrefix = tablePrefix.get(Area.class)
@@ -829,15 +767,15 @@ valueSql.append("smart.computeHours(");
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null){
-						fromSql.append(" and ");
+						fromSql.append(" and "); //$NON-NLS-1$
 						fromSql.append(caFilter.asSql(areaPrefix));
 					}
-					fromSql.append(" and ");
-					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'");
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					groupBySql.append(key);
 				} else {
-					// TODO deal with patrol values
+					//patrol value area group bys; use the track 
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
 					String areaPrefix = tablePrefix.get(Area.class)
@@ -863,12 +801,11 @@ valueSql.append("smart.computeHours(");
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null ){
-						fromSql.append(" and ");
+						fromSql.append(" and ");//$NON-NLS-1$
 						fromSql.append(caFilter.asSql(areaPrefix));
 					}
-					fromSql.append(" and ");
-					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'");
-					
+					fromSql.append(" and ");//$NON-NLS-1$
+					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'");//$NON-NLS-1$ //$NON-NLS-2$ 
 					groupBySql.append(key);
 				}
 				
@@ -1019,7 +956,7 @@ valueSql.append("smart.computeHours(");
 	 * @param item
 	 * @return
 	 */
-	private String getAggFieldName(PatrolValueItem item){
+	private String getAggFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
 		switch(item.getOption()){
 		case NUM_PATROLS:
 			return "count(p_uuid)"; //$NON-NLS-1$
@@ -1031,11 +968,19 @@ valueSql.append("smart.computeHours(");
 		case DISTANCE:
 			return "sum(distance)"; //$NON-NLS-1$
 		case NUM_HOURS:
-			return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))"; //$NON-NLS-1$
+			if (!hasAreaGroupBy){
+				return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))"; //$NON-NLS-1$
+			}else{
+				return "sum(hours)"; //$NON-NLS-1$
+			}
 		case NUM_MEMBERS:
 			return "count(pl_member)"; //$NON-NLS-1$
 		case MAN_HOURS:
-			return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))"; //$NON-NLS-1$
+			if (!hasAreaGroupBy){
+				return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))"; //$NON-NLS-1$
+			}else{
+				return "sum(hours)"; //$NON-NLS-1$
+			}
 		case MAN_DAYS:
 			return "count(pld_patrol_day) "; //$NON-NLS-1$
 		}
@@ -1043,7 +988,7 @@ valueSql.append("smart.computeHours(");
 		return ""; //$NON-NLS-1$
 	}
 	
-	private String getFieldName(PatrolValueItem item){
+	private String getFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
 		switch(item.getOption()){
 		case NUM_PATROLS:
 			return "p_uuid"; //$NON-NLS-1$
@@ -1053,16 +998,74 @@ valueSql.append("smart.computeHours(");
 			//return "p_start_date,p_end_date"; //$NON-NLS-1$
 			return "p_uuid, pld_patrol_day"; //$NON-NLS-1$
 		case DISTANCE:
-			return tablePrefix.get(Track.class) + ".distance as distance"; //$NON-NLS-1$
+			if (!hasAreaGroupBy){
+				return tablePrefix.get(Track.class) + ".distance as distance"; //$NON-NLS-1$
+			}else{
+				StringBuilder valueSql = new StringBuilder();
+				StringBuilder append = new StringBuilder();
+				valueSql.append("smart.distanceInMeter("); //$NON-NLS-1$
+				for(String prefix : areaGroupByPrefix){
+					valueSql.append("smart.intersection("); //$NON-NLS-1$
+					valueSql.append(prefix);
+					valueSql.append(".geom,"); //$NON-NLS-1$
+					append.append(")"); //$NON-NLS-1$
+				}
+				valueSql.append(tablePrefix.get(Track.class));
+				valueSql.append(".geometry"); //$NON-NLS-1$
+				valueSql.append(append);
+				valueSql.append(") / 1000.0 as distance "); //$NON-NLS-1$
+				return valueSql.toString();
+			}
 		case NUM_HOURS:
-			return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
-			tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time"; //$NON-NLS-1$
+			if (!hasAreaGroupBy){
+				return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
+						tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time"; //$NON-NLS-1$
+			}else{
+				StringBuilder append = new StringBuilder();
+				StringBuilder valueSql = new StringBuilder();
+				valueSql.append("smart.computeHours("); //$NON-NLS-1$
+				for (int i = 0; i < areaGroupByPrefix.size() - 1; i ++){
+					valueSql.append("smart.intersection("); //$NON-NLS-1$
+					valueSql.append(areaGroupByPrefix.get(i));
+					valueSql.append(".geom,"); //$NON-NLS-1$
+					append.append(")"); //$NON-NLS-1$
+				}
+				valueSql.append(areaGroupByPrefix.get(areaGroupByPrefix.size() - 1)+ ".geom"); //$NON-NLS-1$
+				valueSql.append(append);
+					
+				valueSql.append(","); //$NON-NLS-1$
+				valueSql.append(tablePrefix.get(Track.class));
+				valueSql.append(".geometry) as hours "); //$NON-NLS-1$
+				return valueSql.toString();
+			}
 		case NUM_MEMBERS:
 			return tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		case MAN_HOURS:
-			return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
-			tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
-			tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+			if (!hasAreaGroupBy){
+				return tablePrefix.get(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
+						tablePrefix.get(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
+						tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+			}else{
+				StringBuilder valueSql = new StringBuilder();
+				StringBuilder append = new StringBuilder();
+				valueSql.append("smart.computeHours("); //$NON-NLS-1$
+				for (int i = 0; i < areaGroupByPrefix.size() - 1; i ++){
+					valueSql.append("smart.intersection("); //$NON-NLS-1$
+					valueSql.append(areaGroupByPrefix.get(i));
+					valueSql.append(".geom,");//$NON-NLS-1$
+					append.append(")"); //$NON-NLS-1$
+				}
+				valueSql.append(areaGroupByPrefix.get(areaGroupByPrefix.size() - 1)+ ".geom"); //$NON-NLS-1$
+				valueSql.append(append);
+					
+				valueSql.append(","); //$NON-NLS-1$
+				valueSql.append(tablePrefix.get(Track.class));
+				valueSql.append(".geometry)"); //$NON-NLS-1$
+				valueSql.append(" as hours, "); //$NON-NLS-1$
+				valueSql.append(tablePrefix.get(PatrolLegMember.class));
+				valueSql.append(".employee_uuid as pl_member"); //$NON-NLS-1$
+				return valueSql.toString();
+			}
 		case MAN_DAYS:
 			return "pld_patrol_day, " + //$NON-NLS-1$
 			tablePrefix.get(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
