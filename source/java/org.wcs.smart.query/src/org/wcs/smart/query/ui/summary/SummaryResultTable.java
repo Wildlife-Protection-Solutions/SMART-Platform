@@ -148,7 +148,7 @@ public class SummaryResultTable extends Composite {
 		mainTable.getTable().addListener(SWT.Traverse, hlistener);		
 		mainTable.getTable().addListener(SWT.Resize, new Listener(){
 			@Override
-			public void handleEvent(Event event) {				
+			public void handleEvent(Event event) {			
 				Rectangle top = topTable.getTable().getBounds();
 				Rectangle r = mainTable.getTable().getBounds();
 				Point pnt = mainTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
@@ -159,24 +159,26 @@ public class SummaryResultTable extends Composite {
 			
 		});
 		
+		mainTable.setItemCount(results.getNumDataRows());
 		topTable.setInput(results);
 		leftTable.setInput(results);
 		mainTable.setInput(results);
+		
 		
 		//Size Top Table
 		Point p = topTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		Rectangle r = mainTable.getTable().getBounds();
 		topTable.getTable().setBounds(0, 0, r.width, p.y);
 		
-		
 	}
 	
 	private void createMainTable(){
-		mainTable = new TableViewer(this, SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL );
+		mainTable = new TableViewer(this,SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL );
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.heightHint = 200;
+		//gd.heightHint = 200;
 		mainTable.getTable().setLayoutData(gd);
 		mainTable.getTable().setHeaderVisible(false);
+		
 		mainTable.getTable().setLinesVisible(true);
 		for (int i = 0; i < results.getNumDataColumns(); i ++){
 			TableViewerColumn tvc = new TableViewerColumn(mainTable, SWT.NONE);
@@ -352,6 +354,7 @@ public class SummaryResultTable extends Composite {
 		 */
 		@Override
 		public Object[] getElements(Object inputElement) {
+//			return new Double[61][15];
 			return ((SummaryQueryResult)inputElement).getData();
 		}
 		

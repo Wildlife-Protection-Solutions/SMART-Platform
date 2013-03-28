@@ -1,4 +1,3 @@
-package org.wcs.smart.query.parser.test;
 /*
  * Copyright (C) 2012 Wildlife Conservation Society
  *
@@ -20,6 +19,8 @@ package org.wcs.smart.query.parser.test;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package org.wcs.smart.query.parser.test;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
