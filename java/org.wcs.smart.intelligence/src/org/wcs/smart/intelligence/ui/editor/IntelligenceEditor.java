@@ -60,6 +60,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -68,6 +69,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.PatrolPerspective;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
@@ -173,6 +175,21 @@ public class IntelligenceEditor extends EditorPart {
 
 		form.getBody().setLayout(new GridLayout(1, true));
 
+		Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.IntelligenceEditor_Translate_Link, SWT.WRAP);
+		translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		translateLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
+						getEditorSite().getShell(), getIntelligence());
+				if (dialog.open() == IDialogConstants.OK_ID) {
+					IntelligenceHibernateManager.saveIntelligence(getIntelligence());
+					IntelligenceEventManager.getInstance().intelligenceChanged(0, getIntelligence());
+				}
+			}
+		});
+
+		
 		Composite content = toolkit.createComposite(form.getBody(), SWT.NONE);
 		GridLayout leftLayout = new GridLayout(3, false);
 		leftLayout.verticalSpacing = 10;

@@ -74,6 +74,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.model.Team;
@@ -91,6 +92,7 @@ import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
 import org.wcs.smart.plan.ui.targets.TargetPropertyDialog;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 
 
 /**
@@ -245,9 +247,8 @@ public class PlanEditor extends EditorPart {
 		public void eventFired(int type, Plan source) {
 			if (Arrays.equals(source.getUuid(), getPlan().getUuid())){
 				if (type != PlanEventManager.PATROL_PLAN_ATTRIBUTE){
-					//if this is our plan we want to update our object
-					//with the new one.
-					plan = source;
+					//force reload plan to get latest changes
+					plan = loadPlan();
 					initValues();
 				}
 			}
@@ -332,6 +333,20 @@ public class PlanEditor extends EditorPart {
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		form.getBody().setLayout(new GridLayout(1, true));
+
+		Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.PlanEditor_Translate_Link, SWT.WRAP);
+		translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		translateLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
+						getEditorSite().getShell(), getPlan());
+				if (dialog.open() == IDialogConstants.OK_ID) {
+					PlanHibernateManager.savePlan(getPlan(), SmartHibernateManager.openSession()); //session is closed by savePlan(...)
+					PlanEventManager.getInstance().planChanged(0, getPlan());
+				}
+			}
+		});
 
 		final Section summary = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE );
 		summary.setLayout(new GridLayout(2, false));
@@ -598,61 +613,49 @@ public class PlanEditor extends EditorPart {
 	 */
 	private void initValues() {
 		Plan plan = getPlan();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			session.update(plan);
-			setPartName(plan.getLabel());
 
-			setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry()
-					.get(plan.getType().getIconKey()));
-			form.setText(plan.getLabel());
-			String none = Messages.PlanEditor_None_Label;
+		setPartName(plan.getLabel());
 
-			if (plan.getStation() != null) {
-				txtStation.setText(plan.getStation().getName());
-			} else {
-				txtStation.setText(none);
-			}
-			if (plan.getTeam() != null) {
-				txtTeam.setText(plan.getTeam().getName());
-			} else {
-				txtTeam.setText(none);
-			}
-			txtType.setText(plan.getType().getName());
-			txtUnavailableEmployees.setText(plan.getUnavailableEmployees()
-					.toString());
-			if (plan.getParent() != null) {
-				txtParentPlanId.setText(plan.getParent().getId());
-			} else {
-				txtParentPlanId.setText(none);
-			}
-			txtPlanID.setText(plan.getId());
-			if (plan.getName() != null) {
-				txtName.setText(plan.getName());
-			}
-			if (plan.getDescription() != null) {
-				txtDescription.setText(plan.getDescription());
-			}
-			txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
-					.format(plan.getStartDate()));
-			txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
-					.format(plan.getEndDate()));
+		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().get(plan.getType().getIconKey()));
+		form.setText(plan.getLabel());
+		String none = Messages.PlanEditor_None_Label;
 
-			for (Control kid : patrolLinks.getChildren()){
-				kid.dispose();
-			}
-			
-			targetList.initValues(plan.getTargets());
-			
-			loadPatrolsLinksJob.schedule();
-			refreshPlanTargets.schedule();
-			
-			
-			session.getTransaction().rollback();
-		} finally {
-			session.close();
+		if (plan.getStation() != null) {
+			txtStation.setText(plan.getStation().getName());
+		} else {
+			txtStation.setText(none);
 		}
+		if (plan.getTeam() != null) {
+			txtTeam.setText(plan.getTeam().getName());
+		} else {
+			txtTeam.setText(none);
+		}
+		txtType.setText(plan.getType().getName());
+		txtUnavailableEmployees.setText(plan.getUnavailableEmployees()
+				.toString());
+		if (plan.getParent() != null) {
+			txtParentPlanId.setText(plan.getParent().getId());
+		} else {
+			txtParentPlanId.setText(none);
+		}
+		txtPlanID.setText(plan.getId());
+		if (plan.getName() != null) {
+			txtName.setText(plan.getName());
+		}
+		if (plan.getDescription() != null) {
+			txtDescription.setText(plan.getDescription());
+		}
+		txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getStartDate()));
+		txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getEndDate()));
+
+		for (Control kid : patrolLinks.getChildren()) {
+			kid.dispose();
+		}
+		
+		targetList.initValues(plan.getTargets());
+		
+		loadPatrolsLinksJob.schedule();
+		refreshPlanTargets.schedule();
 		
 	}
 	
@@ -726,7 +729,9 @@ public class PlanEditor extends EditorPart {
 		if(t != null){
 			t.getName();
 		}
-		p.getNames().size();
+		for (org.wcs.smart.ca.Label name : p.getNames()) {
+			name.getLanguage().getCode();
+		}
 		session.getTransaction().rollback();
 		session.close();
 		return p;
@@ -797,11 +802,11 @@ public class PlanEditor extends EditorPart {
 	            return;
 	        }
 	        PlanTarget selected = (PlanTarget)selection.getFirstElement(); 
-			TargetPropertyDialog dialog = new TargetPropertyDialog(getEditorSite().getShell(), plan.getTargets(), selected);
+			TargetPropertyDialog dialog = new TargetPropertyDialog(getEditorSite().getShell(), getPlan().getTargets(), selected);
 			dialog.open();
 			if (dialog.isSavePerformed()) {
-				if (PlanHibernateManager.savePlan(plan, HibernateManager.openSession())) {
-					PlanEventManager.getInstance().planChanged(0, plan);
+				if (PlanHibernateManager.savePlan(getPlan(), HibernateManager.openSession())) {
+					PlanEventManager.getInstance().planChanged(0, getPlan());
 				}
 			}
 		}

@@ -106,6 +106,7 @@ public class Messages extends NLS {
 	public static String PlanEditor_Summary_Label;
 	public static String PlanEditor_Targets_Label;
 	public static String PlanEditor_Team_Label;
+	public static String PlanEditor_Translate_Link;
 	public static String PlanEditor_Type_Label;
 	public static String PlanEditor_UnavailableEmployees_Label;
 	public static String PlanEventManager_FireListeners_Error;
