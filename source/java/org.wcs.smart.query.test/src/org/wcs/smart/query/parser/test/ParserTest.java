@@ -36,6 +36,7 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings({"nls", "restriction"})
 public class ParserTest {
 
 	@Test
