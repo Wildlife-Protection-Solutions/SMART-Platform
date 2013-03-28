@@ -67,7 +67,6 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.filter.text.ecql.ECQL;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.hibernate.Session;
@@ -83,7 +82,6 @@ import org.wcs.smart.util.GeometryUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * This class is responsible of maintaining the setting done for a user in the map.
@@ -504,14 +502,6 @@ public class MapSettings {
 			CoordinateReferenceSystem crs = ReferencingFactoryFinder.getCRSFactory(null).createFromWKT(savedLayer.getCRS());
 			layer.setCRS(crs);
 
-			// set the envelop
-			if (savedLayer.getEnvelope() != null){
-				Envelope envelope = GeometryUtils.wktToEnvelop(savedLayer.getEnvelope());
-				ReferencedEnvelope bounds = new ReferencedEnvelope(envelope, crs);
-				layer.setBounds(bounds);
-			}
-			
-	
 			// create a new style for the layer setting its values with those present in the registry
 			StyleBlackboard updatedStyleBlackboard = (StyleBlackboard) layer.getStyleBlackboard().clone();
 			
