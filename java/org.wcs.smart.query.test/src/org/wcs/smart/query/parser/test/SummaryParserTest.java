@@ -1,5 +1,25 @@
 package org.wcs.smart.query.parser.test;
-
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
@@ -9,8 +29,15 @@ import org.wcs.smart.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.parser.internal.summary.GridQueryDefinition;
 import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 
+/**
+ * Sets of tests for the summary parser.
+ * @author Emily
+ *
+ */
+@SuppressWarnings({"nls", "restriction"})
 public class SummaryParserTest {
 
+	
 	@Test
 	public void testAll() throws Exception{
 		
@@ -54,6 +81,7 @@ public class SummaryParserTest {
 		Assert.assertNull(test.getQueryFilter());
 		
 	}
+	
 	
 	@Test
 	public void testPatrolValues() throws Exception{
@@ -501,6 +529,77 @@ public class SummaryParserTest {
 		Assert.assertNull(test.getQueryFilter());
 	}
 	
+	@Test
+	public void testAreaGroupBy() throws Exception{
+		//"CA" | "BA" | "ADMIN" | "MNGT" | "PATRL"
+		String valuePart = "";
+		String rowGroupByPart = "area:CA:ca1:ca2";
+		String colGroupByPart = "";
+		String queryPart = "";
+		String query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "area:error:ca1:ca2:";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		boolean error = false;
+		try{
+			test = parseQuery(query);
+		}catch (Exception ex){
+			error = true;
+		}
+		Assert.assertTrue(error);
+		
+		valuePart = "";
+		rowGroupByPart = "area:BA:ba2";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "area:ADMIN:admin1";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "area:PATRL:p1:p2:p3:p4:p5:p6";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		valuePart = "";
+		rowGroupByPart = "area:MNGT:m1:m2";
+		colGroupByPart = "";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart + "|" + colGroupByPart +"|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+	}
 	
 	
 	@Test
