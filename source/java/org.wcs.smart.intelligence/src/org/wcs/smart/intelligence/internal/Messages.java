@@ -130,6 +130,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceEditor_NoValue;
 
+	public static String IntelligenceEditor_Translate_Link;
+
 	public static String IntelligenceExporter_Converting;
 
 	public static String IntelligenceExporter_Exporting;
