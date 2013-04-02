@@ -77,8 +77,10 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 				return Status.OK_STATUS;
 			}
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
 				final List<String> data = QueryHibernateManager.getInstance().getPatrolIds(s);
+				s.getTransaction().rollback();
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
