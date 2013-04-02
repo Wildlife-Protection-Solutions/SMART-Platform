@@ -218,8 +218,11 @@ public abstract class DropItem {
 			@Override
 			public void dragFinished(DragSourceEvent event) {
 				LocalSelectionTransfer.getTransfer().setSelection(null);
-				targetPanel.finishDrag(DropItem.this);
-
+				if (targetPanel == null){
+					DropItem.this.dispose();
+				}else{
+					targetPanel.finishDrag(DropItem.this);
+				}
 			}
 		});		
 	}
