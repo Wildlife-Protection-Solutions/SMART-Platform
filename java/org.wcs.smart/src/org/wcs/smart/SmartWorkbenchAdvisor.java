@@ -21,6 +21,14 @@
  */
 package org.wcs.smart;
 
+import java.io.IOException;
+import java.util.List;
+
+import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.IResolve;
+import net.refractions.udig.catalog.IService;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.application.IWorkbenchConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchAdvisor;
@@ -52,6 +60,31 @@ public class SmartWorkbenchAdvisor extends WorkbenchAdvisor {
 		}else{
 			return DefaultPerspective.ID;
 		}
+	}
+	
+	/**
+	 * Clears the catalog of all services before shutting down.  This ensures
+	 * that services are not stored from one run to the next.
+	 * 
+	 */
+	@Override
+	public boolean preShutdown() {
+		try {
+			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().members(new NullProgressMonitor());
+			for (IResolve r : resolves){
+				if (r instanceof IService){
+					try{
+						CatalogPlugin.getDefault().getLocalCatalog().remove((IService) r);
+					} catch (Exception e) {
+						SmartPlugIn.log("Error clearning catalog plugin", e); //$NON-NLS-1$
+					}
+				}
+			}
+			
+		} catch (IOException e) {
+			SmartPlugIn.log("Error clearning catalog plugin", e); //$NON-NLS-1$
+		}
+		return true;
 	}
 
 }
