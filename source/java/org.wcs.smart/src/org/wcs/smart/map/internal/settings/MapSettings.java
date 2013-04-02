@@ -612,16 +612,18 @@ public class MapSettings {
 		try{
 			MapRegister mapRegister = createMapRegister(map, SmartDB.getCurrentEmployee().getSmartUserLevel() ); 
 			
-			 GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
-			 Gson gson = gsonBuilder.create();
-			 String jsonMap = gson.toJson(mapRegister);
-			 this.baseMap.setMapDef(jsonMap);
+			GsonBuilder gsonBuilder = new GsonBuilder().serializeSpecialFloatingPointValues(); 
+			Gson gson = gsonBuilder.create();
+			String jsonMap = gson.toJson(mapRegister);
+			this.baseMap.setMapDef(jsonMap);
 			 
 			Session s = HibernateManager.openSession();
 			try{
 				s.beginTransaction();
 				s.saveOrUpdate(this.baseMap);
 				s.getTransaction().commit();
+				//these layers are now a part of the basemap and should be flagged as such
+				map.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, map.getLayersInternal());
 			}catch (Exception ex){
 				if (s.getTransaction().isActive()){
 					s.getTransaction().rollback();

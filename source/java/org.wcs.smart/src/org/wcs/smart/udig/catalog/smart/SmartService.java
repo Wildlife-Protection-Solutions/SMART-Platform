@@ -152,7 +152,9 @@ public class SmartService extends IService {
             	SmartPlugIn.log(Messages.SmartService_Error_DisposingService, e);
             }
         }
-        this.ds.dispose();
+        if (this.ds != null){
+        	this.ds.dispose();
+        }
     }
 	
 
