@@ -118,6 +118,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 */
 	private static final String EDIT_LABEL = PatrolUtils.EDIT_LINK_TEXT;
 	private static final int WIDTH_HINT = 50;	//width hint for fields
+	private static final int EMPLOYEE_LIST_HEIGHT_HINT = 120;
 	
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolSummaryEditor"; //$NON-NLS-1$
 
@@ -391,7 +392,8 @@ public class PatrolSummaryEditor extends EditorPart {
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		}
 		((GridData)employeeTable.getLayoutData()).widthHint = WIDTH_HINT;
-		
+		((GridData)employeeTable.getLayoutData()).heightHint = EMPLOYEE_LIST_HEIGHT_HINT;
+	
 		/* --- Patrol days table  ---*/
 		Composite compTable = toolkit.createComposite(compData);
 		compTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
