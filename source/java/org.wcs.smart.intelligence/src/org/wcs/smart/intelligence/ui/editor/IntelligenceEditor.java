@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.ui.editor;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -106,7 +107,11 @@ public class IntelligenceEditor extends EditorPart {
 	private IIntelligenceEventListener intelligenceListener = new IIntelligenceEventListener(){
 		@Override
 		public void eventFired(int type, Intelligence source) {
-			initValues();
+			byte[] uuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
+			if (Arrays.equals(source.getUuid(), uuid)) {
+				intelligence = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
+				initValues();
+			}
 		}
 	};
 
