@@ -191,22 +191,37 @@ public class ListDropTargetPanel implements IDropPanel{
 					return;
 			}
 		}
-		if (item instanceof ICombinableDropItem){
-			for (DropItem it : items){
-				if (it instanceof ICombinableDropItem){
-					if (((ICombinableDropItem)it).addItem(item)){
-						orderElements();
-						validate();
-						return;
-					}
-				}
-			}
+		if (addCombinedItem(item)){
+			//added to existing item so we don't need to add to list
+			return;
 		}
-		
 		item.createWidget(this);
 		items.add(item);
 		orderElements();
 		validate();
+	}
+	
+	/**
+	 * if the drop item is a combinable item it searches the other
+	 * drop items in the list to determine if the item can
+	 * be added to one of the existing items
+	 * 
+	 * @param combinableItem
+	 * @return
+	 */
+	private boolean addCombinedItem(DropItem combinableItem){
+		if (combinableItem instanceof ICombinableDropItem){
+			for (DropItem it : items){
+				if (it instanceof ICombinableDropItem){
+					if (((ICombinableDropItem)it).addItem(combinableItem)){
+						orderElements();
+						validate();
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -263,7 +278,6 @@ public class ListDropTargetPanel implements IDropPanel{
 		
 		if (di.targetPanel == this && !items.contains(di)){
 			int index= items.indexOf(proxy);
-		
 			if (index >= 0){
 				items.add(index, di);
 			}else{
@@ -380,20 +394,29 @@ public class ListDropTargetPanel implements IDropPanel{
 					IDropPanel target =  dragItem.targetPanel;
 					dragItem.moveParent(ListDropTargetPanel.this);
 					target.finishDrag(dragItem);
+					
+					//move this this panel
+					if (ListDropTargetPanel.this.addCombinedItem(dragItem)){
+						//combined with existing drop item
+						ListDropTargetPanel.this.removeElement(dragItem);
+						dragItem.targetPanel = null;
+						dragItem = null;
+					}
 				}
 
-				moveElements(event.x, event.y);
-				//remove proxy and put back the drop item
-				int i = items.indexOf(proxy);
-				items.add(i, dragItem);
-				dragItem.getWidget().setVisible(true);
+				if (dragItem != null){
+					moveElements(event.x, event.y);
+					//remove proxy and put back the drop item
+					int i = items.indexOf(proxy);
+					items.add(i, dragItem);
+					dragItem.getWidget().setVisible(true);
+				}
 				items.remove(proxy);
 				proxy.getWidget().setVisible(false);
 				
 				orderElements();
 				dragItem = null;
 				validate();
-				
 			}
 
 			private void moveElements(int x, int y) {

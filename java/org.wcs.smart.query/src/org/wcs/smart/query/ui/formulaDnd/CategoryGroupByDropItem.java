@@ -122,7 +122,7 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 		}
 		for (ListItem item : dropItem.filters){
 			if (!this.filters.contains(item)){
-				this.filters.addAll(dropItem.filters);		
+				this.filters.add(item);		
 			}
 		}
 		
