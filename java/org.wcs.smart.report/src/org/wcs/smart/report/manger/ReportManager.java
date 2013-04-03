@@ -237,11 +237,18 @@ public class ReportManager {
 	 */
 	public static void editReport(Report r){
 		try {
-			refreshReport(r);
-			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-			window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
+			
 			if (r != null) {
+				
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
 				ReportEditorInput ri = new SmartReportEditorInput(r);
+				
+				IEditorPart part = window.getActivePage().findEditor(ri);
+				if (part == null){
+					//not yet open so lets refresh before we open
+					refreshReport(r);	
+				}
 				IEditorPart editor = window.getActivePage().openEditor(
 								ri,
 								IReportEditorContants.DESIGN_EDITOR_ID);

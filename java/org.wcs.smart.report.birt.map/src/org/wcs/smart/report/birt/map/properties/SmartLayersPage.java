@@ -583,31 +583,28 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			return;
 		}
 			
-		if (layerItems == null) {
-			layerItems = new WritableList();
-			if (mapItem != null && mapItem.getLayers() != null) {
-				for (int i = 0; i < mapItem.getLayers().size(); i++) {
-					LayerDefinition def = new LayerDefinition();
-					def.handle = BirtMapUtils.findHandle(
-							(ReportDesignHandle) this.itemHandle.getRoot(),
-							mapItem.getLayers().get(i));
-					
-					if (mapItem.getLayerNames() != null){
-						def.name = mapItem.getLayerNames().get(i);
-					}else if (def.handle != null){
-						def.name = def.handle.getName();
-					}else{
-						def.name = Messages.SmartLayersPage_MapLayerNameErrorLabel; 
-					}
-					if (mapItem.getLayerStyles() != null){
-						def.style = mapItem.getLayerStyles().get(i);
-					}
-					layerItems.add(def);
-					
+		layerItems = new WritableList();
+		if (mapItem != null && mapItem.getLayers() != null) {
+			for (int i = 0; i < mapItem.getLayers().size(); i++) {
+				LayerDefinition def = new LayerDefinition();
+				def.handle = BirtMapUtils.findHandle(
+						(ReportDesignHandle) this.itemHandle.getRoot(),
+						mapItem.getLayers().get(i));
+				
+				if (mapItem.getLayerNames() != null){
+					def.name = mapItem.getLayerNames().get(i);
+				}else if (def.handle != null){
+					def.name = def.handle.getName();
+				}else{
+					def.name = Messages.SmartLayersPage_MapLayerNameErrorLabel; 
 				}
+				if (mapItem.getLayerStyles() != null){
+					def.style = mapItem.getLayerStyles().get(i);
+				}
+				layerItems.add(def);
+				
 			}
 		}
-
 	}
 
 	@Override
@@ -682,6 +679,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		}
 
 	}
+	
+	@Override
+	public void refresh(){
+		updateUI();
+	}
+	
 	
 	private  Image createImage(Style sld){
 		Rule r = getRule(sld);

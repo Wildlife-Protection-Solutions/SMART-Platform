@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -61,6 +62,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.map.udig.QueryServiceFactory;
+import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.GriddedQuery;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.PatrolQuery;
@@ -177,6 +179,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			for (GeoSmart layer : layers) {
 				IService qs = QueryServiceFactory.generateQueryService(layer.dbQuery);
 				if (qs != null) {
+					boolean add = true;
 					layer.service = qs;
 					if (Query.class.isAssignableFrom( layer.dbQuery.getClass() )){
 						((Query)layer.dbQuery).setDateFilter(dateFilter);
@@ -191,14 +194,17 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 								.getQueryResults(new NullProgressMonitor());
 					} else if (layer.dbQuery instanceof GriddedQuery ){
 						((GriddedQuery)layer.dbQuery).setDateFilter(dateFilter);
-						((GriddedQuery) layer.dbQuery)
-						.getQueryResults(new NullProgressMonitor());
+						Collection<GridResultItem> data = ((GriddedQuery) layer.dbQuery).getQueryResults(new NullProgressMonitor());
+						if (data.size() <= 0){
+							add = false;
+						}
 					}
-					
-					List<? extends IGeoResource> resources = qs.resources(null);
-					if (resources.size() > 0){
-						layer.georesource = resources.get(0);
-						toAdd.add(layer.georesource);
+					if (add){
+						List<? extends IGeoResource> resources = qs.resources(null);
+						if (resources.size() > 0){
+							layer.georesource = resources.get(0);
+							toAdd.add(layer.georesource);
+						}
 					}
 					
 					
@@ -210,7 +216,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			for (Layer l : cmd.getLayers()) {
 				//setup name and style
 				for (GeoSmart smrt : layers){
-					if (smrt.georesource.equals(l.getGeoResource())){
+					if (smrt.georesource != null && smrt.georesource.equals(l.getGeoResource())){
 						l.setName(smrt.name);
 						if (smrt.style != null){
 							Object st = BirtMapUtils.mementoToStyle(smrt.style);
@@ -260,7 +266,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 
 			NullProgressMonitor monitor = new NullProgressMonitor();
 			for (GeoSmart layer: layers) {
-				layer.georesource.dispose(monitor);
+				if (layer.georesource != null){
+					layer.georesource.dispose(monitor);
+				}
 				layer.service.dispose(monitor);
 				CatalogPlugin.getDefault().getLocalCatalog().remove(layer.service);
 			}
