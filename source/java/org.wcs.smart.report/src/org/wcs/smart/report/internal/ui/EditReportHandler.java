@@ -48,12 +48,6 @@ public class EditReportHandler extends AbstractHandler implements IHandler {
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();		
 		if (obj instanceof Report) {
-			try{
-			ReportManager.refreshReport((Report)obj);
-			}catch (Exception ex){
-			//TODO:
-				ex.printStackTrace();
-			}
 			ReportManager.editReport((Report) obj);	
 		}
 		return null;

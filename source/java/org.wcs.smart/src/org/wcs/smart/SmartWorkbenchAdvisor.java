@@ -80,7 +80,6 @@ public class SmartWorkbenchAdvisor extends WorkbenchAdvisor {
 					}
 				}
 			}
-			
 		} catch (IOException e) {
 			SmartPlugIn.log("Error clearning catalog plugin", e); //$NON-NLS-1$
 		}
