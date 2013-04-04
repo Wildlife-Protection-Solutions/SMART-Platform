@@ -16,3 +16,4 @@ Import-Package: org.eclipse.core.databinding.observable.list,
  org.eclipse.jface.databinding.viewers
 Export-Package: org.wcs.smart.plan,
  org.wcs.smart.plan.model
+Bundle-Vendor: org.wcs.smart
