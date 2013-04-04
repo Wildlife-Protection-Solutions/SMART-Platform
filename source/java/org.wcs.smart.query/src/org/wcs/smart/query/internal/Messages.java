@@ -57,8 +57,6 @@ public class Messages extends NLS {
 	public static String ConservationAreaFilterPanel_Error_NoCas;
 	public static String ConservationAreaFilterPanel_FilterCaOp;
 	public static String ConservationAreaFilterPanel_IncludeAllCaOp;
-	public static String ConservationAreaListView_CaInfoLabel;
-	public static String ConservationAreaListView_CaLabel;
 	public static String CreateHandler_QueryEditorError;
 	public static String CreateHandler_QueryPerspectiveError;
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
@@ -268,7 +266,6 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_CouldNotImportError;
 	public static String ImportQueryWizard_ImportFailed;
 	public static String ImportQueryWizard_Title;
-	public static String MultiCaDataModelManagerImpl_LoadMergeJobName;
 	public static String MultiCaDataModelManagerImpl_MergeError;
 	public static String NameCellEditor_CouldNotSaveFolderNameChange;
 	public static String NameCellEditor_CouldNotSaveQueryName;
