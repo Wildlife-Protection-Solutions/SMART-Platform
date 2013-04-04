@@ -794,7 +794,8 @@
          point="org.eclipse.birt.core.ScriptFunctionService">
       <Category
             factoryclass="org.wcs.smart.report.birt.function.SmartCategoryFactory"
-            name="%smart.birt.functions.category.name">
+            isVisible="true"
+            name="SMART_Functions">
          <Function
                desc="%smart.birt.functions.smartuser.desc"
                name="SmartUser">

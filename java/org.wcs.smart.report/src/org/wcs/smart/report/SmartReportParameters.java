@@ -33,7 +33,7 @@ public class SmartReportParameters {
 	/**
 	 * Date parameter group name
 	 */
-	public static final String PARAM_DATEGROUP_NAME = Messages.SmartReportParameters_ReportDates_ParameterGroupName;
+	public static final String PARAM_DATEGROUP_NAME = "Report Dates";//$NON-NLS-1$ Messages.SmartReportParameters_ReportDates_ParameterGroupName;
 	/**
 	 * Start date report parameter key
 	 */
