@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.wcs.smart.reporttable.nl.zh Fragment
+Bundle-SymbolicName: org.wcs.smart.reporttable.nl.zh
+Bundle-Version: 1.0.0
+Fragment-Host: org.wcs.smart.reporttable;bundle-version="[1.0.0,1.1.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6,
+ JavaSE-1.6
