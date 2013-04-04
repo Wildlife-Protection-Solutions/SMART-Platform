@@ -150,7 +150,11 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		
 		distancDecoration = createDecoration(txtDistanceToComplete);
 		distancDecoration.setDescriptionText(Messages.SpatialPlanTargetPropertyPage_InvalidDistanceForCompletion_Error);
-		distancDecoration.hide();
+		if (isDistanceToCompleteValid()) {
+			distancDecoration.hide();
+		} else {
+			distancDecoration.show();
+		}
 		
 		Label descrLabel = new Label(center, SWT.NONE);
 		descrLabel.setText(Messages.SpatialPlanTargetPropertyPage_Description_Label);
