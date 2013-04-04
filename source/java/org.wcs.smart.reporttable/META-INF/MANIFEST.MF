@@ -9,3 +9,4 @@ Require-Bundle: org.wcs.smart,
  org.wcs.smart.patrol
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: org.wcs.smart
