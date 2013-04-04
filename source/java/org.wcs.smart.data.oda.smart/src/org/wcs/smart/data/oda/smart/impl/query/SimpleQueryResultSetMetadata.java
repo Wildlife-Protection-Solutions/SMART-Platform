@@ -103,7 +103,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		return queryColumns[index-1].getName();
+		return queryColumns[index-1].getKey();
 	}
 
 	/**

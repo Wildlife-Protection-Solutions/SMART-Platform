@@ -47,6 +47,7 @@ import org.wcs.smart.query.parser.filter.DateFilter;
  */
 public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 
+	private final static String HEADER_COLUMN_KEY = "header"; //$NON-NLS-1$
 	private SummaryQueryResult results;
 	
 	/**
@@ -127,14 +128,14 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	public String getColumnName(int index) throws OdaException {
 		index = index - 1;
 		if (index < results.getRowHeaders().size()){
-			return Messages.SummaryQueryResultSetMetadata_ColumnNamePrefix + "_" + index; //$NON-NLS-1$
+			return HEADER_COLUMN_KEY + "_" + index; //$NON-NLS-1$
 		}else{
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
 				if (i != 0){
 					sb.append(" _ "); //$NON-NLS-1$
 				}
-				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getFullName());
+				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getKey());
 			}
 			return sb.toString();
 		}
