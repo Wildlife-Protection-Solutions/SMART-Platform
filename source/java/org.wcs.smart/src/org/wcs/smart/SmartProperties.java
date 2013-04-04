@@ -114,7 +114,7 @@ public class SmartProperties {
 	
 	/**
 	 * Sets smart property.
-	 * <p>Only supports setting of PROP_GPS_BABEL.  All other properties
+	 * <p>Only supports setting of PROP_GPS_BABEL and PLAN_DISTANCE_TO_COMPLETE.  All other properties
 	 * not supported.</p>
 	 * 
 	 * @param key smart property key
