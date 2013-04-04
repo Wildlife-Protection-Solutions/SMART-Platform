@@ -168,7 +168,6 @@ public class Messages extends NLS {
 	public static String SmartDateParameterComponent_EarliestDateError;
 	public static String SmartDateParameterComponent_EndDateLabel;
 	public static String SmartDateParameterComponent_StartDateLabel;
-	public static String SmartReportParameters_ReportDates_ParameterGroupName;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -13,7 +13,6 @@ public class Messages extends NLS {
 	public static String SmartQuery_Error_CouldNoLoadQuery;
 	public static String SmartQuery_LoadQuery_JobName;
 	public static String SmartQuery_Warning_SummaryGroupByDates;
-	public static String SummaryQueryResultSetMetadata_ColumnNamePrefix;
 	public static String SummaryQueryResultSetMetadata_ParseQueryJob;
 	static {
 		// initialize resource bundle
