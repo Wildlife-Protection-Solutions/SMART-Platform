@@ -21,10 +21,18 @@
  */
 package org.wcs.smart.plan.query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.query.model.ListItem;
 import org.wcs.smart.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.parser.filter.EmptyFilter;
@@ -61,8 +69,27 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 		String prefix = tableMapping.get(option.getPatrolAttributeClass());
 		String v = SmartUtils.stripQuotes((String)value);
 		//if v is empty this means that this is "Any Plan" case
-		String sql = !isAnyPlan(v) ? "smart.patrolInPlan("+prefix+".uuid, '"+v+"')" : //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					"EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid)";  //$NON-NLS-1$ //$NON-NLS-2$
+		String planSqlPart = ""; //$NON-NLS-1$
+		if (!isAnyPlan(v)) {
+			LoadChildPlanIdJob job = new LoadChildPlanIdJob(v);
+			job.schedule();
+			//This is required as we do NOT want to perform this in current thread in order not to effect its session.
+	    	try {
+	    		job.join(); //we don't want to proceed until job is finished
+			} catch (InterruptedException e) {
+				SmartPlanPlugIn.displayLog(Messages.PatrolPlanQueryFilter_FetchPlanChilder_Interrupted, e);
+			}
+			List<byte[]> planIds = job.getResultData();
+			StringBuilder planSql = new StringBuilder("AND pa2pl.plan_uuid in (x'"+v+"'"); //$NON-NLS-1$ //$NON-NLS-2$
+			for (int i = 0; i < planIds.size(); i++) {
+				planSql.append(",x'"); //$NON-NLS-1$
+				planSql.append(SmartUtils.encodeHex(planIds.get(i)));
+				planSql.append("'"); //$NON-NLS-1$
+			}
+			planSql.append(")"); //$NON-NLS-1$
+			planSqlPart = planSql.toString();
+		}
+		String sql = "EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid "+planSqlPart+")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return sql;
 	}
 
@@ -78,4 +105,33 @@ public class PatrolPlanQueryFilter extends EmptyFilter {
 	private boolean isAnyPlan(String v) {
 		return v == null || v.isEmpty();
 	}
+	
+	/**
+	 * Inner class responsible for wrapping fetching of child plan id operation into {@link Job}
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	private class LoadChildPlanIdJob extends Job {
+		
+		private String id;
+		private List<byte[]> planIds = new ArrayList<byte[]>();
+		
+		public LoadChildPlanIdJob(String id) {
+			super(Messages.PatrolPlanQueryFilter_FetchPlanChilder_JobTitle);
+			this.id = id;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			planIds = PlanHibernateManager.getChildPlanIds(id);
+			return Status.OK_STATUS;
+		}
+		
+		public List<byte[]> getResultData() {
+			return planIds;
+		}
+
+	}
+	
 }

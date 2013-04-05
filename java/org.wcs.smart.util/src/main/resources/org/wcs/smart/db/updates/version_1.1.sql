@@ -14,14 +14,6 @@ insert into smart.conservation_area
   (uuid,id,name,description,designation)
   values (x'00000000000000000000000000000000', 'XXX', 'Cross Conservation Analysis','Internal CA for Cross Conservation Analysis', 'Internal');
   
--- DB Function that check if patrol in within a certain plan including sub-plans (used in platrol query filter) --
-create function smart.patrolInPlan(patrol_uuid CHAR(16) FOR BIT DATA, uuidStr long varchar)
-    returns boolean
-    language java
-    parameter style java
-    reads sql data
-    external name 'org.wcs.smart.plan.SmartPlanDbStored.patrolInPlan';
-  
 -- Translation options support for intelligence (copy current names as default language values, remove names column) -- 
 INSERT INTO smart.I18N_LABEL(LANGUAGE_UUID, ELEMENT_UUID, VALUE) SELECT lang.UUID as LANG_UUID, i.UUID as ELEM_UUID, 
 i.SHORT_NAME as VALUE FROM smart.LANGUAGE lang INNER JOIN smart.INTELLIGENCE i ON lang.CA_UUID = i.CA_UUID WHERE lang.isdefault;
