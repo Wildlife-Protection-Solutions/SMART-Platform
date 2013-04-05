@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.smart_feature"
-      label="SMART"
-      version="1.0.0">
+      label="SMART Feature"
+      version="1.0.0"
+      provider-name="org.wcs.smart">
 
    <description url="http://www.example.com/description">
       The main smart feature that includes all smart modules.
@@ -21,15 +22,15 @@ THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRES
    </license>
 
    <includes
-         id="org.wms.smart.udig-feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.wcs.smart.birtfeature"
          version="0.0.0"/>
 
    <includes
          id="org.eclipse.help"
+         version="0.0.0"/>
+
+   <includes
+         id="org.wcs.smart.udig-feature"
          version="0.0.0"/>
 
    <plugin

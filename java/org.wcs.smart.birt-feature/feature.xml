@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.birtfeature"
-      label="Birt-feature"
-      version="1.0.0">
+      label="SMART Birt Feature"
+      version="1.0.0"
+      provider-name="org.wcs.smart">
 
    <description url="http://www.example.com/description">
       The BIRT requirements to support the SMART reporting module
