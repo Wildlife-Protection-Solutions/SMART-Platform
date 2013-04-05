@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wms.smart.udig-feature"
-      label="Udig"
-      version="1.0.0">
+      id="org.wcs.smart.udig-feature"
+      label="SMART UDig Feature"
+      version="1.0.0"
+      provider-name="org.wcs.smart">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]
