@@ -64,6 +64,8 @@ public class Messages extends NLS {
 	public static String PatrolPlanContribution_PlanId_Label;
 	public static String PatrolPlanContribution_RefreshJob_Title;
 	public static String PatrolPlanContribution_Save_Error;
+	public static String PatrolPlanQueryFilter_FetchPlanChilder_Interrupted;
+	public static String PatrolPlanQueryFilter_FetchPlanChilder_JobTitle;
 	public static String PlanCaDeleteHandler_DeletePatrolPlan_SubTasl;
 	public static String PlanCaDeleteHandler_DeletePlans_SubTask;
 	public static String PlanCaDeleteHandler_DeleteTargets_SubTask;
@@ -122,6 +124,7 @@ public class Messages extends NLS {
 	public static String PlanFilterDialog_Title;
 	public static String PlanHibernateManager_DeletePlan_Error;
 	public static String PlanHibernateManager_ErrorMatchingPatrolToPlan;
+	public static String PlanHibernateManager_FetchChildren_Error;
 	public static String PlanHibernateManager_Plan_NotFound_Error;
 	public static String PlanHibernateManager_SavePlan_Error;
 	public static String PlanIdNameDescComposite_Description;

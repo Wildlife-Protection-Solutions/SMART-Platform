@@ -46,6 +46,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
@@ -563,6 +564,43 @@ public class PlanHibernateManager{
 		@SuppressWarnings("unchecked")
 		List<Plan> plans = criteria.list();
 		return plans;
+	}
+
+	/**
+	 * Returns the list of plan uuid that are children for given plan uuid
+	 * @param planUuid
+	 * @return
+	 */
+	public static List<byte[]> getChildPlanIds(String planUuid) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			byte[] uuid = SmartUtils.decodeHex(planUuid);
+			return listChildPlanIds(uuid, session);
+		} catch (Exception e) {
+			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_FetchChildren_Error, null);
+			return new ArrayList<byte[]>();
+		} finally {
+			session.close();
+		}
+	}
+	
+	/**
+	 * Returns the list of plan uuid that are children for given plan uuid
+	 * @param planUuid
+	 * @param session
+	 * @return
+	 */
+	private static List<byte[]> listChildPlanIds(byte[] planUuid, Session session) {
+		List<byte[]> ids = new ArrayList<byte[]>();
+		Query query = session.createQuery("SELECT p.uuid FROM Plan p where p.parent.uuid = :uuid"); //$NON-NLS-1$
+		query.setParameter("uuid", planUuid); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<byte[]> list = query.list();
+		ids.addAll(list);
+		for (byte[] uuid : list) {
+			ids.addAll(listChildPlanIds(uuid, session));
+		}
+		return ids;
 	}
 	
 }
