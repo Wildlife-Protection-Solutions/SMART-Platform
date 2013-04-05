@@ -5,3 +5,4 @@ Bundle-SymbolicName: org.wcs.smart.data.oda.smart.nl.ru
 Bundle-Version: 1.0.0
 Fragment-Host: org.wcs.smart.data.oda.smart;bundle-version="[1.0.0,1.1.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: org.wcs.smart
