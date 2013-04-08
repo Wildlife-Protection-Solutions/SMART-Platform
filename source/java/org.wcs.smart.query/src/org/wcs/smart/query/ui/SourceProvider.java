@@ -49,6 +49,7 @@ public class SourceProvider extends AbstractSourceProvider {
 	}
 	
 	public final static String SELECTED_FILTERS = "org.wcs.smart.query.ui.filteradd"; //$NON-NLS-1$
+	public final static String QUERY_DATE_VALID = "org.wcs.smart.query.ui.querydatevalid"; //$NON-NLS-1$
 	public final static String QUERY_VALID = "org.wcs.smart.query.ui.queryvalid"; //$NON-NLS-1$
 	public final static String QUERY_ERROR_MESSAGE = "org.wcs.smart.query.ui.queryerrormessage"; //$NON-NLS-1$
 	public final static String QUERY_DROP_TYPE = "org.wcs.smart.query.ui.querybuildertype"; //$NON-NLS-1$
@@ -58,6 +59,7 @@ public class SourceProvider extends AbstractSourceProvider {
 	public SourceProvider(){
 		data.put(SELECTED_FILTERS, IEvaluationContext.UNDEFINED_VARIABLE);
 		data.put(QUERY_VALID, IEvaluationContext.UNDEFINED_VARIABLE);
+		data.put(QUERY_DATE_VALID, IEvaluationContext.UNDEFINED_VARIABLE);
 		data.put(QUERY_DROP_TYPE, IEvaluationContext.UNDEFINED_VARIABLE);
 	}
 	/**
@@ -94,6 +96,21 @@ public class SourceProvider extends AbstractSourceProvider {
 		data.put(QUERY_ERROR_MESSAGE, errorMessage);
 		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_VALID, isValid);
 	}
+	
+	/**
+	 * Sets the state of the current query date range.
+	 * @param isValid <code>true</code> if valid date range, <code>false</code> otherwise
+	 * @param errorMessage error message associated with date range.  Cannot
+	 * be null if isValid = true;
+	 */
+	public void setQueryDateValid(Boolean isValid, String errorMessage){
+		if (isValid){
+			data.put(QUERY_DATE_VALID, null);
+		}else{
+			data.put(QUERY_DATE_VALID, errorMessage);
+		}
+		fireSourceChanged(ISources.ACTIVE_PART_ID, QUERY_DATE_VALID, isValid);
+	}
 		
 	/**
 	 * @see org.eclipse.ui.ISourceProvider#getCurrentState()
@@ -109,7 +126,7 @@ public class SourceProvider extends AbstractSourceProvider {
 	 */
 	@Override
 	public String[] getProvidedSourceNames() {
-		return new String[]{SELECTED_FILTERS, QUERY_VALID, QUERY_DROP_TYPE};
+		return new String[]{SELECTED_FILTERS, QUERY_VALID, QUERY_DROP_TYPE, QUERY_DATE_VALID};
 	}
 
 }

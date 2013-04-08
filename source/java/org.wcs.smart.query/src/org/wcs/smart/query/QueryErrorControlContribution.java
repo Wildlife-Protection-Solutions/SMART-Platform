@@ -63,7 +63,7 @@ public class QueryErrorControlContribution extends
 			if (lblError == null || lblErrorImage == null){
 				return;
 			}
-			if (sourceName.equals(SourceProvider.QUERY_VALID)){
+			if (sourceName.equals(SourceProvider.QUERY_DATE_VALID) || sourceName.equals(SourceProvider.QUERY_VALID)){
 				initValues();
 			}
 		}
@@ -110,25 +110,34 @@ public class QueryErrorControlContribution extends
 	}
 	
 	private void initValues() {
-		Object x = provider.getCurrentState().get(SourceProvider.QUERY_VALID);
-		boolean isValid = true;
-		if (x instanceof Boolean){
-			isValid = (Boolean)x;
-		}
 		if (main.isDisposed()){
 			return;
 		}
-		if (!isValid) {
-			main.setVisible(true);
-			if (provider != null) {
-				String tip = (String) provider.getCurrentState().get(
-						SourceProvider.QUERY_ERROR_MESSAGE);
-				if (tip != null) {
-					lblError.setToolTipText(tip);
-				} else {
-					lblError.setToolTipText(""); //$NON-NLS-1$
+		
+		String errorMessage = null;
+		//check query date valid
+		Object x = provider.getCurrentState().get(SourceProvider.QUERY_DATE_VALID);
+		if (x instanceof String && x != null){
+			errorMessage = (String)x;
+		}
+		
+		if (errorMessage == null){
+			x = provider.getCurrentState().get(SourceProvider.QUERY_VALID);
+			boolean isValid = true;
+			if (x instanceof Boolean){
+				isValid = (Boolean)x;
+			}
+			if (!isValid){
+				errorMessage = (String) provider.getCurrentState().get(SourceProvider.QUERY_ERROR_MESSAGE);
+				if (errorMessage == null){
+					errorMessage = Messages.QueryErrorControlContribution_QueryErrorText;
 				}
 			}
+		}
+		
+		if (errorMessage != null) {
+			main.setVisible(true);
+			lblError.setToolTipText(errorMessage);
 			lblError.setText(Messages.QueryErrorControlContribution_QueryErrorText);
 			main.layout();
 		} else {

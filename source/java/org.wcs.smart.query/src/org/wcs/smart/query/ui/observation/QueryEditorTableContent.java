@@ -98,6 +98,13 @@ public class QueryEditorTableContent {
 		resultsTable.updateVisible(query.getQueryColumns());
 	}
 
+	/**
+	 * Validates the date composite.
+	 */
+	public void validate(){
+		this.dateComposite.validate();
+	}
+	
 	public void setQueryName(ObservationQuery query){
 		compQueryName.setText(query.getName(), query.getId());
 	}

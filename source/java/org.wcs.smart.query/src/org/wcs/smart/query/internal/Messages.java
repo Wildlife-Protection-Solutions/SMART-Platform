@@ -385,6 +385,7 @@ public class Messages extends NLS {
 	public static String QueryDateFilterComposite_BetweenLabel;
 	public static String QueryDateFilterComposite_BetweenLabel2;
 	public static String QueryDateFilterComposite_DateLabel;
+	public static String QueryDateFilterComposite_InvalidDate;
 	public static String QueryDateFilterComposite_TodayLabel;
 	public static String QueryDefView_CloseError;
 	public static String QueryDefView_Warning_Title;

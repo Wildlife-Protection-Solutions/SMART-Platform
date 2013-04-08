@@ -24,6 +24,8 @@ package org.wcs.smart.query.ui;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -36,8 +38,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.parser.PatrolQueryOptions.DATE_FILTER_OP;
@@ -63,6 +69,7 @@ public class QueryDateFilterComposite extends Composite {
 	private Label lbl2;
 	private Composite main;
 	
+	private ControlDecoration cdEndDate;
 	
 	/**
 	 * create new composite 
@@ -192,15 +199,31 @@ public class QueryDateFilterComposite extends Composite {
 					}
 				}
 				main.layout();
+				
+				validate();
 			}
 		});
 		lbl1 = new Label(main, SWT.NONE);
 		lbl1.setText(Messages.QueryDateFilterComposite_BetweenLabel);
 		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
+		Listener validateListener = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				validate();
+			}};
+			
+		dtStart.addListener(SWT.Selection, validateListener);
 		lbl2 = new Label(main, SWT.NONE);
 		lbl2.setText(Messages.QueryDateFilterComposite_AndLabel);
 		dtEnd = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
-
+		dtEnd.addListener(SWT.Selection, validateListener);
+		
+		cdEndDate = new ControlDecoration(dtEnd, SWT.RIGHT | SWT.TOP);
+		cdEndDate.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdEndDate.setShowHover(true);
+		cdEndDate.hide();
+		
 		cmbFilterOptions.setSelection(new StructuredSelection(DATE_FILTER_OP.values()[0]));
 	}
 
@@ -234,6 +257,25 @@ public class QueryDateFilterComposite extends Composite {
 		}else{
 			return new DateFilter(field, filter);
 		}
+	}
+	
+	public void validate(){
+		String error = null;
+		DATE_FILTER_OP filter = (DATE_FILTER_OP)  ((IStructuredSelection)cmbFilterOptions.getSelection()).iterator().next();
+		if (filter == DATE_FILTER_OP.CUSTOM){
+			java.sql.Date start = new java.sql.Date(SmartUtils.getDate(dtStart).getTime());
+			java.sql.Date end = new java.sql.Date(SmartUtils.getDate(dtEnd).getTime());
+			if (start.after(end)){
+				error = Messages.QueryDateFilterComposite_InvalidDate;
+				cdEndDate.setDescriptionText(error);
+				cdEndDate.show();
+			}else{
+				cdEndDate.hide();
+			}
+		}
+		
+		SourceProvider provider = (SourceProvider) ((ISourceProviderService)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_DATE_VALID);
+		provider.setQueryDateValid(error == null, error);
 	}
 	
 }

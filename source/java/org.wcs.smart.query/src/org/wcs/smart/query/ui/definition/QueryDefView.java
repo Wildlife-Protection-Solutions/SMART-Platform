@@ -83,6 +83,7 @@ public class QueryDefView extends ViewPart {
 		public void partVisible(IWorkbenchPartReference partRef) {
 			IWorkbenchPart part = partRef.getPart(false);
 			if (part instanceof IQueryEditor){
+				((IQueryEditor) part).validate();
 				Query q =((IQueryEditor)part).getQuery();
 				if (q != current){
 					setQuery(q);
@@ -136,6 +137,7 @@ public class QueryDefView extends ViewPart {
 		public void partActivated(IWorkbenchPartReference partRef) {
 			IWorkbenchPart part = partRef.getPart(false);
 			if (part instanceof IQueryEditor){
+				((IQueryEditor) part).validate();
 				Query q =((IQueryEditor)part).getQuery();
 				if (q != current){
 					setQuery(q);
