@@ -214,6 +214,14 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 	
 	/**
+	 * 
+	 */
+	@Override
+	public void validate(){
+		page1.validate();
+	}
+	
+	/**
 	 * Updates the editor name with the query name
 	 */
 	public void updatePartName(){

@@ -130,6 +130,12 @@ public class QueryResultsTablePage  extends EditorPart  {
 		return this.content.getDateFilter();
 	}
 	
+	/**
+	 * validates the date filter
+	 */
+	public void validate(){
+		this.content.validate();
+	}
 	
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)

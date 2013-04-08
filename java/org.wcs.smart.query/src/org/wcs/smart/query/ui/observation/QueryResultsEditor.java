@@ -236,6 +236,11 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		super.setPartName(getEditorInput().getName());
 	}
  
+	@Override
+	public void validate(){
+		page1.validate();
+	}
+	
 	/**
 	 * Sets the dirty state of the editor
 	 * @param isDirty

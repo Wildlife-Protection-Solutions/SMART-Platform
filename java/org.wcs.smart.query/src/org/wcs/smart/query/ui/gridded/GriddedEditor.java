@@ -311,6 +311,10 @@ public class GriddedEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return this.isDirty;
 	}
 	
+	@Override
+	public void validate(){
+		resultPage.validate();
+	}
 	
 	/**
 	 * Saves the current query

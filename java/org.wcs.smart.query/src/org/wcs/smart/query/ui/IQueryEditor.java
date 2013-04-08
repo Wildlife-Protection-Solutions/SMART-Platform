@@ -42,4 +42,10 @@ public interface IQueryEditor {
 	 * @return the editor input
 	 */
 	public QueryInput getInputInternal();
+	
+	
+	/**
+	 * Validates the editor input
+	 */
+	public void validate();
 }

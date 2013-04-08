@@ -110,6 +110,12 @@ public class GriddedTableContent {
 	}
 	
 	/**
+	 * Validates the dates for the query
+	 */
+	public void validate(){
+		this.dateComposite.validate();
+	}
+	/**
 	 * Updates the results table data.  This
 	 * runs in the display thread.
 	 * 

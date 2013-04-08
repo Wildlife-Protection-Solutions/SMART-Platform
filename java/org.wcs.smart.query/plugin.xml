@@ -763,6 +763,12 @@
                   </equals>
                </with>
                <with
+                     variable="org.wcs.smart.query.ui.querydatevalid">
+                  <equals
+                        value="true">
+                  </equals>
+               </with>
+               <with
                      variable="activeEditorId">
                   <or>
                      <equals
@@ -929,6 +935,10 @@
          <variable
                name="org.wcs.smart.query.ui.querybuildertype"
                priorityLevel="activePartId">
+         </variable>
+         <variable
+               name="org.wcs.smart.query.ui.querydatevalid"
+               priorityLevel="workbench">
          </variable>
       </sourceProvider>
    </extension>

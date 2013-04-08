@@ -113,6 +113,12 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 		return this.content.getDateFilter();
 	}
 	
+	/**
+	 * validates date filter
+	 */
+	public void validate(){
+		this.content.validate();
+	}
 	
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)

@@ -113,6 +113,13 @@ public class PatrolQueryEditorTableContent {
 	}
 	
 	/**
+	 * validates the date filter
+	 */
+	public void validate(){
+		dateComposite.validate();
+	}
+	
+	/**
 	 * Updates the results table data.  This
 	 * runs in the display thread.
 	 * 

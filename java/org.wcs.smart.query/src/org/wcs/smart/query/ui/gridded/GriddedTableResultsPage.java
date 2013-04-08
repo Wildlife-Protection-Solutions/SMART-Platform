@@ -48,6 +48,10 @@ public class GriddedTableResultsPage  extends EditorPart  {
 	public void doSaveAs() {
 	}
 
+	public void validate(){
+		content.validate();
+	}
+	
 	/**
 	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
 	 */

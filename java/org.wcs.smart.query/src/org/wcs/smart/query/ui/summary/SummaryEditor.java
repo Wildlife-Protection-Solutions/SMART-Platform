@@ -118,11 +118,6 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 			 session.beginTransaction();
 			 try{
 				 query = (SummaryQuery) session.load(SummaryQuery.class, input.getUuid());
-			
-//				 query.getFilterDropItems();
-//				 query.getValueDropItems();
-//				 query.getRowGroupByDropItems();
-//				 query.getColumnGroupByDropItems();
 				 query.generateDropItems(session);
 				 
 				getSite().getShell().getDisplay().asyncExec(new Runnable() {
@@ -160,6 +155,10 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
 	}
 
+	@Override
+	public void validate(){
+		dateFilterComposite.validate();
+	}
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#init(org.eclipse.ui.IEditorSite,
 	 *      org.eclipse.ui.IEditorInput)
