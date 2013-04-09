@@ -119,12 +119,16 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		q.setInteger("cnt", SmartDB.getConservationAreaConfiguration().getCaCount()); //$NON-NLS-1$
 		
 		List<String> keys = q.list();
-			
-		query = "FROM AttributeListItem a WHERE a.attribute.conservationArea = :ca and a.keyId IN (:keys)"; //$NON-NLS-1$
+		if (keys.size() == 0){
+			//return empty list
+			return new ArrayList<AttributeListItem>();
+		}
+		query = "FROM AttributeListItem a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca AND a.keyId IN (:keys)"; //$NON-NLS-1$
 		q = session.createQuery(query);
 		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
 		q.setParameterList("keys", keys); //$NON-NLS-1$
-			
+		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
+		
 		List<AttributeListItem> items = q.list();
 		return items;
 	}
@@ -159,22 +163,35 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		q.setInteger("cnt", SmartDB.getConservationAreaConfiguration().getCaCount()); //$NON-NLS-1$
 		
 		List<String> hkeys = q.list();
-			
-		query = "FROM AttributeTreeNode a WHERE a.attribute.conservationArea = :ca and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
+		if (hkeys.size() == 0){
+			return new ArrayList<AttributeTreeNode>();
+		}
+		query = "FROM AttributeTreeNode a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
 		q = session.createQuery(query);
 		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
 		q.setParameterList("keys", hkeys); //$NON-NLS-1$
+		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 			
 		List<AttributeTreeNode> roots = q.list();
-			
+		
+		//load all kids
 		for (AttributeTreeNode node:roots){
-			visitTreeNode(node, hkeys);
+			loadChildren(node);
+		}
+		//merge all kids evicting as we go so we don't have problems later
+		for (AttributeTreeNode node:roots){
+			visitTreeNode(session, node, hkeys);
 		}
 			
 		return roots;		
 	}
-	
-	private void visitTreeNode(AttributeTreeNode parent, List<String> keys){
+	private void loadChildren(AttributeTreeNode parent){
+		for (AttributeTreeNode kid : parent.getChildren()){
+			loadChildren(kid);
+		}
+	}
+	private void visitTreeNode(Session session, AttributeTreeNode parent, List<String> keys){
+		session.evict(parent);
 		for (Iterator<AttributeTreeNode> iterator = parent.getChildren().iterator(); iterator.hasNext();) {
 			AttributeTreeNode node = (AttributeTreeNode) iterator.next();
 			if (!keys.contains(node.getHkey())){
@@ -183,7 +200,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		}
 		parent.setActiveChildren(parent.getChildren());
 		for (AttributeTreeNode child: parent.getChildren()){
-			visitTreeNode(child,keys);
+			visitTreeNode(session,child,keys);
 		}
 	}
 	
