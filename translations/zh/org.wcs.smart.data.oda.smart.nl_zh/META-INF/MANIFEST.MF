@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: org.wcs.smart.data.oda.smart.nl_zh Fragment
+Bundle-Name: SMART Chinese ODA Fragment
 Bundle-SymbolicName: org.wcs.smart.data.oda.smart.nl_zh
 Bundle-Version: 1.0.0
 Fragment-Host: org.wcs.smart.data.oda.smart;bundle-version="[1.0.0,1.1.0)"
