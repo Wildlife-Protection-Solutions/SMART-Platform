@@ -82,9 +82,9 @@ public class QueryResultItemComparator extends ViewerComparator{
 			return 0;
 		}
 		if (direction == SWT.UP){
-			return -compareValue(object1, object2);
-		}else{
 			return compareValue(object1, object2);
+		}else{
+			return -compareValue(object1, object2);
 		}
 	}
 		
