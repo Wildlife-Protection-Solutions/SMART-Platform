@@ -386,12 +386,10 @@
                      tooltip="%menu.query.menu.newquery.newgridquery.command.tooltip">
                   <visibleWhen
                         checkEnabled="false">
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.query.SmartQueryPerspective">
-                        </equals>
-                     </with>
+                     <test
+                           forcePluginActivation="false"
+                           property="org.wcs.smart.caSingle">
+                     </test>
                   </visibleWhen>
                </command>
             </menu>
