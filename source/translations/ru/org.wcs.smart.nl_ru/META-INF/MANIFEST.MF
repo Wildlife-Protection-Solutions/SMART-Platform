@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: org.wcs.smart.nl_ru Fragment
+Bundle-Name: SMART Russian Fragment
 Bundle-SymbolicName: org.wcs.smart.nl_ru
 Bundle-Version: 1.0.0
 Fragment-Host: org.wcs.smart;bundle-version="[1.0.0,1.1.0)"
