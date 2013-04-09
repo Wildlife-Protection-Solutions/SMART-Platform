@@ -24,6 +24,7 @@ INSERT INTO smart.I18N_LABEL(LANGUAGE_UUID, ELEMENT_UUID, VALUE) SELECT lang.UUI
 coalesce(p.NAME, '') as VALUE FROM smart.LANGUAGE lang INNER JOIN smart.PLAN p ON lang.CA_UUID = p.CA_UUID WHERE lang.isdefault;
 ALTER TABLE smart.PLAN DROP COLUMN NAME;
 
+GRANT ALL PRIVILEGES ON smart.i18n_label TO data_entry;
 
 
 -- Addition spatial functions to support group by areas in queries
