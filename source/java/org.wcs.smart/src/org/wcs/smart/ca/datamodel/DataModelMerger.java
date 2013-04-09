@@ -88,7 +88,7 @@ public class DataModelMerger {
 				copy.setKeyId(a.getKeyId());
 				copy.setMaxValue(a.getMaxValue());
 				copy.setMinValue(a.getMinValue());
-				copy.setName(a.findName(defaultLanguage));
+				copy.setName(a.getName());
 				copy.setRegex(a.getRegex());
 				copy.setType(a.getType());
 				
@@ -124,7 +124,7 @@ public class DataModelMerger {
 		clone.setIsActive(true);
 		
 		//clone the labels
-		clone.setName(toClone.findName(defaultLanguage));
+		clone.setName(toClone.getName());
 			
 		if (toClone.getAttributes() != null){
 			clone.setAttributes(new ArrayList<CategoryAttribute>());

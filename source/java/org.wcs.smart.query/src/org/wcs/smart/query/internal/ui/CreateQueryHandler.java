@@ -40,7 +40,6 @@ public class CreateQueryHandler extends CreateHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		super.execute(event);
 		super.createQuery(QueryType.OBSERVATION);
-		
 		return null;
 	}
 
