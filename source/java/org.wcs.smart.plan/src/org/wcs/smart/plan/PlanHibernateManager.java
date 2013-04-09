@@ -349,7 +349,7 @@ public class PlanHibernateManager{
 		          Timestamp t1 = (Timestamp)row[0];
 		          Timestamp t2 = (Timestamp)row[1];
 		          Long milDiff = t1.getTime() - t2.getTime();
-		          targetTotal += Math.round(milDiff / 1000 /60 /60 / 24) + 1; 
+		          targetTotal += (milDiff / 1000 /60 /60 / 24) + 1; 
 		        }
 		     }
 		}else if (type == TargetType.PATROL_HOURS) {
@@ -373,7 +373,7 @@ public class PlanHibernateManager{
 		          Time t1 = (Time)row[0];
 		          Time t2 = (Time)row[1];
 		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
-		          targetTotal += Math.round(milDiff / 1000 /60 / 60); 
+		          targetTotal += (milDiff / 1000 /60 / 60); 
 		        }
 		    }
 
@@ -399,7 +399,7 @@ public class PlanHibernateManager{
 		          Time t1 = (Time)row[0];
 		          Time t2 = (Time)row[1];
 		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
-		          targetTotal += Math.round(milDiff / 1000 /60 / 60); 
+		          targetTotal += (milDiff / 1000 /60 / 60); 
 		        }
 		    }
 

@@ -105,7 +105,7 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 				name = findNameInLanguage(language, labelKeyType.getLabel());
 				if (name == null) {
 					language = SmartDB.getCurrentLanguage();
-					if (codeWarnLabel != language.getCode()) {
+					if (!codeWarnLabel.equals(language.getCode())) {
 						codeWarnLabel += "; " + language.getCode(); //$NON-NLS-1$
 					}
 					name = findNameInLanguage(language, labelKeyType.getLabel());

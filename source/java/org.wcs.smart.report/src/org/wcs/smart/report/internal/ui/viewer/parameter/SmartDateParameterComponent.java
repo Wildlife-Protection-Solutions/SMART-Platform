@@ -208,8 +208,9 @@ public class SmartDateParameterComponent implements IBirtParameterComponent{
 					Date startdate = null;
 					if (data != null && data.size() >= 1 && data.get(0) != null){
 						startdate = (java.sql.Timestamp)data.get(0);
+						params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(startdate.getTime()));	//JAN 01 1900
 					}
-					params.put(SmartReportParameters.PARAM_START_DATE_KEY, new java.sql.Date(startdate.getTime()));	//JAN 01 1900  
+					  
 				}catch (Exception ex){					
 					ReportPlugIn.log(Messages.SmartDateParameterComponent_EarliestDateError, ex);
 				}finally{
