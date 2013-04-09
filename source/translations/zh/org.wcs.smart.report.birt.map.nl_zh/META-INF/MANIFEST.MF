@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: org.wcs.smart.report.birt.map.nl.zh Fragment
-Bundle-SymbolicName: org.wcs.smart.report.birt.map.nl.zh
+Bundle-Name: SMART BIRT Map Chinese Fragment
+Bundle-SymbolicName: org.wcs.smart.report.birt.map.nl_zh
 Bundle-Version: 1.0.0
 Fragment-Host: org.wcs.smart.report.birt.map;bundle-version="[1.0.0,1.1.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
