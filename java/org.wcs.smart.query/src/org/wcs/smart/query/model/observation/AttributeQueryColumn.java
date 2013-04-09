@@ -80,12 +80,10 @@ public class AttributeQueryColumn extends QueryColumn {
 		if (queryResultItem instanceof QueryResultItem) {
 			QueryResultItem item = (QueryResultItem) queryResultItem;
 			Object x = item.getAttributeValue(attributeKey);
-			if (x != null){
-				if (getType()  == QueryColumn.ColumnType.BOOLEAN){
-					return Boolean.valueOf((Double)x >= 0.5);
-				}	
-				return x;
+			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
+				return Boolean.valueOf((Double)x >= 0.5);
 			}
+			return x;
 		}
 		return ""; //$NON-NLS-1$
 	}

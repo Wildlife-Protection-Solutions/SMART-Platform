@@ -125,7 +125,7 @@ public class QueryResultItemComparator extends ViewerComparator{
 			}else{
 				compare = SmartUtils.nullDoubleComparator;
 			}
-		}if (type == ColumnType.STRING){
+		}else if (type == ColumnType.STRING){
 			compare = SmartUtils.nullStringComparator;
 		}
 		if (compare != null){
