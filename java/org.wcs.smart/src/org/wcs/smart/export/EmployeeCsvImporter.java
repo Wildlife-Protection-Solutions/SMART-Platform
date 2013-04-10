@@ -54,6 +54,7 @@ import com.ibm.icu.text.SimpleDateFormat;
  * @since 1.0.0
  */
 public class EmployeeCsvImporter implements ICsvDataImporter {
+	
 	public static final String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 
 	/* to export employees from derby in correct format:
@@ -70,6 +71,8 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 	 */
 	private List<Agency> agencies = null;
 	
+	private List<String> warnings = null;
+	
 	/**
 	 * Imports employees from the CSV file into
 	 * the current conservation area.
@@ -84,6 +87,8 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 	 */
 	@Override
 	public boolean importCsvFile(File file, boolean skipHeader, IProgressMonitor monitor, Session session) throws Exception {
+		warnings = new ArrayList<String>();
+		
 		if (!file.exists()){
 			throw new IOException(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist + file.toString() );
 		}
@@ -197,7 +202,9 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 				Agency ag = findAgency(agency, session);
 				if (ag == null){
 					//warning or something here
-					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
+//					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
+					warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
+					e.setAgency(null);
 				}else{
 					e.setAgency(ag);
 					//look for matching rank
@@ -206,7 +213,9 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 					}else{
 						Rank r = findRank(ag, rank);
 						if (r == null){
-							throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
+//							throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
+							warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
+							e.setRank(null);
 						}else{
 							e.setRank(r);
 						}
@@ -234,7 +243,10 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 		return true;
 	}
 	
-	
+	@Override
+	public List<String> getWarnings(){
+		return this.warnings;
+	}
 	
 	/**
 	 * Searches a agency for a rank with a given name.

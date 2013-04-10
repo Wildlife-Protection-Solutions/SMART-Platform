@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -35,8 +36,11 @@ import java.util.Set;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -235,7 +239,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				deleteEmployee();
+				deleteEmployees();
 			}
 		});
 		btnDelete.setEnabled(false);
@@ -349,41 +353,96 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	/**
 	 * deletes selected employee
 	 */
-	private void deleteEmployee(){
+	private void deleteEmployees(){
 		/* get employee to edit */
 		IStructuredSelection sec = (IStructuredSelection)tblEmployee.getSelection();
 		if (sec.isEmpty()){
 			return;
 		}
-		Employee e = (Employee)sec.getFirstElement();
+		@SuppressWarnings("unchecked")
+		final List<Employee> toDelete = sec.toList();
 		
+		String message = null;
+		if (toDelete.size() == 1){
+			message = MessageFormat.format(
+					Messages.EmployeePropertyPage_DeleteEmployee_DialogMessage, 
+					new Object[]{toDelete.get(0).getLabel()});
+		}else{
+			message = MessageFormat.format(Messages.EmployeePropertyPage_ConfirmDeleteMulti, new Object[]{toDelete.size()});
+		}
 		if (!MessageDialog.openConfirm(getShell(), 
-				Messages.EmployeePropertyPage_8, 
-				MessageFormat.format(
-						Messages.EmployeePropertyPage_DeleteEmployee_DialogMessage, 
-						new Object[]{e.getLabel()}))){
+				Messages.EmployeePropertyPage_8,
+				message
+				)){
 			return;
 		}
-		Session s = getSession();
-		Transaction tx = s.beginTransaction();
-		try{
-			if (!DeleteManager.canDelete(e, s)){
-				tx.rollback();
-				return;
-			}
-			s.delete(e);
-			employees.remove(e);
-			tx.commit();
-		}catch (Exception ex){
-			try{
-				tx.rollback();
-			}catch (Exception ex2){
-				SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
-			}
-			SmartPlugIn.displayLog(getShell(), MessageFormat.format(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee, new Object[]{ e.getLabel()}) + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
+		ProgressMonitorDialog pd = new ProgressMonitorDialog(getShell());
+		final boolean[] restart = {false};
+		
+		try {
+			pd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask(Messages.EmployeePropertyPage_ProgessDeleteEmployee, toDelete.size());
+					Session s = getSession();
+					Transaction tx = s.beginTransaction();
+					try{
+						for (Employee del : toDelete){
+							monitor.subTask(del.getLabel());
+							String deleteError = null;
+							try{
+								if (!DeleteManager.canDelete(del, s)){
+									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{del.getLabel()});
+								}else{
+									if (del.equals(SmartDB.getCurrentEmployee())){
+										restart[0] = true;
+									}
+									s.delete(del);
+									employees.remove(del);
+								}
+							}catch (Exception ex){
+								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{del.getLabel()}); //$NON-NLS-1$
+							}
+							
+							if (deleteError != null){
+								final String errormsg = deleteError;
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, errormsg);
+									}});
+								
+							}
+							monitor.worked(1);
+						}
+						monitor.subTask(Messages.EmployeePropertyPage_ProgressCommitChanges);
+						tx.commit();
+					}catch ( final Exception ex){
+						try{
+							tx.rollback();
+						}catch (Exception ex2){
+							SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
+						}
+						Display.getDefault().syncExec(new Runnable(){
+
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(null, Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
+								
+							}});
+						
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(null, e.getLocalizedMessage(), e);
 		}
 		
-		if (e.equals(SmartDB.getCurrentEmployee())){
+		
+		
+		if (restart[0]){
 			//restart
 			PlatformUI.getWorkbench().restart();
 		}
@@ -410,7 +469,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 * 
 	 */
 	private TableViewer createEmployeeTableViewer(Composite parent){
-		TableViewer tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.VIRTUAL );
+		TableViewer tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.VIRTUAL | SWT.MULTI);
 		
 
 		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);

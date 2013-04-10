@@ -22,6 +22,7 @@
 package org.wcs.smart.export.config;
 
 import java.io.File;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -36,4 +37,10 @@ public interface ICsvDataImporter {
 
 	public boolean importCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
 	
+	/**
+	 * 
+	 * @return a list of warning generated during the import process.  Can be
+	 * <code>null</code> or an empty list if no warnings generated
+	 */
+	public List<String> getWarnings();
 }

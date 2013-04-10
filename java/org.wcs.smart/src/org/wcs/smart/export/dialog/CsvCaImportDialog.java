@@ -87,32 +87,47 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 
 	@Override
 	protected boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+		boolean result = false;
 		if (isImportFromCa) {
 			File tmpFile = File.createTempFile("tempImport", ".csv"); //$NON-NLS-1$ //$NON-NLS-2$
 			try {
-				boolean result = config.getExporter().exportCsvFile(tmpFile, caToExportFrom, false, monitor, session);
+				result = config.getExporter().exportCsvFile(tmpFile, caToExportFrom, false, monitor, session);
 				if (result) {
 					result = config.getImporter().importCsvFile(tmpFile, false, monitor, session);
 				}
-				return result;
+				
 			} finally {
 				tmpFile.deleteOnExit();
 			}
+		}else{
+			result = config.getImporter().importCsvFile(file, headers, monitor, session);
 		}
-		return config.getImporter().importCsvFile(file, headers, monitor, session);
+		return result;
 	}
 
+	@Override
+	protected List<String> getWarnings(){
+		return config.getImporter().getWarnings();
+	}
+	
 	/**
 	 * Create contents of the dialog.
 	 */
 	@Override
 	public Control createDialogArea(Composite parent) {
+		Composite c = (Composite) super.createDialogArea(parent);
+		Composite inner = new Composite(c, SWT.NONE);
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		inner.setLayout(new GridLayout());
+		
 		List<ConservationArea> areas = loadCaList();
 		if (areas.isEmpty()) {
 			//no need to display ca dropdown, so display parent control with all its functionality
-			return super.createDialogArea(parent);
+			super.createFileComposite(inner, true);
+			return c;
 		}
-		btnFromCsv = new Button(parent, SWT.RADIO);
+		
+		btnFromCsv = new Button(inner, SWT.RADIO);
 		btnFromCsv.setSelection(true);
 		btnFromCsv.setText(Messages.CsvCaImportDialog_FromCsv_Label);
 		btnFromCsv.addSelectionListener(new SelectionAdapter() {
@@ -121,7 +136,8 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 			}
 		});
 
-		csvComposite = new CsvFileComposite(parent, SWT.NONE, config);
+		
+		csvComposite = super.createFileComposite(inner, false);
 		((GridLayout)csvComposite.getLayout()).marginLeft = CONTENT_MARGIN;
 		csvComposite.addFileModifyListener(new Listener() {
 			@Override
@@ -130,7 +146,7 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 			}
 		});
 
-		createImportFromCa(parent, areas);
+		createImportFromCa(inner, areas);
 		updateControlsState();
 		
 		initDialogLabels();

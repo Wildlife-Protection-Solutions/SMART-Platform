@@ -23,6 +23,7 @@ package org.wcs.smart.export.dialog;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
@@ -68,20 +70,33 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 	 */
 	@Override
 	public Control createDialogArea(Composite parent) {
-		csvComposite = new CsvFileComposite(parent, SWT.NONE, config);
-		csvComposite.addFileModifyListener(new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (csvComposite.getFileText().length() > 0){
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
-				}else{
-					getButton(IDialogConstants.OK_ID).setEnabled(false);
-				}
-			}
-		});
-
+		Composite comp = (Composite) super.createDialogArea(parent);
 		initDialogLabels();
-		return parent;
+		return comp;
+	}
+	
+	/**
+	 * Creates the file import option
+	 * @param parent parent composite
+	 * @param updateButtons <code>true</code> if dialog buttons should be updated when
+	 * file changed <code>false</code> otherwise
+	 * @return the csv file composite created
+	 */
+	protected CsvFileComposite createFileComposite(Composite parent, boolean updateButtons){
+		csvComposite = new CsvFileComposite(parent, SWT.NONE, config);
+		if (updateButtons){
+			csvComposite.addFileModifyListener(new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					if (csvComposite.getFileText().length() > 0){
+						getButton(IDialogConstants.OK_ID).setEnabled(true);
+					}else{
+						getButton(IDialogConstants.OK_ID).setEnabled(false);
+					}
+				}
+			});
+		}
+		return csvComposite;
 	}
 	
 	protected void initDialogLabels() {
@@ -123,7 +138,14 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 			boolean headers = csvComposite.getHeadersSelection();
 			ProcessingRunnable processRunnable = new ProcessingRunnable(fileName, headers);
 			dialog.run(true, true, processRunnable);
+			
+			
 			if (processRunnable.isSuccess()) {
+				//display warnings
+				if (getWarnings() != null && getWarnings().size() > 0){
+					WarningDialog wdialog = new WarningDialog(getShell(), config.getTitle(),Messages.AbstractCsvDialog_ImportWarning,getWarnings());
+					wdialog.open();
+				}
 				MessageDialog.openInformation(getShell(), config.getTitle(), config.getSuccessMessage());
 				return true;
 			}else{
@@ -138,6 +160,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
 	protected abstract boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception;
 
+	protected abstract List<String> getWarnings();
 	/**
 	 * Inner class responsible for wrapping import/export operation into {@link IRunnableWithProgress}
 	 * 

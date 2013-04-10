@@ -22,8 +22,11 @@
 package org.wcs.smart.export.dialog;
 
 import java.io.File;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.export.config.ICsvImportDialogConfig;
@@ -50,6 +53,18 @@ public class CsvImportDialog extends AbstractCsvDialog {
 	@Override
 	protected boolean performAction(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		return config.getImporter().importCsvFile(file, headers, monitor, session);
+	}
+	
+	@Override
+	protected List<String> getWarnings(){
+		return config.getImporter().getWarnings();
+	}
+	
+	@Override
+	public Control createDialogArea(Composite parent) {
+		Composite comp = (Composite) super.createDialogArea(parent);
+		super.createFileComposite(comp, true);
+		return comp;
 	}
 
 }
