@@ -118,7 +118,7 @@ public class QueryListViewContentProvider implements ITreeContentProvider{
 					boolean q1 = o1 instanceof QueryFolder;
 					boolean q2 = o2 instanceof QueryFolder;
 					if (q1 & !q2) return -1;
-					if (!q2 & q2) return 1;
+					if (!q1 & q2) return 1;
 					if (q1 && q2){
 						return Collator.getInstance().compare(((QueryFolder)o1).getName().toLowerCase(), ((QueryFolder)o2).getName().toLowerCase());
 					}else{
