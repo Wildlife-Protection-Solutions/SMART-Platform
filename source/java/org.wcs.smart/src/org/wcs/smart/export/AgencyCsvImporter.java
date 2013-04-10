@@ -65,6 +65,11 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 	public AgencyCsvImporter() {
 		//nothing
 	}
+	
+	@Override
+	public List<String> getWarnings(){
+		return null;
+	}
 
 	@Override
 	public boolean importCsvFile(File file, boolean headers, IProgressMonitor monitor, Session session) throws Exception {

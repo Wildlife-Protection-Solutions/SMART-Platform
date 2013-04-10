@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String AbstractCsvDialog_File_Label;
 	public static String AbstractCsvDialog_FileFilter_All;
 	public static String AbstractCsvDialog_FileFilter_Csv;
+	public static String AbstractCsvDialog_ImportWarning;
 	public static String AbstractPropertyJHeaderDialog_ConfirmClose_DialogMessage;
 	public static String AbstractPropertyJHeaderDialog_ConfirmClose_DialogTitle;
 	public static String AbstractPropertyJHeaderDialog_ConfirmSave_DialogMessage;
@@ -502,6 +503,8 @@ public class Messages extends NLS {
 	public static String EmployeeDialog_SaveButton;
 	public static String EmployeePropertyPage_8;
 	public static String EmployeePropertyPage_ActiveFlag;
+	public static String EmployeePropertyPage_ConfirmDeleteMulti;
+	public static String EmployeePropertyPage_CouldNotDeleteEmployee;
 	public static String EmployeePropertyPage_CreateNew_Button;
 	public static String EmployeePropertyPage_Delete_Tooltip;
 	public static String EmployeePropertyPage_DeleteEmployee_DialogMessage;
@@ -514,6 +517,8 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_InActiveFlag;
 	public static String EmployeePropertyPage_Op_IncludeInActive;
 	public static String EmployeePropertyPage_PageTitle;
+	public static String EmployeePropertyPage_ProgessDeleteEmployee;
+	public static String EmployeePropertyPage_ProgressCommitChanges;
 	public static String ExportEmployeeDialog_CSVFormat_1;
 	public static String ExportEmployeeDialog_CSVFormat_2;
 	public static String ExportEmployeeDialog_CSVFormat_3;

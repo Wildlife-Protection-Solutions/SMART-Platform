@@ -76,9 +76,18 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 				Date endDate = employee.getEndEmploymentDate();
 				data[6] = endDate == null ? null : dateFormat.format(endDate);
 				Agency agency = employee.getAgency();
-				data[7] = agency == null ? null : agency.getName();
+				if (agency != null){
+					data[7] = agency.findName(ca.getDefaultLanguage());
+				}else{
+					data[7] = null;
+				}
+				
 				Rank rank = employee.getRank();
-				data[8] = rank == null ? null : rank.getName();
+				if (rank != null){
+					data[8] = rank.findName(ca.getDefaultLanguage());
+				}else{
+					data[8] = null;
+				}
 				
 				writer.writeNext(data);
 			}
