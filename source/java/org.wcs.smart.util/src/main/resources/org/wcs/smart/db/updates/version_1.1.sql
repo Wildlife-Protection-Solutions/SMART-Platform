@@ -61,3 +61,25 @@ ALTER TABLE smart.language DROP COLUMN code;
 RENAME COLUMN smart.language.codeA TO code;
 
 
+-- Remove hatbox functionality as we are not currently using this 
+-- anywhere in our code and it takes up extra time/space
+drop table smart.area_geometries_hatbox;
+drop trigger smart.area_geometries_instrg;
+drop trigger smart.area_geometries_updtrg;
+drop trigger smart.area_geometries_deltrg;
+       
+drop procedure HATBOX.SPATIALIZE_PROC;
+drop procedure HATBOX.BUILD_INDEX_PROC;
+drop procedure HATBOX.DE_SPATIALIZE_PROC;
+drop procedure HATBOX.INS_SPATIAL_PROC;
+drop procedure HATBOX.UPD_SPATIAL_PROC;
+drop procedure HATBOX.DEL_SPATIAL_PROC;
+drop procedure HATBOX.SAVE_ENTRY_PROC;
+
+drop function HATBOX.MBR_INTERSECTS_ENV;
+drop function HATBOX.INTERSECTS_WKB;
+drop function HATBOX.INTERSECTS_WKT;
+drop function HATBOX.QUERY_WITH_PREDICATE_WKB;
+drop function HATBOX.QUERY_WITH_PREDICATE_WKT;
+
+drop schema HATBOX restrict;
