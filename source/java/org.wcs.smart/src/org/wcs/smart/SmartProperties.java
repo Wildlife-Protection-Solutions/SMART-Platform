@@ -44,7 +44,7 @@ public class SmartProperties {
 	 */
 	public static final String PROPERTIES_DIR = "properties"; //$NON-NLS-1$
 	
-	private static final String DEFAULT_DATAMODEL_FILE = PROPERTIES_DIR + File.separator + "datamodel.xml"; //$NON-NLS-1$
+	private static final String DEFAULT_DATAMODEL_FILE ="/" + PROPERTIES_DIR + "/datamodel.xml"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Database location key
@@ -83,7 +83,7 @@ public class SmartProperties {
 	}
 	
 	public static InputStream getIucnDataModelFile(){
-		return SmartApp.class.getClassLoader().getResourceAsStream(DEFAULT_DATAMODEL_FILE);
+		return SmartProperties.class.getResourceAsStream(DEFAULT_DATAMODEL_FILE);
 	}
 	
 	public String getProperty(String key){
