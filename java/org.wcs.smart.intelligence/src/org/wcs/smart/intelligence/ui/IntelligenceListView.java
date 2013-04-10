@@ -241,11 +241,13 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 		
 		private List<?> loadIntelligences() {
 			Session session = SmartHibernateManager.openSession();
+			session.beginTransaction();
 			try {
 				Query query = IntelligenceListView.this.getFilter().buildQuery(session);
 				List<?> list = query.list();
 				return list;
 			} finally {
+				session.getTransaction().rollback();
 				session.close();
 			}
 		}
