@@ -57,7 +57,8 @@ import org.wcs.smart.internal.Messages;
  * @since 1.0.0
  */
 public class SmartUtils {
-	
+
+	public static final String INVALID_FILENAME_CHARS_PATTERN = "[\"',/:;<>\\\\|]"; //$NON-NLS-1$
 	
 	/**
 	 * Various pre-defined regex expressions
@@ -612,4 +613,20 @@ public class SmartUtils {
 		return xgc;
 	}
 
+	/**
+	 * Determines the output file name for given smart object name by
+	 * removing characters from the name that are not valid for file name
+	 * 
+	 * @param smartName
+	 * @return
+	 */
+	public static String getFileName(String smartName) {
+		//remove all special characters from the name
+		smartName = smartName.replaceAll(INVALID_FILENAME_CHARS_PATTERN, ""); //$NON-NLS-1$
+		if (smartName.isEmpty()) {
+			smartName = "object"; //$NON-NLS-1$
+		}
+		return smartName;
+	}
+	
 }

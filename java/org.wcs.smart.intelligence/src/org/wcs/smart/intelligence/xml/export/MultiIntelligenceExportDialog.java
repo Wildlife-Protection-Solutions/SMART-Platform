@@ -117,7 +117,7 @@ public class MultiIntelligenceExportDialog extends XmlMultiExportDialog implemen
 					for(Object x : results){
 						Object[] row = (Object[])x;
 						String dname = Intelligence.generateLabel((String)row[1], (Date)row[2]);
-						Object[] thisdata = {dname, (byte[])row[0]};
+						Object[] thisdata = {dname, (byte[])row[0], row[1]};
 						data[counter++] = thisdata;
 					}
 					

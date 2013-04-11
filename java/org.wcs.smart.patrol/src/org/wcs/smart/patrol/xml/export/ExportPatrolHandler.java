@@ -113,11 +113,8 @@ public class ExportPatrolHandler extends AbstractHandler {
 
 							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ SmartUtils.encodeHex(puuid)}));
 
-							File outFile = PatrolExporter.getOutputFile(
-									new File(dir, p.getId() + ".xml").toString(), //$NON-NLS-1$
-									includeAtt);
-							PatrolExporter.exportPatrol(p, outFile, includeAtt,
-									monitor);
+							File outFile = PatrolExporter.getOutputFile(dir, p.getId(), includeAtt);
+							PatrolExporter.exportPatrol(p, outFile, includeAtt, monitor);
 							exportCnt++;
 						} catch (Exception ex) {
 							displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{SmartUtils.encodeHex(puuid)}) + ex.getLocalizedMessage(), ex);

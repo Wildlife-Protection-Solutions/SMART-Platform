@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.common.control;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -52,6 +56,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog to allow users to export multiple objects at once into xml file.
@@ -84,22 +89,38 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 		this.filterLinkText = filterLinkText;
 	}
 
+	@Override
+	protected void okPressed() {
+		this.objUuids = new ArrayList<byte[]>();
+		Object[] checked = tableViewer.getCheckedElements();
+		int objNameIndex = 0;
+		if (checked.length > 0 && ((Object[])checked[0]).length >= 3) {
+			//expected table viewer input [gui name, uuid, object name]; if name is missing use gui name as object name
+			objNameIndex = 2; 
+		}
+		Map<String, String> file2Obj = new HashMap<String, String>();
+		for (int i = 0; i < checked.length; i ++){
+			String objName = (String)((Object[])checked[i])[objNameIndex];
+			String fileName = SmartUtils.getFileName(objName);
+			if (file2Obj.containsKey(fileName)) {
+				//output file name conflict error (two exported items will try to write data in a same file)
+				MessageDialog.openWarning(getShell(), Messages.XmlMultiExportDialog_WarnDialog_Title, MessageFormat.format(Messages.XmlMultiExportDialog_FilenameConflict_Message, file2Obj.get(fileName), objName, fileName));
+				return;
+			}
+			file2Obj.put(fileName, objName);
+			objUuids.add( (byte[])((Object[])checked[i])[1] );
+		}
+		super.okPressed();
+	}
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
 		dirName = txtFile.getText();
 		includeAttachements = btnIncludeAttachments.getSelection();
-		
-		this.objUuids = new ArrayList<byte[]>();
-		Object[] checked = tableViewer.getCheckedElements();
-		for (int i = 0; i < checked.length; i ++){
-			objUuids.add(  (byte[])((Object[])checked[i])[1] );
-		}
-		
 		super.buttonPressed(buttonId);
 	}
-	
+
 	/**
 	 * @return the filename selected by user
 	 */
