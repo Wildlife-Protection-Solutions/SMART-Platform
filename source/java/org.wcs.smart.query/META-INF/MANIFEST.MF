@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %Bundle-Name
+Bundle-Name: Query
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.5
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -43,4 +43,4 @@ Export-Package: .,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
 Bundle-ClassPath: .
-Bundle-Vendor: %Bundle-Vendor
+Bundle-Vendor: org.wcs.smart

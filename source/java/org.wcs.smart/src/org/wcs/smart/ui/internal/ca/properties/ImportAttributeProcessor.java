@@ -292,7 +292,8 @@ public class ImportAttributeProcessor {
 	 * for the given attribute
 	 */
 	private boolean hasPredefinedFile(){
-		URL url = SmartApp.class.getClassLoader().getResource(getAttributeFile());
+		URL url = SmartProperties.class.getResource(getAttributeFile());
+		InputStream in  = SmartProperties.class.getResourceAsStream(getAttributeFile());
 		return url != null;
 	}
 	
@@ -301,7 +302,7 @@ public class ImportAttributeProcessor {
 	 * @return
 	 */
 	private String getAttributeFile(){
-		return SmartProperties.PROPERTIES_DIR + File.separator + attribute.getKeyId() + ".xml"; //$NON-NLS-1$
+		return "/" + SmartProperties.PROPERTIES_DIR + "/" + attribute.getKeyId() + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	

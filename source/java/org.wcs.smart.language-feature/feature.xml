@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.language_feature"
       label="Language Feature"
-      version="1.0.0">
+      version="1.0.5">
 
    <description url="http://www.example.com/description">
       This feature contains the language packs to provide internationalization support to the SMART application.

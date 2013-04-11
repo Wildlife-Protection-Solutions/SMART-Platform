@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Smart Data Source ODA Runtime Driver
 Bundle-SymbolicName: org.wcs.smart.data.oda.smart; singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.5
 Bundle-ClassPath: .,
  src
 Bundle-ActivationPolicy: lazy
