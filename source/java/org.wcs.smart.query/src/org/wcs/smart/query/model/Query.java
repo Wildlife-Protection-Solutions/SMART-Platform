@@ -219,6 +219,7 @@ public abstract class Query extends SimpleListItem {
 	 */
 	@Column(name="ca_filter")
 	public String getConservationAreaFilter(){
+		if (this.caFilter == null) return null;
 		return this.caFilter.asString();
 	}
 	/**
