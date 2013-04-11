@@ -114,7 +114,7 @@ limitations under the License.
    </plugins>
 
    <features>
-      <feature id="org.wcs.smart.smart_feature" version="1.0.0"/>
+      <feature id="org.wcs.smart.smart_feature"/>
       <feature id="org.eclipse.rcp"/>
    </features>
 
