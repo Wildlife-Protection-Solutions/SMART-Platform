@@ -1,4 +1,4 @@
--- Database Updates For Version 1.1
+-- Database Updates For Version 1.0.5
 update smart.db_version set version = '1.0.5';
 
 -- Add "Distance For Completion"("Success Distance") for Plan Target and set default value for previously added spacial targets to 250 --

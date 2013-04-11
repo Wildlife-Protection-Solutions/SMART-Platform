@@ -35,7 +35,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
- * A object class which represnts the i18n_label table.
+ * A object class which represents the i18n_label table.
  * <p>
  * This is similar to the Label object but does not
  * user a has_label object as the primary key.  Instead
