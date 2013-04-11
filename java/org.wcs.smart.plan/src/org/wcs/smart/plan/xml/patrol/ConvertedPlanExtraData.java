@@ -87,10 +87,12 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 
 	@Override
 	public boolean saveInTransaction(Session session, Patrol patrol) {
-		PatrolPlan pp = new PatrolPlan();
-		pp.setPatrol(patrol);
-		pp.setPlan(plan);
-		session.saveOrUpdate(pp);
+		if (plan != null) {
+			PatrolPlan pp = new PatrolPlan();
+			pp.setPatrol(patrol);
+			pp.setPlan(plan);
+			session.saveOrUpdate(pp);
+		}
 		return true;
 	}
 
