@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.report.internal.ui;
 
+import java.text.Collator;
+
 import org.eclipse.core.expressions.PropertyTester;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -111,7 +113,11 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 					return false;
 				}
 			}else{
-				return folder.getEmployee().equals(SmartDB.getCurrentEmployee());
+				if (SmartDB.isMultipleAnalysis()){
+					return Collator.getInstance().equals(folder.getEmployee().getSmartUserId(), SmartDB.getCurrentEmployee().getSmartUserId());
+				}else{
+					return folder.getEmployee().equals(SmartDB.getCurrentEmployee());
+				}
 			}
 			
 		}
@@ -130,7 +136,11 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 					return false;
 				}
 			}else{
-				return r.getOwner().equals(SmartDB.getCurrentEmployee());
+				if (SmartDB.isMultipleAnalysis()){
+					return Collator.getInstance().equals(r.getOwner().getSmartUserId(), SmartDB.getCurrentEmployee().getSmartUserId());
+				}else{
+					return r.getOwner().equals(SmartDB.getCurrentEmployee());
+				}
 			}
 			
 		}
