@@ -109,7 +109,7 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 
 							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_SubTask, SmartUtils.encodeHex(uuid)));
 
-							File outFile = IntelligenceExporter.getOutputFile(new File(dir, intel.getName() + ".xml").toString(), includeAtt); //$NON-NLS-1$
+							File outFile = IntelligenceExporter.getOutputFile(dir, intel.getName(), includeAtt);
 							IntelligenceExporter.exportIntelligence(intel, outFile, includeAtt, monitor);
 
 							exportCnt++;

@@ -46,6 +46,7 @@ import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
 import org.wcs.smart.patrol.xml.model.PatrolType;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class responsible for exporting
@@ -133,7 +134,7 @@ public class PatrolExporter {
 		if (index >= 0){
 			name= name.substring(0, index);
 		}
-		File xmlFile = File.createTempFile(name, ".xml"); //$NON-NLS-1$
+		File xmlFile = File.createTempFile("temp_patrol_export", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		exportPatrolWithoutAttachments(xml, xmlFile, monitor);
 		
 		
@@ -200,23 +201,15 @@ public class PatrolExporter {
 	 * based on given input file
 	 * and if attachments are included.
 	 * 
-	 * @param inputFile
+	 * @param dir
+	 * @param name
 	 * @param includeAttributes
 	 * @return
 	 */
-	public static File getOutputFile(String inputFile, boolean includeAttributes){
-		if (!includeAttributes){
-			return new File(inputFile);
-		}else{
-			//turn into zip file
-			File in = new File(inputFile);
-			int index = in.getName().lastIndexOf('.');
-			String name = in.getName();
-			if (index > 0){
-				name = name.substring(0, index);
-			}
-			String zip = in.getParent() + File.separator + name + ".zip"; //$NON-NLS-1$
-			return new File(zip);
-		}
+	public static File getOutputFile(File dir, String name, boolean includeAttachs) throws Exception {
+		name = SmartUtils.getFileName(name);
+		String ext = includeAttachs ? ".zip" : ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
+		return new File(dir, name + ext);
 	}
+	
 }

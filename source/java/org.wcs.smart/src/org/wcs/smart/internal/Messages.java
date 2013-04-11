@@ -816,10 +816,12 @@ public class Messages extends NLS {
 	public static String XmlMultiExportDialog_DeselectAll_Label;
 	public static String XmlMultiExportDialog_DestinationFolderLabel;
 	public static String XmlMultiExportDialog_ExportButton;
+	public static String XmlMultiExportDialog_FilenameConflict_Message;
 	public static String XmlMultiExportDialog_IncludeAttachmentsLabel;
 	public static String XmlMultiExportDialog_LoadingText;
 	public static String XmlMultiExportDialog_OverwriteWarningLabel;
 	public static String XmlMultiExportDialog_SelectAllLabel;
+	public static String XmlMultiExportDialog_WarnDialog_Title;
 	public static String ZipUtil_Error_CreatingTempDir;
 	public static String ZipUtil_Error_UnzipFailed;
 	public static String ZipUtil_Progress_CreatingZip;

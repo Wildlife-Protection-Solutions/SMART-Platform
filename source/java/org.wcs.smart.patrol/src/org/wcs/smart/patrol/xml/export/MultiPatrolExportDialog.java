@@ -99,7 +99,7 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 						Object[] row = (Object[])x;
 						
 						String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[3]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[4]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						Object[] thisdata = {pname, (byte[])row[0]};
+						Object[] thisdata = {pname, (byte[])row[0], row[1]};
 						data[counter++] = thisdata;
 					}
 					
