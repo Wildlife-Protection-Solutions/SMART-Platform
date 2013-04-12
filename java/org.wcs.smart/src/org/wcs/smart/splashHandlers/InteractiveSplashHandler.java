@@ -140,8 +140,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		
 		//auto-login for testing
-		txtUserName.setText("smart"); //$NON-NLS-1$
-		txtPassword.setText("smart"); //$NON-NLS-1$
+//		txtUserName.setText("smart"); //$NON-NLS-1$
+//		txtPassword.setText("smart"); //$NON-NLS-1$
 		//handleButtonOKWidgetSelected();
 
 		doEventLoop();
