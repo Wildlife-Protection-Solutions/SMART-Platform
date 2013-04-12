@@ -44,7 +44,7 @@ PARAMETER STYLE JAVA
 NO SQL
 RETURNS NULL ON NULL INPUT;
 
-CREATE FUNCTION smart.computeHours(wkb1 geometry, wkb2 ls) returns double
+CREATE FUNCTION smart.computeHours(wkb1 blob, wkb2 blob) returns double
 LANGUAGE JAVA
 deterministic
 external name 'org.wcs.smart.util.GeometryUtils.computeHours'
