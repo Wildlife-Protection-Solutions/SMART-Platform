@@ -44,6 +44,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -247,16 +248,21 @@ public class SmartUtils {
 	 * @param dir the directory to created
 	 * @return <code>false</code> if not created, <code>true</code> otherwise
 	 */
-	public static boolean createDirectory(File dir) {
+	public static boolean createDirectory(final File dir) {
 		try {
 			FileUtils.forceMkdir(dir);
 			return true;
-		} catch (IOException ex) {
-			SmartPlugIn
+		} catch (final IOException ex) {
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					SmartPlugIn
 					.displayLog(
 							null,
 							Messages.SmartUtils_Error_CouldNotCreateDir + dir.getAbsolutePath(),
 							ex);
+				}});
+			
 		}
 		return false;
 	}
