@@ -98,10 +98,15 @@ public class AutoBackupEngine {
 						
 					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss"); //$NON-NLS-1$
 					Date date = new Date();
-					File tmp = new File(properties.getProperty(PROP_BACKUP_LOCATION));
+					final File tmp = new File(properties.getProperty(PROP_BACKUP_LOCATION));
+					
 					if(!tmp.exists()){
-						SmartUtils.createDirectory(tmp);
+						if (! SmartUtils.createDirectory(tmp)){
+							//TODO: create an error message that says something about the auto-backup engine
+							return;
+						}
 					}
+					
 					File f = new File(properties.getProperty(PROP_BACKUP_LOCATION) + File.separator + BACKUP_FILENAME_PREFIX + dateFormat.format(date) + ".zip"); //$NON-NLS-1$
 					try{
 						if(DerbyBackupEngine.backupSystem(f, monitor)){					
@@ -111,7 +116,7 @@ public class AutoBackupEngine {
 							    public void run (){    
 							        MessageDialog.openError(shell, Messages.AutoBackupEngine_AutoBackupFailed_Dialog_Title, Messages.AutoBackupEngine_AutoBackupCancelled_Dialog_Message);
 							}
-								});
+							});
 						}else{
 							shell.getDisplay().syncExec(new Runnable(){
 							    public void run (){    
@@ -148,6 +153,10 @@ public class AutoBackupEngine {
 		cutoffDate.setTime(cutoffDate.getTime() - (long)(Double.valueOf(properties.getProperty(PROP_DELETE_TIMER)) * 86400 * 1000)); //1 day in milliseconds 86k*1000
 
 		File dir = new File(properties.getProperty(PROP_BACKUP_LOCATION));
+		if (dir.listFiles() == null){
+			//no files, nothing to delete
+			return;
+		}
 		  for (File child : dir.listFiles()) {
 			  if (child.getName().equals(".") || //$NON-NLS-1$
 					  child.getName().equals("..")){ //$NON-NLS-1$
