@@ -36,7 +36,10 @@ public class Messages extends NLS {
 	public static String NewPlanHandler_LoadWizard_Error;
 	public static String NewPlanHandler_LoadWizard_TaskName;
 	public static String NumericPlanTarget_CategoryName;
+	public static String NumericPlanTarget_days;
 	public static String NumericPlanTarget_GuiName;
+	public static String NumericPlanTarget_hours;
+	public static String NumericPlanTarget_km;
 	public static String NumericPlanTarget_TargetType_DistanceTraveled;
 	public static String NumericPlanTarget_TargetType_PatrolDays;
 	public static String NumericPlanTarget_TargetType_PatrolHours;
