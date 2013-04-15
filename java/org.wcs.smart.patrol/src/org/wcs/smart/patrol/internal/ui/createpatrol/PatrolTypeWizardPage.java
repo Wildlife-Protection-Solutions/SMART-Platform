@@ -81,6 +81,7 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 		}finally{
 			session.getTransaction().rollback();
 		}
+
 		for (PatrolType t: types){
 			Button btn = new Button(buttonPanel, SWT.RADIO);
 			btn.setText(t.getType().getGuiName());
@@ -93,8 +94,12 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 			btnTypes.get(0).setSelection(true);
 			setPageComplete(true);
 		}else{
-			lbl = new Label(main, SWT.MULTI);
+			lbl = new Label(buttonPanel, SWT.WRAP);
 			lbl.setText(Messages.PatrolTypeWizardPage_Error_NoTypesFound);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			lbl.setLayoutData(gd);
+			gd.widthHint = 200;
+			setErrorMessage(Messages.PatrolTypeWizardPage_Error_NoTypesFound);
 			setPageComplete(false);
 		}
 		
