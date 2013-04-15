@@ -591,14 +591,14 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 						(ReportDesignHandle) this.itemHandle.getRoot(),
 						mapItem.getLayers().get(i));
 				
-				if (mapItem.getLayerNames() != null){
+				if (mapItem.getLayerNames() != null  && i < mapItem.getLayerNames().size()){
 					def.name = mapItem.getLayerNames().get(i);
 				}else if (def.handle != null){
 					def.name = def.handle.getName();
 				}else{
 					def.name = Messages.SmartLayersPage_MapLayerNameErrorLabel; 
 				}
-				if (mapItem.getLayerStyles() != null){
+				if (mapItem.getLayerStyles() != null && i < mapItem.getLayerStyles().size()){
 					def.style = mapItem.getLayerStyles().get(i);
 				}
 				layerItems.add(def);
