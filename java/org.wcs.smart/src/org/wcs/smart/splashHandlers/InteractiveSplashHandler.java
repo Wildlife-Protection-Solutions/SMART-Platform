@@ -401,6 +401,13 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				@Override
 				public void run() {
 					DisplayAccess.accessDisplayDuringStartup();
+					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							//disable controls while we reload conservation area
+							enableControls(false);
+						}
+					});
 					final List<Object> cas = new ArrayList<Object>();
 					try{
 						cas.addAll(SmartStartUp.getConservationAreas());
