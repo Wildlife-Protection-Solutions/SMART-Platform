@@ -25,19 +25,23 @@ public class NumericPlanTarget extends PlanTarget {
 	 * Valid target types
 	 */
 	public enum TargetType{
-		DISTANCE(Messages.NumericPlanTarget_TargetType_DistanceTraveled),
-		PATROL_HOURS(Messages.NumericPlanTarget_TargetType_PatrolHours),
-		PATROL_DAYS(Messages.NumericPlanTarget_TargetType_PatrolDays),
-		PATROL_MANHOURS(Messages.NumericPlanTarget_TargetType_PatrolManHours);
+		DISTANCE(Messages.NumericPlanTarget_TargetType_DistanceTraveled, Messages.NumericPlanTarget_km),
+		PATROL_HOURS(Messages.NumericPlanTarget_TargetType_PatrolHours, Messages.NumericPlanTarget_hours),
+		PATROL_DAYS(Messages.NumericPlanTarget_TargetType_PatrolDays, Messages.NumericPlanTarget_days),
+		PATROL_MANHOURS(Messages.NumericPlanTarget_TargetType_PatrolManHours, Messages.NumericPlanTarget_hours);
 		
 		public String guiName;
-		private TargetType(String guiName){
+		public String units;
+		private TargetType(String guiName, String units){
 			this.guiName = guiName;
+			this.units = units;
 		}
 		public String getName(){
 			return guiName;
 		}
-		
+		public String getUnits(){
+			return this.units;
+		}
 	}
 	
 	/*

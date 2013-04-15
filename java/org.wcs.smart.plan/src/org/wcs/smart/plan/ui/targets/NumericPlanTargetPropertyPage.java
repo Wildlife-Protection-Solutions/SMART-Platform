@@ -71,6 +71,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	private ControlDecoration cdTargetValue;
 	private ControlDecoration cdTargetName;
 	private PlanTarget planTarget;
+	private Label lblUnits; 
 	
 	private boolean isInit = false;	
 	private Listener changeListener = new Listener() {
@@ -94,16 +95,17 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		return NumericPlanTarget.TARGET_GUI_NAME;
 	}
 	
-	private GridData createGridDataWithIndent(){
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+	private GridData createGridDataWithIndent(int colspan){
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false, colspan, 1);
 		gd.horizontalIndent = 8;
 		return gd;
 	}
 	
 	@Override
 	public Composite createComponent(Composite parent, int style) {
+		TargetType defaultTt = NumericPlanTarget.TargetType.DISTANCE;
 		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(2, false));
+		center.setLayout(new GridLayout(3, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 	
 		Label lbl2 = new Label(center, SWT.NONE);
@@ -111,7 +113,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		lbl2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		targetType= new ComboViewer(center, SWT.READ_ONLY);
-		targetType.getControl().setLayoutData(createGridDataWithIndent());
+		targetType.getControl().setLayoutData(createGridDataWithIndent(2));
 		targetType.setContentProvider(ArrayContentProvider.getInstance());
 		targetType.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -119,7 +121,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 			}
 		});
 		targetType.setInput(NumericPlanTarget.TargetType.values());
-		targetType.setSelection(new StructuredSelection(NumericPlanTarget.TargetType.DISTANCE));
+		targetType.setSelection(new StructuredSelection(defaultTt));
 		targetType.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -127,17 +129,18 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 				if(planTarget == null || planTarget.getName() == null || planTarget.getName().isEmpty()){
 					targetName.setText( getTargetType().getName() );
 				}
-				
+				lblUnits.setText(getTargetType().getUnits());
 			}
 		});
 		targetType.getControl().addListener(SWT.Selection, changeListener);
+		targetType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		Label lbl3 = new Label(center, SWT.NONE);
 		lbl3.setText(Messages.NumericPlanTargetPropertyPage_Operator_Label);
 		lbl3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		targetOp= new ComboViewer(center, SWT.READ_ONLY);
-		targetOp.getControl().setLayoutData(createGridDataWithIndent());
+		targetOp.getControl().setLayoutData(createGridDataWithIndent(2));
 		targetOp.setContentProvider(ArrayContentProvider.getInstance());
 		targetOp.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -147,6 +150,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetOp.setInput(NumericPlanTarget.Operator.values());
 		targetOp.setSelection(new StructuredSelection(NumericPlanTarget.Operator.GREATER));
 		targetOp.getControl().addListener(SWT.Selection, changeListener);
+		targetOp.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		Label lbl4 = new Label(center, SWT.NONE);
 		lbl4.setText(Messages.NumericPlanTargetPropertyPage_TargetValue_Label);
@@ -154,21 +158,26 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 
 		targetValue = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetValue.setTextLimit(32);
-		targetValue.setLayoutData(createGridDataWithIndent());
+		targetValue.setLayoutData(createGridDataWithIndent(1));
 		targetValue.addListener(SWT.Modify, changeListener);
-
+		
+		lblUnits = new Label(center, SWT.NONE);
+		lblUnits.setText(getTargetType().getUnits());
+		lblUnits.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.NumericPlanTargetPropertyPage_TargetName_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		targetName = new Text(center, SWT.BORDER | SWT.LEFT);
 		targetName.setTextLimit(SpatialPlanTarget.MAX_NAME_LENGTH);
-		targetName.setLayoutData(createGridDataWithIndent());
+		targetName.setLayoutData(createGridDataWithIndent(2));
 		if(planTarget == null){
 			targetName.setText( getTargetType().getName() );
 		}
 		targetName.addListener(SWT.Modify, changeListener);
-
+		
+		
 		cdTargetValue = createDecoration(targetValue);
 		cdTargetName = createDecoration(targetName);
 
@@ -178,10 +187,12 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 
 		targetDesc = new Text(center, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
 		targetDesc.setTextLimit(AdministrativePlanTarget.MAX_DESC_LENGTH);
-		targetDesc.setLayoutData(createGridDataWithIndent());
+		targetDesc.setLayoutData(createGridDataWithIndent(2));
+		((GridData)targetDesc.getLayoutData()).verticalSpan = 2;
 		((GridData)targetDesc.getLayoutData()).widthHint = 100;
 		((GridData)targetDesc.getLayoutData()).heightHint = 50;
 		((GridData)targetDesc.getLayoutData()).grabExcessVerticalSpace = true;
+		
 		targetDesc.addListener(SWT.Modify, changeListener);
 		
 		return center;
@@ -316,6 +327,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 			this.targetValue.setText(pt.getValue().toString());
 			this.planTarget = p;
 			this.targetName.setText(pt.getName());
+			lblUnits.setText(pt.getType().getUnits());
 			String descr = pt.getDescription();
 			this.targetDesc.setText(descr != null ? descr : ""); //$NON-NLS-1$
 		
