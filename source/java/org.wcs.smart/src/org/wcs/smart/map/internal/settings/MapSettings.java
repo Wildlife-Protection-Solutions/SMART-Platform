@@ -623,7 +623,9 @@ public class MapSettings {
 				s.saveOrUpdate(this.baseMap);
 				s.getTransaction().commit();
 				//these layers are now a part of the basemap and should be flagged as such
-				map.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, map.getLayersInternal());
+				List<ILayer> backgroundlayers = new ArrayList<ILayer>();
+				backgroundlayers.addAll(map.getLayersInternal());
+				map.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, backgroundlayers);
 			}catch (Exception ex){
 				if (s.getTransaction().isActive()){
 					s.getTransaction().rollback();
