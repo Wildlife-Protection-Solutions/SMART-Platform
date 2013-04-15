@@ -166,6 +166,7 @@ public class MapDialog extends Dialog implements MapPart{
 		layer.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
+				if (bounds == null) return;
 				map.getViewportModelInternal().setBounds(bounds);
 				map.getRenderManager().refresh(null);
 			}
