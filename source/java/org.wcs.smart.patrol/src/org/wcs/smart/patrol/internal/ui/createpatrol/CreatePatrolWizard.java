@@ -281,8 +281,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
 		if (event.getCurrentPage() instanceof NewPatrolWizardPage) {
-			if (!((NewPatrolWizardPage) event.getCurrentPage())
-					.updateModel(patrol)) {
+			if (!((NewPatrolWizardPage) event.getCurrentPage()).updateModel(patrol)) {
 				event.doit = false;
 				return;
 			}
