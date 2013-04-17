@@ -126,7 +126,14 @@ public class QueryEditorUtils {
 				}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 					query.setIsShared(true);
 				}
-				query.setOwner(SmartDB.getCurrentEmployee());
+				//set the owner
+				if (query.getIsShared() && SmartDB.isMultipleAnalysis()){
+					//shared queries in the cross-ca analysis do not have a user
+					query.setOwner(SmartDB.getSharedEmployee());
+				}else{
+					query.setOwner(SmartDB.getCurrentEmployee());
+				}
+				
 				query.setConservationArea(SmartDB.getCurrentConservationArea());			
 		}
 				
@@ -206,7 +213,12 @@ public class QueryEditorUtils {
 					}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 						newQuery.setIsShared(true);
 					}
-					newQuery.setOwner(SmartDB.getCurrentEmployee());
+					//set the owner
+					if (newQuery.getIsShared() && SmartDB.isMultipleAnalysis()){
+						newQuery.setOwner(SmartDB.getSharedEmployee());
+					}else{
+						newQuery.setOwner(SmartDB.getCurrentEmployee());
+					}
 					newQuery.setConservationArea(SmartDB.getCurrentConservationArea());
 					
 					

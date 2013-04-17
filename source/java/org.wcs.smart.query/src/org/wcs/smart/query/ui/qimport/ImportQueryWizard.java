@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -135,6 +136,14 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 							query.setIsShared(qf.getEmployee() == null);
 						}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 							query.setIsShared(true);
+						}
+						
+						//set the owner
+						if (query.getIsShared() && SmartDB.isMultipleAnalysis()){
+							//shared queries in the cross-ca analysis do not have a user
+							query.setOwner(SmartDB.getSharedEmployee());
+						}else{
+							query.setOwner(SmartDB.getCurrentEmployee());
 						}
 						
 						Session session = HibernateManager.openSession();

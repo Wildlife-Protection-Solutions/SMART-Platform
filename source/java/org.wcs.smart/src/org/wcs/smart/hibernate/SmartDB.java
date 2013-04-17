@@ -29,6 +29,8 @@ import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
 import org.geotools.referencing.CRS;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
@@ -118,7 +120,34 @@ public class SmartDB {
 		getCurrentLanguage();
 	}
 	
-	
+	/**
+	 * Loads from the DB the shared user which is used 
+	 * for associated shared cross conservation area queries.
+	 * 
+	 * @return shared user or null if shared user not found
+	 */
+	public static Employee getSharedEmployee(){
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			Query q = s.createQuery("From Employee e WHERE e.uuid = :e and e.conservationArea.uuid = :ca"); //$NON-NLS-1$
+			q.setParameter("e", Employee.SHARED_UUID); //$NON-NLS-1$
+			q.setParameter("ca", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
+			@SuppressWarnings("unchecked")
+			List<Employee> es = q.list();
+			if (es.size() > 0){
+				return es.get(0);
+			}
+			return null;
+		}finally{
+			try{
+				s.getTransaction().rollback();
+			}catch (Exception ex){
+				//eatme
+			}
+			s.close();
+		}
+	}
 	
 	
 	/**
