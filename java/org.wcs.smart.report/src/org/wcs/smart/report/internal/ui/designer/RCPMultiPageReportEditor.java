@@ -241,9 +241,13 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 					if (!SmartDB.getCurrentLanguage().isDefault()){
 						copy.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), dialog.getReportName());
 					}
-					copy.setOwner(SmartDB.getCurrentEmployee());
-					copy.setShared(isShared);
-
+					
+					if (SmartDB.isMultipleAnalysis() && copy.getShared()){
+						copy.setOwner(SmartDB.getSharedEmployee());
+					}else{
+						copy.setOwner(SmartDB.getCurrentEmployee());
+					}
+					
 					Session s = HibernateManager.openSession();
 					try {
 						s.beginTransaction();

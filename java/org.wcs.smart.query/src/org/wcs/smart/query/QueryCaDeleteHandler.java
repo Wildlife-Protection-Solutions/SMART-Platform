@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.Query.QueryType;
 
 /**
  * Conservation area delete handler for queries and folders
@@ -59,35 +60,133 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteObservationQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from ObservationQuery where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		moveCrossCaUserQueries(ca, session, QueryType.OBSERVATION);
+		deleteQueries(QueryType.OBSERVATION, ca, session);
 	}
 
 	private void deleteSummaryQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from SummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		moveCrossCaUserQueries(ca, session, QueryType.SUMMARY);
+		deleteQueries(QueryType.SUMMARY, ca, session);
 	}
 
 	private void deletePatrolQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from PatrolQuery where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
+		moveCrossCaUserQueries(ca, session, QueryType.PATROL);
+		deleteQueries(QueryType.PATROL, ca, session);
 	}
 	
 	private void deleteGriddedQueries(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from GriddedQuery where conservationArea = :ca"); //$NON-NLS-1$
+		moveCrossCaUserQueries(ca, session, QueryType.GRIDDED);
+		deleteQueries(QueryType.GRIDDED, ca, session);
+	}
+	
+	private void deleteQueries(QueryType qt, ConservationArea ca, Session session) throws Exception{
+		Query q = session.createQuery("delete from " + qt.getObjectName() + " where conservationArea = :ca"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteQueryFolders(ConservationArea ca, Session session) throws Exception{
+		moveCrossCaQueryFolders(ca, session);
+		
 		Query q = session.createQuery("delete from QueryFolder where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	
+	/*
+	 * Checks and moves or deletes query folders that are cross-ca queries associated 
+	 * with a user in the current conservation 
+	 */
+	private void moveCrossCaQueryFolders(ConservationArea ca, Session session) throws Exception{
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("update QueryFolder qf set qf.employee = ("); //$NON-NLS-1$
+		sql.append("select min(c.uuid) from ");//$NON-NLS-1$
+		sql.append(" Employee b, Employee c" ); //$NON-NLS-1$
+		sql.append(" WHERE b.smartUserId = c.smartUserId " ); //$NON-NLS-1$
+		sql.append(" and b.conservationArea != c.conservationArea "); //$NON-NLS-1$
+		sql.append(" and qf.employee.uuid = b.uuid "); //$NON-NLS-1$
+		sql.append(" and qf.conservationArea.uuid = :ca1 "); //$NON-NLS-1$
+		sql.append(" and b.conservationArea = :ca2)" ); //$NON-NLS-1$
+		sql.append(	"WHERE qf.uuid in (select h.uuid from "); //$NON-NLS-1$
+		sql.append(" QueryFolder h, Employee i "); //$NON-NLS-1$
+		sql.append(" where h.employee.smartUserId = i.smartUserId "); //$NON-NLS-1$
+		sql.append(" and h.employee.conservationArea != i.conservationArea "); //$NON-NLS-1$
+		sql.append(" and h.conservationArea = :ca1 and "); //$NON-NLS-1$
+		sql.append(" h.employee.conservationArea = :ca2)"); //$NON-NLS-1$
+		
+		Query q = session.createQuery(sql.toString());
+		q.setParameter("ca1", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
+		q.setParameter("ca2", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		//here any query folders still associated with a 
+		//user from the current conservation area can be removed
+		q = session.createQuery("delete from QueryFolder a WHERE a.uuid in (select b.uuid from QueryFolder b WHERE a.conservationArea.uuid = :ca1 and a.employee.conservationArea = :ca2)");  //$NON-NLS-1$
+		q.setParameter("ca1", ConservationArea.MULTIPLE_CA);  //$NON-NLS-1$
+		q.setParameter("ca2", ca);  //$NON-NLS-1$
+		q.executeUpdate();
+		
+	}
+	
+	/*
+	 * Checks and moves or deletes queries that are cross-ca queries associated 
+	 * with a user in the current conservation 
+	 */
+	private void moveCrossCaUserQueries(ConservationArea ca, Session session, QueryType queryType) throws Exception{
+
+		//for all query folder owned by somebody in this ca but
+		//associated with the cross ca Conservation Area we update
+		//the owner to any other user with the same query id 
+		StringBuilder innerSql = new StringBuilder();
+		innerSql.append("select min(c.uuid) as newuuid from "); //$NON-NLS-1$
+		innerSql.append(" Employee b, Employee c "); //$NON-NLS-1$
+		innerSql.append(" WHERE b.smartUserId = c.smartUserId "); //$NON-NLS-1$
+		innerSql.append(" and b.conservationArea != c.conservationArea "); //$NON-NLS-1$
+		innerSql.append(" and qf.owner.uuid = b.uuid "); //$NON-NLS-1$
+		innerSql.append(" and qf.conservationArea.uuid = :ca1 "); //$NON-NLS-1$
+		innerSql.append(" and b.conservationArea = :ca2 ");		 //$NON-NLS-1$
+		
+		StringBuilder wheresql = new StringBuilder();
+		wheresql.append("select h.uuid from "); //$NON-NLS-1$
+		wheresql.append(queryType.getObjectName());
+		wheresql.append(" h, Employee i  "); //$NON-NLS-1$
+		wheresql.append(" where i.smartUserId = h.owner.smartUserId and "); //$NON-NLS-1$
+		wheresql.append(" h.owner.conservationArea != i.conservationArea "); //$NON-NLS-1$
+		wheresql.append(" and h.conservationArea = :ca1 "); //$NON-NLS-1$
+		wheresql.append(" and h.owner.conservationArea = :ca2"); //$NON-NLS-1$
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("update "); //$NON-NLS-1$
+		sql.append(queryType.getObjectName());
+		sql.append(" qf set qf.owner = ( "); //$NON-NLS-1$
+		sql.append(innerSql);
+		sql.append(") where qf.uuid in (" ); //$NON-NLS-1$
+		sql.append(wheresql.toString());
+		sql.append(")"); //$NON-NLS-1$
+	
+		Query q = session.createQuery(sql.toString());
+		q.setParameter("ca1", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
+		q.setParameter("ca2", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	
+		//here any query folders still associated with a 
+		//user from the current conservation area can be removed
+		sql = new StringBuilder();
+		sql.append("delete from "); //$NON-NLS-1$
+		sql.append( queryType.getObjectName() );
+		sql.append( " a WHERE a.uuid in ("); //$NON-NLS-1$
+		sql.append(" select b.uuid from "); //$NON-NLS-1$
+		sql.append( queryType.getObjectName() );
+		sql.append( " b WHERE a.conservationArea.uuid = :ca1 and "); //$NON-NLS-1$
+		sql.append(" a.owner.conservationArea = :ca2)"); //$NON-NLS-1$
+		
+		q = session.createQuery(sql.toString());
+		q.setParameter("ca1", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
+		q.setParameter("ca2", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+	}
 
 }

@@ -51,6 +51,12 @@ import org.wcs.smart.internal.Messages;
 @Table(name = "smart.employee")
 public class Employee {
 
+	/**
+	 * UUID for the 'shared' employee.  This employee uuid
+	 * is associated with the CrossCA Conservation Area.
+	 */
+	public static final byte[] SHARED_UUID = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	
 	public static final String GIVEN_NAME = Messages.Employee_GiveName_Label;
 	public static final String FAMILY_NAME = Messages.Employee_FamilyName_Label;
 	public static final String IS_ACTIVE = Messages.Employee_IsActive_Label;
@@ -182,7 +188,7 @@ public class Employee {
 		this.familyName = familyName;
 	}
 	
-	@Column(name="startemployementdate")
+	@Column(name="startemploymentdate")
 	public Date getStartEmploymentDate() {
 		return startEmploymentDate;
 	}
@@ -190,7 +196,7 @@ public class Employee {
 		this.startEmploymentDate = startEmploymentDate;
 	}
 	
-	@Column(name="endemployementdate")
+	@Column(name="endemploymentdate")
 	public Date getEndEmploymentDate() {
 		return endEmploymentDate;
 	}

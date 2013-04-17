@@ -108,7 +108,6 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 		//create new report object
 		final Report report = new Report();
 		report.setConservationArea(SmartDB.getCurrentConservationArea());
-		report.setOwner(SmartDB.getCurrentEmployee());
 		
 		report.updateName(SmartDB.getCurrentLanguage(), reportName);
 		report.setName(reportName);
@@ -118,7 +117,12 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 		
 		report.setShared(isShared);
 		report.setFolder(parentFolder);
-
+		if (SmartDB.isMultipleAnalysis() && report.getShared()){
+			report.setOwner(SmartDB.getSharedEmployee());
+		}else{
+			report.setOwner(SmartDB.getCurrentEmployee());
+		}
+		
 		//save report
 		Job createReportJob = new Job(Messages.NewReportHandler_Progress_CreatingReport) {
 			@Override

@@ -188,7 +188,11 @@ public class ImportReportEngine {
 				}
 				
 				importReport.setId(ReportManager.generateReportId(session));
-				importReport.setOwner(SmartDB.getCurrentEmployee());
+				if (SmartDB.isMultipleAnalysis() && importReport.getShared()){
+					importReport.setOwner(SmartDB.getSharedEmployee());
+				}else{
+					importReport.setOwner(SmartDB.getCurrentEmployee());
+				}
 			}else{
 				//existing query
 				//remove report->query link so when validating
