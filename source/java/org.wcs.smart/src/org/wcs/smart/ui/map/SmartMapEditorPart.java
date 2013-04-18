@@ -44,8 +44,11 @@ import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.internal.commands.draw.DrawFeatureCommand;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
+import net.refractions.udig.project.ui.tool.ActionTool;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.tool.IToolManager;
+import net.refractions.udig.project.ui.tool.ModalTool;
+import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 import net.refractions.udig.ui.IBlockingSelection;
 
@@ -112,11 +115,15 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 	private Label lblCoordinates;
 	private Button lblSRID;
 	
-	 IPartListener2 partlistener = new IPartListener2(){
+	private Tool activeTool = null;
+	private MapToolComposite tools;
+	
+	IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
 	            if (partRef.getPart(false) == getParentEditor()) {
-	                IToolManager tools = ApplicationGIS.getToolManager();
-	                tools.setCurrentEditor( (SmartMapEditorPart.this).mapViewer );
+	                IToolManager toolManager = ApplicationGIS.getToolManager();
+	                toolManager.setCurrentEditor( SmartMapEditorPart.this.mapViewer );
+                	SmartMapEditorPart.this.tools.selectLastTool();
 	            }
 	        }
 
@@ -266,7 +273,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 	      
         ApplicationGIS.getToolManager().setCurrentEditor(this);
         
-		MapToolComposite tools = new MapToolComposite();
+		tools = new MapToolComposite();
 		tools.createComposite(composite);
 		tools.selectTool("net.refractions.udig.tools.Pan"); //$NON-NLS-1$
 		

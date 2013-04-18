@@ -53,12 +53,14 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
 	
     private MapViewer mapviewer;
     private Map map;
-
+    private String lastToolId;
+    
     IPartListener2 partlistener = new IPartListener2(){
         public void partActivated( IWorkbenchPartReference partRef ) {
         	if (partRef.getPart(false) == MapView.this){
                 IToolManager tools = ApplicationGIS.getToolManager();
                 tools.setCurrentEditor(MapView.this );
+                selectLastTool();
             }
         }
 
@@ -128,6 +130,13 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
     	ToolProxy mi =((ToolManager)ApplicationGIS.getToolManager()).findToolProxy(toolId);
     	if (mi != null){
     		ApplicationGIS.getToolManager().getToolAction(mi.getId(), mi.getCategoryId()).run();
+    		this.lastToolId = mi.getId();
+    	}
+    }
+    
+    private void selectLastTool(){
+    	if (this.lastToolId != null){
+    		setTool(lastToolId);
     	}
     }
     

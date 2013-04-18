@@ -65,6 +65,7 @@ public class MapToolComposite {
 			BBoxInfoTool.ID};
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();
+	private String currentToolId = null;
 	
 	public MapToolComposite(){
 		
@@ -122,6 +123,7 @@ public class MapToolComposite {
 	 * @param id
 	 */
 	public void selectTool(String id){
+		currentToolId = null;
 		for (ToolItem it : items){
 			if (  ((ToolProxy)it.getData()).getId().equals(id) ){
 				select(it);
@@ -155,7 +157,17 @@ public class MapToolComposite {
 			}
 		}
 		ApplicationGIS.getToolManager().getToolAction(mi.getId(), mi.getCategoryId()).run();
-
+		currentToolId = mi.getId();
+	}
+	
+	public String getCurrentToolId(){
+		return this.currentToolId;
+	}
+	
+	public void selectLastTool(){
+		if (this.currentToolId != null){
+			selectTool(currentToolId);
+		}
 	}
 	
 }
