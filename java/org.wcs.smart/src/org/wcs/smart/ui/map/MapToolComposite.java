@@ -29,7 +29,6 @@ import net.refractions.udig.project.ui.internal.tool.display.ToolManager;
 import net.refractions.udig.project.ui.internal.tool.display.ToolProxy;
 import net.refractions.udig.project.ui.tool.IToolManager;
 import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.tool.info.InfoTool;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
