@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.udig.SetBasemapTool;
+import org.wcs.smart.ui.map.tool.BBoxInfoTool;
 
 /**
  * 
@@ -61,7 +62,8 @@ public class MapToolComposite {
 			UDIG_ZOOM_ID,
 			UDIG_ZOOM_IN_ID,
 			UDIG_ZOOM_OUT_ID,
-			InfoTool.ID};
+			//InfoTool.ID,
+			BBoxInfoTool.ID};
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();
 	
