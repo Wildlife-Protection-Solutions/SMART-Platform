@@ -28,10 +28,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -40,7 +42,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Engine responsible for checking if the auto-backup is supposed to run,
@@ -93,16 +94,24 @@ public class AutoBackupEngine {
 
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if(timerIsExpired(properties)){
+				if (timerIsExpired(properties)){
 					deleteOldFiles(properties);
 						
 					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss"); //$NON-NLS-1$
 					Date date = new Date();
 					final File tmp = new File(properties.getProperty(PROP_BACKUP_LOCATION));
 					
-					if(!tmp.exists()){
-						if (! SmartUtils.createDirectory(tmp)){
-							//TODO: create an error message that says something about the auto-backup engine
+					if(!tmp.exists()){						
+						try{
+							FileUtils.forceMkdir(tmp);
+						}catch (final Exception ex){
+							final String error = MessageFormat.format(Messages.AutoBackupEngine_MakeDirectoryFailed, new Object[]{ex.getLocalizedMessage()});
+							shell.getDisplay().syncExec(new Runnable(){
+							    public void run (){
+							    	SmartPlugIn.displayLog(shell, error, ex);
+							        
+							}
+							});
 							return;
 						}
 					}
