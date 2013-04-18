@@ -38,6 +38,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.UserNamePasswordDialog;
 import org.wcs.smart.util.SmartUtils;
@@ -209,6 +210,27 @@ public class DerbyRestoreEngine {
 		HibernateManager.endSessionFactory(true);
 		monitor.worked(1);
 
+		/* connect to the extractedDb and verify version */
+		SmartHibernateManager.setDatabaseParameter(extractedDb.getAbsolutePath());
+		try{
+			SmartPlugIn.versionCheck();
+		}catch (Exception ex){
+			HibernateManager.endSessionFactory(true);
+			String cleanUpErr = cleanUp(new File[] { temp });
+			if (cleanUpErr.length() > 0) {
+				throw new Exception(
+						ex.getLocalizedMessage()
+						+ "\n\n"  //$NON-NLS-1$
+						+ Messages.DerbyRestoreEngine_Error_CouldNotCleanup
+						+ cleanUpErr, ex);
+			}
+			throw ex;
+		}finally{
+			HibernateManager.endSessionFactory(true);	
+		}
+		//restore database parameter to main db
+		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+		
 		/* create a copy of the current files incase something goes wrong */
 		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_MovingFiles);
 		File dbFileBack = null;

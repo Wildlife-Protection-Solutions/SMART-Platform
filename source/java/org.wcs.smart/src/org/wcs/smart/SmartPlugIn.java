@@ -21,6 +21,7 @@
  */
 package org.wcs.smart;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
@@ -34,10 +35,13 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -139,11 +143,43 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
 		
-		
 		// add delete handler
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
 	}
 
+	/**
+	 * Checks the current database version against the expected version.  If an excpetion
+	 * is thrown, the calling function should terminate the application.
+	 *  
+	 * @return
+	 * @throws exception if the version are inccorect
+	 */
+	public static void versionCheck() throws Exception{
+		boolean isokay = false;
+		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
+		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
+		Session s = HibernateManager.openSession();
+		try{
+			SQLQuery q = s.createSQLQuery("SELECT * FROM smart.db_version"); //$NON-NLS-1$
+			@SuppressWarnings("rawtypes")
+			List results = q.list();
+			if (results.size() > 0){
+				dbVersion = (String)results.get(0);
+				if (dbVersion.equals(smartDbVersion) ){
+					isokay = true;
+				}
+			}
+		}catch (Exception ex){
+			//we cannot dermine db version so we don't let the user login
+			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{dbVersion, smartDbVersion}), ex);
+			
+		}finally{
+			s.close();
+		}
+		if (!isokay){
+			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{dbVersion, smartDbVersion}));
+		}
+	}
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)

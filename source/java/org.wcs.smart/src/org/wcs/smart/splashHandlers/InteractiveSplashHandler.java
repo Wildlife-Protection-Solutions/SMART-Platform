@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -140,8 +141,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 		
 		//auto-login for testing
-//		txtUserName.setText("smart"); //$NON-NLS-1$
-//		txtPassword.setText("smart"); //$NON-NLS-1$
+		txtUserName.setText("smart"); //$NON-NLS-1$
+		txtPassword.setText("smart"); //$NON-NLS-1$
 		//handleButtonOKWidgetSelected();
 
 		doEventLoop();
@@ -392,7 +393,13 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 * loading the conservation areas.
 	 */
 	private void startup(){
-		SmartStartUp.initDb();
+		try{
+			SmartStartUp.initDb();
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);
+			handleButtonCancelWidgetSelected();
+			return;
+		}
 		try {
 			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_LoadingCa);
 			

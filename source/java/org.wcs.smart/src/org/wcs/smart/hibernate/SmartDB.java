@@ -56,6 +56,7 @@ public class SmartDB {
 			SmartPlugIn.log(Messages.SmartDB_Error_ReadingDefaultCRS, e);
 		}
 	}
+	
 	/**
 	 * MapSettingsStore user accounts
 	 * 

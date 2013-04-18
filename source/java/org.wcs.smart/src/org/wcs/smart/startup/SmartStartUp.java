@@ -57,8 +57,28 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartStartUp {
 	
-	public static void initDb(){
+	/**
+	 * Initializes the db and checks the version.
+	 * @return <code>true</code> if successful, <code>false</code> if error
+	 * occurs and application should exit.
+	 */
+	public static void initDb() throws Exception{
 		SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+		
+		//check that the database exists
+		if (!SmartDB.dbExists()){
+			throw new Exception (MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
+		}
+		
+		try{
+			SmartPlugIn.versionCheck();
+		}catch (Exception ex){
+			if (checkAlreadyRunning(ex)){
+				throw new IllegalStateException(Messages.SmartStartUp_MultiConnectError);
+			}else{
+				throw ex;
+			}
+		}
 	}
 	
 	

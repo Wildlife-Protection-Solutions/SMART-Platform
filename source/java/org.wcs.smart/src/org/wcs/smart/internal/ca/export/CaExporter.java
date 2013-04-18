@@ -144,6 +144,8 @@ public class CaExporter {
 		fw.write(ca.getName());
 		fw.write(SmartUtils.LINE_SEPARATOR);
 		fw.write(ca.getDescription());
+		fw.write(SmartUtils.LINE_SEPARATOR);
+		fw.write(SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY));
 		fw.close();
 	}
 	

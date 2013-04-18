@@ -1,3 +1,7 @@
+-- Database Updates For Version 1.1.0
+update smart.db_version set version = '1.1.0';
+grant select on smart.db_version to login;
+
 --spelling fix
 RENAME COLUMN smart.employee.startemployementdate to startemploymentdate;
 RENAME COLUMN smart.employee.endemployementdate to endemploymentdate;
