@@ -189,6 +189,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 					tableViewer.refresh();
 					setDirty();
 				}
+				validate();
 			}
 
 			@Override
@@ -253,8 +254,9 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 					
 					((Area)element).setKeyId(newKey);
 					tableViewer.refresh();
-					setDirty();
+					setDirty();	
 				}
+				validate();
 			}
 			
 			@Override
@@ -276,8 +278,14 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		});
 	}
 	private void setDirty(){
-		getButton(IDialogConstants.OK_ID).setEnabled(true);
 		dirty = true;
+	}
+	private void validate(){
+		if (getErrorMessage() == null){
+			getButton(IDialogConstants.OK_ID).setEnabled(true);	
+		}else{
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
+		}
 	}
 
 	@Override
