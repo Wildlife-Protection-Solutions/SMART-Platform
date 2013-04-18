@@ -72,10 +72,10 @@ public class DerbyRestoreEngine {
 
 		Session session = HibernateManager.openSession();
 		try {
-			Long cnt = (Long) session.createCriteria(ConservationArea.class)
+			Long cnt = (Long) session.createCriteria(ConservationArea.class).add(Restrictions.ne("uuid", ConservationArea.MULTIPLE_CA)) //$NON-NLS-1$
 					.setProjection(Projections.rowCount()).uniqueResult();
 			if (cnt == 0) {
-				//there are not conservation areas
+				//there are no conservation areas
 				return true;
 			}
 
