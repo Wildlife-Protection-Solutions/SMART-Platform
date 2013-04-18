@@ -178,19 +178,20 @@ public class Area extends SimpleListItem{
 		String key = raw;
 		if (key.substring(0, 1).matches("[0-9_]")){ //$NON-NLS-1$
 			//cannot start with a digit
-			key = "A" + key; //$NON-NLS-1$
+			key = "a" + key; //$NON-NLS-1$
 		}
-		if (raw.length() > Area.KEY_MAX_LENGTH){
-			key = raw.substring(0, Area.KEY_MAX_LENGTH);
+		if (key.length() > Area.KEY_MAX_LENGTH){
+			key = key.substring(0, Area.KEY_MAX_LENGTH);
 		}
-
+		
+		String postfix = key; 
 		while(otherValues.contains(key)){
 			count ++;
 			String cnt = String.valueOf(count);
-			if (raw.length() + cnt.length() > Area.KEY_MAX_LENGTH){
-				key = raw.substring(0, Area.KEY_MAX_LENGTH- cnt.length() ) + cnt;
+			if (postfix.length() + cnt.length() > Area.KEY_MAX_LENGTH){
+				key = postfix.substring(0, Area.KEY_MAX_LENGTH- cnt.length() ) + cnt;
 			}else{
-				key = raw + String.valueOf(count);
+				key = postfix + String.valueOf(count);
 			}
 			
 		}

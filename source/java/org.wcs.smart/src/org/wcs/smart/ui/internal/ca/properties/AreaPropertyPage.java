@@ -155,7 +155,14 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(SmartServiceExtension.CA_UUID_KEY, currentCa.getUuid());
 		URL serviceurl = SmartServiceExtension.createURL(params);
-		SmartService ss = (SmartService) CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor).get(0);
+		
+		List<IResolve> services = CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor);
+		SmartService ss = null;
+		if (services.size() > 0){
+			ss = (SmartService) CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor).get(0);
+		}else{
+			ss = new SmartService(params);
+		}
 		
 		if (updated){
 			//we need to reset the service
