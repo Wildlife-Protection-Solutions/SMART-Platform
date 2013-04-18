@@ -205,6 +205,7 @@ public class Messages extends NLS {
 	public static String CaImporter_Error_SystemRestored;
 	public static String CaImporter_Error_TableDataFiles;
 	public static String CaImporter_Error_TableInfo;
+	public static String CaImporter_InvalidExportVersion;
 	public static String CaImporter_Progress_BackupCurrent;
 	public static String CaImporter_Progress_CleanUp;
 	public static String CaImporter_Progress_ImportingCa;
@@ -744,6 +745,9 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_GPSBabel_LocationLabel;
 	public static String SmartInstallationInfoPage_SystemLang_Label;
 	public static String SmartPlugIn_Error_Dialog_Title;
+	public static String SmartPlugIn_UnknownVersion;
+	public static String SmartPlugIn_VersionErrorDialogTitle;
+	public static String SmartPlugIn_VersionErrorMessage;
 	public static String SmartPointLabelProvider_ConversionFail_Label;
 	public static String SmartProperties_InvalidProperty;
 	public static String SmartService_Error_DisposingService;

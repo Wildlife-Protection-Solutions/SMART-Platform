@@ -209,19 +209,31 @@ public class CaImporter {
 		}
 		String id = reader.readLine();
 		String name = reader.readLine();
-		
+		reader.readLine();	//description;
+		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
+		String line = reader.readLine();
+		if (line != null){
+			dbVersion = line;
+		}
 		session.beginTransaction();
+		byte[] uuid = null;
 		try{
-			byte[] uuid = SmartUtils.decodeHex(cauuid);
+			uuid = SmartUtils.decodeHex(cauuid);
 			long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
 			if (cnt != 0){				
 				throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
 			}
-			return uuid;
+			
 		}finally{
 			session.getTransaction().commit();
 			reader.close();
 		}
+		/*validate backup file version */
+		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY); 
+		if (!dbVersion.equals(smartDbVersion)){
+			throw new Exception(MessageFormat.format(Messages.CaImporter_InvalidExportVersion, new Object[]{dbVersion, smartDbVersion}));
+		}
+		return uuid;
 	}
 	
 	/**

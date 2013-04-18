@@ -22,8 +22,10 @@
 package org.wcs.smart;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
@@ -45,6 +47,7 @@ public class SmartProperties {
 	public static final String PROPERTIES_DIR = "properties"; //$NON-NLS-1$
 	
 	private static final String DEFAULT_DATAMODEL_FILE ="/" + PROPERTIES_DIR + "/datamodel.xml"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String SMART_PROPERTIES ="/" + PROPERTIES_DIR + "/smart.properties"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Database location key
@@ -64,6 +67,11 @@ public class SmartProperties {
 	private static final String FILESTORE_DIR_NAME = "filestore" + File.separator; //$NON-NLS-1$
 	//subloction of database within the data directory
 	private static final String DB_DIR_NAME = "database" + File.separator + "smartdb" + File.separator; //$NON-NLS-1$ //$NON-NLS-2$
+	
+	/**
+	 * Current supported database version key
+	 */
+	public static final String DB_VERSION_KEY = "dbversion"; //$NON-NLS-1$
 	
 	private static SmartProperties instance = null;
 	
@@ -97,8 +105,27 @@ public class SmartProperties {
 			return getSystemProperty(SYSPROP_BACKUPDIR);
 		}else if (key.equals(PROP_PLAN_DISTANCE_TO_COMPLETE)){
 			return getSystemProperty(SYSPROP_PLAN_DISTANCE_TO_COMPLETE);
+		}else if (key.equals(DB_VERSION_KEY)){
+			return getSmartProperties(key);
 		}
 		throw new IllegalStateException(MessageFormat.format(Messages.SmartProperties_InvalidProperty, new Object[]{key}));
+	}
+	
+	/**
+	 * Reads the given key from the SMART properties file.
+	 * @param key
+	 * @return
+	 */
+	private String getSmartProperties(String key){
+		Properties prop = new Properties();
+		try {
+			prop.load(SmartProperties.class.getResourceAsStream(SMART_PROPERTIES));
+		} catch (IOException e) {
+			SmartPlugIn.log("Error determining database version from properties file.", e); //$NON-NLS-1$
+			return null;
+		}
+		return prop.getProperty(key);
+		
 	}
 		
 	/**
