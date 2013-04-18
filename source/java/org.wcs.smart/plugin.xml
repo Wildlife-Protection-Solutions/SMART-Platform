@@ -1049,6 +1049,22 @@
             id="selectPointCursor"
             image="images/pointers/addpoint_cursor.gif">
       </toolCursor>
+      <modalTool
+            categoryId="org.wcs.smart.location.maptools"
+            class="org.wcs.smart.ui.map.tool.BBoxInfoTool"
+            icon="images/icons/etool16/infobbox.gif"
+            id="org.wcs.smart.ui.map.tool.BBoxInfoTool"
+            name="%bboxinfo.tool.name"
+            onToolbar="true"
+            toolCursorId="org.wcs.smart.udig.bboxCursor"
+            tooltip="%bboxinfo.tool.tooltip">
+      </modalTool>
+      <toolCursor
+            hotspotX="10"
+            hotspotY="10"
+            id="org.wcs.smart.udig.bboxCursor"
+            image="images/pointers/bbox_info.png">
+      </toolCursor>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">
