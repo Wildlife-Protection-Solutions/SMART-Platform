@@ -86,7 +86,13 @@ public class SimpleListItem extends HasLabel {
 		return name;
 	}
 	/**
-	 * Do not use to set the name.
+	 * Do not use to set the name.<br>
+	 * This will only set the name for
+	 * the current object; it will not be persisted to the database 
+	 * for future objects.  To persist name changes use 
+	 * the updateName(Language, String)
+	 * function.
+	 *  
 	 * @param name
 	 */
 	public void setName(String name) {
