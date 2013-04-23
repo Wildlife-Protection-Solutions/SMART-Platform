@@ -121,10 +121,9 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, File file, IProgressMonitor monitor)
-			throws Exception {
+	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
 		ObservationQuery q = ((ObservationQuery)query);
-		super.setData(q.getLastResults(), q.getQueryColumns(), file);
+		super.setData(q.getLastDerbyResult(), q.getQueryColumns(), file);
 		super.export(monitor);
 		
 	}

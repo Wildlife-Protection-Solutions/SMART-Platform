@@ -132,9 +132,13 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 	 */
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
-		SimpleQuery q = ((SimpleQuery)query);
-		
-		super.setData(q.getLastResults(), q.getQueryColumns(), file);
+		if (query instanceof ObservationQuery) {
+			ObservationQuery qr = ((ObservationQuery)query);
+			super.setData(qr.getLastDerbyResult(), qr.getQueryColumns(), file);
+		} else {
+			SimpleQuery q = ((SimpleQuery)query);
+			super.setData(q.getLastResults(), q.getQueryColumns(), file);
+		}
 		super.export(monitor);
 		
 	}

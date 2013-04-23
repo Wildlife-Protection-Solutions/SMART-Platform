@@ -48,9 +48,10 @@ import org.wcs.smart.query.model.observation.QueryColumn;
 public class QueryResultsTable {
 
 	private static final String INITQUERYTABLE_JOBNAME = Messages.QueryResultsTable_InitQueryResultsTableJobName;
-	private TableViewer table;
+	
+	protected TableViewer table;
 	private QueryTableViewerColumn[] tableViewerColumns;
-
+	
 	private QueryResultItemComparator sorter;
 	
 	/**
@@ -69,6 +70,7 @@ public class QueryResultsTable {
 		table.setItemCount(0);
 		sorter = new QueryResultItemComparator(table);
 		table.setComparator(sorter);
+		
 		return table;
 	}
 	
@@ -87,7 +89,7 @@ public class QueryResultsTable {
 						if (table.getTable().isDisposed()){
 							return;
 						}
-						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
+						tableViewerColumns = createColumns(table,query.getQueryColumns());
 					}
 				});
 				return Status.OK_STATUS;
@@ -109,7 +111,7 @@ public class QueryResultsTable {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						tableViewerColumns = createColumns(table,query.getQueryColumns(), sorter);
+						tableViewerColumns = createColumns(table,query.getQueryColumns());
 					}
 				});
 				return Status.OK_STATUS;
@@ -140,9 +142,6 @@ public class QueryResultsTable {
 		}
 	}
 	
-	
-	
-
 	/**
 	 * Creates the table viewer columns.
 	 * 
@@ -150,15 +149,17 @@ public class QueryResultsTable {
 	 * @param columns table column definition
 	 * @return list of table viewer columns
 	 */
-	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<QueryColumn> columns, QueryResultItemComparator sorter) {
+	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<QueryColumn> columns) {
 		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
 		for (int i = 0; i < columns.size(); i++) {
-			viewers[i] = new QueryTableViewerColumn(
-					viewer,columns.get(i), sorter);
+			viewers[i] = new QueryTableViewerColumn(viewer,columns.get(i), getColumnSorter());
 		}
 		return viewers;
 	}
 
+	protected IQueryColumnSorter getColumnSorter() {
+		return sorter;
+	}
 	
 	/**
 	 * 

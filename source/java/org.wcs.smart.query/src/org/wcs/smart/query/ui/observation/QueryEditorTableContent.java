@@ -21,10 +21,6 @@
  */
 package org.wcs.smart.query.ui.observation;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
@@ -42,15 +38,15 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ObservationQuery;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
 import org.wcs.smart.query.ui.QueryPropertiesDialog;
-import org.wcs.smart.query.ui.querytable.QueryResultsTable;
+import org.wcs.smart.query.ui.querytable.QueryLazyResultsTable;
 
 /**
  * A class that manages a table that display 
@@ -66,7 +62,7 @@ public class QueryEditorTableContent {
 	private QueryDateFilterComposite dateComposite;
 	private ProgressAreaComposite progressComp;
 	
-	private QueryResultsTable resultsTable;
+	private QueryLazyResultsTable resultsTable;
 	private Composite runQueryComp;
 	private Composite tableComp;;
 	private Composite stackComposite;
@@ -121,7 +117,7 @@ public class QueryEditorTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final Collection<QueryResultItem> items, final IProgressMonitor monitor) {
+	public void setTableData(final DerbyQueryResult items, final IProgressMonitor monitor) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
@@ -130,11 +126,16 @@ public class QueryEditorTableContent {
 					//window closed nothing to update
 					return;
 				}
-				if (monitor.isCanceled()){
+				if (monitor.isCanceled()) {
 					showCancelled();
-				}else{
-					lblNumResults.setText(String.valueOf(items.size()));
-					lblIncidentCnt.setText(String.valueOf(computeIncidentCnt(items)));
+				} else {
+					if (items != null) {
+						lblNumResults.setText(String.valueOf(items.getItemCount()));
+						lblIncidentCnt.setText(String.valueOf(items.getWpCount()));
+					} else {
+						lblNumResults.setText(""); //$NON-NLS-1$
+						lblIncidentCnt.setText(""); //$NON-NLS-1$
+					}
 					lblNumResults.getParent().getParent().layout();
 					resultsTable.setInput(items);
 					showTable();
@@ -142,19 +143,7 @@ public class QueryEditorTableContent {
 			}
 		});
 	}
-	private int computeIncidentCnt(Collection<QueryResultItem> items){
-		HashSet<Integer> keys = new HashSet<Integer>();
-		int cnt = 0;
-		for (QueryResultItem it : items){
-			int key = Arrays.hashCode(it.getWaypointUuid());
-			if (!keys.contains(key)){
-				cnt++;
-				keys.add(key);
-			}
-		}
-		return cnt;
-	}
-
+	
 	/**
 	 * Sets the state of the progress area to cancelled
 	 * which disables the progress bar, cancel button and
@@ -308,11 +297,10 @@ public class QueryEditorTableContent {
 		toolkit.createLabel(comp,  Messages.QueryEditorTableContent_NumberOfIncidentLabel);
 		lblIncidentCnt = toolkit.createLabel(comp, Messages.QueryEditorTableContent_NaLabel);
 		
-		resultsTable = new QueryResultsTable();
+		resultsTable = new QueryLazyResultsTable();
 
 		TableViewer viewer = resultsTable.createTable(main);
-		viewer.getTable().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(viewer.getTable());
 
 		return main;
@@ -342,7 +330,7 @@ public class QueryEditorTableContent {
 	/**
 	 * @return the results table
 	 */
-	public QueryResultsTable getQueryResultsTable() {
+	public QueryLazyResultsTable getQueryResultsTable() {
 		return resultsTable;
 	}
 	

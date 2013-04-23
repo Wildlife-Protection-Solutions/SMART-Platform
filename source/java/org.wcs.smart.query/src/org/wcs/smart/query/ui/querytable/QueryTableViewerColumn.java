@@ -63,9 +63,7 @@ public class QueryTableViewerColumn {
 	 * @param viewer the table viewer
 	 * @param column the column
 	 */
-	public QueryTableViewerColumn(TableViewer viewer, 
-			QueryColumn column,
-			final QueryResultItemComparator sorter){
+	public QueryTableViewerColumn(TableViewer viewer, QueryColumn column, final IQueryColumnSorter sorter) {
 		this.column = column;
 		
 		tcolumn = new TableViewerColumn(viewer, SWT.NONE);

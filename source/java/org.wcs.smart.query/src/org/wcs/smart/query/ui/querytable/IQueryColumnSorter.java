@@ -19,15 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.engine;
+package org.wcs.smart.query.ui.querytable;
 
 /**
- * A query engine for executing
- * queries.
+ * Represents objects that are able to provide sorting functionality for {@link QueryTableViewerColumn}
  * 
- * @author Emily
+ * @author elitvin
  * @since 1.0.0
  */
-public interface QueryEngine {
-
+public interface IQueryColumnSorter {
+	
+	public void setSortColumn(QueryTableViewerColumn sort);
+	
 }

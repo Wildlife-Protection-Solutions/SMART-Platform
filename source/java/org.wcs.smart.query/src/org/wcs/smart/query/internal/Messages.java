@@ -83,6 +83,15 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_Progress_CreatingTempTable;
 	public static String DerbyGridEngine_Progress_PopulatingResults;
 	public static String DerbyGridEngine_Progress_RunningQuery;
+	public static String DerbyObservationEngine_Progress_CategoryData;
+	public static String DerbyObservationEngine_Progress_FetchSize;
+	public static String DerbyObservationEngine_Progress_LeaderPilotData;
+	public static String DerbyObservationEngine_Progress_ListAttributesData;
+	public static String DerbyObservationEngine_Progress_MandateData;
+	public static String DerbyObservationEngine_Progress_StationData;
+	public static String DerbyObservationEngine_Progress_TeamData;
+	public static String DerbyObservationEngine_Progress_TransportData;
+	public static String DerbyObservationEngine_Progress_TreeAttributesData;
 	public static String DerbyPatrolEngine_Progress_CreatingObservationTable;
 	public static String DerbyPatrolEngine_Progress_CreatingTempTable;
 	public static String DerbyPatrolEngine_Progress_LoadingResults;
@@ -442,6 +451,8 @@ public class Messages extends NLS {
 	public static String QueryInput_EditorNameNoQuery;
 	public static String QueryInput_EditorNameQuery;
 	public static String QueryInput_NullQueryName;
+	public static String QueryLazyResultsContentProvider_Loading;
+	public static String QueryLazyResultsContentProvider_LoadJob_Title;
 	public static String QueryListView_LoadingLabel;
 	public static String QueryListView_LoadQueryJobName;
 	public static String QueryListViewContentProvider_LoadingLabel;

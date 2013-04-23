@@ -23,9 +23,11 @@ package org.wcs.smart.query.export;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
@@ -40,7 +42,8 @@ import org.wcs.smart.query.model.observation.QueryColumn;
  */
 public abstract class SimpleQueryExporter {
 
-	protected Collection<QueryResultItem> data;
+	private Iterator<QueryResultItem> data;
+	private int dataSize;
 	protected List<QueryColumn> queryColumns; 
 	protected File outputFile;
 	
@@ -56,14 +59,15 @@ public abstract class SimpleQueryExporter {
 			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);
 		}
 		
-		monitor.beginTask(Messages.SimpleQueryExporter_Progress_ExportingFile, data.size() + 2);
+		monitor.beginTask(Messages.SimpleQueryExporter_Progress_ExportingFile, dataSize + 2);
 		try {
 			monitor.subTask(Messages.SimpleQueryExporter_Progress_InitializingWriter);
 			init();
 			monitor.worked(1);
 
 			monitor.subTask(Messages.SimpleQueryExporter_Progress_WritingData);
-			for (QueryResultItem it : data) {
+			while (data.hasNext()) {
+				QueryResultItem it = data.next();
 				writeRow(it);
 				monitor.worked(1);
 				if (monitor.isCanceled()){
@@ -111,11 +115,24 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	public void setData(Collection<QueryResultItem> data, 
-			List<QueryColumn> queryColumns, 
-			File outputFile ){
-		this.data = data;
+	public void setData(Collection<QueryResultItem> data, List<QueryColumn> queryColumns, File outputFile ) {
+		this.data = data != null ? data.iterator() : null;
+		dataSize = data != null ? data.size() : 0;
 		this.queryColumns = queryColumns;
 		this.outputFile = outputFile;
 	}
+
+	/**
+	 * Sets the data to export
+	 * @param data the query results to export
+	 * @param queryColumns the columns to export
+	 * @param outputFile the file to export to
+	 */
+	public void setData(DerbyQueryResult derbyResult, List<QueryColumn> queryColumns, File outputFile ) {
+		this.data = derbyResult != null ? derbyResult.iterator() : null;
+		this.dataSize = derbyResult != null ? derbyResult.getItemCount() : 0;
+		this.queryColumns = queryColumns;
+		this.outputFile = outputFile;
+	}
+	
 }

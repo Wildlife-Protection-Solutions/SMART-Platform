@@ -38,7 +38,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryResultItemComparator extends ViewerComparator{
+public class QueryResultItemComparator extends ViewerComparator implements IQueryColumnSorter {
 
 	private TableViewer viewer;
 	private QueryTableViewerColumn column = null;

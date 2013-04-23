@@ -32,8 +32,10 @@ import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.engine.DerbyQueryEngine2;
+import org.wcs.smart.query.engine.DerbyObservationEngine;
+import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.model.observation.QueryColumnCache;
 
@@ -51,6 +53,9 @@ import org.wcs.smart.query.model.observation.QueryColumnCache;
 public class ObservationQuery extends SimpleQuery{
 
 	private List<QueryColumn> queryColumns = null;
+	
+	private DerbyQueryResult lastResult;
+	
 	
 	/**
 	 * Creates a new observation query with the default
@@ -131,9 +136,38 @@ public class ObservationQuery extends SimpleQuery{
 
 	/** public for testing purposes only */
 	@Transient
-	public Collection<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception{
-		DerbyQueryEngine2 engine = new DerbyQueryEngine2();
-		return engine.executeQuery(this, session, progressMonitor);
+	@Override
+	@Deprecated
+	public Collection<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception {
+		throw new IllegalStateException("Operation not supported"); //$NON-NLS-1$
+	}
+	
+	@Transient
+	@Override
+	@Deprecated
+	public Collection<QueryResultItem> getLastResults() {
+		throw new IllegalStateException("Operation not supported"); //$NON-NLS-1$
+	}
+
+	@Transient
+	public DerbyQueryResult getDerbyQueryResults(IProgressMonitor progressMonitor) throws Exception {
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			DerbyObservationEngine engine = new DerbyObservationEngine();
+			lastResult = engine.executeDerbyQuery(this, session, progressMonitor);
+			return lastResult;
+		} finally {
+			if (session.isOpen()){
+				session.getTransaction().commit();
+				session.close();
+			}
+		}
+	}
+
+	@Transient
+	public DerbyQueryResult getLastDerbyResult() {
+		return lastResult;
 	}
 	
 	/**
