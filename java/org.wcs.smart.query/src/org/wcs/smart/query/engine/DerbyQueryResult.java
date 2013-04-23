@@ -512,7 +512,13 @@ public class DerbyQueryResult {
 	        return Arrays.hashCode(data);
 	    }
 	}
-	
+
+	/**
+	 * Iterator that uses lazy approach
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
 	private class LazyQueryIterator implements Iterator<QueryResultItem> {
 		
 		private int itOffset = 0; //offset of element at which list begins
