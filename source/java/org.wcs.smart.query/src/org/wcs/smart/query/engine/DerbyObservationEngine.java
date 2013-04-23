@@ -47,18 +47,15 @@ import org.wcs.smart.query.parser.filter.IFilter;
 
 /**
  * Query engine for executing lazy queries using derby.
+ * This engines create temporary tables that one to one correspond with the table
+ * that user see. {@link DerbyQueryResult} obtains the name of this table and is
+ * responsible for all other operations (fetching/sorting/deleting tables)
  * 
  * @author elitvin
  * @since 1.0.0
  */
 public class DerbyObservationEngine extends DerbyQueryEngine2 {
 
-//	@Deprecated
-//	@Override
-//	public Collection<QueryResultItem> executeQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
-//		throw new IllegalStateException("Operation is not supported."); //$NON-NLS-1$
-//	}
-	
 	public DerbyQueryResult executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
 		
 		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
