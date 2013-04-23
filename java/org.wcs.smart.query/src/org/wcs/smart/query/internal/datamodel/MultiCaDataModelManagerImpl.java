@@ -55,6 +55,10 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
+/**
+ * @author Emily
+ *
+ */
 public class MultiCaDataModelManagerImpl implements IDataModelManager{
 
 	private DataModel dm = null;
@@ -472,7 +476,15 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 		return Label.getDescription(keyuuid, cauuid);
 	}
 	
-	
+	/**
+	 * @see org.wcs.smart.query.internal.datamodel.IDataModelManager#getActiveAttributes(org.wcs.smart.ca.datamodel.DataModel)
+	 * @returns a list of all attributes in the merged data model
+	 */
+	public List<Attribute> getActiveAttributes(DataModel dm){
+		List<Attribute> attributes = new ArrayList<Attribute>();
+		attributes.addAll(dm.getAttributes());
+		return attributes;
+	}
 	
 	private IRunnableWithProgress loadAndMergeDataModelJob = new IRunnableWithProgress() {
 		
