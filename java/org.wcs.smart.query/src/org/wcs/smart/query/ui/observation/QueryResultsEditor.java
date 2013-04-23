@@ -22,8 +22,6 @@
 package org.wcs.smart.query.ui.observation;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.ui.internal.MapPart;
@@ -49,16 +47,16 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFactory;
 import org.wcs.smart.query.model.QueryInput;
-import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.ui.IQueryEditor;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
-import org.wcs.smart.query.ui.querytable.QueryResultsTable;
+import org.wcs.smart.query.ui.querytable.QueryLazyResultsTable;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -205,7 +203,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 	/**
 	 * @return the query results display table
 	 */
-	public QueryResultsTable getQueryResultsTable(){
+	public QueryLazyResultsTable getQueryResultsTable() {
 		return this.page1.getQueryResultsTable();
 	}
 	
@@ -314,10 +312,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		}
 		
 		//clear existing results
-		if (query.getLastResults() != null){
-			query.getLastResults().clear();
-		}
-		page1.getQueryResultsTable().setInput(null);
+		page1.getQueryResultsTable().setInput((DerbyQueryResult)null);
 		
 		//show progress area
 		page1.showProgressArea();
@@ -329,11 +324,11 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					Collection<QueryResultItem> results = query.getQueryResults(mymonitor);
+					DerbyQueryResult results = query.getDerbyQueryResults(mymonitor);
 					page1.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					QueryPlugIn.displayLog(Messages.QueryResultsEditor_ErrorRunningQuery, ex);
-					page1.updateAndShowTable(new ArrayList<QueryResultItem>(), mymonitor);
+					page1.updateAndShowTable(null, mymonitor);
 				}
 				page2.refresh();
 				return Status.OK_STATUS;

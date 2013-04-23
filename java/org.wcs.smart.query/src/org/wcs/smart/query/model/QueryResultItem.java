@@ -143,6 +143,10 @@ public class QueryResultItem implements IResultItem{
 		this.observationCategory = categoryLabels;
 	}
 	
+	public void setAttributes(HashMap<String, Object> attributes) {
+		this.attributes = attributes;
+	}
+	
 	/**
 	 * Finds the attribute value of the associated attribute
 	 * key.

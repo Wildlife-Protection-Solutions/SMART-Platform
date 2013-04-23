@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.query.ui.observation;
 
-import java.util.Collection;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -30,9 +28,9 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.wcs.smart.query.model.QueryResultItem;
+import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.parser.filter.DateFilter;
-import org.wcs.smart.query.ui.querytable.QueryResultsTable;
+import org.wcs.smart.query.ui.querytable.QueryLazyResultsTable;
 
 /**
  * Query editor page that displays observation query
@@ -43,7 +41,6 @@ import org.wcs.smart.query.ui.querytable.QueryResultsTable;
  */
 public class QueryResultsTablePage  extends EditorPart  {
 
-	
 	private QueryResultsEditor parentEditor;
 	private QueryEditorTableContent content ;
 	
@@ -58,7 +55,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 	/**
 	 * @return the query results table
 	 */
-	public QueryResultsTable getQueryResultsTable(){
+	public QueryLazyResultsTable getQueryResultsTable(){
 		return content.getQueryResultsTable();
 	}
 	
@@ -157,8 +154,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(Collection<QueryResultItem> results, 
-			IProgressMonitor monitor){
+	public void updateAndShowTable(DerbyQueryResult results, IProgressMonitor monitor){
 		content.setTableData(results, monitor);
 	}
 	

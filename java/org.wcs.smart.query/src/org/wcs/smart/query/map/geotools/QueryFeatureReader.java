@@ -55,8 +55,8 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		this.ftype = ftype;
 		this.fIterator = null;
 		this.query = query;
-		if (query.getLastResults() != null){
-			fIterator = query.getLastResults().iterator();
+		if (query.getLastDerbyResult() != null){
+			fIterator = query.getLastDerbyResult().iterator();
 		}
 	}
 	
@@ -89,9 +89,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 * @see org.geotools.data.FeatureReader#next()
 	 */
 	@Override
-	public SimpleFeature next() throws IOException, IllegalArgumentException,
-			NoSuchElementException {
-		
+	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		QueryResultItem next = (QueryResultItem) this.fIterator.next();
 		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, query.getQueryColumns(), ftype);
 		return f;
