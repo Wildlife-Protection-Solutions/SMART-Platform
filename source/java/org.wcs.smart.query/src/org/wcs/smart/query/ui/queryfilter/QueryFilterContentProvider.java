@@ -23,7 +23,6 @@ package org.wcs.smart.query.ui.queryfilter;
 
 import java.text.Collator;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,6 +45,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.parser.PatrolQueryOptions.PatrolQueryOption;
@@ -215,11 +215,8 @@ public class QueryFilterContentProvider implements ITreeContentProvider {
 			if (parentElement == DataModelItem.CATEGORIES){
 					return provider.getChildren(provider.getElements(null)[0]);	
 			}else if (parentElement == DataModelItem.ATTRIBUTES){
-				List<Attribute> atts = new ArrayList<Attribute>();
-				for (Attribute a : this.dataModel.getAttributes()){
-					//TODO: check categories and only include attributes with at least one active category
-					atts.add(a);
-				}
+				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(this.dataModel);
+				
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
 					public int compare(Attribute o1, Attribute o2) {

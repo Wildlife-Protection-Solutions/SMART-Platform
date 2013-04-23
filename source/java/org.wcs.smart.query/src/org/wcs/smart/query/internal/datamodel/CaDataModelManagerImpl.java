@@ -338,6 +338,54 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		return Label.getDescription(uuid);
 	}
 	
+	/**
+	 * @see org.wcs.smart.query.internal.datamodel.IDataModelManager#getActiveAttributes(org.wcs.smart.ca.datamodel.DataModel)
+	 */
+	public List<Attribute> getActiveAttributes(DataModel dm){
+		List<Attribute> active = new ArrayList<Attribute>();
+		for (Attribute a : dm.getAttributes()){
+			if (isActive(a, dm)){
+				active.add(a);
+			}
+		}
+		return active;
+		
+	}
+	
+	/*
+	 * determines if attribute in the data model
+	 * has an active category association
+	 */
+	private boolean isActive(Attribute a, DataModel dm){
+		for (Category c : dm.getActiveCategories()){
+			if (isActive(c, a)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/*
+	 * determines if the attribute has an active association
+	 * with the given category or subcategory
+	 */
+	private boolean isActive(Category c, Attribute a){
+		for (CategoryAttribute ca : c.getAttributes()){
+			if (ca.getAttribute().equals(a) && ca.getIsActive()){
+				return true;
+			}
+		}
+		for (Category kid : c.getActiveChildren()){
+			if (isActive(kid,a)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	
+	
 	private Job loadDataModelJob = new Job(Messages.CaDataModelManagerImpl_LoadDataModelJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

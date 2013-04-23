@@ -187,4 +187,17 @@ public interface IDataModelManager {
 	 * @return
 	 */
 	public String getAttributeTreeNodeLabel(Session session, byte[] cauuid, byte[] keyuuid);
+	
+	/**
+	 * Returns a modifiable list of all the active attributes
+	 * in the given data model. An attribute is active if it has
+	 * at least one active category association.
+	 * 
+	 * Note: the data model only has active categories loaded
+	 * so getActiveCategories will work but getCategories will fail
+	 * if hibernate session not active.
+	 * @param dm
+	 * @return
+	 */
+	public List<Attribute> getActiveAttributes(DataModel dm);
 }

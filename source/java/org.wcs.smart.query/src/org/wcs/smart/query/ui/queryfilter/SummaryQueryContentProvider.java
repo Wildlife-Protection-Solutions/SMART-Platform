@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -505,19 +506,29 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				//assume data model
 				return results;
 			}else if (type == NodeType.DATAMODEL_VALUE_ATTRIBUTES){
-				List<Attribute> atts = dataModel.getAttributes();
+				//get all active attributes
+				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(dataModel);
+				
+				//filter out numeric only
+				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
+					Attribute attribute = (Attribute) iterator.next();
+					if (attribute.getType() != AttributeType.NUMERIC){
+						iterator.remove();
+					}
+					
+				}
+				//sort
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
 					public int compare(Attribute o1, Attribute o2) {
 						return Collator.getInstance().compare(o1.getName(),o2.getName());
 					}
 				});
+				//create required summary objects
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
-					if (att.getType() == AttributeType.NUMERIC){
-						results[cnt++] = new SummaryDmObject(att, true);
-					}
+					results[cnt++] = new SummaryDmObject(att, true);
 				}
 				return Arrays.copyOf(results, cnt);
 				
@@ -532,23 +543,31 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				//assume data model
 				return results;
 			}else if (type == NodeType.DATAMODEL_GROUPBY_ATTRIBUTES){
-				List<Attribute> atts = dataModel.getAttributes();
+				//get all active attributes
+				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(dataModel);
+				
+				//filter out numeric only
+				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
+					Attribute attribute = (Attribute) iterator.next();
+					if (attribute.getType() != AttributeType.LIST && attribute.getType() != AttributeType.TREE){
+						iterator.remove();
+					}
+					
+				}
+				//sort
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
 					public int compare(Attribute o1, Attribute o2) {
 						return Collator.getInstance().compare(o1.getName(),o2.getName());
 					}
 				});
+				//create required summary objects
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
-					if (att.getType() == AttributeType.LIST ||
-						att.getType() == AttributeType.TREE){
-						results[cnt++] = new SummaryDmObject(att, false);
-					}
+					results[cnt++] = new SummaryDmObject(att, true);
 				}
-				return Arrays.copyOf(results, cnt);
-				
+				return Arrays.copyOf(results, cnt);				
 			}
 			return null;
 		}
