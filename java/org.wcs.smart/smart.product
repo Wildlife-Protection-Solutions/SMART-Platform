@@ -14,9 +14,8 @@
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xmx500M -Dosgi.parentClassloader=ext -XX:MaxPermSize=250M</vmArgs>
+      <vmArgs>-Xmx500M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -XX:MaxPermSize=250M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true</vmArgsMac>
-      <vmArgsWin>-XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass</vmArgsWin>
    </launcherArgs>
 
    <windowImages i16="/org.wcs.smart/images/icons/smart16.gif" i32="/org.wcs.smart/images/icons/smart32.gif" i48="/org.wcs.smart/images/icons/smart48.gif" i64="/org.wcs.smart/images/icons/smart64.gif" i128="/org.wcs.smart/images/icons/smart128.gif"/>
