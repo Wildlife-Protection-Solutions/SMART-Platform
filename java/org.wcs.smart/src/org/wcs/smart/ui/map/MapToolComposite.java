@@ -155,9 +155,10 @@ public class MapToolComposite {
 					it.setSelection(true);
 				}
 			}
+			currentToolId = mi.getId();	
 		}
 		ApplicationGIS.getToolManager().getToolAction(mi.getId(), mi.getCategoryId()).run();
-		currentToolId = mi.getId();
+		
 	}
 	
 	public String getCurrentToolId(){

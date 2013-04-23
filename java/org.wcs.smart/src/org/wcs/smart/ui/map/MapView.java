@@ -130,7 +130,10 @@ public class MapView extends ViewPart implements MapPart, IAdaptable {
     	ToolProxy mi =((ToolManager)ApplicationGIS.getToolManager()).findToolProxy(toolId);
     	if (mi != null){
     		ApplicationGIS.getToolManager().getToolAction(mi.getId(), mi.getCategoryId()).run();
-    		this.lastToolId = mi.getId();
+    		if (mi.getType() == 1){
+    			//MODAL Tool
+    			this.lastToolId = mi.getId();
+    		}
     	}
     }
     

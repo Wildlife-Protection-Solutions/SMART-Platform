@@ -44,11 +44,8 @@ import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.internal.commands.draw.DrawFeatureCommand;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
-import net.refractions.udig.project.ui.tool.ActionTool;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.tool.IToolManager;
-import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.project.ui.tool.Tool;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 import net.refractions.udig.ui.IBlockingSelection;
 
@@ -115,7 +112,6 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
 	private Label lblCoordinates;
 	private Button lblSRID;
 	
-	private Tool activeTool = null;
 	private MapToolComposite tools;
 	
 	IPartListener2 partlistener = new IPartListener2(){
