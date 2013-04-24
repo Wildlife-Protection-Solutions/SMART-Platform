@@ -45,11 +45,8 @@ public class SmartPreferenceDialog extends PreferenceDialog {
 	 * @return
 	 */
 	private static PreferenceManager createPreferenceManager(){
-		PreferenceManager manager = new PreferenceManager();
 		PreferenceManager platformPrefManager = PlatformUI.getWorkbench().getPreferenceManager();
-		manager.addToRoot(platformPrefManager.find(GpsBabelPreferencePage.ID));
-		manager.addToRoot(platformPrefManager.find(PlanConfigurationPreferencePage.ID));
-		return manager;
+		return platformPrefManager;
 	}
 	
 }

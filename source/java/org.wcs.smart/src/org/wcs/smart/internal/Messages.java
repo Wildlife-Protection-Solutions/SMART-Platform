@@ -663,11 +663,6 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_Key_Label;
 	public static String NameKeyComposite_LanguageLabel;
 	public static String NameKeyComposite_Name_Label;
-	public static String PlanConfigurationPreferencePage_CannotUpdate_Error;
-	public static String PlanConfigurationPreferencePage_DistanceToComplete_Decoration_Message;
-	public static String PlanConfigurationPreferencePage_DistanceToComplete_Label;
-	public static String PlanConfigurationPreferencePage_ErrorDialog_Message;
-	public static String PlanConfigurationPreferencePage_ErrorDialog_Title;
 	public static String ProjectionDialog_DialogMessage;
 	public static String ProjectionDialog_DialogTitle;
 	public static String ProjectionDialog_Error_LoadProjectionMessage;
@@ -746,7 +741,6 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_SystemLang_Label;
 	public static String SmartPlugIn_Error_Dialog_Title;
 	public static String SmartPlugIn_UnknownVersion;
-	public static String SmartPlugIn_VersionErrorDialogTitle;
 	public static String SmartPlugIn_VersionErrorMessage;
 	public static String SmartPointLabelProvider_ConversionFail_Label;
 	public static String SmartProperties_InvalidProperty;

@@ -246,7 +246,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		cmbLeader.setLabelProvider(new EmployeeLabelProvider());
 		cmbLeader.setContentProvider(new ObservableListContentProvider());
 		cmbLeader.setInput(employeeList);
-		cmbLeader.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbLeader.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cmbLeader.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

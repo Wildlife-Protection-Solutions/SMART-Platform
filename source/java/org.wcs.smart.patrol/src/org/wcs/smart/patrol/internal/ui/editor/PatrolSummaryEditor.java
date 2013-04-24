@@ -200,7 +200,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		container.setMinHeight(300);
 		container.setMinWidth(300);
 
-//		toolkit.paintBordersFor(container);
+		toolkit.paintBordersFor(container);
 //		container.getBody().setLayout(new GridLayout(1, false));
 //		container.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //		

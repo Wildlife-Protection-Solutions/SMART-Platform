@@ -79,6 +79,11 @@ public class Messages extends NLS {
 	public static String PlanCompositeFactory_Title_Station;
 	public static String PlanCompositeFactory_Title_Targets;
 	public static String PlanCompositeFactory_Title_Type;
+	public static String PlanConfigurationPreferencePage_CannotUpdate_Error;
+	public static String PlanConfigurationPreferencePage_DistanceToComplete_Decoration_Message;
+	public static String PlanConfigurationPreferencePage_DistanceToComplete_Label;
+	public static String PlanConfigurationPreferencePage_ErrorDialog_Message;
+	public static String PlanConfigurationPreferencePage_ErrorDialog_Title;
 	public static String PlanDatesComposite_ClidRangeViolation_Message;
 	public static String PlanDatesComposite_EndDate;
 	public static String PlanDatesComposite_EndDate_Invalid_Error;
