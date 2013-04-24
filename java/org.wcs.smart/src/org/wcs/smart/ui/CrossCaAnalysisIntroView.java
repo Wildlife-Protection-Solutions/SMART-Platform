@@ -68,6 +68,7 @@ public class CrossCaAnalysisIntroView extends ViewPart {
 	@Override
 	public void dispose(){
 		super.dispose();
+		toolkit.dispose();
 		SmartDB.removeConfigurationChangeListener(changeListener);
 	}
 	

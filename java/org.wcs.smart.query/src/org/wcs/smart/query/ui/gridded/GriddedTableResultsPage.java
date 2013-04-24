@@ -5,9 +5,11 @@ import java.util.Collection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -18,6 +20,7 @@ public class GriddedTableResultsPage  extends EditorPart  {
 	
 	private GriddedEditor parentEditor;
 	private GriddedTableContent content;
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	/**
 	 * Creates new editor page
@@ -48,6 +51,15 @@ public class GriddedTableResultsPage  extends EditorPart  {
 	public void doSaveAs() {
 	}
 
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (toolkit != null){
+			toolkit.dispose();
+			toolkit = null;
+		}
+	}
+	
 	public void validate(){
 		content.validate();
 	}
@@ -107,7 +119,7 @@ public class GriddedTableResultsPage  extends EditorPart  {
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		parent.setLayout(layout);
-		content = new GriddedTableContent(parent, parentEditor);
+		content = new GriddedTableContent(parent, parentEditor, toolkit);
 	}
 	
 	/**

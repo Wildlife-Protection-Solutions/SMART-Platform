@@ -24,9 +24,11 @@ package org.wcs.smart.query.ui.observation;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.parser.filter.DateFilter;
@@ -43,6 +45,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 
 	private QueryResultsEditor parentEditor;
 	private QueryEditorTableContent content ;
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	/**
 	 * Creates new editor page
@@ -66,6 +69,15 @@ public class QueryResultsTablePage  extends EditorPart  {
 	public void doSave(IProgressMonitor monitor) {
 	}
 
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (this.toolkit != null){
+			toolkit.dispose();
+			toolkit = null;
+		}
+	}
+	
 	/**
 	 * Does nothing.
 	 */
@@ -81,8 +93,6 @@ public class QueryResultsTablePage  extends EditorPart  {
 			throws PartInitException {
 		super.setSite(site);
 		super.setInput(input);
-		
-		
 	}
 
 	/**
@@ -145,7 +155,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		parent.setLayout(layout);
-		content = new QueryEditorTableContent(parent, parentEditor);
+		content = new QueryEditorTableContent(parent, parentEditor, toolkit);
 	}
 	
 	/**

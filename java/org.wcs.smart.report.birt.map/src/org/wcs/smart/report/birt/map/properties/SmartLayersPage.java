@@ -618,6 +618,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	public void dispose() {
 		if (toolkit != null) {
 			toolkit.dispose();
+			toolkit = null;
 		}
 		contentpane.dispose();
 		contentpane = null;

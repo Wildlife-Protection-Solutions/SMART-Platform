@@ -24,6 +24,8 @@ package org.wcs.smart.query.ui.summary;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -55,16 +57,25 @@ public class SummaryResultsArea extends Composite{
 	private FormToolkit toolkit;
 	
 	
-	public SummaryResultsArea(Composite parentArea, FormToolkit toolkit, SummaryEditor parentEditor){
+	
+	public SummaryResultsArea(Composite parentArea, SummaryEditor parentEditor){
 		super(parentArea, SWT.NONE);
-		toolkit.adapt(this);
-		this.toolkit = toolkit;
 		this.editor = parentEditor;
 		
-		createTable();
+		toolkit = new FormToolkit(Display.getCurrent());
+		super.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				toolkit.dispose();
+			}
+		});
+		toolkit.adapt(this);
+		
+		createTable(toolkit);
 	}
 	
-	public void createTable(){
+	public void createTable(FormToolkit toolkit){
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginHeight = gl.marginWidth = gl.horizontalSpacing = gl.verticalSpacing = 0;
 		this.setLayout(gl);
@@ -120,9 +131,6 @@ public class SummaryResultsArea extends Composite{
 	}
 	public void updateAndShowTable(final SummaryQueryResult results){
 		Display.getDefault().asyncExec(new Runnable(){
-			
-			
-
 			@Override
 			public void run() {
 				((StackLayout)stackComposite.getLayout()).topControl = tableComp;

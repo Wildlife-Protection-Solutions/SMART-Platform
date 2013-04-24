@@ -226,6 +226,8 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	public void dispose(){
 		super.dispose();
 		
+		toolkit.dispose();
+		
 		PatrolEventManager.getInstance().removeListener(EventType.WAYPOINT_DELETED, waypointListener);
 		PatrolEventManager.getInstance().removeListener(EventType.WAYPOINT_MODIFIED, waypointListener);
 		

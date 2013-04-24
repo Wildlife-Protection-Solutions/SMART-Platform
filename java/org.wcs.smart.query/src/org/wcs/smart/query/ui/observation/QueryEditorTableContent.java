@@ -58,7 +58,6 @@ import org.wcs.smart.query.ui.querytable.QueryLazyResultsTable;
  */
 public class QueryEditorTableContent {
 
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	private QueryDateFilterComposite dateComposite;
 	private ProgressAreaComposite progressComp;
 	
@@ -78,8 +77,8 @@ public class QueryEditorTableContent {
 	 * @param parent parent composite
 	 * @param editor parent editor 
 	 */
-	public QueryEditorTableContent(Composite parent, QueryResultsEditor editor) {
-		createContent(parent);
+	public QueryEditorTableContent(Composite parent, QueryResultsEditor editor, FormToolkit toolkit) {
+		createContent(parent, toolkit);
 		this.editor = editor;
 	}
 
@@ -188,7 +187,7 @@ public class QueryEditorTableContent {
 		return progressComp.createProgressMonitor();
 	}
 		
-	private void createNameHeader(Composite main) {
+	private void createNameHeader(Composite main, FormToolkit toolkit) {
 		compQueryName = new QueryHeaderComposite(main,Messages.QueryEditorTableContent_QueryLabel, 
 				toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -204,7 +203,7 @@ public class QueryEditorTableContent {
 	 * Creates the main content area 
 	 * @param parent
 	 */
-	private void createContent(Composite parent) {
+	private void createContent(Composite parent, FormToolkit toolkit) {
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
 		toolkit.paintBordersFor(container);
@@ -227,7 +226,7 @@ public class QueryEditorTableContent {
 		frmQueryArea.getBody().setLayout(layout);
 		
 		
-		createNameHeader(frmQueryArea.getBody());
+		createNameHeader(frmQueryArea.getBody(), toolkit);
 		
 		// --- Query Properties ----
 		Composite queryProp = toolkit.createComposite(frmQueryArea.getBody(), SWT.NONE);
@@ -264,8 +263,8 @@ public class QueryEditorTableContent {
 		stackComposite.setLayout(new StackLayout());
 		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
 				true));
-		runQueryComp = createRunQueryComp(stackComposite);
-		tableComp = createTableResultsComposite(stackComposite);
+		runQueryComp = createRunQueryComp(stackComposite, toolkit);
+		tableComp = createTableResultsComposite(stackComposite, toolkit);
 		progressComp = new ProgressAreaComposite(stackComposite);
 		progressComp.adapt(toolkit);
 		((StackLayout) stackComposite.getLayout()).topControl = runQueryComp;
@@ -276,7 +275,7 @@ public class QueryEditorTableContent {
 	 * @param parent
 	 * @return
 	 */
-	private Composite createTableResultsComposite(Composite parent) {
+	private Composite createTableResultsComposite(Composite parent, FormToolkit toolkit) {
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout(1, false));
 		
@@ -313,7 +312,7 @@ public class QueryEditorTableContent {
 	 * @param parent
 	 * @return
 	 */
-	private Composite createRunQueryComp(Composite parent){
+	private Composite createRunQueryComp(Composite parent, FormToolkit toolkit){
 		Composite main = toolkit.createComposite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		

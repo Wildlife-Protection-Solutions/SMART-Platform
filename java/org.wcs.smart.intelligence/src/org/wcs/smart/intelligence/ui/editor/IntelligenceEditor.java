@@ -84,8 +84,6 @@ public class IntelligenceEditor extends EditorPart {
 
 	public static final String ID = "org.wcs.smart.intelligence.IntelligenceEditor"; //$NON-NLS-1$
 
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
-
 	private Intelligence intelligence;
 	
 	private boolean isDirty;
@@ -100,7 +98,8 @@ public class IntelligenceEditor extends EditorPart {
 	private Text txtToDate;
 	private TableViewer pointsList;
 	private TableViewer attachmentsList;
-
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	
 	/**
 	 * listener for intelligence change events.
 	 */
@@ -144,6 +143,10 @@ public class IntelligenceEditor extends EditorPart {
 
 	@Override
 	public void dispose() {
+		if (toolkit != null){
+			toolkit.dispose();
+			toolkit = null;
+		}
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_DELETED, deleteListener);
 		super.dispose();
@@ -169,6 +172,7 @@ public class IntelligenceEditor extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit.setBorderStyle(SWT.BORDER);
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
 		toolkit.paintBordersFor(container);
