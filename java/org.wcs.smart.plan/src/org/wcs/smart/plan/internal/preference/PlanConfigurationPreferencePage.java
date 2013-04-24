@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal.preference;
+package org.wcs.smart.plan.internal.preference;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -39,7 +39,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
-import org.wcs.smart.internal.Messages;
+import org.wcs.smart.plan.internal.Messages;
 
 /**
  * SMART Plan Configuration Preference Page
@@ -82,7 +82,7 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 
 		Label distanceLabel = new Label(main, SWT.NONE);
 		distanceLabel.setText(Messages.PlanConfigurationPreferencePage_DistanceToComplete_Label);
-		distanceLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		distanceLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		txtDistanceToComplete = new Text(main, SWT.BORDER);
 		txtDistanceToComplete.setTextLimit(32);

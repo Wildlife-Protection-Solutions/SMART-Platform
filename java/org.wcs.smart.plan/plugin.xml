@@ -332,5 +332,13 @@
             class="org.wcs.smart.plan.xml.patrol.PatrolPlanXmlExtraDataContribution">
       </contribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.wcs.smart.plan.internal.preference.PlanConfigurationPreferencePage"
+            id="org.wcs.smart.preference.PlanConfiguration"
+            name="%planconfig.preferencepage.name">
+      </page>
+   </extension>
 
 </plugin>

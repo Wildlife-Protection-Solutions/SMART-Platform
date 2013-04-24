@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -122,13 +123,14 @@ public class DeleteItemHandler extends AbstractHandler {
 		
 		// close the editor
 		try {
-			IEditorReference[] refs = HandlerUtil
-					.getActiveWorkbenchWindow(event).getActivePage()
-					.getEditorReferences();
-			for (int i = 0; i < refs.length; i++) {
-				if (refs[i].getEditorInput().equals(o)) {
-					HandlerUtil.getActiveWorkbenchWindow(event).getActivePage()
+			IWorkbenchPage page = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
+			if (page != null){
+				IEditorReference[] refs = page.getEditorReferences();
+				for (int i = 0; i < refs.length; i++) {
+					if (refs[i].getEditorInput().equals(o)) {
+						HandlerUtil.getActiveWorkbenchWindow(event).getActivePage()
 							.closeEditor(refs[i].getEditor(false), false);
+					}
 				}
 			}
 		} catch (Exception ex) {
