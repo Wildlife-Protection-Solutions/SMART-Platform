@@ -66,8 +66,7 @@ public class QueryHeaderComposite extends Composite {
 	
 	private Label lblId;
 		
-	private FormToolkit toolkit;
-
+	
 	private String name = null;
 	private String id = null;
 	private boolean cancelled = false;
@@ -78,9 +77,8 @@ public class QueryHeaderComposite extends Composite {
 			FormToolkit toolkit, Font headerFont, Color headerColor) {
 		
 		super(parent, SWT.NONE);
-		this.toolkit = toolkit;
 		toolkit.adapt(this);
-		createComposite(fixedName, headerFont, headerColor);
+		createComposite(fixedName, headerFont, headerColor, toolkit);
 	}
 
 	public void setText(String text, String id){
@@ -96,7 +94,7 @@ public class QueryHeaderComposite extends Composite {
 	}
 	
 	
-	private void createComposite(String fixedName, Font headerFont, Color headerColor) {
+	private void createComposite(String fixedName, Font headerFont, Color headerColor, FormToolkit toolkit) {
 		GridLayout gl = new GridLayout(3, false);
 		setLayout(gl);
 

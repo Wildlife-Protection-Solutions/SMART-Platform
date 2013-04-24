@@ -444,7 +444,7 @@ public class PatrolLegDayInputComposite {
 
 		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		editor.getPatrolEditor().getSelectionProvider().addSelectionProvider(observationTable);
-		toolkit.adapt(observationTable.getTable());
+		//toolkit.adapt(observationTable.getTable());
 		setupObservationTable();
 		observationTable.getTable().addPaintListener(new PaintListener() {
 			

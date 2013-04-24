@@ -161,12 +161,26 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 			gl.marginHeight = 12;
 			ops.setLayout(gl);
 			ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+			Label lbl2 = new Label(inner, SWT.HORIZONTAL | SWT.SEPARATOR);
+			lbl2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			stackPanel = new Composite(inner, SWT.NONE);
+			stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+			stackPanel.setLayout(new StackLayout());
+			
+			/* create page controls & radio buttons*/
 			
 			final HashMap<ITargetPage, Control> controls = new HashMap<ITargetPage, Control>();
 			
 			/* create radio button options */
-			for (final ITargetPage page : pages){
+			for (int i = 0; i < pages.size(); i ++){
+				final ITargetPage page = pages.get(i);
 				Button radio = new Button(ops, SWT.RADIO);
+				if (i == 0){
+					currentPage = page;
+					radio.setSelection(true);
+				}
 				radio.setText(page.getPageName());
 				radio.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -176,24 +190,11 @@ public class TargetPropertyDialog extends TitleAreaDialog {
 						stackPanel.layout();
 						setDirty();
 					}
-					
 				});
-			};
-			Label lbl2 = new Label(inner, SWT.HORIZONTAL | SWT.SEPARATOR);
-			lbl2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-			
-			stackPanel = new Composite(inner, SWT.NONE);
-			stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
-			stackPanel.setLayout(new StackLayout());
-			
-			/* create page controls */
-			for (ITargetPage page : pages) {
 				controls.put(page, page.createComponent(stackPanel, SWT.NONE));
-			}
+			};
 			
-			currentPage = pages.get(0);
 			((StackLayout)stackPanel.getLayout()).topControl = controls.get(currentPage);
-		
 			setMessage(Messages.TargetPropertyPage_CreateMessage);
 			
 		} else if (pages.size() == 1) {

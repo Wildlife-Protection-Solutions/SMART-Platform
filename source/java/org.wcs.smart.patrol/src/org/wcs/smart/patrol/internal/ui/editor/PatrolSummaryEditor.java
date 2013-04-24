@@ -123,10 +123,6 @@ public class PatrolSummaryEditor extends EditorPart {
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolSummaryEditor"; //$NON-NLS-1$
 
 	private boolean isDirty = false;
-	
-	
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
-
 	private FormText txtPatrolType;
 	private FormText txtPatrolId;
 	private Text txtMandate;
@@ -150,6 +146,7 @@ public class PatrolSummaryEditor extends EditorPart {
 
 	private PatrolEditor editor;
 	private TableViewer tblPatrolData;
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());;
 	
 	private boolean isMulti = false;
 	
@@ -180,6 +177,10 @@ public class PatrolSummaryEditor extends EditorPart {
 
 	@Override
 	public void dispose() {
+		if (toolkit != null){
+			toolkit.dispose();
+			toolkit = null;
+		}
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, modifyListener);
 		super.dispose();
 	}
@@ -191,24 +192,21 @@ public class PatrolSummaryEditor extends EditorPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-
-		//ScrolledForm container = toolkit.createScrolledForm(parent);
+		toolkit.setBorderStyle(SWT.BORDER);
+		
 		ScrolledComposite container = new ScrolledComposite(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		container.setLayout(new GridLayout());
 		container.setExpandHorizontal(true);
 		container.setExpandVertical(true);
 		container.setMinHeight(300);
 		container.setMinWidth(300);
-
-		toolkit.paintBordersFor(container);
-//		container.getBody().setLayout(new GridLayout(1, false));
-//		container.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		
-//		frmPatrolSummary = toolkit.createForm(container.getBody());
+		
 		outline = toolkit.createComposite(container);
 		outline.setLayout(new GridLayout());
 		outline.setLayoutData(new GridData(SWT.FILL, SWT.FILL ,true, true));
 		container.setContent(outline);
+		
+		toolkit.paintBordersFor(outline);
 		
 		frmPatrolSummary = toolkit.createForm(outline);
 		frmPatrolSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -445,7 +443,6 @@ public class PatrolSummaryEditor extends EditorPart {
 				
 		container.setMinSize(p.x, p.y+100);
 		initValues();
-		
 	}
 
 	/**
@@ -455,7 +452,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * @param partEditor editor to use
 	 * @return hyperlink created
 	 */
-	private Hyperlink createEditLink(FormToolkit tolkit, Composite parent, final PatrolItemComposite partEditor ){
+	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent, final PatrolItemComposite partEditor ){
 		Hyperlink editLink = toolkit.createHyperlink(parent, EDIT_LABEL, SWT.WRAP);
 		
 		if (editor.canEdit() != null){

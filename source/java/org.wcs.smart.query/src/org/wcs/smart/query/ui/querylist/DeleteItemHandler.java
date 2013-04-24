@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -84,6 +85,12 @@ public class DeleteItemHandler extends AbstractHandler {
 	
 	
 	private void deleteQuery(QueryInput o, ExecutionEvent event) {
+		/**
+		 * Get the current window here for linux bug:
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=242246
+		 */
+		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
+		
 		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
 				Messages.DeleteItemHandler_Confirm_DialogTitle, 
 				MessageFormat.format(
@@ -123,13 +130,14 @@ public class DeleteItemHandler extends AbstractHandler {
 		
 		// close the editor
 		try {
-			IWorkbenchPage page = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
-			if (page != null){
-				IEditorReference[] refs = page.getEditorReferences();
-				for (int i = 0; i < refs.length; i++) {
-					if (refs[i].getEditorInput().equals(o)) {
-						HandlerUtil.getActiveWorkbenchWindow(event).getActivePage()
-							.closeEditor(refs[i].getEditor(false), false);
+			if (window != null) {
+				final IWorkbenchPage page = window.getActivePage();
+				if (page != null) {
+					IEditorReference[] refs = page.getEditorReferences();
+					for (int i = 0; i < refs.length; i++) {
+						if (refs[i].getEditorInput().equals(o)) {
+							page.closeEditor(refs[i].getEditor(false), false);
+						}
 					}
 				}
 			}

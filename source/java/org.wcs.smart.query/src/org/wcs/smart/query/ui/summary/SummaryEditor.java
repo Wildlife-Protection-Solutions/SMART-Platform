@@ -75,7 +75,8 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	public static final String ID = "org.wcs.smart.query.ui.SummaryEditor"; //$NON-NLS-1$
 
 	private SummaryQuery query;
-
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	
 	private boolean isDirty = false;
 
 	private IQueryListener qListener = new IQueryListener() {
@@ -152,6 +153,10 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	@Override
 	public void dispose() {
 		super.dispose();
+		if (toolkit != null){
+			toolkit.dispose();
+			toolkit = null;
+		}
 		QueryEventManager.getInstance().removeQueryChangedEvent(qListener);
 	}
 
@@ -327,9 +332,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		resultsArea.setFocus();
 	}
 
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
-
-	private QueryDateFilterComposite dateFilterComposite;
+		private QueryDateFilterComposite dateFilterComposite;
 	private Form frmSummaryArea;
 	private SummaryResultsArea resultsArea;
 
@@ -345,7 +348,6 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
 		toolkit.paintBordersFor(container);
@@ -378,7 +380,7 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 		gl.marginWidth = gl.marginHeight = gl.verticalSpacing = gl.horizontalSpacing = 0;
 		main.setLayout(gl);
 		
-		createNameHeader(main);
+		createNameHeader(main, toolkit);
 
 		Composite queryProp = toolkit.createComposite(main, SWT.NONE);
 		layout = new GridLayout(2, false);
@@ -409,14 +411,14 @@ public class SummaryEditor extends EditorPart implements IQueryEditor {
 				}
 			}
 		});
-		resultsArea = new SummaryResultsArea(main, toolkit, this);
+		resultsArea = new SummaryResultsArea(main, this);
 		resultsArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		initQuery();
 		updatePartName();
 	}
 
-	private void createNameHeader(Composite main) {
+	private void createNameHeader(Composite main, FormToolkit toolkit) {
 		compQueryName = new QueryHeaderComposite(main, Messages.SummaryEditor_SummaryQueryLabel, 
 				toolkit, frmSummaryArea.getFont(), 
 				frmSummaryArea.getForeground());

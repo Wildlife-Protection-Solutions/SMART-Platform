@@ -24,6 +24,7 @@
       location="org.wcs.smart"
       handlerType="interactive" />
    <launcher name="SMART">
+      <linux icon="/org.wcs.smart/images/icons/smart.xpm"/>
       <macosx icon="/org.wcs.smart/images/icons/smart.icns"/>
       <solaris/>
       <win useIco="true">
@@ -31,6 +32,7 @@
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>

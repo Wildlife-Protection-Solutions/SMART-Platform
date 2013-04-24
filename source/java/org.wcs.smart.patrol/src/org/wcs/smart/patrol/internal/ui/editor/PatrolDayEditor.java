@@ -71,10 +71,10 @@ public class PatrolDayEditor extends EditorPart {
 
 	private PatrolEditor editor = null;
 	
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
-	
 	private PatrolLegDayInputComposite[] children ;
 	private ScrolledForm frmSummary; 
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	
 	
 	public PatrolDayEditor(PatrolEditor editor) {
 		super.setPartName(""); //$NON-NLS-1$
@@ -84,6 +84,11 @@ public class PatrolDayEditor extends EditorPart {
 	
 	@Override
 	public void dispose(){
+		if (toolkit != null){
+			toolkit.dispose();
+			toolkit = null;
+		}
+		
 		if (children != null){
 			for (int i = 0; i < children.length; i ++){
 				children[i].dispose();
@@ -213,8 +218,7 @@ public class PatrolDayEditor extends EditorPart {
 			session.close();
 		}
 		
-		frmSummary.getBody().getParent().layout();
-		
+		frmSummary.getBody().getParent().layout();		
 	}
 
 	/**

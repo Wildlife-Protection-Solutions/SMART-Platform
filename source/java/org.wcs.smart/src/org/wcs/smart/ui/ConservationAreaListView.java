@@ -73,6 +73,12 @@ public class ConservationAreaListView extends ViewPart {
 	}
 
 	@Override
+	public void dispose(){
+		super.dispose();
+		toolkit.dispose();
+	}
+	
+	@Override
 	public void createPartControl(Composite parent) {
 		this.parent = parent;
 		

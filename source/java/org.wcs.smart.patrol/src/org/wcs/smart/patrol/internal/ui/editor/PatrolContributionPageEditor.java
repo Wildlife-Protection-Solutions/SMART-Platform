@@ -61,9 +61,8 @@ import org.wcs.smart.patrol.ui.PatrolEditor;
  */
 public class PatrolContributionPageEditor extends EditorPart{
 
-	
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	private PatrolEditor editor = null;
+	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 	
 	/**
 	 * Creates new page
@@ -90,6 +89,12 @@ public class PatrolContributionPageEditor extends EditorPart{
 		setInput(input);
 	}
 
+	@Override
+	public void dispose(){
+		super.dispose();
+		toolkit.dispose();
+	}
+	
 	@Override
 	public boolean isDirty() {
 		return false;

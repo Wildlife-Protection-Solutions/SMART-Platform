@@ -299,6 +299,8 @@ public class PlanEditor extends EditorPart {
 
 	@Override
 	public void dispose() {
+		toolkit.dispose();
+		
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_MODIFIED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_DELETED, deleteListener);
 		
@@ -329,6 +331,7 @@ public class PlanEditor extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit.setBorderStyle(SWT.BORDER);
 		form = toolkit.createForm(parent);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
@@ -545,7 +548,7 @@ public class PlanEditor extends EditorPart {
 		ll2.setFont(boldFont);
 		
 		
-		targetList  = new TargetProgressViewer(targetContent);
+		targetList  = new TargetProgressViewer(targetContent, toolkit);
 		targetList.getViewer().addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -588,7 +591,7 @@ public class PlanEditor extends EditorPart {
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		ll.setFont(boldFont);
 		
-		targetList2  = new TargetProgressViewer(targetContent, true);
+		targetList2  = new TargetProgressViewer(targetContent, true, toolkit);
 		
 
 		Composite childTargetButtons = toolkit.createComposite(targetContent, SWT.NONE);

@@ -98,7 +98,7 @@ public class TargetProgressViewer{
 	}
 	private TableViewer v;
 	private Label lbl;
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	
 	private TargetTableColumn[] myColumns = null;
 	
 	/**
@@ -107,33 +107,34 @@ public class TargetProgressViewer{
 	 * 
 	 * @param parent
 	 * @param includePlan if the plan name should be included
+	 * @param toolkit parent editor toolkit
 	 */
-	public TargetProgressViewer(Composite parent, boolean includePlan){
-		this(parent, TargetTableColumn.values());
+	public TargetProgressViewer(Composite parent, boolean includePlan, FormToolkit toolkit){
+		this(parent, TargetTableColumn.values(), toolkit);
 	}
 	
 	/**
 	 * Creates a new target progress viewer with 
 	 * targetname, summary, status, and status icon columns
 	 * @param parent
+	 * @param toolkit parent editor toolkit
 	 */
-	public TargetProgressViewer(Composite parent) {
+	public TargetProgressViewer(Composite parent, FormToolkit toolkit) {
 		this(parent, new TargetTableColumn[]{
 				TargetTableColumn.TARGETNAME, 
 				TargetTableColumn.SUMMARY, 
 				TargetTableColumn.STATUS, 
-				TargetTableColumn.STATUS_ICON});
+				TargetTableColumn.STATUS_ICON}, toolkit);
 		
 	}
 		
-	private TargetProgressViewer(Composite parent, TargetTableColumn[] columns){
+	private TargetProgressViewer(Composite parent, TargetTableColumn[] columns, FormToolkit toolkit){
 		this.myColumns = columns;
-		create(parent);
+		create(parent, toolkit);
 	}
 	
 	
-	private void create(Composite parent){
-
+	private void create(Composite parent, FormToolkit toolkit){
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -205,6 +206,7 @@ public class TargetProgressViewer{
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)table.getLayoutData()).heightHint = 80;
 	}
+	
 	public TableViewer getViewer(){
 		return this.v;
 	}
