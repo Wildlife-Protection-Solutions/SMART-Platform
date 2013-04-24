@@ -141,6 +141,7 @@ public class SmartMapItemGeneralPage extends AttributesUtil.PageWrapper {
 
 	@Override
 	public void dispose() {
+		super.dispose();
 		if (toolkit != null) {
 			toolkit.dispose();
 		}

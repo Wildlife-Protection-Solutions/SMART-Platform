@@ -444,7 +444,7 @@ public class PatrolLegDayInputComposite {
 
 		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		editor.getPatrolEditor().getSelectionProvider().addSelectionProvider(observationTable);
-		//toolkit.adapt(observationTable.getTable());
+		toolkit.adapt(observationTable.getTable());
 		setupObservationTable();
 		observationTable.getTable().addPaintListener(new PaintListener() {
 			
@@ -614,7 +614,8 @@ public class PatrolLegDayInputComposite {
 		
 		for (Iterator<Entry<OtColumn, TableViewerColumn>> iterator = observationTableColumns.entrySet().iterator(); iterator.hasNext();) {
 			Entry<OtColumn, TableViewerColumn> type = iterator.next();
-			type.getValue().getColumn().setWidth(getMaximumWidth(gc, type.getKey()));
+			int maxWidth = getMaximumWidth(gc, type.getKey());
+			type.getValue().getColumn().setWidth(maxWidth);
 		}
 		gc.dispose();
 	}
@@ -725,6 +726,7 @@ public class PatrolLegDayInputComposite {
 			column.getColumn().setText(columntype.guiName);
 			column.getColumn().setResizable(true);
 			column.getColumn().setMoveable(false);
+			column.getColumn().setWidth(25);
 
 			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH){
 				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
