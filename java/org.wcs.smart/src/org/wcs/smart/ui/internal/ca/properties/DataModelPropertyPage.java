@@ -803,6 +803,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			refreshTree();
 		}else if (ret == AddAttributeDialog1.NEXT){
 			Attribute att = new Attribute();
+			att.setConservationArea(currentCa);
 			
 			AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(), att,
 					((DataModel) viewer.getInput()).getAttributes(),
@@ -813,7 +814,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			if (ret == Window.CANCEL){
 				return;
 			}
-			att.setConservationArea(currentCa);
+			
 			DataModel dm = (DataModel)viewer.getInput();
 			dm.addNewAttribute(att, parent);
 			session.saveOrUpdate(att);

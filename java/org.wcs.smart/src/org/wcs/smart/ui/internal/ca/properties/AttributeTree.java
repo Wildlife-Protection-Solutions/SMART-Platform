@@ -209,7 +209,7 @@ public class AttributeTree {
 			public void widgetSelected(SelectionEvent e){
 				ImportAttributeProcessor processor = new ImportAttributeProcessor((Attribute)viewer.getInput());
 				processor.importAttribute();
-				refreshTree();
+				viewer.setInput((Attribute)viewer.getInput());
 				fireChangeListener();
 				viewer.expandToLevel(2);
 			}
