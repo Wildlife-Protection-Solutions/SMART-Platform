@@ -117,12 +117,13 @@ public class ImportAttributeProcessor {
 			newNodes.add(convertNodeCascade(root, null));
 		}
 			
+		if (attribute.getTree() == null){
+			attribute.setTree(new ArrayList<AttributeTreeNode>());
+		}
 		//merge
 		for(AttributeTreeNode newNode : newNodes){
 			boolean found = false;
-			if (attribute.getTree() == null){
-				attribute.setTree(new ArrayList<AttributeTreeNode>());
-			}
+
 			for (AttributeTreeNode existing : attribute.getTree()){
 				if (existing.getKeyId().equals(newNode.getKeyId())){
 					found = true;

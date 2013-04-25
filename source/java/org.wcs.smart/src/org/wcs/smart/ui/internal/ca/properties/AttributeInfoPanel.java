@@ -177,6 +177,14 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 		
 		/* Name & Key */
 		createNameKeyFields(this, canEdit, createNew);
+		txtKey.addListener(SWT.Modify, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				if (AttributeInfoPanel.this.attTree != null){
+					AttributeInfoPanel.this.attTree.getAttribute().setKeyId(txtKey.getText());
+				}
+			}});
 		
 		/* required */
 		Label lblRequired = new Label(this, SWT.NONE);
@@ -733,10 +741,12 @@ public abstract class AttributeInfoPanel extends NameKeyComposite {
 				lstAttributeList.setInput(attributeList);
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
 				treeComposite.setVisible(false);
-				if(attTree != null){
-					attTree.setInput(att, currentSession);
-				}
+				
 			}
+		}
+		
+		if(attTree != null){
+			attTree.setInput(att, currentSession);
 		}
 		selectOption();
 		
