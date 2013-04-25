@@ -294,7 +294,6 @@ public class ImportAttributeProcessor {
 	 */
 	private boolean hasPredefinedFile(){
 		URL url = SmartProperties.class.getResource(getAttributeFile());
-		InputStream in  = SmartProperties.class.getResourceAsStream(getAttributeFile());
 		return url != null;
 	}
 	
