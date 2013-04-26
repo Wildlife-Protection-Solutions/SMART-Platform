@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART BIRT Report Table Thai Fragment
+Bundle-SymbolicName: org.wcs.smart.reporttable.nl_th
+Bundle-Version: 1.0.5
+Fragment-Host: org.wcs.smart.reporttable;bundle-version="1.0.5"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6,
+ JavaSE-1.6
+Bundle-Vendor: org.wcs.smart
