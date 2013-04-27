@@ -21,26 +21,29 @@
  */
 package org.wcs.smart.data.oda.smart.impl.query;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.model.IResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
+import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.QueryResultItem;
 
 /**
- * Result set for a simple SMART query.
+ * Result set for a SMART observation query.
  * 
- * @author egouge
+ * @author elitvin
  * @since 1.0.0
  */
-public class SimpleQueryResultSet extends AbstractQueryResultSet {
+public class ObservationQueryResultSet extends AbstractQueryResultSet {
 
-	private List<IResultItem> items = null;
 	private SimpleQueryResultSetMetadata metadata;
+
+	private DerbyQueryResult derbyResult;
+	private Map<Integer, IResultItem> weakMap = new WeakHashMap<Integer, IResultItem>();
 
 	/**
 	 * Creates a new results set
@@ -48,71 +51,49 @@ public class SimpleQueryResultSet extends AbstractQueryResultSet {
 	 * @param metadata
 	 *            query metadata
 	 */
-	public SimpleQueryResultSet(SimpleQuery query, SimpleQueryResultSetMetadata metadata) {
+	public ObservationQueryResultSet(ObservationQuery query, SimpleQueryResultSetMetadata metadata) {
 		super(metadata);
 		this.metadata = metadata;
 
 		try {
-			Collection<? extends IResultItem> results = query.getLastResults();
-			if (results == null){
-				results = query.getQueryResults(new NullProgressMonitor());
+			derbyResult = query.getLastDerbyResult();
+			if (derbyResult == null){
+				derbyResult = query.getDerbyQueryResults(new NullProgressMonitor());
 			}
-			init(results);
-			
-			
+			setMaxRows(derbyResult.getItemCount());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Creates a new results set
-	 * 
-	 * @param metadata query metadata
-	 * @param query gridded query
-	 */
-	public SimpleQueryResultSet(GriddedQuery query, SimpleQueryResultSetMetadata metadata) {
-		super(metadata);
-		this.metadata = metadata;
-		try {
-			Collection<? extends IResultItem> results = query.getLastResults();
-			if (results == null){
-				results = query.getQueryResults(new NullProgressMonitor());
-			}
-			init(results);
-			
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void init(Collection<? extends IResultItem> queryResults){
-		setMaxRows(queryResults.size());
-		
-		if (queryResults instanceof List){
-			items =  (List<IResultItem>)queryResults;
-		}else{
-			items = new ArrayList<IResultItem>();
-			for (IResultItem i : queryResults){
-				items.add(i);
-			}
 		}
 	}
 	
 	@Override
 	protected int getDatasetSize() {
-		return items.size();
+		return derbyResult.getItemCount();
 	}
 
 	@Override
 	protected Object getCurrentItem(int colIndex) {
-		return metadata.getQueryColumn(colIndex - 1).getValue(items.get(getRow()));
+		return metadata.getQueryColumn(colIndex - 1).getValue(getItemForIndex(getRow()));
 	}
 
+	private IResultItem getItemForIndex(int index) {
+		IResultItem item = weakMap.get(index);
+		if (item != null)
+			return item;
+		//item was not previously loaded or was garbage collected
+		List<QueryResultItem> data = derbyResult.getData(index);
+		for (int i = 0; i < data.size(); i++) {
+			weakMap.put(index + i, data.get(i));
+		}
+		return data.get(0);
+	}
+	
 	@Override
 	public void close() throws OdaException {
 		super.close();
-		items = null;
+		if (derbyResult != null)
+			derbyResult.destroy();
+		derbyResult = null;
 	}
+	
 }

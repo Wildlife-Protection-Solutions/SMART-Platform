@@ -46,6 +46,7 @@ import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.SimpleQuery;
@@ -220,8 +221,10 @@ public class SmartQuery implements IQuery {
 				startDate, endDate);
 
 		//the result set
-		if (smartQuery.getType() == QueryType.OBSERVATION
-				|| smartQuery.getType() == QueryType.PATROL) {
+		if (smartQuery.getType() == QueryType.OBSERVATION) {
+			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
+			resultSet = new ObservationQueryResultSet((ObservationQuery) smartQuery, (SimpleQueryResultSetMetadata)getMetaData());
+		}else if (smartQuery.getType() == QueryType.PATROL) {
 			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
 			resultSet = new SimpleQueryResultSet((SimpleQuery) smartQuery,
 					(SimpleQueryResultSetMetadata)getMetaData());

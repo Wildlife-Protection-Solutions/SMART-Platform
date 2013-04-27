@@ -187,7 +187,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 					if (layer.dbQuery instanceof ObservationQuery) {
 						((ObservationQuery) layer.dbQuery).setDateFilter(dateFilter);
 						((ObservationQuery) layer.dbQuery)
-								.getQueryResults(new NullProgressMonitor());
+								.getDerbyQueryResults(new NullProgressMonitor());
 					} else if (layer.dbQuery instanceof PatrolQuery) {
 						((PatrolQuery) layer.dbQuery).setDateFilter(dateFilter);
 						((PatrolQuery) layer.dbQuery)
