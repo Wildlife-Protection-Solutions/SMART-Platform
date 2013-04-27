@@ -134,7 +134,13 @@ public class ObservationQuery extends SimpleQuery{
 		}
 	}
 
-	/** public for testing purposes only */
+	@Transient
+	@Override
+	@Deprecated
+	public Collection<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception{
+		throw new IllegalStateException("Operation not supported"); //$NON-NLS-1$
+	}
+	
 	@Transient
 	@Override
 	@Deprecated
