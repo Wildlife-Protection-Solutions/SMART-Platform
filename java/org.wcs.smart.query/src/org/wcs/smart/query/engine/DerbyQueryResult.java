@@ -31,6 +31,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
@@ -39,6 +43,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.AttributeQueryColumn;
 import org.wcs.smart.query.model.observation.CategoryQueryColumn;
@@ -95,42 +100,9 @@ public class DerbyQueryResult {
 	public void destroy() {
 		//simply closing result set and deleting temporary table
 		dropResultSet();
-		final Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			session.doWork(new Work() {
-				@Override
-				public void execute(Connection c) throws SQLException {
-					//original table
-					try {
-						String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
-						c.createStatement().execute(sql);
-						QueryPlugIn.logSql(sql);
-					} catch (Exception ex) {
-						// eatme
-					}
-					//list elements value table
-					try {
-						String sql = "DROP TABLE " + queryTempTable + "_LIST"; //$NON-NLS-1$ //$NON-NLS-2$
-						c.createStatement().execute(sql);
-						QueryPlugIn.logSql(sql);
-					} catch (Exception ex) {
-						// eatme
-					}
-					//tree elements value table
-					try {
-						String sql = "DROP TABLE " + queryTempTable + "_TREE"; //$NON-NLS-1$ //$NON-NLS-2$
-						c.createStatement().execute(sql);
-						QueryPlugIn.logSql(sql);
-					} catch (Exception ex) {
-						// eatme
-					}
-				}
-			});
-		} finally {
-			session.getTransaction().commit();
-			session.close();
-		}
+		Job cleanUpJob = new CleanUpJob();
+		cleanUpJob.setSystem(true); //we don't want this job to be displayed to user
+		cleanUpJob.schedule();
 	}
 
 	public List<QueryResultItem> getData(final int offset) {
@@ -165,7 +137,6 @@ public class DerbyQueryResult {
 	}
 	
 	private List<QueryResultItem> getData(final Session session, final int offset) {
-		long time = System.currentTimeMillis();
 		final List<QueryResultItem> result = new ArrayList<QueryResultItem>();
 		final String dataSql = "SELECT r.* FROM "+queryTempTable+" r "+getSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
 		session.doWork(new Work() {
@@ -180,7 +151,6 @@ public class DerbyQueryResult {
 				attachObservations(result, c, session);
 			}
 		});
-		time = System.currentTimeMillis() - time;
 		return result;
 	}
 
@@ -291,6 +261,7 @@ public class DerbyQueryResult {
 				lastResultSet.close();
 			} catch (SQLException e) {
 				//nothing
+				e.printStackTrace();
 			}
 			lastResultSet = null;
 		}
@@ -554,6 +525,55 @@ public class DerbyQueryResult {
 		@Override
 		public void remove() {
 			throw new IllegalStateException("Remove operation is not supported."); //$NON-NLS-1$
+		}
+		
+	}
+	
+	private class CleanUpJob extends Job {
+
+		public CleanUpJob() {
+			super(Messages.DerbyQueryResult_CleanUpJob_Title);
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			final Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try {
+				session.doWork(new Work() {
+					@Override
+					public void execute(Connection c) throws SQLException {
+						//original table
+						try {
+							String sql = "DROP TABLE " + queryTempTable; //$NON-NLS-1$
+							c.createStatement().execute(sql);
+							QueryPlugIn.logSql(sql);
+						} catch (Exception ex) {
+							// eatme
+						}
+						//list elements value table
+						try {
+							String sql = "DROP TABLE " + queryTempTable + "_LIST"; //$NON-NLS-1$ //$NON-NLS-2$
+							c.createStatement().execute(sql);
+							QueryPlugIn.logSql(sql);
+						} catch (Exception ex) {
+							// eatme
+						}
+						//tree elements value table
+						try {
+							String sql = "DROP TABLE " + queryTempTable + "_TREE"; //$NON-NLS-1$ //$NON-NLS-2$
+							c.createStatement().execute(sql);
+							QueryPlugIn.logSql(sql);
+						} catch (Exception ex) {
+							// eatme
+						}
+					}
+				});
+			} finally {
+				session.getTransaction().commit();
+				session.close();
+			}
+			return Status.OK_STATUS;
 		}
 		
 	}
