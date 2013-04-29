@@ -79,6 +79,8 @@ public class SmartStartUp {
 				throw ex;
 			}
 		}
+		SmartPlugIn.removeTempData();
+
 	}
 	
 	

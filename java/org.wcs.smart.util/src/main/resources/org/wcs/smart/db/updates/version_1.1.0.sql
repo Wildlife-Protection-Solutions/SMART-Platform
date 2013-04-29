@@ -29,3 +29,16 @@ update smart.waypoint_query set creator_uuid = x'0000000000000000000000000000000
 update smart.gridded_query set creator_uuid = x'00000000000000000000000000000000' where ca_uuid = x'00000000000000000000000000000000';
 update smart.summary_query set creator_uuid = x'00000000000000000000000000000000' where ca_uuid = x'00000000000000000000000000000000';
 update smart.patrol_query set creator_uuid = x'00000000000000000000000000000000' where ca_uuid = x'00000000000000000000000000000000';
+
+-- clean up procedure for temporary data
+create procedure smart.cleanUpTempData()
+    language java
+    parameter style java
+    external security definer
+    modifies sql data
+    external name 'org.wcs.smart.SmartDbProcedure.cleanUpTempData';
+
+GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO login;
+GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO manager;
+GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO analyst;
+GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO data_entry;

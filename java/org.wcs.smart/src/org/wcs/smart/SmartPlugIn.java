@@ -21,6 +21,9 @@
  */
 package org.wcs.smart;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -37,6 +40,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -180,6 +184,33 @@ public class SmartPlugIn extends AbstractUIPlugin {
 			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{dbVersion, smartDbVersion}));
 		}
 	}
+
+	/**
+	 * Runs DB procedure which checks if there are some temporary tables
+	 * (possible after hard shutdown) and cleans them up if they present.
+	 * 
+	 * @throws Exception
+	 */
+	public static void removeTempData() {
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try {
+			s.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					Statement st = c.createStatement();
+					st.execute("call smart.cleanUpTempData()"); //$NON-NLS-1$
+				}
+			});
+			s.getTransaction().commit();
+		} catch (Exception ex) {
+			s.getTransaction().rollback();
+			displayLog(null, Messages.SmartPlugIn_CleanUp_Error, ex);
+		} finally {
+			s.close();
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
