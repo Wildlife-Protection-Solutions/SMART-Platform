@@ -102,6 +102,7 @@ public class Messages extends NLS {
 	public static String DerbyQueryEngine2_Progress_LoadingError;
 	public static String DerbyQueryEngine2_Progress_PopulatingResults;
 	public static String DerbyQueryEngine2_Progress_RunningQuery;
+	public static String DerbyQueryResult_CleanUpJob_Title;
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
