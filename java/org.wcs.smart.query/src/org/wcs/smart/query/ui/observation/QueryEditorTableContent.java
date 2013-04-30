@@ -38,8 +38,8 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.parser.filter.DateFilter;
 import org.wcs.smart.query.ui.ProgressAreaComposite;
@@ -116,7 +116,7 @@ public class QueryEditorTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final DerbyQueryResult items, final IProgressMonitor monitor) {
+	public void setTableData(final IObservationPagedQueryResultSet items, final IProgressMonitor monitor) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override

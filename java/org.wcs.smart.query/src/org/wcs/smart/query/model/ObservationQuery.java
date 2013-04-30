@@ -22,7 +22,6 @@
 package org.wcs.smart.query.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -35,7 +34,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.engine.DerbyObservationEngine;
-import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.query.model.observation.QueryColumnCache;
 
@@ -50,11 +48,11 @@ import org.wcs.smart.query.model.observation.QueryColumnCache;
  */
 @Entity
 @Table(name="smart.waypoint_query")
-public class ObservationQuery extends SimpleQuery{
+public class ObservationQuery extends SimpleQuery implements IPagedQuery{
 
 	private List<QueryColumn> queryColumns = null;
 	
-	private DerbyQueryResult lastResult;
+	private IObservationPagedQueryResultSet lastResult;
 	
 	
 	/**
@@ -64,8 +62,6 @@ public class ObservationQuery extends SimpleQuery{
 	protected ObservationQuery(){
 		super();
 	}
-	
-	
 	
 	/**
 	 * Updates the visible columns based 
@@ -134,29 +130,9 @@ public class ObservationQuery extends SimpleQuery{
 		}
 	}
 
-	@Transient
-	@Override
-	@Deprecated
-	public Collection<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception{
-		throw new IllegalStateException("Operation not supported"); //$NON-NLS-1$
-	}
-	
-	@Transient
-	@Override
-	@Deprecated
-	public Collection<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception {
-		throw new IllegalStateException("Operation not supported"); //$NON-NLS-1$
-	}
-	
-	@Transient
-	@Override
-	@Deprecated
-	public Collection<QueryResultItem> getLastResults() {
-		throw new IllegalStateException("Operation not supported"); //$NON-NLS-1$
-	}
 
 	@Transient
-	public DerbyQueryResult getDerbyQueryResults(IProgressMonitor progressMonitor) throws Exception {
+	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
@@ -172,7 +148,7 @@ public class ObservationQuery extends SimpleQuery{
 	}
 
 	@Transient
-	public DerbyQueryResult getLastDerbyResult() {
+	public IPagedQueryResultSet getLastPagedResults() {
 		return lastResult;
 	}
 	

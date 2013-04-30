@@ -47,8 +47,9 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryListener;
 import org.wcs.smart.query.QueryEventManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFactory;
@@ -312,7 +313,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 		}
 		
 		//clear existing results
-		page1.getQueryResultsTable().setInput((DerbyQueryResult)null);
+		page1.getQueryResultsTable().setInput((IPagedQueryResultSet)null);
 		
 		//show progress area
 		page1.showProgressArea();
@@ -324,7 +325,7 @@ public class QueryResultsEditor extends MultiPageEditorPart implements MapPart, 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					DerbyQueryResult results = query.getDerbyQueryResults(mymonitor);
+					IObservationPagedQueryResultSet results = (IObservationPagedQueryResultSet) query.getPagedQueryResults(mymonitor);
 					page1.updateAndShowTable(results, mymonitor);
 				} catch (Exception ex) {
 					QueryPlugIn.displayLog(Messages.QueryResultsEditor_ErrorRunningQuery, ex);

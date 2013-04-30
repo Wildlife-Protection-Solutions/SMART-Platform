@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.engine.DerbyPatrolEngine;
 import org.wcs.smart.query.model.observation.QueryColumn;
@@ -43,10 +45,10 @@ import org.wcs.smart.query.model.observation.QueryColumnCache;
  */
 @Entity
 @Table(name="smart.patrol_query")
-public class PatrolQuery extends SimpleQuery {
+public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 
 	private List<QueryColumn> queryColumns = null;
-
+	private Collection<QueryResultItem> lastResults  = null;
 	
 	/**
 	 * Creates a new patrol query with the default
@@ -158,5 +160,39 @@ public class PatrolQuery extends SimpleQuery {
 	public QueryType getType() {
 		return QueryType.PATROL;
 	}
+	
+	
+	/**
+	 * Runs the query and returns the results.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	@Transient
+	public Collection<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception{
+		
+		lastResults = null;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try{
+			lastResults = getQueryResults(session, progressMonitor);
+		}finally{
+			if (session.isOpen()){
+				session.getTransaction().commit();
+				session.close();
+			}
+		}
+		return lastResults;
+	}
+	
+	/**
+	 * Returns the results from last time the query was run.  Does not re-run the query.
+	 * @return the last run results
+	 */
+	@Transient
+	public Collection<QueryResultItem> getLastResults(){
+		return lastResults;
+	}
+
 }
 

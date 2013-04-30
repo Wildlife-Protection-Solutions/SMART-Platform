@@ -28,6 +28,8 @@ import java.util.NoSuchElementException;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.query.engine.DerbyPagedObservationResult;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.QueryResultItem;
 
@@ -55,8 +57,8 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		this.ftype = ftype;
 		this.fIterator = null;
 		this.query = query;
-		if (query.getLastDerbyResult() != null){
-			fIterator = query.getLastDerbyResult().iterator();
+		if (query.getLastPagedResults() != null){
+			fIterator = query.getLastPagedResults().iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
 		}
 	}
 	
@@ -81,7 +83,9 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public boolean hasNext() throws IOException {
-		if (fIterator == null) return false;
+		if (fIterator == null){
+			return false;
+		}
 		return fIterator.hasNext();
 	}
 

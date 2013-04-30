@@ -81,7 +81,9 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 	 */
 	@Override
 	public boolean hasNext() throws IOException {
-		if (fIterator == null) return false;
+		if (fIterator == null){
+			return false;
+		}
 		return fIterator.hasNext();
 	}
 

@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -34,9 +33,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.observation.QueryColumn;
@@ -70,7 +67,6 @@ public abstract class SimpleQuery extends Query {
 	
 	private DateFilter dateFilter;
 		
-	private Collection<QueryResultItem> lastResults  = null;
 	protected String visibleTableColumnKeys = null;
 	
 	/**
@@ -166,51 +162,6 @@ public abstract class SimpleQuery extends Query {
 	public void setDateFilter(DateFilter dateFilter){
 		this.dateFilter = dateFilter;
 	}
-
-	
-	/**
-	 * Runs the query and returns the results.
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	@Transient
-	public Collection<QueryResultItem> getQueryResults(IProgressMonitor progressMonitor) throws Exception{
-		
-		lastResults = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			lastResults = getQueryResults(session, progressMonitor);
-		}finally{
-			if (session.isOpen()){
-				session.getTransaction().commit();
-				session.close();
-			}
-		}
-		return lastResults;
-	}
-	
-	/**
-	 * Returns the results from last time the query was run.  Does not re-run the query.
-	 * @return the last run results
-	 */
-	@Transient
-	public Collection<QueryResultItem> getLastResults(){
-		return lastResults;
-	}
-	
-	
-	/* public for testing purposes only */
-	/**
-	 * Runs the query and returns the results
-	 * @param session
-	 * @param progressMonitor
-	 * @return
-	 * @throws Exception
-	 */
-	@Transient
-	public abstract Collection<QueryResultItem> getQueryResults(Session session, IProgressMonitor progressMonitor) throws Exception;
 
 	
 	/**

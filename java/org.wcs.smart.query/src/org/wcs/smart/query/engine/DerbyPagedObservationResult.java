@@ -44,12 +44,15 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.AttributeQueryColumn;
 import org.wcs.smart.query.model.observation.CategoryQueryColumn;
 import org.wcs.smart.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.model.observation.QueryColumn;
 import org.wcs.smart.util.SmartUtils;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 
 /**
@@ -59,7 +62,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyQueryResult {
+public class DerbyPagedObservationResult implements IObservationPagedQueryResultSet{
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
 		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
@@ -70,17 +73,18 @@ public class DerbyQueryResult {
 	
 	private String queryTempTable;
 	private String sortSql = ""; //$NON-NLS-1$
-	private int pageSize = 100;
 	private int itemCount = 0;
 	private int wpCount = 0;
 
 	private ResultSet lastResultSet;
+	
+	private Envelope bounds = null;
 
-	public DerbyQueryResult(String queryTempTable) {
+	public DerbyPagedObservationResult(String queryTempTable) {
 		this.queryTempTable = queryTempTable;
 	}
 
-	public DerbyQueryResult(String queryTempTable, int itemCount, int wpCount) {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount) {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;
@@ -88,10 +92,10 @@ public class DerbyQueryResult {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DerbyQueryResult) {
+		if (obj instanceof DerbyPagedObservationResult) {
 			if (queryTempTable == null)
 				return super.equals(obj);
-			DerbyQueryResult r2 = (DerbyQueryResult) obj;
+			DerbyPagedObservationResult r2 = (DerbyPagedObservationResult) obj;
 			return queryTempTable.equals(r2.queryTempTable);
 		}
 		return super.equals(obj);
@@ -104,24 +108,24 @@ public class DerbyQueryResult {
 		cleanUpJob.setSystem(true); //we don't want this job to be displayed to user
 		cleanUpJob.schedule();
 	}
-
-	public List<QueryResultItem> getData(final int offset) {
+	
+	public List<QueryResultItem> getData(final int offset, final int pageSize) {
 		final Session session = HibernateManager.openSession();
 		//NOTE: session will not be closed on purpose!!!!
 		//as we want related ResultSet to remain opened for performance reasons
-		List<QueryResultItem> result = getNextData(session, offset);
+		List<QueryResultItem> result = getNextData(session, offset, pageSize);
 		if (result == null) {
-			result = getData(session, offset);
+			result = getData(session, offset, pageSize);
 		}
 		return result;
 	}
 	
-	private List<QueryResultItem> getNextData(final Session session, final int offset) {
+	private List<QueryResultItem> getNextData(final Session session, final int offset, final int pageSize) {
 		if (lastResultSet == null)
 			return null;
 		final List<QueryResultItem> result = new ArrayList<QueryResultItem>();
 		try {
-			result.addAll(getResults(lastResultSet, offset));
+			result.addAll(getResults(lastResultSet, offset, pageSize));
 		} catch (SQLException e) {
 			//most likely someone closed our old session/connection and old ResultSet is not working
 			lastResultSet = null;
@@ -136,7 +140,33 @@ public class DerbyQueryResult {
 		return result;
 	}
 	
-	private List<QueryResultItem> getData(final Session session, final int offset) {
+	
+	@Override
+	public Envelope getEnvelope(){
+		if (this.bounds == null){
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+			s.doWork(new Work(){
+
+				@Override
+				public void execute(Connection c) throws SQLException {
+					ResultSet q = c.createStatement().executeQuery(sql);
+					q.next();
+					double minx = q.getDouble(1);
+					double maxx = q.getDouble(2);
+					double miny = q.getDouble(3);
+					double maxy = q.getDouble(4);
+					
+					bounds = new Envelope(minx, maxx, miny, maxy);
+				}});
+		}
+		return bounds;
+		
+	}
+	
+	
+	private List<QueryResultItem> getData(final Session session, final int offset, final int pageSize) {
 		final List<QueryResultItem> result = new ArrayList<QueryResultItem>();
 		final String dataSql = "SELECT r.* FROM "+queryTempTable+" r "+getSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
 		session.doWork(new Work() {
@@ -144,7 +174,7 @@ public class DerbyQueryResult {
 			public void execute(Connection c) throws SQLException {
 				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
 				try {
-					result.addAll(getResults(lastResultSet, offset));
+					result.addAll(getResults(lastResultSet, offset, pageSize));
 				} finally {
 					//rs.close();
 				}
@@ -178,7 +208,7 @@ public class DerbyQueryResult {
 			return;
 		}
 		attrSql.append(')');
-		
+
 		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
 		try {
 			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
@@ -267,7 +297,7 @@ public class DerbyQueryResult {
 		}
 	}
 	
-	protected List<QueryResultItem> getResults(ResultSet rs, int from) throws SQLException {
+	protected List<QueryResultItem> getResults(ResultSet rs, int from, int pageSize) throws SQLException {
 		List<QueryResultItem> items = new ArrayList<QueryResultItem>();
 		/*
 		1	P_CA_UUID
@@ -304,7 +334,9 @@ public class DerbyQueryResult {
 		32	P_TRANSPORT
 		33	P_LEADER
 		34	P_PILOT
-		35+	CATEGORY_0 -> CATEGORY_N (N last category number)
+		35  CA_ID
+		36  CA_NAME
+		37+	CATEGORY_0 -> CATEGORY_N (N last category number)
 		 */
 		rs.absolute(from);
 		int to = from + pageSize;
@@ -317,6 +349,8 @@ public class DerbyQueryResult {
 //		while (rs.next()) {
 			QueryResultItem it = new QueryResultItem();
 			
+			it.setConservationAreaId(rs.getString(35));
+			it.setConservationAreaName(rs.getString(36));
 			it.setPatrolUuid(rs.getBytes(2));
 			it.setPatrolId(rs.getString(3));
 			it.setPatrolStartDate(rs.getDate(10));
@@ -344,7 +378,7 @@ public class DerbyQueryResult {
 			it.setObservationUuid(rs.getBytes(25));
 			//build categories
 			List<String> categories = new ArrayList<String>();
-			for (int j = 35; j <= columnCount; j++) {
+			for (int j = 37; j <= columnCount; j++) {
 				String category = rs.getString(j);
 				if (category == null) {
 					break;
@@ -425,21 +459,21 @@ public class DerbyQueryResult {
 		return null;
 	}
 
-	public Iterator<QueryResultItem> iterator() {
-		return new LazyQueryIterator();
+	public Iterator<QueryResultItem> iterator(int pageSize) {
+		return new LazyQueryIterator(pageSize);
 	}
 	
 	private MapByteArrayKey wrap(byte[] array) {
 		return new MapByteArrayKey(array);
 	}
 	
-	public int getPageSize() {
-		return pageSize;
-	}
-
-	protected void setPageSize(int pageSize) {
-		this.pageSize = pageSize;
-	}
+//	public int getPageSize() {
+//		return pageSize;
+//	}
+//
+//	protected void setPageSize(int pageSize) {
+//		this.pageSize = pageSize;
+//	}
 
 	public int getItemCount() {
 		return itemCount;
@@ -495,7 +529,12 @@ public class DerbyQueryResult {
 		private int itOffset = 0; //offset of element at which list begins
 		private int itIndex = 0;
 		private List<QueryResultItem> data;
+		private int pageSize = 0;
 
+		public LazyQueryIterator(int pageSize){
+			this.pageSize = pageSize;
+		}
+		
 		@Override
 		public boolean hasNext() {
 			return itOffset + itIndex + 1 < itemCount;
@@ -508,7 +547,7 @@ public class DerbyQueryResult {
 			if (data == null) {
 				itOffset = 0;
 				itIndex = 0;
-				data = getData(itOffset);
+				data = getData(itOffset, pageSize);
 				return data.get(itIndex);
 			}
 			itIndex++;
@@ -518,7 +557,7 @@ public class DerbyQueryResult {
 			//we need to load new portion of data
 			itOffset += data.size();
 			itIndex = 0;
-			data = getData(itOffset);
+			data = getData(itOffset, pageSize);
 			return data.get(itIndex);
 		}
 

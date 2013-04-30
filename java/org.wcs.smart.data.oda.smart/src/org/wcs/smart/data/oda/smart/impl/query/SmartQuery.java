@@ -46,7 +46,8 @@ import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.model.GriddedQuery;
-import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.IMemoryQuery;
+import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.Query.QueryType;
 import org.wcs.smart.query.model.SimpleQuery;
@@ -223,14 +224,14 @@ public class SmartQuery implements IQuery {
 		//the result set
 		if (smartQuery.getType() == QueryType.OBSERVATION) {
 			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
-			resultSet = new ObservationQueryResultSet((ObservationQuery) smartQuery, (SimpleQueryResultSetMetadata)getMetaData());
+			resultSet = new PagedQueryResultSet((IPagedQuery) smartQuery, (SimpleQueryResultSetMetadata)getMetaData());
 		}else if (smartQuery.getType() == QueryType.PATROL) {
 			((SimpleQuery) smartQuery).setDateFilter(dateFilter);
-			resultSet = new SimpleQueryResultSet((SimpleQuery) smartQuery,
+			resultSet = new MemoryQueryResultSet((IMemoryQuery) smartQuery,
 					(SimpleQueryResultSetMetadata)getMetaData());
 		}else if (smartQuery.getType() == QueryType.GRIDDED){
 			((GriddedQuery) smartQuery).setDateFilter(dateFilter);
-			resultSet = new SimpleQueryResultSet((GriddedQuery) smartQuery,
+			resultSet = new MemoryQueryResultSet((GriddedQuery) smartQuery,
 					(SimpleQueryResultSetMetadata)getMetaData());
 		} else if (smartQuery.getType() == QueryType.SUMMARY) {
 			((SummaryQuery) smartQuery).setDateFilter(dateFilter);
