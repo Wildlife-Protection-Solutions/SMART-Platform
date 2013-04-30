@@ -27,9 +27,9 @@ import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.query.engine.DerbyQueryResult;
+import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IResultItem;
-import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.QueryResultItem;
 
 /**
@@ -38,11 +38,11 @@ import org.wcs.smart.query.model.QueryResultItem;
  * @author elitvin
  * @since 1.0.0
  */
-public class ObservationQueryResultSet extends AbstractQueryResultSet {
+public class PagedQueryResultSet extends AbstractQueryResultSet {
 
 	private SimpleQueryResultSetMetadata metadata;
 
-	private DerbyQueryResult derbyResult;
+	private IPagedQueryResultSet pagedQueryResults;
 	private Map<Integer, IResultItem> weakMap = new WeakHashMap<Integer, IResultItem>();
 
 	/**
@@ -51,16 +51,16 @@ public class ObservationQueryResultSet extends AbstractQueryResultSet {
 	 * @param metadata
 	 *            query metadata
 	 */
-	public ObservationQueryResultSet(ObservationQuery query, SimpleQueryResultSetMetadata metadata) {
+	public PagedQueryResultSet(IPagedQuery query, SimpleQueryResultSetMetadata metadata) {
 		super(metadata);
 		this.metadata = metadata;
 
 		try {
-			derbyResult = query.getLastDerbyResult();
-			if (derbyResult == null){
-				derbyResult = query.getDerbyQueryResults(new NullProgressMonitor());
+			pagedQueryResults = query.getLastPagedResults();
+			if (pagedQueryResults == null){
+				pagedQueryResults = query.getPagedQueryResults(new NullProgressMonitor());
 			}
-			setMaxRows(derbyResult.getItemCount());
+			setMaxRows(pagedQueryResults.getItemCount());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -68,7 +68,7 @@ public class ObservationQueryResultSet extends AbstractQueryResultSet {
 	
 	@Override
 	protected int getDatasetSize() {
-		return derbyResult.getItemCount();
+		return pagedQueryResults.getItemCount();
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class ObservationQueryResultSet extends AbstractQueryResultSet {
 		if (item != null)
 			return item;
 		//item was not previously loaded or was garbage collected
-		List<QueryResultItem> data = derbyResult.getData(index);
+		List<QueryResultItem> data = pagedQueryResults.getData(index, 500);
 		for (int i = 0; i < data.size(); i++) {
 			weakMap.put(index + i, data.get(i));
 		}
@@ -91,9 +91,9 @@ public class ObservationQueryResultSet extends AbstractQueryResultSet {
 	@Override
 	public void close() throws OdaException {
 		super.close();
-		if (derbyResult != null)
-			derbyResult.destroy();
-		derbyResult = null;
+		if (pagedQueryResults != null)
+			pagedQueryResults.destroy();
+		pagedQueryResults = null;
 	}
 	
 }

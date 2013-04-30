@@ -36,8 +36,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.query.engine.DerbyQueryResult;
+import org.wcs.smart.query.engine.DerbyPagedObservationResult;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
@@ -54,10 +55,13 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 	private static final ISchedulingRule CELL_JOB_MUTEX = new LoadCellDataMutex();
 	
 	private TableViewer viewer;
-	private DerbyQueryResult input;
+	private IPagedQueryResultSet input;
+	private int pageSize = IPagedQueryResultSet.TABLE_DEFAULT_PAGE_SIZE;
 	
 	private QueryTableViewerColumn sortColumn = null;
 	private int direction = SWT.UP;
+	
+	 
 	
 	/**
 	 * As viewer.replace(...) is executed in separate thread noticed that we might get
@@ -79,11 +83,11 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput == null || newInput instanceof DerbyQueryResult) {
+		if (newInput == null || newInput instanceof IPagedQueryResultSet) {
 			if (input != null && !input.equals(newInput)) {
 				input.destroy();
 			}
-			input = (DerbyQueryResult) newInput;
+			input = (IPagedQueryResultSet) newInput;
 		}
 	}
 
@@ -104,7 +108,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		int from = index+1;
 		boolean isDown = from < viewer.getTable().getItemCount() && viewer.getElementAt(from) == null;
 		if (!isDown) {
-			from -= input.getPageSize();
+			from -= pageSize;
 			if (from < 0) {
 				from = 0;
 			}
@@ -121,7 +125,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 	}
 
 	private void maskItems(int from) {
-		int to = from + input.getPageSize() - 1;
+		int to = from + pageSize - 1;
 		if (to >= viewer.getTable().getItemCount()) {
 			to = viewer.getTable().getItemCount() - 1;
 		}
@@ -168,13 +172,13 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		private int from;
 		
 		public LoadCellDataJob(int from) {
-			super(MessageFormat.format(Messages.QueryLazyResultsContentProvider_LoadJob_Title, from, from + input.getPageSize()));
+			super(MessageFormat.format(Messages.QueryLazyResultsContentProvider_LoadJob_Title, from, from + pageSize));
 			this.from = from;
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			final List<QueryResultItem> data = input.getData(from);
+			final List<QueryResultItem> data = input.getData(from, pageSize);
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {

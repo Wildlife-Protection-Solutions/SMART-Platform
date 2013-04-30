@@ -83,6 +83,7 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_Progress_CreatingTempTable;
 	public static String DerbyGridEngine_Progress_PopulatingResults;
 	public static String DerbyGridEngine_Progress_RunningQuery;
+	public static String DerbyObservationEngine_Progress_CaInfo;
 	public static String DerbyObservationEngine_Progress_CategoryData;
 	public static String DerbyObservationEngine_Progress_FetchSize;
 	public static String DerbyObservationEngine_Progress_LeaderPilotData;

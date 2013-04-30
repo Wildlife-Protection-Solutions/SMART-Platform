@@ -27,8 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.query.engine.DerbyQueryResult;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.observation.QueryColumn;
 
@@ -128,8 +128,8 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	public void setData(DerbyQueryResult derbyResult, List<QueryColumn> queryColumns, File outputFile ) {
-		this.data = derbyResult != null ? derbyResult.iterator() : null;
+	public void setData(IPagedQueryResultSet derbyResult, List<QueryColumn> queryColumns, File outputFile ) {
+		this.data = derbyResult != null ? derbyResult.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE) : null;
 		this.dataSize = derbyResult != null ? derbyResult.getItemCount() : 0;
 		this.queryColumns = queryColumns;
 		this.outputFile = outputFile;

@@ -28,8 +28,8 @@ import java.util.List;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.query.model.GriddedQuery;
+import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IResultItem;
-import org.wcs.smart.query.model.SimpleQuery;
 
 /**
  * Result set for a simple SMART query.
@@ -37,7 +37,7 @@ import org.wcs.smart.query.model.SimpleQuery;
  * @author egouge
  * @since 1.0.0
  */
-public class SimpleQueryResultSet extends AbstractQueryResultSet {
+public class MemoryQueryResultSet extends AbstractQueryResultSet {
 
 	private List<IResultItem> items = null;
 	private SimpleQueryResultSetMetadata metadata;
@@ -48,7 +48,7 @@ public class SimpleQueryResultSet extends AbstractQueryResultSet {
 	 * @param metadata
 	 *            query metadata
 	 */
-	public SimpleQueryResultSet(SimpleQuery query, SimpleQueryResultSetMetadata metadata) {
+	public MemoryQueryResultSet(IMemoryQuery query, SimpleQueryResultSetMetadata metadata) {
 		super(metadata);
 		this.metadata = metadata;
 
@@ -71,7 +71,7 @@ public class SimpleQueryResultSet extends AbstractQueryResultSet {
 	 * @param metadata query metadata
 	 * @param query gridded query
 	 */
-	public SimpleQueryResultSet(GriddedQuery query, SimpleQueryResultSetMetadata metadata) {
+	public MemoryQueryResultSet(GriddedQuery query, SimpleQueryResultSetMetadata metadata) {
 		super(metadata);
 		this.metadata = metadata;
 		try {

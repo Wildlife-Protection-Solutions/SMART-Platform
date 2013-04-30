@@ -31,8 +31,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -48,7 +50,7 @@ import org.wcs.smart.query.parser.filter.IFilter;
 /**
  * Query engine for executing lazy queries using derby.
  * This engines create temporary tables that one to one correspond with the table
- * that user see. {@link DerbyQueryResult} obtains the name of this table and is
+ * that user see. {@link DerbyPagedObservationResult} obtains the name of this table and is
  * responsible for all other operations (fetching/sorting/deleting tables)
  * 
  * @author elitvin
@@ -56,12 +58,12 @@ import org.wcs.smart.query.parser.filter.IFilter;
  */
 public class DerbyObservationEngine extends DerbyQueryEngine2 {
 
-	public DerbyQueryResult executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+	public DerbyPagedObservationResult executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
 		
 		queryTempTable = QUERY_TEMP_TABLE_PREFIX + System.nanoTime();
 		observationTempTable = QUERY_OB_TEMP_TABLE_PREFIX + System.nanoTime();
 		
-		final DerbyQueryResult result = new DerbyQueryResult(queryTempTable);
+		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryTempTable);
 		
 		session.doWork(new Work() {
 			@Override
@@ -220,6 +222,17 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
+		
+		//create index on observation uuid as this is used in other query joings
+		sql = new StringBuilder();
+		sql.append("create index "); //$NON-NLS-1$
+		sql.append(queryTempTable);
+		sql.append("_obuuid_idx on "); //$NON-NLS-1$
+		sql.append(queryTempTable);
+		sql.append("(ob_uuid)"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+		
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
@@ -296,6 +309,9 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		
 		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_leader varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD p_pilot varchar(164)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD ca_id varchar(8)"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD ca_name varchar(256)"); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		if (monitor.isCanceled()){
 			return;
 		}
@@ -360,6 +376,26 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		monitor.worked(12);
 		if (monitor.isCanceled()){
 			return;
+		}
+		
+		//ca information
+		if (SmartDB.isMultipleAnalysis()){
+			//ca id and names are only used for cross-ca analysis
+			monitor.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
+			sql = new StringBuilder();
+			sql.append("UPDATE "); //$NON-NLS-1$
+			sql.append(queryTempTable);
+			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
+			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryTempTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			c.createStatement().executeUpdate(sql.toString());
+			sql = new StringBuilder();
+			sql.append("UPDATE "); //$NON-NLS-1$
+			sql.append(queryTempTable);
+			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
+			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryTempTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			c.createStatement().executeUpdate(sql.toString());
 		}
 		
 		//populating categories

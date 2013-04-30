@@ -24,7 +24,7 @@ package org.wcs.smart.query.ui.querytable;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.query.engine.DerbyQueryResult;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 /**
  * Lazy query results table for a given query.
@@ -57,7 +57,7 @@ public class QueryLazyResultsTable extends QueryResultsTable {
 		return table;
 	}
 
-	public void setInput(DerbyQueryResult result) {
+	public void setInput(IPagedQueryResultSet result) {
 		if (!table.getTable().isDisposed()){
 			if (result == null){
 				table.setItemCount(0);

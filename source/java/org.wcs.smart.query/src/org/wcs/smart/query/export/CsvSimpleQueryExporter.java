@@ -26,8 +26,8 @@ import java.io.FileWriter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.ObservationQuery;
-import org.wcs.smart.query.model.PatrolQuery;
+import org.wcs.smart.query.model.IMemoryQuery;
+import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryResultItem;
 import org.wcs.smart.query.model.SimpleQuery;
@@ -121,7 +121,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof ObservationQuery || query instanceof PatrolQuery){
+		if (query instanceof SimpleQuery && (query instanceof IPagedQuery || query instanceof IMemoryQuery)){
 			return true;
 		}
 		return false;
@@ -132,12 +132,12 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements IQuer
 	 */
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
-		if (query instanceof ObservationQuery) {
-			ObservationQuery qr = ((ObservationQuery)query);
-			super.setData(qr.getLastDerbyResult(), qr.getQueryColumns(), file);
+		
+		if (query instanceof IPagedQuery) {
+			IPagedQuery qr = ((IPagedQuery)query);
+			super.setData(qr.getLastPagedResults(), ((SimpleQuery)query).getQueryColumns(), file);
 		} else {
-			SimpleQuery q = ((SimpleQuery)query);
-			super.setData(q.getLastResults(), q.getQueryColumns(), file);
+			super.setData(((IMemoryQuery)query).getLastResults(), ((SimpleQuery)query).getQueryColumns(), file);
 		}
 		super.export(monitor);
 		

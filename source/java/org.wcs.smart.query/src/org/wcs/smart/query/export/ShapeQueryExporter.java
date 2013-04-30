@@ -123,7 +123,7 @@ public class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExp
 	@Override
 	public void export(Query query, File file, IProgressMonitor monitor) throws Exception {
 		ObservationQuery q = ((ObservationQuery)query);
-		super.setData(q.getLastDerbyResult(), q.getQueryColumns(), file);
+		super.setData(q.getLastPagedResults(), q.getQueryColumns(), file);
 		super.export(monitor);
 		
 	}
