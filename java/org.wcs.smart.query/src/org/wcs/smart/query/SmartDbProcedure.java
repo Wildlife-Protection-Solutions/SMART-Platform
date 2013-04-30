@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.query;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -36,6 +36,7 @@ import java.util.List;
  * @author elitvin
  * @since 1.0.0
  */
+
 public class SmartDbProcedure {
 
 	/**

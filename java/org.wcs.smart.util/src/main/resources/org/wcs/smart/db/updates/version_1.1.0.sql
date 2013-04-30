@@ -36,7 +36,7 @@ create procedure smart.cleanUpTempData()
     parameter style java
     external security definer
     modifies sql data
-    external name 'org.wcs.smart.SmartDbProcedure.cleanUpTempData';
+    external name 'org.wcs.smart.query.SmartDbProcedure.cleanUpTempData';
 
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO login;
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO manager;

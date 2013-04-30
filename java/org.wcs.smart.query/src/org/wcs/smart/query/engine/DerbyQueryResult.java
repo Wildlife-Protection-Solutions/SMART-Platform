@@ -70,7 +70,7 @@ public class DerbyQueryResult {
 	
 	private String queryTempTable;
 	private String sortSql = ""; //$NON-NLS-1$
-	private int pageSize = 30;
+	private int pageSize = 100;
 	private int itemCount = 0;
 	private int wpCount = 0;
 

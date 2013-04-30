@@ -739,7 +739,6 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_FilestoreLocation_Label;
 	public static String SmartInstallationInfoPage_GPSBabel_LocationLabel;
 	public static String SmartInstallationInfoPage_SystemLang_Label;
-	public static String SmartPlugIn_CleanUp_Error;
 	public static String SmartPlugIn_Error_Dialog_Title;
 	public static String SmartPlugIn_UnknownVersion;
 	public static String SmartPlugIn_VersionErrorMessage;

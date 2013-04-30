@@ -35,10 +35,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.internal.ui.MultiCaQueryPerspective;
 import org.wcs.smart.query.internal.ui.QueryPerspective;
@@ -266,12 +269,30 @@ public class QueryPlugIn extends AbstractUIPlugin {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				//clean up queries directory
 				File dir = getQueryTempDirectory();
 				if (dir.exists() && dir.isDirectory()){
 					File[] toDel = dir.listFiles();
 					for (int i = 0; i < toDel.length; i ++){
 						toDel[i].delete();
 					}
+				}
+				
+				//cleanup query tables
+				
+				Session session = SmartHibernateManager.openSession();
+				try{
+					session.beginTransaction();
+					SQLQuery q = session.createSQLQuery("CALL smart.cleanUpTempData()"); //$NON-NLS-1$
+					q.executeUpdate();
+					session.getTransaction().commit();
+				}catch (Exception ex){
+					if (session.getTransaction().isActive()){
+						session.getTransaction().rollback();
+					}
+					QueryPlugIn.log("Could not cleanup query temporary tables.", ex); //$NON-NLS-1$
+				}finally{
+					session.close();
 				}
 				return Status.OK_STATUS;
 			}
