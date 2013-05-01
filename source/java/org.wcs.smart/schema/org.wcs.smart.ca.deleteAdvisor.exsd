@@ -67,7 +67,7 @@
                   The advisor providing information if the item can be deleted or not.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.ca.IDeleteAdvisor"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.ca.advisors.IDeleteAdvisor"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -312,7 +312,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(getShell(),
-					MessageFormat.format(Messages.TeamPropertyPage_Error_DeletingTeam, new Object[]{team.getName()}), ex);
+					MessageFormat.format(Messages.TeamPropertyPage_Error_DeletingTeam + "\n\n" + ex.getLocalizedMessage(), new Object[]{team.getName()}), ex); //$NON-NLS-1$
 		}
 		tableViewer.refresh();
 	}
