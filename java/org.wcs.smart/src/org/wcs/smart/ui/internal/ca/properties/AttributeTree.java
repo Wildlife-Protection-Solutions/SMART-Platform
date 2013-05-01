@@ -525,6 +525,7 @@ public class AttributeTree {
 			}else{
 				if (a.getTree() == null){
 					a.setTree(new ArrayList<AttributeTreeNode>());
+					viewer.setInput((Attribute)viewer.getInput());
 				}
 				a.getTree().add(it);
 			}
