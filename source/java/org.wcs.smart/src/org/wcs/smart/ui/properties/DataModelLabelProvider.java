@@ -83,7 +83,7 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 		
 		if (element instanceof DmObject){
 			DmObject obj = (DmObject)element;
-			if (currentLang != null){
+			if (currentLang != null && !currentLang.equals(SmartDB.getCurrentLanguage())){
 				String x = obj.findNameNull(currentLang);
 				if (x==null){
 					x = obj.getName();
