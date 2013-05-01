@@ -340,5 +340,16 @@
             name="%planconfig.preferencepage.name">
       </page>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.plan.advisors.StationDeleteAdvisor"
+            class="org.wcs.smart.ca.Station">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.plan.advisors.TeamDeleteAdvisor"
+            class="org.wcs.smart.patrol.model.Team">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>

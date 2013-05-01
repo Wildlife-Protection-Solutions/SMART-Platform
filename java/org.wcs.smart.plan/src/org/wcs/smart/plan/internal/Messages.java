@@ -195,6 +195,8 @@ public class Messages extends NLS {
 	public static String SpatialPlanTargetPropertyPage_Name_Label;
 	public static String SpatialPlanTargetPropertyPage_Name_Required_Error;
 	public static String SpatialPlanTargetPropertyPage_PageName;
+	public static String StationDeleteAdvisor_InvalidObjectType;
+	public static String StationDeleteAdvisor_StationPlanLinkError;
 	public static String StationTeamPlanWizardPage_Message;
 	public static String StationTeamPlanWizardPage_PageName;
 	public static String TargetListViewer_Summary_Label;
@@ -217,6 +219,8 @@ public class Messages extends NLS {
 	public static String TargetPropertyPage_Update_Title;
 	public static String TargetsPlanWizardPage_Message;
 	public static String TargetsPlanWizardPage_PageName;
+	public static String TeamDeleteAdvisor_InvalidObjectError;
+	public static String TeamDeleteAdvisor_TeamPlanLinkError;
 	public static String TemplateSelectPlanWizardPage_Filter_Link;
 	public static String TemplateSelectPlanWizardPage_Message;
 	public static String TemplateSelectPlanWizardPage_PageName;

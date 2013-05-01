@@ -50,7 +50,6 @@ public class IntelligenceEventManager {
 		INTELLIGENCE_ADDED,
 		INTELLIGENCE_DELETED,
 		INTELLIGENCE_MODIFIED
-//		INTELLIGENCE_SAVED
 	}
 
 	/**

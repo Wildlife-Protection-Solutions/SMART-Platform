@@ -19,25 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model;
+package org.wcs.smart.plan.advisors;
 
-import javax.persistence.Transient;
+import java.text.MessageFormat;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.model.Plan;
 
 /**
- * Interface of queries whose results are available through
- * a paging interface.
- * 
+ * Delete advisor for stations
  * @author Emily
  *
  */
-public interface IPagedQuery {
-	
-	@Transient
-	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor) throws Exception;
-		
+public class TeamDeleteAdvisor implements IDeleteAdvisor {
 
-	@Transient
-	public IPagedQueryResultSet getLastPagedResults();
+	@Override
+	public String canDelete(Object object, Session session) {
+		if (!(object instanceof Team)){
+			return Messages.TeamDeleteAdvisor_InvalidObjectError;
+		}
+		
+		Long cnt = (Long) session.createCriteria(Plan.class).add(Restrictions.eq("team", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		if (cnt == 0){
+			return null;
+		}else{
+			return MessageFormat.format(Messages.TeamDeleteAdvisor_TeamPlanLinkError,
+					new Object[]{((Team)object).getName(), cnt });
+		}
+	}
+
 }

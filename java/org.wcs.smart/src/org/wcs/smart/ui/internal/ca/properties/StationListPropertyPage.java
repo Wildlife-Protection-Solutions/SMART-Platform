@@ -306,7 +306,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 				
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.StationListPropertyPage_Error_CouldNotDelete + s.getName(), ex);
+			SmartPlugIn.displayLog(getShell(), Messages.StationListPropertyPage_Error_CouldNotDelete + s.getName() + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 		}	
 		
 		tableViewer.refresh();
