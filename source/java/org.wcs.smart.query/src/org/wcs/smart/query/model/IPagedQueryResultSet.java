@@ -46,7 +46,7 @@ public interface IPagedQueryResultSet {
 	 * A larger page size for iterating over all features
 	 * (for example in a map). 
 	 */
-	public static final int MAP_PAGE_SIZE = 500;
+	public static final int MAP_PAGE_SIZE = 1000;
 	
 	/**
 	 * Close and destroy the paged results set

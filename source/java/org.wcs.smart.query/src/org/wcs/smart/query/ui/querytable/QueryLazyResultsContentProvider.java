@@ -36,7 +36,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.query.engine.DerbyPagedObservationResult;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryResultItem;
@@ -178,6 +177,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			if (input == null){ return Status.OK_STATUS; }
 			final List<QueryResultItem> data = input.getData(from, pageSize);
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override

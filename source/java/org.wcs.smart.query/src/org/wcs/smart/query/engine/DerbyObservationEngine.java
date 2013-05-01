@@ -233,6 +233,14 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
+		sql = new StringBuilder();
+		sql.append("create index "); //$NON-NLS-1$
+		sql.append(queryTempTable);
+		sql.append("_ob_category_uuid_idx on "); //$NON-NLS-1$
+		sql.append(queryTempTable);
+		sql.append("(ob_uuid)"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
