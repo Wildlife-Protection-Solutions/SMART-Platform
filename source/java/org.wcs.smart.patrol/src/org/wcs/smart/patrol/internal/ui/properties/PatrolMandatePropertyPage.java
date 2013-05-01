@@ -310,7 +310,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog( 
-					MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_DeletingMandate, new Object[]{mandate.getName()}), ex);
+					MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_DeletingMandate + "\n\n" + ex.getLocalizedMessage(), new Object[]{mandate.getName()}), ex); //$NON-NLS-1$
 		}	
 		
 		tableViewer.refresh();
