@@ -27,6 +27,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -44,6 +48,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -51,6 +56,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -80,10 +86,36 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	private Label lblSelectAttribute; // select attribute label
 
 	/* Data Model Items */
-	private Language defaultLang; // current working language
+	private Language lang; // current working language
 	private Category category; // category attribute being added to
 	private DataModel dm; // data model being updated
 
+	private Job loadAttributesJob = new Job("Loading Attributes"){ //$NON-NLS-1$
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			final ArrayList<Attribute> attributeList = new ArrayList<Attribute>();
+			attributeList.addAll(dm.getAttributes());
+			Collections.sort(attributeList, new Comparator<Attribute>() {
+				@Override
+				public int compare(Attribute o1, Attribute o2) {
+					String name1 = findName(o1, lang);
+					String name2 = findName(o2, lang);
+					return Collator.getInstance().compare(name1,  name2);
+				}
+			});
+			final Object[] input = attributeList.toArray();
+			Display.getDefault().asyncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					checkboxTableViewer.setInput(input);
+					
+				}});
+			return Status.OK_STATUS;
+		}
+		
+	};
 	/**
 	 * Creates a new attribute dialog that prompts the user if they want to add
 	 * existing or create new attributes
@@ -97,13 +129,37 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	 *            the current language being modified
 	 */
 	protected AddAttributeDialog1(Shell parentShell, Category cat,
-			DataModel dm, Language defaultLang) {
+			DataModel dm, Language lang) {
 		super(parentShell);
 		this.category = cat;
 		this.dm = dm;
-		this.defaultLang = defaultLang;
+		this.lang = lang;
 	}
 
+	/*
+	 * find the attribute name; first looking for the name
+	 * that matches the language then the default  if the
+	 * language provided is the default it calls getName instead of
+	 * findName as this is much faster 
+	 */
+	private String findName(Attribute a, Language lang){
+		String name = null;
+		if(lang.equals(SmartDB.getCurrentLanguage())){
+			name = a.getName();
+			if (name != null){
+				return name;
+			}
+		}
+		name = a.findNameNull(lang);
+		if (name != null){
+			return name;
+		}
+		name = a.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		if (name != null){
+			return name;
+		}
+		return "";
+	}
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
@@ -166,8 +222,8 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		});
 
 		Composite compAddExisting = new Composite(composite, SWT.NONE);
-		compAddExisting.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
+		compAddExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+				true, 1, 1));
 		compAddExisting.setLayout(new GridLayout(2, false));
 		((GridLayout) compAddExisting.getLayout()).marginLeft = 20;
 
@@ -182,6 +238,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		Table tblAttributes = checkboxTableViewer.getTable();
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		gd.heightHint = 300;
+		gd.widthHint = 300;
 		tblAttributes.setLayoutData(gd);
 		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 
@@ -194,24 +251,19 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 			public String getText(Object element) {
 				if (element instanceof Attribute) {
 					Attribute att = (Attribute) element;
-					return att.findName(defaultLang) + " [" + att.getKeyId() //$NON-NLS-1$
-							+ "]"; //$NON-NLS-1$
+					return findName(att, lang) + " [" + att.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					
 				}
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
 		});
-		ArrayList<Attribute> attributeList = new ArrayList<Attribute>();
-		attributeList.addAll(dm.getAttributes());
-		Collections.sort(attributeList, new Comparator<Attribute>() {
-			@Override
-			public int compare(Attribute o1, Attribute o2) {
-				String name1 = o1.findName(defaultLang);
-				String name2 = o2.findName(defaultLang);
-				return Collator.getInstance().compare(name1,  name2);
-			}
-		});
-		checkboxTableViewer.setInput(attributeList.toArray());
 
+		checkboxTableViewer.setInput(new String[]{Messages.AddAttributeDialog1_LoadingAttributesText});
+		
+		/* load attributes */
+		loadAttributesJob.setSystem(true);
+		loadAttributesJob.schedule();
+		
 		if (dm.getAttributes().size() == 0) {
 			btnAddExsiting.setSelection(false);
 			btnAddNew.setSelection(true);
@@ -224,18 +276,18 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 			public Collection<Attribute> getSiblings() {
 				return null;
 			}
-
 		};
-
+		attributeInfo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
 		checkboxTableViewer
 				.addSelectionChangedListener(new ISelectionChangedListener() {
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
-						Attribute sel = (Attribute) (((StructuredSelection) checkboxTableViewer
-								.getSelection()).getFirstElement());
-						if (sel != null) {
+						Object x = (((StructuredSelection) checkboxTableViewer.getSelection()).getFirstElement());
+						if (x!= null && x instanceof Attribute){
+							Attribute sel = (Attribute)x ;
 							attributeInfo.setVisible(true);
-							attributeInfo.setAttribute(sel, defaultLang);
+							attributeInfo.setAttribute(sel, lang);
 						} else {
 							attributeInfo.setVisible(false);
 						}
@@ -249,7 +301,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		//set title message for dialog
-		setMessage(Messages.AddAttributeDialog1_DialogMessage + category.findName(defaultLang));
+		setMessage(Messages.AddAttributeDialog1_DialogMessage + category.findName(lang));
 		return myparent;
 	}
 
@@ -287,7 +339,10 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	private void addAttributes(Category cat, DataModel dm) {
 		Object[] checked = checkboxTableViewer.getCheckedElements();
 		for (int i = 0; i < checked.length; i++) {
-			dm.addExistingAttribute((Attribute) checked[i], cat);
+			Object x = checked[i];
+			if (x instanceof Attribute){
+				dm.addExistingAttribute((Attribute) checked[i], cat);
+			}
 		}
 	}
 

@@ -131,10 +131,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 */
 	public void setDataModel(DataModel dm){
 		this.dataModel = dm;
-		if (viewer != null){
-			viewer.setInput(this.dataModel);
-			viewer.refresh();
-		}
 	}
 	
 	/**
@@ -245,7 +241,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		gd.heightHint = 300;
 		viewer.getTree().setLayoutData(gd);
 		viewer.setAutoExpandLevel(3);
-		viewer.setInput(this.dataModel);
+		
+		//schedule this for later
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				viewer.setInput(dataModel);
+			}});
+		
 		
 		int operations = DND.DROP_MOVE;
 		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
@@ -797,7 +800,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		}
 		
 		//show dialog
-		AddAttributeDialog1 d1 = new AddAttributeDialog1(getShell(), parent, (DataModel)viewer.getInput(), currentCa.getDefaultLanguage());
+		AddAttributeDialog1 d1 = new AddAttributeDialog1(getShell(), parent, (DataModel)viewer.getInput(), getLanguage());
 		int ret = d1.open();
 		if (ret == AddAttributeDialog1.FINISH){
 			refreshTree();

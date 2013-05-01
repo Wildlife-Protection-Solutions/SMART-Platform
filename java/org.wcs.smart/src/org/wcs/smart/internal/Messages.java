@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog1_DialogMessage;
 	public static String AddAttributeDialog1_DialogQuestion_Label;
 	public static String AddAttributeDialog1_DialogTitle;
+	public static String AddAttributeDialog1_LoadingAttributesText;
 	public static String AddAttributeDialog1_OpAddExisting;
 	public static String AddAttributeDialog1_OpCreateNew;
 	public static String AddAttributeDialog1_SelectAttribute_Label;

@@ -98,9 +98,9 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 			
 			dataModel = ppd.dm;
 		}
-		
 		dialog.setDataModel(dataModel);
 		dialog.open();
+		
 		return null;
 	}
 
