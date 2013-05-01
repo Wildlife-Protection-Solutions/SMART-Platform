@@ -265,15 +265,18 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 	private void populateTemporaryTableCategory(Connection c, Session session) throws SQLException {
 		DataModel dataModel = QueryDataModelManager.getInstance().getDataModel();
 		// add data model category columns
-		int numCategory = 0;
+		int numCategory = -1;
 		for (Category cat : dataModel.getActiveCategories()) {
 			numCategory = Math.max(numCategory, getDepth(cat));
 		}
 		
-		for (int i = 0; i < numCategory; i++) {
+		for (int i = 0; i <= numCategory; i++) {
 			c.createStatement().execute("ALTER TABLE "+queryTempTable+" ADD category_"+i+" varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-
+		if (numCategory < 0){
+			//nothing to update
+			return;
+		}
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
 		ResultSet rs = c.createStatement().executeQuery("SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryTempTable);  //$NON-NLS-1$
 		try {
@@ -283,24 +286,25 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 					continue;
 				String[] names = getCategoryLabels(uuid, session);
 				int count = names.length;
+				int depth = Math.min(numCategory+1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
 				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement
 				if (statement == null) {
 					//that means that we didn't create update statement for this number of columns to update -> create one
 					StringBuilder colunms = new StringBuilder();
-					for (int j = 0; j < count; j++) {
-						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
-						if (j != count-1) {
+					for (int j = 0; j < depth; j++) {
+						if (j > 0){
 							colunms.append(", "); //$NON-NLS-1$
 						}
+						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					statement = c.prepareStatement("UPDATE "+queryTempTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					num2Statement.put(count, statement);
 				}
 				
-				for (int i = 0; i < count; i++) {
+				for (int i = 0; i <  depth; i++) {
 					statement.setString(i+1, names[i]);
 				}
-				statement.setBytes(count+1, uuid);
+				statement.setBytes( depth+1, uuid);
 				statement.executeUpdate();
 			}
 		} finally {
@@ -471,7 +475,7 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 	 * @return maximum depth
 	 */
 	private int getDepth(Category cat) {
-		int maxDepth = 0;
+		int maxDepth = -1;
 		for (Category child : cat.getActiveChildren()) {
 			maxDepth = Math.max(maxDepth, getDepth(child));
 		}
