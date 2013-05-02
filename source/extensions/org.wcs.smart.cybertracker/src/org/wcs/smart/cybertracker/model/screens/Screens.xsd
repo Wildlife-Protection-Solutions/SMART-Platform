@@ -71,6 +71,13 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:int" name="MinValue" minOccurs="0"/>
 						<xs:element type="xs:int" name="MaxValue" minOccurs="0"/>
 						<xs:element type="xs:string" name="Translate__MajorScreenId" />
+						<xs:element type="xs:string" name="Translate__MinorScreenId" />
+ 						<xs:element type="xs:string" name="ShowEdit" />
+						<xs:element type="xs:string" name="ShowGPS" />
+						<xs:element type="xs:string" name="ShowMajor" />
+						<xs:element type="xs:string" name="ShowMinor" />
+						<xs:element type="xs:string" name="ShowBack" />
+						<xs:element type="xs:string" name="ShowNext" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>

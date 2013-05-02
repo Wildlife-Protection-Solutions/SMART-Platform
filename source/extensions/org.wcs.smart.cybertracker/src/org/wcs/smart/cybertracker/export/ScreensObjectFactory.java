@@ -128,6 +128,9 @@ public class ScreensObjectFactory {
     <Node>
         <Id>???</Id>
         <Name>???</Name>
+        <Items>
+            <Value>???</Value>
+        </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
             <NextId>13</NextId>
@@ -139,10 +142,14 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeNumber(String id, String name) {
+	public static Node createNodeNumber(String id, String name, String itemId) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
+		if (itemId != null) {
+			node.setItems(new Node.Items());
+			node.getItems().getValue().add(itemId);
+		}
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 
 		Node.Data data = new Node.Data();
@@ -153,7 +160,7 @@ public class ScreensObjectFactory {
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
 		controls.getControl().add(createControl11());
-		controls.getControl().add(createNumberControl12());
+		controls.getControl().add(createNumberControl12(itemId));
 		data.setControls(controls);
 		node.setData(data);
 		
@@ -229,7 +236,6 @@ public class ScreensObjectFactory {
     <Control>
         <Type>{1BAF7223-9DF3-44E2-8B0E-969D951492AC}</Type>
         <Id>6</Id>
-        <BorderWidth>0</BorderWidth> <!-- present in radio, but missing in number & note -->
         <BorderStyle>0</BorderStyle>
         <Align>1</Align>
         <Left>0</Left>
@@ -243,7 +249,6 @@ public class ScreensObjectFactory {
 		Controls.Control control = new Controls.Control();
 		control.setType("{1BAF7223-9DF3-44E2-8B0E-969D951492AC}"); //$NON-NLS-1$
 		control.setId(6);
-//		control.setBorderWidth(0);
 		control.setBorderStyle(0);
 		control.setAlign(1);
 		control.setLeft(0);
@@ -343,9 +348,10 @@ public class ScreensObjectFactory {
         <DisplayHeight>50</DisplayHeight>
         <MinValue>0</MinValue>
         <MaxValue>99999999</MaxValue>
+        <Translate__Element>???</Translate__Element>
     </Control>
 	 */
-	public static Controls.Control createNumberControl12() {
+	public static Controls.Control createNumberControl12(String element) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{5D9A98BA-0F3A-4B6C-9439-7D72D6B06F9E}"); //$NON-NLS-1$
 		control.setLockProperties("Decimals;Digits;Result Element"); //$NON-NLS-1$
@@ -364,6 +370,7 @@ public class ScreensObjectFactory {
 		control.setDisplayHeight(50);
 		control.setMinValue(0);
 		control.setMaxValue(99999999);
+		control.setTranslateElement(element);
 		return control;
 	}
 
@@ -391,5 +398,5 @@ public class ScreensObjectFactory {
 		control.setHeight(262);
 		return control;
 	}
-	
+
 }
