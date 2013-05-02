@@ -42,6 +42,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -54,13 +55,19 @@ import org.wcs.smart.hibernate.SmartDB;
  * @since 1.0.0
  */
 public class CyberTrackerExporter {
+	
+	private static CyberTrackerId rootId;
+	private static Elements elements;
 
 	public static File export(File file, IProgressMonitor monitor) throws Exception {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
+			elements = buildEmptyElements();
 			return performExport(file, monitor, session);
-		} finally{
+		} finally {
+			elements = null;
+			rootId = null;
 			session.getTransaction().rollback();
 			session.close();
 		}
@@ -70,6 +77,7 @@ public class CyberTrackerExporter {
 		DataModel dataModel = getDataModel(session);
 		Category root = CyberTrackerUtil.buildRoot(dataModel);
 		Map<Category, CyberTrackerId> keyMap = CyberTrackerUtil.buildMap(root);
+		rootId = keyMap.get(root);
 		
 		List<Node> screenNodes = buildScreenNodes(root, keyMap);
 		Screens screens = ScreensObjectFactory.createScreens(screenNodes);
@@ -80,8 +88,8 @@ public class CyberTrackerExporter {
 			outS.close();
 		}
 		
-		Elements elements = buildEmptyElements();
-		addElements(elements, root, keyMap);
+//		Elements elements = buildEmptyElements();
+		addCategoryElements(elements, root, keyMap);
 		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream("c:/dev/CyberTracker/out/Elements.xml")); //$NON-NLS-1$
 		try {
 			writeDataModel(elements, outE, Elements.class);
@@ -123,13 +131,20 @@ public class CyberTrackerExporter {
 		List<Attribute> attrList = new ArrayList<Attribute>();
 		category.getAllAttribute(attrList, true);
 		List<Node> result = new ArrayList<Node>();
-		CyberTrackerId id = keyMap.get(category);
+		CyberTrackerId startId = keyMap.get(category);
+		CyberTrackerId id = startId;
 		for (Attribute attribute : attrList) {
+			CyberTrackerId idItem = new CyberTrackerId(); //id for result item in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
-				result.add(ScreensObjectFactory.createNodeNumber(id.getNodeId(), attribute.getName()));
+			{
+				Node node = ScreensObjectFactory.createNodeNumber(id.getNodeId(), attribute.getName(), idItem.getItemId());
+				result.add(node);
 				id = new CyberTrackerId();
+				Control control2 = node.getData().getControls().getControl().get(0);
+				control2.setTranslateNextScreenId(id.getNodeId());
 				break;
+			}
 			case TEXT:
 				result.add(ScreensObjectFactory.createNodeNote(id.getNodeId(), attribute.getName()));
 				id = new CyberTrackerId();
@@ -139,26 +154,67 @@ public class CyberTrackerExporter {
 			case TREE:
 				break;
 			case BOOLEAN:
+			{
+				List<String> values = addCustomElements(elements, "Yes", "No", "Undefined");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), attribute.getName(), values, null, null);
+				result.add(node);
+				id = new CyberTrackerId();
+				Control control2 = node.getData().getControls().getControl().get(0);
+				control2.setTranslateNextScreenId(id.getNodeId());
 				//TODO: implement!!!!
 				//result.add(ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks);
 				break;
 			}
+			}
+			addElementsItem(elements, "#"+attribute.getName(), idItem.getItemId()); //$NON-NLS-1$
+		}
+		if (result.size() > 0) {
+			Node lastNode = result.get(result.size()-1);
+			Control control2 = lastNode.getData().getControls().getControl().get(0);
+			control2.setShowMajor("True"); //$NON-NLS-1$
+			control2.setShowMinor("True"); //$NON-NLS-1$
+			control2.setShowNext("False"); //$NON-NLS-1$
+			control2.setTranslateNextScreenId(null); //no next button at last screen
+			control2.setTranslateMajorScreenId(rootId.getNodeId());
+			control2.setTranslateMinorScreenId(startId.getNodeId());
 		}
 		return result;
 	}
 
-	private static void addElements(Elements elements, Category category, Map<Category, CyberTrackerId> keyMap) {
-		Elements.List.Items.Item item = new Elements.List.Items.Item();
-		item.setName(category.getName());
-		item.setId(keyMap.get(category).getItemId());
-		elements.getList().getItems().getItem().add(item);
-		if (category.getChildren() != null) {
+	private static void addCategoryElements(Elements elements, Category category, Map<Category, CyberTrackerId> keyMap) {
+		addElementsItem(elements, category.getName(), keyMap.get(category).getItemId());
+		if (category.getChildren() != null || category.getChildren().isEmpty()) {
 			for (Category child : category.getChildren()) {
-				addElements(elements, child, keyMap);
+				addCategoryElements(elements, child, keyMap);
 			}
 		}
 	}
 
+	/**
+	 * For given labels function:
+	 *  - creates items
+	 *	- adds them to elements
+	 *  - returns the list of item ids
+	 * @param elements
+	 * @return
+	 */
+	private static List<String> addCustomElements(Elements elements, String... labels) {
+		List<String> idList = new ArrayList<String>();
+		for (String string : labels) {
+			CyberTrackerId id = new CyberTrackerId();
+			addElementsItem(elements, string, id.getItemId());
+			idList.add(id.getItemId());
+		}
+		return idList;
+	}
+	
+	private static void addElementsItem(Elements elements, String name, String id) {
+		Elements.List.Items.Item item = new Elements.List.Items.Item();
+		item.setName(name);
+		item.setId(id);
+		elements.getList().getItems().getItem().add(item);
+	}
+	
 	private static void writeDataModel(Object obj, OutputStream file, Class<?> clazz) throws JAXBException, IOException {
 		JAXBContext context = JAXBContext.newInstance(clazz);
 		Marshaller marshaller = context.createMarshaller();
