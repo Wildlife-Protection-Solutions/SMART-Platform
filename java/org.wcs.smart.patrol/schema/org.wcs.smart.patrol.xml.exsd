@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart.patrol" id="org.wcs.smart.patrol.xml" name="XML Export/Import Contribution"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         Extension point that adds extra data to the patrol xml export.  This allows other plugins to link to patrol data and include those links when exporting the patrol.
       </documentation>
    </annotation>
 
