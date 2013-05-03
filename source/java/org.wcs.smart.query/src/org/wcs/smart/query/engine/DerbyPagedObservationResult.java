@@ -589,6 +589,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 							QueryPlugIn.logSql(sql);
 						} catch (Exception ex) {
 							// eatme
+							ex.printStackTrace();
 						}
 						//list elements value table
 						try {
@@ -597,6 +598,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 							QueryPlugIn.logSql(sql);
 						} catch (Exception ex) {
 							// eatme
+							ex.printStackTrace();
 						}
 						//tree elements value table
 						try {
@@ -605,12 +607,24 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 							QueryPlugIn.logSql(sql);
 						} catch (Exception ex) {
 							// eatme
+							ex.printStackTrace();
 						}
 					}
 				});
+			}catch (Exception ex){
+				QueryPlugIn.log("Failed to cleanup temp query tables", ex); //$NON-NLS-1$
 			} finally {
-				session.getTransaction().commit();
-				session.close();
+				
+				try{
+					session.getTransaction().commit();
+				}catch (Exception ex){
+					//sometimes during shut down the connection is closed before this 
+					//commit is called
+				}
+				
+				try{
+					session.close();
+				}catch(Exception ex){}
 			}
 			return Status.OK_STATUS;
 		}
