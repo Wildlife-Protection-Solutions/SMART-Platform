@@ -98,29 +98,6 @@
                   tooltip="%backup.command.tooltip">
             </command>
             <command
-                  commandId="org.wcs.smart.auto_backup"
-                  icon="images/icons/obj16/cog_go.png"
-                  label="%configurebackup.command.label"
-                  mnemonic="%autobackup.command.mnemonic"
-                  style="push"
-                  tooltip="%configurebackup.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
-            </command>
-            <command
                   commandId="org.wcs.smart.changeUserPassword"
                   icon="images/icons/etool16/changepass.png"
                   id="org.wcs.menu.file.changeuserpassword"
@@ -565,10 +542,6 @@
             name="%exportca.command.name">
       </command>
       <command
-            id="org.wcs.smart.auto_backup"
-            name="%configurebackup.command.name">
-      </command>
-      <command
             id="org.wcs.smart.showBasemaps"
             name="%basemaps.command.name">
       </command>
@@ -730,16 +703,6 @@
       <handler
             class="org.wcs.smart.ui.internal.backup.ExportCaHandler"
             commandId="org.wcs.smart.exportCa">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.ui.internal.backup.AutoBackupConfigHandler"
-            commandId="org.wcs.smart.auto_backup">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -1119,6 +1082,11 @@
             class="org.wcs.smart.ui.internal.preference.GpsBabelPreferencePage"
             id="org.wcs.smart.preference.GpsBabel"
             name="%gpsbabel.preferencepage.name">
+      </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.AutoBackupPerferencePage"
+            id="org.wcs.smart.autobackup"
+            name="Automatic Backup Configuration">
       </page>
    </extension>
    <extension
