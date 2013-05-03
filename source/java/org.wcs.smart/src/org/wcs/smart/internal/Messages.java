@@ -155,8 +155,6 @@ public class Messages extends NLS {
 	public static String AutoBackupDialog_Error_InvalidDirectory;
 	public static String AutoBackupDialog_Error_InvalidNumberDays;
 	public static String AutoBackupDialog_Message;
-	public static String AutoBackupDialog_SaveButton;
-	public static String AutoBackupDialog_SellTitle;
 	public static String AutoBackupDialog_TimeLabel;
 	public static String AutoBackupDialog_TimerInfo;
 	public static String AutoBackupDialog_Title;
@@ -167,6 +165,7 @@ public class Messages extends NLS {
 	public static String AutoBackupEngine_ErrorReadingPropFile;
 	public static String AutoBackupEngine_ErrorWirtingPropFile;
 	public static String AutoBackupEngine_MakeDirectoryFailed;
+	public static String AutoBackupPerferencePage_InvalidUser;
 	public static String BackupDialog_BrowseButton;
 	public static String BackupDialog_Confirm_DialogTitle;
 	public static String BackupDialog_Confirm_Message;

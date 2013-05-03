@@ -8,7 +8,7 @@
       <documentation>
          This extension point should be implemented if a plugin needs to export additional data when a conservation area is exported.
 
-By default all tables mapped to hibernate will be exported and do not need to be exported by the plugin.  If the plugin relies on a table not mapped directly to a hibernate class or export addition information it should implement this plugin.
+By default all tables mapped to hibernate (with conservation area properties) will be exported and do not need to be exported by the plugin.  If the plugin relies on a table not mapped directly to a conservation area or exporting additional database information is needed, this extension point should be used.
       </documentation>
    </annotation>
 
