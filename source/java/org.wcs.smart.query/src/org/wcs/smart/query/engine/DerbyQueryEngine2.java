@@ -263,6 +263,11 @@ public class DerbyQueryEngine2 implements QueryEngine {
 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
+		
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + observationTempTable + "_obuuid_idx on " + observationTempTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
 	}
 	
 	
