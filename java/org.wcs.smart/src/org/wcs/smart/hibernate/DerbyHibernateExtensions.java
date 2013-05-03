@@ -42,7 +42,8 @@ public class DerbyHibernateExtensions {
 		try {
 			DriverManager.getConnection("jdbc:derby:;shutdown=true"); //$NON-NLS-1$
 		} catch (Exception e) {
-			//eatme - this will always through an exception
+			//e.printStackTrace();
+			//eatme - this will always throw an exception
 			//e.printStackTrace();
 		}
 		
