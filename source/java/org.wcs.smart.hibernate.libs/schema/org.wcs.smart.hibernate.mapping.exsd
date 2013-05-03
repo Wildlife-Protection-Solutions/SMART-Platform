@@ -6,7 +6,9 @@
          <meta.schema plugin="org.wcs.smart.hibernate.libs" id="org.wcs.smart.hibernate.mapping" name="Hibernate Entity Class"/>
       </appinfo>
       <documentation>
-         Provides a class that should be added to the hibernate mapping.
+         An extension point that allows plugins to register Hibernate objects.  The java class should be annotated with the required Hibernate annotations.
+
+All extensions will be registered with Hibernate.
       </documentation>
    </annotation>
 
