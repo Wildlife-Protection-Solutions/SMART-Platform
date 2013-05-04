@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.model.screens.Node;
@@ -103,39 +104,75 @@ public class CyberTrackerUtil {
 		}
 	}
 
+	public static Map<AttributeTreeNode, CyberTrackerId> buildTreeNodeMap(List<AttributeTreeNode> treeNodes) {
+		Map<AttributeTreeNode, CyberTrackerId> map = new HashMap<AttributeTreeNode, CyberTrackerId>();
+		mapTreeNodes(treeNodes, map);
+		return map;
+	}
+
+	private static void mapTreeNodes(List<AttributeTreeNode> treeNodes, Map<AttributeTreeNode, CyberTrackerId> map) {
+		if (treeNodes == null)
+			return;
+		for (AttributeTreeNode attrTreeNode : treeNodes) {
+			map.put(attrTreeNode, new CyberTrackerId());
+			if (attrTreeNode.getActiveChildren() != null && !attrTreeNode.getActiveChildren().isEmpty()) {
+				mapTreeNodes(attrTreeNode.getChildren(), map);
+			}
+		}
+	}
+	
 	public static Node createRadioNode(Category category, Map<Category, CyberTrackerId> keyMap) {
 		String id = keyMap.get(category).getNodeId();
 		String name = category.getName();
-		List<String> values = listNodeValues(category, keyMap);
-		String trElements = translateElements(category, keyMap);
-		String trLinks = translateLinks(category, keyMap);
-		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks);
+		List<CyberTrackerId> childIds = getChildrenIds(category.getChildren(), keyMap);
+		List<String> values = listItemIds(childIds);
+		String trElements = translateElements(childIds);
+		String trLinks = translateLinks(childIds, true);
+		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, null);
 	}
 
-	private static List<String> listNodeValues(Category category, Map<Category, CyberTrackerId> keyMap) {
-		if (category.getChildren() == null || category.getChildren().isEmpty())
-			return null;
-		List<String> result = new ArrayList<String>();
-		for (Category child : category.getChildren()) {
-			result.add(keyMap.get(child).getItemId());
+	public static Node createRadioNode(String id, String name, List<CyberTrackerId> childIds) {
+		List<String> values = listItemIds(childIds);
+		String trElements = translateElements(childIds);
+		String trLinks = translateLinks(childIds, true);
+		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, null);
+	}
+	
+	public static List<CyberTrackerId> getChildrenIds(List<?> objects, Map<?, CyberTrackerId> keyMap) {
+		List<CyberTrackerId> result = new ArrayList<CyberTrackerId>();
+		if (objects == null)
+			return result;
+		for (Object child : objects) {
+			result.add(keyMap.get(child));
 		}
 		return result;
 	}
-
-	private static String translateElements(Category category, Map<Category, CyberTrackerId> keyMap) {
+	
+	public static List<String> listItemIds(List<CyberTrackerId> ids) {
+		List<String> result = new ArrayList<String>();
+		for (CyberTrackerId id : ids) {
+			result.add(id.getItemId());
+		}
+		return result;
+	}
+	
+	public static String translateElements(List<CyberTrackerId> ids) {
 		StringBuilder elements = new StringBuilder(); 
-		for (Category child : category.getChildren()) {
-			CyberTrackerId id = keyMap.get(child);
+		for (CyberTrackerId id : ids) {
 			elements.append(id.getItemTranslatedId());
 		}
 		return elements.toString();
 	}
 
-	private static String translateLinks(Category category, Map<Category, CyberTrackerId> keyMap) {
+	public static String translateLinks(List<CyberTrackerId> ids, boolean linkToNode) {
 		StringBuilder links = new StringBuilder(); 
-		for (Category child : category.getChildren()) {
-			CyberTrackerId id = keyMap.get(child);
-			links.append(id.getItemTranslatedId()).append(id.getNodeTranslatedId());
+		for (CyberTrackerId id : ids) {
+			links.append(id.getItemTranslatedId());
+			if (linkToNode) {
+				links.append(id.getNodeTranslatedId());
+			} else {
+				links.append("00000000000000000000000000000000"); //$NON-NLS-1$
+			}
 		}
 		return links.toString();
 	}
