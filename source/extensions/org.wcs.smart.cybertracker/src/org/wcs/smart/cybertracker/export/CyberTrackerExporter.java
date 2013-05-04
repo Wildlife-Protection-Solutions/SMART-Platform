@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -37,9 +38,12 @@ import javax.xml.bind.Marshaller;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
@@ -79,7 +83,7 @@ public class CyberTrackerExporter {
 		Map<Category, CyberTrackerId> keyMap = CyberTrackerUtil.buildMap(root);
 		rootId = keyMap.get(root);
 		
-		List<Node> screenNodes = buildScreenNodes(root, keyMap);
+		List<Node> screenNodes = buildCategoryNodes(root, keyMap);
 		Screens screens = ScreensObjectFactory.createScreens(screenNodes);
 		BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream("c:/dev/CyberTracker/out/Screens.xml")); //$NON-NLS-1$
 		try {
@@ -89,7 +93,7 @@ public class CyberTrackerExporter {
 		}
 		
 //		Elements elements = buildEmptyElements();
-		addCategoryElements(elements, root, keyMap);
+		addElements(elements, keyMap);
 		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream("c:/dev/CyberTracker/out/Elements.xml")); //$NON-NLS-1$
 		try {
 			writeDataModel(elements, outE, Elements.class);
@@ -109,7 +113,7 @@ public class CyberTrackerExporter {
 		return elements;
 	}
 
-	private static List<Node> buildScreenNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
+	private static List<Node> buildCategoryNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
 		List<Node> result = new ArrayList<Node>();
 		if (category == null)
 			return result;
@@ -122,7 +126,7 @@ public class CyberTrackerExporter {
 		result.add(CyberTrackerUtil.createRadioNode(category, keyMap));
 		
 		for (Category child : category.getChildren()) {
-			result.addAll(buildScreenNodes(child, keyMap));
+			result.addAll(buildCategoryNodes(child, keyMap));
 		}		
 		return result;
 	}
@@ -134,41 +138,54 @@ public class CyberTrackerExporter {
 		CyberTrackerId startId = keyMap.get(category);
 		CyberTrackerId id = startId;
 		for (Attribute attribute : attrList) {
-			CyberTrackerId idItem = new CyberTrackerId(); //id for result item in attribute screen node
+			CyberTrackerId resultElementId = new CyberTrackerId(); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
-			{
-				Node node = ScreensObjectFactory.createNodeNumber(id.getNodeId(), attribute.getName(), idItem.getItemId());
-				result.add(node);
-				id = new CyberTrackerId();
-				Control control2 = node.getData().getControls().getControl().get(0);
-				control2.setTranslateNextScreenId(id.getNodeId());
+				result.add(ScreensObjectFactory.createNodeNumber(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
 				break;
-			}
 			case TEXT:
-				result.add(ScreensObjectFactory.createNodeNote(id.getNodeId(), attribute.getName()));
-				id = new CyberTrackerId();
+				result.add(ScreensObjectFactory.createNodeNote(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
 				break;
 			case LIST:
+			{
+				List<String> itemNames = new ArrayList<String>();
+				for (AttributeListItem listItem : attribute.getActiveListItems()) {
+					itemNames.add(listItem.getName());
+				}
+				List<CyberTrackerId> ids = addCustomElements(elements, itemNames.toArray(new String[itemNames.size()]));
+				List<String> values = CyberTrackerUtil.listItemIds(ids);
+				String trElements = CyberTrackerUtil.translateElements(ids);
+				String trLinks = CyberTrackerUtil.translateLinks(ids, false);
+				Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), attribute.getName(), values, trElements, trLinks, resultElementId.getItemId());
+				result.add(node);
 				break;
+			}
 			case TREE:
+				result.addAll(buildAttributeTreeNodes(attribute, id.getNodeId()));
 				break;
 			case BOOLEAN:
 			{
-				List<String> values = addCustomElements(elements, "Yes", "No", "Undefined");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), attribute.getName(), values, null, null);
+				List<CyberTrackerId> ids = addCustomElements(elements, "Yes", "No", "Undefined");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				List<String> values = CyberTrackerUtil.listItemIds(ids);
+				String trElements = CyberTrackerUtil.translateElements(ids);
+				String trLinks = CyberTrackerUtil.translateLinks(ids, false);
+				Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), attribute.getName(), values, trElements, trLinks, resultElementId.getItemId());
 				result.add(node);
-				id = new CyberTrackerId();
-				Control control2 = node.getData().getControls().getControl().get(0);
-				control2.setTranslateNextScreenId(id.getNodeId());
-				//TODO: implement!!!!
-				//result.add(ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks);
 				break;
 			}
+			default:
+				throw new IllegalArgumentException("Unknown attribute type"); //$NON-NLS-1$
 			}
-			addElementsItem(elements, "#"+attribute.getName(), idItem.getItemId()); //$NON-NLS-1$
+			
+			id = new CyberTrackerId(); //this id will be used for next screen
+			if (attribute.getType() != Attribute.AttributeType.TREE && !result.isEmpty()) {
+				Node lastNode = result.get(result.size()-1);
+				Control control2 = lastNode.getData().getControls().getControl().get(0);
+				control2.setTranslateNextScreenId(id.getNodeId());
+			}
+			addElementsItem(elements, "#"+attribute.getName(), resultElementId.getItemId()); //$NON-NLS-1$
 		}
-		if (result.size() > 0) {
+		if (result.size() > 0) { //TODO: if last attribute is tree attribute this code is not correct
 			Node lastNode = result.get(result.size()-1);
 			Control control2 = lastNode.getData().getControls().getControl().get(0);
 			control2.setShowMajor("True"); //$NON-NLS-1$
@@ -181,15 +198,59 @@ public class CyberTrackerExporter {
 		return result;
 	}
 
-	private static void addCategoryElements(Elements elements, Category category, Map<Category, CyberTrackerId> keyMap) {
-		addElementsItem(elements, category.getName(), keyMap.get(category).getItemId());
-		if (category.getChildren() != null || category.getChildren().isEmpty()) {
-			for (Category child : category.getChildren()) {
-				addCategoryElements(elements, child, keyMap);
-			}
+	/**
+	 * Builds top level attribute radio node and calls for recursive child nodes creation.
+	 * @param treeAttribute
+	 * @param nodeId
+	 * @return
+	 */
+	private static List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId) {
+		List<Node> result = new ArrayList<Node>();
+		List<AttributeTreeNode> activeTreeNodes = treeAttribute.getActiveTreeNodes();
+		
+		Map<AttributeTreeNode, CyberTrackerId> map = CyberTrackerUtil.buildTreeNodeMap(activeTreeNodes);
+		List<CyberTrackerId> childIds = CyberTrackerUtil.getChildrenIds(activeTreeNodes, map);
+		result.add(CyberTrackerUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds));
+		for (AttributeTreeNode treeNode : activeTreeNodes) {
+			result.addAll(buildAttributeTreeNodes(treeNode, map));
+		}
+		addElements(elements, map);
+		return result;
+	}
+	
+	private static List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map) {
+		List<Node> result = new ArrayList<Node>();
+		if (treeNode == null)
+			return result;
+		
+//		if (treeNode.getChildren() == null || treeNode.getChildren().isEmpty()) {
+//			result.addAll(buildAttributeNodes(category, keyMap));
+//			return result;
+//		}
+//		result.add(CyberTrackerUtil.createRadioNode(category, keyMap));
+
+		String id = map.get(treeNode).getNodeId();
+		List<CyberTrackerId> childIds = CyberTrackerUtil.getChildrenIds(treeNode.getActiveChildren(), map);
+		result.add(CyberTrackerUtil.createRadioNode(id, treeNode.getName(), childIds));
+		
+		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
+			result.addAll(buildAttributeTreeNodes(child, map));
+		}		
+		return result;
+	}
+	
+	/**
+	 * Simply add all from the map to elements
+	 * @param elements
+	 * @param map
+	 */
+	private static void addElements(Elements elements, Map<? extends DmObject, CyberTrackerId> map) {
+		Set<? extends DmObject> keys = map.keySet();
+		for (DmObject dmObject : keys) {
+			addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId());
 		}
 	}
-
+	
 	/**
 	 * For given labels function:
 	 *  - creates items
@@ -198,12 +259,12 @@ public class CyberTrackerExporter {
 	 * @param elements
 	 * @return
 	 */
-	private static List<String> addCustomElements(Elements elements, String... labels) {
-		List<String> idList = new ArrayList<String>();
+	private static List<CyberTrackerId> addCustomElements(Elements elements, String... labels) {
+		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
 		for (String string : labels) {
 			CyberTrackerId id = new CyberTrackerId();
 			addElementsItem(elements, string, id.getItemId());
-			idList.add(id.getItemId());
+			idList.add(id);
 		}
 		return idList;
 	}

@@ -99,7 +99,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeRadio(String id, String name, List<String> values, String trElements, String trLinks) {
+	public static Node createNodeRadio(String id, String name, List<String> values, String trElements, String trLinks, String resultElement) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -116,7 +116,7 @@ public class ScreensObjectFactory {
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
-		controls.getControl().add(createRadioControl7(trElements, trLinks));
+		controls.getControl().add(createRadioControl7(trElements, trLinks, resultElement));
 		controls.getControl().add(createControl11());
 		data.setControls(controls);
 		node.setData(data);
@@ -142,13 +142,13 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeNumber(String id, String name, String itemId) {
+	public static Node createNodeNumber(String id, String name, String resultElementId) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
-		if (itemId != null) {
+		if (resultElementId != null) {
 			node.setItems(new Node.Items());
-			node.getItems().getValue().add(itemId);
+			node.getItems().getValue().add(resultElementId);
 		}
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 
@@ -160,7 +160,7 @@ public class ScreensObjectFactory {
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
 		controls.getControl().add(createControl11());
-		controls.getControl().add(createNumberControl12(itemId));
+		controls.getControl().add(createNumberControl12(resultElementId));
 		data.setControls(controls);
 		node.setData(data);
 		
@@ -182,7 +182,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public static Node createNodeNote(String id, String name) {
+	public static Node createNodeNote(String id, String name, String resultElementId) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -196,7 +196,7 @@ public class ScreensObjectFactory {
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
 		controls.getControl().add(createControl11());
-		controls.getControl().add(createNoteControl12());
+		controls.getControl().add(createNoteControl12(resultElementId));
 		data.setControls(controls);
 		node.setData(data);
 		
@@ -275,9 +275,10 @@ public class ScreensObjectFactory {
         <Attribute>0</Attribute>
         <Translate__Elements>???</Translate__Elements>
         <Translate__Links>???</Translate__Links>
+        <Translate__RadioElement>???</Translate__RadioElement>
     </Control>
 	 */
-	public static Controls.Control createRadioControl7(String trElements, String trLinks) {
+	public static Controls.Control createRadioControl7(String trElements, String trLinks, String radioElement) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
 		control.setVersion(1);
@@ -293,6 +294,7 @@ public class ScreensObjectFactory {
 		control.setAttribute(0);
 		control.setTranslateElements(trElements);
 		control.setTranslateLinks(trLinks);
+		control.setTranslateRadioElement(radioElement);
 		return control;
 	}
 
@@ -384,9 +386,10 @@ public class ScreensObjectFactory {
         <Top>34</Top>
         <Width>240</Width>
         <Height>262</Height>
+        <Translate__Element>???</Translate__Element>
     </Control>
 	 */
-	public static Controls.Control createNoteControl12() {
+	public static Controls.Control createNoteControl12(String element) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{49728018-D9F6-49B8-86E4-3EA49A29F4BC}"); //$NON-NLS-1$
 		control.setId(12);
@@ -396,6 +399,7 @@ public class ScreensObjectFactory {
 		control.setTop(34);
 		control.setWidth(240);
 		control.setHeight(262);
+		control.setTranslateElement(element);
 		return control;
 	}
 
