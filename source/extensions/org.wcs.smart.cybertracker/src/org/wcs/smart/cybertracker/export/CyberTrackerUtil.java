@@ -131,11 +131,21 @@ public class CyberTrackerUtil {
 		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, null);
 	}
 
-	public static Node createRadioNode(String id, String name, List<CyberTrackerId> childIds) {
+	/**
+	 * Creates radio node with options from childIds.
+	 * NOTE: If resultElement is not null this will be treated as final radio list (not as part of navigation in some tree)
+	 * 
+	 * @param id
+	 * @param name
+	 * @param childIds
+	 * @param resultElement
+	 * @return
+	 */
+	public static Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement) {
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
-		String trLinks = translateLinks(childIds, true);
-		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, null);
+		String trLinks = translateLinks(childIds, resultElement == null);
+		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
 	}
 	
 	public static List<CyberTrackerId> getChildrenIds(List<?> objects, Map<?, CyberTrackerId> keyMap) {
