@@ -29,8 +29,11 @@ import net.refractions.udig.catalog.IService;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.feature.Feature;
+import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.query.model.ObservationQuery;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -59,13 +62,20 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
 			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			
+			this.bounds = env;
 			QueryService service = (QueryService) resource.resolve(IService.class, monitor);
 			if (service.getQuery() instanceof ObservationQuery){
 				Envelope local = ((ObservationQuery)service.getQuery()).getLastPagedResults().getEnvelope();
 				env.expandToInclude(local.getMinX(), local.getMinY());
 				env.expandToInclude(local.getMaxX(), local.getMaxY());
-				this.bounds = env;				
+			}else{
+				fs.getFeatures().accepts(new FeatureVisitor() {
+					@Override
+					public void visit(Feature f) {
+						BoundingBox bb = f.getBounds();
+						env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+					}
+				}, null);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
