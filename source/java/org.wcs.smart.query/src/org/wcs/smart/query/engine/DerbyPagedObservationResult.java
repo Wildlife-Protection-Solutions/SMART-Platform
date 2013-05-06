@@ -152,13 +152,17 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 				@Override
 				public void execute(Connection c) throws SQLException {
 					ResultSet q = c.createStatement().executeQuery(sql);
-					q.next();
-					double minx = q.getDouble(1);
-					double maxx = q.getDouble(2);
-					double miny = q.getDouble(3);
-					double maxy = q.getDouble(4);
+					try{
+						q.next();
+						double minx = q.getDouble(1);
+						double maxx = q.getDouble(2);
+						double miny = q.getDouble(3);
+						double maxy = q.getDouble(4);
 					
-					bounds = new Envelope(minx, maxx, miny, maxy);
+						bounds = new Envelope(minx, maxx, miny, maxy);
+					}finally{
+						q.close();
+					}
 				}});
 		}
 		return bounds;
