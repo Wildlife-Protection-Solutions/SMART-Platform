@@ -25,10 +25,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
 
 /**
@@ -80,12 +83,13 @@ public class CyberTrackerUtil {
 	public static Category buildRoot(DataModel dataModel) {
 		Category fakeRoot = new Category();
 		fakeRoot.setName("Data Model"); //$NON-NLS-1$
-//		fakeRoot.setChildren(dataModel.getCategories());
-		//TODO: switch back to original full datamodel
-		List<Category> cats = new ArrayList<Category>();
-		cats.add(dataModel.getCategories().get(0));
-		fakeRoot.setChildren(cats);
+		fakeRoot.setChildren(dataModel.getCategories());
 		return fakeRoot;
+		//TODO: switch back to original full datamodel
+//		List<Category> cats = new ArrayList<Category>();
+//		cats.add(dataModel.getCategories().get(0));
+//		fakeRoot.setChildren(cats);
+//		return fakeRoot;
 	}
 
 	public static Map<Category, CyberTrackerId> buildMap(Category category) {

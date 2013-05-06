@@ -21,13 +21,23 @@
  */
 package org.wcs.smart.cybertracker.handler;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
 import org.wcs.smart.cybertracker.export.CyberTrackerExporter;
+import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
  * Handler for exporting intelligence data.
@@ -44,15 +54,51 @@ public class CyberTrackerExportHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		try {
-			CyberTrackerExporter.export(null, null);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
 		Shell shell = HandlerUtil.getActiveShell(event);
-		MessageDialog.openInformation(shell, "Done", "Done");
+		CyberTrackerExportDialog dialog = new CyberTrackerExportDialog(shell);
+		if (dialog.open() != IDialogConstants.OK_ID) {
+			return null;
+		}
+		final File dirFile = dialog.getSelectedFile();
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
+					try {
+						CyberTrackerExporter.export(dirFile, monitor);
+					} catch (Exception e) {
+						displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportHandler_ErrDialog_Message);
+						e.printStackTrace();
+					}
+					displayInfo(Messages.CyberTrackerExportHandler_InfoDialog_Title, Messages.CyberTrackerExportHandler_InfoDialog_Message);
+				}
+
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}	
 
+	private void displayInfo(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), title, message);
+			}
+		});
+	}
+
+	private void displayError(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);
+			}
+		});
+	}
 	
 }
