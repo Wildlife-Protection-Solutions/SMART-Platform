@@ -29,7 +29,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -43,7 +42,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
@@ -67,7 +65,7 @@ public class CyberTrackerExporter {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			elements = buildEmptyElements();
+			elements = ElementsUtil.buildEmptyElements();
 			return performExport(file, monitor, session);
 		} finally {
 			elements = null;
@@ -79,37 +77,37 @@ public class CyberTrackerExporter {
 		
 	private static File performExport(File file, IProgressMonitor monitor, Session session) throws Exception {
 		DataModel dataModel = getDataModel(session);
+		monitor.worked(10);
+		
 		Category root = CyberTrackerUtil.buildRoot(dataModel);
 		Map<Category, CyberTrackerId> keyMap = CyberTrackerUtil.buildMap(root);
 		rootId = keyMap.get(root);
-		
+		monitor.worked(5);
+
 		List<Node> screenNodes = buildCategoryNodes(root, keyMap);
+		monitor.worked(70);
+		
 		Screens screens = ScreensObjectFactory.createScreens(screenNodes);
-		BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream("c:/dev/CyberTracker/out/Screens.xml")); //$NON-NLS-1$
+		monitor.worked(5);
+
+		BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Screens.xml")); //$NON-NLS-1$
 		try {
 			writeDataModel(screens, outS, Screens.class);
 		} finally {
 			outS.close();
 		}
+		monitor.worked(10);
 		
-		addElements(elements, keyMap);
-		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream("c:/dev/CyberTracker/out/Elements.xml")); //$NON-NLS-1$
+		ElementsUtil.addElements(elements, keyMap);
+		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Elements.xml")); //$NON-NLS-1$
 		try {
 			writeDataModel(elements, outE, Elements.class);
 		} finally {
 			outE.close();
 		}
+		monitor.done();
 		
 		return file;
-	}
-
-	private static Elements buildEmptyElements() {
-		Elements elements = new Elements();
-		Elements.List list = new Elements.List();
-		elements.setList(list);
-		Elements.List.Items items = new Elements.List.Items();
-		list.setItems(items);
-		return elements;
 	}
 
 	private static List<Node> buildCategoryNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
@@ -154,7 +152,7 @@ public class CyberTrackerExporter {
 				for (AttributeListItem listItem : attribute.getActiveListItems()) {
 					itemNames.add(listItem.getName());
 				}
-				List<CyberTrackerId> ids = addCustomElements(elements, itemNames.toArray(new String[itemNames.size()]));
+				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, itemNames.toArray(new String[itemNames.size()]));
 				List<String> values = CyberTrackerUtil.listItemIds(ids);
 				String trElements = CyberTrackerUtil.translateElements(ids);
 				String trLinks = CyberTrackerUtil.translateLinks(ids, false);
@@ -164,6 +162,9 @@ public class CyberTrackerExporter {
 			}
 			case TREE:
 			{
+				//TODO: test without "Species"
+//				if (attribute.getName().equals("Species"))
+//					break;
 				//NOTE: This is a special case as we might have multiple ending screens!!!
 				String nodeId = id.getNodeId();
 				id = new CyberTrackerId(); //this id will be used for next screen
@@ -175,7 +176,7 @@ public class CyberTrackerExporter {
 			}
 			case BOOLEAN:
 			{
-				List<CyberTrackerId> ids = addCustomElements(elements, "Yes", "No", "Undefined");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, "Yes", "No", "Undefined");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), ids, resultElementId.getItemId()));
 				break;
 			}
@@ -183,7 +184,7 @@ public class CyberTrackerExporter {
 				throw new IllegalArgumentException("Unknown attribute type"); //$NON-NLS-1$
 			}
 
-			addElementsItem(elements, "#"+attribute.getName(), resultElementId.getItemId()); //$NON-NLS-1$
+			ElementsUtil.addElementsItem(elements, "#"+attribute.getName(), resultElementId.getItemId()); //$NON-NLS-1$
 			//tracking navigation for non-tree attributes (tree attributes are handle separately)
 			if (!Attribute.AttributeType.TREE.equals(attribute.getType())) {
 				//handle only cases for non-tree attributes, as all the have single ending screen
@@ -220,7 +221,6 @@ public class CyberTrackerExporter {
 			control2.setTranslateMajorScreenId(rootId.getNodeId());
 			control2.setTranslateMinorScreenId(navigateId.getNodeId());
 		}
-		
 	}
 	
 	/**
@@ -239,7 +239,7 @@ public class CyberTrackerExporter {
 		for (AttributeTreeNode treeNode : activeTreeNodes) {
 			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId, hasNext));
 		}
-		addElements(elements, map);
+		ElementsUtil.addElements(elements, map);
 		return result;
 	}
 	
@@ -277,43 +277,6 @@ public class CyberTrackerExporter {
 			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, hasNext));
 		}		
 		return result;
-	}
-	
-	/**
-	 * Simply add all from the map to elements
-	 * @param elements
-	 * @param map
-	 */
-	private static void addElements(Elements elements, Map<? extends DmObject, CyberTrackerId> map) {
-		Set<? extends DmObject> keys = map.keySet();
-		for (DmObject dmObject : keys) {
-			addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId());
-		}
-	}
-	
-	/**
-	 * For given labels function:
-	 *  - creates items
-	 *	- adds them to elements
-	 *  - returns the list of item ids
-	 * @param elements
-	 * @return
-	 */
-	private static List<CyberTrackerId> addCustomElements(Elements elements, String... labels) {
-		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
-		for (String string : labels) {
-			CyberTrackerId id = new CyberTrackerId();
-			addElementsItem(elements, string, id.getItemId());
-			idList.add(id);
-		}
-		return idList;
-	}
-	
-	private static void addElementsItem(Elements elements, String name, String id) {
-		Elements.List.Items.Item item = new Elements.List.Items.Item();
-		item.setName(name);
-		item.setId(id);
-		elements.getList().getItems().getItem().add(item);
 	}
 	
 	private static void writeDataModel(Object obj, OutputStream file, Class<?> clazz) throws JAXBException, IOException {
