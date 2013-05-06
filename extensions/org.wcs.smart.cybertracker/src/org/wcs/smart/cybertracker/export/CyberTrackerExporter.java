@@ -92,7 +92,6 @@ public class CyberTrackerExporter {
 			outS.close();
 		}
 		
-//		Elements elements = buildEmptyElements();
 		addElements(elements, keyMap);
 		BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream("c:/dev/CyberTracker/out/Elements.xml")); //$NON-NLS-1$
 		try {
@@ -137,7 +136,10 @@ public class CyberTrackerExporter {
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(category);
 		CyberTrackerId id = startId;
-		for (Attribute attribute : attrList) {
+//		for (Attribute attribute : attrList) {
+		int attrListLastIndex = attrList.size() - 1;
+		for (int i = 0; i <= attrListLastIndex; i++) {
+			Attribute attribute = attrList.get(i);
 			CyberTrackerId resultElementId = new CyberTrackerId(); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
@@ -161,80 +163,118 @@ public class CyberTrackerExporter {
 				break;
 			}
 			case TREE:
-				result.addAll(buildAttributeTreeNodes(attribute, id.getNodeId()));
+			{
+				//NOTE: This is a special case as we might have multiple ending screens!!!
+				String nodeId = id.getNodeId();
+				id = new CyberTrackerId(); //this id will be used for next screen
+				boolean hasNext = i != attrListLastIndex;
+				CyberTrackerId navId = hasNext ? id : startId;
+
+				result.addAll(buildAttributeTreeNodes(attribute, nodeId, navId, resultElementId.getItemId(), hasNext));
 				break;
+			}
 			case BOOLEAN:
 			{
 				List<CyberTrackerId> ids = addCustomElements(elements, "Yes", "No", "Undefined");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				List<String> values = CyberTrackerUtil.listItemIds(ids);
-				String trElements = CyberTrackerUtil.translateElements(ids);
-				String trLinks = CyberTrackerUtil.translateLinks(ids, false);
-				Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), attribute.getName(), values, trElements, trLinks, resultElementId.getItemId());
-				result.add(node);
+				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), ids, resultElementId.getItemId()));
 				break;
 			}
 			default:
 				throw new IllegalArgumentException("Unknown attribute type"); //$NON-NLS-1$
 			}
-			
-			id = new CyberTrackerId(); //this id will be used for next screen
-			if (attribute.getType() != Attribute.AttributeType.TREE && !result.isEmpty()) {
-				Node lastNode = result.get(result.size()-1);
-				Control control2 = lastNode.getData().getControls().getControl().get(0);
-				control2.setTranslateNextScreenId(id.getNodeId());
-			}
+
 			addElementsItem(elements, "#"+attribute.getName(), resultElementId.getItemId()); //$NON-NLS-1$
+			//tracking navigation for non-tree attributes (tree attributes are handle separately)
+			if (!Attribute.AttributeType.TREE.equals(attribute.getType())) {
+				//handle only cases for non-tree attributes, as all the have single ending screen
+				id = new CyberTrackerId(); //this id will be used for next screen
+				if (!result.isEmpty()) {
+					Node lastNode = result.get(result.size()-1);
+					boolean hasNext = i != attrListLastIndex;
+					CyberTrackerId navId = hasNext ? id : startId;
+					buildNodeNavigation(lastNode, navId, hasNext);
+				}
+			}
 		}
-		if (result.size() > 0) { //TODO: if last attribute is tree attribute this code is not correct
-			Node lastNode = result.get(result.size()-1);
-			Control control2 = lastNode.getData().getControls().getControl().get(0);
+		return result;
+	}
+
+	/**
+	 * Adds "Next" or "Save" button to screen depending on input parameters
+	 * 
+	 * @param node
+	 * @param navigateId
+	 * @param hasNext
+	 */
+	private static void buildNodeNavigation(Node node, CyberTrackerId navigateId, boolean hasNext) {
+		Control control2 = node.getData().getControls().getControl().get(0);
+		if (hasNext) {
+			//we have some screens after this, so displaying "Next" button
+			control2.setTranslateNextScreenId(navigateId.getNodeId());
+		} else {
+			//this is the last screen and we need to show "Save" button
 			control2.setShowMajor("True"); //$NON-NLS-1$
 			control2.setShowMinor("True"); //$NON-NLS-1$
 			control2.setShowNext("False"); //$NON-NLS-1$
 			control2.setTranslateNextScreenId(null); //no next button at last screen
 			control2.setTranslateMajorScreenId(rootId.getNodeId());
-			control2.setTranslateMinorScreenId(startId.getNodeId());
+			control2.setTranslateMinorScreenId(navigateId.getNodeId());
 		}
-		return result;
+		
 	}
-
+	
 	/**
 	 * Builds top level attribute radio node and calls for recursive child nodes creation.
 	 * @param treeAttribute
 	 * @param nodeId
 	 * @return
 	 */
-	private static List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId) {
+	private static List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, boolean hasNext) {
 		List<Node> result = new ArrayList<Node>();
 		List<AttributeTreeNode> activeTreeNodes = treeAttribute.getActiveTreeNodes();
 		
 		Map<AttributeTreeNode, CyberTrackerId> map = CyberTrackerUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = CyberTrackerUtil.getChildrenIds(activeTreeNodes, map);
-		result.add(CyberTrackerUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds));
+		result.add(CyberTrackerUtil.createRadioNode(nodeId, treeAttribute.getName(), childIds, null));
 		for (AttributeTreeNode treeNode : activeTreeNodes) {
-			result.addAll(buildAttributeTreeNodes(treeNode, map));
+			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId, hasNext));
 		}
 		addElements(elements, map);
 		return result;
 	}
 	
-	private static List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map) {
+	private static List<Node> buildAttributeTreeNodes(AttributeTreeNode treeNode, Map<AttributeTreeNode, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, boolean hasNext) {
 		List<Node> result = new ArrayList<Node>();
 		if (treeNode == null)
 			return result;
 		
-//		if (treeNode.getChildren() == null || treeNode.getChildren().isEmpty()) {
-//			result.addAll(buildAttributeNodes(category, keyMap));
-//			return result;
-//		}
-//		result.add(CyberTrackerUtil.createRadioNode(category, keyMap));
+		if (treeNode.getChildren() == null || treeNode.getChildren().isEmpty()) {
+			return result;
+		}
 
+		boolean isEndScreen = true;
+		//NOTE: there might be issues if at the save depth level leaf and non-leaf elements are present
+		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
+			if (child.getChildren() != null && !child.getChildren().isEmpty()) {
+				isEndScreen = false;
+				break;
+			}
+		}		
+		
 		String id = map.get(treeNode).getNodeId();
 		List<CyberTrackerId> childIds = CyberTrackerUtil.getChildrenIds(treeNode.getActiveChildren(), map);
-		result.add(CyberTrackerUtil.createRadioNode(id, treeNode.getName(), childIds));
+		if (isEndScreen) {
+			Node node = CyberTrackerUtil.createRadioNode(id, treeNode.getName(), childIds, resultElementId);
+			buildNodeNavigation(node, navId, hasNext);
+			result.add(node);
+			return result;
+		}
+		
+		//this is NOT an end screen, proceed recursively till the end
+		result.add(CyberTrackerUtil.createRadioNode(id, treeNode.getName(), childIds, null));
 		
 		for (AttributeTreeNode child : treeNode.getActiveChildren()) {
-			result.addAll(buildAttributeTreeNodes(child, map));
+			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, hasNext));
 		}		
 		return result;
 	}
