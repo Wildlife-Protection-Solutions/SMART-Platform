@@ -109,7 +109,9 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 
 				@Override
 				public void run() {
-					checkboxTableViewer.setInput(input);
+					if (!checkboxTableViewer.getTable().isDisposed()){
+						checkboxTableViewer.setInput(input);
+					}
 					
 				}});
 			return Status.OK_STATUS;
@@ -158,7 +160,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		if (name != null){
 			return name;
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	@Override
 	protected void configureShell(Shell shell) {
