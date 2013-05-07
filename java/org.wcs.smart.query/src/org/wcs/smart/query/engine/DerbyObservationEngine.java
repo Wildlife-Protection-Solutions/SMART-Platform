@@ -77,7 +77,8 @@ public class DerbyObservationEngine extends DerbyQueryEngine2 {
 						return;
 					}
 					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter());
+						createObservationTable(c, query.getFilter(), query.getDateFilter(), 
+								query.getConservationAreaFilterAsFilter(), monitor);
 					}
 					monitor.worked(2);
 					if (monitor.isCanceled()){
