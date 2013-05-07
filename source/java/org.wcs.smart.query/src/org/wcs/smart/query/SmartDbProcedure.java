@@ -54,7 +54,7 @@ public class SmartDbProcedure {
 	 */
 	public static void cleanUpTempData() throws SQLException {
 		Connection connection = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
-		String sql = "select tbl.TABLENAME, sch.SCHEMANAME from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME like 'QUERY_RESULTS_%'"; //$NON-NLS-1$
+		String sql = "select tbl.TABLENAME, sch.SCHEMANAME from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME like 'QUERY_TEMP_%'"; //$NON-NLS-1$
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql);
 		List<String> toDrop = new ArrayList<String>();

@@ -96,7 +96,8 @@ public class DerbyPatrolEngine extends DerbyQueryEngine2{
 						return;
 					}
 					if (qFilter != IFilter.EMPTY_FILTER && qFilter.hasAttributeFilter()) {
-						createObservationTable(c, query.getFilter(), query.getDateFilter(), query.getConservationAreaFilterAsFilter());
+						createObservationTable(c, query.getFilter(), query.getDateFilter(), 
+								query.getConservationAreaFilterAsFilter(), monitor);
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()){

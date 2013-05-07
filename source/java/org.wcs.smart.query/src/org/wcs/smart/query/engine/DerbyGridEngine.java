@@ -213,7 +213,7 @@ public class DerbyGridEngine extends DerbyQueryEngine2{
 			}
 			if (filter != IFilter.EMPTY_FILTER && filter.hasAttributeFilter()) {
 				createObservationTable(c, filter, query.getDateFilter(),
-						query.getConservationAreaFilterAsFilter());
+						query.getConservationAreaFilterAsFilter(), monitor);
 			}
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
