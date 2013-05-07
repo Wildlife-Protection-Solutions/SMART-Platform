@@ -99,6 +99,9 @@ public abstract class NameKeyComposite extends Composite {
 			if (type.getValue() != null){
 				dmObject.updateName(type.getKey(), type.getValue());
 			}
+			if (type.getKey().equals(SmartDB.getCurrentLanguage())){
+				dmObject.setName(type.getValue());
+			}
 		}
 		
 		dmObject.setKeyId(txtKey.getText());
