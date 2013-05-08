@@ -25,13 +25,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.datamodel.DmObject;
-import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
 
 /**
@@ -146,9 +143,13 @@ public class CyberTrackerUtil {
 	 * @return
 	 */
 	public static Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement) {
+		return createRadioNode(id, name, childIds, resultElement, resultElement == null);
+	}
+
+	public static Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement, boolean linkToNode) {
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
-		String trLinks = translateLinks(childIds, resultElement == null);
+		String trLinks = translateLinks(childIds, linkToNode);
 		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
 	}
 	

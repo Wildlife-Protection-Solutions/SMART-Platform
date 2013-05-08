@@ -130,6 +130,51 @@ public class ScreensObjectFactory {
         <Name>???</Name>
         <Items>
             <Value>???</Value>
+            <Value>???</Value>
+            ...
+        </Items>
+        <DataClass>TctScreen</DataClass>
+        <Data>
+            <NextId>12</NextId>
+            <TemplateId>{AB59A6BF-A6CB-4446-8350-DA326FABA878}</TemplateId>
+            <Name>???</Name>
+            <Controls>
+                <Control>...</Control>
+                ...
+        </Data>
+    </Node>
+	 */
+	public static Node createNodeChecklist(String id, String name, List<String> values, String trElements, String trLinks) {
+		Node node = new Node();
+		node.setId(id);
+		node.setName(name);
+		if (values != null) {
+			node.setItems(new Node.Items());
+			node.getItems().getValue().addAll(values);
+		}
+		node.setDataClass("TctScreen"); //$NON-NLS-1$
+		
+		Node.Data data = new Node.Data();
+		data.setNextId(12);
+		data.setTemplateId("{AB59A6BF-A6CB-4446-8350-DA326FABA878}"); //$NON-NLS-1$
+		data.setName(name);
+		Controls controls = new Controls();
+		controls.getControl().add(createControl2());
+		controls.getControl().add(createControl6());
+		controls.getControl().add(createChecklistControl7(trElements, trLinks));
+		controls.getControl().add(createControl11());
+		data.setControls(controls);
+		node.setData(data);
+		
+		return node;
+	}
+	
+	/**
+    <Node>
+        <Id>???</Id>
+        <Name>???</Name>
+        <Items>
+            <Value>???</Value>
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
@@ -298,6 +343,46 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
+	/**
+    <Control>
+        <Type>{289461C2-B3EE-4075-9538-451580BD4B38}</Type>
+        <Version>1</Version>
+        <LockProperties>Elements</LockProperties>
+        <Id>7</Id>
+        <Align>5</Align>
+        <Left>0</Left>
+        <Top>34</Top>
+        <Width>240</Width>
+        <Height>262</Height>
+        <Translate__Font>MS Sans Serif,10,B</Translate__Font>
+        <ItemHeight>25</ItemHeight>
+        <Version>1</Version>
+        <Attribute>0</Attribute>
+        <ListMode>1</ListMode>
+        <Translate__Elements>???</Translate__Elements>
+        <Translate__Links>???</Translate__Links>
+    </Control>
+	 */
+	public static Controls.Control createChecklistControl7(String trElements, String trLinks) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
+		control.setVersion(1);
+		control.setLockProperties("Elements"); //$NON-NLS-1$
+		control.setId(7);
+		control.setAlign(5);
+		control.setLeft(0);
+		control.setTop(34);
+		control.setWidth(240);
+		control.setHeight(262);
+		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
+		control.setItemHeight(25);
+		control.setAttribute(0);
+		control.setListMode(1);
+		control.setTranslateElements(trElements);
+		control.setTranslateLinks(trLinks);
+		return control;
+	}
+	
 	/**
     <Control>
         <Type>{1BAF7223-9DF3-44E2-8B0E-969D951492AC}</Type>

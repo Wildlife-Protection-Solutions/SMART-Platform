@@ -81,10 +81,11 @@ public class CyberTrackerExporter {
 		
 		Category root = CyberTrackerUtil.buildRoot(dataModel);
 		Map<Category, CyberTrackerId> keyMap = CyberTrackerUtil.buildMap(root);
-		rootId = keyMap.get(root);
+		List<Node> screenNodes = new ArrayList<Node>();
+		rootId = PatrolScreensUtil.addPatrolNodes(screenNodes, elements, keyMap.get(root), session);
 		monitor.worked(5);
 
-		List<Node> screenNodes = buildCategoryNodes(root, keyMap);
+		screenNodes.addAll(buildCategoryNodes(root, keyMap));
 		monitor.worked(70);
 		
 		Screens screens = ScreensObjectFactory.createScreens(screenNodes);
@@ -163,8 +164,8 @@ public class CyberTrackerExporter {
 			case TREE:
 			{
 				//TODO: test without "Species"
-//				if (attribute.getName().equals("Species"))
-//					break;
+				if (attribute.getName().equals("Species"))
+					break;
 				//NOTE: This is a special case as we might have multiple ending screens!!!
 				String nodeId = id.getNodeId();
 				id = new CyberTrackerId(); //this id will be used for next screen
