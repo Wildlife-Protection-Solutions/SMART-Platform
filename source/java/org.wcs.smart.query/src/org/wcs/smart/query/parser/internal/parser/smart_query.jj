@@ -77,13 +77,12 @@ TOKEN :
   			< PATROL_STATION_KEY > |
 			< PATROL_TEAM_KEY > |
 			< PATROL_MANDATE_KEY > |
-			< PATROL_TYPE_KEY > |
 			< PATROLLEG_TRANSPORT_KEY > |
 			< PATROLLEG_LEADER_KEY > |
 			< PATROL_CA_KEY > |
 			< PATROLLEG_MEMBER_KEY > ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 |    < PATROL_STRING_GROUPBY_OPTION :
-  			< PATROL_ID_KEY >  ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
+  			( < PATROL_ID_KEY > | < PATROL_TYPE_KEY > ) ":" (< QUOTED_STRING >)? (":"  < QUOTED_STRING>)*  >
 | 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  AREA_GROUPBY_ITEM : "area:" < AREA_TYPE_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :

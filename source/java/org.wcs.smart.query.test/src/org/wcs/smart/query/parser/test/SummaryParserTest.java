@@ -38,6 +38,31 @@ import org.wcs.smart.query.parser.internal.summary.SumQueryDefinition;
 @SuppressWarnings({"nls", "restriction"})
 public class SummaryParserTest {
 
+	@Test
+	public void testPatrolTypeGroupBy() throws Exception{
+		String valuePart = "patrol:sum:numdays"; 
+		String rowGroupByPart = "patrol:patroltype:\"AIR\":\"GROUND\"";
+		String colGroupByPart = "";
+		String queryPart = "";
+		String query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + queryPart;
+		SumQueryDefinition test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+		
+		
+		valuePart = "patrol:sum:numdays"; 
+		rowGroupByPart = "patrol:id:\"0001\":\"0002\"";
+		colGroupByPart = "";//"patrol:station:\"\",date:month";
+		queryPart = "";
+		query = valuePart + "|" + rowGroupByPart +"|" + colGroupByPart + "|" + queryPart;
+		test = parseQuery(query);
+		Assert.assertEquals(test.getValuePart().asString(), valuePart);
+		Assert.assertEquals(test.getRowGroupByPart().asString(), rowGroupByPart);
+		Assert.assertEquals(test.getColumnGroupByPart().asString(), colGroupByPart);
+		Assert.assertNull(test.getQueryFilter());
+	}
 	
 	@Test
 	public void testAll() throws Exception{

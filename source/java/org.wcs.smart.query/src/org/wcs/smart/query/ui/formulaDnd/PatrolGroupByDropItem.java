@@ -101,7 +101,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 					queryPart.append(  SmartUtils.encodeHex( filteredValues.get(i).getUuid())  );
 				}else{
 					queryPart.append("\""); //$NON-NLS-1$
-					queryPart.append(   filteredValues.get(i).getKey() );
+					queryPart.append( filteredValues.get(i).getKey() );
 					queryPart.append("\""); //$NON-NLS-1$
 				}
 				if (i != filteredValues.size() -1){
