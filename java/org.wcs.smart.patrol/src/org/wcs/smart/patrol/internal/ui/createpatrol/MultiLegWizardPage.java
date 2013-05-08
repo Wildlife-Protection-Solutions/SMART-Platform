@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import java.util.ArrayList;
 
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -89,6 +90,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		btnNo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				getWizardInternal().setCanFinish(true);
 				getWizardInternal().getContainer().updateButtons();
 				
 			}
@@ -100,6 +102,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		btnYes.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				getWizardInternal().setCanFinish(false);
 				getWizardInternal().getContainer().updateButtons();
 			}
 		});
@@ -129,9 +132,11 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
        	if (p.getLegs() != null && p.getLegs().size() == 1){
        		btnNo.setSelection(true);
        		btnYes.setSelection(false);
+       		getWizardInternal().setCanFinish(true);
        	}else{
        		btnYes.setSelection(true);
        		btnNo.setSelection(false);
+       		getWizardInternal().setCanFinish(false);
        	}
        	setPageComplete(true);
     }
@@ -161,6 +166,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		if (btnNo.getSelection()){
 			//skip the patrol legs wizard page
 			IWizardPage page = getWizard().getNextPage(this);
+			((WizardPage)page).setPageComplete(true);
 			return getWizard().getNextPage(page);
 		}
 		return getWizard().getPage(PatrolLegsWizardPage.PAGE_NAME);

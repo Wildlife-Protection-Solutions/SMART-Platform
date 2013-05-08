@@ -412,6 +412,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		return Messages.PatrolLegsComposite_Title;
 	}
 
+	public int getLegCount(){
+		if (legs == null){ return 0; }
+		return legs.size();
+	}
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#getErrorMessage()
 	 */

@@ -82,10 +82,14 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 		if (error == null){
 			setErrorMessage(null);
 			super.setPageComplete(true);
+			if (legComposite.getLegCount() < 2){
+				super.setPageComplete(false);
+			}
 		}else{
 			setErrorMessage(error);
 			super.setPageComplete(false);
 		}
+		
 	}
 
 	/**
