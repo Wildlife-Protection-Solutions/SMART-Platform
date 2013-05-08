@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -280,8 +281,12 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	 */
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
+		
 		if (event.getCurrentPage() instanceof NewPatrolWizardPage) {
-			if (!((NewPatrolWizardPage) event.getCurrentPage()).updateModel(patrol)) {
+			boolean movingNext = event.getTargetPage().equals(((WizardPage)event.getCurrentPage()).getNextPage());
+			boolean update = ((NewPatrolWizardPage) event.getCurrentPage()).updateModel(patrol); 
+			if (movingNext && !update) {
+				//only if moving to the next page to we disallow this event; if moving backwards we are ok
 				event.doit = false;
 				return;
 			}
