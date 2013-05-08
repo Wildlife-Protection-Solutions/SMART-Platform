@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -153,26 +154,30 @@ public class ReportDefintionExporter implements IReportExporter {
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
 		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
-		
+		HashSet<String> processedQueries = new HashSet<String>();
 		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
 				if (((OdaDataSetHandle)dataset).getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
 					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1]; //$NON-NLS-1$
-					QueryType qType = QueryType.valueOf(((OdaDataSetHandle) dataset).getQueryText().split(":")[0]); //$NON-NLS-1$
-					byte[] uuid = SmartUtils.decodeHex(queryUuid);Session hsession = HibernateManager.openSession();
-					Query smartQuery = null;
-					try{
-						hsession.beginTransaction();
-						smartQuery = QueryHibernateManager.getInstance().findQuery(hsession, uuid, qType);
-					}finally{
-						hsession.getTransaction().commit();
-						hsession.close();
-					}
+					if (!processedQueries.contains(queryUuid)){
+						processedQueries.add(queryUuid);
+						QueryType qType = QueryType.valueOf(((OdaDataSetHandle) dataset).getQueryText().split(":")[0]); //$NON-NLS-1$
+						byte[] uuid = SmartUtils.decodeHex(queryUuid);
+						Session hsession = HibernateManager.openSession();
+						Query smartQuery = null;
+						try{
+							hsession.beginTransaction();
+							smartQuery = QueryHibernateManager.getInstance().findQuery(hsession, uuid, qType);
+						}finally{
+							hsession.getTransaction().commit();
+							hsession.close();
+						}	
 					
-					if (smartQuery == null) throw new Exception(Messages.ReportDefintionExporter_Error_LoadingQueryDef);
-					exportQuery(smartQuery, zout);
+						if (smartQuery == null) throw new Exception(Messages.ReportDefintionExporter_Error_LoadingQueryDef);
+						exportQuery(smartQuery, zout);
+					}
 				}
 			}
 		}
