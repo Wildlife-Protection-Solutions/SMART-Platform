@@ -318,6 +318,7 @@ public class ScreensObjectFactory {
         <Translate__Font>MS Sans Serif,10,B</Translate__Font>
         <ItemHeight>25</ItemHeight>
         <Attribute>0</Attribute>
+        <AutoRadioNext>True</AutoRadioNext>
         <Translate__Elements>???</Translate__Elements>
         <Translate__Links>???</Translate__Links>
         <Translate__RadioElement>???</Translate__RadioElement>
@@ -337,6 +338,7 @@ public class ScreensObjectFactory {
 		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
 		control.setItemHeight(25);
 		control.setAttribute(0);
+		control.setAutoRadioNext("True"); //$NON-NLS-1$
 		control.setTranslateElements(trElements);
 		control.setTranslateLinks(trLinks);
 		control.setTranslateRadioElement(radioElement);
