@@ -164,6 +164,14 @@ public class PatrolScreensUtil {
 	}
 
 	private static void addTaskNode(CyberTrackerId id, List<Node> nodes, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId) {
+		CyberTrackerId confId = new CyberTrackerId();
+		Node confirmNode = ScreensObjectFactory.createNodeMsgText(confId.getNodeId(), "Confirm", "Press \"Save\" to confirm ending patrol or use back button");
+		//disable next button, enable save button,navigate on save to start point
+		Control control2 = confirmNode.getData().getControls().getControl().get(0);
+		control2.setShowNext("False"); //$NON-NLS-1$
+		control2.setShowMajor("True"); //$NON-NLS-1$
+		control2.setTranslateMajorScreenId(startId.getNodeId());
+		
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, "Make Observation", "End Patrol");
 		List<String> values = CyberTrackerUtil.listItemIds(ids);
 		String trElements = CyberTrackerUtil.translateElements(ids);
@@ -171,10 +179,11 @@ public class PatrolScreensUtil {
 		StringBuilder links = new StringBuilder();
 		// "Make observations" leads to datamodel root
 		links.append(ids.get(0).getItemTranslatedId()).append(dmRootId.getNodeTranslatedId());
-		// "End Patrol" leads to starting point
-		links.append(ids.get(1).getItemTranslatedId()).append(startId.getNodeTranslatedId());
+		// "End Patrol" leads to confirmation screen
+		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
 		Node node = ScreensObjectFactory.createNodeRadio(id.getNodeId(), "Next Task", values, trElements, links.toString(), null);
 		nodes.add(node);
+		nodes.add(confirmNode);
 	}
 	
 	public static String[] toNamesArray(List<? extends SimpleListItem> items) {
