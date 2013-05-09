@@ -247,6 +247,42 @@ public class ScreensObjectFactory {
 		
 		return node;
 	}
+
+	/**
+    <Node>
+        <Id>???</Id>
+        <Name>???</Name>
+        <DataClass>TctScreen</DataClass>
+        <Data>
+            <NextId>14</NextId>
+            <TemplateId>{8A40BEBA-3329-41EE-B03E-E41D85EB7DCE}</TemplateId>
+            <Name>???</Name>
+            <Controls>
+                <Control>...</Control>
+                ...
+        </Data>
+    </Node>
+	 */
+	public static Node createNodeMsgText(String id, String name, String text) {
+		Node node = new Node();
+		node.setId(id);
+		node.setName(name);
+		node.setDataClass("TctScreen"); //$NON-NLS-1$
+
+		Node.Data data = new Node.Data();
+		data.setNextId(14);
+		data.setTemplateId("{8A40BEBA-3329-41EE-B03E-E41D85EB7DCE}"); //$NON-NLS-1$
+		data.setName(name);
+		Controls controls = new Controls();
+		controls.getControl().add(createControl2());
+		controls.getControl().add(createControl6());
+		controls.getControl().add(createControl11());
+		controls.getControl().add(createMsgTextControl12(text));
+		data.setControls(controls);
+		node.setData(data);
+		
+		return node;
+	}
 	
 	/**
 	<Control>
@@ -489,5 +525,78 @@ public class ScreensObjectFactory {
 		control.setTranslateElement(element);
 		return control;
 	}
+	
+	/**
+	<Control>
+	    <Type>{A25E984A-294B-4ADF-B7F7-900C4D991DE5}</Type>
+	    <LockProperties>Image</LockProperties>
+	    <Id>12</Id>
+	    <BorderWidth>2</BorderWidth>
+	    <Align>5</Align>
+	    <Left>0</Left>
+	    <Top>34</Top>
+	    <Width>240</Width>
+	    <Height>262</Height>
+	    <Controls>
+	        <Control>
+	            <Id>13</Id>
+	            ...
+	        </Control>
+	    </Controls>
+	    <Stretch>True</Stretch>
+	    <Proportional>False</Proportional>
+	</Control>
+	 */
+	public static Controls.Control createMsgTextControl12(String text) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{A25E984A-294B-4ADF-B7F7-900C4D991DE5}"); //$NON-NLS-1$
+		control.setLockProperties("Image"); //$NON-NLS-1$
+		control.setId(12);
+		control.setBorderWidth(2);
+		control.setAlign(5);
+		control.setLeft(0);
+		control.setTop(34);
+		control.setWidth(240);
+		control.setHeight(262);
+		Controls innerControls = new Controls();
+		innerControls.getControl().add(createMsgTextControl13(text));
+		control.setControls(innerControls);
+		control.setStretch("True"); //$NON-NLS-1$
+		control.setStretch("False"); //$NON-NLS-1$
+		return control;
+	}
 
+	/**
+	<Controls>
+	    <Control>
+	        <Type>{F4D19E36-BC93-4D89-B82B-1A8900710077}</Type>
+	        <Id>13</Id>
+	        <BorderStyle>0</BorderStyle>
+	        <Transparent>True</Transparent>
+	        <Align>5</Align>
+	        <Left>2</Left>
+	        <Top>2</Top>
+	        <Width>236</Width>
+	        <Height>258</Height>
+	        <Translate__Font>MS Sans Serif,10,B</Translate__Font>
+	        <Caption>Enter text here...</Caption>
+	    </Control>
+	</Controls>
+	 */
+	public static Controls.Control createMsgTextControl13(String text) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{F4D19E36-BC93-4D89-B82B-1A8900710077}"); //$NON-NLS-1$
+		control.setId(13);
+		control.setBorderStyle(0);
+		control.setTransparent("True"); //$NON-NLS-1$
+		control.setAlign(5);
+		control.setLeft(2);
+		control.setTop(2);
+		control.setWidth(236);
+		control.setHeight(258);
+		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
+		control.setCaption(text);
+		return control;
+	}
+	
 }
