@@ -164,8 +164,8 @@ public class CyberTrackerExporter {
 			case TREE:
 			{
 				//TODO: test without "Species"
-				if (attribute.getName().equals("Species"))
-					break;
+//				if (attribute.getName().equals("Species"))
+//					break;
 				//NOTE: This is a special case as we might have multiple ending screens!!!
 				String nodeId = id.getNodeId();
 				id = new CyberTrackerId(); //this id will be used for next screen
