@@ -118,7 +118,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		parent.setLayout(new GridLayout(1, false));
+		parent = (Composite)super.createDialogArea(parent);
 		
 		// date  
 		Composite timecomp = new Composite(parent, SWT.NONE);
@@ -175,7 +175,9 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog{
 		
 		/* new leader/pilot */
 		compTransportType = new PatrolTransportComposite();
-		compTransportType.createComponent(parent, SWT.NONE);
+		Composite c = compTransportType.createComponent(parent, SWT.NONE);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
 		boolean close = false;
 		if (!session.isOpen()){
 			session = HibernateManager.openSession();

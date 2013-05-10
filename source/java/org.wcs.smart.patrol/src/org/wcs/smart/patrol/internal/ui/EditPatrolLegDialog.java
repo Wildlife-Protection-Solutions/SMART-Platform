@@ -135,7 +135,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Label lbl;
-		parent.setLayout(new GridLayout(1, false));
+		parent = (Composite) super.createDialogArea(parent);
 		
 		employeeList = new ArrayList<Employee>();
 		employeeList.addAll(patrolMembers);
@@ -149,8 +149,9 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		WritableList selectedEmployees = new WritableList(employeeListA, Employee.class);
 		
 		Composite patrolIdComp = new Composite(parent, SWT.NONE);
-		patrolIdComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		patrolIdComp.setLayout(new GridLayout(2, false));
+		patrolIdComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
 		lbl = new Label(patrolIdComp, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_LegId_Label );
 		txtLegId = new Text(patrolIdComp, SWT.BORDER);
@@ -185,7 +186,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		
 		Composite leaderComp = new Composite(right, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
-		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		groupALeader = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupALeader_Label, selectedEmployees, editLeg.getLeader().getMember());
 		if (editLeg.getPatrol().hasPilot()){
@@ -207,7 +208,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		cmb.setLabelProvider(new EmployeeLabelProvider());
 		cmb.setContentProvider(new ObservableListContentProvider());
 		cmb.setInput(employeeList);
-		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		
 		cmb.setSelection( new StructuredSelection(defaultValue));
 		
