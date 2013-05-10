@@ -89,11 +89,19 @@ public class AutoBackupEngine {
 		if(properties == null || properties.getProperty(PROP_BACKUP_TIMER) == null) return false; //no file exists
 
 		try {
-			ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
+			final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
+			
 			pmdDialog.run(true, true, new IRunnableWithProgress() {
 
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				shell.getDisplay().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						pmdDialog.getShell().setText(Messages.AutoBackupEngine_ProgressDialogTitle);
+					}
+					
+				});
 				if (timerIsExpired(properties)){
 					deleteOldFiles(properties);
 						
