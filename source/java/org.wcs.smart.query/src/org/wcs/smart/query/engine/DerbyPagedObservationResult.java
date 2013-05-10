@@ -72,7 +72,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	};
 	
 	private String queryTempTable;
-	private String sortSql = ""; //$NON-NLS-1$
+
 	private int itemCount = 0;
 	private int wpCount = 0;
 
@@ -80,6 +80,15 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	
 	private Envelope bounds = null;
 
+	//next sort column
+	private QueryColumn sortColumn = null;
+	//last sort column
+	private QueryColumn lastSortColumn = null;
+	//current direction
+	private int direction = SWT.UP;
+	private boolean hasSortColumns = false;
+
+	
 	public DerbyPagedObservationResult(String queryTempTable) {
 		this.queryTempTable = queryTempTable;
 	}
@@ -169,19 +178,128 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		
 	}
 	
+	private void updateSortColumn(QueryColumn sortColumn, Session session, Connection c) throws SQLException{
+		if (sortColumn instanceof AttributeQueryColumn){
+			if (!hasSortColumns){
+				//add the sort columns
+				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyDbl double"); //$NON-NLS-1$ //$NON-NLS-2$
+				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyTxt varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+				hasSortColumns = true;
+			}
+			String key = sortColumn.getKey();
+			key = key.split(":")[1]; //$NON-NLS-1$
+			Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
+			switch (attribute.getType()) {
+			case BOOLEAN:
+			case NUMERIC:
+				//TODO: nullify first
+				StringBuilder sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyDbl = null "); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			case TEXT:
+			case LIST:
+			case TREE:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = null"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			}
+			
+			switch (attribute.getType()) {
+			case BOOLEAN:
+			case NUMERIC:
+				StringBuilder sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.NUMBER_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append(".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			case TEXT:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append( key );
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append(".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				break;
+			case LIST:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append( "_LIST rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append( key );
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable); 
+				sql.append(".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				
+				break;
+			case TREE:
+				sql = new StringBuilder();
+				sql.append("UPDATE ");//$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
+				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append("_TREE rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append( key );
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append( queryTempTable );
+				sql.append( ".ob_uuid)"); //$NON-NLS-1$
+				c.createStatement().execute(sql.toString());
+				
+				break;
+			}
+		}
+		c.commit();
+	}
+		
+		
 	
 	private List<QueryResultItem> getData(final Session session, final int offset, final int pageSize) {
 		final List<QueryResultItem> result = new ArrayList<QueryResultItem>();
-		final String dataSql = "SELECT r.* FROM "+queryTempTable+" r "+getSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
+		final String dataSql = "SELECT r.* FROM "+queryTempTable+" r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				try {
-					result.addAll(getResults(lastResultSet, offset, pageSize));
-				} finally {
-					//rs.close();
+				if ((lastSortColumn == null && sortColumn != null) || (lastSortColumn != null && sortColumn != null && !lastSortColumn.equals(sortColumn)) ){
+					updateSortColumn(sortColumn, session, c);
 				}
+				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
+				//this forces garbage collection; without this the program
+				//will fail with out of memory error when sorting
+				//on columns multiple times.
+				System.gc();
+				
+				result.addAll(getResults(lastResultSet, offset, pageSize));
 				attachObservations(result, c, session);
 			}
 		});
@@ -229,9 +347,10 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		}		
 	}
 	
-	private String buildSortSql(QueryColumn sortColumn, int direction) {
+	private String buildSortSql() {
 		if (sortColumn == null || direction == SWT.NONE)
 			return ""; //$NON-NLS-1$
+		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
@@ -249,24 +368,17 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 		if (sortColumn instanceof AttributeQueryColumn) {
 			String key = sortColumn.getKey();
 			key = key.split(":")[1]; //$NON-NLS-1$
-			Attribute attribute = QueryDataModelManager.getInstance().getAttribute(HibernateManager.openSession(), key); //session will not be closed on purpose
-			switch (attribute.getType()) {
-			case BOOLEAN:
-			case NUMERIC:
-				result = "left join (select wpoa.observation_uuid as ob_uuid, wpoa.NUMBER_VALUE as a_value, a.KEYID as a_key from smart.wp_observation_attributes wpoa inner join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid AND a.KEYID = '"+key+"') x on x.ob_uuid = r.OB_UUID order by x.a_value"; //$NON-NLS-1$ //$NON-NLS-2$
-				break;
-			case TEXT:
-				result = "left join (select wpoa.observation_uuid as ob_uuid, wpoa.STRING_VALUE as a_value, a.KEYID as a_key from smart.wp_observation_attributes wpoa inner join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid AND a.KEYID = '"+key+"') x on x.ob_uuid = r.OB_UUID order by x.a_value"; //$NON-NLS-1$ //$NON-NLS-2$
-				break;
-			case LIST:
-				result = "left join (select rl.value, wpoa.observation_uuid from "+queryTempTable+"_LIST rl inner join smart.wp_observation_attributes wpoa on rl.uuid = wpoa.LIST_ELEMENT_UUID inner join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid AND a.KEYID = '"+key+"') x on x.OBSERVATION_UUID = r.OB_UUID order by x.value";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				break;
-			case TREE:
-				result = "left join (select rl.value, wpoa.observation_uuid from "+queryTempTable+"_TREE rl inner join smart.wp_observation_attributes wpoa on rl.uuid = wpoa.TREE_NODE_UUID inner join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid AND a.KEYID = '"+key+"') x on x.OBSERVATION_UUID = r.OB_UUID order by x.value";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				break;
+			switch (sortColumn.getType()) {
+				case BOOLEAN:
+				case NUMBER:
+				case INTEGER:
+					result = "order by sortKeyDbl"; //$NON-NLS-1$
+					break;
+				default:
+					result = "order by sortKeyTxt"; //$NON-NLS-1$
+					break;
 			}
 		}
-		
 		if (!result.isEmpty()) {
 			result += direction == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -274,24 +386,21 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	}
 	
 	
-	
-	private String getSortSql() {
-		//return "order by r.wp_x asc";
-		return sortSql;
-	}
-
-	public void setSorting(QueryColumn sortColumn, int direction) {
-		String newSql = buildSortSql(sortColumn, direction);
-		if (newSql.equals(sortSql)) {
-			return;
-		}
-		sortSql = newSql;
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.query.model.IPagedQueryResultSet#setSorting(org.wcs.smart.query.model.observation.QueryColumn, int)
+	 */
+	public void setSorting(final QueryColumn sortColumn, int direction) {
+		this.lastSortColumn = this.sortColumn;
+		this.sortColumn = sortColumn;
+		this.direction = direction;
 		dropResultSet();
 	}
 
 	private void dropResultSet() {
+		
 		if (lastResultSet != null) {
 			try {
+				lastResultSet.getStatement().close();
 				lastResultSet.close();
 			} catch (SQLException e) {
 				//nothing
@@ -470,14 +579,6 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	private MapByteArrayKey wrap(byte[] array) {
 		return new MapByteArrayKey(array);
 	}
-	
-//	public int getPageSize() {
-//		return pageSize;
-//	}
-//
-//	protected void setPageSize(int pageSize) {
-//		this.pageSize = pageSize;
-//	}
 
 	public int getItemCount() {
 		return itemCount;
