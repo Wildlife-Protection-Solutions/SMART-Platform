@@ -86,10 +86,6 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	private Button opEnd;
 	private Button opEndCustom;
 	
-//	private WritableList employeeList;
-//	private WritableList employeeListA;
-//	private WritableList employeeListB;
-	
 	private ArrayList<Employee> employees;
 	private ArrayList<Employee> employeesA;
 	private ArrayList<Employee> employeesB;
@@ -140,6 +136,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		parent = new Composite(parent, SWT.NONE);
+		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gl = new GridLayout(1, false);
 		
 		gl.marginBottom = gl.marginTop = gl.verticalSpacing = 0;
@@ -198,7 +197,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		
 		Composite leaderComp = new Composite(gA, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
-		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		groupALeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupALeader_Label, (WritableList)groupAEmployees.getInput());
 		if (existingLeg.getPatrol().hasPilot()){
@@ -271,12 +270,12 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		btnRemoveA.setText("<-"); //$NON-NLS-1$
 		btnRemoveA.setToolTipText(Messages.PatrolLegSplitDialog_RemoveEmployees_Tooltip);
 		
-		
 		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		groupList.setLabelProvider(new EmployeeLabelProvider());
 		groupList.setContentProvider(new ObservableListContentProvider());
 		groupList.setInput(new WritableList(input, Employee.class));
-		groupList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
+		groupList.getTable().setLayoutData(gd);
 		
 		btnAddA.addSelectionListener(new SelectionAdapter() {
 			@Override

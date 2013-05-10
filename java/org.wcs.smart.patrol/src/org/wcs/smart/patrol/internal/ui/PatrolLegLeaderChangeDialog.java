@@ -115,7 +115,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		parent.setLayout(new GridLayout(1, false));
+		parent = (Composite)super.createDialogArea(parent);
 		
 		// date  
 		Composite timecomp = new Composite(parent, SWT.NONE);
@@ -170,8 +170,10 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog{
 		
 		/* new leader/pilot */
 		leaderPilotcomp = new LeaderPilotComposite();
-		leaderPilotcomp.createComponent(parent, SWT.NONE);
+		Composite c = leaderPilotcomp.createComponent(parent, SWT.NONE);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		leaderPilotcomp.setValues(this.newLeg, null);
+		
 		
 		super.getShell().setText(Messages.PatrolLegLeaderChangeDialog_DialogTitle);
 		setMessage(Messages.PatrolLegLeaderChangeDialog_DialogMessage);
