@@ -307,6 +307,10 @@ public class Messages extends NLS {
 	public static String CsvConfig_Agency_Import_Message;
 	public static String CsvConfig_Agency_Import_Success;
 	public static String CsvConfig_Agency_Import_Title;
+	public static String DataModel_CloneAttributes1;
+	public static String DataModel_CloneAttributes2;
+	public static String DataModel_CloneCategories;
+	public static String DataModel_CloneSubCategories;
 	public static String DataModel_Error_Key_InvalidCharacters;
 	public static String DataModel_Error_Key_NotEmpty;
 	public static String DataModel_Error_Key_NotUnique;
@@ -596,7 +600,9 @@ public class Messages extends NLS {
 	public static String InitCaDataModelDialog_Op_ImportCustom;
 	public static String InitCaDataModelDialog_Op_UseBlank;
 	public static String InitCaDataModelDialog_Op_UseIUCN;
+	public static String InitCaDataModelDialog_Progress_CloneLanguages;
 	public static String InitCaDataModelDialog_Progress_ClosingDm;
+	public static String InitCaDataModelDialog_Progress_loadDataModel;
 	public static String InitCaDataModelDialog_Progress_LoadingDefaultDm;
 	public static String InitCaDataModelDialog_Progress_SavingDm;
 	public static String InitCaDataModelDialog_XmlFileFilter_Name;

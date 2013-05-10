@@ -268,21 +268,29 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 	}
 
 	private boolean saveDataModel() {
-
+		final boolean isIUCN = btnUseIucn.getSelection();
+		ConservationArea caToCloneFromA = null;
+		final boolean isCa = btnClone != null && btnClone.getSelection();
+		if (isCa){
+			caToCloneFromA = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
+		}
+		final ConservationArea caToCloneFrom = caToCloneFromA;
+		
+		final boolean isBlank = btnBlank.getSelection();
 		try {
 			
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(
 					getShell());
 			
 			
-			pmd.run(false, false, new IRunnableWithProgress() {
+			pmd.run(true, false, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException,
 						InterruptedException {
 					
-					if (btnUseIucn.getSelection()) {
+					if (isIUCN) {
 						monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_LoadingDefaultDm);
 						InputStream is = SmartProperties.getIucnDataModelFile();
 						try {
@@ -296,14 +304,16 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							dm = null;
 							throw new InvocationTargetException(ex);
 						}
-					}else if (btnClone != null && btnClone.getSelection()) {
+					}else if (isCa) {
 						//clone from another data model
-						monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_ClosingDm);
-						ConservationArea caToCloneFrom = (ConservationArea) ((IStructuredSelection) caViewer.getSelection()).getFirstElement();
+						monitor.beginTask(Messages.InitCaDataModelDialog_Progress_ClosingDm, 3);
+						
 						DataModel dmToClone = null;
 						getSession().beginTransaction();
 						try{
+							monitor.subTask(MessageFormat.format(Messages.InitCaDataModelDialog_Progress_loadDataModel, caToCloneFrom.getName()));
 							dmToClone = HibernateManager.loadDataModel(caToCloneFrom, getSession());
+							monitor.worked(1);
 						}finally{
 							getSession().getTransaction().commit();
 						}
@@ -316,6 +326,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						//TODO: this needs to be tested when we support multiple languages
 						boolean hasLang = false;
 
+						monitor.subTask(Messages.InitCaDataModelDialog_Progress_CloneLanguages);
 						for (Language lang: caToCloneFrom.getLanguages()){
 							if (lang.getCode().equals(ca.getDefaultLanguage().getCode())){
 								hasLang = true;
@@ -323,19 +334,32 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						}
 						String code = null;
 						if (!hasLang){
-							String[] codes = new String[caToCloneFrom.getLanguages().size()];
+							final String[] codes = new String[caToCloneFrom.getLanguages().size()];
 							int index = 0;
 							for (Language ll : caToCloneFrom.getLanguages()){
 								codes[index++] = ll.getCode();
 							}
-							LanguageSelectionDialog lsd = new LanguageSelectionDialog(getShell(), ca, codes);
-							if (lsd.open() != IDialogConstants.OK_ID){
+							final String[] langCode = {null};
+							Display.getDefault().syncExec(new Runnable(){
+
+								@Override
+								public void run() {
+									LanguageSelectionDialog lsd = new LanguageSelectionDialog(getShell(), ca, codes);
+									if (lsd.open() == IDialogConstants.OK_ID){
+										langCode[0] = (String)((IStructuredSelection)lsd.getSelection()).getFirstElement();
+									}
+									
+								}});
+							if (langCode[0] == null){
 								dm = null;
+							}else{
+								code = langCode[0];
 							}
-							code = (String)((IStructuredSelection)lsd.getSelection()).getFirstElement();
 						}
-						dm = dmToClone.clone(ca, code);
-					}else if (btnBlank.getSelection()){
+						
+						dm = dmToClone.clone(ca, code, monitor);
+						monitor.worked(1);
+					}else if (isBlank){
 						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());
 					}
 					
@@ -343,8 +367,9 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						String error = Messages.InitCaDataModelDialog_Error_NoDataModel;
 						throw new InvocationTargetException(new IllegalStateException(error), error);
 					}
-					monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_SavingDm);
+					monitor.subTask(Messages.InitCaDataModelDialog_Progress_SavingDm);
 					dm.save(getSession(), monitor);
+					monitor.worked(1);
 					return ;
 				}
 			});
