@@ -50,6 +50,8 @@ import org.wcs.smart.query.internal.ui.QueryPerspective;
  * The activator class controls the plug-in life cycle
  */
 public class QueryPlugIn extends AbstractUIPlugin {
+	
+	private static final boolean LOG_QUERY = false;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.query"; //$NON-NLS-1$
@@ -336,6 +338,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * @param t error
 	 */
 	public static void logSql(String sql){
+		if (!LOG_QUERY) return;
 		int status = IStatus.INFO;
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, sql, null));
 	}
