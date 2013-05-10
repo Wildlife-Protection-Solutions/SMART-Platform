@@ -400,7 +400,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		txtBounds = toolkit.createText(bm, ""); //$NON-NLS-1$
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 		gd.widthHint = 200;
+		txtBounds.setEditable(false);
 		txtBounds.setLayoutData(gd);
+		
 		
 		toolkit.createLabel(bm, Messages.SmartLayersPage_CRSLabel);
 		txtSrid = toolkit.createText(bm, Area.AREA_CRS.getName().getCode());
