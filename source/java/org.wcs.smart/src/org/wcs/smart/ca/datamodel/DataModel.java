@@ -508,22 +508,26 @@ public class DataModel {
 	 * default language of the new conservation area
 	 * @return the cloned data model
 	 */
-	public DataModel clone(ConservationArea newCa, String defaultLang){
+	public DataModel clone(ConservationArea newCa, String defaultLang, IProgressMonitor monitor){
 		DataModel clone = new DataModel();
 		
 		clone.setConservationArea(newCa);
 		
 		//attributes
+		monitor.subTask(Messages.DataModel_CloneAttributes1);
 		if (this.getAttributes() != null){
 			clone.attributes = new ArrayList<Attribute>();
 			for (Attribute att: this.getAttributes()){
+				monitor.subTask(Messages.DataModel_CloneAttributes2 + att.getName());
 				clone.attributes.add(att.clone(newCa,defaultLang));
 			}
 		}
 		
 		//categories
 		clone.categories = new ArrayList<Category>();
+		monitor.subTask(Messages.DataModel_CloneCategories);
 		for (Category cat: this.getCategories()){
+			monitor.subTask(Messages.DataModel_CloneSubCategories + cat.getName());
 			clone.categories.add(cat.clone(newCa, null, clone.attributes, defaultLang));
 		}
 		
