@@ -165,6 +165,7 @@ public class Messages extends NLS {
 	public static String AutoBackupEngine_ErrorReadingPropFile;
 	public static String AutoBackupEngine_ErrorWirtingPropFile;
 	public static String AutoBackupEngine_MakeDirectoryFailed;
+	public static String AutoBackupEngine_ProgressDialogTitle;
 	public static String AutoBackupPerferencePage_InvalidUser;
 	public static String BackupDialog_BrowseButton;
 	public static String BackupDialog_Confirm_DialogTitle;
