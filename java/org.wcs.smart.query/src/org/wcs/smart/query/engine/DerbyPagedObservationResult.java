@@ -286,7 +286,8 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	
 	private List<QueryResultItem> getData(final Session session, final int offset, final int pageSize) {
 		final List<QueryResultItem> result = new ArrayList<QueryResultItem>();
-		final String dataSql = "SELECT r.* FROM "+queryTempTable+" r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
+		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
+		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
