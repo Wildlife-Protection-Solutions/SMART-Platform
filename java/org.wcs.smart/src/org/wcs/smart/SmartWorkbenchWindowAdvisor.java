@@ -85,6 +85,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
         
         perspectiveTracker = new PerspectiveEditorTracker();
         perspectiveListener = new PerspectiveEditorListener(perspectiveTracker);
+        
     }
 
     public void dispose(){
@@ -107,7 +108,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 //        configurer.setInitialSize(new Point(bounds.width, bounds.height));
       	
         configurer.setShowCoolBar(true);
-        configurer.setShowStatusLine(false);
+        configurer.setShowStatusLine(false);	//udig adds a bunch of tools to the status line which we don't want
         configurer.setShowProgressIndicator(true);
         
         /* setup perspective tracker */
@@ -197,25 +198,4 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	}    	
     }    
 
-    
-//    /**
-//     * Look up configuration object, using UDIGWorkbenchConfiguration as a default.
-//     * @return WorkbenchConfiguration from preferences, or UDIGWorkbenchConfiguration if not found
-//     */
-//    private WorkbenchConfiguration lookupConfiguration() {
-//
-//        Class<WorkbenchConfiguration> interfaceClass = WorkbenchConfiguration.class;
-//        String prefConstant = PreferenceConstants.P_WORKBENCH_CONFIGURATION;
-//        String xpid = WorkbenchConfiguration.XPID;
-//        String idField = WorkbenchConfiguration.ATTR_ID;
-//        String classField = WorkbenchConfiguration.ATTR_CLASS;
-//
-//        WorkbenchConfiguration config = (WorkbenchConfiguration) UiPlugin
-//                .lookupConfigurationObject(interfaceClass, UiPlugin.getDefault()
-//                        .getPreferenceStore(), UiPlugin.ID, prefConstant, xpid, idField, classField);
-//        if (config == null) {
-//            return new SmartWorkbenchConfigurator();
-//        }
-//        return config;
-//    }
 }
