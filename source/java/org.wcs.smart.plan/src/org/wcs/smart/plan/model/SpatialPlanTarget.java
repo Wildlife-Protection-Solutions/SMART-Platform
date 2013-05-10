@@ -94,10 +94,15 @@ public class SpatialPlanTarget extends PlanTarget {
 	public PlanTarget clone() {
 		SpatialPlanTarget spt = new SpatialPlanTarget();
 		super.clone(spt);
-		//NOTE: this is not a deep copy of a list,
-		//as list content are the same instances as in original list
-		spt.setPoints(new ArrayList<SpatialPlanTargetPoint>(getPoints()));
+		ArrayList<SpatialPlanTargetPoint> targets = new ArrayList<SpatialPlanTargetPoint>();
+		for (SpatialPlanTargetPoint pnt: getPoints()){
+			SpatialPlanTargetPoint copy = pnt.clone();
+			copy.setPlanTarget(spt);
+			targets.add(copy);
+		}
+		spt.setPoints(targets);
 		spt.setDescription(getDescription());
+		spt.setDistanceForCompletion(getDistanceForCompletion());
 		return spt;
 	}
 

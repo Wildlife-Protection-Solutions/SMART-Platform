@@ -85,5 +85,17 @@ public class SpatialPlanTargetPoint implements ISmartPoint {
 	public void setY(double y) {
 		this.y = y;
 	}
+	
+	/**
+	 * Clones the target point coying the x, y, and plantarget values.
+	 * Uuid is not copied.
+	 */
+	public SpatialPlanTargetPoint clone(){
+		SpatialPlanTargetPoint clone = new SpatialPlanTargetPoint();
+		clone.setX(getX());
+		clone.setY(getY());
+		clone.setPlanTarget(getPlanTarget());
+		return clone;
+	}
 
 }
