@@ -1107,6 +1107,14 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            class="org.wcs.smart.map.internal.ExportMapToImageWizard"
+            id="org.wcs.smart.exportMap"
+            name="Map To Image">
+      </wizard>
+   </extension>
 
 </plugin>
 
