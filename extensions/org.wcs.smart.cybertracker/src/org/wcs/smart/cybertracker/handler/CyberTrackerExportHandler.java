@@ -40,11 +40,10 @@ import org.wcs.smart.cybertracker.export.CyberTrackerExporter;
 import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
- * Handler for exporting intelligence data.
+ * Handler for exporting data to CyberTracker application.
  * 
  * <p>
- * Displays a dialog for users to select export location and other parameters,
- * then exports the intelligence data.
+ * Displays a dialog for users to select export location, then exports the data to specified folder.
  * </p>
  * 
  * @author elitvin
