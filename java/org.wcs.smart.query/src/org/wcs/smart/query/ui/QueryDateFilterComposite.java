@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.services.ISourceProviderService;
@@ -274,8 +275,11 @@ public class QueryDateFilterComposite extends Composite {
 			}
 		}
 		
-		SourceProvider provider = (SourceProvider) ((ISourceProviderService)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_DATE_VALID);
-		provider.setQueryDateValid(error == null, error);
+		IWorkbenchPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
+		if (part != null){
+			SourceProvider provider = (SourceProvider) ((ISourceProviderService)part.getSite().getService(ISourceProviderService.class)).getSourceProvider(SourceProvider.QUERY_DATE_VALID);
+			provider.setQueryDateValid(error == null, error);
+		}
 	}
 	
 }
