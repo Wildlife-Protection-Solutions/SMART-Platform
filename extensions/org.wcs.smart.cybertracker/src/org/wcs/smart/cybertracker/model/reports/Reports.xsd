@@ -7,8 +7,13 @@
 					<xs:sequence>
 						<!-- From List -->
 						<!-- <xs:element name="OpenViews"> -->
-						<xs:element name="Queries" />
-					
+						<xs:element name="Queries">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Items" type="Items"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
 						<!-- From Queries -->
 						<xs:element type="xs:string" name="Id" />
 						<xs:element type="xs:string" name="Name" />
@@ -78,12 +83,6 @@
 		</xs:sequence>
 	</xs:complexType>
 -->
-
-	<xs:complexType name="Queries">
-		<xs:sequence>
-			<xs:element name="Items" type="Items"/>
-		</xs:sequence>
-	</xs:complexType>
 
 	<xs:complexType name="Table">
 		<xs:sequence>
