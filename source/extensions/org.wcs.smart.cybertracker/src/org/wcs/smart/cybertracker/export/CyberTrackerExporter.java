@@ -250,6 +250,14 @@ public class CyberTrackerExporter {
 			return result;
 		
 		if (treeNode.getChildren() == null || treeNode.getChildren().isEmpty()) {
+			//if we are here that means that it was a screen with leaf and non-leaf elements above and treeNode is a leaf element
+			//adding fake screen that contains only this element
+			CyberTrackerId id = map.get(treeNode);
+			List<CyberTrackerId> childIds = new ArrayList<CyberTrackerId>();
+			childIds.add(id);
+			Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), treeNode.getName(), childIds, resultElementId);
+			buildNodeNavigation(node, navId, hasNext);
+			result.add(node);
 			return result;
 		}
 
