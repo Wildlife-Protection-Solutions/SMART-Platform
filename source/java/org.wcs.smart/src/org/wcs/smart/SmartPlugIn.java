@@ -116,7 +116,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor for warning icon
 	 */
 	public static final String BULLET_BLACK = "org.wsc.smart.BULLET_BLACK"; //$NON-NLS-1$
-		
+
+	/**
+	 * Image descriptor for wizard banner export
+	 */
+	public static final String WIZBAN_EXPORT_IMAGE = "org.wsc.smart.WIZBAN_EXPORT_IMAGE"; //$NON-NLS-1$
 	
 	public BasemapDefinition defaultDefinition = null;
 	
@@ -221,6 +225,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(WARN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/warn.png")); //$NON-NLS-1$
 	     reg.put(BULLET_BLACK, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/bullet_black.png")); //$NON-NLS-1$
+	     
+	     reg.put(WIZBAN_EXPORT_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/wizban/exportimage_wiz.gif")); //$NON-NLS-1$
 	}
 	
 	/**

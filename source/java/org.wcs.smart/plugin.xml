@@ -1111,8 +1111,12 @@
          point="org.eclipse.ui.exportWizards">
       <wizard
             class="org.wcs.smart.map.internal.ExportMapToImageWizard"
+            icon="images/icons/etool16/exportimage_wiz.png"
             id="org.wcs.smart.exportMap"
             name="Map To Image">
+         <description>
+            Exports the current map to Image (+world) file or a PDF.
+         </description>
       </wizard>
    </extension>
 
