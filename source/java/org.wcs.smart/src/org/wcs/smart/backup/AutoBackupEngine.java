@@ -230,7 +230,12 @@ public class AutoBackupEngine {
 			if (!f.exists()){
 				return properties;
 			}
-		    properties.load(new FileInputStream(location));
+			FileInputStream fis = new FileInputStream(location);
+			try{
+				properties.load(fis);
+			}finally{
+				fis.close();
+			}
 		} catch (IOException e) {
 			SmartPlugIn.log(Messages.AutoBackupEngine_ErrorReadingPropFile + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
 			return properties;
@@ -246,7 +251,12 @@ public class AutoBackupEngine {
 	public static boolean setAutoBackupProperties(Properties prop){
 		try {
 			String location = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE) + SMART_BACKUP_PROPERTIES_FILE;
-			prop.store(new FileOutputStream(location), null);
+			FileOutputStream fout = new FileOutputStream(location);
+			try{
+				prop.store(fout, null);
+			}finally{
+				fout.close();
+			}
 			return true;
 		} catch (IOException e) {
 			SmartPlugIn.displayLog(null, Messages.AutoBackupEngine_ErrorWirtingPropFile + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$

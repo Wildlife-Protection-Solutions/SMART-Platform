@@ -1086,7 +1086,7 @@
       <page
             class="org.wcs.smart.ui.internal.preference.AutoBackupPerferencePage"
             id="org.wcs.smart.autobackup"
-            name="Automatic Backup Configuration">
+            name="%autobackup.preferencepage.name">
       </page>
    </extension>
    <extension
