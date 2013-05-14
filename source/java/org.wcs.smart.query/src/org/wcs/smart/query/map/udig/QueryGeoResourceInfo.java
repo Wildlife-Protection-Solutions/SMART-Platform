@@ -34,7 +34,8 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
-import org.wcs.smart.query.model.ObservationQuery;
+import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -64,10 +65,13 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
 			this.bounds = env;
 			QueryService service = (QueryService) resource.resolve(IService.class, monitor);
-			if (service.getQuery() instanceof ObservationQuery){
-				Envelope local = ((ObservationQuery)service.getQuery()).getLastPagedResults().getEnvelope();
-				env.expandToInclude(local.getMinX(), local.getMinY());
-				env.expandToInclude(local.getMaxX(), local.getMaxY());
+			if (service.getQuery() instanceof IPagedQuery){
+				IPagedQueryResultSet rs = ((IPagedQuery)service.getQuery()).getLastPagedResults();
+				if (rs != null){
+					Envelope local = rs.getEnvelope();
+					env.expandToInclude(local.getMinX(), local.getMinY());
+					env.expandToInclude(local.getMaxX(), local.getMaxY());
+				}
 			}else{
 				fs.getFeatures().accepts(new FeatureVisitor() {
 					@Override
