@@ -214,6 +214,7 @@ public class ImportReportEngine {
 			session.saveOrUpdate(importReport);
 			
 			ReportDesignHandle rdh = SessionHandleAdapter.getInstance().getSessionHandle().openDesign(reportXmlFile.getAbsolutePath());
+			
 			//remove existing library & make sure it points to the library associated with this ca
 			LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 			rdh.dropLibraryAndBreakExtends(library);
@@ -627,35 +628,17 @@ public class ImportReportEngine {
 			//save to db
 			session.saveOrUpdate(smartQuery);
 			queriesAdded.add(smartQuery);
-//			final org.wcs.smart.query.model.Query thisQuery = smartQuery;
-//			display.syncExec(new Runnable(){
-//				@Override
-//				public void run() {
-//					QueryEventManager.getInstance().fireFolderChangedListeners(IQueryFolderListener.QUERY_ADDED, thisQuery);
-//				}
-//				
-//			});
-			
 
 		}else{
 			//overwrite or use original
 			session.saveOrUpdate(smartQuery);
 			queriesModified.add(smartQuery);
-//			final org.wcs.smart.query.model.Query thisQuery = smartQuery;
-//			
-//			display.syncExec(new Runnable(){
-//				@Override
-//				public void run() {
-//					QueryEventManager.getInstance().fireQueryChangedListeners(thisQuery);
-//				}
-//			});
 		}
 		
 		//update report definition to point to correct query
 		String newQueryText = smartQuery.getType().name() + ":" + SmartUtils.encodeHex(smartQuery.getUuid());  //$NON-NLS-1$
 		oldToNewQueries.put(handle.getQueryText(), newQueryText);
 		handle.setQueryText( newQueryText );
-		
 		return true;
 	}
 	
