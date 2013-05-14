@@ -20,7 +20,16 @@ information gathered during the patrols. Many perspectives share similar
 components, bringing familiarity throughout the application while still
 providing unique functionality for each perspective. </p>
 
-<p>&lt;&lt;&lt;ADD SCREENSHOT OF FINAL OVERVIEW&gt;&gt;&gt;</p>
+<p></p>
+
+<p><strong>Overview</strong></p>
+
+<p><img alt="SMART Overview" src="images/Overview.png" width="631" height="485"
+/></p>
+
+<p></p>
+
+<p><strong>SMART Components</strong></p>
 
 <table border="1">
   <thead>
@@ -52,11 +61,13 @@ providing unique functionality for each perspective. </p>
     </tr>
     <tr>
       <td>SMART Plans</td>
-      <td></td>
+      <td><img alt="plan icon" src="images/plans.png" width="21" height="20"
+      /></td>
     </tr>
     <tr>
       <td>SMART Intelligence</td>
-      <td></td>
+      <td><img alt="Intelligence Icon" src="images/intelligence.png" width="21"
+        height="20" /></td>
     </tr>
   </tbody>
 </table>
@@ -73,12 +84,6 @@ default cartrography of the Conservation Area (see Creating Basemaps). </p>
 <p><em>Note: Mapping windows exist in the Patrol and Query Perspectives and the
 map navigation for these windows are the same as the Map View Perspective.
 </em></p>
-
-<p></p>
-
-<p></p>
-
-<p>&lt;&lt;&lt;ADD SCREENSHOT OF MAP PERSPECTIVE&gt;&gt;&gt;</p>
 
 <p></p>
 
@@ -167,7 +172,7 @@ mapping window. </p>
     </tr>
     <tr>
       <td>Add a layer to the map</td>
-      <td><img alt="add layers" src="images/addLayers.png" width="20"
+      <td><img alt="Add Layers" src="images/iconAddLayers.png" width="20"
         height="19" /></td>
     </tr>
   </tbody>
@@ -194,19 +199,14 @@ initialization of the Conservation Area. </p>
 
 <p></p>
 
-<p><img alt="add layers window" src="images/AddLayersDialog.png" width="407"
+<p><img alt="Add Layers Dialog" src="images/AddLayersDialog.png" width="407"
 height="372" /></p>
-
-<p></p>
 
 <p><strong>Files</strong> - ESRI Shapefiles, ArcGrid files and various image
 file formats are all supported.</p>
 
 <p><strong>Map Decoration</strong> - North arrow, scalebar, legend and a grid
 are additional cartographic elements.</p>
-
-<p><strong>PostGIS</strong> - creates a connection to PostGIS for direct access
-from the database.</p>
 
 <p><strong>Smart Area Connection Page</strong> - opens the dialog for
 adding/updating the original five (5) boundary files.</p>
@@ -280,8 +280,6 @@ these basemaps can be accessed later by the other user level accounts. </p>
 
 <p></p>
 
-<p></p>
-
 <h2><a id="Patrol">Patrol Perspective</a></h2>
 
 <p>The Patrol Perspective is where patrols are created and their associated
@@ -304,7 +302,8 @@ Map tab that displays the waypoints and routes of the patrol.</p>
 
 <p></p>
 
-<p>&lt;&lt;&lt;ADD SCREENSHOT OF PATROL PERSPECTIVE&gt;&gt;&gt;</p>
+<p><img alt="Patrol Perspective" src="images/PatrolPerspective.png"
+width="1059" height="772" /></p>
 
 <p></p>
 
@@ -437,6 +436,8 @@ characteristics of the patrol. </p>
 <p><strong>Patrol Entry Window Steps</strong></p>
 <ol>
   <li>Patrol ID</li>
+  <li>Links to Plans</li>
+  <li>Links to Intelligence Records</li>
   <li>Patrol Type (Air, Ground, Marine)</li>
   <li>Patrol Transportation Type</li>
   <li>Armed Patrol</li>
@@ -609,8 +610,10 @@ another day.</p>
 import the track info is the same as for waypoints, except that the process is
 initiated by selecting <em>Set Track.</em></p>
 
-<p>Note: Tracks can be created from available waypoints if no collected GPS
-track information exists. </p>
+<p><em>Note: Tracks can be created from available waypoints if no collected GPS
+track information exists.</em> </p>
+
+<p></p>
 
 <h4><a id="Observations">Entering Observations</a></h4>
 
@@ -692,9 +695,9 @@ selected patrols.</p>
 
 <p><strong>Export </strong>- Executes the patrol export process.</p>
 
-<h5>Patrol Import</h5>
-
 <p></p>
+
+<h5>Patrol Import</h5>
 
 <p><img alt="Import patrol" src="images/ImportPatrol.png" width="507"
 height="333" /></p>
@@ -708,6 +711,8 @@ files.</p>
 import process.</p>
 
 <p><strong>Import</strong> - Executes the patrol import process.</p>
+
+<p></p>
 
 <h2><a id="Query">Query Perspective</a></h2>
 
@@ -725,12 +730,12 @@ which query is chosen.</p>
 <p><em>Note: Patrol and Waypoint queries share all the same components with
 each other and many of the same components as Summary and Grid Queries</em>.</p>
 
+<p></p>
+
 <h4><a id="QueryType">Query Types</a></h4>
 
 <p>A SMART query is a logical expression used to filter the entries in the
 database. SMART has four query types (waypoint, patrol, summary, and grid).</p>
-
-<p></p>
 
 <h5>Waypoint</h5>
 
@@ -892,10 +897,20 @@ tables or on a map.</p>
   </tbody>
 </table>
 
+<p></p>
+
 <h4><a id="PatrolObservationQuery">Patrol and Observation Queries</a></h4>
 
-<p><img alt="Query Perspective" src="images/QueryPerspective.png" width="983"
-height="654" /></p>
+<p></p>
+
+<p><img alt="Query Perspective" src="images/QueryPerspective2.png" width="986"
+height="665" /></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
 
 <table border="1">
   <caption><strong>Query Perspective Icons</strong></caption>
@@ -1130,7 +1145,13 @@ to allow SMART users to be able to build more complex queries.</p>
   </tbody>
 </table>
 
+<p></p>
+
+<p></p>
+
 <h4><a id="SummaryQuery">Summary Queries</a></h4>
+
+<p></p>
 
 <p><strong>Summary Query Overview</strong></p>
 
@@ -1181,7 +1202,8 @@ height="583" /></p>
     <tr>
       <td><img alt="query tab" src="images/queryTab.png" width="85" height="20"
         /></td>
-      <td>Filters the available query list.</td>
+      <td>Filters the available query list. Constrution of the filters is the
+        same as an observation or patrol query.</td>
     </tr>
     <tr>
       <td><img alt="run query 1" src="images/runQuery1.png" width="83"
@@ -1234,10 +1256,6 @@ height="583" /></p>
   </tbody>
 </table>
 
-<p><strong></strong></p>
-
-<p></p>
-
 <p><strong>Group By Options</strong></p>
 
 <p><strong>Patrol Group By &ndash;</strong> aggregations of values based on
@@ -1276,92 +1294,207 @@ are placed.</p>
 windows but not all combinations are permissible if they break logical
 groupings.</em></p>
 
-<p></p>
-
-<p></p>
 
 <p><strong>Sample Summaries</strong></p>
 
-<table border="1">
-  <caption>Sample Summaries</caption>
-  <col />
-  <col />
-  <col />
+<p>The following summary is a basic summary to count the number of Observed
+Threats and Grouped by Patrol Types. </p>
+
+<p><img alt="" src="images/summary2.png" width="646" height="346" /></p>
+
+<p></p>
+
+<p>The query has been modified with the Number of Threats added a second time
+but with the Count Incidents Option chosen.</p>
+
+<p>This will give the number of observations and the number of incidents
+(multiple observations at one waypoint).</p>
+
+<p><img alt="" src="images/summary2b.png" width="651" height="319" /></p>
+
+<p></p>
+
+<p>This example shows some basic stats on the patrol heading out from the
+Conservation Area stations. The X values of Number of Patrols, Days, Nights,
+Distance, etc.. are selected from the Patrol Values section. </p>
+
+<p>The Station list is populated by selecting the Group By Option - Patrol
+Group Bys - Station. </p>
+
+<p><img alt="" src="images/summary-1.png" width="882" height="604" /></p>
+
+<p></p>
+
+<p>This example is of the same summary but without the Station Group By.</p>
+
+<p><img alt="" src="images/summary1b.png" width="881" height="105" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Aggregates</strong></p>
+
+<p>Once a data model Number attribute has its aggregates initialized they can
+be used to in summaries to provide Min, Max, Sum and Average summaries for that
+particular attribute. </p>
+
+<p>In the following example the query is to show the Sum of the Number of
+Weapons Confiscated and Seen.</p>
+
+<p><em>Note: If no Aggregates are available when building a Summary then the
+data model has been set to disallow them. If required contact your Smart
+Administrator to initialize the Aggregates.</em></p>
+
+<p><img alt="" src="images/aggregates.png" width="724" height="378" /></p>
+
+<p><strong>Compute Rate / Encounter Rates</strong></p>
+
+<p>Smart can provide Encounter Rates for the x Value Options. The base values
+are calculated against the chosen Encounter Rate to provide how many
+Observations/Incidents per X...</p>
+
+<p>These rates are accessed through the Compute Rate link. If multiple
+Encounter Rates are required in the Summary then the Value item will need to be
+added as many times as required.</p>
+
+<p></p>
+
+<p><img alt="" src="images/encounterRates.png" width="709" height="441" /></p>
+
+<p></p>
+
+<p></p>
+
+<p>In the following example the Count of Threats (Incidents) per Distance,
+Person Hours and Patrols are summaries by Teams. The output of this summary
+shows Team 2 is encountering nearly 10 times as many threats per distance
+travelled than Team 1 and approximately 2.5 times more observations per
+kilometer than Team 3. </p>
+
+<p><img alt="" src="images/EncounterRate2.png" width="901" height="561" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="GriddedQueries">Gridded Summary Queries</a></h4>
+
+<p>Smart's Gridded Summary Queries summarizes the query into a user defined
+grid and outputs the results in a tabular form or in a raster map output. The
+raster outputs provides a heat map of the summary results which can be quickly
+interpreted by users to see where the issues are located. The X values for the
+Gridded Summary are constructed in the same way as with the Summary queries
+with the major difference is no Group-By Options are available.</p>
+
+<h5>Gridded Summary Icons and Links</h5>
+
+<table>
+  <thead>
+    <tr>
+      <td>Icon or Link</td>
+      <td>Description</td>
+    </tr>
+  </thead>
   <tbody>
     <tr>
-      <td><strong>QUERY DEFINITION</strong></td>
-      <td><strong>DESCRIPTION</strong></td>
-      <td><strong>FILTERS USED</strong></td>
+      <td><img alt="DATE FILTER" src="images/30days.png" width="264"
+        height="38" /></td>
+      <td>Filters the date of the query.</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="No Name Query" src="images/query_noNameQuery.png"
+        width="214" height="30" /></td>
+      <td>Used to change the name of the query.</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="summary properties" src="images/summaryProperties.png"
+        width="127" height="18" /></td>
+      <td>Changes the name of the query. Filters the fields returned in the
+        query results.</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="saved queries folder" src="images/QueryFolders.png"
+        width="189" height="61" /></td>
+      <td>Location of saved queries and summaries. By default there are two
+        folders (Conservation Area Queries &amp; My Queries). 
+
+        <p>Any user account can save into My Queries, but saved items are only
+        accessible to the user account that created them.</p>
+
+        <p>Only Manager and Admin accounts can save in the Conservation Area
+        Queries folder.</p>
+      </td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="run query 1" src="images/runQuery1.png" width="83"
+        height="25" />&amp; <img alt="run query 2" src="images/runQuery2.png"
+        width="16" height="13" /></td>
+      <td>Executes the query.</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="save query" src="images/SaveQuery.png" width="23"
+        height="20" /></td>
+      <td>Saves the query.</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="erase query" src="images/eraseQuery.png" width="19"
+        height="20" /></td>
+      <td>Clears the Query.</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="Grid Filter Values" src="images/FilterValues1.png"
+        width="187" height="16" /></td>
+      <td>Opens windows for the "Group By and Values Tab" and "Filter Tab".</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="Grid Projection" src="images/gridprojection.png"
+        width="185" height="30" /></td>
+      <td>Option to chose the available projections to build the grid.</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img alt="Grid Size" src="images/gridSize.png" width="103"
+        height="25" /></td>
+      <td>Sets the grid size based on the map units of the projection.</td>
+    </tr>
+    <tr>
+      <td><img alt="X Grid Value" src="images/xGridValue.png" width="94"
+        height="26" /></td>
+      <td>The value of the Gridded Summary. </td>
     </tr>
   </tbody>
 </table>
 
-<p></p>
+
+<p>The following example is of a sinple Grid Summary to show the Observed
+Threats based on a 0.01 (degree) grid. In a Grid query there is aways a base
+display of where the patrols went. </p>
+
+<p>These entries are given a value of 0. Any values greater than 0 indicate the
+presence of the chosen Grid Value.</p>
+
+<p><img alt="Raster Grid Map" src="images/rasterGrid.png" width="680"
+height="589" /></p>
 
 <p></p>
 
 <p></p>
 
-<p></p>
+<p><strong>Grid Filters</strong></p>
+
+<p>Additional filters can be applied to Gridded Queries in the same way as with
+other query types. Selecting the Filter Tab will open the framework for adding
+additional filters to the query.</p>
+
+<p><em>Note: If Encounter Rates are applied to the X Grid Values an additional
+filter (Rate Filter) appears in the Filter Tab. This additional filter can
+allow the user to fine tune the filter parameters to produce a multi-layered
+filter that is applied to the X Grid Value item.</em></p>
 
 <p></p>
 
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
+<p><img alt="Grid Filters Rate Filter" src="images/GridFilters.png" width="775"
+height="100" /></p>
 
 <p></p>
 
@@ -1371,23 +1504,414 @@ groupings.</em></p>
 
 <h2><a id="Reports">Reports</a></h2>
 
+<p>SMART reports are highly configurable and allow for a wide range of
+standardized reporting. The information on the reports can be dynamically
+generated based on the results of SMART queries and summaries. A major
+component of SMART is its mapping ability, and SMART reports allow maps to be
+included and customized to suit the report. Smart reports contain many common
+reporting elements (tables, charts/graphs, images, etc...) as well as other
+elements (maps and dynamic query results) that all result in a powerful
+reporting package. </p>
+
+<p>The SMART reporting is built off the Eclipe open source project (BIRT). For
+a detailed description of the BIRT project and enhanced help on reporting
+please refer to ...</p>
+
+<p><a
+href="http://www.eclipse.org/birt/phoenix/intro/">http://www.eclipse.org/birt/phoenix/intro/</a></p>
+
+<p></p>
+
+<p><img alt="Report Icon" src="images/reportICon.png" width="418" height="67"
+/></p>
+
+<p></p>
+
+<p><strong>Report List Toolbar</strong></p>
+
+<p>The report toolbar has icons for creating, editing, running, exporting and
+deleting reports.</p>
+
+<p><img alt="Report List" src="images/reportList.png" width="328" height="130"
+/></p>
+
+
+<p><strong>Report Toolbar Icons</strong></p>
+
+<table border="1">
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><img alt="Delete Report" src="images/deleteReport.png" width="22"
+        height="18" /></td>
+      <td>Deletes the selected report(s)</td>
+    </tr>
+    <tr>
+      <td><img alt="Create Report" src="images/CreateReport.png" width="22"
+        height="18" /></td>
+      <td>Creates a new report</td>
+    </tr>
+    <tr>
+      <td><img alt="Edit Report" src="images/editReport.png" width="22"
+        height="18" /></td>
+      <td>Edits the selected report(s)</td>
+    </tr>
+    <tr>
+      <td><img alt="Run and Export Report" src="images/RunExportReport.png"
+        width="22" height="18" /></td>
+      <td>Runs and exports the selected report(s)</td>
+    </tr>
+    <tr>
+      <td><img alt="Run Report" src="images/RunReport.png" width="22"
+        height="18" /></td>
+      <td>Runs the selected report(s)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p><strong>Components of the Report Editor</strong></p>
+
+<p>The Report Editor consists of a few basic components, which contain their
+own functionality and have their own purpose. In building basic to intermediate
+reports there will likely be many functions of the SMART reporting that will
+not be used. </p>
+
+<p></p>
+
+<p><img alt="Report Editor Framework" src="images/ReportFramework.png"
+width="1090" /></p>
+
 <p></p>
 
 <p></p>
+
+<p><strong>Design Window</strong></p>
+
+<p>The Design Window is where the components of the report are organized. This
+window does preview what the final report will look like as reports are
+generally based off dynamic data. The window allows for the layout of the
+objects to be added and customized as to content, size and style.</p>
+
+<p>The Layout and Master Page tabs at the bottom are the two tabs that most
+users will mainly use. It is highly recommended not to make any edits in the
+Script or XML Source tabs, unless you are an advanced user who understands the
+risks of directly editing the code used to generate the report.</p>
+
+<p></p>
+
+<p><strong>Property Editor</strong></p>
+
+<p>This window is used to edit the properties of the objects that have been
+loaded into the Design Window. The Property Editor options will change if you
+move between the Layout and Master Page tabs.</p>
+
+<p></p>
+
+<p><strong>Report Properties (Master Page tab)</strong></p>
+
+<p>Used to specify general properties of the report&rsquo;s master page.</p>
+
+<p><img alt="Report Master Page" src="images/ReportMasterPage.png" width="1017"
+height="291" /></p>
+
+<p></p>
+
+<p><strong>Outline</strong></p>
+
+<p>The Outline is used to organize the objects that are used to build and
+organize your report. Objects and Elements are imported into the outline, and
+allow for easy access to these components when reports are designed in the
+Design Window. If an object is commonly used by many reports (logos, titles,
+...) then these objects can be exported to the Shared Resources library. This
+is done by right-clicking the object and selecting "Export to Library..." </p>
+
+<p><img alt="Report Outline" src="images/ReportOutline.png" width="193"
+height="266" /></p>
+
+<p></p>
+<ul>
+  <li><strong>Da</strong><strong>ta Sets</strong> - Linked to existing tables
+    in the database (employees, stations, agencies and ranks, etc...) or to
+    saved queries and summaries.</li>
+  <li><strong>Body</strong> - When objects of the report are brought into the
+    Layout Editor these objects will be visible in the Body section. Objects
+    can be selected directly in this folder, moved around, deleted or edited
+    through exposed parameters.</li>
+  <li><strong>Embedded Images</strong> - Any images to be included in the
+    report must first be included in this folder.</li>
+</ul>
+
+<p></p>
+
+<p><strong>Resource Explorer</strong></p>
+
+<p>The Resource Explorer is where the Shared Resources of the library are
+accessed. Here is where you can save common report elements that are used in
+multiple reports, for example logos. If an object will likly be used for most
+if not all reports then it is best to share the objects in the Shared Resources
+library. Any report creation and edits can immediately access these objects and
+do not need to import or link to any of them. </p>
+
+<p><em>Note: It is recommended to limit object in the Shared Resources library
+to objects that will be used by most if not all reports. Adding too many
+objects to the library negatively impacts performance of the reporting
+framework.</em></p>
+
+<p><img alt="Report Resource Explorer" src="images/ResourceExplorere.png"
+width="320" height="336" /></p>
+
+<p></p>
+
+<p><strong>Report Items</strong></p>
+
+<p>Report Items contain many of the objects used to create the report. These
+objects are selected and inserted in to the report editor widow to build up the
+desired report.</p>
+
+<p><img alt="Report Items" src="images/ReportItems.png" width="327"
+height="398" /></p>
+
+<p></p>
+<ul>
+  <li><strong>Label</strong> - generally single line objects used for report
+    titles or object labels</li>
+  <li><strong>Text</strong> - open text boxes allowing for static text to be
+    typed into the report</li>
+  <li><strong>Dynamic Text</strong> - text based off custom or predefined
+    variables or functions</li>
+  <li><strong>Data</strong> - items in this data section have to be pre-loaded
+    in the Outline or Library before they will appear</li>
+  <li><strong>Image</strong> - items in the image section have to be pre-loaded
+    in the Outline or Library before they will appear</li>
+  <li><strong>Grid</strong> - grids allow for layout objects to be organized
+    into rows and columns</li>
+  <li><strong>List</strong> - insert flexible format presentation of data set
+    rows in header/detail &amp; footers</li>
+  <li><strong>Table</strong> - insert column presentation of data set rows in
+    header/detail &amp; footers</li>
+  <li><strong>Chart</strong> - used to insert charts into the report</li>
+  <li><strong>Cross Tab</strong> - inserts aggregated data in row and column
+    format</li>
+  <li><strong>Smart Map</strong> - inserts maps into the report</li>
+</ul>
 
 <p></p>
 
 <h2><a id="Plans">SMART Plans</a></h2>
 
+<p>SMART Plans allow for a set of targets to be assigned to a patrol or series
+of patrols and to keep track of available and active rangers. SMART plans can
+be arranged in a parent-child relationship where a parent plan can have a
+number of children plans (sub-plans) that are associated with the parent. Plans
+are assigned to patrols and when the patrol return from the field and the data
+has been entered into SMART the software will automatically validate if the
+objectives have been met or not. </p>
+
 <p></p>
+
+<p><strong>Developing Plans</strong></p>
+
+<p>A plan allows for specific targets and goals be assigned to a Conservation
+Area, station, team or series of patrols. A plan is created through the use of
+a similar wizard used to create patrols. After a plan has been created it can
+be associated with a patrol or series of patrols which then uses the track
+information to calculate the success or failure of defined targets.</p>
+
+<p></p>
+
+<p><strong>Steps in Creating a Plan</strong></p>
+
+<p><strong>1. Template</strong><strong>-</strong> Create a plan from scratch or
+use an existing plan as a template</p>
+
+<p><strong>2. Plan Type -</strong> Chose the type of plan (Patrol, Team,
+Station or Conservation Area) and available rangers for the plan</p>
+
+<p><strong>3. Parent Plan -</strong> Chose if the plan is a sub-plan of another
+plan or stans alone</p>
+
+<p><strong>4. Plan Information -</strong> Plan ID, Name and Description</p>
+
+<p><strong>5. Station / Team -</strong> Selection of the Team and Station
+involved in the plan</p>
+
+<p><strong>6. Plan Dates -</strong> Selection of the start and end date of the
+plan</p>
+
+<p><strong>7. Plan Targets -</strong> Adds targets and objectives to the
+plan</p>
+
+<p></p>
+
+<p><strong>Target Types</strong></p>
+<dl>
+  <dt><strong>Numeric</strong> - targets include distance and amount of patrol
+  time</dt>
+</dl>
+
+<p><img alt="numeric plan" src="images/numericPlan.png" width="351"
+height="345" /></p>
+
+<p><strong>Numeric Target Types:</strong></p>
+<ul>
+  <li>Distance Travelled</li>
+  <li>Patrol Hours</li>
+  <li>Patrol Days</li>
+  <li>Patrol Man-Hours</li>
+</ul>
+
+<p></p>
+<dl>
+  <dt><strong>Administrative</strong> - can be defined and described as
+  required by the administrators and planners of the Conservation Area patrols.
+  SMART does not automatically evaluate the pass/fail of Administrative
+  patrols. When an administrative patrol target has been achieved the check box
+  for "Target has been achieved" will be manually selected.</dt>
+</dl>
+
+<p><img alt="Administrative Plan" src="images/AdministrativePlan.png"
+width="352" height="349" /></p>
+
+<p></p>
+<dl>
+  <dt><strong>Spatial</strong> - locations within the Conservation Area that
+  need to be visited by the patrols selected by manual coordinate input or
+  through mapping interface <img alt="Add Spatial Target Point"
+  src="images/AddSpatialTarget.png" width="16" height="16" />. The Distance for
+  Completion (meters) parameter is how close to the exact coordinates the
+  patrol needs to be before the target location is successful. </dt>
+</dl>
+
+<p><img alt="Spatial Target" src="images/SpatialTarget.png" width="708"
+height="548" /></p>
+<ul>
+</ul>
+
+<p></p>
+
+<p><strong>Summary Screen of Plan</strong></p>
+
+<p><img alt="Plan Summary Overview" src="images/PlanOverviewSummary.png"
+width="718" height="671" /></p>
+
+<p></p>
+
+<p><strong>edit</strong> - edits the selected plan target</p>
+
+<p><strong>manage</strong> - opens dialog to add new targets</p>
+
+<p><strong>refresh</strong> - refreshes validation checks on patrols associated
+with these targets.</p>
+
+<p></p>
+
+<p><strong>Linking Patrols to Plan Targets</strong></p>
+
+<p>After a plan has been created it can then be assigned to a patrol or
+multiple patrols. </p>
+
+<p>Linking a patrol to a plan requires the user open that specific patrol in
+the Patrol Perspective and click on the "Other" tab (bottom of window).</p>
+
+<p>Then clicking on the edit link next to the Plan window will open a dialog to
+link the active patrol with a plan.</p>
+
+<p><img alt="Linking a Patrol to a Plan" src="images/linkingPlanPatrols.png"
+width="769" height="593" /></p>
+
+<p><strong>Validating Plans</strong></p>
+
+<p>After a patrol has been linked to a plan SMART can then validate the numeric
+and spatial targets. These targets are validated against the track information
+so if no track information has been entered the validation of the plans will
+not be successful. </p>
+
+<p><img alt="Plan Validation" src="images/PlanValidation.png" width="860"
+height="232" /></p>
+
+<p>After the patrols and plans have been linked the user will need to click the
+refresh button to run the validation. When the target has been successfully
+validated the red circle turns green. This applies to numeric and spatial
+targets.</p>
+
+<p></p>
+
+<p>Validation of administrative targets is a manual process which requires the
+user to select and edit the Admin targets and click the checkbox "Target has
+been achieved".</p>
+
+<p><img alt="Admin plan validation" src="images/adminTargetValidation.png"
+width="589" height="261" /></p>
 
 <p></p>
 
 <p></p>
 
-<h2><a id="Intelligence">SMART Intelligence</a></h2>
+<p></p>
+
+<h2><a id="Intelligence">SMART Intelligence Records</a></h2>
+
+<p>Intelligence records are pieces of information that has been gathered
+through previous patrols or by external sources. Information from intelligence
+records can be used by Conservation Area managers to help plan future patrols.
+</p>
 
 <p></p>
+
+<p><strong>Steps in Creating Intelligence Records</strong></p>
+
+<p>1. Intelligence Received Date</p>
+
+<p>2. Intelligence Source (Patrol, Public, Informant, CET)</p>
+
+<p>3. Intelligence relevant for Multiple Days</p>
+
+<p>4. Intelligence Name and Description</p>
+
+<p>5. Intelligence Location</p>
+
+<p>6 . Intelligence Attachments</p>
+
+<p></p>
+
+<p><strong>Intelligence Record Types</strong></p>
+
+<p><strong>Patrol</strong> - gathered directly by a previous patrol</p>
+
+<p><strong>Public</strong> - from an unassociated public member</p>
+
+<p><strong>Informant</strong> - a person with some ties to the Conservation
+Area</p>
+
+<p><strong>CET</strong> - Community Extension Team (i.e. the separate Forest
+Department/ NGO team working with local communities)</p>
+
+<p></p>
+
+<p><img alt="Intelligence Overview" src="images/IntelligenceOverview.png"
+width="850" height="628" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Intelligence is Relevant for Multiple Days</strong></p>
+
+<p>If the incoming intelligence is to cover activity that spans multiple days
+then in this step you should check the box and enter in the appropriate dates.
+For this exercise you will accept the default day.</p>
+
+<p></p>
+
+<p><strong>Querying Patrols with Plans and Intelligence Records</strong></p>
+
+<p>Plans with links to patrols can be queried with a Patrol Query with Patrol
+Filters. The patrol filter "Motivated by Intelligence" is to query out any
+patrols associated with Intelligence Records. The patrol filter "Part of Plan"
+is to query any patrols that were associated with Plans.</p>
 
 <p></p>
 
@@ -1395,78 +1919,151 @@ groupings.</em></p>
 
 <h2><a id="DataModel">Data Model</a></h2>
 
-<p></p>
+<p>SMART's data model is the foundation of the data entry, analysis and
+reporting. Defining a data model to meet the needs of a Conservation Area is
+crucial to ensuring that the data entry, analysis and reporting all work
+together to provide the information necessary to properly manage the patrols.
+SMART installs come with a default data model that can be customized by a SMART
+Administrator to fully meet the requirments of the Conservation. </p>
+
+<p><strong>Categories</strong></p>
+
+<p>The SMART data model structure is based on a tree structure, comprised of
+nodes (Categories) and a series of &lsquo;leaves&rsquo; (Attributes) that can
+be associated to any number of the tree&rsquo;s categories. <img
+alt="Category Icon" src="images/category.png" width="16" height="16" /></p>
+
+<p>Categories can be with or without attributes and can be a parent to other
+categories or a child to others. </p>
 
 <p></p>
 
-<p></p>
+<p><strong>Attribute Types</strong></p>
+
+<p>SMART supports attribute types of Numeric, Text, List, Tree and Boolean.
+Usage of the attribute types will depend on the nature of the observation
+information collected in the field.</p>
+
+<p>Examples and recommended usages of attribute types are:</p>
+
+<table border="1">
+  <caption></caption>
+  <col />
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>ICON</strong></td>
+      <td><strong>TYPE</strong></td>
+      <td><strong>DESCRIPTION</strong></td>
+    </tr>
+    <tr>
+      <td><img alt="Attribute Number" src="images/att_number.png" width="19"
+        height="18" /></td>
+      <td>Numeric</td>
+      <td>Widths, lengths, amounts, numbers of animals, people or items</td>
+    </tr>
+    <tr>
+      <td><img alt="Attribute List" src="images/att_list.png" width="19"
+        height="18" /></td>
+      <td>List</td>
+      <td>Names of items where the list is known and the list is not too
+      long</td>
+    </tr>
+    <tr>
+      <td><img alt="Attribute Text" src="images/attribute_text.png" width="19"
+        height="18" /></td>
+      <td>Text</td>
+      <td>Specific names that cannot be preloaded into a list</td>
+    </tr>
+    <tr>
+      <td><img alt="Attribute Tree" src="images/attTree.png" width="18"
+        height="19" /></td>
+      <td>Tree</td>
+      <td>A collection of attributes that can be arranged in a hierarchical or
+        logical format such as animal species</td>
+    </tr>
+    <tr>
+      <td><img alt="Attribute Boolean" src="images/att_boolean.png" width="18"
+        height="17" /></td>
+      <td>Boolean</td>
+      <td>Any situation that can be answered with a Yes or No</td>
+    </tr>
+  </tbody>
+</table>
 
 <p></p>
 
-<p></p>
+<p><strong>Creating Attributes</strong></p>
+
+<p>An attribute cannot exist on its own and is an extension of a category and
+must be associated with a category. A category in contrast does not necessarily
+require attributes. </p>
+
+<p>Attributes can be associated with a single category or with multiple
+categories. </p>
+<ol>
+  <li>Select Category and Click Add Attribute</li>
+  <li>Chose to create a new attribute or to apply an existing attribute or
+    attributes. If the choice is to apply existing attribute(s) to the selected
+    catgory the user can select a single attribute or multiple attributes.</li>
+  <li>Select type of attribute and provide name (key will be automatically
+    generated) and if the attribute is required.
+    <ul>
+      <li>Numeric - select aggregations and provide data range (if
+      requested)</li>
+      <li>Text - optional regular expression validation </li>
+      <li>List - click add to add values to the list</li>
+      <li>Tree - click on root then add to start building the tree nodes and
+        branches. Import options exist for attributes properly formatted in
+      XML.</li>
+      <li>Boolean - no additional options available for boolean attributes.</li>
+    </ul>
+  </li>
+  <li>Finish and Save</li>
+</ol>
 
 <p></p>
 
-<p></p>
+<p><strong>Disabling and Deleting Categories or Attributes</strong></p>
+
+<p>Categories, attributes or values within attributes can all be deleted from
+the data model, or disabled.</p>
+
+<p><strong>Deletion</strong> - Completely removes the feature from the data
+model. This can only be done if there are no dependencies. A dependency can be
+a child category, attribute, recorded observation or query/summary. If no
+dependencies exist, the feature can be completely removed from the data
+model.</p>
+
+<p><strong>Disable</strong> - If dependencies exist or the administrator does
+not wish to fully remove the feature, it can be disabled. Disabling removes the
+ability to record any observations based on the disabled feature, but does
+preserve the ability to perform analysis on the feature. Disabling / Enabling
+categories is a much easier process because it does not require that all
+dependencies be disabled before proceeding with the higher level category. It
+also allows for reintroduction if the need arises. A disabled Category or
+Attribute will appear grey until re-enabled.</p>
 
 <p></p>
 
-<p></p>
+<p><strong>Repositioning Categories and Attributes</strong></p>
 
-<p></p>
+<p>Categories and attributes can be repositioned by dragging the object into a
+new position within that tier. </p>
 
-<p></p>
+<p><strong>Maintenance of Keys</strong></p>
 
-<p></p>
+<p>When an attribute or category is created a unique key is automatically
+generated. The generated keys are generally the common name without spaces or
+other characters. If a common name is the same as a previous name the key SMART
+will append a number to the end to make it unique. If the common name starts
+with a number SMART will drop the number(s) and start with an alpha
+character.</p>
 
-<p></p>
+<p><em>Note: It is highly recommended to leave the keys unedited unless you
+fully understand what could happen if the keys are edited.</em></p>
 
-<p></p>
 
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
-
-<p></p>
 </body>
 </html>
