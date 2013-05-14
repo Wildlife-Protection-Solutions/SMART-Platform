@@ -76,11 +76,29 @@ public class ElementsUtil {
 		}
 		return idList;
 	}
+
+	public static List<CyberTrackerId> addCustomElements(Elements elements, List<String> labels, List<String> tag0Values) {
+		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
+		int size = labels.size() > tag0Values.size() ? tag0Values.size() : labels.size(); //size of smallest array (it is expected that arrays are of same size!!!)
+		for (int i = 0; i < size; i++) {
+			String label = labels.get(i);
+			String tag0 = tag0Values.get(i);
+			CyberTrackerId id = new CyberTrackerId();
+			addElementsItem(elements, label, id.getItemId(), tag0);
+			idList.add(id);
+		}
+		return idList;
+	}
 	
 	public static void addElementsItem(Elements elements, String name, String id) {
+		addElementsItem(elements, name, id, null);
+	}
+
+	public static void addElementsItem(Elements elements, String name, String id, String tag0) {
 		Elements.List.Items.Item item = new Elements.List.Items.Item();
 		item.setName(name);
 		item.setId(id);
+		item.setTag0(tag0);
 		elements.getList().getItems().getItem().add(item);
 	}
 	
