@@ -72,7 +72,8 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
+		Composite pp = (Composite) super.createDialogArea(parent);
+		Composite main = new Composite(pp, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -89,7 +90,7 @@ public class EditProjectionDialog extends TitleAreaDialog implements Listener{
 		
 		txtDef = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true,2,1);
-		
+		gd.heightHint = 250;
 		txtDef.setLayoutData(gd);
 		txtDef.setText(toEdit.getDefinition());
 		

@@ -32,14 +32,20 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TableViewerEditor;
+import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -185,7 +191,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				addAgency();
 			}
 		});
-		Button btnDeleteAgency = new Button(buttons, SWT.NONE);
+		final Button btnDeleteAgency = new Button(buttons, SWT.NONE);
 		btnDeleteAgency.setText(Messages.AgencyRankPropertyPage_Delete_Button);
 		btnDeleteAgency.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -193,7 +199,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				deleteAgency();
 			}
 		});
-		
+		btnDeleteAgency.setEnabled(false);
 		
 		tblAgencies.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -205,6 +211,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 						currentRankSet.dispose();
 					}
 					currentRankSet = null;
+					btnDeleteAgency.setEnabled(false);
 					enableRank(false);
 				}else{
 					Agency agent = (Agency)selection.getFirstElement();
@@ -214,6 +221,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					tblRank.setInput(currentRankSet);
 					current = agent;
 					enableRank(true);
+					btnDeleteAgency.setEnabled(true);
 				}
 			}
 		});
@@ -228,6 +236,12 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2,1));
 		owner.setLayout(new TableColumnLayout());
 		tblRank = createRankTableViewer(owner);
+		tblRank.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				btnDeleteRank.setEnabled(!tblRank.getSelection().isEmpty());
+			}
+		});
 		
 		Composite buttons_1 = new Composite(container, SWT.NONE);
 		buttons_1.setLayout(new GridLayout(1,true));
@@ -399,7 +413,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void enableRank(boolean enable){
 		tblRank.getTable().setEnabled(enable);
 		btnAddRank.setEnabled(enable);
-		btnDeleteRank.setEnabled(enable);
+		btnDeleteRank.setEnabled(!tblRank.getSelection().isEmpty());
 	}
 	
 	/**
@@ -410,11 +424,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		TableViewer tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		tableViewer.setContentProvider(new ObservableListContentProvider());
-		
-//		Session s = getSession();
-//		s.beginTransaction();
-//		agencies = new WritableList(HibernateManager.getAgencies(ca, s), Agency.class);
-//		s.getTransaction().rollback();
+
 		resetAgencyList();
 		
 		tableViewer.setInput(agencies);
@@ -443,6 +453,19 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		}
 		agencySorter = new AgencySorter();
 		tableViewer.setComparator(agencySorter);
+		
+		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(tableViewer, new FocusCellHighlighter(tableViewer){});
+		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(tableViewer) {
+			protected boolean isEditorActivationEvent(
+					ColumnViewerEditorActivationEvent event) {
+				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
+						|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
+						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
+						|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+			}
+		};
+		TableViewerEditor.create(tableViewer, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
+
 		return tableViewer;
 	}
 	
@@ -480,6 +503,19 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		}
 		rankSorter = new RankSorter();
 		tableViewer.setComparator(rankSorter);
+		
+		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(tableViewer, new FocusCellHighlighter(tableViewer){});
+		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(tableViewer) {
+			protected boolean isEditorActivationEvent(
+					ColumnViewerEditorActivationEvent event) {
+				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
+						|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
+						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
+						|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+			}
+		};
+		TableViewerEditor.create(tableViewer, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
+
 		return tableViewer;
 	}
 	
@@ -613,6 +649,10 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 	}
 	private void deleteRank() {
+		if (tblRank.getSelection().isEmpty()){
+			//nothing to delete
+			return;
+		}
 		Rank r =(Rank) ((IStructuredSelection)tblRank.getSelection()).getFirstElement();
 		try{
 		
