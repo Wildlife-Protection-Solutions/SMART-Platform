@@ -278,7 +278,7 @@ public class ReportManager {
 			if (((OdaDataSourceHandle)dataset.getDataSource()).getExtensionID().equals(SMART_DATASOURCE_ID)){
 				//refresh the columns in the query
 				try{
-					DataSetUIUtil.updateColumnCacheAfterCleanRs(dataset);
+					DataSetUIUtil.updateColumnCache(dataset);
 				}catch (Exception ex){
 					//eat me - could not update column cache
 				}
