@@ -3,6 +3,7 @@
  <xsl:template match="extension[@id='net.refractions.udig.project.ui.op.selection']"></xsl:template>
  <xsl:template match="extension[@id='net.refractions.udig.project.ui.op']"></xsl:template> 
  <xsl:template match="wizard[@id='net.refractions.udig.project.ui.export.project']"></xsl:template>
+ <xsl:template match="wizard[@id='net.refractions.udig.project.ui.export.image']"></xsl:template>
  
  <xsl:template match="node()|@*">
          <xsl:copy>
