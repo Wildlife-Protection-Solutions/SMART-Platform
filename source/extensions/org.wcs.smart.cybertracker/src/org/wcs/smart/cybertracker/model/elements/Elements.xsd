@@ -13,6 +13,19 @@
                         <xs:sequence>
                           <xs:element type="xs:string" name="Id"/>
                           <xs:element type="xs:string" name="Name"/>
+                          <xs:element type="xs:string" name="Description"/>
+                          <xs:element type="xs:string" name="Keywords"/>
+                          <xs:element type="xs:string" name="Tag0"/>
+                          <xs:element type="xs:string" name="Tag1"/>
+                          <xs:element type="xs:string" name="Tag2"/>
+                          <xs:element type="xs:string" name="Tag3"/>
+                          <xs:element type="xs:string" name="Tag4"/>
+                          <xs:element type="xs:string" name="Tag5"/>
+                          <xs:element type="xs:string" name="Tag6"/>
+                          <xs:element type="xs:string" name="Tag7"/>
+                          <xs:element type="xs:string" name="Alias0"/> <!-- aka "Scientific Name" -->
+                          <xs:element type="xs:string" name="Alias1"/>
+                          <xs:element type="xs:string" name="Alias2"/>
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
