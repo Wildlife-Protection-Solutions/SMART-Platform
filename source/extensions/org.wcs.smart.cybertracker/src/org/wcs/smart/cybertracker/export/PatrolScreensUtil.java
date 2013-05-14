@@ -38,6 +38,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Util for creating patrol screens for CyberTracker.
@@ -56,20 +57,27 @@ public class PatrolScreensUtil {
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		CyberTrackerId id = addSimpleNextRadioNode(startId, nodes, elements, "SMART CyberTracker", "#PatrolStart", "Start New Patrol");
+		CyberTrackerId id = addSimpleNextRadioNode(startId, nodes, elements, "SMART CyberTracker", "#PatrolStart", ElementsUtil.addCustomElements(elements, "Start New Patrol"));
 		//patrol type & transport
 		id = addTypeTransportNodes(id, nodes, elements, session);
 		//patrol armed
-		id = addSimpleNextRadioNode(id, nodes, elements, "Is Armed", "#Armed", "Yes", "No");
+		List<String> labelValues = new ArrayList<String>();
+		labelValues.add("Yes");
+		labelValues.add("No");
+		List<String> tag0Values = new ArrayList<String>();
+		tag0Values.add("true"); //$NON-NLS-1$
+		tag0Values.add("false"); //$NON-NLS-1$
+		List<CyberTrackerId> armedIds = ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+		id = addSimpleNextRadioNode(id, nodes, elements, "Is Armed", "#Armed", armedIds);
 		
 		List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Team", "#Team", toNamesArray(teams));
+		id = addSimpleNextRadioNode(id, nodes, elements, "Team", "#Team", toCyberTrackerIds(elements, teams));
 
 		List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Station", "#Station", toNamesArray(stations));
+		id = addSimpleNextRadioNode(id, nodes, elements, "Station", "#Station", toCyberTrackerIds(elements, stations));
 
 		List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Mandate", "#Mandate", toNamesArray(mandates));
+		id = addSimpleNextRadioNode(id, nodes, elements, "Mandate", "#Mandate", toCyberTrackerIds(elements, mandates));
 
 		id = addNoteNextNode(id, nodes, elements, "Objective", "#Objective");
 		id = addNoteNextNode(id, nodes, elements, "Comments", "#Comments");
@@ -112,11 +120,6 @@ public class PatrolScreensUtil {
 		return nextId;
 	}
 	
-	private static CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, List<Node> nodes, Elements elements, String name, String resultElName,  String... options) {
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, options);
-		return addSimpleNextRadioNode(id, nodes, elements, name, resultElName, ids);
-	}
-
 	private static CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, List<Node> nodes, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids) {
 		String resultId = createResultElement(resultElName, elements);
 		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
@@ -134,10 +137,12 @@ public class PatrolScreensUtil {
 	private static CyberTrackerId addTypeTransportNodes(CyberTrackerId id, List<Node> nodes, Elements elements, Session session) {
 		List<PatrolType> pTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
 		List<String> types = new ArrayList<String>();
+		List<String> tag0Types = new ArrayList<String>();
 		for (PatrolType patrolType : pTypes) {
 			types.add(patrolType.getType().getGuiName());
+			tag0Types.add(patrolType.getType().name());
 		}
-		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types.toArray(new String[types.size()]));
+		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
 		String resultElemId = createResultElement("#PatrolType", elements);
 		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), "Patrol Type", typeIds, resultElemId, true);
 		nodes.add(node);
@@ -145,7 +150,7 @@ public class PatrolScreensUtil {
 		CyberTrackerId resultId = new CyberTrackerId();
 		ElementsUtil.addElementsItem(elements, "#PatrolTransport", resultId.getItemId()); //$NON-NLS-1$
 		for (int i = 0; i < pTypes.size(); i++) {
-			List<CyberTrackerId> trIds = ElementsUtil.addCustomElements(elements, toNamesArray(pTypes.get(i).getTransportTypes()));
+			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, pTypes.get(i).getTransportTypes());
 			node = CyberTrackerUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultId.getItemId());
 			nodes.add(node);
 			Control control2 = node.getData().getControls().getControl().get(0);
@@ -186,12 +191,14 @@ public class PatrolScreensUtil {
 		nodes.add(confirmNode);
 	}
 	
-	public static String[] toNamesArray(List<? extends SimpleListItem> items) {
-		List<String> result = new ArrayList<String>();
+	public static List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends SimpleListItem> items) {
+		List<String> labelValues = new ArrayList<String>();
+		List<String> tag0Values = new ArrayList<String>();
 		for (SimpleListItem i : items) {
-			result.add(i.getName());
+			labelValues.add(i.getName());
+			tag0Values.add(SmartUtils.encodeHex(i.getUuid()));
 		}
-		return result.toArray(new String[result.size()]);
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 	}
 	
 }
