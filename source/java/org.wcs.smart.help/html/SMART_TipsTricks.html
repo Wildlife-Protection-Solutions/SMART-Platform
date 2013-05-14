@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>Tips Tricks FAQ &amp; Other Info</title>
+  <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<h2>Tips Tricks FAQ &amp; Other Info</h2>
+
+<p></p>
+
+<h4><a id="Tips">Tricks and Tips</a></h4>
+
+<p><strong><a id="ShiftSelect">Shift Select Spacebar</a></strong></p>
+
+<p>In many parts of the SMART application when many objects (attributes,
+waypoints, etc...) are toggled on or off the user can toggle them individually,
+through the Select All/De-select All or through another option.</p>
+
+<p>Using the Shift button and selecting a block of entries and hitting the
+Space Bar the selected entries will toggle on or off.</p>
+
+<p></p>
+
+<p><img alt="Shift Select SpaceBar" src="images/shiftSelectSpaceBar.png"
+width="370" height="547" /> <img alt="shift Select SpaceBar 2"
+src="images/shiftSelectSpaceBar2.png" width="398" height="535" /></p>
+
+<p></p>
+
+<h4><a id="FAQ">FAQ</a></h4>
+
+<a id="Q1"></a><p><strong>Q.</strong><strong> Adding a gracticule to the map view it often
+fails to draw, resulting in a red X on the graticule layer in the TOC. How do I
+get the Gradicule to display?</strong></p>
+
+<p></p>
+
+<p><strong>A.</strong> <strong>Graticule only support CRS with unit
+&ldquo;meter&rdquo; on all axis.</strong></p>
+
+<p>To specify the projection for the Graticule:</p>
+
+<p>1. Open the Graticule style layer (right click on the layer and pick 'Change
+Styles' or select the layer and use the edit style button);</p>
+
+<p>2. Pick "Projection" page from the list on the left</p>
+
+<p>3. Select a projection with "meter" on all axis.</p>
+
+<p>4. Apply.</p>
+
+<p></p>
+
+<hr/>
+
+<a id="Q2"></a><p><strong>Q. Why is the style editor theme function not working in
+reports?</strong></p>
+
+<p></p>
+
+<p><strong>A. This is a fundamental problem with the way themeing styler works.
+It builds themes based on the data in the layer. However when setting up the
+report there is no data in the layer hence the error. The query data is not
+generated until the report is run and dates are provided.</strong></p>
+
+<p>The work around; if you want themed styles in your report is to:</p>
+
+<p>1. Run the query in the query perspective and setup the themeing style using
+this the style editor associated with the query layer.</p>
+
+<p>2. When the themeing style is configured the way you want it, open the style
+dialog for the layer, select the 'XML' page from the list on the left.</p>
+
+<p>3. Copy the entire XML snippet shown.</p>
+
+<p>4. Switch back to editing your report.</p>
+
+<p>5. Change the style of the map layer in the report which you want to apply
+the themeing to and paste the copied XML into the "XML" page of this style
+dialog.</p>
+
+<p>6. Save.</p>
+
+<p>7. Re-run your report and the data will match your themed style. </p>
+
+<hr/>
+
+<p><strong>Q.</strong></p>
+
+<p></p>
+
+<p><strong>A.</strong></p>
+
+<p></p>
+
+<h4><a id="other">Other Info</a></h4>
+
+<p><strong>Removed uDig Functions still appear on Mac OSX</strong></p>
+
+<p>Some existing uDig functions continue to appear in the application and
+causes some confusion as no functionality is associated with these options.</p>
+
+<p></p>
+
+<p>To fix this is to run SMART with the -clean argument.</p>
+
+<p>&lt;code&gt;SMART.exe -clean &lt;/code&gt;</p>
+</body>
+</html>

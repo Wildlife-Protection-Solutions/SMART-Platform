@@ -2,11 +2,7 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="SMART Help">
-   <topic label="Introduction">
-      <topic label="Getting Started">
-      </topic>
-      <topic href="html/Requirements.html" label="Requirements">
-      </topic>
+   <topic href="html/Requirements.html" label="System Requirements">
    </topic>
    <topic href="html/AdministrativeTasks.html" label="Administrator Tasks">
       <topic href="html/SettingUpANewConservationArea.html" label="Creating a Conservation Area">
@@ -80,6 +76,8 @@
          </topic>
          <topic href="html/ComponentsOfSMART.html#SummaryQuery" label="SummaryQuery">
          </topic>
+         <topic href="html/ComponentsOfSMART.html#GriddedQueries" label="Gridded Query">
+         </topic>
       </topic>
       <topic href="html/ComponentsOfSMART.html#Reports" label="Report Prespective">
       </topic>
@@ -88,6 +86,26 @@
       <topic href="html/ComponentsOfSMART.html#Intelligence" label="Intelligence Prespective">
       </topic>
       <topic href="html/ComponentsOfSMART.html#DataModel" label="The SMART Data Model">
+      </topic>
+   </topic>
+   <topic href="html/Internationalization.html" label="Internationalization">
+      <topic href="html/Internationalization.html#LanguageSupport" label="Internationalization">
+      </topic>
+      <topic href="html/Internationalization.html#LanguagePacks" label="Language Packs">
+      </topic>
+   </topic>
+   <topic href="html/SMART_TipsTricks.html" label="Tips,Tricks, and FAQ">
+      <topic href="html/SMART_TipsTricks.html#Tips" label="Tips &amp; Tricks">
+         <topic href="html/SMART_TipsTricks.html#ShiftSelect" label="Checkbox List Select">
+         </topic>
+      </topic>
+      <topic href="html/SMART_TipsTricks.html#FAQ" label="FAQ">
+         <topic href="html/SMART_TipsTricks.html#Q1" label="Graticule Errors">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q2" label="Style Themeing in Reports">
+         </topic>
+      </topic>
+      <topic href="html/SMART_TipsTricks.html#Other" label="Other">
       </topic>
    </topic>
 </toc>
