@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.map.internal;
 
 import java.awt.Graphics2D;
@@ -30,21 +51,26 @@ import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.SmartPlugIn;
-
+import org.wcs.smart.internal.Messages;
+/**
+ * A copy of the udig export map to image wizard that implements custom export 
+ * options.  In particular this wizard will only export the current map
+ * and you can optionally choose to preserve bounds or scale when exporting.
+ * 
+ * @author Emily
+ *
+ */
 public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
 	private ExportMapWizardPage mapSelectorPage;
 
 	public ExportMapToImageWizard() {
-		setWindowTitle("Export map as image");
+		setWindowTitle(Messages.ExportMapToImageWizard_WindowTitle);
 		setDialogSettings(SmartPlugIn.getDefault().getDialogSettings());
-
-		String title = null; // will use default title
-		//	        ImageDescriptor banner = ProjectUIPlugin.getDefault().getImageDescriptor(Icons.WIZBAN + "exportimage_wiz.gif"); //$NON-NLS-1$
-		// setDefaultPageImageDescriptor(banner);
-		mapSelectorPage = new ExportMapWizardPage("Select Map", title, null); //$NON-NLS-1$
+		
+		setDefaultPageImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.WIZBAN_EXPORT_IMAGE));
+		mapSelectorPage = new ExportMapWizardPage(); 
 		addPage(mapSelectorPage);
-		// addPage(imageSettingsPage);
 		setNeedsProgressMonitor(true);
 	}
 
@@ -66,26 +92,26 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
                     IMap map = mapSelectorPage.getMap();
 
-                    monitor.beginTask("Exporting Map", 1);
+                    monitor.beginTask(Messages.ExportMapToImageWizard_Progress_Exporting, 1);
                     
                     try {
                     	exportMap(map, new SubProgressMonitor(monitor, 3));
                     } catch (RenderException e) {
                            Object[] args = new Object[]{map.getName(), e.getLocalizedMessage()};
-                            String pattern = "Error occurred while rendering {0} -> {1}";
+                            String pattern = Messages.ExportMapToImageWizard_RenderError;
                             errors.add(MessageFormat.format(pattern, args));
                         } catch (IOException e) {
-                            errors.add("Error occurred while attempting to write the rendered image to a  file:"
+                            errors.add(Messages.ExportMapToImageWizard_RenderError2
                                     + e.getLocalizedMessage());
                         } catch (TransformException e) {
                             errors
-                                    .add("Failed to create world file.  This image can not be used as a Raster file in uDig");
+                                    .add(Messages.ExportMapToImageWizard_WorldFileError1);
                         } catch (NoninvertibleTransformException e) {
                             errors
-                                    .add("Failed to create world file.  This image can not be used as a Raster file in uDig");
+                                    .add(Messages.ExportMapToImageWizard_WorldFileError2);
                         } catch (RuntimeException e) {
                             errors
-                                    .add("An unexpected failure occurred: "
+                                    .add(Messages.ExportMapToImageWizard_Error
                                             + e.getLocalizedMessage());
                         }
                     
@@ -99,7 +125,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
         if (!errors.isEmpty()) {
             ((WizardPage) getContainer().getCurrentPage())
-                    .setErrorMessage("Error were generated while exporting map. "
+                    .setErrorMessage(Messages.ExportMapToImageWizard_Error2
                             + errors.iterator().next());
             return false;
         }
@@ -112,19 +138,15 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 			throws RenderException, IOException, TransformException,
 			NoninvertibleTransformException {
 
-		monitor.beginTask("Rendering", 3);
-		String pattern = "Preparing {0} for export.";
-		Object[] args = new Object[] { map.getName() };
-		monitor.setTaskName(MessageFormat.format(pattern, args));
+		monitor.beginTask(Messages.ExportMapToImageWizard_Progress_Rendering, 3);
+		monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_Prepare, new Object[] { map.getName() }));
 		File destination = determineDestinationFile(map);
 		if (destination == null) {
 			return;
 		}
 
-		int width = mapSelectorPage.getWidth(map.getViewportModel()
-				.getWidth(), map.getViewportModel().getHeight());
-		int height = mapSelectorPage.getHeight(map.getViewportModel()
-				.getWidth(), map.getViewportModel().getHeight());
+		int width = mapSelectorPage.getWidth();
+		int height = mapSelectorPage.getHeight();
 
 		// gdavis - ARGB won't output proper background color for non-alpha
 		// supporting
@@ -139,9 +161,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 		IMap renderedMap;
 		try {
 			monitor.worked(1);
-			pattern = "Rendering {0}";
-			args = new Object[] { map.getName() };
-			monitor.setTaskName(MessageFormat.format(pattern, args));
+			monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_RenderingMap,  new Object[] { map.getName() }));
 
 			DrawMapParameter drawMapParameter = new DrawMapParameter(g,
 					new java.awt.Dimension(width, height), map,
@@ -154,9 +174,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 			g.dispose();
 		}
 		monitor.worked(1);
-		pattern = "Writing {0} to disk.";
-		args = new Object[] { map.getName() };
-		monitor.setTaskName(MessageFormat.format(pattern, args));
+		monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_WriteDisk, new Object[] { map.getName() }));
 		mapSelectorPage.getSelectedFormat().write(renderedMap, image, destination);
 
 
@@ -169,15 +187,15 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 		File destination = addSuffix(new File(exportDir, name));
 		if (destination.exists()) {
 			boolean overwrite = !MessageDialog.openQuestion(getContainer()
-					.getShell(), "Export Map","Overwrite existing file? " + destination.getName());
+					.getShell(), Messages.ExportMapToImageWizard_OverwriteDialogTitle,Messages.ExportMapToImageWizard_OverwriteDialogMessage + destination.getName());
 
 			if (!overwrite) {
 				if (!destination.delete()) {
-					destination = selectFile(destination, "Unable to delete existing file.");
+					destination = selectFile(destination, Messages.ExportMapToImageWizard_OverwriteError);
 				}
 
 			} else {
-				destination = selectFile(destination,"Choose new filename");
+				destination = selectFile(destination,Messages.ExportMapToImageWizard_ChooseFilenameMessage);
 			}
 		}
 

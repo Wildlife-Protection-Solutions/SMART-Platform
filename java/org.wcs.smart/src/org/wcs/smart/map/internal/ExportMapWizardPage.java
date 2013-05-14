@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.map.internal;
 
 import java.io.File;
@@ -20,11 +41,12 @@ import net.refractions.udig.project.ui.wizard.export.image.PDFImageExportFormat;
 import net.refractions.udig.project.ui.wizard.export.image.WorldImageExportFormat;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -43,15 +65,27 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
-
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
+/**
+ * Custom export map to image wizard page for gathering
+ * map and export options.  Based on the udig ExportMapToImage wizard 
+ * pages.
+ * 
+ * @author Emily
+ *
+ */
 public class ExportMapWizardPage extends WizardPage {
 
-	public static final String WIDTH_KEY = "ExportMapWizardPageWidth";
-	public static final String HEIGHT_KEY = "ExportMapWizardPageHeight";
-	public static final String EXPORT_OP_KEY = "ExportMapWizardPageOption";
-	public static final String ASPECT_KEY = "ExportMapWizardPageAspect";
-	public static final String FORMAT_KEY = "ExportMapWizardPageFormat";
-	public static final String DIR_KEY = "ExportMapWizardPageDir";
+	/*
+	 * Keys for storing dialog last values
+	 */
+	private static final String WIDTH_KEY = "ExportMapWizardPageWidth"; //$NON-NLS-1$
+	private static final String HEIGHT_KEY = "ExportMapWizardPageHeight"; //$NON-NLS-1$
+	private static final String EXPORT_OP_KEY = "ExportMapWizardPageOption"; //$NON-NLS-1$
+	private static final String ASPECT_KEY = "ExportMapWizardPageAspect"; //$NON-NLS-1$
+	private static final String FORMAT_KEY = "ExportMapWizardPageFormat"; //$NON-NLS-1$
+	private static final String DIR_KEY = "ExportMapWizardPageDir"; //$NON-NLS-1$
 	
 	private Text destDir;
 	private Text exportMap;
@@ -69,67 +103,99 @@ public class ExportMapWizardPage extends WizardPage {
 	private Spinner opHeight;
 	private Button btnOpAspect;
 	
-	protected ExportMapWizardPage(String pageName, String title,
-			ImageDescriptor titleImage) {
-		super(pageName, title, titleImage);
+	/**
+	 * Creates a new page
+	 */
+	protected ExportMapWizardPage() {
+		super("ExportOps", Messages.ExportMapWizardPage_PageTitle, SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.WIZBAN_EXPORT_IMAGE)); //$NON-NLS-1$
 		
-		
+		setMessage(Messages.ExportMapWizardPage_PageDescription);
 		setPageComplete(true);
 	}
 
+	/**
+	 * Sets the current map selection.  If no map found
+	 * the current active map is used.
+	 * @param selection
+	 */
 	public void setSelection(IStructuredSelection selection){
-		if (selection.isEmpty()){
-			map = null;
+		map = null;
+		for (@SuppressWarnings("unchecked")
+		Iterator<Object> iterator = selection.iterator(); iterator.hasNext();) {
+			Object x = iterator.next();
+			if (x instanceof IMap){
+				map = (IMap) x;
+				break;
+			}
+		}
+		if (map == null){
 			IMap activeMap = ApplicationGIS.getActiveMap();
             if (activeMap != ApplicationGIS.NO_MAP) {
                 map = activeMap;
-            }
-			
-		}else{
-			for (Iterator<Object> iterator = selection.iterator(); iterator.hasNext();) {
-				Object x = iterator.next();
-				if (x instanceof IMap){
-					map = (IMap) x;
-					break;
-				}
-			}
+            }	
 		}
 	}
 	
+	/**
+	 * 
+	 * @return the selected map
+	 */
 	public IMap getMap(){
 		return this.map;
 	}
 	
+	/**
+	 * 
+	 * @return the export directory
+	 */
 	public File getOutputDir(){
 		return new File(this.destDir.getText());
 	}
 	
-	
-	public int getWidth(double mapwidth, double mapheight) {
+	/**
+	 * Computes the width of the output map based
+	 * on the format settings and the current map
+	 * settings. 
+	 * 
+	 * @return output image width
+	 */
+	public int getWidth() {
 		if (getSelectedFormat().useStandardDimensionControls()) {
 			return opWidth.getSelection();
 		} else {
-			return getSelectedFormat().getWidth(mapwidth, mapheight);
+			return getSelectedFormat().getWidth(map.getViewportModel().getWidth(), map.getViewportModel().getHeight());
 		}
 	}
 
-	public int getHeight(double mapwidth, double mapheight) {
+	/**
+	 * Computes the height of the output image based
+	 *  on the format settings, scale options
+	 *  and current map.
+	 *  
+	 * @return output image height
+	 */
+	public int getHeight() {
+		double mapwidth = map.getViewportModel().getWidth();
+		double mapheight = map.getViewportModel().getHeight();
 		int height;
 		if (getSelectedFormat().useStandardDimensionControls()) {
 			if (btnOpAspect.getSelection()) {
-				height = (int) (mapheight / (mapwidth / getWidth(mapwidth,
-						mapheight)));
+				height = (int) (mapheight / (mapwidth / getWidth()));
 			} else {
 				height = opHeight.getSelection();
 			}
 		} else {
 			height = getSelectedFormat().getHeight(mapwidth, mapheight);
 		}
-
 		return height;
-
 	}
 	    
+	/**
+	 * Bounds strategy to use when exporting map.  Either
+	 * preserves bounds or scale.
+	 * 
+	 * @return
+	 */
 	public BoundsStrategy getBoundsStrategy(){
 		if (btnMaintainBounds.getSelection()){
 			return new BoundsStrategy(map.getViewportModel().getBounds());
@@ -156,7 +222,7 @@ public class ExportMapWizardPage extends WizardPage {
         createSizeOptions(comp);
         
         
-        formatOpComp = new Composite(comp, SWT.BORDER);
+        formatOpComp = new Composite(comp, SWT.NONE);
         formatOpComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
         formatOpComp.setLayout(new FillLayout());
         
@@ -223,6 +289,9 @@ public class ExportMapWizardPage extends WizardPage {
          }
     }
     
+    /**
+     * Saves selections to dialog settings store.
+     */
     public void saveLastSelection(){
     	if (getSelectedFormat() != null){
     		getWizard().getDialogSettings().put(FORMAT_KEY, getSelectedFormat().getExtension());
@@ -247,8 +316,7 @@ public class ExportMapWizardPage extends WizardPage {
     
     
     private void createSizeOptions(Composite parent){
-    	Label lbl = new Label(parent, SWT.NONE);
-    	//lbl.setText("Image Size:");
+    	new Label(parent, SWT.NONE);
     	
     	Composite a = new Composite(parent, SWT.NONE);
     	a.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -257,7 +325,7 @@ public class ExportMapWizardPage extends WizardPage {
     	opWidth = createSpinner(WIDTH_KEY, a);
     	opHeight = createSpinner(HEIGHT_KEY, a);
     	btnOpAspect = new Button(a, SWT.CHECK);
-    	btnOpAspect.setText("Preserve Aspect Ratio");
+    	btnOpAspect.setText(Messages.ExportMapWizardPage_AspectRatioLabel);
     	btnOpAspect.addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -281,9 +349,9 @@ public class ExportMapWizardPage extends WizardPage {
     private Spinner createSpinner( String spinnerKey, Composite comp ) {
         Label label = new Label(comp, SWT.NONE);
         if (spinnerKey == WIDTH_KEY){
-        	label.setText("Width:");
+        	label.setText(Messages.ExportMapWizardPage_WidthLabel);
         }else if (spinnerKey == HEIGHT_KEY){
-        	label.setText("Height:");
+        	label.setText(Messages.ExportMapWizardPage_HeightLabel);
         }
         label.setLayoutData(new GridData());
 
@@ -306,21 +374,21 @@ public class ExportMapWizardPage extends WizardPage {
     
     private void createExportOptions(Composite comp){
     	Label lbl = new Label(comp, SWT.NONE);
-    	lbl.setText("Export Options:");
+    	lbl.setText(Messages.ExportMapWizardPage_ExportOptionsLabel);
     	Composite compa = new Composite(comp, SWT.NONE);
     	compa.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,2,1));
     	compa.setLayout(new GridLayout(2, false));
     	btnMaintainBounds = new Button(compa, SWT.RADIO);
-    	btnMaintainBounds.setText("Preserve Bounds");
+    	btnMaintainBounds.setText(Messages.ExportMapWizardPage_BoundsOpLabel);
     	btnMaintainBounds.setSelection(true);
     	
     	btnMaintainScale = new Button(compa, SWT.RADIO);
-    	btnMaintainScale.setText("Preserve Scale");
+    	btnMaintainScale.setText(Messages.ExportMapWizardPage_ScaleOpLabel);
     	
     }
     private void createFormat(Composite comp) {
         Label scaleLabel = new Label(comp, SWT.NONE);
-        scaleLabel.setText("Image Format:");
+        scaleLabel.setText(Messages.ExportMapWizardPage_ImgFormatLabel);
         scaleLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false,
                 false));
         cmbFormat = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -338,11 +406,10 @@ public class ExportMapWizardPage extends WizardPage {
         
         loadFormats();
         cmbFormat.setInput(formats);
-        
-        cmbFormat.getCombo().addSelectionListener(new SelectionListener() {
+        cmbFormat.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void selectionChanged(SelectionChangedEvent event) {
 				ImageExportFormat format = getSelectedFormat();
 				if (format == null){
 					return;
@@ -354,15 +421,9 @@ public class ExportMapWizardPage extends WizardPage {
 				
 				lastFormat.setParent(formatOpComp);
 				formatOpComp.layout();
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
+       
     }
     public ImageExportFormat getSelectedFormat(){
     	if (cmbFormat.getSelection().isEmpty()){
@@ -373,7 +434,7 @@ public class ExportMapWizardPage extends WizardPage {
     
     private void createMapInfo(Composite comp) {
         Label scaleLabel = new Label(comp, SWT.NONE);
-        scaleLabel.setText("Export Map");
+        scaleLabel.setText(Messages.ExportMapWizardPage_ExportMapLabel);
         scaleLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false,
                 false));
         exportMap = new Text(comp, SWT.SINGLE|SWT.BORDER);
@@ -383,18 +444,18 @@ public class ExportMapWizardPage extends WizardPage {
         if (map != null){
         	exportMap.setText(map.getName());
         }else{
-        	setErrorMessage("No map found to export");
+        	setErrorMessage(Messages.ExportMapWizardPage_NoMapFoundErrorMsg);
         }
     }
     
     private void createExportDirectory(Composite comp) {
         Label scaleLabel = new Label(comp, SWT.NONE);
-        scaleLabel.setText("Export Directory");
+        scaleLabel.setText(Messages.ExportMapWizardPage_ExportdirLabel);
         scaleLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false,
                 false));
         
         destDir = new Text(comp, SWT.SINGLE | SWT.BORDER);
-        destDir.setToolTipText("The location to export the map to");
+        destDir.setToolTipText(Messages.ExportMapWizardPage_ExportDirToolTip);
         GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
         destDir.setLayoutData(gridData);
         String previousLocation = getWizard().getDialogSettings().get(ExportMapToImageWizard.DIRECTORY_KEY);
@@ -405,8 +466,8 @@ public class ExportMapWizardPage extends WizardPage {
         }
         
         Button browse = new Button(comp, SWT.PUSH);
-        browse.setText("Browse");
-        browse.setToolTipText("Select export location");
+        browse.setText(Messages.ExportMapWizardPage_BrowseButton);
+        browse.setToolTipText(Messages.ExportMapWizardPage_BrowseButtonTooltip);
         browse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		browse.addSelectionListener(new SelectionListener() {
 			@Override
