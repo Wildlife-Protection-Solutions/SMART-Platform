@@ -30,6 +30,8 @@ import net.refractions.udig.ui.CRSChooserDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -126,6 +128,12 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				btnEdit.setEnabled(enabled);
 				btnRemove.setEnabled(enabled);
 				btnDefault.setEnabled(enabled);
+			}
+		});
+		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				editSelected();
 			}
 		});
 		projections = new ArrayList<Projection>(HibernateManager.getCaProjectionList(getSession()));
