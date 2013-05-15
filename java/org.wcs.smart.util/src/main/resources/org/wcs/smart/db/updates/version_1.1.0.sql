@@ -1,5 +1,4 @@
--- Database Updates For Version 1.1.0
-update smart.db_version set version = '1.1.0';
+
 grant select on smart.db_version to login;
 
 --spelling fix
@@ -42,3 +41,7 @@ GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO login;
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO manager;
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO analyst;
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO data_entry;
+
+
+-- Database Updates For Version 1.1.0
+update smart.db_version set version = '1.1.0';
