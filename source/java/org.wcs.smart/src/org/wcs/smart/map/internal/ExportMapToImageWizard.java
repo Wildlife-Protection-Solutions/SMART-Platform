@@ -183,7 +183,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
 	private File determineDestinationFile(IMap map) {
 		File exportDir = mapSelectorPage.getOutputDir();
-		String name = URLUtils.cleanFilename(map.getName());
+		String name = URLUtils.cleanFilename(mapSelectorPage.getFileName());
 		File destination = addSuffix(new File(exportDir, name));
 		if (destination.exists()) {
 			boolean overwrite = !MessageDialog.openQuestion(getContainer()
