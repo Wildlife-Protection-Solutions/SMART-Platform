@@ -23,6 +23,7 @@ package org.wcs.smart.map.internal;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -88,7 +89,8 @@ public class ExportMapWizardPage extends WizardPage {
 	private static final String DIR_KEY = "ExportMapWizardPageDir"; //$NON-NLS-1$
 	
 	private Text destDir;
-	private Text exportMap;
+	private Text fileName;
+	private ComboViewer cmbMap;
 	private ComboViewer cmbFormat;
 	private Composite formatOpComp;
 	
@@ -118,22 +120,29 @@ public class ExportMapWizardPage extends WizardPage {
 	 * the current active map is used.
 	 * @param selection
 	 */
-	public void setSelection(IStructuredSelection selection){
+	public void setSelection(IStructuredSelection selection) {
 		map = null;
 		for (@SuppressWarnings("unchecked")
 		Iterator<Object> iterator = selection.iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
-			if (x instanceof IMap){
+			if (x instanceof IMap) {
 				map = (IMap) x;
 				break;
 			}
 		}
-		if (map == null){
+		
+		if (map == null) {
+			Collection<? extends IMap> visibleMaps = ApplicationGIS.getVisibleMaps();
 			IMap activeMap = ApplicationGIS.getActiveMap();
-            if (activeMap != ApplicationGIS.NO_MAP) {
-                map = activeMap;
-            }	
+			if (activeMap != ApplicationGIS.NO_MAP && visibleMaps.contains(activeMap)) {
+				map = activeMap;
+			}else{
+				if (!visibleMaps.isEmpty()){
+					map = visibleMaps.iterator().next();
+				}
+			}
 		}
+		
 	}
 	
 	/**
@@ -141,7 +150,15 @@ public class ExportMapWizardPage extends WizardPage {
 	 * @return the selected map
 	 */
 	public IMap getMap(){
-		return this.map;
+		return (IMap) ((IStructuredSelection)this.cmbMap.getSelection()).getFirstElement();
+	}
+	
+	/**
+	 * 
+	 * @return the selected filename
+	 */
+	public String getFileName(){
+		return fileName.getText();
 	}
 	
 	/**
@@ -214,8 +231,9 @@ public class ExportMapWizardPage extends WizardPage {
         GridLayout layout = new GridLayout(3, false);
         comp.setLayout(layout);
         
-        createExportDirectory(comp);
         createMapInfo(comp);
+        createExportDirectory(comp);
+        createFileName(comp);
 
         createFormat(comp);
         createExportOptions(comp);
@@ -287,6 +305,14 @@ public class ExportMapWizardPage extends WizardPage {
          if (getWizard().getDialogSettings().get(DIR_KEY) != null){
         	 destDir.setText(getWizard().getDialogSettings().get(DIR_KEY));
          }
+         
+         
+         cmbMap.setInput(ApplicationGIS.getOpenMaps());
+         if (map != null){
+        	 cmbMap.setSelection(new StructuredSelection(map));
+         }else{
+         	setErrorMessage(Messages.ExportMapWizardPage_NoMapFoundErrorMsg);
+         }
     }
     
     /**
@@ -313,6 +339,15 @@ public class ExportMapWizardPage extends WizardPage {
     	
     	getWizard().getDialogSettings().put(DIR_KEY, destDir.getText());
     }
+    
+    private void createFileName(Composite parent){
+    	Label lbl = new Label(parent, SWT.NONE);
+    	lbl.setText(Messages.ExportMapWizardPage_Filename);
+    	
+    	fileName = new Text(parent, SWT.BORDER);
+    	fileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    }
+    
     
     
     private void createSizeOptions(Composite parent){
@@ -437,15 +472,24 @@ public class ExportMapWizardPage extends WizardPage {
         scaleLabel.setText(Messages.ExportMapWizardPage_ExportMapLabel);
         scaleLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false,
                 false));
-        exportMap = new Text(comp, SWT.SINGLE|SWT.BORDER);
-        exportMap.setEditable(false);
-        exportMap.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-        
-        if (map != null){
-        	exportMap.setText(map.getName());
-        }else{
-        	setErrorMessage(Messages.ExportMapWizardPage_NoMapFoundErrorMsg);
-        }
+        cmbMap = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+        cmbMap.setLabelProvider(new LabelProvider(){
+        	@Override
+        	public String getText(Object element){
+        		if (element instanceof IMap){
+        			return ((IMap) element).getName();
+        		}
+        		return super.getText(element);
+        	}
+        });
+        cmbMap.setContentProvider(ArrayContentProvider.getInstance());
+        cmbMap.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+        cmbMap.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fileName.setText(getMap().getName());
+			}
+		});
     }
     
     private void createExportDirectory(Composite comp) {

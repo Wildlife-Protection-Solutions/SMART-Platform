@@ -564,6 +564,7 @@ public class Messages extends NLS {
 	public static String ExportMapWizardPage_ExportDirToolTip;
 	public static String ExportMapWizardPage_ExportMapLabel;
 	public static String ExportMapWizardPage_ExportOptionsLabel;
+	public static String ExportMapWizardPage_Filename;
 	public static String ExportMapWizardPage_HeightLabel;
 	public static String ExportMapWizardPage_ImgFormatLabel;
 	public static String ExportMapWizardPage_NoMapFoundErrorMsg;
