@@ -21,8 +21,14 @@
  */
 package org.wcs.smart.cybertracker.export;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -31,6 +37,9 @@ import org.wcs.smart.ca.SimpleListItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.filter.Categories;
+import org.wcs.smart.cybertracker.model.filter.ElementFilters;
+import org.wcs.smart.cybertracker.model.filter.Filter;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.hibernate.SmartDB;
@@ -90,10 +99,12 @@ public class PatrolScreensUtil {
 		}
 		String[] memberNames = members.toArray(new String[members.size()]);
 		List<CyberTrackerId> memberIds = ElementsUtil.addCustomElements(elements, memberNames);
+		String filter = buildMembersFilter(id.getNodeId(), memberIds, Arrays.asList(memberNames));
+		filter = SmartUtils.encodeHex(filter.getBytes());
 		
 		id = addMembersNode(id, nodes, memberIds);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Leader", "#Leader", memberIds);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Pilot", "#Pilot", memberIds);
+		id = addSimpleNextRadioNode(id, nodes, elements, "Leader", "#Leader", memberIds, filter);
+		id = addSimpleNextRadioNode(id, nodes, elements, "Pilot", "#Pilot", memberIds, filter);
 		
 //		addSimpleNextRadioNode(id, nodes, elements, "Next Task", "#Task", "Make Observation", "End Patrol");
 //		Control control2 = nodes.get(nodes.size()-1).getData().getControls().getControl().get(0);
@@ -119,10 +130,26 @@ public class PatrolScreensUtil {
 		control2.setTranslateNextScreenId(nextId.getNodeId());
 		return nextId;
 	}
+
+	private static void applyFilter(Node node, String filter) {
+		if (filter != null) {
+			Control control7 = node.getData().getControls().getControl().get(2);
+			control7.setFilterEnabled("True"); //$NON-NLS-1$
+			control7.setTranslateFilter(filter);
+		}
+	}
 	
 	private static CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, List<Node> nodes, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids) {
 		String resultId = createResultElement(resultElName, elements);
 		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
+		nodes.add(node);
+		return toNextScreen(node);
+	}
+
+	private static CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, List<Node> nodes, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, String filter) {
+		String resultId = createResultElement(resultElName, elements);
+		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
+		applyFilter(node, filter);
 		nodes.add(node);
 		return toNextScreen(node);
 	}
@@ -200,5 +227,47 @@ public class PatrolScreensUtil {
 		}
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 	}
-	
+
+	private static String buildMembersFilter(String memberNodeId, List<CyberTrackerId> memberIds, List<String> memberNames) {
+		Filter filter = new Filter();
+		filter.setVersion(1);
+		
+		Categories categories = new Categories();
+		filter.setCategories(categories);
+		Categories.Items cItems = new Categories.Items();
+		categories.setItems(cItems);
+		Categories.Items.Item cIt = new Categories.Items.Item();
+		cIt.setId(new CyberTrackerId().getNodeId());
+		cIt.setName("Members"); //$NON-NLS-1$
+		cIt.setCategoryId(memberNodeId);
+		cItems.getItem().add(cIt);
+		
+		ElementFilters elFilter = new ElementFilters();
+		filter.setElementFilters(elFilter);
+		ElementFilters.Items eItems = new ElementFilters.Items();
+		elFilter.setItems(eItems);
+		for (int i = 0; i < memberIds.size(); i++) {
+			CyberTrackerId id = memberIds.get(i);
+			String name = (memberNames != null && memberNames.size() > i) ? memberNames.get(i) : null;
+			ElementFilters.Items.Item eIt = new ElementFilters.Items.Item();
+			eIt.setId(id.getItemId());
+			eIt.setName(name);
+			ElementFilters.Items.Item.CheckedElements chEl = new ElementFilters.Items.Item.CheckedElements();
+			eIt.setCheckedElements(chEl);
+			chEl.getValue().add(id.getItemId());
+			eItems.getItem().add(eIt);
+		}
+		
+		try {
+			JAXBContext context = JAXBContext.newInstance(Filter.class);
+			Marshaller marshaller = context.createMarshaller();
+			final StringWriter stringWriter = new StringWriter();
+			//marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.marshal(filter, stringWriter);
+			return stringWriter.toString();
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
