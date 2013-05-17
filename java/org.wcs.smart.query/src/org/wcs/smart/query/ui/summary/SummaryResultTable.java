@@ -126,11 +126,21 @@ public class SummaryResultTable extends Composite {
 		//sync position on all tables
 		
 		//top table  
+		final String OS = System.getProperty("os.name");
 		final ScrollBar hBar = mainTable.getTable().getHorizontalBar();
 		Listener hlistener = new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				topTable.getTable().setLocation(-hBar.getSelection() , 0);
+				Point pnt = topTable.getTable().getLocation();
+				pnt.x = -hBar.getSelection();
+				
+				//topTable.getTable().setLocation(-hBar.getSelection() , 0);
+				if (OS.contains("Mac OS X")){
+					int scrollWidth = (topTable.getTable().getBounds().width -15)- mainTable.getTable().getHorizontalBar().getSize().x;
+					int newX = (int) ((mainTable.getTable().getHorizontalBar().getSelection() / 90.0) * scrollWidth );
+					pnt.x = -newX;
+				}
+				topTable.getTable().setLocation(pnt);
 			}
 		};
 		
