@@ -111,7 +111,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		
 		Hyperlink btnCreate = toolkit.createHyperlink(main, Messages.ReportedIntelligenceContribution_Create_Button, SWT.NONE);
 		btnCreate.setToolTipText(Messages.ReportedIntelligenceContribution_Create_Button_Tooltip);
-		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		btnCreate.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -138,7 +138,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		});
 
 		btnOpen = toolkit.createButton(main, Messages.ReportedIntelligenceContribution_Open_Button, SWT.PUSH);
-		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		btnOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
