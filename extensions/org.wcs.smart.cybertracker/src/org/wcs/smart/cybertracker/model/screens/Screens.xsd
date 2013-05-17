@@ -83,6 +83,9 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="cts:Controls" name="Controls" minOccurs="0"/>
 						<xs:element type="xs:string" name="Stretch" />
 						<xs:element type="xs:string" name="Proportional" />
+						<xs:element type="xs:string" name="FilterEnabled" />
+						<xs:element type="xs:string" name="Translate__Filter" />
+						
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
