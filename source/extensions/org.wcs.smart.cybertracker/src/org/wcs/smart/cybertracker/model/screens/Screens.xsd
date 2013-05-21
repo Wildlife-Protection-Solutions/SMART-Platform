@@ -85,7 +85,11 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="Proportional" />
 						<xs:element type="xs:string" name="FilterEnabled" />
 						<xs:element type="xs:string" name="Translate__Filter" />
-						
+						<xs:element type="xs:string" name="Formula" />
+						<xs:element type="xs:string" name="Hidden" />
+						<xs:element type="xs:string" name="Translate__TargetScreenId0" />
+						<xs:element type="xs:string" name="Translate__TargetScreenId1" />
+						<xs:element type="xs:string" name="ResultGlobalValue" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
