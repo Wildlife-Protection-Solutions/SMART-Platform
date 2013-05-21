@@ -155,13 +155,20 @@ public class SummaryResultTable extends Composite {
 	}
 	
 	private void updateVerticalSlider(){
-		int position = - (vSlider.getSelection() * leftTable.getTable().getItemHeight());
-		Point p = leftTable.getTable().getLocation();
-		p.y = position;
-		leftTable.getTable().setLocation(p);
-		p = mainTable.getTable().getLocation();
-		p.y = position;
-		mainTable.getTable().setLocation(p);
+//		int position = - (vSlider.getSelection() * leftTable.getTable().getItemHeight());
+
+		leftTable.getTable().setTopIndex(vSlider.getSelection());
+		mainTable.getTable().setTopIndex(vSlider.getSelection());
+
+//		int position = - (vSlider.getSelection() * leftTable.getTable().getItemHeight());
+//		Point p = leftTable.getTable().getLocation();
+//		p.y = position;
+//		leftTable.getTable().setLocation(p);
+//		p = mainTable.getTable().getLocation();
+//		p.y = position;
+//		mainTable.getTable().setLocation(p.x, position);
+//		System.out.println(position);
+//		System.out.println(mainTable.getTable().getLocation().y);
 	}
 	
 	private void updateHorizontalSlider(){
@@ -181,11 +188,9 @@ public class SummaryResultTable extends Composite {
 	}
 	
 	private void resize(){
-		super.layout(true);
-		
+		super.layout(true);		
 		int displayHeight = mainTable.getTable().getParent().getBounds().height;
-		int itemHeight = mainTable.getTable().getItemHeight();
-		
+		int itemHeight = mainTable.getTable().getItemHeight()+4;
 		int numVisibleItems = (int) Math.ceil(displayHeight / (double)itemHeight);
 		int numItems = results.getNumDataRows();
 		if (numVisibleItems > numItems){
@@ -193,7 +198,7 @@ public class SummaryResultTable extends Composite {
 			vSlider.setSelection(0);
 		}else{
 			vSlider.setEnabled(true);
-			vSlider.setMaximum((numItems - numVisibleItems) + vSlider.getThumb()+1);
+			vSlider.setMaximum((numItems - numVisibleItems) + 1 + vSlider.getThumb() );
 		}
 		
 		int displayWidth = mainTable.getTable().getParent().getBounds().width;
@@ -211,6 +216,7 @@ public class SummaryResultTable extends Composite {
 		
 		int tableWidth = Math.max(displayWidth, width);
 		int tableHeight = Math.max(displayHeight, mainTable.getTable().getBounds().height);
+		tableHeight = displayHeight;
 		
 		Rectangle rect = mainTable.getTable().getBounds();
 		mainTable.getTable().setBounds(rect.x, rect.y, tableWidth, tableHeight);
@@ -226,11 +232,11 @@ public class SummaryResultTable extends Composite {
 	}
 	
 	private void createMainTable(){
-		Composite mainComposite = new Composite(this, SWT.NONE);
+		Composite comp = new Composite(this, SWT.NONE);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		mainComposite.setLayoutData(gd);
+		comp.setLayoutData(gd);
 		
-		mainTable = new TableViewer(mainComposite,SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.NO_SCROLL);
+		mainTable = new TableViewer(comp, SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.NO_SCROLL | SWT.BORDER);
 		mainTable.getTable().setLocation(0,0);
 		mainTable.getTable().setHeaderVisible(false);
 		
@@ -246,16 +252,15 @@ public class SummaryResultTable extends Composite {
 	
 	
 	private void createLeftTable(){
-		final Composite comp = new Composite(this, SWT.BORDER);
+		Composite comp = new Composite(this, SWT.BORDER);
 		
-		leftTable = new TableViewer(comp, SWT.VIRTUAL | SWT.SINGLE | SWT.FULL_SELECTION | SWT.NO_SCROLL);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 2);
+		comp.setLayoutData(gd);
+		
+		leftTable = new TableViewer(comp, SWT.VIRTUAL | SWT.SINGLE | SWT.FULL_SELECTION | SWT.NO_SCROLL );
 		leftTable.getTable().setHeaderVisible(false);
 		leftTable.getTable().setLinesVisible(true);
 		leftTable.getTable().setLocation(0, 0);
-		
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 2);
-		gd.heightHint = 200;
-		comp.setLayoutData(gd);
 		
 		leftTable.getTable().setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR));
 		for (int i = 0; i < results.getRowHeaders().size(); i++){
