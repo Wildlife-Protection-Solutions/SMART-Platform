@@ -1,24 +1,3 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package org.wcs.smart.query.ui.summary;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -44,19 +23,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Slider;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.query.model.SummaryHeader;
 import org.wcs.smart.query.model.SummaryQueryResult;
 import org.wcs.smart.util.SmartUtils;
 
-/**
- * Summary results table which display the results
- * of the summary query in a table.
- * 
- * @author egouge
- * @since 1.0.0
- */
 public class SummaryResultTable extends Composite {
 
 	private static final int DEFAULT_COL_SIZE = 100;
@@ -70,7 +42,11 @@ public class SummaryResultTable extends Composite {
 	private SummaryQueryResult results;
 	private Label lblSpacer;
 	
+	private Slider vSlider;
+	private Slider hSlider;
 	
+	private int hSliderAbsoluteMax = 0;
+	private Listener resizeListener;
 	
 	/**
 	 * Creates a new summary results table
@@ -83,6 +59,9 @@ public class SummaryResultTable extends Composite {
 		super(parent, SWT.NONE);
 		
 		this.results = results;
+		if (toolkit == null){
+			toolkit = new FormToolkit(parent.getDisplay());
+		}
 		createComposite(toolkit);
 		
 		if (toolkit != null){
@@ -93,22 +72,49 @@ public class SummaryResultTable extends Composite {
 	
 	private void createComposite(FormToolkit toolkit){
 		//setup layout
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(3, false);
 		layout.marginWidth = layout.marginHeight = layout.horizontalSpacing = layout.verticalSpacing = 0;
 		setLayout(layout);
 		
-		if (toolkit == null){
-			lblSpacer = new Label(this, SWT.NONE);
-		}else{
-			lblSpacer = toolkit.createLabel(this, ""); //$NON-NLS-1$
-		}
+		lblSpacer = toolkit.createLabel(this, ""); //$NON-NLS-1$
 		lblSpacer.setVisible(false);
 		lblSpacer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
 		createTopTable();
+		
+		lblSpacer = toolkit.createLabel(this, ""); //$NON-NLS-1$
+		lblSpacer.setVisible(false);
+		lblSpacer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		
 		createLeftTable();
+		
 		createMainTable();
+		
+		vSlider = new Slider(this, SWT.VERTICAL);
+		vSlider.setMinimum(0);
+		vSlider.setMaximum(100);
+		vSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
+		hSlider = new Slider(this, SWT.HORIZONTAL);
+		hSlider.setMinimum(0);
+		hSlider.setMaximum(100);
+		hSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		hSlider.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				updateHorizontalSlider();
+			}
+		});
+		vSlider.addListener(SWT.Selection, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				updateVerticalSlider();
+			}
+		});
+				
 		// sync selection the same in both tables
 		leftTable.getTable().addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
@@ -122,52 +128,6 @@ public class SummaryResultTable extends Composite {
 						mainTable.getTable().getSelectionIndices());
 			}
 		});
-
-		//sync position on all tables
-		
-		//top table  
-		final String OS = System.getProperty("os.name");
-		final ScrollBar hBar = mainTable.getTable().getHorizontalBar();
-		Listener hlistener = new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				Point pnt = topTable.getTable().getLocation();
-				pnt.x = -hBar.getSelection();
-				
-				//topTable.getTable().setLocation(-hBar.getSelection() , 0);
-				if (OS.contains("Mac OS X")){
-					int scrollWidth = (topTable.getTable().getBounds().width -15)- mainTable.getTable().getHorizontalBar().getSize().x;
-					int newX = (int) ((mainTable.getTable().getHorizontalBar().getSelection() / 90.0) * scrollWidth );
-					pnt.x = -newX;
-				}
-				topTable.getTable().setLocation(pnt);
-			}
-		};
-		
-		ScrollBar vBarMain = mainTable.getTable().getVerticalBar();
-		Listener vlistener = new Listener() {
-			public void handleEvent(Event event) {
-				leftTable.getTable().setTopIndex(mainTable.getTable().getTopIndex());
-			}
-		};
-		hBar.addListener(SWT.Selection, hlistener);
-		vBarMain.addListener(SWT.Selection, vlistener);
-		mainTable.getTable().addListener(SWT.Selection, vlistener);
-		mainTable.getTable().addListener(SWT.Resize, vlistener);
-		mainTable.getTable().addListener(SWT.Resize, hlistener);
-		mainTable.getTable().addListener(SWT.Traverse, hlistener);		
-		mainTable.getTable().addListener(SWT.Resize, new Listener(){
-			@Override
-			public void handleEvent(Event event) {			
-				Rectangle top = topTable.getTable().getBounds();
-				Rectangle r = mainTable.getTable().getBounds();
-				Point pnt = mainTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
-
-				topTable.getTable().setBounds(top.x,top.y,Math.max(r.width,pnt.x),top.height);
-				topTable.getTable().getParent().layout();
-			}
-			
-		});
 		
 		mainTable.setItemCount(results.getNumDataRows());
 		topTable.setInput(results);
@@ -175,18 +135,103 @@ public class SummaryResultTable extends Composite {
 		mainTable.setInput(results);
 		
 		
-		//Size Top Table
+		//Table sizes		
 		Point p = topTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		Rectangle r = mainTable.getTable().getBounds();
-		topTable.getTable().setBounds(0, 0, r.width, p.y);
+		topTable.getTable().setBounds(0, 0, p.x, p.y);
+		
+		p = leftTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		leftTable.getTable().setBounds(0, 0, p.x, p.y + 50);
+		
+		p = mainTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		mainTable.getTable().setBounds(0, 0, p.x, p.y+50);
+		
+		resizeListener = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				resize();
+			}
+		};
+		super.addListener(SWT.Resize, resizeListener);
+	}
+	
+	private void updateVerticalSlider(){
+		int position = - (vSlider.getSelection() * leftTable.getTable().getItemHeight());
+		Point p = leftTable.getTable().getLocation();
+		p.y = position;
+		leftTable.getTable().setLocation(p);
+		p = mainTable.getTable().getLocation();
+		p.y = position;
+		mainTable.getTable().setLocation(p);
+	}
+	
+	private void updateHorizontalSlider(){
+		int position = hSlider.getSelection()  * 10;
+		if (position > hSliderAbsoluteMax){
+			position = hSliderAbsoluteMax;
+		}
+		
+		Point p = topTable.getTable().getLocation();
+		p.x = -position;
+		topTable.getTable().setLocation(p);
+		
+		p = mainTable.getTable().getLocation();
+		p.x = -position;
+		mainTable.getTable().setLocation(p);
 		
 	}
 	
+	private void resize(){
+		super.layout(true);
+		
+		int displayHeight = mainTable.getTable().getParent().getBounds().height;
+		int itemHeight = mainTable.getTable().getItemHeight();
+		
+		int numVisibleItems = (int) Math.ceil(displayHeight / (double)itemHeight);
+		int numItems = results.getNumDataRows();
+		if (numVisibleItems > numItems){
+			vSlider.setEnabled(false);
+			vSlider.setSelection(0);
+		}else{
+			vSlider.setEnabled(true);
+			vSlider.setMaximum((numItems - numVisibleItems) + vSlider.getThumb()+1);
+		}
+		
+		int displayWidth = mainTable.getTable().getParent().getBounds().width;
+		int width = mainTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		
+		if (displayWidth > width){
+			hSlider.setEnabled(false);
+			hSlider.setSelection(0);
+		}else{
+			hSlider.setEnabled(true);
+			hSliderAbsoluteMax = (width - displayWidth);
+			int maxValue = (int)Math.ceil((width - displayWidth) / 10.0) + hSlider.getThumb();
+			hSlider.setMaximum(maxValue);
+		}
+		
+		int tableWidth = Math.max(displayWidth, width);
+		int tableHeight = Math.max(displayHeight, mainTable.getTable().getBounds().height);
+		
+		Rectangle rect = mainTable.getTable().getBounds();
+		mainTable.getTable().setBounds(rect.x, rect.y, tableWidth, tableHeight);
+
+		rect = leftTable.getTable().getBounds();
+		leftTable.getTable().setBounds(rect.x, rect.y, rect.width, tableHeight+hSlider.getBounds().height);
+		
+		rect = topTable.getTable().getBounds();
+		topTable.getTable().setBounds(rect.x, rect.y, tableWidth, rect.height);
+		
+		updateHorizontalSlider();
+		updateVerticalSlider();
+	}
+	
 	private void createMainTable(){
-		mainTable = new TableViewer(this,SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL );
+		Composite mainComposite = new Composite(this, SWT.NONE);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		//gd.heightHint = 200;
-		mainTable.getTable().setLayoutData(gd);
+		mainComposite.setLayoutData(gd);
+		
+		mainTable = new TableViewer(mainComposite,SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.NO_SCROLL);
+		mainTable.getTable().setLocation(0,0);
 		mainTable.getTable().setHeaderVisible(false);
 		
 		mainTable.getTable().setLinesVisible(true);
@@ -201,13 +246,17 @@ public class SummaryResultTable extends Composite {
 	
 	
 	private void createLeftTable(){
-		leftTable = new TableViewer(this, SWT.VIRTUAL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION | SWT.NO_SCROLL);
+		final Composite comp = new Composite(this, SWT.BORDER);
+		
+		leftTable = new TableViewer(comp, SWT.VIRTUAL | SWT.SINGLE | SWT.FULL_SELECTION | SWT.NO_SCROLL);
 		leftTable.getTable().setHeaderVisible(false);
 		leftTable.getTable().setLinesVisible(true);
+		leftTable.getTable().setLocation(0, 0);
 		
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, true);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 2);
 		gd.heightHint = 200;
-		leftTable.getTable().setLayoutData(gd);
+		comp.setLayoutData(gd);
+		
 		leftTable.getTable().setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR));
 		for (int i = 0; i < results.getRowHeaders().size(); i++){
 			TableViewerColumn tvc = new TableViewerColumn(leftTable, SWT.NONE);
@@ -233,6 +282,8 @@ public class SummaryResultTable extends Composite {
 						Point x = leftTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT);
 						Rectangle left = leftTable.getTable().getBounds();
 						leftTable.getTable().setBounds(left.x, left.y, x.x, left.height);
+						SummaryResultTable.this.layout(true);
+						resize();
 					}
 				},
 				null);
@@ -309,21 +360,14 @@ public class SummaryResultTable extends Composite {
 						int totalWidth = 0;
 						for (int i = 0; i < mainTable.getTable()
 								.getColumnCount(); i++) {
-							totalWidth += mainTable.getTable().getColumn(i)
-									.getWidth();
+							totalWidth += mainTable.getTable().getColumn(i).getWidth();
 						}
 						Rectangle top = topTable.getTable().getBounds();
 						Rectangle r = mainTable.getTable().getBounds();
 
-						int x = top.x;
-						if (totalWidth < r.width) {
-							x = -mainTable.getTable().getHorizontalBar()
-									.getSelection();
-						}
-						topTable.getTable().setBounds(x, top.y,
-								Math.max(totalWidth, r.width), top.height);
-						// topTable.getTable().getParent().layout();
-						topTable.getTable().layout();
+						topTable.getTable().setBounds(top.x, top.y, totalWidth, top.height);
+						mainTable.getTable().setBounds(r.x, r.y, totalWidth, r.height);
+						resize();
 					}
 				}, new Listener() {
 
