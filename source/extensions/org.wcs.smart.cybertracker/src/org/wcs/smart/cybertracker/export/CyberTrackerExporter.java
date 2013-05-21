@@ -44,6 +44,8 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.reports.Items;
+import org.wcs.smart.cybertracker.model.reports.Reports;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
@@ -106,8 +108,8 @@ public class CyberTrackerExporter {
 		} finally {
 			outE.close();
 		}
-		monitor.done();
 		
+		monitor.done();
 		return file;
 	}
 
@@ -209,7 +211,7 @@ public class CyberTrackerExporter {
 	 * @param hasNext
 	 */
 	private static void buildNodeNavigation(Node node, CyberTrackerId navigateId, boolean hasNext) {
-		Control control2 = node.getData().getControls().getControl().get(0);
+		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		if (hasNext) {
 			//we have some screens after this, so displaying "Next" button
 			control2.setTranslateNextScreenId(navigateId.getNodeId());
@@ -289,7 +291,7 @@ public class CyberTrackerExporter {
 	}
 	
 	private static void writeDataModel(Object obj, OutputStream file, Class<?> clazz) throws JAXBException, IOException {
-		JAXBContext context = JAXBContext.newInstance(clazz);
+		JAXBContext context = JAXBContext.newInstance(obj.getClass());
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		marshaller.marshal(obj, file);
