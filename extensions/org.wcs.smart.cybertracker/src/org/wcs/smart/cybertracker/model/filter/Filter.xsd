@@ -11,6 +11,7 @@
 									<xs:element type="xs:string" name="Id" />
 									<xs:element type="xs:string" name="Name" />
 									<xs:element type="xs:string" name="CategoryId" />
+									<xs:element type="xs:int" name="FilterType" minOccurs="0" />
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
