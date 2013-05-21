@@ -56,6 +56,8 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class PatrolScreensUtil {
+	
+	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
 	/**
 	 * @param screens
@@ -68,7 +70,8 @@ public class PatrolScreensUtil {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		CyberTrackerId id = addSimpleNextRadioNode(startId, nodes, elements, "SMART CyberTracker", "#PatrolStart", ElementsUtil.addCustomElements(elements, "Start New Patrol"));
 		//patrol type & transport
-		id = addTypeTransportNodes(id, nodes, elements, session);
+		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
+		id = addTypeTransportNodes(id, nodes, elements, patrolTypes);
 		//patrol armed
 		List<String> labelValues = new ArrayList<String>();
 		labelValues.add("Yes");
@@ -104,11 +107,11 @@ public class PatrolScreensUtil {
 		
 		id = addMembersNode(id, nodes, memberIds);
 		id = addSimpleNextRadioNode(id, nodes, elements, "Leader", "#Leader", memberIds, filter);
+		Node leaderNode = nodes.get(nodes.size()-1);
+		String pilotNodeId = id.getNodeId();
 		id = addSimpleNextRadioNode(id, nodes, elements, "Pilot", "#Pilot", memberIds, filter);
+		addNavigationFormula(leaderNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
 		
-//		addSimpleNextRadioNode(id, nodes, elements, "Next Task", "#Task", "Make Observation", "End Patrol");
-//		Control control2 = nodes.get(nodes.size()-1).getData().getControls().getControl().get(0);
-//		control2.setTranslateNextScreenId(dmRootId.getNodeId());
 		addTaskNode(id, nodes, elements, startId, dmRootId);
 		return id;
 	}
@@ -126,14 +129,14 @@ public class PatrolScreensUtil {
 
 	private static CyberTrackerId toNextScreen(Node node) {
 		CyberTrackerId nextId = new CyberTrackerId();
-		Control control2 = node.getData().getControls().getControl().get(0);
+		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		control2.setTranslateNextScreenId(nextId.getNodeId());
 		return nextId;
 	}
 
 	private static void applyFilter(Node node, String filter) {
 		if (filter != null) {
-			Control control7 = node.getData().getControls().getControl().get(2);
+			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 			control7.setFilterEnabled("True"); //$NON-NLS-1$
 			control7.setTranslateFilter(filter);
 		}
@@ -161,8 +164,7 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 	}
 
-	private static CyberTrackerId addTypeTransportNodes(CyberTrackerId id, List<Node> nodes, Elements elements, Session session) {
-		List<PatrolType> pTypes = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
+	private static CyberTrackerId addTypeTransportNodes(CyberTrackerId id, List<Node> nodes, Elements elements, List<PatrolType> pTypes) {
 		List<String> types = new ArrayList<String>();
 		List<String> tag0Types = new ArrayList<String>();
 		for (PatrolType patrolType : pTypes) {
@@ -172,6 +174,8 @@ public class PatrolScreensUtil {
 		List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
 		String resultElemId = createResultElement("#PatrolType", elements);
 		Node node = CyberTrackerUtil.createRadioNode(id.getNodeId(), "Patrol Type", typeIds, resultElemId, true);
+		Control control7 = ScreensObjectFactory.getRadioMainControl(node);
+		control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
 		nodes.add(node);
 		CyberTrackerId nextId = new CyberTrackerId();
 		CyberTrackerId resultId = new CyberTrackerId();
@@ -180,7 +184,7 @@ public class PatrolScreensUtil {
 			List<CyberTrackerId> trIds = toCyberTrackerIds(elements, pTypes.get(i).getTransportTypes());
 			node = CyberTrackerUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultId.getItemId());
 			nodes.add(node);
-			Control control2 = node.getData().getControls().getControl().get(0);
+			Control control2 = ScreensObjectFactory.getNavigationControl(node);
 			control2.setTranslateNextScreenId(nextId.getNodeId());
 		}
 		return nextId;
@@ -199,7 +203,7 @@ public class PatrolScreensUtil {
 		CyberTrackerId confId = new CyberTrackerId();
 		Node confirmNode = ScreensObjectFactory.createNodeMsgText(confId.getNodeId(), "Confirm", "Press \"Save\" to confirm ending patrol or use back button");
 		//disable next button, enable save button,navigate on save to start point
-		Control control2 = confirmNode.getData().getControls().getControl().get(0);
+		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
 		control2.setShowNext("False"); //$NON-NLS-1$
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(startId.getNodeId());
@@ -270,4 +274,28 @@ public class PatrolScreensUtil {
 		}
 		return null;
 	}
+	
+	private static String builPilotFormula(List<PatrolType> patrolTypes) {
+		String result = ""; //$NON-NLS-1$
+		for (int i = 0; i < patrolTypes.size(); i++) {
+			patrolTypes.get(i).getType();
+			switch (patrolTypes.get(i).getType()) {
+			case AIR:
+			case MARINE:
+				if (!result.isEmpty())
+					result += " || "; //$NON-NLS-1$
+				result += GLOBAL_PATROL_TYPE+"=="+String.valueOf(i+1); //$NON-NLS-1$
+				break;
+			default:
+				break;
+			}
+		}
+		return result;
+	}
+	
+	private static void addNavigationFormula(Node node, String formula, String successId, String failId) {
+		Control formulaControl = ScreensObjectFactory.createFormulaControl12(formula, failId, successId);
+		node.getData().getControls().getControl().add(formulaControl);
+	}
+	
 }
