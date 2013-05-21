@@ -244,6 +244,7 @@ public class PatrolScreensUtil {
 		cIt.setId(new CyberTrackerId().getNodeId());
 		cIt.setName("Members"); //$NON-NLS-1$
 		cIt.setCategoryId(memberNodeId);
+		cIt.setFilterType(1); // 1 for "Any" filter type
 		cItems.getItem().add(cIt);
 		
 		ElementFilters elFilter = new ElementFilters();
