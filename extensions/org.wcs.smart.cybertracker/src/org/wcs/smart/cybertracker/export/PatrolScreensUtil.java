@@ -103,7 +103,9 @@ public class PatrolScreensUtil {
 		String[] memberNames = members.toArray(new String[members.size()]);
 		List<CyberTrackerId> memberIds = ElementsUtil.addCustomElements(elements, memberNames);
 		String filter = buildMembersFilter(id.getNodeId(), memberIds, Arrays.asList(memberNames));
-		filter = SmartUtils.encodeHex(filter.getBytes());
+		if (filter != null) {
+			filter = SmartUtils.encodeHex(filter.getBytes());
+		}
 		
 		id = addMembersNode(id, nodes, memberIds);
 		id = addSimpleNextRadioNode(id, nodes, elements, "Leader", "#Leader", memberIds, filter);
@@ -269,7 +271,9 @@ public class PatrolScreensUtil {
 			final StringWriter stringWriter = new StringWriter();
 			//marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 			marshaller.marshal(filter, stringWriter);
-			return stringWriter.toString();
+			String filterStr = stringWriter.toString();
+			int index = filterStr.indexOf("<Filter>"); //$NON-NLS-1$
+			return "<?xml version=\"1.0\"?>\r\n" + filterStr.substring(index); //$NON-NLS-1$ //this is REQUIRED as CyberTracker expects EXACTLY "<?xml version=\"1.0\"?>\r\n<Filter>" at the begining
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
