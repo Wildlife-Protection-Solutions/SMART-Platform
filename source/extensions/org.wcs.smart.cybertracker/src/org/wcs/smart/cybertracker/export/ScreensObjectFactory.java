@@ -34,6 +34,9 @@ import org.wcs.smart.cybertracker.model.screens.Screens;
  * @since 1.0.0
  */
 public class ScreensObjectFactory {
+	
+	private static final int CONTROL_2_INDEX = 0;
+	private static final int CONTROL_7_INDEX = 2;
 
 	/**
 	<Screens>
@@ -90,7 +93,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>12</NextId>
+            <NextId>13</NextId>
             <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -110,7 +113,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(12);
+		data.setNextId(13);
 		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
@@ -598,5 +601,49 @@ public class ScreensObjectFactory {
 		control.setCaption(text);
 		return control;
 	}
+
+
+	/**
+	<Control>
+	     <Type>{C26ACA43-8C7C-497C-9586-382E5BD27115}</Type>
+	     <LockProperties>Elements A;Elements B;Elements C;Font;Formula;Result Element;Link 0;Link 1</LockProperties>
+	     <Id>12</Id>
+	     <Align>0</Align>
+	     <Left>4</Left>
+	     <Top>4</Top>
+	     <Width>40</Width>
+	     <Height>20</Height>
+	     <Formula>...</Formula>
+	     <Hidden>True</Hidden>
+	     <Translate__TargetScreenId0>...</Translate__TargetScreenId0>
+	     <Translate__TargetScreenId1>...</Translate__TargetScreenId1>
+	 </Control>
+	 */
+	public static Controls.Control createFormulaControl12(String formula, String id0, String id1) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{C26ACA43-8C7C-497C-9586-382E5BD27115}"); //$NON-NLS-1$
+		control.setLockProperties("Elements A;Elements B;Elements C;Font;Formula;Result Element;Link 0;Link 1"); //$NON-NLS-1$
+		control.setId(12);
+		control.setAlign(0);
+		control.setLeft(4);
+		control.setTop(4);
+		control.setWidth(40);
+		control.setHeight(20);
+		control.setFormula(formula);
+		control.setHidden("True"); //$NON-NLS-1$
+		control.setTranslateTargetScreenId0(id0);
+		control.setTranslateTargetScreenId1(id1);
+		return control;
+	}
+
 	
+	//Util methods
+	public static Controls.Control getNavigationControl(Node node) {
+		return node.getData().getControls().getControl().get(CONTROL_2_INDEX);
+	}
+
+	public static Controls.Control getRadioMainControl(Node node) {
+		return node.getData().getControls().getControl().get(CONTROL_7_INDEX);
+	}
+
 }
