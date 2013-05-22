@@ -256,6 +256,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	
 		Button btnImport = new Button(composite, SWT.NONE);
 		btnImport.setText(Messages.EmployeePropertyPage_Import_Button);
+		btnImport.setToolTipText(Messages.EmployeePropertyPage_ImportButtonTooltip);
 		btnImport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -266,12 +267,12 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				}else{
 					refreshEmployeeList();
 				}
-				
 			}
 		});
 		
 		Button btnExport = new Button(composite, SWT.NONE);
 		btnExport.setText(Messages.EmployeePropertyPage_Export_Button);
+		btnExport.setToolTipText(Messages.EmployeePropertyPage_ExportButtonTooltip);
 		btnExport.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
