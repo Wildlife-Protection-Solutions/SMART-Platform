@@ -241,6 +241,9 @@ public class GriddedFilterPanel {
 	}
 	private void copyValueFilterToRateFilter(){
 		String queryString = valueFilter.getQueryString();
+		if (queryString == null || queryString.trim().isEmpty()){
+			return;
+		}
 		Session session = null;
 		try{
 			InputStream is = new ByteArrayInputStream(queryString.getBytes());
