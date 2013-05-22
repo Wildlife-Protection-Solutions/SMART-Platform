@@ -117,7 +117,8 @@ public class Messages extends NLS {
 	public static String ExportPatrolHandler_Error_CouldNotFindPatrol;
 	public static String ExportPatrolHandler_Error_ExportingPatrol;
 	public static String ExportPatrolHandler_Error_NothingToExport;
-	public static String ExportPatrolHandler_ExportComplete_DialogMessage;
+	public static String ExportPatrolHandler_ExportCancelledDialogTitle;
+	public static String ExportPatrolHandler_ExportComplete_DialogMessage1;
 	public static String ExportPatrolHandler_ExportComplete_DialogTitle;
 	public static String ExportPatrolHandler_ExportDialog_Title;
 	public static String ExportPatrolHandler_ExportErrorMessage;
@@ -213,6 +214,8 @@ public class Messages extends NLS {
 	public static String MultiLegWizardPage_PageMessage;
 	public static String MultiLegWizardPage_Title;
 	public static String MultiPatrolExportDialog_ChangeFilter;
+	public static String MultiPatrolExportDialog_CouldNotCreateDirectory;
+	public static String MultiPatrolExportDialog_InvalidDirectory;
 	public static String MultiPatrolExportDialog_LoadPatrolJobName;
 	public static String MultiPatrolExportDialog_Message;
 	public static String MultiPatrolExportDialog_PageTitle;

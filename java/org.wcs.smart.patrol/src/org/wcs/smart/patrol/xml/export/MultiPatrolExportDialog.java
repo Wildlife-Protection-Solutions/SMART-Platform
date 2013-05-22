@@ -1,7 +1,9 @@
 package org.wcs.smart.patrol.xml.export;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -9,7 +11,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -18,13 +22,18 @@ import org.hibernate.Session;
 import org.wcs.smart.common.control.XmlMultiExportDialog;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.IPatrolFilteringView;
 import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
 import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog to allow users to export multiple patrols at once.
+ * 
+ * This code performs validation to ensure at least one patrol is selected
+ * and that the output directory is a valid directory.
  * 
  * @author egouge
  *
@@ -33,7 +42,8 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
-	
+	private static final String EXPORT_DIALOGTITLE = Messages.ExportPatrolHandler_ExportDialog_Title;
+
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.patrol.export.dialog"); //$NON-NLS-1$
 	static{
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
@@ -42,7 +52,8 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	private PatrolViewFilter currentFilter = new PatrolViewFilter();
 	
 	/**
-	 * Creates a new dialog
+	 * Creates a new dialog.
+	 * 
 	 * @param parentShell parent shell
 	 * @param patrol patrol to export
 	 */
@@ -62,9 +73,37 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
+		if (buttonId == IDialogConstants.OK_ID){
+			if(!validate()){
+				return;
+			}
+		}
 		super.buttonPressed(buttonId);
 		dialogSettings.put(OUTPUT_DIR, getDirectory());
 		dialogSettings.put(INCLUDE_ATTACHMENT, getIncludeAttachments());
+	}
+	
+	private boolean validate(){
+		
+		if (super.getTableViewer().getCheckedElements().length == 0) {
+			MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, Messages.ExportPatrolHandler_Error_NothingToExport);
+			return false;
+		}
+		
+		File dir = new File(txtFile.getText());
+		if (!dir.exists()) {
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.ExportPatrolHandler_Warning_DirNotExist, new Object[]{dir.getAbsolutePath()}))) {
+				return false;
+			}
+			if (!SmartUtils.createDirectory(dir)){
+				SmartPatrolPlugIn.displayLog(Messages.MultiPatrolExportDialog_CouldNotCreateDirectory, null);
+				return false;
+			}
+		}else if (!dir.isDirectory()){
+			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.MultiPatrolExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
+			return false;
+		}
+		return true;
 	}
 
 	@Override
