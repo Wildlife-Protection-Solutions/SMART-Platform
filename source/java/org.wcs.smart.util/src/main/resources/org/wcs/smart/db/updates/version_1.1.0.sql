@@ -43,5 +43,44 @@ GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO analyst;
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO data_entry;
 
 
+-- update names
+DELETE FROM smart.dm_aggregation_i18n;
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'en', 'sum' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'en', 'minimum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'en', 'maximum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'en', 'average' );
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'fr', 'total' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'fr', 'minimum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'fr', 'maximum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'fr', 'moyenne' );
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'es', 'total' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'es', 'mínimo');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'es', 'máximo');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'es', 'promedio' );
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'in', 'jumlah' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'in', 'minimum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'in', 'maksimum');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'in', 'rata-rata' );
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'th', 'ผลรวม' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'th', 'ค่าต่ำสุด');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'th', 'ค่าสูงสุด');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'th', 'ค่าเฉลี่ย' );
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'zh', '合计' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'zh', '最小');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'zh', '最大');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'zh', '平均' );
+
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'sum', 'ru', 'итога' );
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min', 'ru', 'минимальный');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'ru', 'максимальный');
+INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'ru', 'средний' );
+
+
 -- Database Updates For Version 1.1.0
 update smart.db_version set version = '1.1.0';
