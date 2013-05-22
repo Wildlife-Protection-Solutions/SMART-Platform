@@ -374,7 +374,9 @@
          <command
                commandId="org.wcs.smart.map.saveMap"
                icon="images/icons/elcl16/save_map.png"
-               style="push">
+               label="%savebasemap.command.name"
+               style="push"
+               tooltip="%savebasemap.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -1113,9 +1115,9 @@
             class="org.wcs.smart.map.internal.ExportMapToImageWizard"
             icon="images/icons/etool16/exportimage_wiz.png"
             id="org.wcs.smart.exportMap"
-            name="Map To Image">
+            name="%exportmap.wizard.name">
          <description>
-            Exports the current map to Image (+world) file or a PDF.
+            %exportmap.wizard.description
          </description>
       </wizard>
    </extension>
