@@ -226,6 +226,8 @@ public class Messages extends NLS {
 
     public static String IntelligenceReceived_ReceivedDate_Label;
 
+	public static String IntelligenceReceivedComposite_FutureDate;
+
     public static String IntelligenceSourceType_CET;
 
 	public static String IntelligenceSourceType_Informant;
