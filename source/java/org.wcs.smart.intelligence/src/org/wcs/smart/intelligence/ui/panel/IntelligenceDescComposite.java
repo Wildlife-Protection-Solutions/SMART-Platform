@@ -69,7 +69,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         shortName = new Text(this, SWT.BORDER | SWT.LEFT);
-        shortName.setTextLimit(32);
+        shortName.setTextLimit(org.wcs.smart.ca.Label.MAX_LENGTH);
         shortName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -97,9 +97,11 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         descLabel.setText(Messages.IntelligenceDesc_Description_Label);
         descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-        description = new Text(this, SWT.BORDER | SWT.LEFT| SWT.WRAP | SWT.V_SCROLL);
+        description = new Text(this, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
+        description.setTextLimit(Intelligence.MAX_DESCRIPTION_LENTH);
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
         gd.heightHint = 80;
+        gd.widthHint = 50;
         gd.horizontalIndent = 8;
 
         description.setLayoutData(gd);

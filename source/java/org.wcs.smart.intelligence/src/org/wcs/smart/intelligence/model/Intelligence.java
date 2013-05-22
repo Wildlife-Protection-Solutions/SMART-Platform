@@ -52,6 +52,11 @@ import org.wcs.smart.util.SmartUtils;
 @Table(name = "smart.intelligence")
 public class Intelligence extends SimpleListItem {
 
+	/**
+	 * Maximum length of description field
+	 */
+	public static final int MAX_DESCRIPTION_LENTH = 32700;
+				
     private ConservationArea conservationArea;
     private Date receivedDate;
     private IntelligenceSourceType source;
