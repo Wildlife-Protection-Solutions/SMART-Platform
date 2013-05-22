@@ -305,7 +305,7 @@ public abstract class SmartMapEditorPart  extends EditorPart implements MapPart 
         lblSRID.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectionDialog pd = new ProjectionDialog(getSite().getShell());
+				ProjectionDialog pd = new ProjectionDialog(getSite().getShell(), mapViewer.getMap().getViewportModel().getCRS());
 				if (pd.open() == IDialogConstants.OK_ID){
 					try{
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());

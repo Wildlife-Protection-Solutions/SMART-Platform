@@ -58,6 +58,7 @@ public class Messages extends NLS {
 	public static String CategoryDMAdvisor_DeleteError;
 	public static String CategoryDMAdvisor_Error_InvalidObjectType;
 	public static String CommentComposite_Comments_Label;
+	public static String CommentComposite_PatrolCommentTooLongErrorMessage;
 	public static String CommentComposite_Title;
 	public static String CommentWizardPage_PageMessage;
 	public static String CommentWizardPage_Title;
@@ -220,6 +221,7 @@ public class Messages extends NLS {
 	public static String NewPatrolHandler_ErrorLoadingPerspective;
 	public static String NewPatrolHandler_Progress_DisplayingWizard;
 	public static String ObjectiveComposite_Objective_Label;
+	public static String ObjectiveComposite_PatrolObjectiveTooLongError;
 	public static String ObjectiveComposite_Title;
 	public static String ObservationCellEditor_LoadDataModel_JobName;
 	public static String ObservationCellEditor_NoObservations_Label;

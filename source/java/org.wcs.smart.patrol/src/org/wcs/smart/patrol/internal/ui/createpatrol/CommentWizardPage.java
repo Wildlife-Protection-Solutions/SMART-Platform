@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
+import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
@@ -54,6 +55,13 @@ public class CommentWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		commentComp = new CommentComposite();
+		commentComp.addChangeListener(new IPatrolItemChangeListener() {			
+			@Override
+			public void itemChanged() {
+				setErrorMessage(commentComp.getErrorMessage());
+				setPageComplete(commentComp.getErrorMessage() == null);
+			}
+		});
 		setTitle(Messages.CommentWizardPage_Title);
 		setMessage(Messages.CommentWizardPage_PageMessage);
 		super.setControl(commentComp.createComponent(parent, SWT.NONE));

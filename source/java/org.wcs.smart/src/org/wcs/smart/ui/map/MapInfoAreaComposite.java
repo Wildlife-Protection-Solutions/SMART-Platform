@@ -101,7 +101,7 @@ public class MapInfoAreaComposite extends Composite {
         lblSRID.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectionDialog pd = new ProjectionDialog(getShell());
+				ProjectionDialog pd = new ProjectionDialog(getShell(), mapViewer.getMap().getViewportModel().getCRS());
 				if (pd.open() == IDialogConstants.OK_ID){
 					try{
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
