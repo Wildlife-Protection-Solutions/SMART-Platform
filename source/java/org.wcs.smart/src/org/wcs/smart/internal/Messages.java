@@ -520,7 +520,9 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_Edit_ToolTip;
 	public static String EmployeePropertyPage_Error_CannotDeleteEmployee;
 	public static String EmployeePropertyPage_Export_Button;
+	public static String EmployeePropertyPage_ExportButtonTooltip;
 	public static String EmployeePropertyPage_Import_Button;
+	public static String EmployeePropertyPage_ImportButtonTooltip;
 	public static String EmployeePropertyPage_InActiveFlag;
 	public static String EmployeePropertyPage_Op_IncludeInActive;
 	public static String EmployeePropertyPage_PageTitle;
