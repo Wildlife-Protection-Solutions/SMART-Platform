@@ -163,7 +163,7 @@ public class DataModelXmlToSmartConverter {
 	 * @return null if should not continue (no default language found); otherwise
 	 * the language code to use as the default ca language
 	 */
-	public static String checkLanguage(List<LanguageType> xmlLanguages, ConservationArea targetCa){
+	public static String checkLanguage(List<LanguageType> xmlLanguages, final ConservationArea targetCa){
 		//here we check to ensure default ca lang
 		for (LanguageType lt : xmlLanguages){
 			if (lt.getCode().equals(targetCa.getDefaultLanguage().getCode())){
@@ -171,15 +171,27 @@ public class DataModelXmlToSmartConverter {
 			}
 		}
 		
-		String[] values = new String[xmlLanguages.size()];
+		final String[] values = new String[xmlLanguages.size()];
 		for (int i = 0; i < values.length; i ++){
 			values[i] = xmlLanguages.get(i).getCode();
 		}
-		LanguageSelectionDialog sd = new LanguageSelectionDialog(Display.getCurrent().getActiveShell(), targetCa, values);
-		if (sd.open() != IDialogConstants.OK_ID){
-			return null;
-		}
-		return (String)((StructuredSelection)sd.getSelection()).getFirstElement();
+		final String[] selected = new String[1];
+		selected[0] = null;
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				LanguageSelectionDialog sd = new LanguageSelectionDialog(Display.getDefault().getActiveShell(), targetCa, values);
+				if (sd.open() != IDialogConstants.OK_ID){
+					selected[0] = null;
+				}else{
+					selected[0] = (String)((StructuredSelection)sd.getSelection()).getFirstElement();
+				}
+				
+			}});
+		
+		
+		return selected[0];
 	}
 	
 	/**
