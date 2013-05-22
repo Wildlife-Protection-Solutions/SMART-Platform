@@ -127,7 +127,8 @@
          </command>
          <command
                commandId="org.wcs.smart.plan.ShowPlanFilter"
-               style="push">
+               style="push"
+               tooltip="%filterplan.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
