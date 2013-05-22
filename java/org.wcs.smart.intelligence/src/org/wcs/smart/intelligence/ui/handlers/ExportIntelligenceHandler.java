@@ -30,6 +30,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -68,29 +69,26 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 		}
 		
 		final List<byte[]> ids = dialog.getObjectUuids();
-		if (ids.size() == 0) {
-			MessageDialog.openInformation(shell, Messages.MultiIntelligenceExportDialog_Title, Messages.ExportIntelligenceHandler_NothingSelected);
-			return null;
-		}
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
 
-		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(shell, Messages.MultiIntelligenceExportDialog_Title, MessageFormat.format(Messages.ExportIntelligenceHandler_DirectoryNotExist, dir.getAbsolutePath()))) {
-				return null;
-			}
+		if (ids.size() == 0 || !dir.exists() || !dir.isDirectory()){
+			return null;
 		}
-
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
+			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ExportIntelligenceHandler_Export_Task, ids.size());
 					int exportCnt = 0;
 					for (int i = 0; i < ids.size(); i++) {
-
+						if (monitor.isCanceled()){
+							break;
+						}
 						byte[] uuid = ids.get(i);
+						String name = null;
 						try {
 							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_SubTask,  SmartUtils.encodeHex(uuid)));
 							Intelligence intel = null;
@@ -99,6 +97,7 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 							try {
 								intel = (Intelligence) s.load(Intelligence.class, uuid);
 								intel.getReceivedDate();
+								name = intel.getName();
 							} catch (Exception ex) {
 								displayLogError(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_Error, SmartUtils.encodeHex(uuid)), ex);
 								continue;
@@ -107,18 +106,22 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 								s.close();
 							}
 
-							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_SubTask, SmartUtils.encodeHex(uuid)));
+							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_SubTask, name));
 
 							File outFile = IntelligenceExporter.getOutputFile(dir, intel.getName(), includeAtt);
-							IntelligenceExporter.exportIntelligence(intel, outFile, includeAtt, monitor);
+							IntelligenceExporter.exportIntelligence(intel, outFile, includeAtt, new NullProgressMonitor());
 
 							exportCnt++;
 						} catch (Exception ex) {
-							displayLogError(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_Error , SmartUtils.encodeHex(uuid)) + ex.getLocalizedMessage(), ex);
+							displayLogError(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_Error , name != null ? name : SmartUtils.encodeHex(uuid)) + "\n" +  ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
+						monitor.worked(1);
 					}
-
-					displayInfo(Messages.MultiIntelligenceExportDialog_Title, MessageFormat.format(Messages.ExportIntelligenceHandler_Completed_Message, new Object[]{exportCnt,dir.toString()}));
+					if (monitor.isCanceled()){
+						displayInfo(Messages.ExportIntelligenceHandler_ExportCancelledDialogTitle, MessageFormat.format(Messages.ExportIntelligenceHandler_Completed_Message1, new Object[]{exportCnt,dir.toString(), ids.size()}));
+					}else{
+						displayInfo(Messages.MultiIntelligenceExportDialog_Title1, MessageFormat.format(Messages.ExportIntelligenceHandler_Completed_Message1, new Object[]{exportCnt,dir.toString(), ids.size()}));
+					}
 				}
 
 			});

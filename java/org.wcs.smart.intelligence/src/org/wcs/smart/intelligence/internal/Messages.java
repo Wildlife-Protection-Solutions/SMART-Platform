@@ -58,11 +58,13 @@ public class Messages extends NLS {
 
 	public static String EditPatrolMotivationDialog_Title;
 
-	public static String ExportIntelligenceHandler_Completed_Message;
+	public static String ExportIntelligenceHandler_Completed_Message1;
 
 	public static String ExportIntelligenceHandler_DirectoryNotExist;
 
 	public static String ExportIntelligenceHandler_Export_Task;
+
+	public static String ExportIntelligenceHandler_ExportCancelledDialogTitle;
 
 	public static String ExportIntelligenceHandler_ExportIntelligence_Error;
 
@@ -258,13 +260,17 @@ public class Messages extends NLS {
 
 	public static String MultiIntelligenceExportDialog_ChangeFilter;
 
+	public static String MultiIntelligenceExportDialog_CouldNotCreateDirectoryError;
+
+	public static String MultiIntelligenceExportDialog_InvalidDirectoryError;
+
 	public static String MultiIntelligenceExportDialog_LoadJobName;
 
 	public static String MultiIntelligenceExportDialog_Message;
 
-	public static String MultiIntelligenceExportDialog_PageTitle;
+	public static String MultiIntelligenceExportDialog_PageTitle1;
 
-	public static String MultiIntelligenceExportDialog_Title;
+	public static String MultiIntelligenceExportDialog_Title1;
 
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
