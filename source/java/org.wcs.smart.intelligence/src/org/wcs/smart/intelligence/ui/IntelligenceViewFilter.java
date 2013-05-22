@@ -87,7 +87,7 @@ public class IntelligenceViewFilter {
 			}
 			Date end = receivedDateFilter.getEndDate();
 			if (end == null){
-				end = receivedDateStart;
+				end = receivedDateEnd;
 			}
 			query.setParameter("receivedStart", start); //$NON-NLS-1$
 			query.setParameter("receivedEnd", end); //$NON-NLS-1$
