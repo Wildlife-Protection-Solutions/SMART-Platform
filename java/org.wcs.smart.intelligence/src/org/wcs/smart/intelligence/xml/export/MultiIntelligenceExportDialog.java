@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
@@ -86,8 +87,10 @@ public class MultiIntelligenceExportDialog extends XmlMultiExportDialog implemen
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
-		if (!validate()){
-			return;
+		if (buttonId == IDialogConstants.OK_ID){
+			if (!validate()){
+				return;
+			}
 		}
 		super.buttonPressed(buttonId);
 		dialogSettings.put(OUTPUT_DIR, getDirectory());
