@@ -75,29 +75,25 @@ public class TableResizeColumnListener implements Listener {
 					moveIndex = i;
 				}
 			}
-			lastX = event.x;
-			mouseDown = true;
-			table.setCursor(ewCursor);
-			table.setCapture(true);
+			if (moveIndex >= 0){
+				lastX = event.x;
+				mouseDown = true;
+				table.setCursor(ewCursor);
+				table.setCapture(true);
+			}
 
 		} else if (event.type == SWT.MouseUp) {
+			if (mouseDown && moveIndex >= 0 && onMouseUp != null){
+				onMouseUp.handleEvent(event);
+			}
 			// reset
 			mouseDown = false;
 			moveIndex = -1;
 			lastX = 0;
 			table.setCapture(false);
 			table.setCursor(null);
-
-			// update table width
-
-			if (onMouseUp != null){
-				onMouseUp.handleEvent(event);
-			}
-
-			table.getParent().layout();
-
 		} else if (event.type == SWT.MouseMove) {
-			if (moveIndex < 0) {
+			if (!mouseDown && moveIndex < 0) {
 				table.setCursor(null);
 				int width = 0;
 				for (int i = 0; i < table.getColumnCount(); i++) {
@@ -108,7 +104,7 @@ public class TableResizeColumnListener implements Listener {
 					}
 				}
 			} else if (mouseDown && moveIndex >= 0) {
-				// resize colum in this table and the main table
+				// resize column in this table and the main table
 				int prev = lastX - event.x;
 				lastX = event.x;
 				TableColumn col = table.getColumn(moveIndex);
