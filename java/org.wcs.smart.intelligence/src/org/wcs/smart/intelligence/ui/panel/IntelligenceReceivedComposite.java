@@ -22,7 +22,9 @@
 package org.wcs.smart.intelligence.ui.panel;
 
 import java.util.Calendar;
+import java.util.Date;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,6 +33,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.util.SmartUtils;
@@ -44,8 +48,9 @@ import org.wcs.smart.util.SmartUtils;
 public class IntelligenceReceivedComposite extends IntelligenceComposite {
 
    private DateTime dtReceivedDate;
+   private ControlDecoration cdDate;
 	
-	/**
+   /**
 	 * @param parent
 	 * @param style
 	 */
@@ -69,9 +74,18 @@ public class IntelligenceReceivedComposite extends IntelligenceComposite {
         dtReceivedDate.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
+        		if (SmartUtils.getDate(dtReceivedDate).after(new Date())){
+        			cdDate.setDescriptionText(Messages.IntelligenceReceivedComposite_FutureDate);
+        			cdDate.show();
+        		}else{
+        			cdDate.hide();
+        		}
         		fireInputChangeListeners();
         	}
 		});
+        cdDate = new ControlDecoration(dtReceivedDate, SWT.LEFT);
+        cdDate.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
+        cdDate.hide();
 	}
 
 	@Override
