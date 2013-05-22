@@ -82,6 +82,14 @@ public class Patrol {
 	 * Maximum patrol id length
 	 */
 	public static final Integer MAX_ID_LENGTH = 32;
+	/**
+	 * Maximum length of patrol objective
+	 */
+	public static final int MAX_OBJECTIVE_LENGTH = 8192;
+	/**
+	 * Maximum length of patrol comment
+	 */
+	public static final int MAX_COMMENT_LENGTH = 32700;
 	
 	private byte[] uuid;
 	private ConservationArea ca;

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -54,11 +55,18 @@ public class ProjectionDialog extends TitleAreaDialog {
 
 	private ListViewer lst ;
 	private Projection selection;
+	private CoordinateReferenceSystem defaultCrs;
 	
-	public ProjectionDialog(Shell parentShell) {
+	/**
+	 * 
+	 * @param parentShell
+	 * @param current current projection or null if does not exist
+	 */
+	public ProjectionDialog(Shell parentShell, CoordinateReferenceSystem defaultCrs) {
 		super(parentShell);
+		this.defaultCrs = defaultCrs;
 	}
-
+	
 	/**
 	 * 
 	 * @return the projection selected by the user
@@ -104,8 +112,21 @@ public class ProjectionDialog extends TitleAreaDialog {
 						@Override
 						public void run() {
 							lst.setInput(ps);
-							if (ps.length > 0){
-								lst.setSelection(new StructuredSelection(ps[0]));
+							try{
+								Projection selection = null;
+								for (Object x : ps){
+									if (x instanceof Projection && ((Projection) x).getCrs().equals(defaultCrs)){
+										selection = (Projection) x;
+									}
+								}
+								if (selection == null && ps.length > 0){
+									selection = (Projection) ps[0];
+								}	
+								if (selection != null){
+									lst.setSelection(new StructuredSelection(selection));
+								}
+							}catch (Exception ex){
+								//eatme
 							}
 						}});
 						

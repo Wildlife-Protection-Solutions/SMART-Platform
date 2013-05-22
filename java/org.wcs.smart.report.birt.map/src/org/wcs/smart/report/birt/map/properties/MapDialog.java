@@ -240,7 +240,7 @@ public class MapDialog extends Dialog implements MapPart{
 		lblSRID.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectionDialog pd = new ProjectionDialog(getShell());
+				ProjectionDialog pd = new ProjectionDialog(getShell(), viewer.getMap().getViewportModel().getCRS());
 				if (pd.open() == IDialogConstants.OK_ID) {
 					try {
 						ChangeCRSCommand command = new ChangeCRSCommand(pd

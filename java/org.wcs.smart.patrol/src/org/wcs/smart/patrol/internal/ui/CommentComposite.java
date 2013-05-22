@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.MessageFormat;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -40,7 +42,7 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author egouge
  * @since 1.0.0
  */
-public class CommentComposite extends PatrolItemComposite{
+public class CommentComposite extends PatrolItemComposite implements ModifyListener{
 	private Text txtComment;
 
 	public CommentComposite() {
@@ -67,16 +69,24 @@ public class CommentComposite extends PatrolItemComposite{
 		gd.widthHint = 150;
 		gd.heightHint = 80;
 		txtComment.setLayoutData(gd);
-		txtComment.addModifyListener(new ModifyListener() {			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				fireChangeListeners();
-			}
-		});
+		txtComment.addModifyListener(this);
 
 		return main;
 	}
 
+	/**
+	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+	 */
+	@Override
+	public void modifyText(ModifyEvent e) {
+		String error = null;
+		if (txtComment.getText().length() > Patrol.MAX_COMMENT_LENGTH){
+			error = MessageFormat.format( Messages.CommentComposite_PatrolCommentTooLongErrorMessage, new Object[]{Patrol.MAX_COMMENT_LENGTH});
+		}
+		setErrorMessage(error);
+		fireChangeListeners();
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */

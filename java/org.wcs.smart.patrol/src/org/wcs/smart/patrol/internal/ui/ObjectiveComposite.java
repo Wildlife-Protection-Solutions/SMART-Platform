@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.MessageFormat;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -41,7 +43,7 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author Emily
  * @since 1.0.0
  */
-public class ObjectiveComposite extends PatrolItemComposite{
+public class ObjectiveComposite extends PatrolItemComposite implements ModifyListener{
 	private Text txtObjective;
 
 	public ObjectiveComposite() {
@@ -68,15 +70,24 @@ public class ObjectiveComposite extends PatrolItemComposite{
 		gd.widthHint = 150;
 		gd.heightHint = 80;
 		txtObjective.setLayoutData(gd);
-		txtObjective.addModifyListener(new ModifyListener() {			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				fireChangeListeners();
-			}
-		});
+		txtObjective.addModifyListener(this);
+		
 		return main;
 	}
 
+	/**
+	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+	 */
+	@Override
+	public void modifyText(ModifyEvent e) {
+		String error = null;
+		if (txtObjective.getText().length() > Patrol.MAX_OBJECTIVE_LENGTH){
+			error = MessageFormat.format(Messages.ObjectiveComposite_PatrolObjectiveTooLongError, new Object[]{Patrol.MAX_OBJECTIVE_LENGTH});
+		}
+		setErrorMessage(error);
+		fireChangeListeners();
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */

@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
@@ -56,6 +57,14 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		objectiveComp = new ObjectiveComposite();
+		objectiveComp.addChangeListener(new IPatrolItemChangeListener() {			
+			@Override
+			public void itemChanged() {
+				setErrorMessage(objectiveComp.getErrorMessage());
+				setPageComplete(objectiveComp.getErrorMessage() == null);
+			}
+		});
+		
 		setTitle(Messages.PatrolObjectiveWizardPage_Title);
 		setMessage(Messages.PatrolObjectiveWizardPage_PageMessage);
 		super.setControl(objectiveComp.createComponent(parent, SWT.NONE));
