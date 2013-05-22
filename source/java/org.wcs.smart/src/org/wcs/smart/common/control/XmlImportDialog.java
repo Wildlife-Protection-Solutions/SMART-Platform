@@ -119,7 +119,7 @@ public class XmlImportDialog  extends TitleAreaDialog {
 		
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.XmlImportDialog_Files_Label);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, true, 2, 1));
+		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 2, 1));
 		
 		lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstFiles.setContentProvider(ArrayContentProvider.getInstance());
