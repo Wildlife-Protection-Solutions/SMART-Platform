@@ -30,6 +30,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -57,8 +58,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ExportPatrolHandler extends AbstractHandler {
 
-	private static final String EXPORT_DIALOGTITLE = Messages.ExportPatrolHandler_ExportDialog_Title;
-
+	
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
@@ -66,43 +66,43 @@ public class ExportPatrolHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		Shell shell = HandlerUtil.getActiveShell(event);
+		
 		MultiPatrolExportDialog dialog = new MultiPatrolExportDialog(shell);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return null;
 		}
-		final List<byte[]> patrols = dialog.getObjectUuids();
-		if (patrols.size() == 0) {
-			MessageDialog.openInformation(shell, EXPORT_DIALOGTITLE, Messages.ExportPatrolHandler_Error_NothingToExport);
-			return null;
-		}
+		
+		final List<byte[]> patrols = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
-
-		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(shell,EXPORT_DIALOGTITLE,MessageFormat.format(Messages.ExportPatrolHandler_Warning_DirNotExist, new Object[]{dir.getAbsolutePath()}))) {
-				return null;
-			}
+		if (patrols.size() == 0){
+			return null;
 		}
-
+		if (!dir.exists() || !dir.isDirectory()){
+			return null;
+		}
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
+			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ExportPatrolHandler_Progress_ExportingPatrols, patrols.size());
 					int exportCnt = 0;
 					for (int i = 0; i < patrols.size(); i++) {
-
+						if (monitor.isCanceled()) break;
 						byte[] puuid = patrols.get(i);
+						String id = null;
 						try {
 							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_LoadingPatrol,new Object[]{ SmartUtils.encodeHex(puuid)}));
 							Patrol p = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
+							
 							try {
 								p = (Patrol) s.load(Patrol.class, puuid);
-								p.getId();
+								id = p.getId();
 							} catch (Exception ex) {
 								displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
 								continue;
@@ -111,17 +111,21 @@ public class ExportPatrolHandler extends AbstractHandler {
 								s.close();
 							}
 
-							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ SmartUtils.encodeHex(puuid)}));
+							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ id }));
 
 							File outFile = PatrolExporter.getOutputFile(dir, p.getId(), includeAtt);
-							PatrolExporter.exportPatrol(p, outFile, includeAtt, monitor);
+							PatrolExporter.exportPatrol(p, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{SmartUtils.encodeHex(puuid)}) + ex.getLocalizedMessage(), ex);
+							displayLogError(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
+						monitor.worked(1);
 					}
-
-					displayInfo(Messages.ExportPatrolHandler_ExportComplete_DialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage, new Object[]{exportCnt,dir.toString()}));
+					if (monitor.isCanceled()){
+						displayInfo(Messages.ExportPatrolHandler_ExportCancelledDialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage1, new Object[]{exportCnt,dir.toString(),patrols.size()}));
+					}else{
+						displayInfo(Messages.ExportPatrolHandler_ExportComplete_DialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage1, new Object[]{exportCnt,dir.toString(),patrols.size()}));
+					}
 				}
 
 			});

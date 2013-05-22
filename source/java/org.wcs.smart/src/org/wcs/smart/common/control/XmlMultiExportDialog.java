@@ -69,7 +69,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 
 	private static final String LOADING_TEXT = Messages.XmlMultiExportDialog_LoadingText;
 	
-	private Text txtFile;
+	protected Text txtFile;
 	private Button btnIncludeAttachments;
 	private CheckboxTableViewer tableViewer;
 	
