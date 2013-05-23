@@ -52,6 +52,8 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
@@ -109,15 +111,19 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
 		
-		Hyperlink btnCreate = toolkit.createHyperlink(main, Messages.ReportedIntelligenceContribution_Create_Button, SWT.NONE);
-		btnCreate.setToolTipText(Messages.ReportedIntelligenceContribution_Create_Button_Tooltip);
-		btnCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		btnCreate.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				createIntelligence();
-			}
-		});
+		if (SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ANALYST){
+			Hyperlink btnCreate = toolkit.createHyperlink(main, Messages.ReportedIntelligenceContribution_Create_Button, SWT.NONE);
+			btnCreate.setToolTipText(Messages.ReportedIntelligenceContribution_Create_Button_Tooltip);
+			btnCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			btnCreate.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					createIntelligence();
+				}
+			});
+		}else{
+			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		}
 		
 		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL);
 		tableViewer = new TableViewer(reportedTable);
