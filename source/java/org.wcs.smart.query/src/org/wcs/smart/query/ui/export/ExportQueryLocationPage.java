@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.export.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 
@@ -64,7 +63,7 @@ public class ExportQueryLocationPage extends WizardPage {
 	 * Initializes the values in the query wizard
 	 */
 	public void initValues(){
-		String location = QueryPlugIn.getDefault().getDialogSettings().get(LAST_DIR_KEY);
+		String location = getWizard().getDialogSettings().get(LAST_DIR_KEY);
 		if (location == null){
 			location = System.getProperty("user.home"); //$NON-NLS-1$
 		}
@@ -147,7 +146,7 @@ public class ExportQueryLocationPage extends WizardPage {
 	public void performFinish(){
 		try{
 			File f = new File(txtFile.getText());
-			QueryPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, f.getParent().toString());
+			getWizard().getDialogSettings().put(LAST_DIR_KEY, f.getParent().toString());
 		}catch (Exception ex){
 			//eatme
 		}
