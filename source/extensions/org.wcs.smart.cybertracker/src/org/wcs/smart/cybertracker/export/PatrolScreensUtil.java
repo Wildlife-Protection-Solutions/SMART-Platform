@@ -81,12 +81,18 @@ public class PatrolScreensUtil {
 		tag0Values.add("false"); //$NON-NLS-1$
 		List<CyberTrackerId> armedIds = ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 		id = addSimpleNextRadioNode(id, nodes, elements, "Is Armed", "#Armed", armedIds);
-		
-		List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Team", "#Team", toCyberTrackerIds(elements, teams));
 
+		List<CyberTrackerId> cyberTrackerIds = ElementsUtil.addCustomElements(elements, "None", null);
+		CyberTrackerId noneElemId = cyberTrackerIds.get(0);
+		List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
+		cyberTrackerIds.addAll(toCyberTrackerIds(elements, teams));
+		id = addSimpleNextRadioNode(id, nodes, elements, "Team", "#Team", cyberTrackerIds);
+
+		cyberTrackerIds.clear();
+		cyberTrackerIds.add(noneElemId);
 		List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
-		id = addSimpleNextRadioNode(id, nodes, elements, "Station", "#Station", toCyberTrackerIds(elements, stations));
+		cyberTrackerIds.addAll(toCyberTrackerIds(elements, stations));
+		id = addSimpleNextRadioNode(id, nodes, elements, "Station", "#Station", cyberTrackerIds);
 
 		List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
 		id = addSimpleNextRadioNode(id, nodes, elements, "Mandate", "#Mandate", toCyberTrackerIds(elements, mandates));
@@ -223,7 +229,7 @@ public class PatrolScreensUtil {
 		nodes.add(node);
 		nodes.add(confirmNode);
 	}
-	
+
 	public static List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends SimpleListItem> items) {
 		List<String> labelValues = new ArrayList<String>();
 		List<String> tag0Values = new ArrayList<String>();
