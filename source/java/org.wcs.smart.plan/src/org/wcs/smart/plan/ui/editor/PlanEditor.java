@@ -336,20 +336,25 @@ public class PlanEditor extends EditorPart {
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		form.getBody().setLayout(new GridLayout(1, true));
-
-		Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.PlanEditor_Translate_Link, SWT.WRAP);
-		translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		translateLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
-						getEditorSite().getShell(), getPlan());
-				if (dialog.open() == IDialogConstants.OK_ID) {
-					PlanHibernateManager.savePlan(getPlan(), SmartHibernateManager.openSession()); //session is closed by savePlan(...)
-					PlanEventManager.getInstance().planChanged(0, getPlan());
+		if (canEdit()) {
+			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.PlanEditor_Translate_Link, SWT.WRAP);
+			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			translateLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
+							getEditorSite().getShell(), getPlan());
+					
+					if (dialog.open() == IDialogConstants.OK_ID) {
+						//session is closed by savePlan()
+						PlanHibernateManager.savePlan(getPlan(),
+								SmartHibernateManager.openSession()); 
+						PlanEventManager.getInstance()
+								.planChanged(0, getPlan());
+					}
 				}
-			}
-		});
+			});
+		}
 
 		final Section summary = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE );
 		summary.setLayout(new GridLayout(2, false));
