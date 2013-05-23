@@ -22,7 +22,6 @@
 package org.wcs.smart.intelligence.ui.patrol;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -48,7 +47,7 @@ import org.wcs.smart.intelligence.ui.IntelligenceViewFilter;
 
 /**
  * Composite to select intelligence.  This composite consists of two list:
- * a list of employees to select from and a list of employees selected.
+ * a list of intelligence records to select from and a list of selected records.
  * Users move items from one list to the other.
  * 
  * It also adds filtering functionality that allows to filter list of items to select from.
@@ -72,7 +71,6 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
 		super(parent, style);
 
 		setLabelProvider(new IntelligenceLabelProvider());
-		setItemComparator(new IntelligenceNameComparator());
 		setLabelAllText(Messages.PatrolMotivationComposite_Selector_All_Label);
 		setLabelSelectedText(Messages.PatrolMotivationComposite_Selector_Selected_Label);
 		
@@ -139,7 +137,6 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
     			i.setReceivedDate((Date)data[2]);
     			intelligences.add(i);
     		}
-    		Collections.sort(intelligences, new IntelligenceNameComparator());
     		return intelligences;
     	} finally {
     		s.close();

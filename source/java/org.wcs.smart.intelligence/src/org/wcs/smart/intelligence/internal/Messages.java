@@ -154,6 +154,10 @@ public class Messages extends NLS {
 
 	public static String IntelligenceFilterDialog_RelevantGroup_Label;
 
+	public static String IntelligenceFilterDialog_SortByGroup;
+
+	public static String IntelligenceFilterDialog_SortByLabel;
+
 	public static String IntelligenceFilterDialog_Title;
 
 	public static String IntelligenceFilteredSelectComposite_Filter_Tooltip;
@@ -252,7 +256,11 @@ public class Messages extends NLS {
 
     public static String IntelligenceSource_PatrolId_Label;
 
-    public static String IntelligenceWizard_Title;
+    public static String IntelligenceViewFilter_NameFilterName;
+
+	public static String IntelligenceViewFilter_ReceivedDateFilterName;
+
+	public static String IntelligenceWizard_Title;
 
 	public static String MotivationIntelligenceContribution_Motivated_Label;
 

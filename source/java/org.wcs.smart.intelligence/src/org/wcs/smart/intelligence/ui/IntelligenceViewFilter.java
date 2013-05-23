@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.internal.Messages;
 
 /**
  * Filter for the intelligence view.  Filters
@@ -37,6 +38,26 @@ import org.wcs.smart.hibernate.SmartDB;
  * @since 1.0.0
  */
 public class IntelligenceViewFilter {	
+	
+	public enum SortBy{
+		RECEIVED_DATE(Messages.IntelligenceViewFilter_ReceivedDateFilterName, "i.receivedDate DESC"), //$NON-NLS-1$
+		NAME(Messages.IntelligenceViewFilter_NameFilterName, "lbl.value"); //$NON-NLS-1$
+		
+		private String guiName;
+		private String sqlFilter;
+		
+		private SortBy(String guiName, String sqlFilter){
+			this.guiName = guiName;
+			this.sqlFilter = sqlFilter;
+		}
+		public String getGuiName(){
+			return this.guiName;
+		}
+		public String getSqlFilterField(){
+			return this.sqlFilter;
+		}
+	};
+	
 	private DateFilter receivedDateFilter;
 	private Date receivedDateStart;
 	private Date receivedDateEnd;
@@ -47,17 +68,20 @@ public class IntelligenceViewFilter {
 
 	private StringComparison nameComparison;
 	private String name;
+	
+	private SortBy sortBy = SortBy.RECEIVED_DATE;
 
 	public IntelligenceViewFilter() {
 		resetDefaults();
 	}
 	
 	public Query buildQuery(Session s) { 
+		boolean label = (nameComparison != null && name != null) || sortBy == SortBy.NAME;
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT i.uuid, i.name, i.receivedDate "); //$NON-NLS-1$
 		str.append("FROM Intelligence i "); //$NON-NLS-1$
-		if (nameComparison != null && name != null) {
+		if (label) {
 			str.append(", Label lbl "); //$NON-NLS-1$
 		}
 		str.append("WHERE i.conservationArea = :ca " ); //$NON-NLS-1$
@@ -73,12 +97,21 @@ public class IntelligenceViewFilter {
 		}
 		
 		//name
-		if (nameComparison != null && name != null) {
-		    str.append("AND  lbl.id.element.uuid = i.uuid AND lower(lbl.value) like :name AND lbl.id.language = :language"); //$NON-NLS-1$
+		if (label) {
+		    str.append("AND  lbl.id.element.uuid = i.uuid AND lbl.id.language = :language"); //$NON-NLS-1$
+		    if (nameComparison != null && name != null) {
+		    	str.append("AND lower(lbl.value) like :name");  //$NON-NLS-1$
+		    }
 		}
 		
-		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-
+		if (sortBy != null && sortBy.getSqlFilterField() != null){
+			str.append(" ORDER BY " + sortBy.getSqlFilterField()); //$NON-NLS-1$
+		}
+		
+		Query query = s.createQuery(str.toString());
+		
+		//---- parameters ----
+		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		//received date
 		if (receivedDateFilter != null) {
 			Date start = receivedDateFilter.getStartDate();
@@ -117,6 +150,8 @@ public class IntelligenceViewFilter {
 				query.setParameter("name", name.toLowerCase()); //$NON-NLS-1$
 				break;
 			}
+		}
+		if (label){
 			query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
 		}
 
@@ -236,6 +271,13 @@ public class IntelligenceViewFilter {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public void setSortByField(SortBy field){
+		this.sortBy = field;
+	}
+	public SortBy getSortByField(){
+		return this.sortBy;
 	}
 
 }
