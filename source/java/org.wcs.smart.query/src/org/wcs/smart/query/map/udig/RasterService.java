@@ -80,6 +80,7 @@ public class RasterService extends AbstractRasterService {
     public final static String URL_PARAM = "URL"; //$NON-NLS-1$
 
 	private static GeoTiffFormatFactorySpi factory = null;
+	
 	private String rasterFileName;
 	private File rasterFile;
 	private List<AbstractRasterGeoResource> geoResources = null;
@@ -131,6 +132,13 @@ public class RasterService extends AbstractRasterService {
         return factory;
     }
 
+    /**
+     * Disposes of GeoTiffFormatFactorySpi
+     */
+    private synchronized static void disposeFactory(){
+    	factory = null;
+    }
+    
 	/**
 	 * Creates a {@link File} for the raster associated to the query result.
 	 * 
@@ -358,7 +366,7 @@ public class RasterService extends AbstractRasterService {
 		}
     	
 		//remove service from catalog		
-		factory = null;
+		disposeFactory();
 		CatalogPlugin.getDefault().getLocalCatalog().remove(this);
     	
     	if (geoResources != null){
