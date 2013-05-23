@@ -265,7 +265,7 @@ public class GriddedFilterPanel {
 			rateFilter.addElements(copies);
 		}catch (Exception ex){
 			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);
-			if (session.getTransaction().isActive()){
+			if (session != null && session.getTransaction().isActive()){
 				session.getTransaction().rollback();
 			}
 		}finally{
