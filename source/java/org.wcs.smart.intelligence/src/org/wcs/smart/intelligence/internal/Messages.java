@@ -126,6 +126,10 @@ public class Messages extends NLS {
 
     public static String IntelligenceDesc_PageTitle;
 
+	public static String IntelligenceDescComposite_DescTooLong;
+
+	public static String IntelligenceDescComposite_NameTooLong;
+
 	public static String IntelligenceEditor_Edit_LinkLabel;
 
 	public static String IntelligenceEditor_FailOpenPatrol_Error;

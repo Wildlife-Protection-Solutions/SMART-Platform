@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.panel;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -69,7 +71,6 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         shortName = new Text(this, SWT.BORDER | SWT.LEFT);
-        shortName.setTextLimit(org.wcs.smart.ca.Label.MAX_LENGTH);
         shortName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -98,7 +99,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         descLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         description = new Text(this, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
-        description.setTextLimit(Intelligence.MAX_DESCRIPTION_LENTH);
+        
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
         gd.heightHint = 80;
         gd.widthHint = 50;
@@ -108,6 +109,7 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
         description.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				validate();
 				fireInputChangeListeners();
 			}
 		});
@@ -132,6 +134,14 @@ public class IntelligenceDescComposite extends IntelligenceComposite {
 	protected void validate() {
 		if (!isShortNameValid()) {
 			setErrorMessage(Messages.IntelligenceDesc_NameRequired_Error);
+			return;
+		}
+		if (shortName.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
+			setErrorMessage(MessageFormat.format(Messages.IntelligenceDescComposite_NameTooLong, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
+			return;
+		}
+		if (description.getText().length() > Intelligence.MAX_DESCRIPTION_LENTH){
+			setErrorMessage(MessageFormat.format(Messages.IntelligenceDescComposite_DescTooLong, new Object[]{Intelligence.MAX_DESCRIPTION_LENTH}));
 			return;
 		}
 		setErrorMessage(null);
