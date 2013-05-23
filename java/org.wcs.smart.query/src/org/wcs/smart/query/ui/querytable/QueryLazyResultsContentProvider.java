@@ -154,7 +154,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		//there are other ways to clear data but this is the fastest (0.3s on 250k items comparing to 10+ seconds with other approaches)
 		viewer.getTable().removeAll();
 		viewer.getTable().setItemCount(input.getItemCount());
-		QueryColumn sColumn = sortColumn == null ? null : sortColumn.getColumn();
+		QueryColumn sColumn = sortColumn.getColumn();
 		input.setSorting(sColumn, direction);
 		loadingIndexes.clear();
 		viewer.refresh(true);

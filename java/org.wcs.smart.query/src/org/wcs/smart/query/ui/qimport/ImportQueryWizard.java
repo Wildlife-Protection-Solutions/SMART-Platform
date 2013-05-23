@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui.qimport;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -134,7 +135,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						if (!qf.isRootFolder()){
 							query.setFolder(qf);
 							query.setIsShared(qf.getEmployee() == null);
-						}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
+						}else if (Arrays.equals(qf.getUuid(),IQueryHibernateManager.CA_QUERY_KEY)){
 							query.setIsShared(true);
 						}
 						

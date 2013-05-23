@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -123,7 +124,7 @@ public class QueryEditorUtils {
 					query.setFolder(qf);
 					query.setIsShared(qf.getEmployee() == null);
 				
-				}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
+				}else if (Arrays.equals(qf.getUuid(),IQueryHibernateManager.CA_QUERY_KEY)){
 					query.setIsShared(true);
 				}
 				//set the owner
@@ -210,7 +211,7 @@ public class QueryEditorUtils {
 						newQuery.setFolder(qf);
 						newQuery.setIsShared(qf.getEmployee() == null);
 					
-					}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
+					}else if (Arrays.equals(qf.getUuid(),IQueryHibernateManager.CA_QUERY_KEY)){
 						newQuery.setIsShared(true);
 					}
 					//set the owner

@@ -33,14 +33,13 @@ import org.wcs.smart.query.model.observation.FixedQueryColumn.FixedColumns;
 public class QueryColumnCache {
 
 	private static QueryColumnCache instance = null;
+	
 	public static QueryColumnCache getInstance(){
 		if (instance == null){
 			instance = new QueryColumnCache();
 		}
 		return instance;
 	}
-	
-	
 	
 	private QueryColumn[] queryColumns = null;
 	private QueryColumn[] patrolQueryColumns = null;
