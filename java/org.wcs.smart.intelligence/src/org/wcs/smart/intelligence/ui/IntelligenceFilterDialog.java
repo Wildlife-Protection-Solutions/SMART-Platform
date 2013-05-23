@@ -59,6 +59,7 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
 		setMessage(Messages.IntelligenceFilterDialog_Message);
+		setTitle("Intelligence Filter");
 		
 		Composite composite = new Composite((Composite) filter, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
