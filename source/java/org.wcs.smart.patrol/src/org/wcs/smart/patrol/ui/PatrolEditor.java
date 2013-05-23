@@ -23,11 +23,9 @@ package org.wcs.smart.patrol.ui;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -47,7 +45,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -55,6 +52,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.CombinedSelectionProvider;
@@ -191,27 +189,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(){
-		
-		//analyst users can never edit
-		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
-			return Messages.PatrolEditor_EditError_InsufficientPrivledges;
-		}
-		
-		if (ops.getEditTime() == null || ops.getEditTime() < 0){
-			return null;
-		}else if (patrol.getStartDate() == null){
-			return null;
-		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
-			Date d = new Date();
-			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
-			if (patrol.getStartDate().after(d)){
-				return null;
-			}else{
-				return MessageFormat.format(Messages.PatrolEditor_EditError_PatrolToOld, new Object[]{ops.getEditTime() }) ;
-			}
-		}else{
-			return null;
-		}
+		return PatrolManager.getInstance().canEdit(patrol, ops);
 	}
 	
 	public Patrol getPatrol(){

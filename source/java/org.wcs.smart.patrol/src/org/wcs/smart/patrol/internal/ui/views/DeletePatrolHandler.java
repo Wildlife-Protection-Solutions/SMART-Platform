@@ -83,7 +83,7 @@ public class DeletePatrolHandler extends AbstractHandler {
 									@Override
 									public void run() {
 										SmartPatrolPlugIn.displayLog(
-												MessageFormat.format(Messages.DeletePatrolHandler_DeletePatrol_ErrorMessage, new Object[]{in.getPatrolId()}),ex);
+												MessageFormat.format(Messages.DeletePatrolHandler_DeletePatrol_ErrorMessage, new Object[]{in.getPatrolId()}) + "\n\n" + ex.getLocalizedMessage(),ex); //$NON-NLS-1$
 									}});
 							}
 						}

@@ -22,17 +22,21 @@
 package org.wcs.smart.patrol;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolOptions;
 
 /**
  * Patrol Manager for deleting patrols.
@@ -63,6 +67,36 @@ public class PatrolManager {
 	
 	
 	/**
+	 * 
+	 * @param patrol the patrol to be edited
+	 * @param ops current patrol options {@link PatrolHibernateManager#getPatrolOptions(org.wcs.smart.ca.ConservationArea, Session)}
+	 * @return null if the patrol can be edited, otherwise a string
+	 * that described reason why can't be edited.
+	 */
+	public String canEdit(Patrol patrol, PatrolOptions ops){
+		
+		//analyst users can never edit
+		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
+			return Messages.PatrolEditor_EditError_InsufficientPrivledges;
+		}
+		if (ops.getEditTime() == null || ops.getEditTime() < 0){
+			return null;
+		}else if (patrol.getStartDate() == null){
+			return null;
+		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
+			Date d = new Date();
+			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
+			if (patrol.getStartDate().after(d)){
+				return null;
+			}else{
+				return MessageFormat.format(Messages.PatrolEditor_EditError_PatrolToOld, new Object[]{ops.getEditTime() }) ;
+			}
+		}else{
+			return null;
+		}
+	}
+	
+	/**
 	 * Deletes a given patrol.  Once the patrol is deleted
 	 * a patrol delete event is fired
 	 * 
@@ -79,39 +113,50 @@ public class PatrolManager {
 		
 		monitor.beginTask(Messages.PatrolManager_Progress_DeletingPatrol, work);
 		monitor.worked(0);
+		Patrol patrol = null;
 		Session session = HibernateManager.openSession();
-		Patrol patrol = (Patrol)session.load(Patrol.class, patrolUuid);
 		
-		session.beginTransaction();
 		try{
-			File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath());
-			
-			runDeleteHandlers(patrol, session, monitor);
-			monitor.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
-			session.delete(patrol);
-			session.getTransaction().commit();
-			monitor.worked(1);
-			
-			runAfterDeleteHandlers(patrol, monitor);
-			
-			if (fileStore.exists()){
-				monitor.subTask(Messages.PatrolManager_Progress_RemovingFileStore);
-				try{
-					FileUtils.forceDelete(fileStore);
-				}catch(Exception ex){
-					SmartPatrolPlugIn.displayLog(Messages.PatrolManager_Error_CouldNotDeleteFilestore + fileStore.getAbsolutePath(), ex);
-				}
+			patrol = (Patrol)session.load(Patrol.class, patrolUuid);
+		
+			// ensure can edit patrol 
+			String canEdit = canEdit(patrol, PatrolHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));
+			if (canEdit != null){
+				throw new Exception(canEdit);
 			}
-			monitor.worked(1);
+			session.beginTransaction();
+			try{
+				File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath());
+			
+				runDeleteHandlers(patrol, session, monitor);
+				monitor.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
+				session.delete(patrol);
+				session.getTransaction().commit();
+				monitor.worked(1);
+			
+				runAfterDeleteHandlers(patrol, monitor);
+			
+				if (fileStore.exists()){
+					monitor.subTask(Messages.PatrolManager_Progress_RemovingFileStore);
+					try{
+						FileUtils.forceDelete(fileStore);
+					}catch(Exception ex){
+						SmartPatrolPlugIn.displayLog(Messages.PatrolManager_Error_CouldNotDeleteFilestore + fileStore.getAbsolutePath(), ex);
+					}
+				}
+				monitor.worked(1);
 
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
+			}
 		}finally{
 			session.close();
 		}
-		
-		PatrolEventManager.getInstance().patrolDeleted(patrol);
+	
+		if (patrol != null){
+			PatrolEventManager.getInstance().patrolDeleted(patrol);
+		}
 	}
 	
 	/**
