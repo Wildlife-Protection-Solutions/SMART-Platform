@@ -49,7 +49,6 @@ public class GpsBabelPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
 	public static final String ID = "org.wcs.smart.preference.GpsBabel"; //$NON-NLS-1$
-	public static final String DEFAULT_VALUE = "./GPSBabel/gpsbabel.exe"; //$NON-NLS-1$
 
 	private FileFieldEditor gpsLoc;
 
@@ -115,7 +114,7 @@ public class GpsBabelPreferencePage extends PreferencePage implements
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		gpsLoc.setStringValue(DEFAULT_VALUE);
+		gpsLoc.setStringValue(SmartProperties.getInstance().getSystemDefaultValue(SmartProperties.PROP_GPS_BABEL));
 		performApply();
 		
 	

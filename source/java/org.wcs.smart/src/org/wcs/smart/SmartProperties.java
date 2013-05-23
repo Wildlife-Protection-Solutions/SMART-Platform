@@ -27,10 +27,6 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Properties;
 
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -109,6 +105,15 @@ public class SmartProperties {
 	}
 	
 	/**
+	 * 
+	 * @param key
+	 * @return default value for system preference
+	 */
+	public String getSystemDefaultValue(String key){
+		return SmartPlugIn.getDefault().getPreferenceStore().getDefaultString(key);
+	}
+	
+	/**
 	 * Reads the given key from the SMART properties file.
 	 * @param key
 	 * @return
@@ -126,19 +131,17 @@ public class SmartProperties {
 	}
 		
 	/**
-	 * Loads a given property from the property file.
+	 * Loads a given property from the SMART properties
 	 * @param key
 	 * @return
 	 */
 	private String getSystemProperty(String key){
-		IPreferencesService service = Platform.getPreferencesService();
-		String value = service.getString(SmartPlugIn.PLUGIN_ID, key, null, null);
-		return value;
+		return SmartPlugIn.getDefault().getPreferenceStore().getString(key);
 	}
 	
 	/**
 	 * Sets smart property.
-	 * <p>Only supports setting of PROP_GPS_BABEL and PLAN_DISTANCE_TO_COMPLETE.  All other properties
+	 * <p>Only supports setting of PROP_GPS_BABEL All other properties
 	 * not supported.</p>
 	 * 
 	 * @param key smart property key
@@ -147,9 +150,7 @@ public class SmartProperties {
 	 */
 	public void setKey(String key, String value) throws Exception{
 		if (key.equals(PROP_GPS_BABEL)){
-			IEclipsePreferences pref = ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID);
-			pref.put(SYSPROP_GPS_BABEL, value);
-			pref.flush();
+			SmartPlugIn.getDefault().getPreferenceStore().setValue(key, value);
 		}
 	}
 }
