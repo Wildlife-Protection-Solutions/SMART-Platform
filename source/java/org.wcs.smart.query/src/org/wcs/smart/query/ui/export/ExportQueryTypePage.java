@@ -100,6 +100,7 @@ public class ExportQueryTypePage extends WizardPage {
 				
 			}
 		});
+		setTitle(Messages.ExportQueryTypePage_PageTitle);
 		setMessage(Messages.ExportQueryTypePage_DialogMessage);
 		setControl(main);
 		setPageComplete(false);

@@ -131,6 +131,7 @@ public class ExportQueryLocationPage extends WizardPage {
 				}
 			}
 		});
+		setTitle(Messages.ExportQueryLocationPage_PageTitle);
 		setMessage(Messages.ExportQueryLocationPage_DialogMessage);
 		setPageComplete(false);
 		setControl(main);
