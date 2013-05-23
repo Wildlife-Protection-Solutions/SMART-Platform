@@ -70,6 +70,23 @@
                   mnemonic="%patrol.export.command.mnemonic"
                   style="push"
                   tooltip="%patrol.export.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.patrol.separator1"
