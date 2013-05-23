@@ -21,18 +21,24 @@
  */
 package org.wcs.smart.intelligence.ui;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.ui.IntelligenceViewFilter.SortBy;
 
 /**
  * Filter dialog for filtering intelligences displayed in the intelligence list view.
@@ -47,6 +53,7 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 	private DateFilterComposite receivedDateCmp;
 	private DateFilterComposite relevantDateCmp;
 	private StringFilterComposite nameCmp;
+	private ComboViewer sortByViewer;
 
 	public IntelligenceFilterDialog(Shell parentShell, IIntelligenceFilteringView view) {
 		super(parentShell, view);
@@ -91,6 +98,25 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 		Composite nameGrp = createGroupComposite(Messages.IntelligenceFilterDialog_NameGroup_Label, composite);
 		nameCmp = new StringFilterComposite(nameGrp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IntelligenceFilterDialog_NameValue_Label, "name")}); //$NON-NLS-1$
 
+		Composite grpSort = createGroupComposite(Messages.IntelligenceFilterDialog_SortByGroup, composite);
+		grpSort.setLayout(new GridLayout(2, false));
+		Label lbl = new Label(grpSort, SWT.NONE);
+		lbl.setText(Messages.IntelligenceFilterDialog_SortByLabel);
+		
+		sortByViewer = new ComboViewer(grpSort, SWT.READ_ONLY | SWT.DROP_DOWN);
+		sortByViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		sortByViewer.setContentProvider(ArrayContentProvider.getInstance());
+		sortByViewer.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelligenceViewFilter.SortBy){
+					return ((IntelligenceViewFilter.SortBy) element).getGuiName();
+				}
+				return super.getText(element);
+			}
+		});
+		sortByViewer.setInput(IntelligenceViewFilter.SortBy.values());
+		
 		updateControlsValues();
 		
 		return filter;
@@ -111,6 +137,8 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 				relevantDateCmp.getStartDateForModel(), relevantDateCmp.getEndDateForModel());
 		
 		currentFilter.setNameFilter(nameCmp.getComparisonForModel(), nameCmp.getFilterValueForModel());
+		
+		currentFilter.setSortByField((SortBy) ((IStructuredSelection)sortByViewer.getSelection()).iterator().next());
 	}
 
 	@Override
@@ -122,6 +150,8 @@ public class IntelligenceFilterDialog extends SmartFilterDialog {
 				currentFilter.getRelevantDateStart(), currentFilter.getRelevantDateEnd());
 		
 		nameCmp.applyState(currentFilter.getNameComparison(), currentFilter.getName(), null);
+		
+		sortByViewer.setSelection(new StructuredSelection(currentFilter.getSortByField()));
 	}
 
 	@Override

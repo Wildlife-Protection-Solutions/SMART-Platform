@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.intelligence.ui;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -226,7 +223,6 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 				Object[] data = (Object[]) obj;
 				inputData.add(new IntelligenceEditorInput((byte[])data[0], (String)data[1], (Date)data[2]));
 			}
-			Collections.sort(inputData, new IntelligenceEditorInputComparator());
 			monitor.internalWorked(0.8);
 			
 			Display.getDefault().asyncExec(new Runnable() {
@@ -252,15 +248,6 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 			}
 		}
    	
-    }
- 
-    private class IntelligenceEditorInputComparator implements Comparator<IntelligenceEditorInput> {
-		@Override
-		public int compare(IntelligenceEditorInput o1, IntelligenceEditorInput o2) {
-			String v1 = (o1.getName() != null) ? o1.getName() : ""; //$NON-NLS-1$
-			String v2 = (o2.getName() != null) ? o2.getName() : ""; //$NON-NLS-1$
-			return Collator.getInstance().compare(v1, v2);
-		}
     }
     
     private class IntelligencePartListener implements IPartListener2 {
