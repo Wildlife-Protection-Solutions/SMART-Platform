@@ -52,6 +52,7 @@ import org.eclipse.ui.IWorkbench;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 /**
  * A copy of the udig export map to image wizard that implements custom export 
  * options.  In particular this wizard will only export the current map
@@ -95,7 +96,9 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
                     monitor.beginTask(Messages.ExportMapToImageWizard_Progress_Exporting, 1);
                     
                     try {
-                    	exportMap(map, new SubProgressMonitor(monitor, 3));
+                    	if (!exportMap(map, new SubProgressMonitor(monitor, 3))){
+                    		errors.add(null);
+                    	}
                     } catch (RenderException e) {
                            Object[] args = new Object[]{map.getName(), e.getLocalizedMessage()};
                             String pattern = Messages.ExportMapToImageWizard_RenderError;
@@ -124,9 +127,11 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
         }
 
         if (!errors.isEmpty()) {
-            ((WizardPage) getContainer().getCurrentPage())
+        	if (errors.iterator().next() != null){
+        		((WizardPage) getContainer().getCurrentPage())
                     .setErrorMessage(Messages.ExportMapToImageWizard_Error2
                             + errors.iterator().next());
+        	}
             return false;
         }
         mapSelectorPage.saveLastSelection();
@@ -134,7 +139,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
         return true;
 	}
 
-	private void exportMap(IMap map, IProgressMonitor monitor)
+	private boolean exportMap(IMap map, IProgressMonitor monitor)
 			throws RenderException, IOException, TransformException,
 			NoninvertibleTransformException {
 
@@ -142,7 +147,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 		monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_Prepare, new Object[] { map.getName() }));
 		File destination = determineDestinationFile(map);
 		if (destination == null) {
-			return;
+			return false;
 		}
 
 		int width = mapSelectorPage.getWidth();
@@ -179,10 +184,27 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
 
 		monitor.done();
+		return true;
 	}
 
 	private File determineDestinationFile(IMap map) {
 		File exportDir = mapSelectorPage.getOutputDir();
+		if (!exportDir.exists()){
+			boolean createDir = MessageDialog.openQuestion(getContainer()
+					.getShell(), Messages.ExportMapToImageWizard_OverwriteDialogTitle,MessageFormat.format(Messages.ExportMapToImageWizard_OutputDirDoesNotExist, new Object[]{exportDir.toString()}));
+			if (!createDir){
+				return null;
+			}else{
+				if (!SmartUtils.createDirectory(exportDir)){
+					return null;
+				}
+			}
+		}
+		if (!exportDir.isDirectory()){
+			MessageDialog.openError(getContainer().getShell(), Messages.ExportMapToImageWizard_OverwriteDialogTitle, Messages.ExportMapToImageWizard_InvalidOutputDir + exportDir.toString());
+			return null;			
+		}
+		
 		String name = URLUtils.cleanFilename(mapSelectorPage.getFileName());
 		File destination = addSuffix(new File(exportDir, name));
 		if (destination.exists()) {

@@ -53,6 +53,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
@@ -98,7 +100,7 @@ public class ExportMapWizardPage extends WizardPage {
 	private Shell temporaryParent;
 	private Control lastFormat;
 	
-	private IMap map;
+	private IMap defaultMap;
 	private Button btnMaintainBounds;
 	private Button btnMaintainScale;
 	private Spinner opWidth;
@@ -121,24 +123,24 @@ public class ExportMapWizardPage extends WizardPage {
 	 * @param selection
 	 */
 	public void setSelection(IStructuredSelection selection) {
-		map = null;
+		defaultMap = null;
 		for (@SuppressWarnings("unchecked")
 		Iterator<Object> iterator = selection.iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
 			if (x instanceof IMap) {
-				map = (IMap) x;
+				defaultMap = (IMap) x;
 				break;
 			}
 		}
 		
-		if (map == null) {
+		if (defaultMap == null) {
 			Collection<? extends IMap> visibleMaps = ApplicationGIS.getVisibleMaps();
 			IMap activeMap = ApplicationGIS.getActiveMap();
 			if (activeMap != ApplicationGIS.NO_MAP && visibleMaps.contains(activeMap)) {
-				map = activeMap;
+				defaultMap = activeMap;
 			}else{
 				if (!visibleMaps.isEmpty()){
-					map = visibleMaps.iterator().next();
+					defaultMap = visibleMaps.iterator().next();
 				}
 			}
 		}
@@ -180,7 +182,7 @@ public class ExportMapWizardPage extends WizardPage {
 		if (getSelectedFormat().useStandardDimensionControls()) {
 			return opWidth.getSelection();
 		} else {
-			return getSelectedFormat().getWidth(map.getViewportModel().getWidth(), map.getViewportModel().getHeight());
+			return getSelectedFormat().getWidth(getMap().getViewportModel().getWidth(), getMap().getViewportModel().getHeight());
 		}
 	}
 
@@ -192,6 +194,7 @@ public class ExportMapWizardPage extends WizardPage {
 	 * @return output image height
 	 */
 	public int getHeight() {
+		IMap map = getMap();
 		double mapwidth = map.getViewportModel().getWidth();
 		double mapheight = map.getViewportModel().getHeight();
 		int height;
@@ -214,6 +217,7 @@ public class ExportMapWizardPage extends WizardPage {
 	 * @return
 	 */
 	public BoundsStrategy getBoundsStrategy(){
+		IMap map = getMap();
 		if (btnMaintainBounds.getSelection()){
 			return new BoundsStrategy(map.getViewportModel().getBounds());
 			
@@ -245,7 +249,7 @@ public class ExportMapWizardPage extends WizardPage {
         formatOpComp.setLayout(new FillLayout());
         
         init();
-        
+        validate();
         setControl(comp);
     }
     
@@ -308,13 +312,24 @@ public class ExportMapWizardPage extends WizardPage {
          
          
          cmbMap.setInput(ApplicationGIS.getOpenMaps());
-         if (map != null){
-        	 cmbMap.setSelection(new StructuredSelection(map));
-         }else{
-         	setErrorMessage(Messages.ExportMapWizardPage_NoMapFoundErrorMsg);
+         if (defaultMap != null){
+        	 cmbMap.setSelection(new StructuredSelection(defaultMap));
          }
     }
     
+    private void validate(){
+    	String error = null;
+    	if (fileName.getText().trim().isEmpty()){
+    		error = Messages.ExportMapWizardPage_InvalidFileName;
+    	}
+    	if (destDir.getText().trim().isEmpty()){
+    		error = Messages.ExportMapWizardPage_InvalidDestinationFolder;
+    	}
+    	if (cmbMap.getSelection().isEmpty()){
+    		error = Messages.ExportMapWizardPage_NoMapFoundErrorMsg;
+    	}
+    	setErrorMessage(error);
+    }
     /**
      * Saves selections to dialog settings store.
      */
@@ -346,6 +361,12 @@ public class ExportMapWizardPage extends WizardPage {
     	
     	fileName = new Text(parent, SWT.BORDER);
     	fileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    	fileName.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				validate();
+			}
+		});
     }
     
     
@@ -488,6 +509,7 @@ public class ExportMapWizardPage extends WizardPage {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fileName.setText(getMap().getName());
+				validate();
 			}
 		});
     }
@@ -508,6 +530,13 @@ public class ExportMapWizardPage extends WizardPage {
         } else {
         	destDir.setText(Platform.getLocation().toOSString());
         }
+        destDir.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				validate();
+				
+			}
+		});
         
         Button browse = new Button(comp, SWT.PUSH);
         browse.setText(Messages.ExportMapWizardPage_BrowseButton);

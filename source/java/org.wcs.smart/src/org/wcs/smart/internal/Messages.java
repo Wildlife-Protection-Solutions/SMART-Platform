@@ -545,6 +545,8 @@ public class Messages extends NLS {
 	public static String ExportMapToImageWizard_ChooseFilenameMessage;
 	public static String ExportMapToImageWizard_Error;
 	public static String ExportMapToImageWizard_Error2;
+	public static String ExportMapToImageWizard_InvalidOutputDir;
+	public static String ExportMapToImageWizard_OutputDirDoesNotExist;
 	public static String ExportMapToImageWizard_OverwriteDialogMessage;
 	public static String ExportMapToImageWizard_OverwriteDialogTitle;
 	public static String ExportMapToImageWizard_OverwriteError;
@@ -569,6 +571,8 @@ public class Messages extends NLS {
 	public static String ExportMapWizardPage_Filename;
 	public static String ExportMapWizardPage_HeightLabel;
 	public static String ExportMapWizardPage_ImgFormatLabel;
+	public static String ExportMapWizardPage_InvalidDestinationFolder;
+	public static String ExportMapWizardPage_InvalidFileName;
 	public static String ExportMapWizardPage_NoMapFoundErrorMsg;
 	public static String ExportMapWizardPage_PageDescription;
 	public static String ExportMapWizardPage_PageTitle;
