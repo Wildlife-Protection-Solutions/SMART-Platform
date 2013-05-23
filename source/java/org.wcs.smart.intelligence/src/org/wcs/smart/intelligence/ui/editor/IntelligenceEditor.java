@@ -184,19 +184,21 @@ public class IntelligenceEditor extends EditorPart {
 
 		form.getBody().setLayout(new GridLayout(1, true));
 
-		Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.IntelligenceEditor_Translate_Link, SWT.WRAP);
-		translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		translateLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
+		if (canEdit()){
+			Hyperlink translateLink = toolkit.createHyperlink(form.getBody(), Messages.IntelligenceEditor_Translate_Link, SWT.WRAP);
+			translateLink.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			translateLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(
 						getEditorSite().getShell(), getIntelligence());
-				if (dialog.open() == IDialogConstants.OK_ID) {
-					IntelligenceHibernateManager.saveIntelligence(getIntelligence());
-					IntelligenceEventManager.getInstance().intelligenceChanged(0, getIntelligence());
+					if (dialog.open() == IDialogConstants.OK_ID) {
+						IntelligenceHibernateManager.saveIntelligence(getIntelligence());
+						IntelligenceEventManager.getInstance().intelligenceChanged(0, getIntelligence());
+					}
 				}
-			}
-		});
+			});
+		}
 
 		
 		Composite content = toolkit.createComposite(form.getBody(), SWT.NONE);
