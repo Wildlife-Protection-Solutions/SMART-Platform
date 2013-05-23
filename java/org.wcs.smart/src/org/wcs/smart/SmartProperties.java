@@ -56,12 +56,11 @@ public class SmartProperties {
 	public static final String PROP_FILESTORE = "FILESTORE_LOC"; //$NON-NLS-1$
 	public static final String PROP_GPS_BABEL = "GPSBABEL"; //$NON-NLS-1$
 	public static final String PROP_BACKUP_DIR = "BACKUP"; //$NON-NLS-1$
-	public static final String PROP_PLAN_DISTANCE_TO_COMPLETE = "PLANDISTANCETOCOMPLETE"; //$NON-NLS-1$
 	
 	private static final String SYSPROP_GPS_BABEL = "GPSBABEL"; //$NON-NLS-1$
 	private static final String SYSPROP_DATASTORE = "DATASTORE_DIR"; //$NON-NLS-1$
 	private static final String SYSPROP_BACKUPDIR = "BACKUP_DIR"; //$NON-NLS-1$
-	private static final String SYSPROP_PLAN_DISTANCE_TO_COMPLETE = "PLAN_DISTANCE_TO_COMPLETE"; //$NON-NLS-1$
+	
 	
 	//subloction of filestore within the data directory
 	private static final String FILESTORE_DIR_NAME = "filestore" + File.separator; //$NON-NLS-1$
@@ -103,8 +102,6 @@ public class SmartProperties {
 			return getSystemProperty(SYSPROP_GPS_BABEL);
 		}else if (key.equals(PROP_BACKUP_DIR)){
 			return getSystemProperty(SYSPROP_BACKUPDIR);
-		}else if (key.equals(PROP_PLAN_DISTANCE_TO_COMPLETE)){
-			return getSystemProperty(SYSPROP_PLAN_DISTANCE_TO_COMPLETE);
 		}else if (key.equals(DB_VERSION_KEY)){
 			return getSmartProperties(key);
 		}
@@ -152,11 +149,6 @@ public class SmartProperties {
 		if (key.equals(PROP_GPS_BABEL)){
 			IEclipsePreferences pref = ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID);
 			pref.put(SYSPROP_GPS_BABEL, value);
-			pref.flush();
-		}
-		if (key.equals(PROP_PLAN_DISTANCE_TO_COMPLETE)){
-			IEclipsePreferences pref = ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID);
-			pref.put(SYSPROP_PLAN_DISTANCE_TO_COMPLETE, value);
 			pref.flush();
 		}
 	}
