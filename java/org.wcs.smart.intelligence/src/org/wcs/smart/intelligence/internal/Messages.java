@@ -148,6 +148,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceFilterDialog_NameValue_Label;
 
+	public static String IntelligenceFilterDialog_PageTitle;
+
 	public static String IntelligenceFilterDialog_ReceivedGroup_Label;
 
 	public static String IntelligenceFilterDialog_RelevantGroup_Label;
