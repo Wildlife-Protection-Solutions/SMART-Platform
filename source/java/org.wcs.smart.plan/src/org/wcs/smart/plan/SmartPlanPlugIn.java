@@ -1,8 +1,10 @@
 package org.wcs.smart.plan;
 
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
@@ -62,6 +64,16 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String STATUS_INCOMPLETE = "org.wsc.smart.patrol.STATUS_INCOMPLETE"; //$NON-NLS-1$
 	
+	/**
+	 * Preference key for plan distance to completion
+	 */
+	public static final String SYSPROP_PLAN_DISTANCE_TO_COMPLETE = "PLAN_DISTANCE_TO_COMPLETE"; //$NON-NLS-1$
+	
+	/**
+	 * Default value for distance to complete
+	 */
+	private static final int DISTANCE_COMPLETE_DEFAULT_VALUE = 250;
+	
 	private PlanCaDeleteHandler deleteCa;
 	
 	private IPatrolDeleteHandler deletePatrol =  new IPatrolDeleteHandler() {
@@ -94,6 +106,9 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		deleteCa = new PlanCaDeleteHandler();
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCa,PlanCaDeleteHandler.EXECUTE_ORDER );
 		PatrolManager.getInstance().addDeleteHandler(deletePatrol,0 );
+		
+		// init default preferences
+		DefaultScope.INSTANCE.getNode(getBundle().getSymbolicName()).putInt(SYSPROP_PLAN_DISTANCE_TO_COMPLETE, DISTANCE_COMPLETE_DEFAULT_VALUE);
 	}
 
 	/*
@@ -139,12 +154,10 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 			@Override
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.SmartPlanPlugIn_Error, message);
-			}
-			
-		});
-		
+			}			
+		});		
 	}
-	
+
 	/**
 	 * Displays an error message to the user, logs the error and
 	 * exits the program with an error code of 1.
@@ -171,4 +184,12 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		reg.put(STATUS_INCOMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_incomplete.png")); //$NON-NLS-1$
     }
 	
+	/**
+	 * 
+	 * @param key
+	 * @return default preference value for given key as integer
+	 */
+	public int getDefaultPreferenceInt(String key){
+		return DefaultScope.INSTANCE.getNode(getBundle().getSymbolicName()).getInt(SYSPROP_PLAN_DISTANCE_TO_COMPLETE, 0);
+	}
 }

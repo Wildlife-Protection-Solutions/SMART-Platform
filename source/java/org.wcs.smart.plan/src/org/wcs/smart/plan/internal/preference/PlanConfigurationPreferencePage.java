@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.SmartProperties;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 
 /**
@@ -50,7 +50,7 @@ import org.wcs.smart.plan.internal.Messages;
 public class PlanConfigurationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String ID = "org.wcs.smart.preference.PlanConfiguration"; //$NON-NLS-1$
-	public static final int DEFAULT_VALUE = 250;
+	
 	
 	private Text txtDistanceToComplete;
     private ControlDecoration distancDecoration;
@@ -77,7 +77,7 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 
 	@Override
 	protected Control createContents(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
+		final Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 
 		Label distanceLabel = new Label(main, SWT.NONE);
@@ -89,6 +89,15 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalIndent = 5;
 		txtDistanceToComplete.setLayoutData(gd);
+		
+		
+		distancDecoration = new ControlDecoration(txtDistanceToComplete, SWT.LEFT);
+		distancDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		distancDecoration.setShowHover(true);
+		distancDecoration.setDescriptionText(Messages.PlanConfigurationPreferencePage_DistanceToComplete_Decoration_Message);
+		//distancDecoration.hide();
+
 		txtDistanceToComplete.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -100,19 +109,9 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 			}
 		});
 		
-		distancDecoration = new ControlDecoration(txtDistanceToComplete, SWT.LEFT);
-		distancDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		distancDecoration.setShowHover(true);
-		distancDecoration.setDescriptionText(Messages.PlanConfigurationPreferencePage_DistanceToComplete_Decoration_Message);
-		distancDecoration.hide();
-
 		//init with values
-		String propValue = SmartProperties.getInstance().getProperty(SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE);
-		if (propValue == null) {
-			propValue = ""; //$NON-NLS-1$
-		}
-		txtDistanceToComplete.setText(propValue);
+		int propValue = SmartPlanPlugIn.getDefault().getPreferenceStore().getInt(SmartPlanPlugIn.SYSPROP_PLAN_DISTANCE_TO_COMPLETE);
+		txtDistanceToComplete.setText(String.valueOf(propValue));
 		
 		return main;
 	}
@@ -125,7 +124,7 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		txtDistanceToComplete.setText(String.valueOf(DEFAULT_VALUE));
+		txtDistanceToComplete.setText(String.valueOf(SmartPlanPlugIn.getDefault().getDefaultPreferenceInt(SmartPlanPlugIn.SYSPROP_PLAN_DISTANCE_TO_COMPLETE)));
 		performApply();
 	}
 
@@ -136,15 +135,15 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 			return false;
 		}
 
-		String value = txtDistanceToComplete.getText();
-		String propValue = SmartProperties.getInstance().getProperty(SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE);
-		if (propValue != null && propValue.equals(value)) {
+		int newValue = Integer.parseInt(txtDistanceToComplete.getText());
+		
+		int oldValue = SmartPlanPlugIn.getDefault().getPreferenceStore().getInt(SmartPlanPlugIn.SYSPROP_PLAN_DISTANCE_TO_COMPLETE);
+		if (oldValue == newValue) {
 			return true;
 		}
 
 		try {
-			SmartProperties.getInstance().setKey(
-					SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE, value);
+			SmartPlanPlugIn.getDefault().getPreferenceStore().setValue(SmartPlanPlugIn.SYSPROP_PLAN_DISTANCE_TO_COMPLETE, newValue);
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(getShell(),
 					Messages.PlanConfigurationPreferencePage_CannotUpdate_Error + ex.getMessage(), ex);

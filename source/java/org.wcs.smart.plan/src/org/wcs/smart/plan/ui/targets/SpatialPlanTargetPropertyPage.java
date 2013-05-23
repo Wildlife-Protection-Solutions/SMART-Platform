@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.SmartProperties;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -133,7 +133,7 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 
 		txtDistanceToComplete = new Text(center, SWT.BORDER);
 		//init with default value BEFORE adding any listeners
-		txtDistanceToComplete.setText(getDefaultDistanceToComplete());
+		txtDistanceToComplete.setText(String.valueOf(getDefaultDistanceToComplete()));
 		txtDistanceToComplete.setTextLimit(32);
 		txtDistanceToComplete.setLayoutData(createGridDataWithIndent());
 		txtDistanceToComplete.addModifyListener(new ModifyListener() {
@@ -302,9 +302,9 @@ public class SpatialPlanTargetPropertyPage implements ITargetPage, ILocationPoin
 		return isTargetNameValid() && isDistanceToCompleteValid() && isLocationPointsValid();
 	}
 
-	private String getDefaultDistanceToComplete() {
-		String propValue = SmartProperties.getInstance().getProperty(SmartProperties.PROP_PLAN_DISTANCE_TO_COMPLETE);
-		return propValue != null ? propValue : ""; //$NON-NLS-1$
+	private int getDefaultDistanceToComplete() {
+		int propValue = SmartPlanPlugIn.getDefault().getPreferenceStore().getInt(SmartPlanPlugIn.SYSPROP_PLAN_DISTANCE_TO_COMPLETE);
+		return propValue;
 	}
 	
 	@Override
