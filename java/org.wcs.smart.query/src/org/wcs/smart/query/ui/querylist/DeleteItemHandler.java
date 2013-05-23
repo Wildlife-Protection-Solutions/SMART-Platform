@@ -64,11 +64,12 @@ public class DeleteItemHandler extends AbstractHandler {
 		}
 		
 		IStructuredSelection selection = (IStructuredSelection)thisSelection;
-		QueryListViewContentProvider contentProvider = ((QueryListView)HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID)).getQueryListContentProvider();
+		
 		
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();			
 			if (o instanceof QueryFolder){
+				QueryListViewContentProvider contentProvider = ((QueryListView)HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID)).getQueryListContentProvider();
 				deleteFolder((QueryFolder)o, contentProvider);
 			}else if (o instanceof Query){
 				deleteQuery((Query)o, event);

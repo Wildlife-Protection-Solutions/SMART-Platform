@@ -41,7 +41,9 @@ public class RunQueryHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		QueryDefView view = (QueryDefView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
-		view.runQuery();
+		if (view != null){
+			view.runQuery();
+		}
 		return null;
 	}
 

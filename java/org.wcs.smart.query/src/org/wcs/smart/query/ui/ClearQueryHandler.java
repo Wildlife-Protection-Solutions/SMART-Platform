@@ -41,7 +41,9 @@ public class ClearQueryHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {		
 		QueryDefView view = (QueryDefView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
-		view.clearQuery();
+		if(view != null){
+			view.clearQuery();
+		}
 		return null;
 	}
 
