@@ -234,6 +234,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 * Performs the login task.
 	 */
 	private void handleButtonOKWidgetSelected() {
+		enableControls(false);
 		try {
 			ConservationArea ca = (ConservationArea) ((IStructuredSelection) cmvConservationArea.getSelection()).getFirstElement();
 			String username = txtUserName.getText();
@@ -251,8 +252,14 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				progressLabel.setText(Messages.InteractiveSplashHandler_Error_AuthenticationFailure);
 			}
 		} catch (Exception ex) {
+			
 			SmartPlugIn.displayLog(null, Messages.InteractiveSplashHandler_Error_LoginFailed, ex);
+		}finally{
+			if (!fAuthenticated){
+				enableControls(true);
+			}
 		}
+	
 	}
 	
 	/**
