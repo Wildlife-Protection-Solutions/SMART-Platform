@@ -23,6 +23,8 @@ package org.wcs.smart.query.ui.export;
 
 import java.io.File;
 
+import net.refractions.udig.catalog.URLUtils;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -63,7 +65,7 @@ public class ExportQueryLocationPage extends WizardPage {
 	 * Initializes the values in the query wizard
 	 */
 	public void initValues(){
-		String location = getWizard().getDialogSettings().get(LAST_DIR_KEY);
+		String location = getWizard().getDialogSettings() != null ? getWizard().getDialogSettings().get(LAST_DIR_KEY) : null;
 		if (location == null){
 			location = System.getProperty("user.home"); //$NON-NLS-1$
 		}
@@ -71,7 +73,7 @@ public class ExportQueryLocationPage extends WizardPage {
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		IQueryExporter exporter = wizard.getQueryExporter();
 		
-		String initFile = location + File.separator + wizard.getQueryName() + "." ; //$NON-NLS-1$
+		String initFile = location + File.separator + URLUtils.cleanFilename(wizard.getQueryName()) + "." ; //$NON-NLS-1$
 		if (exporter == null){
 			initFile += ".txt"; //$NON-NLS-1$
 		}else{
@@ -130,7 +132,7 @@ public class ExportQueryLocationPage extends WizardPage {
 				}
 			}
 		});
-		setTitle(Messages.ExportQueryLocationPage_PageTitle);
+		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQueryName()); //$NON-NLS-1$
 		setMessage(Messages.ExportQueryLocationPage_DialogMessage);
 		setPageComplete(false);
 		setControl(main);

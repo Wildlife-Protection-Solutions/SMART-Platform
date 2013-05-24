@@ -33,10 +33,12 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.export.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Wizard for exporting query results.
@@ -64,6 +66,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	public ExportQueryWizard(Query query) {
 		setWindowTitle(Messages.ExportQueryWizard_WindowTitle);
+		setDialogSettings(QueryPlugIn.getDefault().getDialogSettings());
 		this.query = query;
 	}
 
@@ -120,8 +123,21 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 							hasError = true;
 							return;
 						}
-						
 						File outputFile = page2.getFile();
+						
+						if (!outputFile.getParentFile().exists()){
+							boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputFile.getParent()}));
+							if (!create){
+								hasError = true;
+								return;
+							}else{
+								if (!SmartUtils.createDirectory(outputFile.getParentFile())){
+									hasError = true;
+									return;
+								}
+							}
+						}
+						
 						if (outputFile.exists()){
 							if (!MessageDialog.openConfirm(getShell(), 
 									Messages.ExportQueryWizard_OverwriteDialogTitle, 
@@ -132,7 +148,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 						}
 //						exporter.setData(data,  columns, outputFile, query);
 						exporter.export(query, outputFile, monitor);
-							
+						
+						page1.performFinish();
 						page2.performFinish();
 						
 						if (monitor.isCanceled()){
