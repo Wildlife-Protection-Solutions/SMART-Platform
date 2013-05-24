@@ -154,7 +154,6 @@ public class CyberTrackerExporter {
 		List<Node> result = new ArrayList<Node>();
 		CyberTrackerId startId = keyMap.get(category);
 		CyberTrackerId id = startId;
-//		for (Attribute attribute : attrList) {
 		int attrListLastIndex = attrList.size() - 1;
 		for (int i = 0; i <= attrListLastIndex; i++) {
 			Attribute attribute = attrList.get(i);
@@ -184,9 +183,6 @@ public class CyberTrackerExporter {
 			}
 			case TREE:
 			{
-				//TODO: test without "Species"
-//				if (attribute.getName().equals("Species"))
-//					break;
 				//NOTE: This is a special case as we might have multiple ending screens!!!
 				String nodeId = id.getNodeId();
 				id = new CyberTrackerId(); //this id will be used for next screen
@@ -198,8 +194,7 @@ public class CyberTrackerExporter {
 			}
 			case BOOLEAN:
 			{
-				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, "Yes", "No", "Undefined");
-				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), ids, resultElementId.getItemId()));
+				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), ElementsUtil.booleanElements(elements), resultElementId.getItemId()));
 				break;
 			}
 			default:
