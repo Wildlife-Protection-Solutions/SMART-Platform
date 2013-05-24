@@ -153,7 +153,9 @@ public class PatrolLegDay {
 			this.tracks.get(0).setPatrolLegDay(null);
 			this.tracks.remove(0);
 		}
-		this.tracks.add(t);
+		if (t != null){
+			this.tracks.add(t);
+		}
 	}
 	
 	@Transient

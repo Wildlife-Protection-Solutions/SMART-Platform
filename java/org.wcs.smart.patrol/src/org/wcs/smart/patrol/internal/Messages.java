@@ -148,9 +148,10 @@ public class Messages extends NLS {
 	public static String GPSDataImport_WaypointName;
 	public static String GPSDataImport_WaypointProgress_ReadingGpx;
 	public static String ImportFromWaypointWizardPage_OpGenerateAllTracks;
-	public static String ImportFromWaypointWizardPage_OpGenerateDayTracks;
+	public static String ImportFromWaypointWizardPage_OpGenerateDayTracks1;
 	public static String ImportFromWaypointWizardPage_PageMessage;
 	public static String ImportFromWaypointWizardPage_PageName;
+	public static String ImportFromWaypointWizardPage_PageTitle;
 	public static String ImportGpsDataWizard_DialogTitle;
 	public static String ImportGpsDataWizard_File_WarningNoneFound;
 	public static String ImportGpsDataWizard_GPS_WarningNoneFound;
@@ -166,14 +167,15 @@ public class Messages extends NLS {
 	public static String ImportGpxWizardPage_ImportSingleDayOp;
 	public static String ImportGpxWizardPage_PageMessage;
 	public static String ImportGpxWizardPage_PageName;
+	public static String ImportGpxWizardPage_PageTitle;
 	public static String ImportGpxWizardPage_RemoveButtonText;
 	public static String ImportGPSWizardPage_DeviceType_Label;
 	public static String ImportGPSWizardPage_DialogMessage;
 	public static String ImportGPSWizardPage_Error_CouldNotReadDevices;
-	public static String ImportGPSWizardPage_ImportAllOption;
-	public static String ImportGPSWizardPage_OImportOnlyCurrentDayOp;
 	public static String ImportGPSWizardPage_PageName;
-	public static String ImportGPSWizardPage_SelectPointsToImportOp;
+	public static String ImportGPSWizardPage_PageTitle;
+	public static String ImportOptionsComposite_ImportAllWarning;
+	public static String ImportOptionsComposite_LegPrefix;
 	public static String ImportPatrolDialog_DialogMessage;
 	public static String ImportPatrolDialog_DialogText;
 	public static String ImportPatrolDialog_DialogTitle;
@@ -187,6 +189,7 @@ public class Messages extends NLS {
 	public static String ImportPatrolHandler_Progress_ProcessingFile;
 	public static String ImportWpSelectWizardPage_DeSelectAll;
 	public static String ImportWpSelectWizardPage_PageName;
+	public static String ImportWpSelectWizardPage_PageTitle;
 	public static String ImportWpSelectWizardPage_SelectAll;
 	public static String ImportWpTypeWizardPage_GenerateWaypointsOp;
 	public static String ImportWpTypeWizardPage_GPSOp;
@@ -194,6 +197,7 @@ public class Messages extends NLS {
 	public static String ImportWpTypeWizardPage_ImportFromLabel;
 	public static String ImportWpTypeWizardPage_PageMessage;
 	public static String ImportWpTypeWizardPage_PageName;
+	public static String ImportWpTypeWizardPage_PageTitle;
 	public static String LeaderPilotComposite_Error_LeaderRequired;
 	public static String LeaderPilotComposite_Error_PilotRequired;
 	public static String LeaderPilotComposite_LeaderLabel;

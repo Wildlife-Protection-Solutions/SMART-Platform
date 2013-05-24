@@ -21,19 +21,16 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
-import java.text.DateFormat;
-import java.text.MessageFormat;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 
 /**
  * Wizard page shown when user chooses to import tracks
@@ -49,11 +46,8 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 	 */
 	public static final String PAGE_NAME = Messages.ImportFromWaypointWizardPage_PageName;
 
-	private Button opDate;
-	private Button opAll;
-
-	private boolean importAll;
-	
+	private ImportOptionsComposite ops;
+		
 	/**
 	 * @param pageName
 	 */
@@ -69,7 +63,7 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 	 * are to be selected from a list.
 	 */
 	public boolean getImportAll(){
-		return importAll;
+		return ops.getImportOption() == ImportOption.ALL;
 	}
 	
 	/* (non-Javadoc)
@@ -85,37 +79,24 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
-		
-		Composite ops = new Composite(center, SWT.NONE);
+		ImportGpsDataWizard w = ((ImportGpsDataWizard)getWizard());
+		ops = new ImportOptionsComposite(center, 
+				w.getCurrentDate(),
+				w.getType(),
+				new ImportOption[]{ImportOption.ALL, ImportOption.DATE},
+				new String[]{Messages.ImportFromWaypointWizardPage_OpGenerateAllTracks,
+			Messages.ImportFromWaypointWizardPage_OpGenerateDayTracks1});
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		ops.setLayout(new GridLayout(1, false));
-		
-		this.importAll = true;
-		opAll = new Button(ops, SWT.RADIO);
-		opAll.setText(Messages.ImportFromWaypointWizardPage_OpGenerateAllTracks);
-		opAll.setSelection(true);
-		opAll.addSelectionListener(new SelectionAdapter(){
+		ops.addListener(SWT.Selection, new Listener(){
 			@Override
-			public void widgetSelected(SelectionEvent e){
+			public void handleEvent(Event event) {
 				updateComplete();
-				importAll = true;
-			}
-		});
+			}});
 		
-		opDate = new Button(ops, SWT.RADIO);
-		opDate.setText(MessageFormat.format(
-			Messages.ImportFromWaypointWizardPage_OpGenerateDayTracks,
-			new Object[]{DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
-		opDate.setSelection(false);
-		opDate.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateComplete();
-				importAll = false;
-			}
-		});
+		
 		
 		updateComplete();
+		super.setTitle(Messages.ImportFromWaypointWizardPage_PageTitle);
 		super.setMessage(Messages.ImportFromWaypointWizardPage_PageMessage);
 		super.setControl(comp);
 	}
@@ -126,12 +107,6 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 		getWizard().getContainer().updateButtons();		
 	}
 
-	public boolean importAll(){
-		if (opAll.getSelection()){
-			return true;
-		}
-		return false;
-	}
 	
 	@Override
     public IWizardPage getNextPage() {

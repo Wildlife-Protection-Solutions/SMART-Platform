@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.File;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,9 +41,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -60,17 +62,13 @@ public class ImportGpxWizardPage extends WizardPage {
 	 */
 	public static final String PAGE_NAME = Messages.ImportGpxWizardPage_PageName;
 
-	private Button opSelect;
-	private Button opDate;
-	private Button opAll;
+	private ImportOptionsComposite ops ;
 	
 	private Button btnRemove;
 	private Button btnAdd;
 
 	private ListViewer lstFiles;
 	private WritableList files = new WritableList();
-	
-	private boolean importAll;
 	
 	private ImportWpSelectWizardPage nextPage = null;
 	/**
@@ -88,8 +86,9 @@ public class ImportGpxWizardPage extends WizardPage {
 	 * are to be selected from a list.
 	 */
 	public boolean getImportAll(){
-		return importAll;
+		return ops.getImportOption() == ImportOption.ALL;
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -120,7 +119,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginTop = gl.marginBottom = gl.marginHeight = 0;
 		buttons.setLayout(gl);		
-		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
+		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		btnAdd = new Button(buttons, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -162,44 +161,19 @@ public class ImportGpxWizardPage extends WizardPage {
 			}	
 		});
 		
-		Composite ops = new Composite(center, SWT.NONE);
-		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
-		ops.setLayout(new GridLayout(1, false));
-		
-		this.importAll = true;
-		opAll = new Button(ops, SWT.RADIO);
-		opAll.setText(Messages.ImportGpxWizardPage_ImportAllOp);
-		opAll.setSelection(true);
-		opAll.addSelectionListener(new SelectionAdapter(){
+		ops = new ImportOptionsComposite(center, ((ImportGpsDataWizard)getWizard()).getCurrentDate(), ((ImportGpsDataWizard)getWizard()).getType());
+		ops.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		ops.addListener(SWT.Selection, new Listener(){
+
 			@Override
-			public void widgetSelected(SelectionEvent e){
+			public void handleEvent(Event event) {
 				updateComplete();
-				importAll = true;
-			}
-		});
+			}});
 		
-		opDate = new Button(ops, SWT.RADIO);
-		opDate.setText(MessageFormat.format(Messages.ImportGpxWizardPage_ImportSingleDayOp, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}) );
-		opDate.setSelection(false);
-		opDate.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateComplete();
-				importAll = false;
-			}
-		});
 		
-		opSelect = new Button(ops, SWT.RADIO);
-		opSelect.setText(MessageFormat.format(Messages.ImportGpxWizardPage_ImportSelectionOp, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
-		opSelect.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateComplete();
-				importAll = false;
-			}
-		});
 		setPageComplete(false);
 		
+		super.setTitle(Messages.ImportGpxWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(MessageFormat.format(Messages.ImportGpxWizardPage_PageMessage, new Object[]{ ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() }));
 		super.setControl(comp);
 	}
@@ -211,7 +185,7 @@ public class ImportGpxWizardPage extends WizardPage {
 		}
 		
 		setPageComplete(true);
-		if (opDate.getSelection() || opAll.getSelection() ){
+		if (ops.getImportOption() == ImportOption.DATE || ops.getImportOption() == ImportOption.ALL){
 			((ImportGpsDataWizard)getWizard()).setCanFinish(true);
 		}else{
 			((ImportGpsDataWizard)getWizard()).setCanFinish(false);
@@ -230,20 +204,13 @@ public class ImportGpxWizardPage extends WizardPage {
 		return fs;
 	}
 
-	public boolean importAll(){
-		if (opSelect.getSelection()){
-			return true;
-		}
-		return false;
-	}
-	
 	
 	@Override
     public IWizardPage getNextPage() {
-		if (opDate.getSelection() || opAll.getSelection() ){
+		if (ops.getImportOption() == ImportOption.DATE || ops.getImportOption() == ImportOption.ALL ){
 			//not more pages
 			return null;
-		}else if (opSelect.getSelection()){
+		}else if (ops.getImportOption() == ImportOption.SELECT){
 			if (nextPage == null){
 				nextPage = new ImportWpSelectWizardPage((ImportGpsDataWizard) getWizard());
 			}

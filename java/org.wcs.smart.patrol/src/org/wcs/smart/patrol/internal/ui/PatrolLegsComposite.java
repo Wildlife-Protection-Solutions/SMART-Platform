@@ -21,18 +21,20 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -81,7 +83,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private PatrolLegTable patrolLegViewer;
 	private Patrol patrol;
 	
-	private WritableList legs;
+	private ArrayList<PatrolLeg> legs;
 	
 	private List<PatrolTransportType> typeOps ; 
 	private List<Employee> allEmployes; 
@@ -234,11 +236,12 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		patrolLegViewer.getTable().addSelectionChangedListener(new ISelectionChangedListener() {			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnChangeTransport.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty());
-				btnAddLeg.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty());
-				btnSplit.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty());
-				btnRemoveLeg.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty() && legs.size() > 1);
-				btnEditLeg.setEnabled(! ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty());
+				boolean isEmpty =  ((IStructuredSelection)patrolLegViewer.getSelection()).isEmpty();
+				btnChangeTransport.setEnabled(!isEmpty);
+				btnAddLeg.setEnabled(!isEmpty);
+				btnSplit.setEnabled(!isEmpty);
+				btnRemoveLeg.setEnabled(!isEmpty && legs.size() > 1);
+				btnEditLeg.setEnabled(!isEmpty);
 			}
 		});
 		
@@ -256,6 +259,16 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	}
 
 	private void sortAndRefresh(){
+		Collections.sort(legs, new Comparator<PatrolLeg>() {
+			@Override
+			public int compare(PatrolLeg o1, PatrolLeg o2) {
+				int x =  o1.getStartDate().compareTo(o2.getStartDate());
+				if (x == 0){
+					return Collator.getInstance().compare(o1.getId(), o2.getId());
+				}
+				return x;
+			}
+		});
 		patrolLegViewer.refresh();
 	}
 	
@@ -278,7 +291,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	public void setValues(Patrol p, Session session) {
 		this.session = session;
 		this.patrol = p;
-		this.legs = new WritableList();
+		this.legs = new ArrayList<PatrolLeg>();
 		
 		//clone the legs
 		for (PatrolLeg leg : p.getLegs()){
@@ -334,7 +347,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		patrolLegViewer.showPilotColum(patrol.hasPilot());
-		
+		sortAndRefresh();
 	}
 
 	/**

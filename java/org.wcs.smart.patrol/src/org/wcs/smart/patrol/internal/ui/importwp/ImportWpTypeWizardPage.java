@@ -97,6 +97,7 @@ public class ImportWpTypeWizardPage extends WizardPage {
 			opWaypoint.setText(Messages.ImportWpTypeWizardPage_GenerateWaypointsOp);
 		}
 		
+		super.setTitle(Messages.ImportWpTypeWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(MessageFormat.format(Messages.ImportWpTypeWizardPage_PageMessage, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase()}));
 		super.setControl(comp);
 	}

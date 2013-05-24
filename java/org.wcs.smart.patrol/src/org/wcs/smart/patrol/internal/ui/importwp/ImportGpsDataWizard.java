@@ -26,7 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,6 +43,7 @@ import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 
 /**
  * Wizard for importing data from GPS Device
@@ -63,7 +63,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	
 	private boolean completedOK = false;
 	private boolean canFinish = false;
-	private Date currentDay;
+	private PatrolLegDay currentDay;
 	
 	//a track or a list of waypoints
 	private Object importedData = null;
@@ -72,7 +72,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	/**
 	 * Creates a new wizard.
 	 */
-	public ImportGpsDataWizard(Date currentDay, GPSDataImport.ImportType type) {
+	public ImportGpsDataWizard(PatrolLegDay currentDay, GPSDataImport.ImportType type) {
 		setWindowTitle(MessageFormat.format(Messages.ImportGpsDataWizard_DialogTitle, new Object[]{type.guiName}));
 		this.currentDay = currentDay;
 		this.type = type;
@@ -87,7 +87,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 		this.canFinish = canFinish;
 	}
 	
-	public Date getCurrentDate(){
+	public PatrolLegDay getCurrentDate(){
 		return this.currentDay;
 	}
 	
@@ -145,7 +145,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 						if (allData){
 							importedData = (GPSDataImport.convertGpx(filenames, null, Collections.singleton(type), monitor)).get(type);
 						}else{
-							importedData = (GPSDataImport.convertGpx(filenames, currentDay, Collections.singleton(type), monitor)).get(type);
+							importedData = (GPSDataImport.convertGpx(filenames, currentDay.getDate(), Collections.singleton(type), monitor)).get(type);
 						}
 					}
 				});
@@ -169,7 +169,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 							if (allData){
 								importedData = ( GPSDataImport.importGpsData(deviceType, null, Collections.singleton(type), monitor) ).get(type);
 							}else{
-								importedData = ( GPSDataImport.importGpsData(deviceType, currentDay, Collections.singleton(type), monitor) ).get(type);
+								importedData = ( GPSDataImport.importGpsData(deviceType, currentDay.getDate(), Collections.singleton(type), monitor) ).get(type);
 							}
 						}catch(final Exception ex){
 							Display.getDefault().syncExec(new Runnable() {
@@ -197,7 +197,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			}
 			
 		}else if (lastPage instanceof ImportFromWaypointWizardPage){
-			allData = ((ImportFromWaypointWizardPage)lastPage).importAll();
+			allData = ((ImportFromWaypointWizardPage)lastPage).getImportAll();
 			importedData = CREATE_FROM_WAYPOINTS;
 		}
 		

@@ -753,7 +753,7 @@ public class PatrolLegDayInputComposite {
 	
 	private void showImportTrackWizard(){
 		//Show Create Patrol Wizard
-		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate.getDate(), GPSDataImport.ImportType.TRACK);		
+		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.TRACK);		
 
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 		try {
@@ -785,8 +785,14 @@ public class PatrolLegDayInputComposite {
 									for (Iterator<Entry<PatrolLegDay, Track>> iterator = tracks.entrySet().iterator(); iterator
 											.hasNext();) {
 										Entry<PatrolLegDay, Track> type = (Entry<PatrolLegDay, Track>) iterator.next();
-										type.getKey().setTrack(type.getValue());
-										type.getValue().setPatrolLegDay(type.getKey());
+										PatrolLegDay pld = type.getKey();
+										Track t = type.getValue();
+										if (t != null){
+											pld.setTrack(t);
+											t.setPatrolLegDay(pld);
+										}else{;
+											pld.setTrack(null);
+										}
 										
 										count++;
 									}
@@ -814,17 +820,24 @@ public class PatrolLegDayInputComposite {
 									if (track != null){
 										track.setPatrolLegDay(patrolLegDate);
 										patrolLegDate.setTrack(track);
+										editor.getPatrolEditor().save(patrolLegDate);
+										
 										MessageDialog.openInformation(editor.getSite().getShell(),
 												IMPORT_OK_DIALOG_TITLE, 
 												Messages.PatrolLegDayInputComposite_TrackSingleImportSuccessful_DailogMessage);
-
-										editor.getPatrolEditor().save(patrolLegDate);
+										
 										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
 										
 									}else{
+										//remove track
+										patrolLegDate.setTrack(null);
+										editor.getPatrolEditor().save(patrolLegDate);
+										
 										MessageDialog.openInformation(editor.getSite().getShell(), 
 												Messages.PatrolLegDayInputComposite_ImportTrackError_DialogTitle, 
 												Messages.PatrolLegDayInputComposite_ImportTrackError_DialogMessage);
+										
+										PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDate);
 									}
 									
 									
@@ -848,7 +861,7 @@ public class PatrolLegDayInputComposite {
 
 	private void showImportWaypointWizard(){
 		//Show Create Patrol Wizard
-		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate.getDate(), GPSDataImport.ImportType.WAYPOINT);		
+		final ImportGpsDataWizard wizard = new ImportGpsDataWizard(this.patrolLegDate, GPSDataImport.ImportType.WAYPOINT);		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
