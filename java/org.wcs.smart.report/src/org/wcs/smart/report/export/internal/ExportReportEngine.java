@@ -241,7 +241,7 @@ public class ExportReportEngine {
 			}
 		}
 		if (service == null){
-			System.out.println("NOT SUPPORTED");
+			System.out.println("NOT SUPPORTED"); //$NON-NLS-1$
 			//ERROR
 			return;
 		}
@@ -249,7 +249,7 @@ public class ExportReportEngine {
 		File reportFile = 	report.getFullReportFilename();;
 	
 		if (reportFile == null ){
-			throw new Exception("Cannot run report.");
+			throw new Exception("Cannot run report."); //$NON-NLS-1$
 		}
 		IReportEngine engine = ReportManager.getReportEngine();
 		
@@ -260,7 +260,7 @@ public class ExportReportEngine {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		options.setOutputStream(out);
-		options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf");
+		options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
 		
 		task.setRenderOption(options);
 		task.setParameterValues(reportParameters);
@@ -278,11 +278,11 @@ public class ExportReportEngine {
 		
 		DocPrintJob job = service.createPrintJob();
 		DocFlavor[] supported = service.getSupportedDocFlavors();
-		System.out.println("SUPPORTED---------------");
+		System.out.println("SUPPORTED---------------"); //$NON-NLS-1$
 		for(int i = 0; i < supported.length; i ++){
 			System.out.println(supported[i]);
 		}
-		System.out.println("SUPPORTED---------------");
+		System.out.println("SUPPORTED---------------"); //$NON-NLS-1$
 		
 		Doc doc = new SimpleDoc(pin, DocFlavor.INPUT_STREAM.PDF, null);
 		job.print(doc, pras);

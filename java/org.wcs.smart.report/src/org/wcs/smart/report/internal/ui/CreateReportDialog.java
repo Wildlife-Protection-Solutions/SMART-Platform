@@ -130,6 +130,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 		getShell().setText(Messages.CreateReportDialog_Dialog_Title);
 
 		setMessage(Messages.CreateReportDialog_Dialog_Message);
+		setTitle(Messages.CreateReportDialog_PageTitle);
 
 		Composite main = new Composite(parent, SWT.NONE);
 
