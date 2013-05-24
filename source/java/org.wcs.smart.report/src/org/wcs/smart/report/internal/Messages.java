@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String CreateReportDialog_Error_InvalidReportName;
 	public static String CreateReportDialog_Error_ReportNameBlank;
 	public static String CreateReportDialog_LoadingLabel;
+	public static String CreateReportDialog_PageTitle;
 	public static String CreateReportDialog_ReportNameLabel;
 	public static String CreateReportDialog_SaveLocationLabel;
 	public static String DeleteReportItemHandler_Confirm_DialogMessage;
@@ -36,9 +37,9 @@ public class Messages extends NLS {
 	public static String ExportReportDialog_AllFilesFilterName;
 	public static String ExportReportDialog_BrowseButton;
 	public static String ExportReportDialog_DialogMessage;
-	public static String ExportReportDialog_DialogTitleA;
+	public static String ExportReportDialog_DialogTitleA1;
 	public static String ExportReportDialog_DialogTitleB;
-	public static String ExportReportDialog_DirDoesNotExist;
+	public static String ExportReportDialog_DirDoesNotExist1;
 	public static String ExportReportDialog_DirectoryDialogMessage;
 	public static String ExportReportDialog_DirectoryDialogTitle;
 	public static String ExportReportDialog_DirOverwirtten;
@@ -48,6 +49,7 @@ public class Messages extends NLS {
 	public static String ExportReportDialog_FileOverwritten;
 	public static String ExportReportDialog_FormatLabel;
 	public static String ExportReportDialog_InvalidDir;
+	public static String ExportReportDialog_MultiExportPageTitle;
 	public static String ExportReportDialog_OutputDirectoryLabel;
 	public static String ExportReportDialog_OutputFileLabel;
 	public static String ExportReportEngine_Error_GatheringParameters;

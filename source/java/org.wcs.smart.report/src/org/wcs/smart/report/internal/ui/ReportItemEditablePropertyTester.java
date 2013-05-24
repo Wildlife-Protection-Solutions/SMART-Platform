@@ -127,6 +127,9 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 			}
 			
 			Report r = (Report)receiver;
+			if (operator.equals(EXPORT)){
+				return true;
+			}
 			if (r.getShared()){
 				if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
 						SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER

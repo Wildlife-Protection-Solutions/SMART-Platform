@@ -22,7 +22,10 @@
 package org.wcs.smart.report.internal.ui.export;
 
 import java.io.File;
+import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -52,6 +55,7 @@ import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.internal.ExportReportEngine;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for exporting reports to file.
@@ -122,9 +126,12 @@ public class ExportReportDialog extends TitleAreaDialog {
 	@Override
 	protected Composite createDialogArea(Composite parent) {
 		if (!multipleFiles){
-			getShell().setText(Messages.ExportReportDialog_DialogTitleA + this.report.getName());
+			getShell().setText(Messages.ExportReportDialog_DialogTitleA1);
+			setTitle(Messages.ExportReportDialog_DialogTitleA1 + ": " + this.report.getName()); //$NON-NLS-1$
+			
 		}else{
 			getShell().setText(Messages.ExportReportDialog_DialogTitleB);
+			setTitle(Messages.ExportReportDialog_MultiExportPageTitle);
 		}
 		setMessage(Messages.ExportReportDialog_DialogMessage);
 		
@@ -146,6 +153,12 @@ public class ExportReportDialog extends TitleAreaDialog {
 			}
 		});
 		IExportFormat[] formats= ExportReportEngine.getSupportedExportFormats();
+		Arrays.sort(formats, new Comparator<IExportFormat>() {
+			@Override
+			public int compare(IExportFormat o1, IExportFormat o2) {
+				return Collator.getInstance().compare(o1.getName(), o2.getName());
+			}
+		});
 		cmbEmitters.setInput(formats);
 		
 		if (!this.multipleFiles) {
@@ -196,22 +209,16 @@ public class ExportReportDialog extends TitleAreaDialog {
 		
 		cmbEmitters.setSelection(new StructuredSelection(defaultExport));
 		
+		String location = settings.get(DIRECTORY_SETTING);
+		if (location == null){
+			location = System.getProperty("user.home"); //$NON-NLS-1$
+		}
 		if (this.multipleFiles){
-			
-			x = settings.get(DIRECTORY_SETTING);
-			if (x != null){
-				txtFileName.setText(x);	
-			}
+			txtFileName.setText(location);
 			addDirectoryListener(btnBrowse);
 		}else{
-			x = settings.get(DIRECTORY_SETTING);
-			if (x == null){
-				x = ""; //$NON-NLS-1$
-			}else{
-				x += File.separator;
-			}			
-			x += ExportReportEngine.getOutputFileName(report, null, defaultExport.getFileExtension()).getName(); 
-			txtFileName.setText(x);
+			location += File.separator + ExportReportEngine.getOutputFileName(report, null, defaultExport.getFileExtension()).getName();
+			txtFileName.setText(location);
 			addFileListner(btnBrowse);
 		}
 		return comp;
@@ -259,26 +266,26 @@ public class ExportReportDialog extends TitleAreaDialog {
 	
 	@Override
 	/**
-	 * Validsate the input before continuing
+	 * Validate the input before continuing
 	 */
 	protected void okPressed(){
 		File dir = new File(txtFileName.getText());
+		
 		if (multipleFiles){
-			if (!dir.isDirectory()){
-				MessageDialog.openError(getShell(), Messages.ExportReportDialog_Error_DialogTitle, Messages.ExportReportDialog_InvalidDir);
-			}
-			if (!dir.exists()){
-				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
-						MessageFormat.format(Messages.ExportReportDialog_DirDoesNotExist, new Object[]{txtFileName.getText()}))){
-					return;
-				}
-			}else{
+			if (dir.exists() && dir.isDirectory()){
+			
 				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
 						MessageFormat.format(Messages.ExportReportDialog_DirOverwirtten, new Object[]{txtFileName.getText()}))){
 					return;
 				}
 			}
+			if (!checkDirectory(dir)){
+				return;
+			}
 		}else {
+			if (!checkDirectory(dir.getParentFile())){
+				return;
+			}
 			if (dir.exists()){
 				if (!MessageDialog.openConfirm(getShell(), EXPORT_DIALOGITTLE, 
 					MessageFormat.format(Messages.ExportReportDialog_FileOverwritten, new Object[]{txtFileName.getText()}))){
@@ -289,6 +296,24 @@ public class ExportReportDialog extends TitleAreaDialog {
 		
 		updateValues();
 		super.okPressed();
+	}
+	
+	private boolean checkDirectory(File dir){
+		if (!dir.exists()){
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGITTLE, 
+					MessageFormat.format(Messages.ExportReportDialog_DirDoesNotExist1, new Object[]{dir.toString()}))){
+				return false;
+			}else{
+				if (!SmartUtils.createDirectory(dir)){
+					return false;
+				}
+			}
+		}
+		if (!dir.isDirectory()){
+			MessageDialog.openError(getShell(), Messages.ExportReportDialog_Error_DialogTitle, Messages.ExportReportDialog_InvalidDir);
+			return false;
+		}
+		return true;
 	}
 	
 	private void updateValues(){

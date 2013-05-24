@@ -562,6 +562,10 @@
                   style="push"
                   tooltip="%report.menu.importreport.command.tooltip">
             </command>
+            <command
+                  commandId="org.wcs.smart.report.exportReport"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.report.separator3"
                   visible="true">
