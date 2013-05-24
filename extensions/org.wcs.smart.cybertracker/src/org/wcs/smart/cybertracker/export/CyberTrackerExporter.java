@@ -38,6 +38,7 @@ import javax.xml.bind.Marshaller;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -45,6 +46,8 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.reports.Items;
+import org.wcs.smart.cybertracker.model.reports.Reports;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
@@ -111,20 +114,23 @@ public class CyberTrackerExporter {
 			outE.close();
 		}
 		
-		//TEST
-//		List<Items.Item> columnItems = new ArrayList<Items.Item>();
-//		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date"));
-//		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time"));
+		List<Items.Item> columnItems = new ArrayList<Items.Item>();
+		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date"));
+		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time"));
 //		columnItems.add(ReportsObjectFactory.createColumnItem("{1C640427-4F44-4796-97A6-368469342111}", "#PatrolType"));
 //		columnItems.add(ReportsObjectFactory.createColumnItem("{1C640427-4F44-4796-97A6-368469342115}", "#PatrolTransport"));
-//		Reports reports = ReportsObjectFactory.createReports(columnItems);
-//		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream("c:\\dev\\Reports.xml")); //$NON-NLS-1$
-//		try {
-//			writeDataModel(reports, outR, Reports.class);
-//		} finally {
-//			outR.close();
-//		}
-		//TEST
+		for (Attribute attribute : attr2resultId.keySet()) {
+			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
+			Integer outMode = AttributeType.TEXT.equals(attribute.getType()) || AttributeType.NUMERIC.equals(attribute.getType()) ? null : ReportsObjectFactory.TAG_0_OUTPUT_MODE;
+			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), "#"+attribute.getKeyId(), outMode));
+		}
+		Reports reports = ReportsObjectFactory.createReports(columnItems);
+		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Reports.xml")); //$NON-NLS-1$
+		try {
+			writeDataModel(reports, outR, Reports.class);
+		} finally {
+			outR.close();
+		}
 		
 		monitor.done();
 		return file;

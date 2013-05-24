@@ -36,15 +36,21 @@ import org.wcs.smart.cybertracker.model.reports.Table;
  * @since 1.0.0
  */
 public class ReportsObjectFactory {
+	
+	public static final Integer TAG_0_OUTPUT_MODE = 2;
 
 	public static Items.Item createColumnItem(String sourceGuid, String columnName) {
+		return createColumnItem(sourceGuid, columnName, null);
+	}
+	
+	public static Items.Item createColumnItem(String sourceGuid, String columnName, Integer outputMode) {
 		CyberTrackerId id = new CyberTrackerId(); //just some id to be used for this item
 		Items.Item item = new Items.Item();
 		item.setId(id.getNodeId());
 		item.setName(columnName);
 		item.setSourceGuid(sourceGuid);
 		item.setChecked("True"); //$NON-NLS-1$
-//		item.setOutputMode(2);
+		item.setOutputMode(outputMode);
 		return item;
 	}
 	
