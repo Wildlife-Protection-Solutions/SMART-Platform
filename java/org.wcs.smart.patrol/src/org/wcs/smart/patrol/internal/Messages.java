@@ -159,6 +159,8 @@ public class Messages extends NLS {
 	public static String ImportGpsDataWizard_GPXFileImportError;
 	public static String ImportGpsDataWizard_ImportDialog_Title;
 	public static String ImportGpsDataWizard_Progress_ImportingGPS;
+	public static String ImportGpsDataWizard_TrackWarningOverwriteAll;
+	public static String ImportGpsDataWizard_TrackWarningOverwriteNew;
 	public static String ImportGpxWizardPage_AllFilesFilterName;
 	public static String ImportGpxWizardPage_FilesLabel;
 	public static String ImportGpxWizardPage_GPXFileFilterName;

@@ -43,6 +43,7 @@ import org.wcs.smart.patrol.gpx.WptType;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 
 /**
@@ -188,6 +189,7 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			}
 		
 		}else if (lastPage instanceof ImportWpSelectWizardPage ){
+			// ---- IMPORT SELECTED WAYPOINTS/TRACKS ----
 			allData = false;
 			//select data to import
 			if (type == GPSDataImport.ImportType.WAYPOINT){
@@ -197,8 +199,43 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 			}
 			
 		}else if (lastPage instanceof ImportFromWaypointWizardPage){
+			// ---- GENERATE TRACKS FROM WAYPOINTS ----
 			allData = ((ImportFromWaypointWizardPage)lastPage).getImportAll();
 			importedData = CREATE_FROM_WAYPOINTS;
+		}
+		
+		//validation
+		if (type == ImportType.TRACK){
+			if (allData){
+				boolean hasTracks = false;
+				for(PatrolLeg pl : getCurrentDate().getPatrolLeg().getPatrol().getLegs()){
+					for (PatrolLegDay pld : pl.getPatrolLegDays()){
+						if (pld.getTrack() != null){
+							hasTracks = true;
+							break;
+						}
+					}
+				}
+				if (hasTracks){
+					String warn = ""; //$NON-NLS-1$
+					if  (lastPage instanceof ImportWpSelectWizardPage ){
+						warn = Messages.ImportGpsDataWizard_TrackWarningOverwriteAll;
+					}else{
+						warn = Messages.ImportGpsDataWizard_TrackWarningOverwriteNew;
+					}
+					boolean cont= MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, warn);
+					if (!cont){
+						return false;
+					}
+				}
+			}else{
+				if (getCurrentDate().getTrack() != null){
+					boolean cont= MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, Messages.PatrolLegDayInputComposite_SetTrackDialog_Message);
+					if (!cont){
+						return false;
+					}
+				}
+			}
 		}
 		
 		if (importedData  == null || (importedData instanceof Collection &&  ((Collection)importedData).size() == 0 )){
