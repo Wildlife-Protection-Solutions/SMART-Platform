@@ -88,7 +88,6 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 		super.init(site, input);
 		getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 		ReportEventManager.getInstance().addReportListener(this);
-		
 	}
 
 	//TODO: this is a hack to name the
@@ -144,6 +143,8 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 	public void addPages(){
 		super.addPages();
 		super.getModel().addListener(nameChangeListener);
+		
+		super.setPartName(getEditorInputLocal().getReport().getName() + " [" + getEditorInputLocal().getReport().getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	
