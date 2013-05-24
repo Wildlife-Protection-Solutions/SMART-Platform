@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +45,6 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
-import org.wcs.smart.cybertracker.model.reports.Items;
-import org.wcs.smart.cybertracker.model.reports.Reports;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
@@ -62,6 +61,7 @@ public class CyberTrackerExporter {
 	
 	private static CyberTrackerId rootId;
 	private static Elements elements;
+	private static Map<Attribute, CyberTrackerId> attr2resultId = new HashMap<Attribute, CyberTrackerUtil.CyberTrackerId>();
 
 	public static File export(File file, IProgressMonitor monitor) throws Exception {
 		Session session = HibernateManager.openSession();
@@ -72,6 +72,7 @@ public class CyberTrackerExporter {
 		} finally {
 			elements = null;
 			rootId = null;
+			attr2resultId.clear();
 			session.getTransaction().rollback();
 			session.close();
 		}
@@ -109,6 +110,21 @@ public class CyberTrackerExporter {
 			outE.close();
 		}
 		
+		//TEST
+//		List<Items.Item> columnItems = new ArrayList<Items.Item>();
+//		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date"));
+//		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time"));
+//		columnItems.add(ReportsObjectFactory.createColumnItem("{1C640427-4F44-4796-97A6-368469342111}", "#PatrolType"));
+//		columnItems.add(ReportsObjectFactory.createColumnItem("{1C640427-4F44-4796-97A6-368469342115}", "#PatrolTransport"));
+//		Reports reports = ReportsObjectFactory.createReports(columnItems);
+//		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream("c:\\dev\\Reports.xml")); //$NON-NLS-1$
+//		try {
+//			writeDataModel(reports, outR, Reports.class);
+//		} finally {
+//			outR.close();
+//		}
+		//TEST
+		
 		monitor.done();
 		return file;
 	}
@@ -141,7 +157,7 @@ public class CyberTrackerExporter {
 		int attrListLastIndex = attrList.size() - 1;
 		for (int i = 0; i <= attrListLastIndex; i++) {
 			Attribute attribute = attrList.get(i);
-			CyberTrackerId resultElementId = new CyberTrackerId(); //id for result element in attribute screen node
+			CyberTrackerId resultElementId = getAttributeResultElementId(attribute);//new CyberTrackerId(); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
 				result.add(ScreensObjectFactory.createNodeNumber(id.getNodeId(), attribute.getName(), resultElementId.getItemId()));
@@ -187,7 +203,7 @@ public class CyberTrackerExporter {
 				throw new IllegalArgumentException("Unknown attribute type"); //$NON-NLS-1$
 			}
 
-			ElementsUtil.addElementsItem(elements, "#"+attribute.getName(), resultElementId.getItemId()); //$NON-NLS-1$
+//			ElementsUtil.addElementsItem(elements, "#"+attribute.getName(), resultElementId.getItemId()); //$NON-NLS-1$
 			//tracking navigation for non-tree attributes (tree attributes are handle separately)
 			if (!Attribute.AttributeType.TREE.equals(attribute.getType())) {
 				//handle only cases for non-tree attributes, as all the have single ending screen
@@ -317,5 +333,15 @@ public class CyberTrackerExporter {
 		for (CategoryAttribute ca: cat.getAttributes()){
 			ca.getAttribute().getName();
 		}	
-	}	
+	}
+
+	private static CyberTrackerId getAttributeResultElementId(Attribute attribute) {
+		CyberTrackerId id = attr2resultId.get(attribute);
+		if (id == null) {
+			id = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, "#"+attribute.getKeyId(), id.getItemId()); //$NON-NLS-1$
+			attr2resultId.put(attribute, id);
+		}
+		return id;
+	}
 }
