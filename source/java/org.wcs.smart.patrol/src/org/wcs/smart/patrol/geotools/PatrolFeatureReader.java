@@ -133,7 +133,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 		Object data[] = new Object[7];
 		data[0] = ftype.getName() + "." + waypoint.getId() + "." + SmartUtils.encodeHex(waypoint.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[1] = waypoint.getId();
-		data[2] = waypoint.getPatrolLegDay().getDate();
+		data[2] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
 		data[3] = waypoint.getTime();
 		if (waypoint.getObservations() == null || waypoint.getObservations().size() == 0){
 			data[4] = ""; //$NON-NLS-1$

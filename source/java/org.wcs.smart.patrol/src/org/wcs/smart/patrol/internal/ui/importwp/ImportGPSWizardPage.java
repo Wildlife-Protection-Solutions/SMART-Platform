@@ -22,8 +22,6 @@
 package org.wcs.smart.patrol.internal.ui.importwp;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -36,15 +34,13 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.patrol.internal.ui.importwp.gpsbabel.GPSBabel;
 
 /**
@@ -60,21 +56,18 @@ public class ImportGPSWizardPage extends WizardPage {
 	public static final String PAGE_NAME = Messages.ImportGPSWizardPage_PageName;
 
 	private static final String ERROR_COULD_NOT_READ_DEVICES = Messages.ImportGPSWizardPage_Error_CouldNotReadDevices;
-	private Button opAll;
-	private Button opSelect;
-	private Button opDate;
-	
+
+	private ImportOptionsComposite ops;
 	private ComboViewer gpsViewer;
 	private ImportWpSelectWizardPage nextPage;
 	
-	private boolean importAll = false;
+
 	/**
 	 * @param pageName
 	 */
 	protected ImportGPSWizardPage( ImportGpsDataWizard wizard ) {
 		super(PAGE_NAME);
 		wizard.addPage(this);
-		this.importAll = false;
 	}
 
 	/**
@@ -85,7 +78,7 @@ public class ImportGPSWizardPage extends WizardPage {
 	 * are to be selected from a list.
 	 */
 	public boolean getImportAll(){
-		return importAll;
+		return ops.getImportOption() == ImportOption.ALL;
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -109,54 +102,10 @@ public class ImportGPSWizardPage extends WizardPage {
 		gpsViewer.setContentProvider(ArrayContentProvider.getInstance());
 		gpsViewer.setLabelProvider(new LabelProvider());
 		
-		
-		Composite ops = new Composite(center, SWT.NONE);
+		ImportGpsDataWizard w = ((ImportGpsDataWizard)getWizard());
+		ops = new ImportOptionsComposite(center, w.getCurrentDate(), w.getType());
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		ops.setLayout(new GridLayout(1, false));
 		
-
-		opAll = new Button(ops, SWT.RADIO);
-		opAll.setText(Messages.ImportGPSWizardPage_ImportAllOption);
-		opAll.setSelection(true);
-		opAll.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				importAll = true;
-				updateComplete();
-			}
-		});
-		importAll = true;
-		
-		opDate = new Button(ops, SWT.RADIO);
-		opDate.setText(MessageFormat.format(
-			Messages.ImportGPSWizardPage_OImportOnlyCurrentDayOp,
-			new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(),
-					DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
-		opDate.setSelection(false);
-		opDate.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				importAll = false;
-				updateComplete();
-			}
-		});
-		
-		opSelect = new Button(ops, SWT.RADIO);
-		opSelect.setText(MessageFormat.format(
-				Messages.ImportGPSWizardPage_SelectPointsToImportOp,
-				new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase(),
-						DateFormat.getDateInstance(DateFormat.MEDIUM).format(((ImportGpsDataWizard)getWizard()).getCurrentDate())}));
-
-		
-		
-		
-		opSelect.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				importAll = false;
-				updateComplete();
-			}
-		});
 		
 		//read gps devices
 		HashMap<String, String> supportedDevices;
@@ -188,6 +137,7 @@ public class ImportGPSWizardPage extends WizardPage {
 			setErrorMessage(ERROR_COULD_NOT_READ_DEVICES);
 		}
 		updateComplete();
+		super.setTitle(Messages.ImportGPSWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(Messages.ImportGPSWizardPage_DialogMessage);
 		
 	}
@@ -199,7 +149,8 @@ public class ImportGPSWizardPage extends WizardPage {
 			return;
 		}
 		setPageComplete(true);
-		if (opDate.getSelection() || opAll.getSelection() ){
+		ImportOption op = ops.getImportOption();
+		if (op == ImportOption.DATE || op == ImportOption.ALL ){
 			((ImportGpsDataWizard)getWizard()).setCanFinish(true);
 		}else{
 			((ImportGpsDataWizard)getWizard()).setCanFinish(false);
@@ -235,10 +186,11 @@ public class ImportGPSWizardPage extends WizardPage {
 	
 	@Override
     public IWizardPage getNextPage() {
-		if (opDate.getSelection() || opAll.getSelection() ){
+		ImportOption op = ops.getImportOption();
+		if (op == ImportOption.DATE || op == ImportOption.ALL ){
 			//not more pages
 			return null;
-		}else if (opSelect.getSelection()){
+		}else if (op == ImportOption.SELECT){
 			if (nextPage == null){
 				nextPage = new ImportWpSelectWizardPage((ImportGpsDataWizard) getWizard());
 			}

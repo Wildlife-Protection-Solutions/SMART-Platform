@@ -177,9 +177,7 @@ public class GPSDataImport {
 		for(PatrolLeg leg : patrolLegs){
 			for (PatrolLegDay day : leg.getPatrolLegDays()){
 				Track newTrack = createTrackFromWaypoints(day);
-				if (newTrack != null){
-					output.put(day, newTrack);
-				}
+				output.put(day, newTrack);
 			}
 		}
 		return output;
@@ -288,16 +286,18 @@ public class GPSDataImport {
 		
 		for (Waypoint point : waypoints){
 			
+			boolean found = false;
 			Date wpdt = point.getImportedDate();
-			
 			if (wpdt == null){
 				continue;
 			}
-			for(PatrolLeg leg : patrolLegs){
-				if (betweenDates(SmartUtils.getDatePart(wpdt,false), leg.getStartDate(), leg.getEndDate())){
+			//find patrol leg day based on times
+			for (Iterator<PatrolLeg> iterator = patrolLegs.iterator(); iterator.hasNext();) {
+				PatrolLeg leg = (PatrolLeg) iterator.next();				
+				if (betweenDates(SmartUtils.getDatePart(wpdt,false), SmartUtils.getDatePart(leg.getStartDate(), false), SmartUtils.getDatePart(leg.getEndDate(), false))){
 					//find the leg day
-					boolean found = false;
-					for (PatrolLegDay legday : leg.getPatrolLegDays()){
+					for (Iterator<PatrolLegDay> iterator2 = leg.getPatrolLegDays().iterator(); iterator2.hasNext();) {
+						PatrolLegDay legday = (PatrolLegDay) iterator2.next();
 						Date start = SmartUtils.combineDateTime(legday.getDate(), legday.getStartTime());
 						Date end = SmartUtils.combineDateTime(legday.getDate(), legday.getEndTime());
 						if (betweenDates(wpdt, start, end)){
@@ -311,21 +311,31 @@ public class GPSDataImport {
 							break;
 						}
 					}
-					if (!found) {
-						// start time could not be found; assign based on date
-						// only
-						for (PatrolLegDay legday : leg.getPatrolLegDays()) {
-							if (SmartUtils.getDatePart(wpdt, false).equals(SmartUtils.getDatePart(legday.getDate(),false))) {
-								legday.getWaypoints().add(point);
-								modified.add(legday);
-								point.setPatrolLegDay(legday);
-								if (point.getTime() == null) {
-									point.setTime(new Time(SmartUtils
-											.getMidnight().getTime()));
-								}
-								break;
+					
+				}
+				if (found){
+					break;
+				}
+			}
+			if (!found){
+				//search only for dates not times
+				for (Iterator<PatrolLeg> iterator = patrolLegs.iterator(); iterator.hasNext();) {
+					PatrolLeg leg = (PatrolLeg) iterator.next();
+					for (Iterator<PatrolLegDay> iterator2 = leg.getPatrolLegDays().iterator(); iterator2.hasNext();) {
+						PatrolLegDay legday = (PatrolLegDay) iterator2.next();
+						if (SmartUtils.getDatePart(wpdt, false).equals(SmartUtils.getDatePart(legday.getDate(),false))) {
+							legday.getWaypoints().add(point);
+							modified.add(legday);
+							point.setPatrolLegDay(legday);
+							if (point.getTime() == null) {
+								point.setTime(new Time(SmartUtils.getMidnight().getTime()));
 							}
+							found = true;
+							break;
 						}
+					}
+					if (found){
+						break;
 					}
 				}
 			}

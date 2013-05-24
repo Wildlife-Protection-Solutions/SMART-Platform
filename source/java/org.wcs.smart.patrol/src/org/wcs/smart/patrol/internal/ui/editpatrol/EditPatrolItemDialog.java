@@ -102,7 +102,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				s.close();
 			}
 		}
-		setMessage(item.getTitle());
+		setTitle(item.getTitle());
 		setChangesMade(false);
 		return comp;
 	}

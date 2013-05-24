@@ -143,6 +143,7 @@ public class ImportWpSelectWizardPage extends WizardPage {
 		});
 		
 		((ImportGpsDataWizard)getWizard()).setCanFinish(true);
+		super.setTitle(Messages.ImportWpSelectWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(((ImportGpsDataWizard)getWizard()).getType().importDesc );
 		super.setControl(comp);
 	}

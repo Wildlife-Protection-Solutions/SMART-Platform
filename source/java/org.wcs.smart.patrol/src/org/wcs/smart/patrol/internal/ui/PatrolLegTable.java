@@ -22,12 +22,12 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -114,7 +114,7 @@ public class PatrolLegTable {
 	 * Sets the table viewer input and updates column width.
 	 * @param legs list of patrol legs
 	 */
-	public void setInput(WritableList legs){
+	public void setInput(ArrayList<PatrolLeg> legs){
 		patrolLegViewer.setInput(legs);
 		
 		//update column widths
@@ -164,7 +164,7 @@ public class PatrolLegTable {
 		}catch (Exception ex){}
 		
 		patrolLegViewer.getTable().setLayoutData(gd);
-		patrolLegViewer.setContentProvider(new ObservableListContentProvider());
+		patrolLegViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolLegViewer.getTable().setHeaderVisible(true);
 		patrolLegViewer.getTable().setLinesVisible(true);
 		
