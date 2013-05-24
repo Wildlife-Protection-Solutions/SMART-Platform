@@ -37,6 +37,8 @@ import org.wcs.smart.cybertracker.model.elements.Elements;
  * @since 1.0.0
  */
 public class ElementsUtil {
+	
+	private static List<CyberTrackerId> booleanElementIDs;
 
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();
@@ -79,6 +81,10 @@ public class ElementsUtil {
 
 	public static List<CyberTrackerId> addCustomElements(Elements elements, List<String> labels, List<String> tag0Values) {
 		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
+		if (labels.size() != tag0Values.size()) {
+			//development validation
+			throw new IllegalArgumentException("Lables and Tag0 lists are expected to be of an equl size."); //$NON-NLS-1$
+		}
 		int size = labels.size() > tag0Values.size() ? tag0Values.size() : labels.size(); //size of smallest array (it is expected that arrays are of same size!!!)
 		for (int i = 0; i < size; i++) {
 			String label = labels.get(i);
@@ -102,4 +108,19 @@ public class ElementsUtil {
 		elements.getList().getItems().getItem().add(item);
 	}
 	
+	public static List<CyberTrackerId> booleanElements(Elements elements) {
+		if (booleanElementIDs == null) {
+			List<String> labels = new ArrayList<String>();
+			labels.add("Yes");
+			labels.add("No");
+			labels.add("Undefined");
+			List<String> tag0Values = new ArrayList<String>();
+			tag0Values.add("true"); //$NON-NLS-1$
+			tag0Values.add("false"); //$NON-NLS-1$
+			tag0Values.add("null"); //$NON-NLS-1$
+			booleanElementIDs = ElementsUtil.addCustomElements(elements, labels, tag0Values);
+		}
+		return booleanElementIDs;
+
+	}
 }
