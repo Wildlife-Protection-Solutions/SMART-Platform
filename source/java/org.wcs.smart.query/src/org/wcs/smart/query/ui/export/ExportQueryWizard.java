@@ -33,7 +33,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.export.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
