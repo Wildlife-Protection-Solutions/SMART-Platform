@@ -107,6 +107,7 @@ public class ImportQueryFilePage extends WizardPage {
 				}
 			}
 		});
+		setTitle(Messages.ImportQueryFilePage_WizardPageTitle);
 		setMessage(Messages.ImportQueryFilePage_PageMessage);
 		setPageComplete(false);
 		setControl(main);

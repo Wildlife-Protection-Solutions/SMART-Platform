@@ -21,6 +21,11 @@
  */
 package org.wcs.smart.query.ui.export;
 
+import java.text.Collator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -28,6 +33,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -48,6 +54,8 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class ExportQueryTypePage extends WizardPage {
 
+	private static final String LAST_EXPORT_FORMAT = "QUERY_EXPORT_FORMAT"; //$NON-NLS-1$
+	
 	private TableViewer outputOptions;
 	
 	/**
@@ -81,7 +89,16 @@ public class ExportQueryTypePage extends WizardPage {
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
 		});
-		outputOptions.setInput(QueryExportEngine.getQueryExports(((ExportQueryWizard)getWizard()).getQuery() ));
+		List<IQueryExporter> exports = QueryExportEngine.getQueryExports(((ExportQueryWizard)getWizard()).getQuery() );
+		Collections.sort(exports, new Comparator<IQueryExporter>() {
+
+			@Override
+			public int compare(IQueryExporter o1, IQueryExporter o2) {
+				return Collator.getInstance().compare(o1.getName(), o2.getName());
+			}
+		});
+		outputOptions.setInput(exports);
+		
 		outputOptions.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -89,21 +106,30 @@ public class ExportQueryTypePage extends WizardPage {
 			}
 		});
 		outputOptions.addDoubleClickListener(new IDoubleClickListener() {
-			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				if (!outputOptions.getSelection().isEmpty()){
 					setPageComplete(true);
-					
 					((ExportQueryWizard)getWizard()).getContainer().showPage( getWizard().getNextPage(ExportQueryTypePage.this) );
 				}
 				
 			}
 		});
-		setTitle(Messages.ExportQueryTypePage_PageTitle);
+		String id = getWizard().getDialogSettings().get(LAST_EXPORT_FORMAT);
+		IQueryExporter defaultExport = null;
+		for (IQueryExporter export : exports){
+			if (export.getId().equals(id)){
+				defaultExport = export;
+			}
+		}
+		if (defaultExport != null){
+			outputOptions.setSelection(new StructuredSelection(defaultExport));
+		}
+		
+		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQueryName()); //$NON-NLS-1$
 		setMessage(Messages.ExportQueryTypePage_DialogMessage);
 		setControl(main);
-		setPageComplete(false);
+		setPageComplete(!outputOptions.getSelection().isEmpty());
 	}
 
 	/**
@@ -113,5 +139,13 @@ public class ExportQueryTypePage extends WizardPage {
 		 return   (IQueryExporter) ((IStructuredSelection)outputOptions.getSelection()).getFirstElement();
 	}
 	
-
+	public void performFinish(){
+		try{
+			IQueryExporter f = getQueryExporter();
+			getWizard().getDialogSettings().put(LAST_EXPORT_FORMAT, f.getId());
+		}catch (Exception ex){
+			//eatme
+		}
+		
+	}
 }

@@ -130,6 +130,8 @@ public class Messages extends NLS {
 	public static String ExportQueryTypePage_PageName;
 	public static String ExportQueryTypePage_PageTitle;
 	public static String ExportQueryTypePage_SelectFormatLabel;
+	public static String ExportQueryWizard_DialogTitle;
+	public static String ExportQueryWizard_DirectoryDoesNotExist;
 	public static String ExportQueryWizard_ExportCancelled_DialogMessage;
 	public static String ExportQueryWizard_ExportDialogTitle;
 	public static String ExportQueryWizard_ExportFailedError;
@@ -271,10 +273,12 @@ public class Messages extends NLS {
 	public static String ImportQueryFilePage_FileNotFoundError;
 	public static String ImportQueryFilePage_PageMessage;
 	public static String ImportQueryFilePage_PageTitle;
+	public static String ImportQueryFilePage_WizardPageTitle;
 	public static String ImportQueryFilePage_xmlFilterName;
 	public static String ImportQueryFolderPage_FolderLabel;
 	public static String ImportQueryFolderPage_PageMessage;
 	public static String ImportQueryFolderPage_PageName;
+	public static String ImportQueryFolderPage_PageTitle;
 	public static String ImportQueryHandler_ErrorOpeningPerspective;
 	public static String ImportQueryWizard_Confirm_DialogMessage;
 	public static String ImportQueryWizard_Confirm_DialogTitle;

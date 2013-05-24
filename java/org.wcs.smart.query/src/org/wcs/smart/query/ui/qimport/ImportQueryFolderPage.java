@@ -80,7 +80,7 @@ public class ImportQueryFolderPage extends WizardPage {
 				setPageComplete(!event.getSelection().isEmpty());
 			}
 		});
-		
+		setTitle(Messages.ImportQueryFolderPage_PageTitle);
 		setMessage(Messages.ImportQueryFolderPage_PageMessage);
 		setPageComplete(false);
 		setControl(main);
