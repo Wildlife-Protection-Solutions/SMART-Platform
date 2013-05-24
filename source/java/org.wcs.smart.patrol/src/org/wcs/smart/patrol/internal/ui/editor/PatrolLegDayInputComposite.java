@@ -410,11 +410,6 @@ public class PatrolLegDayInputComposite {
 		importTrack = toolkit.createHyperlink(trackComp, Messages.PatrolLegDayInputComposite_SetTrackLabel, SWT.NONE);
 		importTrack.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
-				if (patrolLegDate.getTrack() != null){
-					if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_SetTrackDialog_Title, Messages.PatrolLegDayInputComposite_SetTrackDialog_Message)){
-						return;
-					}
-				}
 				showImportTrackWizard();
 				viewTrackPoints.setEnabled(patrolLegDate.getTrack() != null);
 			}

@@ -54,6 +54,7 @@ public class ImportOptionsComposite extends Composite {
 	
 	private ImportType importType;
 	private PatrolLegDay pld;
+	private boolean warnUser = true;
 	
 	private ImportOption[] validOptions = {ImportOption.ALL, ImportOption.DATE, ImportOption.SELECT};
 	private String[] labels = {Messages.ImportGpxWizardPage_ImportAllOp,
@@ -82,16 +83,19 @@ public class ImportOptionsComposite extends Composite {
 	 * @param importType
 	 * @param validOptions
 	 * @param opLabels labels much contain the same place holders as existing labels
+	 * @param warnUser if import All should include verification warning
 	 */
 	public ImportOptionsComposite(Composite parent, PatrolLegDay pld, 
 			ImportType importType, 
 			ImportOption[] validOptions,
-			String[] opLabels) {
+			String[] opLabels,
+			boolean warnUser) {
 		super(parent, SWT.NONE);
 		this.pld = pld;
 		this.importType = importType;
 		this.validOptions = validOptions;
 		this.labels = opLabels;
+		this.warnUser = warnUser;
 		createContent();
 	}
 	
@@ -118,7 +122,7 @@ public class ImportOptionsComposite extends Composite {
 			}	
 		}
 		
-		if (all && pld.getPatrolLeg().getPatrol().getLegs().size() > 1){
+		if (all && warnUser && pld.getPatrolLeg().getPatrol().getLegs().size() > 1){
 			Label lbl1 = new Label(this, SWT.WRAP);
 			lbl1.setText(MessageFormat.format(Messages.ImportOptionsComposite_ImportAllWarning , new Object[]{importType.guiName}));
 			GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
@@ -154,7 +158,7 @@ public class ImportOptionsComposite extends Composite {
 	private void createOpAll(Composite parent, String label){
 		opAll = new Button(parent, SWT.RADIO);
 		String message = label;
-		if (pld.getPatrolLeg().getPatrol().getLegs().size() > 1){
+		if (pld.getPatrolLeg().getPatrol().getLegs().size() > 1 && warnUser){
 			message += "*"; //$NON-NLS-1$
 		}
 		opAll.setText(message);

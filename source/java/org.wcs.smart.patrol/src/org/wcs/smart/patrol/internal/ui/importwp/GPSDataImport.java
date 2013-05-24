@@ -197,7 +197,6 @@ public class GPSDataImport {
 		List<Coordinate> coords = new ArrayList<Coordinate>();
 		for (Waypoint wp : day.getWaypoints()){
 			Date d = SmartUtils.combineDateTime(wp.getPatrolLegDay().getDate(), wp.getTime());
-			
 			coords.add(new Coordinate(wp.getX(), wp.getY(),d.getTime()));
 		}
 		Track newTrack = convertToTrack(coords);
@@ -220,11 +219,15 @@ public class GPSDataImport {
 			if (Double.isNaN(point.z)){
 				continue;
 			}
+			
+			boolean found = false;
 			Date wpdt = new Date((long)point.z);
 			for(PatrolLeg leg : patrolLegs){
-				if (betweenDates(wpdt, leg.getStartDate(), leg.getEndDate())){
+				if (betweenDates(SmartUtils.getDatePart(wpdt, false), 
+						SmartUtils.getDatePart(leg.getStartDate(), false),
+						SmartUtils.getDatePart(leg.getEndDate(), false))){
 					//find the leg day
-					boolean found = false;
+					
 					for (PatrolLegDay legday : leg.getPatrolLegDays()){
 						Date start = SmartUtils.combineDateTime(legday.getDate(), legday.getStartTime());
 						Date end = SmartUtils.combineDateTime(legday.getDate(), legday.getEndTime());
@@ -237,36 +240,46 @@ public class GPSDataImport {
 								tracks.put(legday, trackpnts);
 							}
 							trackpnts.add(point);
-						}
-					
-					
-					}
-					
-					if (!found) {
-						// start time could not be found; assign based on date only
-						for (PatrolLegDay legday : leg.getPatrolLegDays()) {
-							List<Coordinate> trackpnts = tracks.get(legday);
-							if (trackpnts == null) {
-								trackpnts = new ArrayList<Coordinate>();
-								tracks.put(legday, trackpnts);
-							}
-							if (SmartUtils.getDatePart(wpdt, false).equals(
-									SmartUtils.getDatePart(legday.getDate(),
-											false))) {
-								trackpnts.add(point);
-							}
+							break;
 						}
 					}
 				}
+				if (found)break;
 			}
-		}		
+				
+		
+		
+			if (!found) {
+				// start time could not be found; assign based on date only
+				for(PatrolLeg leg : patrolLegs){
+					for (PatrolLegDay legday : leg.getPatrolLegDays()) {
+						List<Coordinate> trackpnts = tracks.get(legday);
+						if (trackpnts == null) {
+							trackpnts = new ArrayList<Coordinate>();
+							tracks.put(legday, trackpnts);
+						}
+						if (SmartUtils.getDatePart(wpdt, false).equals(
+							SmartUtils.getDatePart(legday.getDate(),
+								false))) {
+							trackpnts.add(point);
+						}
+						found = true;
+						break;
+					}
+					if(found)break;
+				}
+			}
+		}
+		
 		
 		HashMap<PatrolLegDay, Track> output = new HashMap<PatrolLegDay, Track>();
 		//convert to tracks
 		for (Iterator<Entry<PatrolLegDay, List<Coordinate>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
 			Entry<PatrolLegDay, List<Coordinate>> value = (Entry<PatrolLegDay, List<Coordinate>>) iterator.next();
 			Track newTrack = convertToTrack(value.getValue());
-			output.put(value.getKey(), newTrack);
+			if (newTrack != null){
+				output.put(value.getKey(), newTrack);
+			}
 		}
 		return output;
 	}
@@ -638,6 +651,9 @@ public class GPSDataImport {
 	 * @return track
 	 */
 	public static Track convertToTrack(List<Coordinate> coordinates){
+		if (coordinates.size() < 2){
+			return null;
+		}
 			GeometryFactory gf = new GeometryFactory();
 			Collections.sort(coordinates, new Comparator<Coordinate>() {
 				@Override

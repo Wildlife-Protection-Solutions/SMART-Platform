@@ -85,7 +85,7 @@ public class ImportFromWaypointWizardPage extends WizardPage {
 				w.getType(),
 				new ImportOption[]{ImportOption.ALL, ImportOption.DATE},
 				new String[]{Messages.ImportFromWaypointWizardPage_OpGenerateAllTracks,
-			Messages.ImportFromWaypointWizardPage_OpGenerateDayTracks1});
+			Messages.ImportFromWaypointWizardPage_OpGenerateDayTracks1}, false);
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		ops.addListener(SWT.Selection, new Listener(){
 			@Override
