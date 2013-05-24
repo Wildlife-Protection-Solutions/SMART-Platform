@@ -50,6 +50,7 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Exporter to CyberTracker application
@@ -168,10 +169,12 @@ public class CyberTrackerExporter {
 			case LIST:
 			{
 				List<String> itemNames = new ArrayList<String>();
+				List<String> tag0Values = new ArrayList<String>();
 				for (AttributeListItem listItem : attribute.getActiveListItems()) {
 					itemNames.add(listItem.getName());
+					tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
 				}
-				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, itemNames.toArray(new String[itemNames.size()]));
+				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, itemNames, tag0Values);
 				List<String> values = CyberTrackerUtil.listItemIds(ids);
 				String trElements = CyberTrackerUtil.translateElements(ids);
 				String trLinks = CyberTrackerUtil.translateLinks(ids, false);
@@ -195,7 +198,7 @@ public class CyberTrackerExporter {
 			}
 			case BOOLEAN:
 			{
-				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, "Yes", "No", "Undefined");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, "Yes", "No", "Undefined");
 				result.add(CyberTrackerUtil.createRadioNode(id.getNodeId(), attribute.getName(), ids, resultElementId.getItemId()));
 				break;
 			}
@@ -203,7 +206,6 @@ public class CyberTrackerExporter {
 				throw new IllegalArgumentException("Unknown attribute type"); //$NON-NLS-1$
 			}
 
-//			ElementsUtil.addElementsItem(elements, "#"+attribute.getName(), resultElementId.getItemId()); //$NON-NLS-1$
 			//tracking navigation for non-tree attributes (tree attributes are handle separately)
 			if (!Attribute.AttributeType.TREE.equals(attribute.getType())) {
 				//handle only cases for non-tree attributes, as all the have single ending screen
