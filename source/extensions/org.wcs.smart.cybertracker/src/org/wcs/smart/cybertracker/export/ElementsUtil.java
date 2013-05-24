@@ -29,6 +29,7 @@ import java.util.Set;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Util for manipulations with {@link Elements} object
@@ -57,7 +58,7 @@ public class ElementsUtil {
 	public static void addElements(Elements elements, Map<? extends DmObject, CyberTrackerId> map) {
 		Set<? extends DmObject> keys = map.keySet();
 		for (DmObject dmObject : keys) {
-			addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId());
+			addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), SmartUtils.encodeHex(dmObject.getUuid()));
 		}
 	}
 	
