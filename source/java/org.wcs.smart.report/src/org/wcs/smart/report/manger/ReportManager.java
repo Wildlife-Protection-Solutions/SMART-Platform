@@ -214,9 +214,8 @@ public class ReportManager {
 	 */
 	public synchronized static String generateFilename(Report r) throws Exception{
 		File dir = ReportPlugIn.getReportDirectory();
-		
-		String fname = r.getName().replaceAll("[^\\p{Ll}\\p{Lu}\\p{Lt}\\p{Nd}]", ""); //$NON-NLS-1$ //$NON-NLS-2$  letters and digits
-		fname += "_" + r.getId(); //$NON-NLS-1$
+
+		String fname = r.getId().replaceAll("[^\\p{Ll}\\p{Lu}\\p{Lt}\\p{Nd}]", ""); //$NON-NLS-1$ //$NON-NLS-2$  letters and digits
 		String suffix =  ".rptdesign"; //$NON-NLS-1$
 		
 		int cnt = 0;
