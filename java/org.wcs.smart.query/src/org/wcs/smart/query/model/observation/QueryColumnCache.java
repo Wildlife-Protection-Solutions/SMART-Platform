@@ -182,7 +182,7 @@ public class QueryColumnCache {
 				protected IStatus run(IProgressMonitor monitor) {
 					//load from the database 
 					Session session = HibernateManager.openSession();
-					
+					session.beginTransaction();
 					try {
 						ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 					
@@ -213,6 +213,9 @@ public class QueryColumnCache {
 						patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
 					
 					} finally {
+						if (session.getTransaction().isActive()){
+							session.getTransaction().rollback();
+						}
 						session.close();
 					}
 					return Status.OK_STATUS;

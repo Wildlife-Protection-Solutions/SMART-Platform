@@ -73,14 +73,7 @@ public class PatrolQueryMapPage  extends SmartMapEditorPart{
 	    		AddLayersCommand command = new AddLayersCommand(layers);
 	    		if (getMap() == null) return Status.CANCEL_STATUS;
 	    		getMap().sendCommandASync(command);
-	    		initListener = new IViewportModelListener() {
-					@Override
-					public void changed(ViewportModelEvent event) {
-						getMap().getViewportModel().removeViewportModelListener(initListener);
-						getMap().sendCommandASync(new ZoomExtentCommand());
-					}
-				};
-	    		getMap().getViewportModel().addViewportModelListener(initListener);
+	    		
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, Messages.PatrolQueryMapPage_UnknownStatus, IStatus.ERROR, Messages.PatrolQueryMapPage_ErrorLoadingPage, e);
 			}
@@ -165,6 +158,14 @@ public class PatrolQueryMapPage  extends SmartMapEditorPart{
 
 		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
 		loadDefaultLayers.schedule();
+		initListener = new IViewportModelListener() {
+			@Override
+			public void changed(ViewportModelEvent event) {
+				getMap().getViewportModel().removeViewportModelListener(initListener);
+				getMap().sendCommandASync(new ZoomExtentCommand());
+			}
+		};
+		getMap().getViewportModel().addViewportModelListener(initListener); 
 	}
 
     
