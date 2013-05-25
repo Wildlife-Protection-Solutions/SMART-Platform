@@ -100,7 +100,6 @@ public class Messages extends NLS {
 	public static String DerbyPatrolEngine_Progress_RunningQuery;
 	public static String DerbyQueryEngine2_Progress_CreatingObservationTable;
 	public static String DerbyQueryEngine2_Progress_CreatingTempTable;
-	public static String DerbyQueryEngine2_Progress_LoadingError;
 	public static String DerbyQueryEngine2_Progress_PopulatingResults;
 	public static String DerbyQueryEngine2_Progress_ProcessingAttribute;
 	public static String DerbyQueryEngine2_Progress_ProcessingAttributes;
@@ -128,7 +127,6 @@ public class Messages extends NLS {
 	public static String ExportQueryLocationPage_PageTitle;
 	public static String ExportQueryTypePage_DialogMessage;
 	public static String ExportQueryTypePage_PageName;
-	public static String ExportQueryTypePage_PageTitle;
 	public static String ExportQueryTypePage_SelectFormatLabel;
 	public static String ExportQueryWizard_DialogTitle;
 	public static String ExportQueryWizard_DirectoryDoesNotExist;
@@ -448,7 +446,6 @@ public class Messages extends NLS {
 	public static String QueryFolderTreeComposite_AddFolderButton;
 	public static String QueryGeoResource_Error_NoDatasource;
 	public static String QueryGeoResource_ServiceError;
-	public static String QueryGeoResourceInfo_BoundsError;
 	public static String QueryHeaderComposite_IdFieldLabel;
 	public static String QueryHeaderComposite_NameToLongDialogTitle;
 	public static String QueryHeaderComposite_NameToLongMsg;

@@ -377,7 +377,6 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_Progress_LoadingImportWizard;
 	public static String PatrolLegDayInputComposite_RestMinutesLabel;
 	public static String PatrolLegDayInputComposite_SetTrackDialog_Message;
-	public static String PatrolLegDayInputComposite_SetTrackDialog_Title;
 	public static String PatrolLegDayInputComposite_SetTrackLabel;
 	public static String PatrolLegDayInputComposite_StartTimeLabel;
 	public static String PatrolLegDayInputComposite_Time_ColumnHeader;
