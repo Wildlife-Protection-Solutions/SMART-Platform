@@ -72,7 +72,7 @@ public class LoadDefaultLayersJob extends Job{
 	 * or the smart default basemap.
 	 * 
 	 * @param map
-	 * @param zoom if should zoom to extens after loading basemap
+	 * @param zoom if should zoom to extents after loading basemap
 	 */
 	public LoadDefaultLayersJob(IMap map, boolean zoom){
 		super(JOB_NAME);
