@@ -42,6 +42,18 @@ GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO manager;
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO analyst;
 GRANT EXECUTE ON PROCEDURE smart.cleanUpTempData TO data_entry;
 
+GRANT EXECUTE ON FUNCTION smart.computeTileId to manager;
+GRANT EXECUTE ON FUNCTION smart.computeTileId to analyst;
+GRANT EXECUTE ON FUNCTION smart.pointInPolygon to manager;
+GRANT EXECUTE ON FUNCTION smart.pointInPolygon to analyst;
+GRANT EXECUTE ON FUNCTION smart.computeHours to manager;
+GRANT EXECUTE ON FUNCTION smart.computeHours to analyst;
+GRANT EXECUTE ON FUNCTION smart.intersection to manager;
+GRANT EXECUTE ON FUNCTION smart.intersection to analyst;
+GRANT EXECUTE ON FUNCTION smart.distanceInMeter to manager;
+GRANT EXECUTE ON FUNCTION smart.distanceInMeter to analyst;
+GRANT EXECUTE ON FUNCTION smart.intersects to manager;
+GRANT EXECUTE ON FUNCTION smart.intersects to analyst;
 
 -- update names
 DELETE FROM smart.dm_aggregation_i18n;
@@ -81,6 +93,8 @@ INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'min'
 INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'max', 'ru', 'максимальный');
 INSERT INTO smart.dm_aggregation_i18n (NAME, lang_code, GUI_NAME) VALUES ( 'avg', 'ru', 'средний' );
 
+GRANT SELECT ON smart.dm_aggregation_i18n TO manager;
+GRANT SELECT ON smart.dm_aggregation_i18n TO analyst;
 
 -- Database Updates For Version 1.1.0
 update smart.db_version set version = '1.1.0';
