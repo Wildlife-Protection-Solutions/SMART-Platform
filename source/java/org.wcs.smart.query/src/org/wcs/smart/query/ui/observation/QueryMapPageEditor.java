@@ -27,7 +27,10 @@ import java.util.List;
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.ILayer;
+import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.render.IViewportModelListener;
+import net.refractions.udig.project.render.ViewportModelEvent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,6 +60,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	private QueryResultsEditor parentEditor;
 	private QueryService queryService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
+	private IViewportModelListener initListener ;
 	/*
 	 * Job for adding query layer to map
 	 */
@@ -69,8 +73,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 	    		AddLayersCommand command = new AddLayersCommand(layers);
 	    		if (getMap() == null) return Status.CANCEL_STATUS;
-	    		getMap().getViewportModelInternal().setBounds(layers.get(0).getInfo(monitor).getBounds());
+
 	    		getMap().sendCommandASync(command);
+				
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, Messages.QueryMapPageEditor_UnknownStatus, IStatus.ERROR, Messages.QueryMapPageEditor_ErrorLoadingPages, e);
 			}
@@ -153,8 +158,16 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), true);
 		loadDefaultLayers.schedule();
+		initListener = new IViewportModelListener() {
+			@Override
+			public void changed(ViewportModelEvent event) {
+				getMap().getViewportModel().removeViewportModelListener(initListener);
+				getMap().sendCommandASync(new ZoomExtentCommand());
+			}
+		};
+		getMap().getViewportModel().addViewportModelListener(initListener); 
 	}
 
     
