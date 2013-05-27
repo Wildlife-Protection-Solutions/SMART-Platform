@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -193,13 +194,13 @@ public class PlanDatesComposite extends PlanComposite {
 		
 		if(parentEndDate != null && (SmartUtils.getDate(dtEndDate)).after(parentEndDate) ){
 			cdEndDate.show();
-			String errorText = Messages.PlanDatesComposite_EndDate_Range_Parent_Error + " (" + parentEndDate + ")";  //$NON-NLS-1$ //$NON-NLS-2$
+			String errorText = Messages.PlanDatesComposite_EndDate_Range_Parent_Error + " (" + DateFormat.getDateInstance().format(parentEndDate) + ")";  //$NON-NLS-1$ //$NON-NLS-2$
 			cdEndDate.setDescriptionText(errorText);
 			setErrorMessage(errorText);
 		}
 		if(parentEndDate != null && (SmartUtils.getDate(dtStartDate)).before(parentStartDate) ){
 			cdStartDate.show();
-			String errText = Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + parentStartDate + ")---"; //$NON-NLS-1$ //$NON-NLS-2$
+			String errText = Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + DateFormat.getDateInstance().format(parentStartDate) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 			cdStartDate.setDescriptionText(errText);
 			setErrorMessage(errText);
 		}
