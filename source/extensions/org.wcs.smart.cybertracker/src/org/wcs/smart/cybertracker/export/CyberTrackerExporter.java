@@ -63,9 +63,12 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerExporter {
 	
+	private static final String CATEGORY_RESULT_PREFIX = "#category"; //$NON-NLS-1$
+	
 	private static CyberTrackerId rootId;
 	private static Elements elements;
 	private static Map<Attribute, CyberTrackerId> attr2resultId = new HashMap<Attribute, CyberTrackerUtil.CyberTrackerId>();
+	private static Map<Integer, CyberTrackerId> catLevel2resultId = new HashMap<Integer, CyberTrackerUtil.CyberTrackerId>();
 
 	public static File export(File file, IProgressMonitor monitor) throws Exception {
 		Session session = HibernateManager.openSession();
@@ -77,6 +80,7 @@ public class CyberTrackerExporter {
 			elements = null;
 			rootId = null;
 			attr2resultId.clear();
+			catLevel2resultId.clear();
 			session.getTransaction().rollback();
 			session.close();
 		}
@@ -92,7 +96,7 @@ public class CyberTrackerExporter {
 		rootId = PatrolScreensUtil.addPatrolNodes(screenNodes, elements, keyMap.get(root), session);
 		monitor.worked(5);
 
-		screenNodes.addAll(buildCategoryNodes(root, keyMap));
+		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
 		monitor.worked(70);
 		
 		Screens screens = ScreensObjectFactory.createScreens(screenNodes);
@@ -114,6 +118,7 @@ public class CyberTrackerExporter {
 			outE.close();
 		}
 		
+		//----------------creating Reports.xml----------------
 		List<Items.Item> columnItems = new ArrayList<Items.Item>();
 		columnItems.add(ReportsObjectFactory.createColumnItem("{4764F5E6-15A1-48BF-808A-F673ED7CDCDA}", "Date"));
 		columnItems.add(ReportsObjectFactory.createColumnItem("{EB86279A-E032-43D2-B4A8-8B8B2892B10E}", "Time"));
@@ -123,6 +128,10 @@ public class CyberTrackerExporter {
 			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), attribute.getName()));
 			Integer outMode = AttributeType.TEXT.equals(attribute.getType()) || AttributeType.NUMERIC.equals(attribute.getType()) ? null : ReportsObjectFactory.TAG_0_OUTPUT_MODE;
 			columnItems.add(ReportsObjectFactory.createColumnItem(attr2resultId.get(attribute).getItemId(), "#"+attribute.getKeyId(), outMode));
+		}
+		for (Integer level : catLevel2resultId.keySet()) {
+			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), "!!!"+CATEGORY_RESULT_PREFIX+String.valueOf(level)));
+			columnItems.add(ReportsObjectFactory.createColumnItem(catLevel2resultId.get(level).getItemId(), CATEGORY_RESULT_PREFIX+String.valueOf(level), 2));
 		}
 		Reports reports = ReportsObjectFactory.createReports(columnItems);
 		BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\Reports.xml")); //$NON-NLS-1$
@@ -136,20 +145,21 @@ public class CyberTrackerExporter {
 		return file;
 	}
 
-	private static List<Node> buildCategoryNodes(Category category, Map<Category, CyberTrackerId> keyMap) {
+	private static List<Node> buildCategoryNodes(Category category, Map<Category, CyberTrackerId> keyMap, Integer level) {
 		List<Node> result = new ArrayList<Node>();
 		if (category == null)
 			return result;
 		//result.add(CyberTrackerUtil.createRadioNode(category, keyMap));
 		
-		if (category.getChildren() == null || category.getChildren().isEmpty()) {
+		if (category.getActiveChildren() == null || category.getActiveChildren().isEmpty()) {
 			result.addAll(buildAttributeNodes(category, keyMap));
 			return result;
 		}
-		result.add(CyberTrackerUtil.createRadioNode(category, keyMap));
+		result.add(CyberTrackerUtil.createRadioNode(category, keyMap, getCategoryLevelResultElementId(level).getItemId()));
 		
-		for (Category child : category.getChildren()) {
-			result.addAll(buildCategoryNodes(child, keyMap));
+		Integer nextLevel = level + 1;
+		for (Category child : category.getActiveChildren()) {
+			result.addAll(buildCategoryNodes(child, keyMap, nextLevel));
 		}		
 		return result;
 	}
@@ -347,4 +357,15 @@ public class CyberTrackerExporter {
 		}
 		return id;
 	}
+	
+	private static CyberTrackerId getCategoryLevelResultElementId(Integer level) {
+		CyberTrackerId id = catLevel2resultId.get(level);
+		if (id == null) {
+			id = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, CATEGORY_RESULT_PREFIX+String.valueOf(level), id.getItemId());
+			catLevel2resultId.put(level, id);
+		}
+		return id;
+	}
+	
 }
