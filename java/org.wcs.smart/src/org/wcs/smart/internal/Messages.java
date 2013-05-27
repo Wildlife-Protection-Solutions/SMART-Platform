@@ -22,7 +22,7 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog1_OpCreateNew;
 	public static String AddAttributeDialog1_SelectAttribute_Label;
 	public static String AddAttributeDialog2_DialogTitle;
-	public static String AddAttributeDialog2_Edit_DialogMessage;
+	public static String AddAttributeDialog2_Edit_DialogMessage2;
 	public static String AddAttributeDialog2_EditAttribute_DialogTitle;
 	public static String AddAttributeDialog2_New_DialogMessage;
 	public static String Agency_AgencyName;
@@ -238,8 +238,10 @@ public class Messages extends NLS {
 	public static String CaPropertyPage_PageName;
 	public static String CaPropertyPage_SupportedLanguages_Label;
 	public static String CaPropertyPage_UniqueID_Label;
+	public static String CategoryDialogPage_CreatePageTitle;
 	public static String CategoryDialogPage_DialogTitle;
-	public static String CategoryDialogPage_Edit_DialogTitle;
+	public static String CategoryDialogPage_Edit_DialogTitle2;
+	public static String CategoryDialogPage_EditPageTitle;
 	public static String CategoryDialogPage_New_DialogMessage;
 	public static String CategoryDMAdvisor_Error_CategoryReferencedByAttributes;
 	public static String CategoryDMAdvisor_Error_CategoryReferencedByChildren;
@@ -307,6 +309,9 @@ public class Messages extends NLS {
 	public static String CsvConfig_Agency_Import_Message;
 	public static String CsvConfig_Agency_Import_Success;
 	public static String CsvConfig_Agency_Import_Title;
+	public static String DataModel_AttributeAlreadyExists;
+	public static String DataModel_AttributeAlreadyExistsChild;
+	public static String DataModel_AttributeAlreadyExistsParent;
 	public static String DataModel_CloneAttributes1;
 	public static String DataModel_CloneAttributes2;
 	public static String DataModel_CloneCategories;

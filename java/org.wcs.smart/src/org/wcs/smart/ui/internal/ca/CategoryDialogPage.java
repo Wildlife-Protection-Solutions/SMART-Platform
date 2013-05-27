@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 
@@ -111,8 +112,10 @@ public class CategoryDialogPage  extends TitleAreaDialog {
 		
 		if (toUpdate.getKeyId() == null){
 			setMessage(Messages.CategoryDialogPage_New_DialogMessage);
+			setTitle(Messages.CategoryDialogPage_CreatePageTitle);
 		}else{
-			setMessage(Messages.CategoryDialogPage_Edit_DialogTitle);
+			setMessage(MessageFormat.format(Messages.CategoryDialogPage_Edit_DialogTitle2, new Object[]{toUpdate.getName()}));
+			setTitle(Messages.CategoryDialogPage_EditPageTitle);
 		}
 		return parent;
 		

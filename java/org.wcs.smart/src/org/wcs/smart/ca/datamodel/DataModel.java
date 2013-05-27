@@ -96,6 +96,7 @@ public class DataModel {
 			//otherwise i might close an existing connection when it should be.
 			Job loadAttributesJob = new Job(Messages.DataModel_LoadAttribute_JobName) {
 				
+				@SuppressWarnings("unchecked")
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Session s = HibernateManager.openSession();
@@ -184,7 +185,7 @@ public class DataModel {
 	 * @return the newly created {@link CategoryAttribute} association of
 	 * null if no category provided
 	 */
-	public CategoryAttribute addNewAttribute(Attribute att, Category cat){
+	public CategoryAttribute addNewAttribute(Attribute att, Category cat) throws Exception{
 		attributes.add(att);
 		return addExistingAttribute(att, cat);
 		
@@ -198,16 +199,37 @@ public class DataModel {
 	 * @param cat
 	 * @return
 	 */
-	public CategoryAttribute addExistingAttribute(Attribute att, Category cat ){
+	public CategoryAttribute addExistingAttribute(Attribute att, Category cat ) throws Exception{
 		if (cat != null) {
 			if (cat.getAttributes() == null) {
 				cat.setAttributes(new ArrayList<CategoryAttribute>());
 			}
 			for (CategoryAttribute catatt : cat.getAttributes()) {
 				if (catatt.getAttribute().equals(att)) {
-					// attribute already exists
-					return null;
+					throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExists, new Object[]{att.getName(), cat.getName()}));
 				}
+			}
+			//ensure category does not exist in any child categories
+			List<Category> toCheck = new ArrayList<Category>();
+			toCheck.addAll(cat.getChildren());
+			while(toCheck.size() > 0){
+				Category c = toCheck.remove(0);
+				toCheck.addAll(c.getChildren());
+				for (CategoryAttribute ca : c.getAttributes()){
+					if (ca.getAttribute().equals(att)){
+						throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsChild, new Object[]{c.getName(), att.getName()}));
+					}
+				}
+			}
+			//ensure category does not exist in parent category
+			Category c = cat.getParent();
+			while(c != null){
+				for(CategoryAttribute ca : c.getAttributes()){
+					if (ca.getAttribute().equals(att)){
+						throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsParent, new Object[]{c.getName(), att.getName()}));
+					}
+				}
+				c = c.getParent();
 			}
 			CategoryAttribute ca = new CategoryAttribute();
 			ca.setAttribute(att);

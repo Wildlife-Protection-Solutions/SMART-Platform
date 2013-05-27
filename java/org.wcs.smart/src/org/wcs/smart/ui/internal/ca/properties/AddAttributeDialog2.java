@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -140,9 +141,11 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 		if (toUpdate.getKeyId() == null){
 			getShell().setText(Messages.AddAttributeDialog2_DialogTitle);
 			setMessage(Messages.AddAttributeDialog2_New_DialogMessage);
+			setTitle(Messages.AddAttributeDialog2_DialogTitle);
 		}else{
 			getShell().setText(Messages.AddAttributeDialog2_EditAttribute_DialogTitle);
-			setMessage(Messages.AddAttributeDialog2_Edit_DialogMessage);
+			setMessage(MessageFormat.format(Messages.AddAttributeDialog2_Edit_DialogMessage2, new Object[]{toUpdate.getName()}));
+			setTitle(Messages.AddAttributeDialog2_EditAttribute_DialogTitle);
 		}
 		return composite;
 	}
