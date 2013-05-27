@@ -124,21 +124,24 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 		s.beginTransaction();
 		try{
 			source = (Plan) s.load(Plan.class, inputPlan.getUuid());
+			if (source == null){
+				SmartPlanPlugIn.displayLog(Messages.TemplateSelectPlanWizardPage_PlanNotFound_Error, null);
+				return false;
+			}
+			
+			//fetch real data for nested lazy elements (not lazy bags)
+			if (source.getTeam() != null) {
+				source.getTeam().getName();
+			}
+			if (source.getStation() != null) {
+				source.getStation().getName();
+			}
 		}finally{
 			s.getTransaction().rollback();
 		}
 
-		if (source == null){
-			SmartPlanPlugIn.displayLog(Messages.TemplateSelectPlanWizardPage_PlanNotFound_Error, null);
-			return false;
-		}
-		//fetch real data for nested lazy elements (not lazy bags)
-		if (source.getTeam() != null) {
-			source.getTeam().getName();
-		}
-		if (source.getStation() != null) {
-			source.getStation().getName();
-		}
+		
+		
 		
 		p.setTemplatePlan(source);
 		p.setName(source.getName());
