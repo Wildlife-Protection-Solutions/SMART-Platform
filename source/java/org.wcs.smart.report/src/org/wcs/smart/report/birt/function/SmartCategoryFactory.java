@@ -35,8 +35,8 @@ import org.wcs.smart.hibernate.SmartDB;
 public class SmartCategoryFactory implements IScriptFunctionFactory {
 
 	public static final String SMART_USER_FUNCTION = "SmartUser"; //$NON-NLS-1$
-	public static final String CA_NAME_FUNCTION = "ConservationAreaId"; //$NON-NLS-1$
-	public static final String CA_ID_FUNCTION = "ConservationAreaName"; //$NON-NLS-1$
+	public static final String CA_ID_FUNCTION = "ConservationAreaId"; //$NON-NLS-1$
+	public static final String CA_NAME_FUNCTION = "ConservationAreaName"; //$NON-NLS-1$
 	
 	public SmartCategoryFactory() {
 	}

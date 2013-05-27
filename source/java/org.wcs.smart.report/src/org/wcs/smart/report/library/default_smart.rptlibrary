@@ -4,7 +4,7 @@
     <property name="createdBy">Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408></property>
     <property name="units">in</property>
     <property name="theme">defaultTheme</property>
-	<parameters>
+    <parameters>
         <parameter-group name="Report Dates" id="8">
             <text-property name="displayName">Report Date Range</text-property>
             <parameters>
@@ -36,7 +36,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-    </parameters>    
+    </parameters>
     <data-sources>
         <oda-data-source extensionID="org.wcs.smart.data.oda.smart" name="SMART Data" id="5"/>
     </data-sources>
@@ -44,14 +44,25 @@
         <theme name="defaultTheme" id="4"/>
     </themes>
     <components>
-        <label name="CA Name Label in Pink" id="6">
-            <property name="backgroundColor">#00FFFF</property>
-            <property name="fontFamily">"Vrinda"</property>
-            <property name="fontSize">18pt</property>
+        <text-data name="Date Parameters" id="14">
+            <property name="fontFamily">"Tahoma"</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">params["Start Date"].value + " to " + params["End Date"].value</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <text-data name="Conservation Area Name" id="16">
+            <property name="fontFamily">"Tahoma"</property>
+            <property name="fontSize">16pt</property>
             <property name="fontWeight">bold</property>
-            <property name="color">#FF0080</property>
-            <text-property name="text">HKK the Very Funny Cool Conservation Area</text-property>
-        </label>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">SMART_Functions.ConservationAreaName()</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <text-data name="Smart User Name" id="17">
+            <property name="fontFamily">"Tahoma"</property>
+            <expression name="valueExpr">SMART_Functions.SmartUser()</expression>
+            <property name="contentType">html</property>
+        </text-data>
     </components>
     <page-setup>
         <simple-master-page name="NewSimpleMasterPage" id="3">
@@ -59,6 +70,13 @@
             <property name="leftMargin">1.25in</property>
             <property name="bottomMargin">1in</property>
             <property name="rightMargin">1.25in</property>
+        </simple-master-page>
+        <simple-master-page name="Test Master Page" id="11">
+            <page-header>
+                <label id="12">
+                    <text-property name="text">I Am Cool!</text-property>
+                </label>
+            </page-header>
         </simple-master-page>
     </page-setup>
 </library>
