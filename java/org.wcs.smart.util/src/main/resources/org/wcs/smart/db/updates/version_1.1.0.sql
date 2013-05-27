@@ -55,6 +55,13 @@ GRANT EXECUTE ON FUNCTION smart.distanceInMeter to analyst;
 GRANT EXECUTE ON FUNCTION smart.intersects to manager;
 GRANT EXECUTE ON FUNCTION smart.intersects to analyst;
 
+
+--manager export CA updates
+GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_EXPORT_QUERY to manager;
+
+GRANT SELECT ON smart.agency to manager;
+GRANT SELECT ON smart.rank to manager;
+
 -- update names
 DELETE FROM smart.dm_aggregation_i18n;
 
