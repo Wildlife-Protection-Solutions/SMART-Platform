@@ -115,11 +115,13 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
 	@Override
 	protected void buttonPressed(int buttonId) {
-		String fileName = csvComposite.getFileText();
 		if (IDialogConstants.OK_ID == buttonId) {
-			if (process(fileName)){
-				setReturnCode(OK);
-				close();
+			String fileName = csvComposite.getFileText();
+			if (validateFilename(fileName)){
+				if (process(fileName)){
+					setReturnCode(OK);
+					close();
+				}
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			setReturnCode(CANCEL);
@@ -127,6 +129,15 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 		}
 	}
 
+	/**
+	 * Validates the filename before completing the process.
+	 * @param fileName 
+	 * @return <code>true</code> if file is okay, <code>false</code>if process should not continue
+	 */
+	protected boolean validateFilename(String fileName){
+		return true;
+	}
+	
 	@Override
 	protected boolean isResizable() {
 		return true;

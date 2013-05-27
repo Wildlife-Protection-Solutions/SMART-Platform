@@ -22,15 +22,19 @@
 package org.wcs.smart.export.dialog;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for exporting into csv file
@@ -61,6 +65,33 @@ public class CsvExportDialog extends AbstractCsvDialog {
 		Composite comp = (Composite) super.createDialogArea(parent);
 		super.createFileComposite(comp, true);
 		return comp;
+	}
+	
+	/**
+	 * ensure the export location exists and can be overwritten
+	 * @param fileName
+	 * @return
+	 */
+	@Override
+	protected boolean validateFilename(String fileName){
+		File f = new File(fileName);
+		if (f.exists()){
+			boolean ok = MessageDialog.openQuestion(getShell(), Messages.CsvExportDialog_DialogTitle, MessageFormat.format(Messages.CsvExportDialog_OverwriteFile, new Object[]{f.toString()}));
+			if (!ok){
+				return false;
+			}
+		}
+		if (!f.getParentFile().exists()){
+			boolean ok = MessageDialog.openQuestion(getShell(), Messages.CsvExportDialog_DialogTitle, MessageFormat.format(Messages.CsvExportDialog_CreateDirectory, new Object[]{f.getParent()}));
+			if (ok){
+				if (!SmartUtils.createDirectory(f.getParentFile())){
+					return false;
+				}
+			}else{
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@Override
