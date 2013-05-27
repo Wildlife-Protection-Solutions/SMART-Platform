@@ -93,10 +93,12 @@ public class SmartBirtLibrary {
 		if (!libraryFile.exists()){
 			
 			try {
-				//URL url = FileLocator.toFileURL(ReportPlugIn.getDefault().getBundle().getResource(DEFAULT_LIBRARY_FILENAME));
 				InputStream library = ReportPlugIn.class.getClassLoader().getResourceAsStream(DEFAULT_LIBRARY_FILENAME);
-//				FileUtils.copyFile(new File(url.toURI()), libraryFile);
-				FileUtils.copyInputStreamToFile(library, libraryFile);
+				try{
+					FileUtils.copyInputStreamToFile(library, libraryFile);
+				}finally{
+					library.close();
+				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
