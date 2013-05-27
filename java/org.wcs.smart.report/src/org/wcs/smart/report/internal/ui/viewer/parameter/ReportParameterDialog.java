@@ -97,6 +97,7 @@ public class ReportParameterDialog extends TitleAreaDialog {
 		
 		super.getShell().setText(Messages.ReportParameterDialog_DialogTitle);
 		setMessage(Messages.ReportParameterDialog_DialogMessage);
+		setTitle(Messages.ReportParameterDialog_DialogTitle);
 		
 		return comp;
 	}
