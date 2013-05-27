@@ -15,6 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
+import opendap.servlet.GetInfoHandler;
+
 import org.eclipse.birt.report.designer.internal.ui.editors.IRelatedFileChangeResolve;
 import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor;
@@ -144,7 +146,10 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor implements I
 		super.addPages();
 		super.getModel().addListener(nameChangeListener);
 		
-		super.setPartName(getEditorInputLocal().getReport().getName() + " [" + getEditorInputLocal().getReport().getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (getEditorInput() instanceof SmartReportEditorInput){
+			//if we are editing a SMART report update the name; otherwise leave it alone 
+			super.setPartName(getEditorInputLocal().getReport().getName() + " [" + getEditorInputLocal().getReport().getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 	
 	
