@@ -80,27 +80,27 @@ public class CyberTrackerUtil {
 	public static Category buildRoot(DataModel dataModel) {
 		Category fakeRoot = new Category();
 		fakeRoot.setName("Data Model"); //$NON-NLS-1$
-		fakeRoot.setChildren(dataModel.getCategories());
-		return fakeRoot;
-		//TODO: switch back to original full datamodel
-//		List<Category> cats = new ArrayList<Category>();
-//		cats.add(dataModel.getCategories().get(0));
-//		fakeRoot.setChildren(cats);
+//		fakeRoot.setChildren(dataModel.getCategories());
 //		return fakeRoot;
+		//TODO: switch back to original full datamodel
+		List<Category> cats = new ArrayList<Category>();
+		cats.add(dataModel.getCategories().get(0));
+		fakeRoot.setActiveChildren(cats);
+		return fakeRoot;
 	}
 
 	public static Map<Category, CyberTrackerId> buildMap(Category category) {
 		Map<Category, CyberTrackerId> map = new HashMap<Category, CyberTrackerId>();
 		map.put(category, new CyberTrackerId());
-		mapCategories(category.getChildren(), map);
+		mapCategories(category.getActiveChildren(), map);
 		return map;
 	}
 
 	private static void mapCategories(List<Category> categories, Map<Category, CyberTrackerId> map) {
 		for (Category category : categories) {
 			map.put(category, new CyberTrackerId());
-			if (category.getChildren() != null) {
-				mapCategories(category.getChildren(), map);
+			if (category.getActiveChildren() != null) {
+				mapCategories(category.getActiveChildren(), map);
 			}
 		}
 	}
@@ -122,14 +122,14 @@ public class CyberTrackerUtil {
 		}
 	}
 	
-	public static Node createRadioNode(Category category, Map<Category, CyberTrackerId> keyMap) {
+	public static Node createRadioNode(Category category, Map<Category, CyberTrackerId> keyMap, String resultElementId) {
 		String id = keyMap.get(category).getNodeId();
 		String name = category.getName();
-		List<CyberTrackerId> childIds = getChildrenIds(category.getChildren(), keyMap);
+		List<CyberTrackerId> childIds = getChildrenIds(category.getActiveChildren(), keyMap);
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
 		String trLinks = translateLinks(childIds, true);
-		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, null);
+		return ScreensObjectFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId);
 	}
 
 	/**
