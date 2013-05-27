@@ -238,9 +238,10 @@ public class ReportManager {
 		try {
 			
 			if (r != null) {
-				
+				ReportPlugIn.initReports();
 				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
+				
 				ReportEditorInput ri = new SmartReportEditorInput(r);
 				
 				IEditorPart part = window.getActivePage().findEditor(ri);
