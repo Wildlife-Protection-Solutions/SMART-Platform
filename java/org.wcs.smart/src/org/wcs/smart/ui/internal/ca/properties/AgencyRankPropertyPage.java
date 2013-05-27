@@ -294,6 +294,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		setMessage(Messages.AgencyRankPropertyPage_DialogMessage);
+		setTitle(Messages.AgencyRankPropertyPage_PageTitle);
 		return container;
 	}
 

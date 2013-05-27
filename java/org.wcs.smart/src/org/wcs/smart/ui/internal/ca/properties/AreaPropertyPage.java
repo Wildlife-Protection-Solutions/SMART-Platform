@@ -206,6 +206,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
+		setTitle(Messages.AreaPropertyPage_PageTitle);
 		setMessage(Messages.AreaPropertyPage_Dialog_Message);
 
 		Composite comp = new Composite(parent, SWT.BORDER_DASH);
