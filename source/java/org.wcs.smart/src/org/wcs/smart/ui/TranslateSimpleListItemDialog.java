@@ -170,6 +170,7 @@ public class TranslateSimpleListItemDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		super.getShell().setText(Messages.TranslateSimpleListItemDialog_DialogTitle);
 		super.setMessage(Messages.TranslateSimpleListItemDialog_DialogMessage);
+		setTitle(Messages.TranslateSimpleListItemDialog_DialogTitle);
 		
 		Composite composite = (Composite) super.createDialogArea(parent);
 		composite = new Composite(composite, SWT.NONE);
