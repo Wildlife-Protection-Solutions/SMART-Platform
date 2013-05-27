@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -184,14 +185,14 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 
 		// Create an outer composite for spacing
 		ScrolledComposite scrolled = new ScrolledComposite(myparent,
-				SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+				SWT.V_SCROLL | SWT.H_SCROLL | SWT.NONE);
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolled.setShowFocusedControl(true);
 		scrolled.setExpandHorizontal(true);
 		scrolled.setExpandVertical(true);
 
 		// inner composite
-		Composite composite = new Composite(scrolled, SWT.BORDER);
+		Composite composite = new Composite(scrolled, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		composite.setLayout(new GridLayout(1, false));
 
@@ -304,6 +305,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		
 		//set title message for dialog
 		setMessage(Messages.AddAttributeDialog1_DialogMessage + category.findName(lang));
+		setTitle(Messages.AddAttributeDialog1_DialogTitle);
 		return myparent;
 	}
 
@@ -343,7 +345,11 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		for (int i = 0; i < checked.length; i++) {
 			Object x = checked[i];
 			if (x instanceof Attribute){
-				dm.addExistingAttribute((Attribute) checked[i], cat);
+				try{
+					dm.addExistingAttribute((Attribute) checked[i], cat);
+				}catch (Exception ex){
+					SmartPlugIn.displayLog(getShell(), ex.getMessage(), ex);
+				}
 			}
 		}
 	}

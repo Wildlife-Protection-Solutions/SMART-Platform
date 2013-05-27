@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -145,7 +146,11 @@ public class DataModelXmlToSmartConverter {
 		//there may be attributes linked to no categories
 		for (Attribute attribute : attributeLookUp.values()){
 			if (!dm.getAttributes().contains(attribute)){
-				dm.addNewAttribute(attribute, null);
+				try{
+					dm.addNewAttribute(attribute, null);
+				}catch (Exception ex){
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
 			}
 		}
 		

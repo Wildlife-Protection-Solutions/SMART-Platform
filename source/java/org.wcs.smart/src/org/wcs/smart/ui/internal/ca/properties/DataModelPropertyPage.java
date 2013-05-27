@@ -192,7 +192,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	protected Composite createContent(Composite parent) {
 		parent.setLayout(new GridLayout(1, false));		
 	
-		Composite thisparent = new Composite(parent, SWT.BORDER);
+		Composite thisparent = new Composite(parent, SWT.NONE);
 		thisparent.setLayout(new GridLayout(1, false));
 		thisparent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -819,8 +819,12 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			
 			DataModel dm = (DataModel)viewer.getInput();
-			dm.addNewAttribute(att, parent);
-			session.saveOrUpdate(att);
+			try{
+				dm.addNewAttribute(att, parent);
+				session.saveOrUpdate(att);
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(getShell(), ex.getMessage(), ex);
+			}
 			viewer.setExpandedState(parent, true);
 			refreshTree();
 		}
