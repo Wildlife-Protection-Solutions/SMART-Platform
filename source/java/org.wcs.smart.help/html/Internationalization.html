@@ -18,27 +18,27 @@
 
 <p>SMART multi-language support can be divided into two main components. The
 first component is support for translating the core software to have the
-software display all text, buttons, menues, etc in the supported language(s).
+software display all text, buttons, menus, etc. in the supported language(s).
 The second component is to provide support for changing data model entries,
-queries, reports and other user created text. </p>
+queries, reports and other user-created text. </p>
 
 <p></p>
 
 <h4><a id="LanguageSupport">Adding Language Support</a></h4>
 
-<p>Support for multiple languages within SMART for user created or non-software
-text is done directly within SMART. In the Conservation Area Properties is
+<p>Support for multiple languages within SMART for user-created or non-software
+text is done directly within SMART. The Conservation Area Properties screen is
 where additional languages can be added to a Conservation Area. Clicking on the
 Add button will bring up a dialog box to check the additional languages that
 will be supported by the Conservation Area. </p>
 
-<p>After additional languages have been made available the translatation for
-the languages still need to take place. The method for translating the various
-user defined data (data model, queries, etc...) are different and will be
-described in the following sections. The examples will all take place using the
-alternate language of French.</p>
+<p>After additional languages have been made available, the translatations for
+the languages still need to take place. The methods for translating the various
+user-defined information (data model, queries, etc...) are different and will
+be described in the following sections. The examples will all take place using
+the alternate language of French.</p>
 
-<p> </p>
+<p></p>
 
 <p><img alt="Supported Languages" src="images/LanguageSupport.png" width="577"
 height="411" /></p>
@@ -52,24 +52,24 @@ of the category or attribute. The name property can be considered an alias with
 the actual name being the key.</p>
 
 <p><strong style="color:#ff0000">Warning: Do not change the key unless you
-absolutely know what you are doing and what issues will arise from changing the
-key.</strong></p>
+absolutely know what you are doing and understand what issues will arise from
+changing the key.</strong></p>
 
 <p></p>
 
 <p>The following workflow applies to categories, attributes and values in trees
 and lists. Each entry in the data model will require individual translations.
-For each entry the user will need to select the category, attribute or value
-and click edit.</p>
+For each entry, the user will need to select the category, attribute or value
+and click Edit.</p>
 
 <p><img alt="Translate Data Model Edit" src="images/Translate_EditCategory.png"
 width="810" height="612" /></p>
 
 <p></p>
 
-<p>On the left is the original English entry. To complete the translation
-select the alternate language from the pull-down list and enter in the
-appropriate translation in the name field. </p>
+<p>On the left is the original English entry. To complete the translation,
+select the alternate language from the pull-down list and type the appropriate
+translation in the name field. </p>
 
 <p><img alt="DM English" src="images/dm_english.png" width="342" height="241"
 /> <img alt="DM French" src="images/dm_french.png" width="342" height="241"
@@ -78,11 +78,11 @@ appropriate translation in the name field. </p>
 <p></p>
 
 <p>The default language of English shows the original data model names (see
-left). After selecting the alternate language of French the translated entries
+left). After selecting the alternate language of French, the translated entries
 appear with the new translations.</p>
 
 <p><img alt="DM English Tree" src="images/dm_english_tree.png" width="263"
-height="151" />  <img alt="DM French Tree" src="images/dm_french_tree.png"
+height="151" /> <img alt="DM French Tree" src="images/dm_french_tree.png"
 width="263" height="151" /></p>
 
 <p></p>
@@ -93,7 +93,7 @@ width="263" height="151" /></p>
 
 <p>Translations for Agency and Rank List follows the same procedure as the data
 model. Select the alternate language. Enter in the alternate language
-translation.</p>
+translations.</p>
 
 <p><img alt="Translation Agency Rank" src="images/Translation_AgencyRank.png"
 width="339" height="471" /></p>
@@ -105,27 +105,27 @@ width="339" height="471" /></p>
 <p><strong>Translations for Stations</strong></p>
 
 <p>Translations for Stations follows the same procedure as the data model.
-Select the alternate language. Enter in the alternate language translation.</p>
+Select the alternate language. Enter in the alternate language translations.</p>
 
 <p><img alt="Translation Stations" src="images/Translations_Station.png"
 width="339" height="366" /></p>
 
 <p></p>
 
-<p><em>Note: Patrol Mandates, Patrol Types, Patrol Teams all follow the same
-translation procedure as Stations.</em></p>
+<p><em>Note: Patrol Mandates, Patrol Types, and Patrol Teams all follow the
+same translation procedure as Stations.</em></p>
 
 <p></p>
 
 <p><strong>Translations for Basemaps</strong></p>
 
-<p>Translations for basemaps and other SMART components takes place through the
+<p>Translations for basemaps and other SMART components take place through the
 Rename or Translate function. Select the entry to translate and click the
 Rename Button.</p>
 
-<p>The Translate Names window opens showing the supported names. Direct
+<p>The Translate Names window opens, showing the supported names. Direct
 translation of the entry for the alternate languages can take place in this
-window without having to previously select the alternate language.</p>
+window, without having to previously select the alternate language.</p>
 
 <p><img alt="Translation Basemap" src="images/Translation_Basemap.png"
 width="303" height="294" />  <img alt="Translation Basemap french"
@@ -140,25 +140,23 @@ Records</strong></p>
 
 <p>To translate Queries, Reports, Plans or Intelligence Records the user will
 right click to open up the mouse menu and then select "Translate". A Translate
-Names window open that contains the other supported languages. The following
-example demonstrates the process using a Queries. Translations for Reports,
-Plans and Intelligence Records all follow the same procedures.</p>
+Names window opens; this contains the other supported languages. The following
+example demonstrates the process using a Query. Translations for Reports, Plans
+and Intelligence Records all follow the same procedures.</p>
 
 <p><img alt="Translation Queries" src="images/translate_query.png" width="270"
-height="257" />  <img alt="Tranlation Query 2"
-src="images/translate_query2.png" width="362" height="234" />    </p>
-
-
+height="257" /> <img alt="Tranlation Query 2" src="images/translate_query2.png"
+width="362" height="234" /> </p>
 
 <h4><a id="LanguagePacks">Language Packs</a></h4>
 
-<p>Rather than storing translations inside the main code base, translations
-would be created as Eclipse &ldquo;plug-in fragments&rdquo;. The fragments can
-then be compiled to create a language pack that can be added to an existing
-installed application without the need to update the entire application.</p>
+<p>Rather than storing translations inside the main code base, translations are
+created as Eclipse &ldquo;plug-in fragments&rdquo;. The fragments can then be
+compiled to create a language pack that can be added to an existing installed
+application without the need to update the entire application.</p>
 
-<p>Language packs can be provided to users via a web-site, from which users can
-download only the language packs of interest to them.</p>
+<p>Language packs can be provided to users via a website, from which users can
+download only the language pack(s) of interest to them.</p>
 
 <p>This approach makes it much simpler to provide new translations and upgrade
 existing translations, and provides greater flexibility for users.</p>
@@ -167,7 +165,7 @@ existing translations, and provides greater flexibility for users.</p>
 
 <p><strong>SMART Dependencies</strong></p>
 <ul>
-  <li>By default, this process would only apply to SMART plugins, not SMART
+  <li>By default, this process will only apply to SMART plugins, not SMART
     dependencies (uDig, BIRT, Eclipse).</li>
   <li>BIRT (used for Reporting) already implements this approach and language
     packs for BIRT can be downloaded from here:
@@ -195,13 +193,12 @@ location as the SMART application.</p>
 <p>1. Download the required language pack (for example:
 smart_1.0.5_languagepack_fr.zip).</p>
 
-<p>2. Unzip the contents of the language pack into your smart install
+<p>2. Unzip the contents of the language pack into your SMART install
 directory.</p>
 
 <p>The language pack contains "plugins" and "features" directories. The
 contents of these two directories need to be merged with the contents of the
 smart/features and smart/plugins directories. Make sure you MERGE these
 directories and delete and replace.</p>
-
 </body>
 </html>
