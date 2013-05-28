@@ -61,6 +61,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 
 
 	private ReportCaDeleteHandler deleteHandler = new ReportCaDeleteHandler();
+	private ReportEmployeeListener employeeListener = new ReportEmployeeListener();
 	
 	// The shared instance
 	private static ReportPlugIn plugin;
@@ -85,6 +86,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, ReportCaDeleteHandler.EXECUTE_ORDER);
+		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
 		QueryEventManager.getInstance().addQuerySaveListener(queryListener);
 	}
 
@@ -116,6 +118,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		ReportManager.endReportEngine();
+		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
 		QueryEventManager.getInstance().removeQuerySaveListener(queryListener);
 		plugin = null;
 		super.stop(context);

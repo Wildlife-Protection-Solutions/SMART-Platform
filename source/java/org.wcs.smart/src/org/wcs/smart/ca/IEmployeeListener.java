@@ -19,32 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ca.advisors;
+package org.wcs.smart.ca;
 
 import org.hibernate.Session;
 
 /**
- * Advisor for validating deletion of hibernate
- * objects.  Plugins can extend the deleteAdvisor extension point
- * and implement an IDeleteAdvisor to validate deletions.
- * 
- * Plugsin should not change the state of the 
- * database during this check.  They can only validate
- * if the particular item can be removed.
+ * Listener for employee events. 
  * 
  * @author Emily
  *
  */
-public interface IDeleteAdvisor {
+public interface IEmployeeListener {
 
-	/**
-	 * Should not change the database state.
-	 * 
-	 * @param object the object to be removed
-	 * @param session the current open hibernate session
-	 * @return <code>null</code> if okay to delete object; otherwise a string message to 
-	 * display to user explaining whey item cannot be deleted.
-	 */
-	String canDelete(Object object, Session session);
 	
+	/**
+	 * Fired before an employee is deleted from the system.
+	 * <p>These listeners are applied before
+	 * the employee delete validation is completed.</p>
+	 * 
+	 * @param e employee to be delete
+	 * @param s hibernate session
+	 * @return 
+	 * @throws exception if error occurs
+	 */
+	void beforeDelete(Employee e, Session s);
 }

@@ -208,6 +208,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	private static final String QUERY_PROPERTY_EXTENSION_ID = "org.wcs.smart.query.property"; //$NON-NLS-1$
 
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
+	private QueryEmployeeListener employeeListener = new QueryEmployeeListener();
 	
 	// The shared instance
 	private static QueryPlugIn plugin;
@@ -264,7 +265,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		
 		//add required listeners
 		ConservationAreaManager.getInstance().addDeleteHandler(new QueryCaDeleteHandler(),QueryCaDeleteHandler.EXECUTE_ORDER);
-	
+		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
 
 		//empty query temp directory
 		Job j = new Job(Messages.QueryPlugIn_QueryCleanUpJobName){
@@ -308,6 +309,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		
+		ConservationAreaManager.getInstance().removeEmployeeListener(employeeListener);
 		super.stop(context);
 	}
 
