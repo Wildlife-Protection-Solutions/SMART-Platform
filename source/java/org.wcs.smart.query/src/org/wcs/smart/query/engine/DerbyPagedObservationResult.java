@@ -632,7 +632,7 @@ public class DerbyPagedObservationResult implements IObservationPagedQueryResult
 	 */
 	private class LazyQueryIterator implements Iterator<QueryResultItem> {
 		
-		private int itOffset = 0; //offset of element at which list begins
+		private int itOffset = -1; //offset of element at which list begins
 		private int itIndex = 0;
 		private List<QueryResultItem> data;
 		private int pageSize = 0;
