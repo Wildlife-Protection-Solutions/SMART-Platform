@@ -74,6 +74,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.export.config.impl.EmployeeCsvExportConfig;
@@ -394,9 +395,14 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 							monitor.subTask(del.getLabel());
 							String deleteError = null;
 							try{
+								//first run before delete 
+								ConservationAreaManager.getInstance().fireEmployeeBeforeDelete(del, s);
+								
+								//validate delete
 								if (!DeleteManager.canDelete(del, s)){
 									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{del.getLabel()});
 								}else{
+									//delete
 									if (del.equals(SmartDB.getCurrentEmployee())){
 										restart[0] = true;
 									}
@@ -405,6 +411,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 								}
 							}catch (Exception ex){
 								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{del.getLabel()}); //$NON-NLS-1$
+								SmartPlugIn.log(ex.getMessage(), ex);
 							}
 							
 							if (deleteError != null){

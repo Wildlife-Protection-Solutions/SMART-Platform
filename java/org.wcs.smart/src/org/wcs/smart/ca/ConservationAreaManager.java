@@ -60,6 +60,7 @@ public class ConservationAreaManager {
 	 * List of area listeners
 	 */
 	private List<IAreaModifiedListener> areaListeners = new ArrayList<IAreaModifiedListener>();
+	private List<IEmployeeListener> employeeListener = new ArrayList<IEmployeeListener>();
 	
 	private static ConservationAreaManager instance = null;
 	
@@ -206,6 +207,33 @@ public class ConservationAreaManager {
 	public void fireAreaChanged(Area.AreaType type){
 		for(IAreaModifiedListener listener : areaListeners){
 			listener.areasUpdated(type);
+		}
+	}
+	
+	/**
+	 * Add employee listener
+	 * @param listener
+	 */
+	public void addEmployeeListener(IEmployeeListener listener){
+		employeeListener.add(listener);
+	}
+	
+	/**
+	 * Removes an employee listener
+	 * @param listener
+	 */
+	public void removeEmployeeListener(IEmployeeListener listener){
+		employeeListener.remove(listener);
+	}
+	
+	/**
+	 * Fires employee before delete event 
+	 * @param toDelete employee to delete
+	 * @param session current session with open transaction
+	 */
+	public void fireEmployeeBeforeDelete(Employee toDelete, Session session) {
+		for(IEmployeeListener listener : employeeListener){
+			listener.beforeDelete(toDelete, session);
 		}
 	}
 }
