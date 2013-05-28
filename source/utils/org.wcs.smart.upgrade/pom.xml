@@ -81,6 +81,7 @@
                    				<phase>package</phase>
                    				<goals><goal>replace</goal></goals>                   
                    				<configuration>
+                   				    <file>upgradeSmart.bat</file>
                						<outputFile>${package.dir}/upgradeSmart.bat</outputFile>
                						<replacements>
                    						<replacement>
@@ -107,6 +108,7 @@
                    				<phase>package</phase>
                    				<goals><goal>replace</goal></goals>                   
                    				<configuration>
+                   					<file>upgradeSmart.sh</file>
                						<outputFile>${package.dir}/upgradeSmart.sh</outputFile>
                						<replacements>
                    						<replacement>
@@ -129,9 +131,6 @@
            					</configuration>
                				</execution>
            			</executions>
-           			<configuration>
-               				<file>upgradeSmart.bat</file>
-           			</configuration>
        			</plugin>
        			 <plugin>
     				<artifactId>maven-clean-plugin</artifactId>
