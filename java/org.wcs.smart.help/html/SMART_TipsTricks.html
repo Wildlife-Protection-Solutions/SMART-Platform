@@ -10,20 +10,21 @@
 </head>
 
 <body>
-<h2>Tips Tricks FAQ &amp; Other Info</h2>
+<h2>Tips, Tricks, FAQ &amp; Other Info</h2>
 
 <p></p>
 
-<h4><a id="Tips">Tricks and Tips</a></h4>
+<h4><a id="Tips">Tips and Tricks</a></h4>
 
 <p><strong><a id="ShiftSelect">Shift Select Spacebar</a></strong></p>
 
-<p>In many parts of the SMART application when many objects (attributes,
-waypoints, etc...) are toggled on or off the user can toggle them individually,
-through the Select All/De-select All or through another option.</p>
+<p>In many parts of the SMART application, when many objects (attributes,
+waypoints, etc...) are toggled on or off, the user can toggle them
+individually, through the Select All/De-select All, or through another
+option.</p>
 
 <p>Using the Shift button and selecting a block of entries and hitting the
-Space Bar the selected entries will toggle on or off.</p>
+Space Bar, the selected entries will toggle on or off.</p>
 
 <p></p>
 
@@ -34,68 +35,124 @@ src="images/shiftSelectSpaceBar2.png" width="398" height="535" /></p>
 <p></p>
 
 <h4><a id="FAQ">FAQ</a></h4>
+<a id="Q1"></a> 
 
-<a id="Q1"></a><p><strong>Q.</strong><strong> Adding a gracticule to the map view it often
-fails to draw, resulting in a red X on the graticule layer in the TOC. How do I
-get the Gradicule to display?</strong></p>
+<p><strong>Q.</strong><strong>When adding a graticule to the map view it often
+fails to draw, resulting in a red X on the graticule layer in the Layers list.
+How do I get the graticule to display?</strong></p>
 
 <p></p>
 
-<p><strong>A.</strong> <strong>Graticule only support CRS with unit
-&ldquo;meter&rdquo; on all axis.</strong></p>
+<p><strong>A.</strong> <strong>Graticule only supports CRS with unit
+&ldquo;meter&rdquo; on all axes.</strong></p>
 
-<p>To specify the projection for the Graticule:</p>
+<p>To specify the projection for the graticule:</p>
 
-<p>1. Open the Graticule style layer (right click on the layer and pick 'Change
-Styles' or select the layer and use the edit style button);</p>
+<p>1. Open the graticule style layer (right click on the layer and pick 'Change
+Styles' or select the layer and use the edit style button).</p>
 
-<p>2. Pick "Projection" page from the list on the left</p>
+<p>2. Pick "Projection" page from the list on the left.</p>
 
-<p>3. Select a projection with "meter" on all axis.</p>
+<p>3. Select a projection with "meter" on all axes.</p>
 
 <p>4. Apply.</p>
 
 <p></p>
+<hr />
+<a id="Q2"></a> 
 
-<hr/>
-
-<a id="Q2"></a><p><strong>Q. Why is the style editor theme function not working in
+<p><strong>Q. Why is the style editor theme function not working in
 reports?</strong></p>
 
 <p></p>
 
-<p><strong>A. This is a fundamental problem with the way themeing styler works.
-It builds themes based on the data in the layer. However when setting up the
-report there is no data in the layer hence the error. The query data is not
-generated until the report is run and dates are provided.</strong></p>
+<p><strong>A. This is a fundamental problem with the way the theming styler
+works. It builds themes based on the data in the layer. However, when setting
+up the report there is no data in the layer yet, hence the error. The query
+data is not generated until the report is run and dates are
+provided.</strong></p>
 
-<p>The work around; if you want themed styles in your report is to:</p>
+<p>The work around, if you want themed styles in your report, is to:</p>
 
-<p>1. Run the query in the query perspective and setup the themeing style using
-this the style editor associated with the query layer.</p>
+<p>1. Run the query in the query perspective and set up the theming style using
+the style editor associated with the query layer.</p>
 
 <p>2. When the themeing style is configured the way you want it, open the style
-dialog for the layer, select the 'XML' page from the list on the left.</p>
+dialog for the layer, and select the 'XML' page from the list on the left.</p>
 
 <p>3. Copy the entire XML snippet shown.</p>
 
 <p>4. Switch back to editing your report.</p>
 
 <p>5. Change the style of the map layer in the report which you want to apply
-the themeing to and paste the copied XML into the "XML" page of this style
+the theming to, and paste the copied XML into the "XML" page of this style
 dialog.</p>
 
 <p>6. Save.</p>
 
 <p>7. Re-run your report and the data will match your themed style. </p>
 
-<hr/>
-
-<p><strong>Q.</strong></p>
+<p></p>
+<hr />
 
 <p></p>
 
-<p><strong>A.</strong></p>
+<a id="Q3"></a>
+<p><strong>Q .Why does SMART take a long time to load the conservation areas.
+It doesn&rsquo;t look like it is doing anything?</strong></p>
+
+<p></p>
+
+<p><strong>A. When the SMART application is terminated abnormally (power-off of
+computer, crashing of computer etc) the SMART database performs a validation
+next time it is run. This validation can take a while and is performed when the
+system starts up. To prevent this ensure that you shut down the application
+correctly when you are finished with it.</strong></p>
+
+<p></p>
+<hr />
+
+<p><a id="Q4"></a> </p>
+
+<p><strong>Q. Why does my query fails to load with a &ldquo;Could not parse
+query: &lt;Query Name&gt;&rdquo; error?</strong></p>
+
+<p></p>
+
+<p><strong>A. This is a result of the area filters or data model changing
+without the query being updated. You will have to re-create your
+query.</strong></p>
+
+<p>There are two known situations where this will occur:</p>
+
+<p>1. if the keys in the data model change or are removed. In this case the
+queries are not validated (patrol observations are) so this error will
+occur.</p>
+
+<p>2. if the key of an area filter changes. Again, queries are not validated
+when areas are modified or updated.</p>
+
+<p></p>
+<hr />
+<p><a id="Q5"></a> </p>
+
+<p><strong>Q. Why does the importing of GPS points into a multi-leg patrol
+sometimes place them in the wrong leg?</strong></p>
+
+<p> </p>
+
+<p><strong>A. If two legs share the same time range SMART does not know which
+leg to assign the points to and will pick one of the legs. Verification of the
+correct assignment of the waypoints is highly recommended when importing into a
+multi-leg patrol. If the assignment of the waypoints is incorrect the user can
+move them to a different leg.</strong></p>
+
+<p></p>
+<hr />
+
+<p><strong><a id="Q6">Q. </a></strong></p>
+
+<p><strong>A. </strong></p>
 
 <p></p>
 
@@ -103,13 +160,21 @@ dialog.</p>
 
 <p><strong>Removed uDig Functions still appear on Mac OSX</strong></p>
 
-<p>Some existing uDig functions continue to appear in the application and
+<p>Some existing uDig functions continue to appear in the application, and this
 causes some confusion as no functionality is associated with these options.</p>
 
 <p></p>
 
-<p>To fix this is to run SMART with the -clean argument.</p>
+<p>The fix for this is to run SMART with the -clean argument as follows:</p>
 
 <p>&lt;code&gt;SMART.exe -clean &lt;/code&gt;</p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
 </body>
 </html>

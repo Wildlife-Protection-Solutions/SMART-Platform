@@ -208,7 +208,7 @@ file formats are all supported.</p>
 <p><strong>Map Decoration</strong> - North arrow, scalebar, legend and a grid
 are additional cartographic elements.</p>
 
-<p><strong>Smart Area Connection Page</strong> - opens the dialog for
+<p><strong>SMART Area Connection Page</strong> - opens the dialog for
 adding/updating the original five (5) boundary files.</p>
 
 <p><strong>Web Map Server</strong> - Adds a connection to a Web Map Server
@@ -223,7 +223,7 @@ Server Tile Cache (WMS-C).</p>
 
 <p>SMART has an extensive tool set for creating custom maps with user-defined
 colours and labels. The Style Editor dialog allows for customization of many
-cartrograpic components for point, line, and polygon layers. </p>
+cartrographic components for point, line, and polygon layers. </p>
 
 <p></p>
 
@@ -278,6 +278,50 @@ perspectives. Layers, colours and labels are some of the elements that can be
 saved in a basemap. Multiple basemaps can be created by the Administrator, and
 these basemaps can be accessed later by the other user level accounts. </p>
 
+<p><img alt="Basemap Icons" src="images/baseMapIcons.png" width="243"
+height="26" /></p>
+
+<p></p>
+
+<p><strong>Creating and Selecting a Basemap</strong></p>
+
+<p>Cartography for basemaps is set in the Map Perspective. After the
+cartography has been set the basemap is saved as a new basemap or to overwrite
+an existing one. <img alt="Save Basemap" src="images/saveBaseMap.png"
+width="20" height="19" /> </p>
+
+<p>After a basemap(s) has been created the Administrator can set a that basemap
+to be the default for the Conservation Area. </p>
+
+<p>A non-Admin user can chose to use an alternate basemap for an open session
+by using the select basemap option and chosing the "Use a session default".
+<img alt="Select Basemap" src="images/selectBaseMap.png" width="20" height="19"
+/></p>
+
+<p></p>
+
+<p><strong>Managing Basemaps</strong></p>
+
+<p>By selecting Conservation Area - Manage Basemaps an Administrator can set a
+basemap as the default for the Conservation Area, delete an existing basemap or
+to rename/translate its name.</p>
+
+<p></p>
+
+<p><img alt="Manage Basemaps" src="images/manageBasemaps.png" width="353"
+height="274" /></p>
+
+<p></p>
+
+<p><strong>Basemaps in Reports</strong></p>
+
+<p>Embedded maps in Reports also use basemaps to set the cartography of the map
+object. In the MapLayers tab the user can select which Basemap to use for the
+report map object.</p>
+
+<p><img alt="Basemaps in Reports" src="images/basemapsReports.png" width="708"
+height="234" /></p>
+
 <p></p>
 
 <h2><a id="Patrol">Patrol Perspective</a></h2>
@@ -296,9 +340,15 @@ tracks in the mapping window.</p>
 
 <p><strong>Patrol Info Window</strong> - This is the main window where the
 information gathered during the patrol is accessed. At the bottom of this
-window will be a Summary tab showing an overview of the patrol, a tab for each
-day of the patrol containing the observations gathered for each waypoint, and a
-Map tab that displays the waypoints and routes of the patrol.</p>
+window will be:</p>
+<ul>
+  <li>a Summary tab showing an overview of the patrol;</li>
+  <li>a tab for each day of the patrol containing the observations gathered and
+    waypoints recorded;</li>
+  <li>a Map tab that cartographically displays the waypoints and routes of the
+    patrol; and,</li>
+  <li>an Other tab that contains Planning and Intelligence information.</li>
+</ul>
 
 <p></p>
 
@@ -309,10 +359,10 @@ width="1059" height="772" /></p>
 
 <h4><a id="PatrolOp">Patrol Options</a></h4>
 
-<p>As part of the initialization process for new Conservation Areas the
+<p>As part of the initialization process for a new Conservation Area, the
 Administrator is required to configure various patrol parameters. Patrol
-Options allow for patrols edits to be permissible during a set period of time
-and allows for additional information to be available during the creation of
+Options allow for (1) edits to a patrol to be permissible during a set period
+of time and (2) additional information to be available during the creation of
 patrols. This process is not a requirement during the initialization of the
 patrol information for the Conservation Area.</p>
 
@@ -474,8 +524,8 @@ a single group, or left to complete the patrol in separate groups.</p>
 <p>Waypoint coordinates are primarily entered into SMART through automated
 processes that extract the waypoints directly from a GPS unit or through the
 importation of standardized GPX files. The SMART import wizard has options to
-automatically assign the waypoints to the correct day based on the GPS time
-stamp or to have the user manually assign waypoints to a specific day if
+automatically assign the waypoints to the correct day based on the GPS
+timestamp or to have the user manually assign waypoints to a specific day if
 required. A manual option exists to enter in waypoint coordinates if the
 locational information was not captured by a GPS.</p>
 
@@ -557,7 +607,7 @@ SMART user will select and assign waypoints to the selected date.</p>
 
 <p></p>
 
-<p>select which waypoints to import</p>
+<p><strong>Select which waypoints to import</strong></p>
 
 <p><img alt="Select Waypoints" src="images/selectWaypoints.png" width="478"
 height="488" /></p>
@@ -587,13 +637,9 @@ SMART user will select and assign waypoints to the selected date.</p>
 
 <p></p>
 
-<p></p>
-
-<p><strong>Manual Import of Waypoints</strong></p>
+<p><strong>Manual Entry of Waypoints</strong></p>
 
 <p> SMART allows for the manual entry of waypoint information. </p>
-
-<p></p>
 
 <p><strong>Add Waypoint</strong> - Manual entry of waypoint information.</p>
 
@@ -604,11 +650,27 @@ another day.</p>
 
 <p></p>
 
+<p><strong>Special Notes on Importing GPS Waypoints for Multi-Leg
+Patrols</strong></p>
+<ul>
+  <li>If two (or more) legs share the same time range SMART does not know which
+    leg to assign the points to and will pick one of the legs. Waypoint
+    assignment must be verified after import for multi-leg patrols. It is not
+    always possible to determine which leg to import data into based only on
+    the date.</li>
+  <li>Properly setting up the time ranges for each leg will provide SMART with
+    more information to allow for proper assignment of waypoints.</li>
+  <li>If the assignment of the waypoints is incorrect the user can move them to
+    a different leg.</li>
+</ul>
+
+<p></p>
+
 <h4><a id="ImportTracks">Importing Tracks</a></h4>
 
 <p>If track information has been captured by the GPS device, the process to
-import the track info is the same as for waypoints, except that the process is
-initiated by selecting <em>Set Track.</em></p>
+import the track information is the same as for waypoints, except that the
+process is initiated by selecting <em>Set Track ...</em></p>
 
 <p><em>Note: Tracks can be created from available waypoints if no collected GPS
 track information exists.</em> </p>
@@ -622,8 +684,6 @@ to enter in the observations collected during the patrol. </p>
 
 <p>The process begins by clicking on the button in the Observation column. This
 button will launch the Waypoint Observation entry wizard.</p>
-
-<p></p>
 <ol>
   <li>Select category or categories associated with that waypoint.</li>
   <li>Complete data entry for category. Use the button Add Observation to
@@ -650,7 +710,7 @@ button will launch the Waypoint Observation entry wizard.</p>
 <h4><a id="ViewPatrols">Viewing Patrols</a></h4>
 
 <p>After a patrol has been created and contains waypoint and/or track
-information, the SMART user can use the map tab (lower right) to view the track
+information, the SMART user can use the Map tab (lower right) to view the track
 and waypoint information. </p>
 
 <p>Navigation of the map will be the same as with the <a name="Mapping"
@@ -667,7 +727,7 @@ associated with that feature.</p>
 <p>Data entry in SMART is designed to be distributable. Multiple SMART users
 can enter in patrols and associated observations on multiple computers and
 export the patrol after the information has been entered. The patrol is
-exported in an XML structure and contains the attached files (if any). This XML
+exported in an XML structure and contains attached files (if any). This XML
 package can be later imported into a different computer.</p>
 
 <p></p>
@@ -676,6 +736,8 @@ package can be later imported into a different computer.</p>
 
 <p><img alt="Export Patrol" src="images/ExportPatrol.png" width="508"
 height="574" /></p>
+
+<p></p>
 
 <p><strong>Browse</strong> - Use to select the location of the exported
 patrols.</p>
@@ -699,16 +761,15 @@ selected patrols.</p>
 
 <h5>Patrol Import</h5>
 
-<p><img alt="Import patrol" src="images/ImportPatrol.png" width="507"
-height="333" /></p>
+<p><strong><img alt="Import Patrol" src="images/ImportPatrol.png" width="509"
+height="270" /></strong></p>
 
 <p><strong>Browse</strong> - Imports a single patrol file.</p>
 
-<p><strong>Add Files</strong> - Allows for selection of multiple patrol
-files.</p>
+<p><strong>Add</strong> - Allows for selection of multiple patrol files.</p>
 
-<p><strong>Remove Files</strong> - Removes unwanted patrol files from the
-import process.</p>
+<p><strong>Remove</strong> - Removes unwanted patrol files from the import
+process.</p>
 
 <p><strong>Import</strong> - Executes the patrol import process.</p>
 
@@ -951,8 +1012,8 @@ height="665" /></p>
         <p>Any user account can save into My Queries, but saved items are only
         accessible to the user account that created them. </p>
 
-        <p>Only Manager and Admin accounts can save in the Conservation Area
-        Queries folder.</p>
+        <p>Only Manager and Administrator accounts can save into the
+        Conservation Area Queries folder.</p>
       </td>
     </tr>
     <tr>
@@ -1137,8 +1198,8 @@ to allow SMART users to be able to build more complex queries.</p>
     <tr>
       <td><img alt="query 9" src="images/query9.png" width="670" height="64"
       /></td>
-      <td>All patrols or observations by Team 2 that encountered Sumateran
-        Tiger tracks in the Administrative Areas of East or West</td>
+      <td>All patrols or observations by Team 2 that encountered Sumatran Tiger
+        tracks in the Administrative Areas of East or West</td>
       <td>Data Model - Attribute (category specific) &amp; Patrol &amp;
       Area</td>
     </tr>
@@ -1195,8 +1256,8 @@ height="583" /></p>
         <p>Any user account can save into My Queries, but saved items are only
         accessible to the user account that created them.</p>
 
-        <p>Only Manager and Admin accounts can save in the Conservation Area
-        Queries folder.</p>
+        <p>Only Manager and Administrator accounts can save in the Conservation
+        Area Queries folder.</p>
       </td>
     </tr>
     <tr>
@@ -1219,7 +1280,7 @@ height="583" /></p>
     <tr>
       <td><img alt="erase query" src="images/eraseQuery.png" width="19"
         height="20" /></td>
-      <td>Clears the Query.</td>
+      <td>Clears the query.</td>
     </tr>
     <tr>
       <td><img alt="groupBy Filter Tab" src="images/groupByFilterTab.png"
@@ -1294,7 +1355,6 @@ are placed.</p>
 windows but not all combinations are permissible if they break logical
 groupings.</em></p>
 
-
 <p><strong>Sample Summaries</strong></p>
 
 <p>The following summary is a basic summary to count the number of Observed
@@ -1304,7 +1364,7 @@ Threats and Grouped by Patrol Types. </p>
 
 <p></p>
 
-<p>The query has been modified with the Number of Threats added a second time
+<p>The query has been modified with the Number of Threats added a second time,
 but with the Count Incidents Option chosen.</p>
 
 <p>This will give the number of observations and the number of incidents
@@ -1336,21 +1396,21 @@ Group Bys - Station. </p>
 <p><strong>Aggregates</strong></p>
 
 <p>Once a data model Number attribute has its aggregates initialized they can
-be used to in summaries to provide Min, Max, Sum and Average summaries for that
+be used in summaries to provide Min, Max, Sum and Average summaries for that
 particular attribute. </p>
 
-<p>In the following example the query is to show the Sum of the Number of
+<p>In the following example, the query is to show the Sum of the Number of
 Weapons Confiscated and Seen.</p>
 
-<p><em>Note: If no Aggregates are available when building a Summary then the
-data model has been set to disallow them. If required contact your Smart
+<p><em>Note: If no Aggregates are available when building a Summary, then the
+data model has been set to disallow them. If required contact your SMART
 Administrator to initialize the Aggregates.</em></p>
 
 <p><img alt="" src="images/aggregates.png" width="724" height="378" /></p>
 
 <p><strong>Compute Rate / Encounter Rates</strong></p>
 
-<p>Smart can provide Encounter Rates for the x Value Options. The base values
+<p>SMART can provide Encounter Rates for the x Value Options. The base values
 are calculated against the chosen Encounter Rate to provide how many
 Observations/Incidents per X...</p>
 
@@ -1367,10 +1427,10 @@ added as many times as required.</p>
 <p></p>
 
 <p>In the following example the Count of Threats (Incidents) per Distance,
-Person Hours and Patrols are summaries by Teams. The output of this summary
+Person Hours and Patrols are summarized by Teams. The output of this summary
 shows Team 2 is encountering nearly 10 times as many threats per distance
-travelled than Team 1 and approximately 2.5 times more observations per
-kilometer than Team 3. </p>
+travelled as Team 1 and approximately 2.5 times more observations per kilometer
+than Team 3. </p>
 
 <p><img alt="" src="images/EncounterRate2.png" width="901" height="561" /></p>
 
@@ -1380,12 +1440,12 @@ kilometer than Team 3. </p>
 
 <h4><a id="GriddedQueries">Gridded Summary Queries</a></h4>
 
-<p>Smart's Gridded Summary Queries summarizes the query into a user defined
-grid and outputs the results in a tabular form or in a raster map output. The
-raster outputs provides a heat map of the summary results which can be quickly
+<p>SMART's Gridded Summary Query summarizes the query into a user defined grid
+and outputs the results in a tabular form or in a raster map output. The raster
+map output provides a heat map of the summary results which can be quickly
 interpreted by users to see where the issues are located. The X values for the
 Gridded Summary are constructed in the same way as with the Summary queries
-with the major difference is no Group-By Options are available.</p>
+with the major difference being that no Group-By Options are available.</p>
 
 <h5>Gridded Summary Icons and Links</h5>
 
@@ -1422,8 +1482,8 @@ with the major difference is no Group-By Options are available.</p>
         <p>Any user account can save into My Queries, but saved items are only
         accessible to the user account that created them.</p>
 
-        <p>Only Manager and Admin accounts can save in the Conservation Area
-        Queries folder.</p>
+        <p>Only Manager and Administrator accounts can save in the Conservation
+        Area Queries folder.</p>
       </td>
     </tr>
     <tr>
@@ -1440,7 +1500,7 @@ with the major difference is no Group-By Options are available.</p>
     <tr>
       <td><img alt="erase query" src="images/eraseQuery.png" width="19"
         height="20" /></td>
-      <td>Clears the Query.</td>
+      <td>Clears the query.</td>
     </tr>
     <tr>
       <td><img alt="Grid Filter Values" src="images/FilterValues1.png"
@@ -1465,9 +1525,8 @@ with the major difference is no Group-By Options are available.</p>
   </tbody>
 </table>
 
-
-<p>The following example is of a sinple Grid Summary to show the Observed
-Threats based on a 0.01 (degree) grid. In a Grid query there is aways a base
+<p>The following example is of a simple Grid Summary to show the Observed
+Threats based on a 0.01 (degree) grid. In a Grid query there is always a base
 display of where the patrols went. </p>
 
 <p>These entries are given a value of 0. Any values greater than 0 indicate the
@@ -1508,22 +1567,19 @@ height="100" /></p>
 standardized reporting. The information on the reports can be dynamically
 generated based on the results of SMART queries and summaries. A major
 component of SMART is its mapping ability, and SMART reports allow maps to be
-included and customized to suit the report. Smart reports contain many common
+included and customized to suit the report. SMART reports contain many common
 reporting elements (tables, charts/graphs, images, etc...) as well as other
 elements (maps and dynamic query results) that all result in a powerful
 reporting package. </p>
-
-<p>The SMART reporting is built off the Eclipe open source project (BIRT). For
-a detailed description of the BIRT project and enhanced help on reporting
-please refer to ...</p>
-
-<p><a
-href="http://www.eclipse.org/birt/phoenix/intro/">http://www.eclipse.org/birt/phoenix/intro/</a></p>
 
 <p></p>
 
 <p><img alt="Report Icon" src="images/reportICon.png" width="418" height="67"
 /></p>
+
+<p></p>
+
+<h4>Report Components and Tools</h4>
 
 <p></p>
 
@@ -1535,6 +1591,7 @@ deleting reports.</p>
 <p><img alt="Report List" src="images/reportList.png" width="328" height="130"
 /></p>
 
+<p></p>
 
 <p><strong>Report Toolbar Icons</strong></p>
 
@@ -1572,7 +1629,7 @@ deleting reports.</p>
 
 <p></p>
 
-<p><strong>Components of the Report Editor</strong></p>
+<p><strong>Report Editor</strong></p>
 
 <p>The Report Editor consists of a few basic components, which contain their
 own functionality and have their own purpose. In building basic to intermediate
@@ -1592,7 +1649,7 @@ width="1090" /></p>
 
 <p>The Design Window is where the components of the report are organized. This
 window does preview what the final report will look like as reports are
-generally based off dynamic data. The window allows for the layout of the
+generally based off of dynamic data. The window allows for the layout of the
 objects to be added and customized as to content, size and style.</p>
 
 <p>The Layout and Master Page tabs at the bottom are the two tabs that most
@@ -1650,12 +1707,12 @@ height="266" /></p>
 
 <p>The Resource Explorer is where the Shared Resources of the library are
 accessed. Here is where you can save common report elements that are used in
-multiple reports, for example logos. If an object will likly be used for most
-if not all reports then it is best to share the objects in the Shared Resources
+multiple reports, for example logos. If an object will likely be used for most
+if not all reports, then it is best to share the object in the Shared Resources
 library. Any report creation and edits can immediately access these objects and
 do not need to import or link to any of them. </p>
 
-<p><em>Note: It is recommended to limit object in the Shared Resources library
+<p><em>Note: It is recommended to limit objects in the Shared Resources library
 to objects that will be used by most if not all reports. Adding too many
 objects to the library negatively impacts performance of the reporting
 framework.</em></p>
@@ -1668,7 +1725,7 @@ width="320" height="336" /></p>
 <p><strong>Report Items</strong></p>
 
 <p>Report Items contain many of the objects used to create the report. These
-objects are selected and inserted in to the report editor widow to build up the
+objects are selected and inserted into the report editor window to build up the
 desired report.</p>
 
 <p><img alt="Report Items" src="images/ReportItems.png" width="327"
@@ -1680,7 +1737,7 @@ height="398" /></p>
     titles or object labels</li>
   <li><strong>Text</strong> - open text boxes allowing for static text to be
     typed into the report</li>
-  <li><strong>Dynamic Text</strong> - text based off custom or predefined
+  <li><strong>Dynamic Text</strong> - text based off of custom or predefined
     variables or functions</li>
   <li><strong>Data</strong> - items in this data section have to be pre-loaded
     in the Outline or Library before they will appear</li>
@@ -1688,14 +1745,14 @@ height="398" /></p>
     in the Outline or Library before they will appear</li>
   <li><strong>Grid</strong> - grids allow for layout objects to be organized
     into rows and columns</li>
-  <li><strong>List</strong> - insert flexible format presentation of data set
-    rows in header/detail &amp; footers</li>
-  <li><strong>Table</strong> - insert column presentation of data set rows in
-    header/detail &amp; footers</li>
+  <li><strong>List</strong> - insert flexible format presentation of dataset
+    rows in header/detail and footers</li>
+  <li><strong>Table</strong> - insert column presentation of dataset rows in
+    header/detail and footers</li>
   <li><strong>Chart</strong> - used to insert charts into the report</li>
   <li><strong>Cross Tab</strong> - inserts aggregated data in row and column
     format</li>
-  <li><strong>Smart Map</strong> - inserts maps into the report</li>
+  <li><strong>SMART Map</strong> - inserts maps into the report</li>
 </ul>
 
 <p></p>
@@ -1706,32 +1763,33 @@ height="398" /></p>
 of patrols and to keep track of available and active rangers. SMART plans can
 be arranged in a parent-child relationship where a parent plan can have a
 number of children plans (sub-plans) that are associated with the parent. Plans
-are assigned to patrols and when the patrol return from the field and the data
-has been entered into SMART the software will automatically validate if the
-objectives have been met or not. </p>
+are assigned to patrols, and when a patrol returns from the field and the data
+has been entered into SMART the software will automatically validate whether
+the objectives have been met or not. </p>
 
 <p></p>
 
-<p><strong>Developing Plans</strong></p>
+<h4><strong><a id="DevelopingPlans">Developing Plans</a></strong></h4>
 
-<p>A plan allows for specific targets and goals be assigned to a Conservation
-Area, station, team or series of patrols. A plan is created through the use of
-a similar wizard used to create patrols. After a plan has been created it can
-be associated with a patrol or series of patrols which then uses the track
-information to calculate the success or failure of defined targets.</p>
+<p>A plan allows for specific targets and goals to be assigned to a
+Conservation Area, station, team or series of patrols. A plan is created
+through the use of a wizard, similar to the wizard used to create patrols.
+After a plan has been created, it can be associated with a patrol or series of
+patrols, which then use(s) the track information to calculate the success or
+failure of defined targets.</p>
 
 <p></p>
 
 <p><strong>Steps in Creating a Plan</strong></p>
 
-<p><strong>1. Template</strong><strong>-</strong> Create a plan from scratch or
-use an existing plan as a template</p>
+<p><strong>1. Template </strong><strong>-</strong> Create a plan from scratch
+or use an existing plan as a template</p>
 
-<p><strong>2. Plan Type -</strong> Chose the type of plan (Patrol, Team,
+<p><strong>2. Plan Type -</strong> Choose the type of plan (Patrol, Team,
 Station or Conservation Area) and available rangers for the plan</p>
 
-<p><strong>3. Parent Plan -</strong> Chose if the plan is a sub-plan of another
-plan or stans alone</p>
+<p><strong>3. Parent Plan -</strong> Choose whether the plan is a sub-plan of
+another plan or stands alone</p>
 
 <p><strong>4. Plan Information -</strong> Plan ID, Name and Description</p>
 
@@ -1741,8 +1799,7 @@ involved in the plan</p>
 <p><strong>6. Plan Dates -</strong> Selection of the start and end date of the
 plan</p>
 
-<p><strong>7. Plan Targets -</strong> Adds targets and objectives to the
-plan</p>
+<p><strong>7. Plan Targets -</strong> Add targets and objectives to the plan</p>
 
 <p></p>
 
@@ -1768,8 +1825,8 @@ height="345" /></p>
   <dt><strong>Administrative</strong> - can be defined and described as
   required by the administrators and planners of the Conservation Area patrols.
   SMART does not automatically evaluate the pass/fail of Administrative
-  patrols. When an administrative patrol target has been achieved the check box
-  for "Target has been achieved" will be manually selected.</dt>
+  patrols. When an administrative patrol target has been achieved, the check
+  box for "Target has been achieved" will be manually selected.</dt>
 </dl>
 
 <p><img alt="Administrative Plan" src="images/AdministrativePlan.png"
@@ -1778,11 +1835,12 @@ width="352" height="349" /></p>
 <p></p>
 <dl>
   <dt><strong>Spatial</strong> - locations within the Conservation Area that
-  need to be visited by the patrols selected by manual coordinate input or
-  through mapping interface <img alt="Add Spatial Target Point"
+  need to be visited by the patrols, specified by manual coordinate input or
+  through a mapping interface <img alt="Add Spatial Target Point"
   src="images/AddSpatialTarget.png" width="16" height="16" />. The Distance for
-  Completion (meters) parameter is how close to the exact coordinates the
-  patrol needs to be before the target location is successful. </dt>
+  Completion (meters) parameter defines how close to the exact coordinates the
+  patrol needs to be before the target location is considered to be
+  successfully visited.</dt>
 </dl>
 
 <p><img alt="Spatial Target" src="images/SpatialTarget.png" width="708"
@@ -1801,40 +1859,42 @@ width="718" height="671" /></p>
 
 <p><strong>edit</strong> - edits the selected plan target</p>
 
-<p><strong>manage</strong> - opens dialog to add new targets</p>
+<p><strong>manage</strong> - opens a dialog to add new targets</p>
 
 <p><strong>refresh</strong> - refreshes validation checks on patrols associated
-with these targets.</p>
+with these targets</p>
 
 <p></p>
 
-<p><strong>Linking Patrols to Plan Targets</strong></p>
+<h4><strong><a id="LinkPatrolPlan">Linking Patrols to Plan Targets</a></strong></h4>
 
-<p>After a plan has been created it can then be assigned to a patrol or
+<p>After a plan has been created, it can then be assigned to a patrol or
 multiple patrols. </p>
 
-<p>Linking a patrol to a plan requires the user open that specific patrol in
-the Patrol Perspective and click on the "Other" tab (bottom of window).</p>
+<p>Linking a patrol to a plan requires that the user open that specific patrol
+in the Patrol Perspective and click on the "Other" tab (bottom of window).</p>
 
-<p>Then clicking on the edit link next to the Plan window will open a dialog to
-link the active patrol with a plan.</p>
+<p>Then, clicking on the edit link next to the Plan window will open a dialog
+to link the active patrol with a plan.</p>
 
 <p><img alt="Linking a Patrol to a Plan" src="images/linkingPlanPatrols.png"
 width="769" height="593" /></p>
 
-<p><strong>Validating Plans</strong></p>
+<p></p>
 
-<p>After a patrol has been linked to a plan SMART can then validate the numeric
-and spatial targets. These targets are validated against the track information
-so if no track information has been entered the validation of the plans will
-not be successful. </p>
+<h4><strong><a id="validatePlan">Validating Plans</a></strong></h4>
+
+<p>After a patrol has been linked to a plan, SMART can validate the numeric and
+spatial targets. These targets are validated against the track information, so
+if no track information has been entered the validation of the plans will not
+be successful. </p>
 
 <p><img alt="Plan Validation" src="images/PlanValidation.png" width="860"
 height="232" /></p>
 
-<p>After the patrols and plans have been linked the user will need to click the
-refresh button to run the validation. When the target has been successfully
-validated the red circle turns green. This applies to numeric and spatial
+<p>After the patrols and plans have been linked, the user will need to click
+the refresh button to run the validation. When the target has been successfully
+validated, the red circle turns green. This applies to numeric and spatial
 targets.</p>
 
 <p></p>
@@ -1854,14 +1914,14 @@ width="589" height="261" /></p>
 
 <h2><a id="Intelligence">SMART Intelligence Records</a></h2>
 
-<p>Intelligence records are pieces of information that has been gathered
-through previous patrols or by external sources. Information from intelligence
-records can be used by Conservation Area managers to help plan future patrols.
-</p>
+<p>Intelligence records are pieces of information that have been gathered
+through previous patrols or from external sources. Information from
+intelligence records can be used by Conservation Area managers to help plan
+future patrols. </p>
 
 <p></p>
 
-<p><strong>Steps in Creating Intelligence Records</strong></p>
+<h4><strong><a id="CreateIntel">Steps in Creating Intelligence Records</a></strong></h4>
 
 <p>1. Intelligence Received Date</p>
 
@@ -1873,7 +1933,7 @@ records can be used by Conservation Area managers to help plan future patrols.
 
 <p>5. Intelligence Location</p>
 
-<p>6 . Intelligence Attachments</p>
+<p>6. Intelligence Attachments</p>
 
 <p></p>
 
@@ -1887,7 +1947,7 @@ records can be used by Conservation Area managers to help plan future patrols.
 Area</p>
 
 <p><strong>CET</strong> - Community Extension Team (i.e. the separate Forest
-Department/ NGO team working with local communities)</p>
+Department / NGO team working with local communities)</p>
 
 <p></p>
 
@@ -1900,20 +1960,21 @@ width="850" height="628" /></p>
 
 <p><strong>Intelligence is Relevant for Multiple Days</strong></p>
 
-<p>If the incoming intelligence is to cover activity that spans multiple days
-then in this step you should check the box and enter in the appropriate dates.
-For this exercise you will accept the default day.</p>
+<p>If the incoming intelligence is to cover activity that spans multiple days,
+then in this step you should check the box and enter in the appropriate
+dates.</p>
 
 <p></p>
 
-<p><strong>Querying Patrols with Plans and Intelligence Records</strong></p>
+<h4><strong><a id="QueryIntel">Querying Patrols with Plans and Intelligence Records</a></strong></h4>
 
-<p>Plans with links to patrols can be queried with a Patrol Query with Patrol
-Filters. The patrol filter "Motivated by Intelligence" is to query out any
-patrols associated with Intelligence Records. The patrol filter "Part of Plan"
-is to query any patrols that were associated with Plans.</p>
+<p>Plans with links to patrols can be queried with a Patrol Query using Patrol
+Filters. The patrol filter "Motivated by Intelligence" is to query any patrols
+associated with Intelligence Records. The patrol filter "Part of Plan" is to
+query any patrols that were associated with Plans.</p>
 
-<p></p>
+<p><img alt="Query Plans and Intelligence"
+src="images/QueryPlanIntelligence.png" width="182" height="236" /></p>
 
 <p></p>
 
@@ -1923,22 +1984,24 @@ is to query any patrols that were associated with Plans.</p>
 reporting. Defining a data model to meet the needs of a Conservation Area is
 crucial to ensuring that the data entry, analysis and reporting all work
 together to provide the information necessary to properly manage the patrols.
-SMART installs come with a default data model that can be customized by a SMART
-Administrator to fully meet the requirments of the Conservation. </p>
+The SMART software comes with a default data model that can be customized by a
+SMART Administrator to fully meet the requirements of the Conservation Area.</p>
 
-<p><strong>Categories</strong></p>
+<p></p>
+
+<h4><strong><a id="dmcategories">Categories</a></strong></h4>
 
 <p>The SMART data model structure is based on a tree structure, comprised of
 nodes (Categories) and a series of &lsquo;leaves&rsquo; (Attributes) that can
 be associated to any number of the tree&rsquo;s categories. <img
 alt="Category Icon" src="images/category.png" width="16" height="16" /></p>
 
-<p>Categories can be with or without attributes and can be a parent to other
+<p>Categories can be with or without attributes, and can be a parent to other
 categories or a child to others. </p>
 
 <p></p>
 
-<p><strong>Attribute Types</strong></p>
+<h4><strong><a id="dmattributes">Attributes</a></strong></h4>
 
 <p>SMART supports attribute types of Numeric, Text, List, Tree and Boolean.
 Usage of the attribute types will depend on the nature of the observation
@@ -1994,9 +2057,9 @@ information collected in the field.</p>
 
 <p></p>
 
-<p><strong>Creating Attributes</strong></p>
+<h4><strong><a id="dmcreateattributes">Creating Attributes</a></strong></h4>
 
-<p>An attribute cannot exist on its own and is an extension of a category and
+<p>An attribute cannot exist on its own. It is an extension of a category and
 must be associated with a category. A category in contrast does not necessarily
 require attributes. </p>
 
@@ -2006,26 +2069,27 @@ categories. </p>
   <li>Select Category and Click Add Attribute</li>
   <li>Chose to create a new attribute or to apply an existing attribute or
     attributes. If the choice is to apply existing attribute(s) to the selected
-    catgory the user can select a single attribute or multiple attributes.</li>
+    category, the user can select a single attribute or multiple
+  attributes.</li>
   <li>Select type of attribute and provide name (key will be automatically
-    generated) and if the attribute is required.
+    generated) and whether the attribute is required. 
     <ul>
-      <li>Numeric - select aggregations and provide data range (if
-      requested)</li>
-      <li>Text - optional regular expression validation </li>
-      <li>List - click add to add values to the list</li>
-      <li>Tree - click on root then add to start building the tree nodes and
-        branches. Import options exist for attributes properly formatted in
-      XML.</li>
-      <li>Boolean - no additional options available for boolean attributes.</li>
+      <li><strong>Numeric</strong> - select aggregations and provide data range
+        (if requested)</li>
+      <li><strong>Text</strong> - optional regular expression validation </li>
+      <li><strong>List</strong> - click <strong>add</strong> to add values to
+        the list</li>
+      <li><strong>Tree</strong> - click on <strong>root</strong> then
+        <strong>add</strong> to start building the tree nodes and branches.
+        Import options exist for attributes properly formatted in XML.</li>
+      <li><strong>Boolean</strong> - no additional options available for
+        boolean attributes.</li>
     </ul>
   </li>
-  <li>Finish and Save</li>
+  <li><strong>Finish</strong> and <strong>Save</strong></li>
 </ol>
 
-<p></p>
-
-<p><strong>Disabling and Deleting Categories or Attributes</strong></p>
+<h4><strong><a id="dmdisabledelete">Disabling and Deleting Categories or Attributes</a></strong></h4>
 
 <p>Categories, attributes or values within attributes can all be deleted from
 the data model, or disabled.</p>
@@ -2042,28 +2106,197 @@ ability to record any observations based on the disabled feature, but does
 preserve the ability to perform analysis on the feature. Disabling / Enabling
 categories is a much easier process because it does not require that all
 dependencies be disabled before proceeding with the higher level category. It
-also allows for reintroduction if the need arises. A disabled Category or
+also allows for re-introduction if the need arises. A disabled Category or
 Attribute will appear grey until re-enabled.</p>
 
 <p></p>
 
-<p><strong>Repositioning Categories and Attributes</strong></p>
+<h4><strong><a id="dmmoving">Repositioning Categories and Attributes</a></strong></h4>
 
 <p>Categories and attributes can be repositioned by dragging the object into a
 new position within that tier. </p>
 
-<p><strong>Maintenance of Keys</strong></p>
+<p></p>
+
+<h4><a id="dmimportingattributes">Importing Attributes</a></h4>
+
+<p>Tree attributes can be pre-defined outside of SMART in an XML format and
+imported into the data model using the attribute <strong>Import</strong> option
+when creating a new attribute. The most common usage of this feature would be
+when creating a new Conservation Area and defining the data model for the
+area.</p>
+
+<p>The default data model does not contain a predefined species list. The
+Import option allows for a custom importation of a species list that brings
+only the desired entries into the Conservation Area's data model. Other tree
+attributes can be imported if the XML is properly constructed.</p>
+
+<p></p>
+
+<h4><strong><a id="dmkeys">Maintenance of Keys</a></strong></h4>
 
 <p>When an attribute or category is created a unique key is automatically
 generated. The generated keys are generally the common name without spaces or
-other characters. If a common name is the same as a previous name the key SMART
-will append a number to the end to make it unique. If the common name starts
-with a number SMART will drop the number(s) and start with an alpha
-character.</p>
+other characters. If a common name is the same as a previous name, then SMART
+will append a number to the end of the common name to make it unique. If the
+common name starts with a number, SMART will drop the number(s) so that the key
+starts with an alpha character.</p>
 
-<p><em>Note: It is highly recommended to leave the keys unedited unless you
-fully understand what could happen if the keys are edited.</em></p>
+<p><em><strong><span style="color:#ff0000">Note: It is highly recommended to
+leave the keys unedited unless you fully understand what could happen if the
+keys are edited.</span></strong></em></p>
 
+<p></p>
 
+<p></p>
+
+<h2><a id="CrossCa" name="Patrol1">Cross Conservation Analysis</a></h2>
+
+<p>Analysis between Conservation Areas takes place in the Cross Conservation
+Analysis framework. This framework allows for queries between the Conservation
+Areas stored within one installation of SMART. Cross Conservation Analysis
+requires more than one Conservation Area loaded within one installation of
+SMART. </p>
+
+<h4><strong><a id="ccalogin">Cross Conservation Analysis Log-In Requirements</a></strong></h4>
+
+<p>1. More than one Conservation Area is loaded into SMART</p>
+
+<p>2. A Username and Passsword is common to the available Conservation Areas</p>
+
+<p></p>
+
+<p><img alt="Cross Conservation Area Login" src="images/X-CA_login.png"
+width="495" height="314" /></p>
+
+<p>To log in the user selects <strong>"XXX - Cross Conservation
+Analysis"</strong> and is required to enter in the Username and Password that
+is common to the Conservation Areas.</p>
+
+<p></p>
+
+<p>After the logging in SMART open up the listing of Conservation Areas
+available for analysis. This screen allows for which Conservation Areas will be
+included in the analysis. The SMART user can select which CAs to include by
+licking the <em><strong>"Modify..."</strong></em> link. This will open up a
+window where the user can select specific Conservations Areas for analysis.
+After the Conservation Areas are selected SMART will validate the selected data
+models and search for common comonents that will be available for use in the
+Queries or Reports. </p>
+
+<p></p>
+
+<table border="1">
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>ICON</strong></td>
+      <td><strong>DESCRIPTION</strong></td>
+    </tr>
+    <tr>
+      <td><img alt="Icon Query" src="images/iconQueryPerspective.png"
+        width="22" height="21" /></td>
+      <td>Query Perspective</td>
+    </tr>
+    <tr>
+      <td><img alt="Icon Report" src="images/iconReports.png" width="22"
+        height="21" /></td>
+      <td>Report Perspective</td>
+    </tr>
+    <tr>
+      <td><img alt="Save Query Icon" src="images/querySave.png" width="22"
+        height="19" /></td>
+      <td>Query Save</td>
+    </tr>
+    <tr>
+      <td><img alt="save as" src="images/querySaveAs.png" width="17"
+        height="18" /></td>
+      <td>Query Save As</td>
+    </tr>
+    <tr>
+      <td><img alt="Export Query Icon" src="images/exportQuery.png" width="17"
+        height="18" /></td>
+      <td>Export Query</td>
+    </tr>
+    <tr>
+      <td><img alt="Create New Query Icon" src="images/CreateNewQueryIcon.png"
+        width="18" height="18" /></td>
+      <td>Create Query</td>
+    </tr>
+    <tr>
+      <td><img alt="refresh" src="images/refreshPerspectiveIcon.png" width="18"
+        height="18" /></td>
+      <td>Reset windows</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p><em>Note: The icons used in the Cross Conservation Analysis are the same
+icons used in the remainder of the program. </em></p>
+
+<p></p>
+
+<h4><a id="ccaqueries">Cross Conservation Area Queries</a></h4>
+
+<p>The query filters (patrol and data model) available for use are those
+components that are common to all data models. SMART searches the unique data
+model keys and the patrol information to extract elements common to all of the
+selected Conservation Areas. If a data model key has been altered the software
+will not be able to query against other areas unless all others keys have also
+been updated. Preserving keys in a standardized data model allows for Cross
+Conservation Analysis. Altering keys takes away this ability. </p>
+
+<p></p>
+
+<p>A Cross Conservation Query is built using the same workflow as a standard
+query. </p>
+<ul>
+  <li>Filters are applied (date, patrol &amp; data model)</li>
+  <li>Operators are added if required</li>
+  <li>Query is executed</li>
+  <li>Results are viewed in Tabular or Map window</li>
+  <li>Query is saved (if required) under the Conservation Area Queries or My
+    Queries folders</li>
+</ul>
+
+<p></p>
+
+<h4><a id="ccareports">Cross Conservation Area Reports</a></h4>
+
+<p>As with standard SMART reports Cross Conservation Area reports are linked to
+the saved queries. Any Cross Conservation Area reports wishing to link to a
+query must first build queries specific within the Cross Conservation Analysis
+framework. After queries have been saved they are then available for use in
+Cross Conservation Analysis reports.</p>
+
+<p><em>Note: report datasets linked to tables do not need any work to access
+the information. </em></p>
+
+<p></p>
+
+<p>A Cross Conservation Report is built using the same workflow as a standard
+report.</p>
+<ul>
+  <li>Build up a report</li>
+  <li>Save the report</li>
+  <li>Run and/or export a report</li>
+</ul>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
 </body>
 </html>
