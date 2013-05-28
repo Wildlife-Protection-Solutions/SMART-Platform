@@ -215,18 +215,22 @@ public class DataModel {
 			while(toCheck.size() > 0){
 				Category c = toCheck.remove(0);
 				toCheck.addAll(c.getChildren());
-				for (CategoryAttribute ca : c.getAttributes()){
-					if (ca.getAttribute().equals(att)){
-						throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsChild, new Object[]{c.getName(), att.getName()}));
+				if (c.getAttributes() != null){
+					for (CategoryAttribute ca : c.getAttributes()){
+						if (ca.getAttribute().equals(att)){
+							throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsChild, new Object[]{c.getName(), att.getName()}));
+						}
 					}
 				}
 			}
 			//ensure category does not exist in parent category
 			Category c = cat.getParent();
 			while(c != null){
-				for(CategoryAttribute ca : c.getAttributes()){
-					if (ca.getAttribute().equals(att)){
-						throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsParent, new Object[]{c.getName(), att.getName()}));
+				if (c.getAttributes() != null){
+					for(CategoryAttribute ca : c.getAttributes()){
+						if (ca.getAttribute().equals(att)){
+							throw new Exception(MessageFormat.format(Messages.DataModel_AttributeAlreadyExistsParent, new Object[]{c.getName(), att.getName()}));
+						}
 					}
 				}
 				c = c.getParent();
