@@ -28,7 +28,6 @@ import java.util.NoSuchElementException;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.query.engine.DerbyPagedObservationResult;
 import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.ObservationQuery;
 import org.wcs.smart.query.model.QueryResultItem;
@@ -44,7 +43,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	private SimpleFeatureType ftype;
 	private Iterator<QueryResultItem> fIterator;
 	private ObservationQuery query;
-	
+		
 	/**
 	 * Creates a new feature reader.
 	 * 
