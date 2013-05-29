@@ -274,6 +274,7 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_Modify_Button;
 	public static String ChangeUserPasswordDialog_NewPassword_Label;
 	public static String ChangeUserPasswordDialog_NewPassword2_Label;
+	public static String ChangeUserPasswordDialog_PageTitle;
 	public static String ChangeUserPasswordDialog_PasswordLabel;
 	public static String ChangeUserPasswordDialog_Updated_DialogMessage;
 	public static String ChangeUserPasswordDialog_Updated_DialogTitle;
