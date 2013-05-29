@@ -648,6 +648,7 @@ public class Messages extends NLS {
 	public static String InitCaDataModelDialog_Op_ImportCustom;
 	public static String InitCaDataModelDialog_Op_UseBlank;
 	public static String InitCaDataModelDialog_Op_UseIUCN;
+	public static String InitCaDataModelDialog_PageTitle;
 	public static String InitCaDataModelDialog_Progress_CloneLanguages;
 	public static String InitCaDataModelDialog_Progress_ClosingDm;
 	public static String InitCaDataModelDialog_Progress_loadDataModel;

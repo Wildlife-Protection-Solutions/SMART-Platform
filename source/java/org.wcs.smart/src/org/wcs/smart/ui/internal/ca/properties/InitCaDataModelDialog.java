@@ -122,6 +122,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		comp.setLayout(layout);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		setTitle(Messages.InitCaDataModelDialog_PageTitle);
 		setMessage(Messages.InitCaDataModelDialog_NoDataModel_Message);
 
 		SelectionListener validateListener = new SelectionAdapter() {
