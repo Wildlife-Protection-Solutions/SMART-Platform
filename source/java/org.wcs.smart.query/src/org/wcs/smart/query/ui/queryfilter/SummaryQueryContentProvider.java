@@ -565,7 +565,7 @@ public class SummaryQueryContentProvider  implements ITreeContentProvider {
 				Object[] results = new Object[atts.size()];
 				int cnt = 0;
 				for (Attribute att: atts){
-					results[cnt++] = new SummaryDmObject(att, true);
+					results[cnt++] = new SummaryDmObject(att, false);
 				}
 				return Arrays.copyOf(results, cnt);				
 			}
