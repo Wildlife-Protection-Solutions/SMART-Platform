@@ -208,7 +208,7 @@ public class ImportGpxWizardPage extends WizardPage {
 	@Override
     public IWizardPage getNextPage() {
 		if (ops.getImportOption() == ImportOption.DATE || ops.getImportOption() == ImportOption.ALL ){
-			//not more pages
+			//no more pages
 			return null;
 		}else if (ops.getImportOption() == ImportOption.SELECT){
 			if (nextPage == null){

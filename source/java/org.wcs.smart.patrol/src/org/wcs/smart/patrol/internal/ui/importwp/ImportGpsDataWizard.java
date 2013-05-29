@@ -255,8 +255,9 @@ public class ImportGpsDataWizard extends Wizard implements IPageChangingListener
 	
 	/**
 	 * 
-	 * @return <code>true</code> if all data is imported and should be assigned to correct leg day; <code>false</code> if only
-	 * data for current leg dat was imported
+	 * @return <code>true</code> if all data is imported and 
+	 * should be assigned to correct leg day; <code>false</code> if only
+	 * data for current leg day was imported
 	 */
 	public boolean getImportAll(){
 		return this.allData;
