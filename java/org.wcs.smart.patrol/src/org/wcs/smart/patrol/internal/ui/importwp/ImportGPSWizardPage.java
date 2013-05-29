@@ -37,7 +37,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.ImportOptionsComposite.ImportOption;
@@ -105,7 +107,12 @@ public class ImportGPSWizardPage extends WizardPage {
 		ImportGpsDataWizard w = ((ImportGpsDataWizard)getWizard());
 		ops = new ImportOptionsComposite(center, w.getCurrentDate(), w.getType());
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		ops.addListener(SWT.Selection, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				updateComplete();
+			}});
 		
 		//read gps devices
 		HashMap<String, String> supportedDevices;
