@@ -200,6 +200,7 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		txtPassword2.addModifyListener(validateListener);
 		cdPassword2 = createDecoration(txtPassword2);
 		
+		setTitle(Messages.ChangeUserPasswordDialog_PageTitle);
 		setMessage(Messages.ChangeUserPasswordDialog_Dialog_Message);
 		validate();
 		return data;
