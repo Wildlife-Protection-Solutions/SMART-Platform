@@ -334,7 +334,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		fileDialog = new FileDialog(parent.getShell(), SWT.SINGLE | SWT.OPEN);
 		fileDialog.setText(Messages.AreaPropertyPage_Load_DialogTitle + areatype.getGuiName());
-		fileDialog.setFilterExtensions(new String[]{"*.shp", "*,*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fileDialog.setFilterExtensions(new String[]{"*.shp", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fileDialog.setFilterNames(new String[]{Messages.AreaPropertyPage_Shapefile_FilterName, Messages.AreaPropertyPage_AllFiles_FilterName});
 		
 		String result = fileDialog.open();
