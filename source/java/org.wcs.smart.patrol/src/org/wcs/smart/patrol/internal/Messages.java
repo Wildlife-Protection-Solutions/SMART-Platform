@@ -229,6 +229,7 @@ public class Messages extends NLS {
 	public static String NewPatrolHandler_Error_LoadingWizard;
 	public static String NewPatrolHandler_ErrorLoadingPerspective;
 	public static String NewPatrolHandler_Progress_DisplayingWizard;
+	public static String NumericAttributeField_InvalidNumericAttribute;
 	public static String ObjectiveComposite_Objective_Label;
 	public static String ObjectiveComposite_PatrolObjectiveTooLongError;
 	public static String ObjectiveComposite_Title;
