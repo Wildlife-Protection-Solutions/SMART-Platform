@@ -48,17 +48,10 @@ import org.wcs.smart.patrol.internal.ui.importwp.GPSDataImport;
  */
 public class GPSBabel {
 
-	
-	
 	private static final String ERROR_MSG_COULD_NOT_IMPORT = Messages.GPSBabel_Error_CouldNotImport;
 
 	private static final String ERROR_MSG_PROCESS_TOLONG = Messages.GPSBabel_Error_ProcessTerminatedTooLong;
 
-	/**
-	 * GPS Babel program location
-	 */
-	private static String GPS_BABEL = null;
-	
 	/**
 	 * GPS Babel arguments for getting format list
 	 */
@@ -75,10 +68,8 @@ public class GPSBabel {
 	 * @return the location of the gps babel program
 	 */
 	private static String getGpsBabelLocation(){
-		if (GPS_BABEL == null){
-			GPS_BABEL = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
-		}
-		return new File(GPS_BABEL).getAbsolutePath();
+		String location = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
+		return new File(location).getAbsolutePath();
 	}
 	
 	
